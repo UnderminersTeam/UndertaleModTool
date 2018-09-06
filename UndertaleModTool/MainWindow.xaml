@@ -1,0 +1,232 @@
+﻿<Window x:Class="UndertaleModTool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UndertaleModTool"
+		xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+        mc:Ignorable="d"
+        Title="UndertaleModTool" Height="450" Width="800">
+    <Window.CommandBindings>
+        <CommandBinding Command="Open" Executed="Command_Open" />
+        <CommandBinding Command="Save" Executed="Command_Save" />
+        <CommandBinding Command="Close" Executed="Command_Close" />
+    </Window.CommandBindings>
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Control" Key="O" Command="Open"/>
+        <KeyBinding Modifiers="Control" Key="S" Command="Save"/>
+        <KeyBinding Modifiers="Control" Key="W" Command="Close"/>
+    </Window.InputBindings>
+    <Grid>
+        <DockPanel>
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="_File">
+                    <MenuItem Header="_Open" Command="Open" InputGestureText="Ctrl+O"/>
+                    <MenuItem Header="_Save" Command="Save" InputGestureText="Ctrl+S"/>
+                    <Separator/>
+                    <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+W"/>
+                </MenuItem>
+            </Menu>
+            <TextBox DockPanel.Dock="Bottom" Name="CommandBox" KeyDown="CommandBox_KeyDown"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+                <TreeView Grid.Column="0" Margin="5" DataContext="{Binding Data}" SelectedItemChanged="TreeView_SelectedItemChanged" MouseDoubleClick="MainTree_MouseDoubleClick" AllowDrop="True" Name="MainTree" KeyDown="MainTree_KeyDown"
+                    VirtualizingStackPanel.IsVirtualizing="True"
+                    VirtualizingStackPanel.VirtualizationMode="Recycling">
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <EventSetter Event="TreeViewItem.DragOver" Handler="TreeView_DragOver"/>
+                            <EventSetter Event="TreeViewItem.Drop" Handler="TreeView_Drop"/>
+                            <EventSetter Event="TreeViewItem.MouseMove" Handler="TreeView_MouseMove"/>
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                    <TreeViewItem Header="Data" IsExpanded="True">
+                        <TreeViewItem Header="General info"/>
+                        <TreeViewItem Header="Sounds" ItemsSource="{Binding Sounds}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleSound}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Sprites" ItemsSource="{Binding Sprites}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleSprite}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Backgrounds" ItemsSource="{Binding Backgrounds}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleBackground}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Paths" ItemsSource="{Binding Paths}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertalePath}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Scripts" ItemsSource="{Binding Scripts}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleScript}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Fonts" ItemsSource="{Binding Fonts}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleFont}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Rooms" ItemsSource="{Binding Rooms}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleRoom}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Texture pages" ItemsSource="{Binding TexturePages}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleTexturePage}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Code" ItemsSource="{Binding Code}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleCode}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Variables" ItemsSource="{Binding Variables}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleVariable}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Function declarations" ItemsSource="{Binding FunctionDeclarations}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleFunctionDeclaration}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Function definitions" ItemsSource="{Binding FunctionDefinitions}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleFunctionDefinition}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Strings" ItemsSource="{Binding Strings}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleString}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Embedded textures" ItemsSource="{Binding EmbeddedTextures}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleEmbeddedTexture}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Embedded audio" ItemsSource="{Binding EmbeddedAudio}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleEmbeddedAudio}">
+                                    <TextBlock Text="{Binding .}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                    </TreeViewItem>
+                </TreeView>
+                
+                <GridSplitter Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
+
+                <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                    <ContentControl Margin="10" Content="{Binding Selected}" Name="DataEditor">
+                        <ContentControl.Resources>
+                            <DataTemplate DataType="{x:Type local:DescriptionView}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Heading}" FontWeight="Bold"/>
+                                    <Separator/>
+                                    <TextBlock Text="{Binding Description}"/>
+                                </StackPanel>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type local:GeneralInfoEditor}">
+                                <local:UndertaleGeneralInfoEditor/>
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type undertale:UndertaleSound}">
+                                <local:UndertaleSoundEditor/>
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type undertale:UndertaleBackground}">
+                                <local:UndertaleBackgroundEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleEmbeddedTexture}">
+                                <local:UndertaleEmbeddedTextureEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleEmbeddedAudio}">
+                                <local:UndertaleEmbeddedAudioEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleTexturePage}">
+                                <local:UndertaleTexturePageEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleSprite}">
+                                <local:UndertaleSpriteEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleScript}">
+                                <local:UndertaleScriptEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertalePath}">
+                                <local:UndertalePathEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleFont}">
+                                <local:UndertaleFontEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
+                                <local:UndertaleGameObjectEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
+                                <local:UndertaleRoomEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleCode}">
+                                <local:UndertaleCodeEditor/>
+                            </DataTemplate>
+                        </ContentControl.Resources>
+                    </ContentControl>
+                </ScrollViewer>
+            </Grid>
+        </DockPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="UndertaleModTool.UndertaleSoundEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UndertaleModTool"
+		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleSound}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Flags</TextBlock>
+        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding Flags}"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Type</TextBlock>
+        <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding Type}"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">File</TextBlock>
+        <local:UndertaleStringReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding File}"/>
+
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Unknown</TextBlock>
+        <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding Unknown}"/>
+
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Volume</TextBlock>
+        <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding Volume}"/>
+
+        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Pitch</TextBlock>
+        <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Pitch}"/>
+
+        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Group ID (?)</TextBlock>
+        <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GroupID}"/>
+
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Embedded audio</TextBlock>
+        <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding AudioID.Resource}" ObjectType="{x:Type undertale:UndertaleEmbeddedAudio}"/>
+    </Grid>
+</UserControl>
