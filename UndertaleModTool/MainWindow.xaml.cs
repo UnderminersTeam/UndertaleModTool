@@ -47,18 +47,6 @@ namespace UndertaleModTool
             Selected = Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them");
         }
 
-        internal void ForceUIUpdate()
-        {
-            // TODO: ugly hack
-            object current = Selected;
-            Selected = null;
-            Dispatcher.InvokeAsync(async () =>
-            {
-                await Task.Delay(1);
-                Selected = current;
-            });
-        }
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void Command_Open(object sender, ExecutedRoutedEventArgs e)
@@ -222,7 +210,6 @@ namespace UndertaleModTool
                 Debug.Assert(sourceIndex >= 0 && targetIndex >= 0);
                 list[sourceIndex] = targetItem;
                 list[targetIndex] = sourceItem;
-                CollectionViewSource.GetDefaultView(list).Refresh();
             }
             e.Handled = true;
         }
@@ -276,31 +263,32 @@ namespace UndertaleModTool
                         Selected = null;
                         if (Highlighted == obj)
                             Highlighted = null;
-                        CollectionViewSource.GetDefaultView(list).Refresh();
                     }
                 }
             }
         }
-
-        private async void CommandBox_KeyDown(object sender, KeyEventArgs e)
+        
+        private async void CommandBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            if (e.Key == Key.Enter && !Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
             {
+                e.Handled = true;
                 CommandBox.IsEnabled = false;
                 object result;
                 try
                 {
-                    result = await CSharpScript.EvaluateAsync(CommandBox.Text, null, this);
+                    result = await CSharpScript.EvaluateAsync(CommandBox.Text, ScriptOptions.Default.WithReferences(typeof(UndertaleObject).Assembly).WithImports("UndertaleModLib", "UndertaleModLib.Models"), this);
                 }
-                catch(CompilationErrorException exc)
+                catch (CompilationErrorException exc)
                 {
                     result = exc.Message;
+                    Debug.WriteLine(exc);
                 }
-                catch(Exception exc)
+                catch (Exception exc)
                 {
                     result = exc;
                 }
-                CommandBox.Text = result.ToString();
+                CommandBox.Text = result != null ? result.ToString() : "";
                 CommandBox.IsEnabled = true;
             }
         }

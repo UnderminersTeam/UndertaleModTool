@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UndertaleModLib.Models;
 
 namespace UndertaleModLib
 {
@@ -12,7 +13,7 @@ namespace UndertaleModLib
         void Unserialize(UndertaleReader reader);
     }
 
-    public interface UndertaleObjectWithBlobs : UndertaleObject
+    public interface UndertaleObjectWithBlobs
     {
         void SerializeBlobBefore(UndertaleWriter writer);
     }
@@ -21,5 +22,14 @@ namespace UndertaleModLib
     {
         void SerializePadding(UndertaleWriter writer);
         void UnserializePadding(UndertaleReader reader);
+    }
+
+    public interface UndertaleResource : UndertaleObject
+    {
+    }
+
+    public interface UndertaleNamedResource : UndertaleResource
+    {
+        UndertaleString Name { get; }
     }
 }

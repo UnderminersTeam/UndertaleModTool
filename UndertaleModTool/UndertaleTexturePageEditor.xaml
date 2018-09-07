@@ -59,7 +59,7 @@
         </Grid>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Texture</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding SpritesheetId.Resource}" ObjectType="{x:Type undertale:UndertaleTexturePage}"/>
+        <local:UndertaleObjectReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding SpritesheetId}" ObjectType="{x:Type undertale:UndertaleTexturePage}"/>
 
         <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
             <Border.Background>

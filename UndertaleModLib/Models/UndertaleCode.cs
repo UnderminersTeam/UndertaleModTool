@@ -476,7 +476,7 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleCode : UndertaleObjectWithBlobs
+    public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
     {
         public UndertaleString Name { get; set; }
         public uint Length { get; set; }

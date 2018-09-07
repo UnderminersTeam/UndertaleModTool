@@ -168,13 +168,11 @@
     </ApplicationDefinition>
     <Compile Include="EqualityConverter.cs" />
     <Compile Include="EventNameConverter.cs" />
-    <Compile Include="InvertNumberConverter.cs" />
     <Compile Include="MaskImageConverter.cs" />
     <Compile Include="RectConverter.cs" />
     <Compile Include="StringUpdateWindow.xaml.cs">
       <DependentUpon>StringUpdateWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SumConverter.cs" />
     <Compile Include="SumRectConverter.cs" />
     <Compile Include="UndertaleBackgroundEditor.xaml.cs">
       <DependentUpon>UndertaleBackgroundEditor.xaml</DependentUpon>
@@ -206,7 +204,7 @@
     <Compile Include="UndertaleRoomEditor.xaml.cs">
       <DependentUpon>UndertaleRoomEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleRoomRendererConverter.cs" />
+    <Compile Include="UndertaleCachedImageLoader.cs" />
     <Compile Include="UndertaleScriptEditor.xaml.cs">
       <DependentUpon>UndertaleScriptEditor.xaml</DependentUpon>
     </Compile>

@@ -7,13 +7,7 @@
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleTexturePage}">
-    <!--<UserControl.Resources>
-        <local:InvertNumberConverter x:Key="InvertNumberConverter" />
-    </UserControl.Resources>-->
-    <Image Source="{Binding SpritesheetId.Resource.TextureData.TextureBlob}">
-        <!--<Image.RenderTransform>
-            <TranslateTransform X="{Binding BoundingX, Converter={StaticResource InvertNumberConverter}}" Y="{Binding BoundingY, Converter={StaticResource InvertNumberConverter}}" />
-        </Image.RenderTransform>-->
+    <Image Source="{Binding SpritesheetId.TextureData.TextureBlob}">
         <Image.Clip>
             <RectangleGeometry>
                 <RectangleGeometry.Rect>
@@ -30,21 +24,4 @@
             </RectangleGeometry>
         </Image.Clip>
     </Image>
-    <!--<Image>
-        <Image.Source>
-            <CroppedBitmap Source="{Binding SpritesheetId.Resource.TextureData.TextureBlob}">
-                <CroppedBitmap.SourceRect>
-                    <MultiBinding>
-                        <MultiBinding.Converter>
-                            <local:RectConverter/>
-                        </MultiBinding.Converter>
-                        <Binding Path="BoundingX"/>
-                        <Binding Path="BoundingY"/>
-                        <Binding Path="BoundingWidth"/>
-                        <Binding Path="BoundingHeight"/>
-                    </MultiBinding>
-                </CroppedBitmap.SourceRect>
-            </CroppedBitmap>
-        </Image.Source>
-    </Image>-->
 </UserControl>

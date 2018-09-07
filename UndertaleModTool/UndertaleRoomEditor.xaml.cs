@@ -55,14 +55,11 @@ namespace UndertaleModTool
                     {
                         (selectedObj as UndertaleRoom.GameObject).X = (int)mousePos.X;
                         (selectedObj as UndertaleRoom.GameObject).Y = (int)mousePos.Y;
-                        // TODO: Add INotifyPropertyChanged, for real
-                        CollectionViewSource.GetDefaultView((this.DataContext as UndertaleRoom).GameObjects).Refresh();
                     }
                     else if (selectedObj is UndertaleRoom.Tile)
                     {
                         (selectedObj as UndertaleRoom.Tile).X = (int)mousePos.X;
                         (selectedObj as UndertaleRoom.Tile).Y = (int)mousePos.Y;
-                        CollectionViewSource.GetDefaultView((this.DataContext as UndertaleRoom).Tiles).Refresh();
                     }
                 }
             }
@@ -104,7 +101,7 @@ namespace UndertaleModTool
                 var obj = new UndertaleRoom.GameObject();
                 obj.X = (int)mousePos.X;
                 obj.Y = (int)mousePos.Y;
-                obj.ObjDefIndex.Resource = droppedObject;
+                obj.ObjDefIndex = droppedObject;
                 obj.InstanceID = ++(Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj; // TODO: kinda ugly...
                 obj.CreationCodeID = -1;
                 obj.ScaleX = 1;
@@ -113,8 +110,6 @@ namespace UndertaleModTool
                 obj.Rotation = 0;
                 obj.Unknown = -1;
                 room.GameObjects.Add(obj);
-
-                CollectionViewSource.GetDefaultView(room.GameObjects).Refresh();
 
                 SelectObject(obj);
             }
@@ -132,29 +127,25 @@ namespace UndertaleModTool
                 {
                     UndertaleRoom.Background bg = selectedObj as UndertaleRoom.Background;
                     bg.Enabled = false;
-                    bg.BgDefIndex.Resource = null;
-                    CollectionViewSource.GetDefaultView(room.Backgrounds).Refresh();
+                    bg.BgDefIndex = null;
                     ObjectEditor.Content = null;
                 }
                 else if (selectedObj is UndertaleRoom.View)
                 {
                     UndertaleRoom.View view = selectedObj as UndertaleRoom.View;
                     view.Enabled = false;
-                    CollectionViewSource.GetDefaultView(room.Views).Refresh();
                     ObjectEditor.Content = null;
                 }
                 else if (selectedObj is UndertaleRoom.Tile)
                 {
                     UndertaleRoom.Tile tile = selectedObj as UndertaleRoom.Tile;
                     room.Tiles.Remove(tile);
-                    CollectionViewSource.GetDefaultView(room.Tiles).Refresh();
                     ObjectEditor.Content = null;
                 }
                 else if (selectedObj is UndertaleRoom.GameObject)
                 {
                     UndertaleRoom.GameObject gameObj = selectedObj as UndertaleRoom.GameObject;
                     room.GameObjects.Remove(gameObj);
-                    CollectionViewSource.GetDefaultView(room.GameObjects).Refresh();
                     ObjectEditor.Content = null;
                 }
             }

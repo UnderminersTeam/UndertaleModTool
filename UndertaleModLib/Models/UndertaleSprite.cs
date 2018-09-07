@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,25 +10,42 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleSprite : UndertaleObject
+    public class UndertaleSprite : UndertaleNamedResource, INotifyPropertyChanged
     {
-        public UndertaleString Name { get; set; }
-        public uint Width { get; set; }
-        public uint Height { get; set; }
-        public uint MarginLeft { get; set; }
-        public uint MarginRight { get; set; }
-        public uint MarginBottom { get; set; }
-        public uint MarginTop { get; set; }
-        public uint Unknown1 { get; set; }
-        public uint Unknown2 { get; set; }
-        public uint Unknown3 { get; set; }
-        public uint BBoxMode { get; set; }
-        public uint SepMasks { get; set; }
-        public uint OriginX { get; set; }
-        public uint OriginY { get; set; }
-        public UndertaleSimpleList<TextureEntry> Textures { get; private set; } = new UndertaleSimpleList<TextureEntry>();
-        //public uint MaskCount => (uint)MaskData.Length;
-        public byte[][] CollisionMaskData { get; set; }
+        private UndertaleString _Name;
+        private uint _Width;
+        private uint _Height;
+        private uint _MarginLeft;
+        private uint _MarginRight;
+        private uint _MarginBottom;
+        private uint _MarginTop;
+        private uint _Unknown1;
+        private uint _Unknown2;
+        private uint _Unknown3;
+        private uint _BBoxMode;
+        private uint _SepMasks;
+        private uint _OriginX;
+        private uint _OriginY;
+        private UndertaleSimpleList<TextureEntry> _Textures;
+
+        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+        public uint Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
+        public uint Height { get => _Height; set { _Height = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Height")); } }
+        public uint MarginLeft { get => _MarginLeft; set { _MarginLeft = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginLeft")); } }
+        public uint MarginRight { get => _MarginRight; set { _MarginRight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginRight")); } }
+        public uint MarginBottom { get => _MarginBottom; set { _MarginBottom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginBottom")); } }
+        public uint MarginTop { get => _MarginTop; set { _MarginTop = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginTop")); } }
+        public uint Unknown1 { get => _Unknown1; set { _Unknown1 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown1")); } }
+        public uint Unknown2 { get => _Unknown2; set { _Unknown2 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown2")); } }
+        public uint Unknown3 { get => _Unknown3; set { _Unknown3 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown3")); } }
+        public uint BBoxMode { get => _BBoxMode; set { _BBoxMode = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BBoxMode")); } }
+        public uint SepMasks { get => _SepMasks; set { _SepMasks = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SepMasks")); } }
+        public uint OriginX { get => _OriginX; set { _OriginX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OriginX")); } }
+        public uint OriginY { get => _OriginY; set { _OriginY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OriginY")); } }
+        public UndertaleSimpleList<TextureEntry> Textures { get => _Textures; set { _Textures = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Textures")); } }
+        private ObservableCollection<byte[]> CollisionMaskData { get; } = new ObservableCollection<byte[]>();
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public override string ToString()
         {
@@ -65,7 +84,7 @@ namespace UndertaleModLib.Models
             writer.Write(OriginX);
             writer.Write(OriginY);
             writer.WriteUndertaleObject(Textures);
-            writer.Write((uint)CollisionMaskData.Length);
+            writer.Write((uint)CollisionMaskData.Count);
             uint total = 0;
             foreach(byte[] mask in CollisionMaskData)
             {
@@ -77,7 +96,7 @@ namespace UndertaleModLib.Models
                 writer.Write((byte)0);
                 total++;
             }
-            Debug.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMaskData.Length));
+            Debug.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMaskData.Count));
         }
         
         public void Unserialize(UndertaleReader reader)
@@ -98,12 +117,12 @@ namespace UndertaleModLib.Models
             OriginY = reader.ReadUInt32();
             Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
             uint MaskCount = reader.ReadUInt32();
-            CollisionMaskData = new byte[MaskCount][];
+            CollisionMaskData.Clear();
             uint total = 0;
             for(uint i = 0; i < MaskCount; i++)
             {
                 uint len = (Width + 7) / 8 * Height;
-                CollisionMaskData[i] = reader.ReadBytes((int)len);
+                CollisionMaskData.Add(reader.ReadBytes((int)len));
                 total += len;
             }
             while(total % 4 != 0)

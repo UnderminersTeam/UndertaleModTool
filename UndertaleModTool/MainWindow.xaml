@@ -27,7 +27,7 @@
                     <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+W"/>
                 </MenuItem>
             </Menu>
-            <TextBox DockPanel.Dock="Bottom" Name="CommandBox" KeyDown="CommandBox_KeyDown"/>
+            <TextBox DockPanel.Dock="Bottom" Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown"/>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
@@ -49,56 +49,56 @@
                         <TreeViewItem Header="Sounds" ItemsSource="{Binding Sounds}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleSound}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Sprites" ItemsSource="{Binding Sprites}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleSprite}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Backgrounds" ItemsSource="{Binding Backgrounds}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleBackground}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Paths" ItemsSource="{Binding Paths}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertalePath}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Scripts" ItemsSource="{Binding Scripts}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleScript}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Fonts" ItemsSource="{Binding Fonts}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleFont}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Rooms" ItemsSource="{Binding Rooms}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleRoom}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
@@ -112,35 +112,35 @@
                         <TreeViewItem Header="Code" ItemsSource="{Binding Code}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleCode}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Variables" ItemsSource="{Binding Variables}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleVariable}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Function declarations" ItemsSource="{Binding FunctionDeclarations}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleFunctionDeclaration}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Function definitions" ItemsSource="{Binding FunctionDefinitions}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleFunctionDefinition}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Strings" ItemsSource="{Binding Strings}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleString}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>

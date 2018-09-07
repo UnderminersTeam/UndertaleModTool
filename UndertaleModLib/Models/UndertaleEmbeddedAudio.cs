@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,10 +9,13 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleEmbeddedAudio : UndertaleObject, PaddedObject
+    public class UndertaleEmbeddedAudio : UndertaleResource, PaddedObject, INotifyPropertyChanged
     {
-        public uint Length => (uint)Data.Length;
-        public byte[] Data { get; set; }
+        private byte[] _Data;
+
+        public byte[] Data { get => _Data; set { _Data = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data")); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {

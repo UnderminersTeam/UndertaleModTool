@@ -13,21 +13,21 @@ namespace UndertaleModLib
      * TODO: Now it became even worse. Yeah, definitely a rewrite.
      */
 
-    public interface UndertaleResource
+    public interface UndertaleResourceRef
     {
         Type ResourceType { get; }
         object Resource { get; set; }
         void PostUnserialize(UndertaleReader reader);
     }
 
-    public class UndertaleResourceById<T> : UndertaleResource where T : UndertaleObject, new()
+    public class UndertaleResourceById<T> : UndertaleResourceRef where T : UndertaleResource, new()
     {
         public string ResourceChunkType { get; }
         public int CachedId { get; set; } = -1;
         public T Resource { get; set; }
 
         public Type ResourceType => typeof(T);
-        object UndertaleResource.Resource { get => Resource; set => Resource = (T)value; }
+        object UndertaleResourceRef.Resource { get => Resource; set => Resource = (T)value; }
 
         public UndertaleResourceById(string type, int id = -1)
         {
@@ -92,7 +92,7 @@ namespace UndertaleModLib
             return UndertaleChunk.Unserialize(this);
         }
 
-        private List<UndertaleResource> resUpdate = new List<UndertaleResource>();
+        private List<UndertaleResourceRef> resUpdate = new List<UndertaleResourceRef>();
         internal UndertaleData undertaleData;
 
         public UndertaleData ReadUndertaleData()
@@ -114,14 +114,14 @@ namespace UndertaleModLib
             data.FORM.UnserializeChunk(this);
             lenReader.ToHere();
 
-            foreach (UndertaleResource res in resUpdate)
+            foreach (UndertaleResourceRef res in resUpdate)
                 res.PostUnserialize(this);
             resUpdate.Clear();
 
             return data;
         }
 
-        internal void RequestResourceUpdate(UndertaleResource res)
+        internal void RequestResourceUpdate(UndertaleResourceRef res)
         {
             resUpdate.Add(res);
         }

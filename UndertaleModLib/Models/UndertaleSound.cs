@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleSound : UndertaleObject
+    public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged
     {
         [Flags]
         public enum AudioEntryFlags : uint
@@ -16,15 +17,27 @@ namespace UndertaleModLib.Models
             Regular = 0x64,
         }
 
-        public UndertaleString Name { get; set; }
-        public AudioEntryFlags Flags { get; set; }
-        public UndertaleString Type { get; set; }
-        public UndertaleString File { get; set; }
-        public uint Unknown { get; set; }
-        public float Volume { get; set; }
-        public float Pitch { get; set; }
-        public uint GroupID { get; set; } // ID of audio group in AGRP, seems to be always 0 and AGRP is totally empty
-        public UndertaleResourceById<UndertaleEmbeddedAudio> AudioID { get; } = new UndertaleResourceById<UndertaleEmbeddedAudio>("AUDO");
+        private UndertaleString _Name;
+        private AudioEntryFlags _Flags;
+        private UndertaleString _Type;
+        private UndertaleString _File;
+        private uint _Unknown;
+        private float _Volume;
+        private float _Pitch;
+        private uint _GroupID;
+        private UndertaleResourceById<UndertaleEmbeddedAudio> _AudioID { get; } = new UndertaleResourceById<UndertaleEmbeddedAudio>("AUDO");
+
+        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+        public AudioEntryFlags Flags { get => _Flags; set { _Flags = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Flags")); } }
+        public UndertaleString Type { get => _Type; set { _Type = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Type")); } }
+        public UndertaleString File { get => _File; set { _File = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("File")); } }
+        public uint Unknown { get => _Unknown; set { _Unknown = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown")); } }
+        public float Volume { get => _Volume; set { _Volume = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Volume")); } }
+        public float Pitch { get => _Pitch; set { _Pitch = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Pitch")); } }
+        public uint GroupID { get => _GroupID; set { _GroupID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GroupID")); } } // ID of audio group in AGRP, seems to be always 0 and AGRP is totally empty
+        public UndertaleEmbeddedAudio AudioID { get => _AudioID.Resource; set { _AudioID.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AudioID")); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -36,7 +49,7 @@ namespace UndertaleModLib.Models
             writer.Write(Volume);
             writer.Write(Pitch);
             writer.Write(GroupID);
-            writer.Write(AudioID.Serialize(writer));
+            writer.Write(_AudioID.Serialize(writer));
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -49,7 +62,7 @@ namespace UndertaleModLib.Models
             Volume = reader.ReadSingle();
             Pitch = reader.ReadSingle();
             GroupID = reader.ReadUInt32();
-            AudioID.Unserialize(reader, reader.ReadInt32());
+            _AudioID.Unserialize(reader, reader.ReadInt32());
         }
 
         public override string ToString()

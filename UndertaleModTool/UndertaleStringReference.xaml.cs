@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModTool
@@ -83,7 +84,7 @@ namespace UndertaleModTool
                 switch(dialog.Result)
                 {
                     case StringUpdateWindow.ResultType.ChangeOneValue:
-                        ObjectReference = FindOrCreateString(tb.Text);
+                        ObjectReference = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString(tb.Text);
                         break;
                     case StringUpdateWindow.ResultType.ChangeReferencedValue:
                         binding.UpdateSource();
@@ -93,19 +94,6 @@ namespace UndertaleModTool
                         break;
                 }
             }
-        }
-
-        private UndertaleString FindOrCreateString(string resolvedSource)
-        {
-            // TODO: without reference counting the strings, this may leave unused strings in the array
-            foreach(UndertaleString str in (Application.Current.MainWindow as MainWindow).Data.Strings)
-            {
-                if (str.Content == resolvedSource)
-                    return str;
-            }
-            UndertaleString newString = new UndertaleString(resolvedSource);
-            (Application.Current.MainWindow as MainWindow).Data.Strings.Add(newString);
-            return newString;
         }
     }
 }

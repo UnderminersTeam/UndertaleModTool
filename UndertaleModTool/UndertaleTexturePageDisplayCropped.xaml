@@ -12,7 +12,7 @@
         <Border Canvas.Left="{Binding TargetX}" Canvas.Top="{Binding TargetY}"  Width="{Binding TargetWidth}" Height="{Binding TargetHeight}">
             <Border.Background>
                 <ImageBrush
-                    ImageSource="{Binding SpritesheetId.Resource.TextureData.TextureBlob}" 
+                    ImageSource="{Binding SpritesheetId.TextureData.TextureBlob}" 
                     ViewboxUnits="Absolute"
                     TileMode="None"
                     Stretch="UniformToFill">

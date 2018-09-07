@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,19 +13,33 @@ namespace UndertaleModLib.Models
      * TargetX/Y/W/H is relative to the bounding box, anything outside of that is just transparent.
      * SourceX/Y/W/H is part of SpritesheetId that is drawn over TargetX/Y/W/H
      */
-    public class UndertaleTexturePage : UndertaleObject
+    public class UndertaleTexturePage : UndertaleResource, INotifyPropertyChanged
     {
-        public ushort SourceX { get; set; }
-        public ushort SourceY { get; set; }
-        public ushort SourceWidth { get; set; }
-        public ushort SourceHeight { get; set; }
-        public ushort TargetX { get; set; }
-        public ushort TargetY { get; set; }
-        public ushort TargetWidth { get; set; }
-        public ushort TargetHeight { get; set; }
-        public ushort BoundingWidth { get; set; }
-        public ushort BoundingHeight { get; set; }
-        public UndertaleResourceById<UndertaleEmbeddedTexture> SpritesheetId { get; } = new UndertaleResourceById<UndertaleEmbeddedTexture>("TXTR");
+        private ushort _SourceX;
+        private ushort _SourceY;
+        private ushort _SourceWidth;
+        private ushort _SourceHeight;
+        private ushort _TargetX;
+        private ushort _TargetY;
+        private ushort _TargetWidth;
+        private ushort _TargetHeight;
+        private ushort _BoundingWidth;
+        private ushort _BoundingHeight;
+        private UndertaleResourceById<UndertaleEmbeddedTexture> _SpritesheetId { get; } = new UndertaleResourceById<UndertaleEmbeddedTexture>("TXTR");
+
+        public ushort SourceX { get => _SourceX; set { _SourceX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceX")); } }
+        public ushort SourceY { get => _SourceY; set { _SourceY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceY")); } }
+        public ushort SourceWidth { get => _SourceWidth; set { _SourceWidth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceWidth")); } }
+        public ushort SourceHeight { get => _SourceHeight; set { _SourceHeight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceHeight")); } }
+        public ushort TargetX { get => _TargetX; set { _TargetX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TargetX")); } }
+        public ushort TargetY { get => _TargetY; set { _TargetY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TargetY")); } }
+        public ushort TargetWidth { get => _TargetWidth; set { _TargetWidth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TargetWidth")); } }
+        public ushort TargetHeight { get => _TargetHeight; set { _TargetHeight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TargetHeight")); } }
+        public ushort BoundingWidth { get => _BoundingWidth; set { _BoundingWidth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BoundingWidth")); } }
+        public ushort BoundingHeight { get => _BoundingHeight; set { _BoundingHeight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BoundingHeight")); } }
+        public UndertaleEmbeddedTexture SpritesheetId { get => _SpritesheetId.Resource; set { _SpritesheetId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpritesheetId")); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -38,7 +53,7 @@ namespace UndertaleModLib.Models
             writer.Write(TargetHeight);
             writer.Write(BoundingWidth);
             writer.Write(BoundingHeight);
-            writer.Write((short)SpritesheetId.Serialize(writer));
+            writer.Write((short)_SpritesheetId.Serialize(writer));
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -53,7 +68,7 @@ namespace UndertaleModLib.Models
             TargetHeight = reader.ReadUInt16();
             BoundingWidth = reader.ReadUInt16();
             BoundingHeight = reader.ReadUInt16();
-            SpritesheetId.Unserialize(reader, reader.ReadInt16());
+            _SpritesheetId.Unserialize(reader, reader.ReadInt16());
         }
 
         public override string ToString()

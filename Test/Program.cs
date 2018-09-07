@@ -27,7 +27,7 @@ namespace Test
                     {
                         foreach(var scpt in evnt.CodeBlock)
                         {
-                            Debug.WriteLine(i + "." + evnt.EventSubtype + ": " + scpt.CodeId.Resource.Name.Content);
+                            Debug.WriteLine(i + "." + evnt.EventSubtype + ": " + scpt.CodeId.Name.Content);
                         }
                     }
                 }
@@ -77,10 +77,10 @@ namespace Test
                     Console.WriteLine(room.Name);
                     Console.WriteLine("=============");
                     foreach (var bg in room.Backgrounds)
-                        if(bg.BgDefIndex.Resource != null)
-                            Console.WriteLine(bg.BgDefIndex.Resource.Name);
+                        if(bg.BgDefIndex != null)
+                            Console.WriteLine(bg.BgDefIndex.Name);
                     foreach (var go in room.GameObjects)
-                        Console.WriteLine(go.ObjDefIndex.Resource.Name);
+                        Console.WriteLine(go.ObjDefIndex.Name);
                     Console.WriteLine();
                 }
             }*/
@@ -101,7 +101,7 @@ namespace Test
             {
                 Name = nam,
             };
-            scr.Code.Resource = data.CodeDefinitions[10];
+            scr.Code = data.CodeDefinitions[10];
             data.Scripts.Add(scr);*/
 
             /*UndertaleString roomname = new UndertaleString("room_addedjustnow");
@@ -150,7 +150,7 @@ namespace Test
             texpage.BoundingY = data.TexturePage[0].BoundingY;
             texpage.BoundingWidth = data.TexturePage[0].BoundingWidth;
             texpage.BoundingHeight = data.TexturePage[0].BoundingHeight;
-            texpage.SpritesheetId.Resource = data.TexturePage[0].SpritesheetId.Resource;
+            texpage.SpritesheetId = data.TexturePage[0].SpritesheetId;
             data.TexturePage.Add(texpage);*/
 
             /*UndertaleString name = new UndertaleString("NewAddedSound");
@@ -167,7 +167,7 @@ namespace Test
             snd.Volume = 1.0f;
             snd.GroupID = 0;
             snd.Flags = UndertaleSound.AudioEntryFlags.Regular;
-            snd.AudioID.Resource = null;
+            snd.AudioID = null;
             data.Sounds.Add(snd);*/
 
             UndertaleIO.Write(new FileStream("newdata.win", FileMode.Create), data);

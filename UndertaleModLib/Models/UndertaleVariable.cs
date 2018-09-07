@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleVariable : UndertaleObject
+    public class UndertaleVariable : UndertaleResource
     {
         public UndertaleString Name { get; set; }
         public uint InstanceType { get; set; }

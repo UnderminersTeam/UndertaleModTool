@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib
 {
-    public class UndertaleSimpleList<T> : List<T>, UndertaleObject where T : UndertaleObject, new()
+    public class UndertaleSimpleList<T> : ObservableCollection<T>, UndertaleObject where T : UndertaleObject, new()
     {
         public void Serialize(UndertaleWriter writer)
         {
@@ -26,7 +27,7 @@ namespace UndertaleModLib
         }
     }
 
-    public class UndertalePointerList<T> : List<T>, UndertaleObject where T : UndertaleObject, new()
+    public class UndertalePointerList<T> : ObservableCollection<T>, UndertaleObject where T : UndertaleObject, new()
     {
         public void Serialize(UndertaleWriter writer)
         {

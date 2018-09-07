@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,17 +8,21 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleString : UndertaleObject
+    public class UndertaleString : UndertaleResource, INotifyPropertyChanged
     {
-        public string Content { get; set; }
+        private string _Content;
+
+        public string Content { get => _Content; set { _Content = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Content")); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public UndertaleString()
         {
         }
 
-        public UndertaleString(string Content)
+        public UndertaleString(string content)
         {
-            this.Content = Content;
+            this.Content = content;
         }
 
         public void Serialize(UndertaleWriter writer)

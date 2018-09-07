@@ -10,7 +10,7 @@ namespace UndertaleModLib.Models
 {
     // TODO: I'm not fully sure about the naming of these...
 
-    public class UndertaleFunctionDeclaration : UndertaleObject
+    public class UndertaleFunctionDeclaration : UndertaleNamedResource
     {
         public UndertaleString Name { get; set; }
         public uint Occurrences { get; set; }
@@ -64,7 +64,7 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleFunctionDefinition : UndertaleObject
+    public class UndertaleFunctionDefinition : UndertaleNamedResource
     {
         public uint ArgumentsCount => (uint)Arguments.Count;
         public UndertaleString Name { get; set; }

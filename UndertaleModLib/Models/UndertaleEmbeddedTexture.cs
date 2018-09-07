@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,10 +8,15 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleEmbeddedTexture : UndertaleObject
+    public class UndertaleEmbeddedTexture : UndertaleResource, INotifyPropertyChanged
     {
-        public uint UnknownAlwaysZero { get; set; }
-        public TexData TextureData { get; set; }
+        private uint _UnknownAlwaysZero;
+        private TexData _TextureData;
+
+        public uint UnknownAlwaysZero { get => _UnknownAlwaysZero; set { _UnknownAlwaysZero = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UnknownAlwaysZero")); } }
+        public TexData TextureData { get => _TextureData; set { _TextureData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureData")); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -44,9 +50,13 @@ namespace UndertaleModLib.Models
                 throw new IOException();
         }
 
-        public class TexData : UndertaleObject
+        public class TexData : UndertaleObject, INotifyPropertyChanged
         {
-            public byte[] TextureBlob { get; set; }
+            private byte[] _TextureBlob;
+
+            public byte[] TextureBlob { get => _TextureBlob; set { _TextureBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureBlob")); } }
+
+            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {

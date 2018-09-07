@@ -78,7 +78,7 @@
             <GridViewColumn Header="CodeId" Width="250">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
-                        <local:UndertaleObjectReference ObjectReference="{Binding CodeId.Resource}" ObjectType="{x:Type undertale:UndertaleCode}" />
+                        <local:UndertaleObjectReference ObjectReference="{Binding CodeId}" ObjectType="{x:Type undertale:UndertaleCode}" />
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
@@ -182,7 +182,7 @@
             <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Sprite</TextBlock>
-            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Sprite.Resource}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
+            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
 
             <Viewbox Grid.Row="2" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
                 <Border>
@@ -196,7 +196,7 @@
                             </DrawingBrush.Drawing>
                         </DrawingBrush>
                     </Border.Background>
-                    <local:UndertaleTexturePageDisplayCropped DataContext="{Binding Sprite.Resource.Textures[0].TextureId}"/>
+                    <local:UndertaleTexturePageDisplayCropped DataContext="{Binding Sprite.Textures[0].TextureId}"/>
                     <!-- TODO: animate through all textures? -->
                 </Border>
             </Viewbox>
@@ -214,10 +214,10 @@
             <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Persistent}"/>
 
             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Parent</TextBlock>
-            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding ParentId.Resource}" ObjectType="{x:Type undertale:UndertaleGameObject}"/>
+            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding ParentId}" ObjectType="{x:Type undertale:UndertaleGameObject}"/>
 
             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Texture mask id</TextBlock>
-            <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding TextureMaskId.Resource}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
+            <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding TextureMaskId}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
 
             <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Uses physics</TextBlock>
             <CheckBox Grid.Row="9" Grid.Column="1" Margin="3" IsChecked="{Binding UsesPhysics}"/>

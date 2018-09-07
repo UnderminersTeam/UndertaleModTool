@@ -51,9 +51,6 @@ namespace UndertaleModTool
                     }
 
                     target.TextureData.TextureBlob = data;
-
-                    // TODO: force UI to update
-                    (Application.Current.MainWindow as MainWindow).ForceUIUpdate();
                 }
                 catch (Exception ex)
                 {

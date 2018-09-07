@@ -49,6 +49,6 @@
         <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GroupID}"/>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Embedded audio</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding AudioID.Resource}" ObjectType="{x:Type undertale:UndertaleEmbeddedAudio}"/>
+        <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding AudioID}" ObjectType="{x:Type undertale:UndertaleEmbeddedAudio}"/>
     </Grid>
 </UserControl>

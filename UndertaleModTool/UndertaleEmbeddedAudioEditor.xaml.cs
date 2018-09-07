@@ -46,9 +46,6 @@ namespace UndertaleModTool
                     // TODO: Make sure it's valid WAV
 
                     target.Data = data;
-
-                    // TODO: force UI to update
-                    (Application.Current.MainWindow as MainWindow).ForceUIUpdate();
                 }
                 catch (Exception ex)
                 {

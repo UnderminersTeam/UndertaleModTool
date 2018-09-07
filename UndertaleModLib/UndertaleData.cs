@@ -46,4 +46,30 @@ namespace UndertaleModLib
         public IList<UndertaleEmbeddedTexture> EmbeddedTextures => FORM.TXTR.List;
         public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO.List;
     }
+
+    public static class UndertaleDataExtensionMethods
+    {
+        public static T ByName<T>(this IList<T> list, string name) where T : UndertaleNamedResource
+        {
+            foreach(var item in list)
+            {
+                if (item.Name.Content == name)
+                    return item;
+            }
+            return default(T);
+        }
+
+        public static UndertaleString MakeString(this IList<UndertaleString> list, string content)
+        {
+            // TODO: without reference counting the strings, this may leave unused strings in the array
+            foreach (UndertaleString str in list)
+            {
+                if (str.Content == content)
+                    return str;
+            }
+            UndertaleString newString = new UndertaleString(content);
+            list.Add(newString);
+            return newString;
+        }
+    }
 }

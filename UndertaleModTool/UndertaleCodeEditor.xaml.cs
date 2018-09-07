@@ -152,12 +152,12 @@ namespace UndertaleModTool
                         case UndertaleInstruction.InstructionType.PushInstruction:
                             par.Inlines.Add(new Run(" "));
                             par.Inlines.Add(new Run("(" + instr.Type1.ToString().ToLower() + ")") { Foreground = typeBrush });
-                            Run valueRun = new Run(instr.Value.ToString()) { Foreground = argBrush, Cursor = (instr.Value is UndertaleObject || instr.Value is UndertaleResource) ? Cursors.Hand : Cursors.Arrow };
-                            if (instr.Value is UndertaleResource)
+                            Run valueRun = new Run(instr.Value.ToString()) { Foreground = argBrush, Cursor = (instr.Value is UndertaleObject || instr.Value is UndertaleResourceRef) ? Cursors.Hand : Cursors.Arrow };
+                            if (instr.Value is UndertaleResourceRef) // TODO: to be removed
                             {
                                 valueRun.MouseDown += (sender, e) =>
                                 {
-                                    (Application.Current.MainWindow as MainWindow).Selected = (instr.Value as UndertaleResource).Resource;
+                                    (Application.Current.MainWindow as MainWindow).Selected = (instr.Value as UndertaleResourceRef).Resource;
                                 };
                             }
                             else if (instr.Value is UndertaleObject)
