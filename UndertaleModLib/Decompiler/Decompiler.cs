@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -20,26 +22,13 @@ namespace UndertaleModLib.Decompiler
             public uint? Address;
             public List<UndertaleInstruction> Instructions = new List<UndertaleInstruction>();
             public List<Statement> Statements = null;
-            public Statement ConditionStatement = null;
+            public Expression ConditionStatement = null;
             public bool conditionalExit;
             public Block nextBlockTrue;
             public Block nextBlockFalse;
             public List<Block> entryPoints = new List<Block>();
-            /*public bool isLoop = false;
-            public Block loopExitPoint = null;
-            public ExitType nextBlockTrueExitType = ExitType.Jump;
-            public ExitType nextBlockFalseExitType = ExitType.Jump;
-            public Block nextBlockTrueLoopStart = null;
-            public Block nextBlockFalseLoopStart = null;*/
             internal List<TempVarReference> TempVarsOnEntry;
-
-            /*public enum ExitType
-            {
-                Jump,
-                Break,
-                Continue,
-                Return
-            }*/
+            internal List<Block> Dominators;
 
             public Block(uint? address)
             {
@@ -752,72 +741,172 @@ namespace UndertaleModLib.Decompiler
             return blockByAddress;
         }
 
-        /**
-         * According to https://pcy.ulyssis.be/undertale/decompilation-corrected "there are no improper loops, only breaks and continues"
-         * so I'll assume that because it makes things easier
-         */
-
-        /*private static bool DetectLoop(Block entryPoint, Block current, List<Block> visited, List<Block> blocksInLoop)
+        public abstract class HLStatement : Statement
         {
-            if (current == entryPoint)
-                return true;
-            visited.Add(current);
+        };
 
-            if (current.nextBlockTrue != null && !visited.Contains(current.nextBlockTrue) && DetectLoop(entryPoint, current.nextBlockTrue, visited, blocksInLoop))
-            {
-                blocksInLoop.Add(current);
-                return true;
-            }
-            if (current.nextBlockFalse != null && !visited.Contains(current.nextBlockFalse) && DetectLoop(entryPoint, current.nextBlockFalse, visited, blocksInLoop))
-            {
-                blocksInLoop.Add(current);
-                return true;
-            }
-            
-            return false;
-        }
-
-        public static void DetectLoop(Block entryPoint)
+        public class BlockHLStatement : HLStatement
         {
-            List<Block> blocksInLoop = new List<Block>();
-            if (DetectLoop(entryPoint, entryPoint, new List<Block>(), blocksInLoop))
+            public List<Statement> Statements = new List<Statement>();
+
+            public override string ToString()
             {
-                entryPoint.isLoop = true;
-                Block exitPoint = null;
-                foreach (Block block in blocksInLoop)
+                if (Statements.Count == 1)
+                    return "    " + Statements[0].ToString();
+                else
                 {
-                    // TODO: could be a return as well...
-                    if (!blocksInLoop.Contains(block.nextBlockTrue))
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("{\n");
+                    foreach(var stmt in Statements)
                     {
-                        if (exitPoint != null && block.nextBlockTrue != exitPoint)
-                            throw new Exception("But no improper loops came... or they did?");
-                        exitPoint = block.nextBlockTrue;
-                        block.nextBlockTrueExitType = Block.ExitType.Break;
-                        block.nextBlockTrueLoopStart = entryPoint;
+                        sb.Append("    ");
+                        sb.Append(stmt.ToString().Replace("\n", "\n    "));
+                        sb.Append("\n");
                     }
-                    if (!blocksInLoop.Contains(block.nextBlockFalse))
+                    sb.Append("}");
+                    return sb.ToString();
+                }
+            }
+        };
+
+        public class IfHLStatement : HLStatement
+        {
+            public Expression condition;
+            public BlockHLStatement trueBlock;
+            public BlockHLStatement falseBlock;
+
+            public override string ToString()
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("if " + condition.ToString() + "\n");
+                sb.Append(trueBlock.ToString());
+                if (falseBlock != null && falseBlock.Statements.Count > 0)
+                {
+                    sb.Append("\nelse\n");
+                    sb.Append(falseBlock.ToString());
+                }
+                return sb.ToString();
+            }
+        };
+
+        /*public class LoopHLStatement : HLStatement
+        {
+            BlockHLStatement Block;
+
+            public override string ToString()
+            {
+                return "while(true)\n    " + Block.ToString().Replace("\n", "\n    ");
+            }
+        };*/
+
+        // Based on http://www.backerstreet.com/decompiler/loop_analysis.php
+        private static void ComputeDominators(Dictionary<uint, Block> blocks, Block entryBlock)
+        {
+            List<Block> blockList = blocks.Values.ToList();
+            List<BitArray> dominators = new List<BitArray>();
+
+            for (int i = 0; i < blockList.Count; i++) {
+                dominators.Add(new BitArray(blockList.Count));
+                dominators[i].SetAll(true);
+            }
+
+            var entryBlockId = blockList.IndexOf(entryBlock);
+            dominators[entryBlockId].SetAll(false);
+            dominators[entryBlockId].Set(entryBlockId, true);
+
+            BitArray temp = new BitArray(blockList.Count);
+            bool changed = true;
+            do
+            {
+                changed = false;
+                for (int i = 0; i < blockList.Count; i++)
+                {
+                    if (i == entryBlockId)
+                        continue;
+
+                    foreach (Block pred in blockList[i].entryPoints)
                     {
-                        if (exitPoint != null && block.nextBlockFalse != exitPoint)
-                            throw new Exception("But no improper loops came... or they did?");
-                        exitPoint = block.nextBlockFalse;
-                        block.nextBlockFalseExitType = Block.ExitType.Break;
-                        block.nextBlockFalseLoopStart = entryPoint;
-                    }
-                    if (block.nextBlockTrue == entryPoint)
-                    {
-                        block.nextBlockTrueExitType = Block.ExitType.Continue;
-                        block.nextBlockTrueLoopStart = entryPoint;
-                    }
-                    if (block.nextBlockFalse == entryPoint)
-                    {
-                        block.nextBlockFalseExitType = Block.ExitType.Continue;
-                        block.nextBlockFalseLoopStart = entryPoint;
+                        var predId = blockList.IndexOf(pred);
+                        temp.SetAll(false);
+                        temp.Or(dominators[i]);
+                        dominators[i].And(dominators[predId]);
+                        dominators[i].Set(i, true);
+                        /*if (!dominators[i].SequenceEquals(temp))
+                            changed = true;*/
+                        for(var j = 0; j < blockList.Count; j++)
+                            if (dominators[i][j] != temp[j])
+                            {
+                                changed = true;
+                                break;
+                            }
                     }
                 }
+            } while (changed);
 
-                entryPoint.loopExitPoint = exitPoint ?? throw new Exception("Infinite loop detected!");
+            for(var i = 0; i < blockList.Count; i++)
+            {
+                blockList[i].Dominators = new List<Block>();
+                for(var j = 0; j < blockList.Count; j++)
+                {
+                    if (dominators[i].Get(j))
+                        blockList[i].Dominators.Add(blockList[j]);
+                }
             }
-        }*/
+        }
+
+        private static List<Block> NaturalLoopForEdge(Block header, Block tail)
+        {
+            Stack<Block> workList = new Stack<Block>();
+            List<Block> loopBlocks = new List<Block>();
+
+            loopBlocks.Add(header);
+            if (header != tail)
+            {
+                loopBlocks.Add(tail);
+                workList.Push(tail);
+            }
+
+            while(workList.Count > 0)
+            {
+                Block block = workList.Pop();
+                foreach(Block pred in block.entryPoints)
+                {
+                    if(!loopBlocks.Contains(pred))
+                    {
+                        loopBlocks.Add(pred);
+                        workList.Push(pred);
+                    }
+                }
+            }
+
+            return loopBlocks;
+        }
+
+        private static Dictionary<Block, List<Block>> ComputeNaturalLoops(Dictionary<uint, Block> blocks, Block entryBlock)
+        {
+            ComputeDominators(blocks, entryBlock);
+            Dictionary<Block, List<Block>> loopSet = new Dictionary<Block, List<Block>>();
+
+            foreach(var block in blocks.Values)
+            {
+                // Every successor that dominates its predecessor
+                // must be the header of a loop.
+                // That is, block -> succ is a back edge.
+
+                if (block.nextBlockTrue != null && !loopSet.ContainsKey(block.nextBlockTrue))
+                {
+                    if (block.Dominators.Contains(block.nextBlockTrue))
+                        loopSet.Add(block.nextBlockTrue, NaturalLoopForEdge(block.nextBlockTrue, block));
+                }
+                if (block.nextBlockFalse != null && block.nextBlockTrue != block.nextBlockFalse && !loopSet.ContainsKey(block.nextBlockFalse))
+                {
+                    if (block.Dominators.Contains(block.nextBlockFalse))
+                        loopSet.Add(block.nextBlockFalse, NaturalLoopForEdge(block.nextBlockFalse, block));
+                }
+            }
+
+            return loopSet;
+        }
 
         // Finding ifs
 
@@ -926,92 +1015,56 @@ namespace UndertaleModLib.Decompiler
             return FindLowestCommonAncestor(blocks, rootExitPoint, entryPoint.nextBlockTrue, entryPoint.nextBlockFalse);
         }
 
-        private static void Printer(Block block, string indent = "", List<Block> processed = null)
+        private static BlockHLStatement HLDecompileBlocks(Block entryBlock, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Block rootExitPoint, Block stopAt = null)
         {
-            if (processed == null)
-                processed = new List<Block>();
+            BlockHLStatement output = new BlockHLStatement();
+            Block block = entryBlock;
+            while(block != stopAt && block != rootExitPoint)
+            {
+                // scr_fx_water good loop
+                foreach (var stmt in block.Statements)
+                    output.Statements.Add(stmt);
+                if (block.conditionalExit)
+                {
+                    Block meetPoint = FindFirstMeetPoint(block, rootExitPoint, blocks.Values);
+                    Debug.Assert(meetPoint != null);
 
-            if (processed.Contains(block))
-            {
-                Debug.WriteLine(indent + "* (repeat)");
-                return;
-            }
-            foreach (var instr in block.Instructions)
-                Debug.WriteLine(indent + "* " + instr.ToString());
-            processed.Add(block);
-            if (block.conditionalExit)
-            {
-                if (block.nextBlockTrue != null)
-                {
-                    Debug.WriteLine(indent + "-> IfTrue");
-                    Printer(block.nextBlockTrue, indent + " ", processed);
+                    IfHLStatement cond = new IfHLStatement();
+                    cond.condition = block.ConditionStatement;
+                    cond.trueBlock = HLDecompileBlocks(block.nextBlockTrue, blocks, loops, rootExitPoint, meetPoint);
+                    cond.falseBlock = HLDecompileBlocks(block.nextBlockFalse, blocks, loops, rootExitPoint, meetPoint);
+                    output.Statements.Add(cond);
+
+                    block = meetPoint;
                 }
-                if (block.nextBlockFalse != null)
+                else
                 {
-                    Debug.WriteLine(indent + "-> IfFalse");
-                    Printer(block.nextBlockFalse, indent + " ", processed);
+                    block = block.nextBlockTrue;
                 }
             }
-            else
-            {
-                if (block.nextBlockTrue != null)
-                {
-                    Debug.WriteLine(indent + "-> Jump");
-                    Printer(block.nextBlockTrue, indent + " ", processed);
-                }
-            }
+            return output;
         }
 
-        private static void PrinterV2(StringBuilder sb, Block block, Dictionary<uint, Block> blocks, Block rootExitPoint, string indent = "", Block stopAt = null, int level = 0)
+        private static List<Statement> HLDecompile(Dictionary<uint, Block> blocks, Block entryPoint, Block rootExitPoint)
         {
-            //sb.AppendLine(indent + "// Block " + block.Address);
-            if (level > 300)
+            Dictionary<Block, List<Block>> loops = ComputeNaturalLoops(blocks, entryPoint);
+            foreach(var a in loops)
             {
-                throw new Exception("Stack overflow?");
+                Debug.WriteLine("LOOP at " + a.Key.Address + " contains blocks: ");
+                foreach (var b in a.Value)
+                    Debug.WriteLine("* " + b.Address);
             }
-            if (block == stopAt && stopAt != null)
-                return;
-            foreach (var instr in block.Statements)
-                sb.AppendLine(indent + instr.ToString());
-            if (block.conditionalExit)
-            {
-                Debug.Assert(block.nextBlockTrue != null && block.nextBlockFalse != null);
-
-                Block meetPoint = FindFirstMeetPoint(block, rootExitPoint, blocks.Values);
-                Debug.Assert(meetPoint != null);
-                //sb.AppendLine(indent + "// Meet point from " + block.Address + " is at " + meetPoint.Address);
-
-                sb.AppendLine(indent + "if " + block.ConditionStatement.ToString());
-                sb.AppendLine(indent + "{");
-                if (block.nextBlockTrue != meetPoint)
-                    PrinterV2(sb, block.nextBlockTrue, blocks, rootExitPoint, indent + "    ", meetPoint, level + 1);
-                sb.AppendLine(indent + "}");
-                if (block.nextBlockFalse != meetPoint)
-                {
-                    sb.AppendLine(indent + "else");
-                    sb.AppendLine(indent + "{");
-                    PrinterV2(sb, block.nextBlockFalse, blocks, rootExitPoint, indent + "    ", meetPoint, level + 1);
-                    sb.AppendLine(indent + "}");
-                }
-                if (meetPoint != stopAt)
-                    PrinterV2(sb, meetPoint, blocks, rootExitPoint, indent, stopAt, level + 1);
-            }
-            else
-            {
-                if (block.nextBlockTrue != null && block.nextBlockTrue != stopAt && block.nextBlockTrue != rootExitPoint)
-                {
-                    sb.AppendLine(indent + "// jump to " + block.nextBlockTrue.Address);
-                    PrinterV2(sb, block.nextBlockTrue, blocks, rootExitPoint, indent, stopAt, level + 1);
-                }
-            }
+            return HLDecompileBlocks(entryPoint, blocks, loops, rootExitPoint).Statements;
         }
 
         public static string Decompile(UndertaleCode code)
         {
             Dictionary<uint, Block> blocks = DecompileFlowGraph(code);
             DecompileFromBlock(blocks[0]);
+            List<Statement> stmts = HLDecompile(blocks, blocks[0], blocks[code.Length / 4]);
             StringBuilder sb = new StringBuilder();
-            PrinterV2(sb, blocks[0], blocks, blocks[code.Length / 4]);
+            foreach (var stmt in stmts)
+                sb.Append(stmt.ToString() + "\n");
             return sb.ToString();
         }
 
