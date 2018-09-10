@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -176,7 +177,7 @@ namespace UndertaleModLib.Models
         public Reference<UndertaleVariable> Destination { get; set; }
         public Reference<UndertaleFunctionDeclaration> Function { get; set; }
         public int JumpOffset { get; set; }
-        public int _OrigJumpOffset { get; set; }
+        public bool JumpOffsetIsWeird { get; set; }
         public ushort ArgumentsCount { get; set; }
         public byte DupExtra { get; set; }
 
@@ -228,7 +229,11 @@ namespace UndertaleModLib.Models
                     {
                         // TODO: see unserialize
                         // TODO: why the hell is there exactly ONE number that was NOT encoded in a weird way? If you just rewrite the file with the 'fix' it differs one one byte
-                        writer.WriteInt24(_OrigJumpOffset);
+                        uint JumpOffsetFixed = (uint)JumpOffset;
+                        JumpOffsetFixed &= ~0xFF800000;
+                        if (JumpOffsetIsWeird)
+                            JumpOffsetFixed |= 0x00800000;
+                        writer.WriteInt24((int)JumpOffsetFixed);
 
                         writer.Write((byte)Kind);
                     }
@@ -360,7 +365,7 @@ namespace UndertaleModLib.Models
                             r |= 0xFFC00000;
 
                         JumpOffset = (int)r;
-                        _OrigJumpOffset = (int)v;
+                        JumpOffsetIsWeird = (v & 0x00800000) != 0;
 
                         Debug.Assert(reader.ReadByte() == (byte)Kind);
                     }
@@ -476,29 +481,34 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
+    public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, INotifyPropertyChanged
     {
-        public UndertaleString Name { get; set; }
-        public uint Length { get; set; }
-        public uint ArgumentCount { get; set; }
+        private UndertaleString _Name;
+        internal uint _Length;
+        private uint _ArgumentCount;
         internal uint _BytecodeAbsoluteAddress;
-        public uint UnknownProbablyZero { get; set; }
+        private uint _UnknownProbablyZero;
 
-        public List<UndertaleInstruction> Instructions = new List<UndertaleInstruction>();
+        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+        public uint ArgumentCount { get => _ArgumentCount; set { _ArgumentCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ArgumentCount")); } }
+        public uint UnknownProbablyZero { get => _UnknownProbablyZero; set { _UnknownProbablyZero = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UnknownProbablyZero")); } }
+        public List<UndertaleInstruction> Instructions { get; } = new List<UndertaleInstruction>();
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public void SerializeBlobBefore(UndertaleWriter writer)
         {
             _BytecodeAbsoluteAddress = writer.Position;
-            //TODO: len
-            //Debug.Assert(Bytecode.Length == Length);
+            uint start = writer.Position;
             foreach (UndertaleInstruction instr in Instructions)
                 writer.WriteUndertaleObject(instr);
+            _Length = writer.Position - start;
         }
 
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
-            writer.Write(Length);
+            writer.Write(_Length);
             writer.Write(ArgumentCount);
             int BytecodeRelativeAddress = (int)_BytecodeAbsoluteAddress - (int)writer.Position; // TODO: check
             writer.Write(BytecodeRelativeAddress);
@@ -508,14 +518,14 @@ namespace UndertaleModLib.Models
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
-            Length = reader.ReadUInt32();
+            _Length = reader.ReadUInt32();
             ArgumentCount = reader.ReadUInt32();
             int BytecodeRelativeAddress = reader.ReadInt32();
             _BytecodeAbsoluteAddress = (uint)((int)reader.Position - 4 + BytecodeRelativeAddress);
             uint here = reader.Position;
             reader.Position = _BytecodeAbsoluteAddress;
             Instructions.Clear();
-            while (reader.Position < _BytecodeAbsoluteAddress + Length)
+            while (reader.Position < _BytecodeAbsoluteAddress + _Length)
             {
                 uint a = (reader.Position - _BytecodeAbsoluteAddress) / 4;
                 UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();

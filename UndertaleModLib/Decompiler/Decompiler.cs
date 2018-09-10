@@ -626,8 +626,8 @@ namespace UndertaleModLib.Decompiler
             Dictionary<uint, Block> blockByAddress = new Dictionary<uint, Block>();
             blockByAddress[0] = new Block(0);
             Block entryBlock = new Block(null);
-            Block finalBlock = new Block(code.Length / 4);
-            blockByAddress[code.Length / 4] = finalBlock;
+            Block finalBlock = new Block(code._Length / 4);
+            blockByAddress[code._Length / 4] = finalBlock;
             Block currentBlock = entryBlock;
 
             foreach(var instr in code.Instructions)
@@ -1061,7 +1061,7 @@ namespace UndertaleModLib.Decompiler
         {
             Dictionary<uint, Block> blocks = DecompileFlowGraph(code);
             DecompileFromBlock(blocks[0]);
-            List<Statement> stmts = HLDecompile(blocks, blocks[0], blocks[code.Length / 4]);
+            List<Statement> stmts = HLDecompile(blocks, blocks[0], blocks[code._Length / 4]);
             StringBuilder sb = new StringBuilder();
             foreach (var stmt in stmts)
                 sb.Append(stmt.ToString() + "\n");

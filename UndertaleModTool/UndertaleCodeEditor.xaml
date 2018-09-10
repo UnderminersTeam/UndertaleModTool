@@ -14,13 +14,21 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Argument count</TextBlock>
+        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding ArgumentCount}"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Unknown</TextBlock>
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding UnknownProbablyZero}"/>
         
-        <TabControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
+        <TabControl Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
             <TabItem Header="Disassembly" Name="DisassemblyTab">
                 <RichTextBox IsReadOnly="True" IsDocumentEnabled="True" Name="DisassemblyView" Padding="-5,0,-5,0"/>
             </TabItem>

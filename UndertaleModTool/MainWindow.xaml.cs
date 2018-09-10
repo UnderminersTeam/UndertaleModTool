@@ -272,6 +272,7 @@ namespace UndertaleModTool
         {
             if (e.Key == Key.Enter && !Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
             {
+                Debug.WriteLine(CommandBox.Text);
                 e.Handled = true;
                 CommandBox.IsEnabled = false;
                 object result;
