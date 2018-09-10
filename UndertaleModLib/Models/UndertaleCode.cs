@@ -571,7 +571,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleString(Name);
             writer.Write(_Length);
             writer.Write(ArgumentCount);
-            int BytecodeRelativeAddress = (int)_BytecodeAbsoluteAddress - (int)writer.Position; // TODO: check
+            int BytecodeRelativeAddress = (int)_BytecodeAbsoluteAddress - (int)writer.Position;
             writer.Write(BytecodeRelativeAddress);
             writer.Write(UnknownProbablyZero);
         }

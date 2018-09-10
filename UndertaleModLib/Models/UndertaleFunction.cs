@@ -13,10 +13,10 @@ namespace UndertaleModLib.Models
     public class UndertaleFunctionDeclaration : UndertaleNamedResource
     {
         public UndertaleString Name { get; set; }
-        public uint Occurrences { get; set; }
-        
-        public UndertaleInstruction FirstAddress { get; set; }
         public int UnknownChainEndingValue { get; set; }
+
+        internal uint Occurrences;
+        internal UndertaleInstruction FirstAddress;
 
         public void Serialize(UndertaleWriter writer)
         {

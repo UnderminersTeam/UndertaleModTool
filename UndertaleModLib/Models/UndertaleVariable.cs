@@ -13,10 +13,10 @@ namespace UndertaleModLib.Models
         public UndertaleString Name { get; set; }
         public int InstanceType { get; set; }
         public uint Unknown { get; set; } // some kind of 'parent object' identifier? either 0 or increasing numbers, with the exception of a couple -10
-        internal uint Occurrences;
-
-        internal UndertaleInstruction FirstAddress;
         public int UnknownChainEndingValue { get; set; } // looks like an identifier or counter of some kind. Increases in every variable, but I can't find the pattern
+
+        internal uint Occurrences;
+        internal UndertaleInstruction FirstAddress;
 
         public void Serialize(UndertaleWriter writer)
         {
