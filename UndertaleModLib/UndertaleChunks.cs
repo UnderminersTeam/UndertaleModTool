@@ -192,7 +192,7 @@ namespace UndertaleModLib
     {
         public override string Name => "VARI";
 
-        public uint Unknown1;
+        public uint Unknown1; // max value of UndertaleVariable.Unknown
         public uint Unknown1Again;
         public uint Unknown2;
         public List<UndertaleVariable> List = new List<UndertaleVariable>();

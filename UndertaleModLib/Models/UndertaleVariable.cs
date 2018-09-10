@@ -12,7 +12,7 @@ namespace UndertaleModLib.Models
     {
         public UndertaleString Name { get; set; }
         public uint InstanceType { get; set; }
-        public uint Unknown { get; set; }
+        public uint Unknown { get; set; } // some kind of 'parent object' identifier? either 0 or increasing numbers, with the exception of a couple -10
         public uint Occurrences { get; set; }
 
         // TODO: temporary untill I parse ref chains
@@ -20,7 +20,7 @@ namespace UndertaleModLib.Models
         public uint FirstAddressOffset { get; set; }
         public bool FirstAddressOk { get; set; }
 
-        public int UnknownUniqueChainEndingValue { get; set; } // looks like an identifier of some kind...
+        public int UnknownUniqueChainEndingValue { get; set; } // looks like an identifier or counter of some kind. Increases in every variable, but I can't find the pattern
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -28,14 +28,13 @@ namespace UndertaleModLib.Models
             writer.Write(InstanceType);
             writer.Write(Unknown);
             writer.Write(Occurrences);
-            int FirstAddress;
             if (Occurrences > 0)
-                FirstAddress = (int)(FirstAddressCode._BytecodeAbsoluteAddress + FirstAddressOffset);
+                writer.Write((int)(FirstAddressCode._BytecodeAbsoluteAddress + FirstAddressOffset));
             else
-                FirstAddress = UnknownUniqueChainEndingValue;
-            writer.Write(FirstAddress);
+                writer.Write((int)-1);
         }
 
+        //private static int id = 0;
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -43,8 +42,10 @@ namespace UndertaleModLib.Models
             Unknown = reader.ReadUInt32();
             Occurrences = reader.ReadUInt32();
             int FirstAddress = reader.ReadInt32();
+            //Debug.WriteLine("Variable " + (id++) + " at " + reader.GetAddressForUndertaleObject(Name).ToString("X8") + " child of " + Unknown);
             if (Occurrences > 0)
             {
+                //Debug.WriteLine("* " + FirstAddress.ToString("X8") + " (first)");
                 foreach (UndertaleCode code in reader.undertaleData.Code) // should be already parsed
                 {
                     if (code._BytecodeAbsoluteAddress <= FirstAddress && (FirstAddressCode == null || code._BytecodeAbsoluteAddress > FirstAddressCode._BytecodeAbsoluteAddress))
@@ -67,12 +68,15 @@ namespace UndertaleModLib.Models
                         throw new IOException("Failed to find reference at " + addr);
                     reference.Target = this;
                     addr += (uint)reference.NextOccurrenceOffset;
+                    /*if (i < Occurrences - 1)
+                        Debug.WriteLine("* " + addr.ToString("X8"));*/
                 }
+                //Debug.WriteLine("* " + reference.NextOccurrenceOffset.ToString() + " (ending value)");
                 UnknownUniqueChainEndingValue = reference.NextOccurrenceOffset;
             }
             else
             {
-                UnknownUniqueChainEndingValue = FirstAddress;
+                Debug.Assert(FirstAddress == -1);
             }
         }
 
