@@ -530,8 +530,8 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.Pop:
                         ExpressionVar target = new ExpressionVar(instr.Destination.Target, instr.TypeInst, instr.Destination.Type);
                         Expression val = null;
-                        Debug.Assert((instr.DupExtra & 0xF) == 0x2 || (instr.DupExtra & 0xF) == 0x5);
-                        if ((instr.DupExtra&0xF) == 0x2)
+                        Debug.Assert(instr.Type1 == UndertaleInstruction.DataType.Int32 || instr.Type1 == UndertaleInstruction.DataType.Variable);
+                        if (instr.Type1 == UndertaleInstruction.DataType.Int32)
                             val = stack.Pop();
                         if (target.NeedsInstanceParameters)
                             target.InstanceIndex = stack.Pop();
@@ -540,17 +540,17 @@ namespace UndertaleModLib.Decompiler
                             target.ArrayIndex = stack.Pop();
                             target.InstType = (UndertaleInstruction.InstanceType)Convert.ToInt32((stack.Pop() as ExpressionConstant).Value); // TODO: may crash
                         }
-                        if ((instr.DupExtra & 0xF) == 0x5)
+                        if (instr.Type1 == UndertaleInstruction.DataType.Variable)
                             val = stack.Pop();
                         Debug.Assert(val != null);
                         statements.Add(new AssignmentStatement(target, val));
                         break;
 
-                    case UndertaleInstruction.Opcode.PushCst:
+                    case UndertaleInstruction.Opcode.Push:
                     case UndertaleInstruction.Opcode.PushLoc:
                     case UndertaleInstruction.Opcode.PushGlb:
                     case UndertaleInstruction.Opcode.PushVar:
-                    case UndertaleInstruction.Opcode.PushI16:
+                    case UndertaleInstruction.Opcode.PushI:
                         if (instr.Value is UndertaleInstruction.Reference<UndertaleVariable>)
                         {
                             ExpressionVar pushTarget = new ExpressionVar((instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Target, instr.TypeInst, (instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Type);

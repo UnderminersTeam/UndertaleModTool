@@ -42,11 +42,11 @@ namespace UndertaleModLib.Models
             Bf = 0xB8, // if (!Pop()) goto Index + Offset*4; // GotoInstruction
             PushEnv = 0xBA, // GotoInstruction
             PopEnv = 0xBB, // GotoInstruction
-            PushCst = 0xC0, // Push(Value) // push constant
+            Push = 0xC0, // Push(Value) // push constant
             PushLoc = 0xC1, // Push(Value) // push local
             PushGlb = 0xC2, // Push(Value) // push global
             PushVar = 0xC3, // Push(Value) // push other variable
-            PushI16 = 0x84, // Push(Value) // push int16
+            PushI = 0x84, // Push(Value) // push int16
             Call = 0xD9, // Function(arg0, arg1, ..., argn) where arg = Pop() and n = ArgumentsCount
             Break = 0xFF, // Invalid access guard?
         }
@@ -102,11 +102,11 @@ namespace UndertaleModLib.Models
                 case Opcode.Pop:
                     return InstructionType.PopInstruction;
 
-                case Opcode.PushCst:
+                case Opcode.Push:
                 case Opcode.PushLoc:
                 case Opcode.PushGlb:
                 case Opcode.PushVar:
-                case Opcode.PushI16:
+                case Opcode.PushI:
                     return InstructionType.PushInstruction;
 
                 case Opcode.Call:
@@ -241,10 +241,9 @@ namespace UndertaleModLib.Models
 
                 case InstructionType.PopInstruction:
                     {
+                        writer.Write((short)TypeInst);
                         byte TypePair = (byte)((byte)Type2 << 4 | (byte)Type1);
                         writer.Write(TypePair);
-                        writer.Write((sbyte)TypeInst);
-                        writer.Write((byte)DupExtra);
                         writer.Write((byte)Kind);
                         writer.WriteUndertaleObject(Destination);
                     }
@@ -373,11 +372,10 @@ namespace UndertaleModLib.Models
 
                 case InstructionType.PopInstruction:
                     {
+                        TypeInst = (InstanceType)reader.ReadInt16();
                         byte TypePair = reader.ReadByte();
                         Type1 = (DataType)(TypePair & 0xf);
                         Type2 = (DataType)(TypePair >> 4);
-                        TypeInst = (InstanceType)reader.ReadSByte();
-                        DupExtra = reader.ReadByte();
                         Debug.Assert(reader.ReadByte() == (byte)Kind);
                         Destination = reader.ReadUndertaleObject<Reference<UndertaleVariable>>();
                     }
@@ -477,6 +475,34 @@ namespace UndertaleModLib.Models
 
                 default:
                     return Kind.ToString().ToUpper();
+            }
+        }
+    }
+
+    public static class UndertaleInstructionExtensions
+    {
+        public static string ToOpcodeParam(this UndertaleInstruction.DataType type)
+        {
+            switch(type)
+            {
+                case UndertaleInstruction.DataType.Double:
+                    return "d";
+                case UndertaleInstruction.DataType.Float:
+                    return "f";
+                case UndertaleInstruction.DataType.Int32:
+                    return "i";
+                case UndertaleInstruction.DataType.Int64:
+                    return "l";
+                case UndertaleInstruction.DataType.Boolean:
+                    return "b";
+                case UndertaleInstruction.DataType.Variable:
+                    return "v";
+                case UndertaleInstruction.DataType.String:
+                    return "s";
+                case UndertaleInstruction.DataType.Int16:
+                    return "e";
+                default:
+                    return type.ToString().ToLower();
             }
         }
     }

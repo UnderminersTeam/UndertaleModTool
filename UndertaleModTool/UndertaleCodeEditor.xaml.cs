@@ -98,13 +98,13 @@ namespace UndertaleModTool
                 foreach (var instr in code.Instructions)
                 {
                     par.Inlines.Add(new Run(instr.Address.ToString("D5") + ": ") { Foreground = addressBrush });
-                    par.Inlines.Add(new Run(instr.Kind.ToString().ToUpper()) { Foreground = opcodeBrush, FontWeight = FontWeights.Bold });
+                    par.Inlines.Add(new Run(instr.Kind.ToString().ToLower()) { Foreground = opcodeBrush, FontWeight = FontWeights.Bold });
 
                     switch (UndertaleInstruction.GetInstructionType(instr.Kind))
                     {
                         case UndertaleInstruction.InstructionType.SingleTypeInstruction:
+                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run(" "));
-                            par.Inlines.Add(new Run("(" + instr.Type1.ToString().ToLower() + ")") { Foreground = typeBrush });
 
                             if (instr.Kind == UndertaleInstruction.Opcode.Dup)
                             {
@@ -114,19 +114,16 @@ namespace UndertaleModTool
                             break;
 
                         case UndertaleInstruction.InstructionType.DoubleTypeInstruction:
+                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
+                            par.Inlines.Add(new Run("." + instr.Type2.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run(" "));
-                            par.Inlines.Add(new Run("(" + instr.Type1.ToString().ToLower() + ")") { Foreground = typeBrush });
-                            par.Inlines.Add(new Run(", "));
-                            par.Inlines.Add(new Run("(" + instr.Type2.ToString().ToLower() + ")") { Foreground = typeBrush });
                             break;
 
                         case UndertaleInstruction.InstructionType.ComparisonInstruction:
-                            par.Inlines.Add(new Run(" "));
-                            par.Inlines.Add(new Run("(" + instr.Type1.ToString().ToLower() + ")") { Foreground = typeBrush });
+                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
+                            par.Inlines.Add(new Run("." + instr.Type2.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run(" "));
                             par.Inlines.Add(new Run(instr.ComparisonKind.ToString()) { Foreground = opcodeBrush });
-                            par.Inlines.Add(new Run(" "));
-                            par.Inlines.Add(new Run("(" + instr.Type2.ToString().ToLower() + ")") { Foreground = typeBrush });
                             break;
 
                         case UndertaleInstruction.InstructionType.GotoInstruction:
@@ -135,23 +132,20 @@ namespace UndertaleModTool
                             break;
 
                         case UndertaleInstruction.InstructionType.PopInstruction:
+                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
+                            par.Inlines.Add(new Run("." + instr.Type2.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run(" "));
-                            par.Inlines.Add(new Run("(" + instr.Type1.ToString().ToLower() + ")") { Foreground = typeBrush });
                             Run runDest = new Run(instr.Destination.ToString()) { Foreground = argBrush, Cursor = Cursors.Hand };
                             runDest.MouseDown += (sender, e) =>
                             {
                                 (Application.Current.MainWindow as MainWindow).Selected = instr.Destination;
                             };
                             par.Inlines.Add(runDest);
-                            par.Inlines.Add(new Run(", "));
-                            par.Inlines.Add(new Run("(" + instr.Type2.ToString().ToLower() + ")") { Foreground = typeBrush });
-                            par.Inlines.Add(new Run(", "));
-                            par.Inlines.Add(new Run("0x" + instr.DupExtra.ToString("X2")) { Foreground = argBrush });
                             break;
 
                         case UndertaleInstruction.InstructionType.PushInstruction:
+                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run(" "));
-                            par.Inlines.Add(new Run("(" + instr.Type1.ToString().ToLower() + ")") { Foreground = typeBrush });
                             Run valueRun = new Run(instr.Value.ToString()) { Foreground = argBrush, Cursor = (instr.Value is UndertaleObject || instr.Value is UndertaleResourceRef) ? Cursors.Hand : Cursors.Arrow };
                             if (instr.Value is UndertaleResourceRef) // TODO: to be removed
                             {
@@ -171,17 +165,17 @@ namespace UndertaleModTool
                             break;
 
                         case UndertaleInstruction.InstructionType.CallInstruction:
+                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run(" "));
-                            par.Inlines.Add(new Run("(" + instr.Type1.ToString().ToLower() + ")") { Foreground = typeBrush });
-                            par.Inlines.Add(new Run(", "));
                             par.Inlines.Add(new Run(instr.Function.ToString()) { Foreground = argBrush });
-                            par.Inlines.Add(new Run(", "));
+                            par.Inlines.Add(new Run("(argc="));
                             par.Inlines.Add(new Run(instr.ArgumentsCount.ToString()) { Foreground = argBrush });
+                            par.Inlines.Add(new Run(")"));
                             break;
 
                         case UndertaleInstruction.InstructionType.BreakInstruction:
+                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run(" "));
-                            par.Inlines.Add(new Run("(" + instr.Type1.ToString().ToLower() + ")") { Foreground = typeBrush });
                             par.Inlines.Add(new Run(instr.Value.ToString()) { Foreground = argBrush });
                             break;
                     }
