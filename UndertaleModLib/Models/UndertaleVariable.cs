@@ -28,7 +28,11 @@ namespace UndertaleModLib.Models
             writer.Write(InstanceType);
             writer.Write(Unknown);
             writer.Write(Occurrences);
-            int FirstAddress = FirstAddressOk ? (int)(FirstAddressCode._BytecodeAbsoluteAddress + FirstAddressOffset) : -1;
+            int FirstAddress;
+            if (Occurrences > 0)
+                FirstAddress = (int)(FirstAddressCode._BytecodeAbsoluteAddress + FirstAddressOffset);
+            else
+                FirstAddress = UnknownUniqueChainEndingValue;
             writer.Write(FirstAddress);
         }
 
@@ -39,9 +43,7 @@ namespace UndertaleModLib.Models
             Unknown = reader.ReadUInt32();
             Occurrences = reader.ReadUInt32();
             int FirstAddress = reader.ReadInt32();
-            FirstAddressOk = (FirstAddress > 0);
-            List<int> a = new List<int>();
-            if (FirstAddressOk)
+            if (Occurrences > 0)
             {
                 foreach (UndertaleCode code in reader.undertaleData.Code) // should be already parsed
                 {
@@ -67,6 +69,10 @@ namespace UndertaleModLib.Models
                     addr += (uint)reference.NextOccurrenceOffset;
                 }
                 UnknownUniqueChainEndingValue = reference.NextOccurrenceOffset;
+            }
+            else
+            {
+                UnknownUniqueChainEndingValue = FirstAddress;
             }
         }
 

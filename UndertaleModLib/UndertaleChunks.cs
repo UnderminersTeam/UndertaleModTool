@@ -213,7 +213,7 @@ namespace UndertaleModLib
             Unknown1Again = reader.ReadUInt32();
             Unknown2 = reader.ReadUInt32();
             List.Clear();
-            while (reader.Position < startPosition + Length)
+            while (reader.Position + 20 <= startPosition + Length)
                 List.Add(reader.ReadUndertaleObject<UndertaleVariable>());
         }
     }
@@ -247,7 +247,7 @@ namespace UndertaleModLib
             base.SerializeChunk(writer);
 
             // padding
-            while (writer.Position % 0x200 != 0)
+            while (writer.Position % 0x80 != 0)
                 writer.Write((byte)0);
         }
 
@@ -256,7 +256,7 @@ namespace UndertaleModLib
             base.UnserializeChunk(reader);
 
             // padding
-            while (reader.Position % 0x200 != 0)
+            while (reader.Position % 0x80 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error in STRG");
         }
