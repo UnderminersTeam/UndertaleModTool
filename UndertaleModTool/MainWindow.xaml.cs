@@ -117,7 +117,7 @@ namespace UndertaleModTool
                 }
 
                 Dispatcher.Invoke(() =>
-                {
+                {// TODO: fix exception handling
                     dialog.Hide();
                 });
             });

@@ -11,16 +11,12 @@ namespace UndertaleModLib.Models
     public class UndertaleVariable : UndertaleResource
     {
         public UndertaleString Name { get; set; }
-        public uint InstanceType { get; set; }
+        public int InstanceType { get; set; }
         public uint Unknown { get; set; } // some kind of 'parent object' identifier? either 0 or increasing numbers, with the exception of a couple -10
-        public uint Occurrences { get; set; }
+        internal uint Occurrences;
 
-        // TODO: temporary untill I parse ref chains
-        public UndertaleCode FirstAddressCode { get; set; }
-        public uint FirstAddressOffset { get; set; }
-        public bool FirstAddressOk { get; set; }
-
-        public int UnknownUniqueChainEndingValue { get; set; } // looks like an identifier or counter of some kind. Increases in every variable, but I can't find the pattern
+        internal UndertaleInstruction FirstAddress;
+        public int UnknownChainEndingValue { get; set; } // looks like an identifier or counter of some kind. Increases in every variable, but I can't find the pattern
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -29,7 +25,7 @@ namespace UndertaleModLib.Models
             writer.Write(Unknown);
             writer.Write(Occurrences);
             if (Occurrences > 0)
-                writer.Write((int)(FirstAddressCode._BytecodeAbsoluteAddress + FirstAddressOffset));
+                writer.Write(writer.GetAddressForUndertaleObject(FirstAddress));
             else
                 writer.Write((int)-1);
         }
@@ -38,45 +34,33 @@ namespace UndertaleModLib.Models
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
-            InstanceType = reader.ReadUInt32();
+            InstanceType = reader.ReadInt32();
             Unknown = reader.ReadUInt32();
             Occurrences = reader.ReadUInt32();
-            int FirstAddress = reader.ReadInt32();
             //Debug.WriteLine("Variable " + (id++) + " at " + reader.GetAddressForUndertaleObject(Name).ToString("X8") + " child of " + Unknown);
             if (Occurrences > 0)
             {
-                //Debug.WriteLine("* " + FirstAddress.ToString("X8") + " (first)");
-                foreach (UndertaleCode code in reader.undertaleData.Code) // should be already parsed
-                {
-                    if (code._BytecodeAbsoluteAddress <= FirstAddress && (FirstAddressCode == null || code._BytecodeAbsoluteAddress > FirstAddressCode._BytecodeAbsoluteAddress))
-                        FirstAddressCode = code;
-                }
-                FirstAddressOffset = (uint)(FirstAddress - FirstAddressCode._BytecodeAbsoluteAddress);
+                FirstAddress = reader.ReadUndertaleObjectPointer<UndertaleInstruction>();
 
                 // Parse the chain of references
                 UndertaleInstruction.Reference<UndertaleVariable> reference = null;
-                uint addr = (uint)FirstAddress;
+                uint addr = reader.GetAddressForUndertaleObject(FirstAddress);
                 for (int i = 0; i < Occurrences; i++)
                 {
-                    UndertaleInstruction instr = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(addr);
-                    reference = null;
-                    if (instr.Value is UndertaleInstruction.Reference<UndertaleVariable>)
-                        reference = (instr.Value as UndertaleInstruction.Reference<UndertaleVariable>);
-                    if (instr.Destination != null)
-                        reference = instr.Destination;
+                    reference = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(addr).GetReference<UndertaleVariable>();
                     if (reference == null)
                         throw new IOException("Failed to find reference at " + addr);
                     reference.Target = this;
+                    // Debug.WriteLine("* " + addr.ToString("X8"));
                     addr += (uint)reference.NextOccurrenceOffset;
-                    /*if (i < Occurrences - 1)
-                        Debug.WriteLine("* " + addr.ToString("X8"));*/
                 }
                 //Debug.WriteLine("* " + reference.NextOccurrenceOffset.ToString() + " (ending value)");
-                UnknownUniqueChainEndingValue = reference.NextOccurrenceOffset;
+                UnknownChainEndingValue = reference.NextOccurrenceOffset;
             }
             else
             {
-                Debug.Assert(FirstAddress == -1);
+                Debug.Assert(reader.ReadInt32() == -1);
+                FirstAddress = null;
             }
         }
 

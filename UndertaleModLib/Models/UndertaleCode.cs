@@ -9,10 +9,6 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    /**
-     * TODO: Futher parsing of instructions to make editing feasible
-     */
-
     public class UndertaleInstruction : UndertaleObject
     {
         public enum Opcode : byte
@@ -181,15 +177,30 @@ namespace UndertaleModLib.Models
         public ushort ArgumentsCount { get; set; }
         public byte DupExtra { get; set; }
 
-        public class Reference<T> : UndertaleObject where T : UndertaleObject
+        public class Reference<T> : UndertaleObject where T : class, UndertaleObject
         {
-            public int NextOccurrenceOffset { get; set; }
+            public int NextOccurrenceOffset { get; set; } = 0xdead;
             public VariableType Type { get; set; }
-
             public T Target { get; set; }
+
+            public Reference()
+            {
+            }
+
+            public Reference(T target)
+            {
+                Target = target;
+            }
+
+            public Reference(T target, VariableType type)
+            {
+                Type = type;
+                Target = target;
+            }
 
             public void Serialize(UndertaleWriter writer)
             {
+                NextOccurrenceOffset = 0xdead;
                 writer.WriteInt24(NextOccurrenceOffset);
                 writer.Write((byte)Type);
             }
@@ -202,11 +213,35 @@ namespace UndertaleModLib.Models
 
             public override string ToString()
             {
-                if (false && typeof(T) == typeof(UndertaleVariable) && Type != VariableType.Normal)
-                    return String.Format("({0}){1}", Type.ToString().ToLower(), Target?.ToString() ?? "(null)");
+                if (typeof(T) == typeof(UndertaleVariable) && Type != VariableType.Normal)
+                    return String.Format("[{0}]{1}", Type.ToString().ToLower(), Target?.ToString() ?? "(null)");
                 else
                     return String.Format("{0}", Target?.ToString() ?? "(null)");
             }
+
+            public static Dictionary<T, List<UndertaleInstruction>> CollectReferences(IList<UndertaleCode> codes)
+            {
+                Dictionary<T, List<UndertaleInstruction>> list = new Dictionary<T, List<UndertaleInstruction>>();
+                foreach(UndertaleCode code in codes)
+                {
+                    foreach(UndertaleInstruction instr in code.Instructions)
+                    {
+                        T obj = instr.GetReference<T>()?.Target;
+                        if (obj != null)
+                        {
+                            if (!list.ContainsKey(obj))
+                                list.Add(obj, new List<UndertaleInstruction>());
+                            list[obj].Add(instr);
+                        }
+                    }
+                }
+                return list;
+            }
+        }
+
+        public Reference<T> GetReference<T>() where T : class, UndertaleObject
+        {
+            return (Destination as Reference<T>) ?? (Function as Reference<T>) ?? (Value as Reference<T>);
         }
 
         public void Serialize(UndertaleWriter writer)

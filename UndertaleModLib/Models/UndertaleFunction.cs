@@ -14,47 +14,45 @@ namespace UndertaleModLib.Models
     {
         public UndertaleString Name { get; set; }
         public uint Occurrences { get; set; }
-
-        // TODO: temporary untill I parse ref chains
-        public UndertaleCode FirstAddressCode { get; set; }
-        public uint FirstAddressOffset { get; set; }
-        public bool FirstAddressOk { get; set; }
+        
+        public UndertaleInstruction FirstAddress { get; set; }
+        public int UnknownChainEndingValue { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
             writer.Write(Occurrences);
-            int FirstAddress = FirstAddressOk ? (int)(FirstAddressCode._BytecodeAbsoluteAddress + FirstAddressOffset) : -1;
-            writer.Write(FirstAddress);
+            if (Occurrences > 0)
+                writer.Write(writer.GetAddressForUndertaleObject(FirstAddress));
+            else
+                writer.Write((int)-1);
         }
 
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
             Occurrences = reader.ReadUInt32();
-            int FirstAddress = reader.ReadInt32();
-            FirstAddressOk = (FirstAddress > 0);
-            if (FirstAddressOk)
+            if (Occurrences > 0)
             {
-                foreach (UndertaleCode code in reader.undertaleData.Code) // should be already parsed
-                {
-                    if (code._BytecodeAbsoluteAddress <= FirstAddress && (FirstAddressCode == null || code._BytecodeAbsoluteAddress > FirstAddressCode._BytecodeAbsoluteAddress))
-                        FirstAddressCode = code;
-                }
-                FirstAddressOffset = (uint)(FirstAddress - FirstAddressCode._BytecodeAbsoluteAddress);
-            }
+                FirstAddress = reader.ReadUndertaleObjectPointer<UndertaleInstruction>();
 
-            uint addr = (uint)FirstAddress;
-            for (int i = 0; i < Occurrences; i++)
-            {
-                UndertaleInstruction instr = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(addr);
+                // Parse the chain of references
                 UndertaleInstruction.Reference<UndertaleFunctionDeclaration> reference = null;
-                if (instr.Function != null)
-                    reference = instr.Function;
-                if (reference == null)
-                    throw new IOException("Failed to find reference at " + addr);
-                reference.Target = this;
-                addr += (uint)reference.NextOccurrenceOffset;
+                uint addr = reader.GetAddressForUndertaleObject(FirstAddress);
+                for (int i = 0; i < Occurrences; i++)
+                {
+                    reference = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(addr).GetReference<UndertaleFunctionDeclaration>();
+                    if (reference == null)
+                        throw new IOException("Failed to find reference at " + addr);
+                    reference.Target = this;
+                    addr += (uint)reference.NextOccurrenceOffset;
+                }
+                UnknownChainEndingValue = reference.NextOccurrenceOffset;
+            }
+            else
+            {
+                Debug.Assert(reader.ReadInt32() == -1);
+                FirstAddress = null;
             }
         }
 

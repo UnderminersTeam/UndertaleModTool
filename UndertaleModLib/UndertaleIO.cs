@@ -260,6 +260,8 @@ namespace UndertaleModLib
         {
             if (obj == null)
                 return 0;
+            if (!objectPool.ContainsKey(obj))
+                throw new KeyNotFoundException();
             return objectPool[obj];
         }
 
