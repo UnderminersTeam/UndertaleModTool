@@ -184,6 +184,9 @@ namespace UndertaleModLib.Models
 
         public class EventCodeBlock : UndertaleObject, INotifyPropertyChanged
         {
+            // All the unknown values seem to be provided for compatibility only - in older versions of GM:S they stored the drag and drop blocks,
+            // but newer versions compile them down to GML bytecode anyway
+
             private uint _Unknown1;
             private uint _Unknown2;
             private uint _Unknown3;
@@ -199,20 +202,20 @@ namespace UndertaleModLib.Models
             private uint _Unknown13;
             private uint _Unknown14;
 
-            public uint Unknown1 { get => _Unknown1; set { _Unknown1 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown1")); } } //1
-            public uint Unknown2 { get => _Unknown2; set { _Unknown2 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown2")); } } //603
-            public uint Unknown3 { get => _Unknown3; set { _Unknown3 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown3")); } } //7
-            public uint Unknown4 { get => _Unknown4; set { _Unknown4 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown4")); } } //0
-            public uint Unknown5 { get => _Unknown5; set { _Unknown5 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown5")); } } //0
-            public uint Unknown6 { get => _Unknown6; set { _Unknown6 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown6")); } } //1
-            public uint Unknown7 { get => _Unknown7; set { _Unknown7 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown7")); } } //2
-            public UndertaleString Unknown8 { get => _Unknown8; set { _Unknown8 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown8")); } } //""
+            public uint Unknown1 { get => _Unknown1; set { _Unknown1 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown1")); } } // always 1
+            public uint Unknown2 { get => _Unknown2; set { _Unknown2 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown2")); } } // always 603
+            public uint Unknown3 { get => _Unknown3; set { _Unknown3 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown3")); } } // always 7
+            public uint Unknown4 { get => _Unknown4; set { _Unknown4 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown4")); } } // always 0
+            public uint Unknown5 { get => _Unknown5; set { _Unknown5 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown5")); } } // always 0
+            public uint Unknown6 { get => _Unknown6; set { _Unknown6 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown6")); } } // always 1
+            public uint Unknown7 { get => _Unknown7; set { _Unknown7 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown7")); } } // always 2
+            public UndertaleString Unknown8 { get => _Unknown8; set { _Unknown8 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown8")); } } // always ""
             public UndertaleCode CodeId { get => _CodeId.Resource; set { _CodeId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CodeId")); } }
-            public uint Unknown10 { get => _Unknown10; set { _Unknown10 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown10")); } } //1
-            public int Unknown11 { get => _Unknown11; set { _Unknown11 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown11")); } } //-1
-            public uint Unknown12 { get => _Unknown12; set { _Unknown12 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown12")); } } //0
-            public uint Unknown13 { get => _Unknown13; set { _Unknown13 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown13")); } } //0
-            public uint Unknown14 { get => _Unknown14; set { _Unknown14 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown14")); } } //0
+            public uint Unknown10 { get => _Unknown10; set { _Unknown10 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown10")); } } // always 1
+            public int Unknown11 { get => _Unknown11; set { _Unknown11 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown11")); } } // always -1
+            public uint Unknown12 { get => _Unknown12; set { _Unknown12 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown12")); } } // always 0
+            public uint Unknown13 { get => _Unknown13; set { _Unknown13 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown13")); } } // always 0
+            public uint Unknown14 { get => _Unknown14; set { _Unknown14 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown14")); } } // always 0
 
             public event PropertyChangedEventHandler PropertyChanged;
 

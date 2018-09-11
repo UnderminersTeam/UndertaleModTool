@@ -415,6 +415,29 @@ namespace UndertaleModLib.Decompiler
             public bool NeedsInstanceParameters => /*InstType == UndertaleInstruction.InstanceType.StackTopOrGlobal &&*/ VarType == UndertaleInstruction.VariableType.StackTop;
         }
 
+        public class PushEnvStatement : Statement
+        {
+            public Expression NewEnv;
+
+            public PushEnvStatement(Expression newEnv)
+            {
+                this.NewEnv = newEnv;
+            }
+
+            public override string ToString()
+            {
+                return "pushenv " + NewEnv;
+            }
+        }
+
+        public class PopEnvStatement : Statement
+        {
+            public override string ToString()
+            {
+                return "popenv";
+            }
+        }
+
         internal static void DecompileFromBlock(Block block, List<TempVarReference> tempvars)
         {
             if (block.TempVarsOnEntry != null && (block.nextBlockTrue != null || block.nextBlockFalse != null)) // TODO: RET breaks it?
@@ -540,15 +563,11 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.PushEnv:
-                    case UndertaleInstruction.Opcode.PopEnv: // TODO: seems to change the "environment", duh. After PUSHENV self.test, further references to self are actually self.test, so self.a becomes self.test.a etc.
-                        if (instr.Kind == UndertaleInstruction.Opcode.PushEnv)
-                        {
-                            statements.Add(new CommentStatement(instr.Kind.ToString().ToUpper() + "(" + stack.Pop().ToString() + "): Not supported yet!"));
-                        }
-                        else
-                        {
-                            statements.Add(new CommentStatement(instr.Kind.ToString().ToUpper() + ": Not supported yet!"));
-                        }
+                        statements.Add(new PushEnvStatement(stack.Pop()));
+                        break;
+
+                    case UndertaleInstruction.Opcode.PopEnv:
+                        statements.Add(new PopEnvStatement());
                         break;
 
                     case UndertaleInstruction.Opcode.Pop:
@@ -744,6 +763,14 @@ namespace UndertaleModLib.Decompiler
                     currentBlock.nextBlockFalse = instr.Kind == UndertaleInstruction.Opcode.Bt ? nextBlockIfNotMet : nextBlockIfMet;
                     currentBlock = null;
                 }
+                else if (instr.Kind == UndertaleInstruction.Opcode.PushEnv || instr.Kind == UndertaleInstruction.Opcode.PopEnv)
+                {
+                    Block nextBlock = GetBlock(instr.Address + 1);
+                    currentBlock.conditionalExit = false;
+                    currentBlock.nextBlockTrue = nextBlock;
+                    currentBlock.nextBlockFalse = nextBlock;
+                    currentBlock = null;
+                }
                 else if (instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit || instr.Kind == UndertaleInstruction.Opcode.Break)
                 {
                     currentBlock.nextBlockTrue = finalBlock;
@@ -774,9 +801,9 @@ namespace UndertaleModLib.Decompiler
         {
             public List<Statement> Statements = new List<Statement>();
 
-            public override string ToString()
+            public string ToString(bool canSkipBrackets = true)
             {
-                if (Statements.Count == 1 && !(Statements[0] is IfHLStatement) && !(Statements[0] is LoopHLStatement))
+                if (Statements.Count == 1 && !(Statements[0] is IfHLStatement) && !(Statements[0] is LoopHLStatement) && canSkipBrackets)
                     return "    " + Statements[0].ToString().Replace("\n", "\n    ");
                 else
                 {
@@ -791,6 +818,11 @@ namespace UndertaleModLib.Decompiler
                     sb.Append("}");
                     return sb.ToString();
                 }
+            }
+
+            public override string ToString()
+            {
+                return ToString(true);
             }
         };
 
@@ -837,6 +869,17 @@ namespace UndertaleModLib.Decompiler
             public override string ToString()
             {
                 return "break";
+            }
+        }
+
+        public class WithHLStatement : HLStatement
+        {
+            public Expression NewEnv;
+            public BlockHLStatement Block;
+
+            public override string ToString()
+            {
+                return "with(" + NewEnv.ToString() + ")\n" + Block.ToString(false);
             }
         }
 
@@ -1043,7 +1086,25 @@ namespace UndertaleModLib.Decompiler
                 }
                 
                 foreach (var stmt in block.Statements)
-                    output.Statements.Add(stmt);
+                    if (!(stmt is PushEnvStatement) && !(stmt is PopEnvStatement))
+                        output.Statements.Add(stmt);
+
+                if (block.Statements.Count > 0 && block.Statements.Last() is PushEnvStatement)
+                {
+                    Debug.Assert(!block.conditionalExit);
+                    PushEnvStatement stmt = (block.Statements.Last() as PushEnvStatement);
+                    block = block.nextBlockTrue;
+                    output.Statements.Add(new WithHLStatement()
+                    {
+                        NewEnv = stmt.NewEnv,
+                        Block = HLDecompileBlocks(ref block, blocks, loops, reverseDominators, currentLoop, false, stopAt)
+                    });
+                }
+                if (block.Statements.Count > 0 && block.Statements.Last() is PopEnvStatement)
+                {
+                    Debug.Assert(!block.conditionalExit);
+                    break;
+                }
                 if (block.conditionalExit)
                 {
                     Block meetPoint = FindFirstMeetPoint(block, reverseDominators);
@@ -1091,7 +1152,7 @@ namespace UndertaleModLib.Decompiler
             do
             {
                 changed = false;
-                foreach (var k in blocks.Where(pair => pair.Value.entryPoints.Count == 0).Select(pair => pair.Key).ToList())
+                foreach (var k in blocks.Where(pair => pair.Key != 0 && pair.Value.entryPoints.Count == 0).Select(pair => pair.Key).ToList())
                 {
                     //Debug.WriteLine("Throwing away " + k);
                     foreach (var other in blocks.Values)

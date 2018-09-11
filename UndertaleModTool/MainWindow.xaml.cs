@@ -53,8 +53,8 @@ namespace UndertaleModTool
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.DefaultExt = "data.win";
-            dlg.Filter = "Game Maker Studio data files (data.win)|data.win|All files|*";
+            dlg.DefaultExt = "win";
+            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios)|*.win;*.unx;*.ios|All files|*";
             
             if (dlg.ShowDialog() == true)
             {
@@ -65,7 +65,9 @@ namespace UndertaleModTool
         private void Command_Save(object sender, ExecutedRoutedEventArgs e)
         {
             SaveFileDialog dlg = new SaveFileDialog();
-
+            
+            dlg.DefaultExt = "win";
+            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios)|*.win;*.unx;*.ios|All files|*";
             dlg.FileName = FilePath;
 
             if (dlg.ShowDialog() == true)

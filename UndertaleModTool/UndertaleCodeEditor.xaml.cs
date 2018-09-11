@@ -302,9 +302,9 @@ namespace UndertaleModTool
                                 for (int i = 0; i < split.Count; i++)
                                 {
                                     string token = split[i];
-                                    if (token == "if" || token == "else" || token == "return" || token == "throw" || token == "break" || token == "continue" || token == "while")
+                                    if (token == "if" || token == "else" || token == "return" || token == "throw" || token == "break" || token == "continue" || token == "while" || token == "with")
                                         par.Inlines.Add(new Run(token) { Foreground = keywordBrush, FontWeight = FontWeights.Bold });
-                                    else if (token == "self" || token == "global" || token == "local" || token == "true" || token == "false")
+                                    else if (token == "self" || token == "global" || token == "local" || token == "other" || token == "noone" || token == "true" || token == "false")
                                         par.Inlines.Add(new Run(token) { Foreground = keywordBrush });
                                     else if (token.StartsWith("\""))
                                         par.Inlines.Add(new Run(token) { Foreground = stringBrush });
