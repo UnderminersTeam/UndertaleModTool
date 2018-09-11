@@ -28,7 +28,6 @@ namespace UndertaleModLib.Decompiler
             public Block nextBlockFalse;
             public List<Block> entryPoints = new List<Block>();
             internal List<TempVarReference> TempVarsOnEntry;
-            internal List<Block> Dominators;
 
             public Block(uint? address)
             {
@@ -361,16 +360,25 @@ namespace UndertaleModLib.Decompiler
         public class ExpressionVar : Expression
         {
             public UndertaleVariable Var;
-            public UndertaleInstruction.InstanceType InstType;
+            public Expression InstType; // UndertaleInstruction.InstanceType
             public UndertaleInstruction.VariableType VarType;
             public Expression ArrayIndex;
             public Expression InstanceIndex;
 
-            public ExpressionVar(UndertaleVariable var, UndertaleInstruction.InstanceType instType, UndertaleInstruction.VariableType varType)
+            public ExpressionVar(UndertaleVariable var, Expression instType, UndertaleInstruction.VariableType varType)
             {
                 Var = var;
                 InstType = instType;
                 VarType = varType;
+            }
+
+            private UndertaleInstruction.InstanceType? TryGetInstType()
+            {
+                // TODO: this should be handled along with type information propagation
+                if (InstType is ExpressionConstant)
+                    return (UndertaleInstruction.InstanceType)Convert.ToInt32((InstType as ExpressionConstant).Value);
+                else
+                    return null;
             }
 
             public override string ToString()
@@ -382,8 +390,19 @@ namespace UndertaleModLib.Decompiler
                     name = InstanceIndex.ToString() + "." + name;
                 if (ArrayIndex != null)
                     name = name + "[" + ArrayIndex.ToString() + "]";
-                if (InstType != UndertaleInstruction.InstanceType.StackTopOrGlobal)
-                    name = InstType.ToString().ToLower() + "." + name;
+                var instTypeVal = TryGetInstType();
+                if (instTypeVal.HasValue)
+                {
+                    if (instTypeVal.Value != UndertaleInstruction.InstanceType.StackTopOrGlobal)
+                    {
+                        name = instTypeVal.Value.ToString().ToLower() + "." + name;
+                    }
+                }
+                else
+                {
+                    name = InstType.ToString() + "." + name;
+                }
+
                 return name;
             }
 
@@ -519,16 +538,16 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.PopEnv: // TODO: seems to change the "environment", duh. After PUSHENV self.test, further references to self are actually self.test, so self.a becomes self.test.a etc.
                         if (instr.Kind == UndertaleInstruction.Opcode.PushEnv)
                         {
-                            statements.Add(new CommentStatement(instr.Kind.ToString().ToUpper() + "(" + stack.Pop().ToString() + "): Not supported!"));
+                            statements.Add(new CommentStatement(instr.Kind.ToString().ToUpper() + "(" + stack.Pop().ToString() + "): Not supported yet!"));
                         }
                         else
                         {
-                            statements.Add(new CommentStatement(instr.Kind.ToString().ToUpper() + ": Not supported!"));
+                            statements.Add(new CommentStatement(instr.Kind.ToString().ToUpper() + ": Not supported yet!"));
                         }
                         break;
 
                     case UndertaleInstruction.Opcode.Pop:
-                        ExpressionVar target = new ExpressionVar(instr.Destination.Target, instr.TypeInst, instr.Destination.Type);
+                        ExpressionVar target = new ExpressionVar(instr.Destination.Target, new ExpressionConstant(UndertaleInstruction.DataType.Int16, instr.TypeInst), instr.Destination.Type);
                         Expression val = null;
                         Debug.Assert(instr.Type1 == UndertaleInstruction.DataType.Int32 || instr.Type1 == UndertaleInstruction.DataType.Variable);
                         if (instr.Type1 == UndertaleInstruction.DataType.Int32)
@@ -538,7 +557,7 @@ namespace UndertaleModLib.Decompiler
                         if (target.NeedsArrayParameters)
                         {
                             target.ArrayIndex = stack.Pop();
-                            target.InstType = (UndertaleInstruction.InstanceType)Convert.ToInt32((stack.Pop() as ExpressionConstant).Value); // TODO: may crash
+                            target.InstType = stack.Pop();
                         }
                         if (instr.Type1 == UndertaleInstruction.DataType.Variable)
                             val = stack.Pop();
@@ -553,13 +572,13 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.PushI:
                         if (instr.Value is UndertaleInstruction.Reference<UndertaleVariable>)
                         {
-                            ExpressionVar pushTarget = new ExpressionVar((instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Target, instr.TypeInst, (instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Type);
+                            ExpressionVar pushTarget = new ExpressionVar((instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Target, new ExpressionConstant(UndertaleInstruction.DataType.Int16, instr.TypeInst), (instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Type);
                             if (pushTarget.NeedsInstanceParameters)
                                 pushTarget.InstanceIndex = stack.Pop();
                             if (pushTarget.NeedsArrayParameters)
                             {
                                 pushTarget.ArrayIndex = stack.Pop();
-                                pushTarget.InstType = (UndertaleInstruction.InstanceType)Convert.ToInt32((stack.Pop() as ExpressionConstant).Value); // TODO: may crash
+                                pushTarget.InstType = stack.Pop();
                             }
                             stack.Push(pushTarget);
                         }
@@ -751,8 +770,8 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString()
             {
-                if (Statements.Count == 1)
-                    return "    " + Statements[0].ToString();
+                if (Statements.Count == 1 && !(Statements[0] is IfHLStatement))
+                    return "    " + Statements[0].ToString().Replace("\n", "\n    ");
                 else
                 {
                     StringBuilder sb = new StringBuilder();
@@ -800,7 +819,7 @@ namespace UndertaleModLib.Decompiler
         };*/
 
         // Based on http://www.backerstreet.com/decompiler/loop_analysis.php
-        private static void ComputeDominators(Dictionary<uint, Block> blocks, Block entryBlock)
+        public static Dictionary<Block, List<Block>> ComputeDominators(Dictionary<uint, Block> blocks, Block entryBlock, bool reversed)
         {
             List<Block> blockList = blocks.Values.ToList();
             List<BitArray> dominators = new List<BitArray>();
@@ -824,7 +843,13 @@ namespace UndertaleModLib.Decompiler
                     if (i == entryBlockId)
                         continue;
 
-                    foreach (Block pred in blockList[i].entryPoints)
+                    IEnumerable<Block> e = blockList[i].entryPoints;
+                    if (reversed)
+                        if (blockList[i].conditionalExit)
+                            e = new Block[] { blockList[i].nextBlockTrue, blockList[i].nextBlockFalse };
+                        else
+                            e = new Block[] { blockList[i].nextBlockTrue };
+                    foreach (Block pred in e)
                     {
                         var predId = blockList.IndexOf(pred);
                         temp.SetAll(false);
@@ -843,15 +868,17 @@ namespace UndertaleModLib.Decompiler
                 }
             } while (changed);
 
+            Dictionary<Block, List<Block>> result = new Dictionary<Block, List<Block>>();
             for(var i = 0; i < blockList.Count; i++)
             {
-                blockList[i].Dominators = new List<Block>();
+                result[blockList[i]] = new List<Block>();
                 for(var j = 0; j < blockList.Count; j++)
                 {
                     if (dominators[i].Get(j))
-                        blockList[i].Dominators.Add(blockList[j]);
+                        result[blockList[i]].Add(blockList[j]);
                 }
             }
+            return result;
         }
 
         private static List<Block> NaturalLoopForEdge(Block header, Block tail)
@@ -884,7 +911,7 @@ namespace UndertaleModLib.Decompiler
 
         private static Dictionary<Block, List<Block>> ComputeNaturalLoops(Dictionary<uint, Block> blocks, Block entryBlock)
         {
-            ComputeDominators(blocks, entryBlock);
+            var dominators = ComputeDominators(blocks, entryBlock, false);
             Dictionary<Block, List<Block>> loopSet = new Dictionary<Block, List<Block>>();
 
             foreach(var block in blocks.Values)
@@ -895,12 +922,12 @@ namespace UndertaleModLib.Decompiler
 
                 if (block.nextBlockTrue != null && !loopSet.ContainsKey(block.nextBlockTrue))
                 {
-                    if (block.Dominators.Contains(block.nextBlockTrue))
+                    if (dominators[block].Contains(block.nextBlockTrue))
                         loopSet.Add(block.nextBlockTrue, NaturalLoopForEdge(block.nextBlockTrue, block));
                 }
                 if (block.nextBlockFalse != null && block.nextBlockTrue != block.nextBlockFalse && !loopSet.ContainsKey(block.nextBlockFalse))
                 {
-                    if (block.Dominators.Contains(block.nextBlockFalse))
+                    if (dominators[block].Contains(block.nextBlockFalse))
                         loopSet.Add(block.nextBlockFalse, NaturalLoopForEdge(block.nextBlockFalse, block));
                 }
             }
@@ -908,131 +935,96 @@ namespace UndertaleModLib.Decompiler
             return loopSet;
         }
 
-        // Finding ifs
-
-        /*private static bool FindPathFromRoot(Block root, List<Block> path, Block to)
+        public static Block FindFirstMeetPoint(Block ifStart, Dictionary<Block, List<Block>> reverseDominators)
         {
-            if (path.Contains(root))
+            Debug.Assert(ifStart.conditionalExit);
+            var commonDominators = reverseDominators[ifStart.nextBlockTrue].Intersect(reverseDominators[ifStart.nextBlockFalse]);
+
+            // find the closest one of them
+            List<Block> visited = new List<Block>();
+            visited.Add(ifStart);
+            Queue<Block> q = new Queue<Block>();
+            q.Enqueue(ifStart.nextBlockTrue);
+            q.Enqueue(ifStart.nextBlockFalse);
+            while (q.Count > 0)
             {
-                // loop
-                return false;
+                Block b = q.Dequeue();
+                if (commonDominators.Contains(b))
+                    return b;
+                visited.Add(b);
+                if (b.nextBlockTrue != null && !visited.Contains(b.nextBlockTrue) && !q.Contains(b.nextBlockTrue))
+                    q.Enqueue(b.nextBlockTrue);
+                if (b.nextBlockFalse != null && !visited.Contains(b.nextBlockFalse) && !q.Contains(b.nextBlockFalse))
+                    q.Enqueue(b.nextBlockFalse);
+            }
+            throw new Exception("End of if not found");
+        }
+
+        /*public class ExpressionCollapsedCondition : Expression
+        {
+            public Expression left;
+            public string op;
+            public Expression right;
+
+            public ExpressionCollapsedCondition(Expression left, string op, Expression right)
+            {
+                this.left = left;
+                this.op = op;
+                this.right = right;
             }
 
-            path.Add(root);
-
-            if (root == to)
-                return true;
-
-            foreach(Block b in root.entryPoints)
+            public override string ToString()
             {
-                if (FindPathFromRoot(b, path, to))
-                    return true;
+                return "(" + left.ToString() + " " + op + right.ToString() + ")";
             }
+        }
 
-            path.Remove(root);
-            return false;
+        private static Block HLCollapseMultiIf(Block entryBlock, Expression expr)
+        {
+            bool? ifTrueThen = null;
+            bool? ifFalseThen = null;
+            if (!entryBlock.nextBlockTrue.conditionalExit && entryBlock.nextBlockTrue.Statements.Count == 1)
+            {
+                ifTrueThen = ((short)((entryBlock.nextBlockTrue.Statements[0] as TempVarAssigmentStatement)?.Value as ExpressionConstant).Value) != 0;
+            }
+            if (!entryBlock.nextBlockFalse.conditionalExit && entryBlock.nextBlockFalse.Statements.Count == 1)
+            {
+                ifFalseThen = ((short)((entryBlock.nextBlockFalse.Statements[0] as TempVarAssigmentStatement)?.Value as ExpressionConstant).Value) != 0;
+            }
         }*/
 
-        private static List<Block> FindPathFromRoot(Block from, Block to, Dictionary<uint, Block>.ValueCollection vertices)
-        {
-            var previous = new Dictionary<Block, Block>();
-            var distances = new Dictionary<Block, int>();
-            var nodes = new List<Block>();
-
-            foreach (var vertex in vertices)
-            {
-                if (vertex == from)
-                {
-                    distances[vertex] = 0;
-                }
-                else
-                {
-                    distances[vertex] = int.MaxValue;
-                }
-                nodes.Add(vertex);
-            }
-            nodes.Add(vertices.First().entryPoints[0]); // TODO: ugh, big UGH
-            distances[vertices.First().entryPoints[0]] = int.MaxValue;
-
-            while (nodes.Count != 0)
-            {
-                nodes.Sort((x, y) => distances[x] - distances[y]);
-
-                var smallest = nodes[0];
-                nodes.Remove(smallest);
-
-                if (smallest == to)
-                {
-                    List<Block> path = new List<Block>();
-                    while (previous.ContainsKey(smallest))
-                    {
-                        path.Add(smallest);
-                        smallest = previous[smallest];
-                    }
-                    path.Add(from);
-
-                    path.Reverse();
-                    return path;
-                }
-
-                if (distances[smallest] == int.MaxValue)
-                {
-                    break;
-                }
-
-                foreach (var neighbor in smallest.entryPoints)
-                {
-                    var alt = distances[smallest] + 1;
-                    if (alt < distances[neighbor])
-                    {
-                        distances[neighbor] = alt;
-                        previous[neighbor] = smallest;
-                    }
-                }
-            }
-            return null;
-        }
-
-        private static Block FindLowestCommonAncestor(Dictionary<uint, Block>.ValueCollection blocks, Block root, Block b1, Block b2)
-        {
-            /*List<Block> path1 = new List<Block>();
-            List<Block> path2 = new List<Block>();
-            if (!FindPathFromRoot(root, path1, b1) || !FindPathFromRoot(root, path2, b2))
-                throw new Exception("No paths?");*/
-            var path1 = FindPathFromRoot(root, b1, blocks);
-            var path2 = FindPathFromRoot(root, b2, blocks);
-            if (path1 == null || path2 == null)
-                throw new Exception("No paths?");
-            int i;
-            for (i = 0; i < path1.Count && i < path2.Count; i++)
-                if (path1[i] != path2[i])
-                    break;
-            return path1[i - 1];
-        }
-
-        public static Block FindFirstMeetPoint(Block entryPoint, Block rootExitPoint, Dictionary<uint, Block>.ValueCollection blocks)
-        {
-            return FindLowestCommonAncestor(blocks, rootExitPoint, entryPoint.nextBlockTrue, entryPoint.nextBlockFalse);
-        }
-
-        private static BlockHLStatement HLDecompileBlocks(Block entryBlock, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Block rootExitPoint, Block stopAt = null)
+        private static BlockHLStatement HLDecompileBlocks(Block entryBlock, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, Block stopAt = null)
         {
             BlockHLStatement output = new BlockHLStatement();
             Block block = entryBlock;
-            while(block != stopAt && block != rootExitPoint)
+            while(block != stopAt && block != null)
             {
+                /*if (loops.ContainsKey(block))
+                {
+                    if (currentLoop.Count > 0 && block != currentLoop.Peek())
+                    {
+                        currentLoop.Push(block);
+                        output.Statements.Add(new LoopHLStatement() { Block = HLDecompileBlocks(block, blocks, loops, rootExitPoint, currentLoop, stopAt) });
+                    }
+                    else
+                    {
+                        // this is a continue statement
+                        output.Statements.Add(new ContinueHLStatement());
+                    }
+                }*/
+
                 // scr_fx_water good loop
                 foreach (var stmt in block.Statements)
                     output.Statements.Add(stmt);
                 if (block.conditionalExit)
                 {
-                    Block meetPoint = FindFirstMeetPoint(block, rootExitPoint, blocks.Values);
+                    Block meetPoint = FindFirstMeetPoint(block, reverseDominators);
                     Debug.Assert(meetPoint != null);
 
                     IfHLStatement cond = new IfHLStatement();
                     cond.condition = block.ConditionStatement;
-                    cond.trueBlock = HLDecompileBlocks(block.nextBlockTrue, blocks, loops, rootExitPoint, meetPoint);
-                    cond.falseBlock = HLDecompileBlocks(block.nextBlockFalse, blocks, loops, rootExitPoint, meetPoint);
+                    cond.trueBlock = HLDecompileBlocks(block.nextBlockTrue, blocks, loops, reverseDominators, meetPoint);
+                    cond.falseBlock = HLDecompileBlocks(block.nextBlockFalse, blocks, loops, reverseDominators, meetPoint);
                     output.Statements.Add(cond);
 
                     block = meetPoint;
@@ -1054,7 +1046,10 @@ namespace UndertaleModLib.Decompiler
                 foreach (var b in a.Value)
                     Debug.WriteLine("* " + b.Address);
             }
-            return HLDecompileBlocks(entryPoint, blocks, loops, rootExitPoint).Statements;
+            if (loops.Count > 0)
+                throw new Exception("Loops are not supported yet!");
+            var reverseDominators = ComputeDominators(blocks, rootExitPoint, true);
+            return HLDecompileBlocks(entryPoint, blocks, loops, reverseDominators).Statements;
         }
 
         public static string Decompile(UndertaleCode code)
