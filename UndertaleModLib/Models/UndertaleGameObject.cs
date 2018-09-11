@@ -59,7 +59,7 @@ namespace UndertaleModLib.Models
         public float Friction { get => _Friction; set { _Friction = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Friction")); } }
         public uint Unknown2 { get => _Unknown2; set { _Unknown2 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown2")); } }
         public bool Kinematic { get => _Kinematic; set { _Kinematic = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Kinematic")); } }
-        public UndertalePointerList<UndertalePointerList<CodeEvent>> Events { get; private set; } = new UndertalePointerList<UndertalePointerList<CodeEvent>>();
+        public UndertalePointerList<UndertalePointerList<Event>> Events { get; private set; } = new UndertalePointerList<UndertalePointerList<Event>>();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -89,7 +89,7 @@ namespace UndertaleModLib.Models
             writer.Write(Group);
             writer.Write(LinearDamping);
             writer.Write(AngularDamping);
-            writer.Write(Unknown1);
+            writer.Write(Unknown1); // possible meaning: https://github.com/WarlockD/GMdsam/blob/26aefe3e90a7a7a1891cb83f468079546f32b4b7/GMdsam/GameMaker/ChunkTypes.cs#L553
             writer.Write(Friction);
             writer.Write(Unknown2);
             writer.Write(Kinematic);
@@ -127,7 +127,7 @@ namespace UndertaleModLib.Models
             Friction = reader.ReadSingle();
             Unknown2 = reader.ReadUInt32();
             Kinematic = reader.ReadBoolean();
-            Events = reader.ReadUndertaleObject<UndertalePointerList<UndertalePointerList<CodeEvent>>>();
+            Events = reader.ReadUndertaleObject<UndertalePointerList<UndertalePointerList<Event>>>();
         }
 
         public override string ToString()
@@ -135,25 +135,49 @@ namespace UndertaleModLib.Models
             return Name.Content + " (" + GetType().Name + ")";
         }
 
-        public class CodeEvent : UndertaleObject, INotifyPropertyChanged
+        public class Event : UndertaleObject, INotifyPropertyChanged
         {
             private uint _EventSubtype;
 
             public uint EventSubtype { get => _EventSubtype; set { _EventSubtype = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("EventSubtype")); } } // the ID at the end of name, subtype for some events, 0 if unused
-            public UndertalePointerList<EventCodeBlock> CodeBlock { get; private set; } = new UndertalePointerList<EventCodeBlock>(); // seems to always have 1 entry, maybe the games using drag-and-drop code are different // TODO: this is actually an index into FunctionDefinitions
+            public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>(); // seems to always have 1 entry, maybe the games using drag-and-drop code are different // TODO: this is actually an index into FunctionDefinitions
+
+            public EventSubtypeKey EventSubtypeKey
+            {
+                get => (EventSubtypeKey)EventSubtype;
+                set => EventSubtype = (uint)value;
+            }
+
+            public EventSubtypeStep EventSubtypeStep
+            {
+                get => (EventSubtypeStep)EventSubtype;
+                set => EventSubtype = (uint)value;
+            }
+
+            public EventSubtypeOther EventSubtypeOther
+            {
+                get => (EventSubtypeOther)EventSubtype;
+                set => EventSubtype = (uint)value;
+            }
+
+            public EventSubtypeDraw EventSubtypeDraw
+            {
+                get => (EventSubtypeDraw)EventSubtype;
+                set => EventSubtype = (uint)value;
+            }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(EventSubtype);
-                writer.WriteUndertaleObject(CodeBlock);
+                writer.WriteUndertaleObject(Actions);
             }
 
             public void Unserialize(UndertaleReader reader)
             {
                 EventSubtype = reader.ReadUInt32();
-                CodeBlock = reader.ReadUndertaleObject<UndertalePointerList<EventCodeBlock>>();
+                Actions = reader.ReadUndertaleObject<UndertalePointerList<EventAction>>();
             }
         }
 
@@ -164,28 +188,189 @@ namespace UndertaleModLib.Models
             Alarm = 2, // subtype is alarm id (0-11)
             Step = 3, // subtype is EventSubtypeStep
             Collision = 4, // subtype is other game object ID
-            Keyboard = 5, // subtype is key ID, values unknown
-            Mouse = 6, // subtypes not really known, see game maker studio for possible values
+            Keyboard = 5, // subtype is key ID, see EventSubtypeKey
+            Mouse = 6, // subtypes not really known (see game maker studio for possible values)
             Other = 7, // subtype is EventSubtypeOther
             Draw = 8, // subtype is EventSubtypeDraw
-            KeyPress = 9, // subtype is key ID, values unknown
-            KeyRelease = 10, // subtype is key ID, values unknown, TODO: mapping is a guess
+            KeyPress = 9, // subtype is key ID, see EventSubtypeKey
+            KeyRelease = 10, // subtype is key ID, values unknown
             Gesture = 11, // TODO: mapping is a guess
             Asynchronous = 12, // TODO: mapping is a guess
         }
-
-        // TODO: mappings are guesses
+        
         public enum EventSubtypeStep : uint
         {
-            Step,
-            BeginStep,
-            EndStep,
+            Step = 0,
+            BeginStep = 1,
+            EndStep = 2,
         }
 
-        public class EventCodeBlock : UndertaleObject, INotifyPropertyChanged
+        public enum EventSubtypeDraw : uint
+        {
+            Draw = 0,
+            DrawGUI = 64,
+            Resize = 65,
+            DrawBegin = 72,
+            DrawEnd = 73,
+            DrawGUIBegin = 74,
+            DrawGUIEnd = 75,
+            PreDraw = 76,
+            PostDraw = 77,
+        }
+
+        public enum EventSubtypeKey : uint
+        {
+            // if doesn't match any of the below, then it's probably just chr(value)
+            vk_nokey = 0,
+            vk_anykey = 1,
+
+            vk_left = 37,
+            vk_right = 39,
+            vk_up = 38,
+            vk_down = 40,
+            vk_enter = 13,
+            vk_return = 13,
+            vk_escape = 27,
+            vk_space = 32,
+            vk_shift = 16,
+            vk_control = 17,
+            vk_alt = 18,
+            vk_backspace = 8,
+            vk_tab = 9,
+            vk_home = 36,
+            vk_end = 35,
+            vk_delete = 46,
+            vk_insert = 45,
+            vk_pageup = 33,
+            vk_pagedown = 34,
+            vk_pause = 19,
+            vk_printscreen = 44,
+            vk_f1 = 112,
+            vk_f2 = 113,
+            vk_f3 = 114,
+            vk_f4 = 115,
+            vk_f5 = 116,
+            vk_f6 = 117,
+            vk_f7 = 118,
+            vk_f8 = 119,
+            vk_f9 = 120,
+            vk_f10 = 121,
+            vk_f11 = 122,
+            vk_f12 = 123,
+            vk_numpad0 = 96,
+            vk_numpad1 = 97,
+            vk_numpad2 = 98,
+            vk_numpad3 = 99,
+            vk_numpad4 = 100,
+            vk_numpad5 = 101,
+            vk_numpad6 = 102,
+            vk_numpad7 = 103,
+            vk_numpad8 = 104,
+            vk_numpad9 = 105,
+            vk_multiply = 106,
+            vk_divide = 111,
+            vk_add = 107,
+            vk_subtract = 109,
+            vk_decimal = 110,
+
+            vk_lshift = 160,
+            vk_lcontrol = 162,
+            vk_lalt = 164,
+            vk_rshift = 161,
+            vk_rcontrol = 163,
+            vk_ralt = 165,
+
+            Digit0 = 48,
+            Digit1 = 49,
+            Digit2 = 50,
+            Digit3 = 51,
+            Digit4 = 52,
+            Digit5 = 53,
+            Digit6 = 54,
+            Digit7 = 55,
+            Digit8 = 56,
+            Digit9 = 57,
+            A = 65,
+            B = 66,
+            C = 67,
+            D = 68,
+            E = 69,
+            F = 70,
+            G = 71,
+            H = 72,
+            I = 73,
+            J = 74,
+            K = 75,
+            L = 76,
+            M = 77,
+            N = 78,
+            O = 79,
+            P = 80,
+            Q = 81,
+            R = 82,
+            S = 83,
+            T = 84,
+            U = 85,
+            V = 86,
+            W = 87,
+            X = 88,
+            Y = 89,
+            Z = 90,
+        }
+
+        public enum EventSubtypeOther : uint
+        {
+            OutsideRoom = 0,
+            IntersectBoundary = 1,
+            OutsideView0 = 41,
+            OutsideView1 = 42,
+            OutsideView2 = 43,
+            OutsideView3 = 44,
+            OutsideView4 = 45,
+            OutsideView5 = 45,
+            OutsideView6 = 46,
+            OutsideView7 = 47,
+            BoundaryView0 = 51,
+            BoundaryView1 = 52,
+            BoundaryView2 = 53,
+            BoundaryView3 = 54,
+            BoundaryView4 = 55,
+            BoundaryView5 = 55,
+            BoundaryView6 = 56,
+            BoundaryView7 = 57,
+            GameStart = 2,
+            GameEnd = 3,
+            RoomStart = 4,
+            RoomEnd = 5,
+            NoMoreLives = 6,
+            NoMoreHealth = 9,
+            AnimationEnd = 7,
+            AnimationUpdate = 58,
+            AnimationEvent = 59,
+            EndOfPath = 8,
+            User0 = 10,
+            User1 = 11,
+            User2 = 12,
+            User3 = 13,
+            User4 = 14,
+            User5 = 15,
+            User6 = 16,
+            User7 = 17,
+            User8 = 18,
+            User9 = 19,
+            User10 = 20,
+            User11 = 21,
+            User12 = 22,
+            User13 = 23,
+            User14 = 24,
+            User15 = 25,
+        }
+
+        public class EventAction : UndertaleObject, INotifyPropertyChanged
         {
             // All the unknown values seem to be provided for compatibility only - in older versions of GM:S they stored the drag and drop blocks,
             // but newer versions compile them down to GML bytecode anyway
+            // Possible meaning of values: https://github.com/WarlockD/GMdsam/blob/26aefe3e90a7a7a1891cb83f468079546f32b4b7/GMdsam/GameMaker/ChunkTypes.cs#L466
 
             private uint _Unknown1;
             private uint _Unknown2;

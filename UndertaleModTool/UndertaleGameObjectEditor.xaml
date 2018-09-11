@@ -9,16 +9,38 @@
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleGameObject}">
     <UserControl.Resources>
-        <ObjectDataProvider MethodName="GetValues"
-                        ObjectType="{x:Type sys:Enum}"
-                        x:Key="CollisionShapeFlags">
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="CollisionShapeFlags">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="undertale:CollisionShapeFlags" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeKey">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="undertale:UndertaleGameObject+EventSubtypeKey" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeStep">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="undertale:UndertaleGameObject+EventSubtypeStep" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeOther">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="undertale:UndertaleGameObject+EventSubtypeOther" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeDraw">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="undertale:UndertaleGameObject+EventSubtypeDraw" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
         <local:EventNameConverter x:Key="EventNameConverter"/>
+        <local:GameObjectByIdConverter x:Key="GameObjectByIdConverter"/>
 
-        <GridView x:Key="CodeBlockView" x:Shared="False">
+        <!--
+        Leaving this here for now, I might want to add it back for 'advanced' editor
+        
+        <GridView x:Key="ActionView" x:Shared="False">
             <GridViewColumn Header="Unknown1" Width="75">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
@@ -75,7 +97,7 @@
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
-            <GridViewColumn Header="CodeId" Width="250">
+            <GridViewColumn Header="Code" Width="250">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
                         <local:UndertaleObjectReference ObjectReference="{Binding CodeId}" ObjectType="{x:Type undertale:UndertaleCode}" />
@@ -117,30 +139,7 @@
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
-        </GridView>
-
-        <GridView x:Key="SubtypeView" x:Shared="False">
-            <GridViewColumn Header="Subtype ID" Width="75">
-                <GridViewColumn.CellTemplate>
-                    <DataTemplate>
-                        <TextBox Text="{Binding EventSubtype}" />
-                    </DataTemplate>
-                </GridViewColumn.CellTemplate>
-            </GridViewColumn>
-            <GridViewColumn Header="Code blocks" Width="1300">
-                <GridViewColumn.CellTemplate>
-                    <DataTemplate>
-                        <ListView ItemsSource="{Binding CodeBlock}" View="{DynamicResource CodeBlockView}">
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                        </ListView>
-                    </DataTemplate>
-                </GridViewColumn.CellTemplate>
-            </GridViewColumn>
-        </GridView>
+        </GridView>-->
     </UserControl.Resources>
 
     <StackPanel>
@@ -269,14 +268,158 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
-                        <TextBlock Margin="3" Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource EventNameConverter}}"/>
-                        <ListView ItemsSource="{Binding .}" View="{DynamicResource SubtypeView}">
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <TextBlock Margin="3" Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource EventNameConverter}}" Name="EventTypeName"/>
+                        <DataGrid ItemsSource="{Binding .}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" AddingNewItem="DataGrid_AddingNewItem" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+                            <DataGrid.Resources>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                                <Style TargetType="{x:Type DataGridCell}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                                <Grid Background="{TemplateBinding Background}">
+                                                    <ContentPresenter VerticalAlignment="Center" />
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate>
+                                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
                                 </Style>
-                            </ListView.ItemContainerStyle>
-                        </ListView>
+                            </DataGrid.Resources>
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Subtype ID" Width="1*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ContentControl Margin="3">
+                                                <ContentControl.Style>
+                                                    <Style TargetType="{x:Type ContentControl}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="KeyPress">
+                                                                <Setter Property="ContentTemplate">
+                                                                    <Setter.Value>
+                                                                        <DataTemplate>
+                                                                            <StackPanel>
+                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey}" />
+                                                                                <TextBox Text="{Binding DataContext.EventSubtype}" />
+                                                                            </StackPanel>
+                                                                        </DataTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="KeyRelease">
+                                                                <Setter Property="ContentTemplate">
+                                                                    <Setter.Value>
+                                                                        <DataTemplate>
+                                                                            <StackPanel>
+                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey}" />
+                                                                                <TextBox Text="{Binding DataContext.EventSubtype}" />
+                                                                            </StackPanel>
+                                                                        </DataTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Keyboard">
+                                                                <Setter Property="ContentTemplate">
+                                                                    <Setter.Value>
+                                                                        <DataTemplate>
+                                                                            <StackPanel>
+                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey}" />
+                                                                                <TextBox Text="{Binding DataContext.EventSubtype}" />
+                                                                            </StackPanel>
+                                                                        </DataTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Create">
+                                                                <Setter Property="ContentTemplate">
+                                                                    <Setter.Value>
+                                                                        <DataTemplate>
+                                                                            <TextBlock TextAlignment="Center">n/a</TextBlock>
+                                                                        </DataTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Destroy">
+                                                                <Setter Property="ContentTemplate">
+                                                                    <Setter.Value>
+                                                                        <DataTemplate>
+                                                                            <TextBlock TextAlignment="Center">n/a</TextBlock>
+                                                                        </DataTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Step">
+                                                                <Setter Property="ContentTemplate">
+                                                                    <Setter.Value>
+                                                                        <DataTemplate>
+                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeStep}}" SelectedItem="{Binding DataContext.EventSubtypeStep}" />
+                                                                        </DataTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Other">
+                                                                <Setter Property="ContentTemplate">
+                                                                    <Setter.Value>
+                                                                        <DataTemplate>
+                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeOther}}" SelectedItem="{Binding DataContext.EventSubtypeOther}" />
+                                                                        </DataTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Draw">
+                                                                <Setter Property="ContentTemplate">
+                                                                    <Setter.Value>
+                                                                        <DataTemplate>
+                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeDraw}}" SelectedItem="{Binding DataContext.EventSubtypeDraw}" />
+                                                                        </DataTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Collision">
+                                                                <Setter Property="ContentTemplate">
+                                                                    <Setter.Value>
+                                                                        <DataTemplate>
+                                                                            <local:UndertaleObjectReference ObjectReference="{Binding DataContext.EventSubtype, Converter={StaticResource GameObjectByIdConverter}}" ObjectType="{x:Type undertale:UndertaleGameObject}" CanRemove="False"/>
+                                                                        </DataTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ContentControl.Style>
+                                                <TextBox Text="{Binding EventSubtype}" />
+                                            </ContentControl>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Actions" Width="5*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <DataGrid ItemsSource="{Binding Actions}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
+                                                <DataGrid.Columns>
+                                                    <DataGridTemplateColumn Header="Code" Width="*">
+                                                        <DataGridTemplateColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <local:UndertaleObjectReference ObjectReference="{Binding CodeId}" ObjectType="{x:Type undertale:UndertaleCode}" Margin="23,3,3,3" CanRemove="False"/>
+                                                            </DataTemplate>
+                                                        </DataGridTemplateColumn.CellTemplate>
+                                                    </DataGridTemplateColumn>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
                         <Separator/>
                     </StackPanel>
                 </DataTemplate>
