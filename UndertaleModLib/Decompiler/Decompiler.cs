@@ -33,6 +33,11 @@ namespace UndertaleModLib.Decompiler
             {
                 Address = address;
             }
+
+            public override string ToString()
+            {
+                return "Block " + Address;
+            }
         }
 
         public abstract class Statement
@@ -285,9 +290,9 @@ namespace UndertaleModLib.Decompiler
 
         public class ThrowStatement : Statement
         {
-            public ushort Value;
+            public short Value;
 
-            public ThrowStatement(ushort value)
+            public ThrowStatement(short value)
             {
                 Value = value;
             }
@@ -600,7 +605,7 @@ namespace UndertaleModLib.Decompiler
                         foreach (var expr in stack.Reverse())
                             if (!(expr is ExpressionTempVar))
                                 statements.Add(expr);
-                        statements.Add(new ThrowStatement((ushort)instr.Value));
+                        statements.Add(new ThrowStatement((short)instr.Value));
                         end = true;
                         break;
                 }
@@ -665,7 +670,6 @@ namespace UndertaleModLib.Decompiler
 
                 if (currentBlock == null)
                 {
-                    // TODO: check unreachable code
                     blockByAddress[instr.Address] = currentBlock = new Block(instr.Address);
                 }
 
@@ -729,7 +733,6 @@ namespace UndertaleModLib.Decompiler
                     currentBlock.conditionalExit = false;
                     currentBlock.nextBlockTrue = nextBlock;
                     currentBlock.nextBlockFalse = nextBlock;
-                    nextBlock.entryPoints.Add(currentBlock);
                     currentBlock = null;
                 }
                 else if (instr.Kind == UndertaleInstruction.Opcode.Bt || instr.Kind == UndertaleInstruction.Opcode.Bf)
@@ -739,15 +742,12 @@ namespace UndertaleModLib.Decompiler
                     currentBlock.conditionalExit = true;
                     currentBlock.nextBlockTrue = instr.Kind == UndertaleInstruction.Opcode.Bt ? nextBlockIfMet : nextBlockIfNotMet;
                     currentBlock.nextBlockFalse = instr.Kind == UndertaleInstruction.Opcode.Bt ? nextBlockIfNotMet : nextBlockIfMet;
-                    nextBlockIfMet.entryPoints.Add(currentBlock);
-                    nextBlockIfNotMet.entryPoints.Add(currentBlock);
                     currentBlock = null;
                 }
                 else if (instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit || instr.Kind == UndertaleInstruction.Opcode.Break)
                 {
                     currentBlock.nextBlockTrue = finalBlock;
                     currentBlock.nextBlockFalse = finalBlock;
-                    finalBlock.entryPoints.Add(currentBlock);
                     currentBlock = null;
                 }
             }
@@ -755,7 +755,13 @@ namespace UndertaleModLib.Decompiler
             {
                 currentBlock.nextBlockTrue = finalBlock;
                 currentBlock.nextBlockFalse = finalBlock;
-                finalBlock.entryPoints.Add(currentBlock);
+            }
+            foreach(var block in blockByAddress.Values)
+            {
+                if (block.nextBlockTrue != null && !block.nextBlockTrue.entryPoints.Contains(block))
+                    block.nextBlockTrue.entryPoints.Add(block);
+                if (block.nextBlockFalse != null && !block.nextBlockFalse.entryPoints.Contains(block))
+                    block.nextBlockFalse.entryPoints.Add(block);
             }
             return blockByAddress;
         }
@@ -770,7 +776,7 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString()
             {
-                if (Statements.Count == 1 && !(Statements[0] is IfHLStatement))
+                if (Statements.Count == 1 && !(Statements[0] is IfHLStatement) && !(Statements[0] is LoopHLStatement))
                     return "    " + Statements[0].ToString().Replace("\n", "\n    ");
                 else
                 {
@@ -808,15 +814,31 @@ namespace UndertaleModLib.Decompiler
             }
         };
 
-        /*public class LoopHLStatement : HLStatement
+        public class LoopHLStatement : HLStatement
         {
-            BlockHLStatement Block;
+            public BlockHLStatement Block;
 
             public override string ToString()
             {
-                return "while(true)\n    " + Block.ToString().Replace("\n", "\n    ");
+                return "while(true)\n" + Block.ToString();
             }
-        };*/
+        };
+
+        public class ContinueHLStatement : HLStatement
+        {
+            public override string ToString()
+            {
+                return "continue";
+            }
+        }
+
+        public class BreakHLStatement : HLStatement
+        {
+            public override string ToString()
+            {
+                return "break";
+            }
+        }
 
         // Based on http://www.backerstreet.com/decompiler/loop_analysis.php
         public static Dictionary<Block, List<Block>> ComputeDominators(Dictionary<uint, Block> blocks, Block entryBlock, bool reversed)
@@ -852,6 +874,7 @@ namespace UndertaleModLib.Decompiler
                     foreach (Block pred in e)
                     {
                         var predId = blockList.IndexOf(pred);
+                        Debug.Assert(predId >= 0);
                         temp.SetAll(false);
                         temp.Or(dominators[i]);
                         dominators[i].And(dominators[predId]);
@@ -993,27 +1016,32 @@ namespace UndertaleModLib.Decompiler
             }
         }*/
 
-        private static BlockHLStatement HLDecompileBlocks(Block entryBlock, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, Block stopAt = null)
+        private static BlockHLStatement HLDecompileBlocks(ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, Block currentLoop = null, bool decompileTheLoop = false, Block stopAt = null)
         {
             BlockHLStatement output = new BlockHLStatement();
-            Block block = entryBlock;
             while(block != stopAt && block != null)
             {
-                /*if (loops.ContainsKey(block))
+                if (loops.ContainsKey(block) && !decompileTheLoop)
                 {
-                    if (currentLoop.Count > 0 && block != currentLoop.Peek())
+                    if (block != currentLoop)
                     {
-                        currentLoop.Push(block);
-                        output.Statements.Add(new LoopHLStatement() { Block = HLDecompileBlocks(block, blocks, loops, rootExitPoint, currentLoop, stopAt) });
+                        output.Statements.Add(new LoopHLStatement() { Block = HLDecompileBlocks(ref block, blocks, loops, reverseDominators, block, true, null) });
+                        continue;
                     }
                     else
                     {
                         // this is a continue statement
                         output.Statements.Add(new ContinueHLStatement());
+                        break;
                     }
-                }*/
-
-                // scr_fx_water good loop
+                }
+                else if (currentLoop != null && !loops[currentLoop].Contains(block))
+                {
+                    // this is a break statement
+                    output.Statements.Add(new BreakHLStatement());
+                    break;
+                }
+                
                 foreach (var stmt in block.Statements)
                     output.Statements.Add(stmt);
                 if (block.conditionalExit)
@@ -1023,8 +1051,9 @@ namespace UndertaleModLib.Decompiler
 
                     IfHLStatement cond = new IfHLStatement();
                     cond.condition = block.ConditionStatement;
-                    cond.trueBlock = HLDecompileBlocks(block.nextBlockTrue, blocks, loops, reverseDominators, meetPoint);
-                    cond.falseBlock = HLDecompileBlocks(block.nextBlockFalse, blocks, loops, reverseDominators, meetPoint);
+                    Block blTrue = block.nextBlockTrue, blFalse = block.nextBlockFalse;
+                    cond.trueBlock = HLDecompileBlocks(ref blTrue, blocks, loops, reverseDominators, currentLoop, false, meetPoint);
+                    cond.falseBlock = HLDecompileBlocks(ref blFalse, blocks, loops, reverseDominators, currentLoop, false, meetPoint);
                     output.Statements.Add(cond);
 
                     block = meetPoint;
@@ -1040,21 +1069,39 @@ namespace UndertaleModLib.Decompiler
         private static List<Statement> HLDecompile(Dictionary<uint, Block> blocks, Block entryPoint, Block rootExitPoint)
         {
             Dictionary<Block, List<Block>> loops = ComputeNaturalLoops(blocks, entryPoint);
-            foreach(var a in loops)
+            /*foreach(var a in loops)
             {
                 Debug.WriteLine("LOOP at " + a.Key.Address + " contains blocks: ");
                 foreach (var b in a.Value)
                     Debug.WriteLine("* " + b.Address);
-            }
-            if (loops.Count > 0)
-                throw new Exception("Loops are not supported yet!");
+            }*/
             var reverseDominators = ComputeDominators(blocks, rootExitPoint, true);
-            return HLDecompileBlocks(entryPoint, blocks, loops, reverseDominators).Statements;
+            Block bl = entryPoint;
+            return HLDecompileBlocks(ref bl, blocks, loops, reverseDominators).Statements;
         }
 
         public static string Decompile(UndertaleCode code)
         {
             Dictionary<uint, Block> blocks = DecompileFlowGraph(code);
+
+            // Throw away unreachable blocks
+            // I guess this is a bug in GM:S compiler, it still generates a path to end of script after exit/return
+            // and it's throwing off the loop detector for some reason
+            bool changed;
+            do
+            {
+                changed = false;
+                foreach (var k in blocks.Where(pair => pair.Value.entryPoints.Count == 0).Select(pair => pair.Key).ToList())
+                {
+                    //Debug.WriteLine("Throwing away " + k);
+                    foreach (var other in blocks.Values)
+                        if (other.entryPoints.Contains(blocks[k]))
+                            other.entryPoints.Remove(blocks[k]);
+                    blocks.Remove(k);
+                    changed = true;
+                }
+            } while (changed);
+
             DecompileFromBlock(blocks[0]);
             List<Statement> stmts = HLDecompile(blocks, blocks[0], blocks[code._Length / 4]);
             StringBuilder sb = new StringBuilder();
@@ -1093,6 +1140,12 @@ namespace UndertaleModLib.Decompiler
                     if (block.Value.nextBlockTrue != null)
                         sb.AppendLine("    block_" + block.Key + " -> block_" + block.Value.nextBlockTrue.Address + ";"); //  [headport=n, tailport=s]
                 }
+                /*foreach(var rev in block.Value.entryPoints)
+                {
+                    if (!rev.Address.HasValue)
+                        continue;
+                    sb.AppendLine("    block_" + block.Key + " -> block_" + rev.Address + " [color=\"gray\", weight=0]");
+                }*/
             }
             sb.AppendLine("}");
             return sb.ToString();
