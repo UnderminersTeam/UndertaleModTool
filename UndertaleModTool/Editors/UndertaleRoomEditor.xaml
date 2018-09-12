@@ -335,9 +335,8 @@
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Instance ID</TextBlock>
                             <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding InstanceID}"/>
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Creation code ID</TextBlock>
-                            <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding CreationCodeID}"/>
-                            <!-- TODO -->
+                            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Creation code</TextBlock>
+                            <local:UndertaleObjectReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding CreationCodeID}" ObjectType="{x:Type undertale:UndertaleCode}"/>
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Scale</TextBlock>
                             <Grid Grid.Row="4" Grid.Column="1">

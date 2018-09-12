@@ -9,8 +9,6 @@ namespace UndertaleModLib
     /**
      * TODO: This is not the cleanest implementation, but I was focusing on clean interface.
      * Could probably use some refactoring or a complete rewrite.
-     * 
-     * TODO: Now it became even worse. Yeah, definitely a rewrite.
      */
 
     public interface UndertaleResourceRef
