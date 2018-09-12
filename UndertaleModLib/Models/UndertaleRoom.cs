@@ -24,8 +24,8 @@ namespace UndertaleModLib.Models
         private uint _Height;
         private uint _Speed;
         private bool _Persistent;
-        private uint _Argb;
-        private bool _DrawBGColor;
+        private uint _BackgroundColor;
+        private bool _DrawBackgroundColor;
         private int _Unknown;
         private RoomEntryFlags _Flags;
         private uint _World;
@@ -43,8 +43,8 @@ namespace UndertaleModLib.Models
         public uint Height { get => _Height; set { _Height = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Height")); } }
         public uint Speed { get => _Speed; set { _Speed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Speed")); } }
         public bool Persistent { get => _Persistent; set { _Persistent = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Persistent")); } }
-        public uint Argb { get => _Argb; set { _Argb = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Argb")); } }
-        public bool DrawBGColor { get => _DrawBGColor; set { _DrawBGColor = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("DrawBGColor")); } }
+        public uint BackgroundColor { get => _BackgroundColor; set { _BackgroundColor = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BackgroundColor")); } }
+        public bool DrawBackgroundColor { get => _DrawBackgroundColor; set { _DrawBackgroundColor = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("DrawBackgroundColor")); } }
         public int Unknown { get => _Unknown; set { _Unknown = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown")); } }
         public RoomEntryFlags Flags { get => _Flags; set { _Flags = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Flags")); } }
         public uint World { get => _World; set { _World = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("World")); } }
@@ -70,8 +70,8 @@ namespace UndertaleModLib.Models
             writer.Write(Height);
             writer.Write(Speed);
             writer.Write(Persistent);
-            writer.Write(Argb);
-            writer.Write(DrawBGColor);
+            writer.Write(BackgroundColor);
+            writer.Write(DrawBackgroundColor);
             writer.Write(Unknown);
             writer.Write((uint)Flags);
             writer.WriteUndertaleObjectPointer(Backgrounds);
@@ -100,8 +100,8 @@ namespace UndertaleModLib.Models
             Height = reader.ReadUInt32();
             Speed = reader.ReadUInt32();
             Persistent = reader.ReadBoolean();
-            Argb = reader.ReadUInt32();
-            DrawBGColor = reader.ReadBoolean();
+            BackgroundColor = reader.ReadUInt32();
+            DrawBackgroundColor = reader.ReadBoolean();
             Unknown = reader.ReadInt32();
             Flags = (RoomEntryFlags)reader.ReadUInt32();
             Backgrounds = reader.ReadUndertaleObjectPointer<UndertalePointerList<Background>>();
@@ -142,7 +142,7 @@ namespace UndertaleModLib.Models
             private uint _TileY;
             private int _SpeedX;
             private int _SpeedY;
-            private int _ObjectId; // TODO: ?
+            private UndertaleResourceById<UndertaleGameObject> _ObjectId { get; } = new UndertaleResourceById<UndertaleGameObject>("OBJT");
 
             public bool Enabled { get => _Enabled; set { _Enabled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Enabled")); } }
             public bool Foreground { get => _Foreground; set { _Foreground = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Foreground")); } }
@@ -153,7 +153,7 @@ namespace UndertaleModLib.Models
             public uint TileY { get => _TileY; set { _TileY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileY")); } }
             public int SpeedX { get => _SpeedX; set { _SpeedX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpeedX")); } }
             public int SpeedY { get => _SpeedY; set { _SpeedY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpeedY")); } }
-            public int ObjectId { get => _ObjectId; set { _ObjectId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ObjectId")); } }
+            public UndertaleGameObject ObjectId { get => _ObjectId.Resource; set { _ObjectId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ObjectId")); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -168,7 +168,7 @@ namespace UndertaleModLib.Models
                 writer.Write(TileY);
                 writer.Write(SpeedX);
                 writer.Write(SpeedY);
-                writer.Write(ObjectId);
+                writer.Write(_ObjectId.Serialize(writer));
             }
 
             public void Unserialize(UndertaleReader reader)
@@ -182,7 +182,7 @@ namespace UndertaleModLib.Models
                 TileY = reader.ReadUInt32();
                 SpeedX = reader.ReadInt32();
                 SpeedY = reader.ReadInt32();
-                ObjectId = reader.ReadInt32();
+                _ObjectId.Unserialize(reader, reader.ReadInt32());
             }
         }
 
@@ -201,7 +201,7 @@ namespace UndertaleModLib.Models
             private uint _BorderY;
             private int _SpeedX;
             private int _SpeedY;
-            private int _ObjectId; // TODO: ?
+            private UndertaleResourceById<UndertaleGameObject> _ObjectId { get; } = new UndertaleResourceById<UndertaleGameObject>("OBJT");
 
             public bool Enabled { get => _Enabled; set { _Enabled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Enabled")); } }
             public int ViewX { get => _ViewX; set { _ViewX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ViewX")); } }
@@ -216,7 +216,7 @@ namespace UndertaleModLib.Models
             public uint BorderY { get => _BorderY; set { _BorderY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BorderY")); } }
             public int SpeedX { get => _SpeedX; set { _SpeedX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpeedX")); } }
             public int SpeedY { get => _SpeedY; set { _SpeedY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpeedY")); } }
-            public int ObjectId { get => _ObjectId; set { _ObjectId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ObjectId")); } }
+            public UndertaleGameObject ObjectId { get => _ObjectId.Resource; set { _ObjectId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ObjectId")); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -235,7 +235,7 @@ namespace UndertaleModLib.Models
                 writer.Write(BorderY);
                 writer.Write(SpeedX);
                 writer.Write(SpeedY);
-                writer.Write(ObjectId);
+                writer.Write(_ObjectId.Serialize(writer));
             }
 
             public void Unserialize(UndertaleReader reader)
@@ -253,7 +253,7 @@ namespace UndertaleModLib.Models
                 BorderY = reader.ReadUInt32();
                 SpeedX = reader.ReadInt32();
                 SpeedY = reader.ReadInt32();
-                ObjectId = reader.ReadInt32();
+                _ObjectId.Unserialize(reader, reader.ReadInt32());
             }
         }
 
@@ -266,7 +266,7 @@ namespace UndertaleModLib.Models
             private UndertaleResourceById<UndertaleCode> _CreationCode { get; } = new UndertaleResourceById<UndertaleCode>("CODE");
             private float _ScaleX;
             private float _ScaleY;
-            private uint _ArgbTint;
+            private uint _Color;
             private float _Rotation;
             private int _Unknown;
 
@@ -277,7 +277,7 @@ namespace UndertaleModLib.Models
             public UndertaleCode CreationCode { get => _CreationCode.Resource; set { _CreationCode.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CreationCode")); } }
             public float ScaleX { get => _ScaleX; set { _ScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleX")); } }
             public float ScaleY { get => _ScaleY; set { _ScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleY")); } }
-            public uint ArgbTint { get => _ArgbTint; set { _ArgbTint = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ArgbTint")); } }
+            public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
             public float Rotation { get => _Rotation; set { _Rotation = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Rotation")); } }
             public int Unknown { get => _Unknown; set { _Unknown = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown")); } }
 
@@ -292,7 +292,7 @@ namespace UndertaleModLib.Models
                 writer.Write(_CreationCode.Serialize(writer));
                 writer.Write(ScaleX);
                 writer.Write(ScaleY);
-                writer.Write(ArgbTint);
+                writer.Write(Color);
                 writer.Write(Rotation);
                 writer.Write(Unknown);
             }
@@ -306,7 +306,7 @@ namespace UndertaleModLib.Models
                 _CreationCode.Unserialize(reader, reader.ReadInt32());
                 ScaleX = reader.ReadSingle();
                 ScaleY = reader.ReadSingle();
-                ArgbTint = reader.ReadUInt32();
+                Color = reader.ReadUInt32();
                 Rotation = reader.ReadSingle();
                 Unknown = reader.ReadInt32();
             }
@@ -325,7 +325,7 @@ namespace UndertaleModLib.Models
             private uint _InstanceID;
             private float _ScaleX;
             private float _ScaleY;
-            private uint _ArgbTint;
+            private uint _Color;
 
             public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
             public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
@@ -338,7 +338,7 @@ namespace UndertaleModLib.Models
             public uint InstanceID { get => _InstanceID; set { _InstanceID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("InstanceID")); } }
             public float ScaleX { get => _ScaleX; set { _ScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleX")); } }
             public float ScaleY { get => _ScaleY; set { _ScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleY")); } }
-            public uint ArgbTint { get => _ArgbTint; set { _ArgbTint = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ArgbTint")); } }
+            public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
             
@@ -355,7 +355,7 @@ namespace UndertaleModLib.Models
                 writer.Write(InstanceID);
                 writer.Write(ScaleX);
                 writer.Write(ScaleY);
-                writer.Write(ArgbTint);
+                writer.Write(Color);
             }
 
             public void Unserialize(UndertaleReader reader)
@@ -371,7 +371,7 @@ namespace UndertaleModLib.Models
                 InstanceID = reader.ReadUInt32();
                 ScaleX = reader.ReadSingle();
                 ScaleY = reader.ReadSingle();
-                ArgbTint = reader.ReadUInt32();
+                Color = reader.ReadUInt32();
             }
         }
     }

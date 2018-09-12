@@ -143,7 +143,7 @@ namespace UndertaleModTool
                 obj.CreationCode = null;
                 obj.ScaleX = 1;
                 obj.ScaleY = 1;
-                obj.ArgbTint = 0xFFFFFFFF;
+                obj.Color = 0xFFFFFFFF;
                 obj.Rotation = 0;
                 obj.Unknown = -1;
                 room.GameObjects.Add(obj);
@@ -234,7 +234,7 @@ namespace UndertaleModTool
                     obj.CreationCode = other.CreationCode;
                     obj.ScaleX = other.ScaleX;
                     obj.ScaleY = other.ScaleY;
-                    obj.ArgbTint = other.ArgbTint;
+                    obj.Color = other.Color;
                     obj.Rotation = other.Rotation;
                     obj.Unknown = other.Unknown;
                     room.GameObjects.Add(obj);
@@ -255,7 +255,7 @@ namespace UndertaleModTool
                     obj.InstanceID = ++(Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastTile;
                     obj.ScaleX = other.ScaleX;
                     obj.ScaleY = other.ScaleY;
-                    obj.ArgbTint = other.ArgbTint;
+                    obj.Color = other.Color;
                     room.Tiles.Add(obj);
                     SelectObject(obj);
                 }

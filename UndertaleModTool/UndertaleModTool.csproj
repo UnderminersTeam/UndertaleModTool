@@ -166,6 +166,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\ColorPicker.xaml.cs">
+      <DependentUpon>ColorPicker.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Converters\EqualityConverter.cs" />
     <Compile Include="Converters\EventNameConverter.cs" />
     <Compile Include="Converters\GameObjectByIdConverter.cs" />
@@ -237,6 +240,10 @@
     <Compile Include="Editors\UndertaleTexturePageItemEditor.xaml.cs">
       <DependentUpon>UndertaleTexturePageItemEditor.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\ColorPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Editors\UndertaleStringEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

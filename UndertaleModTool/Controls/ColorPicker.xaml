@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="UndertaleModTool.ColorPicker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UndertaleModTool"
+             mc:Ignorable="d" 
+             d:DesignHeight="20" d:DesignWidth="300">
+    <UserControl.Resources>
+        <local:ColorConverter x:Key="ColorConverter"/>
+        <local:ColorTextConverter x:Key="ColorTextConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Viewbox Grid.Column="0" Stretch="Uniform" StretchDirection="Both">
+            <Border Width="10" Height="10" Margin="3,0,6,0" BorderThickness="1" BorderBrush="Black">
+                <Border.Background>
+                    <SolidColorBrush Color="{Binding Color, Converter={StaticResource ColorConverter}, RelativeSource={RelativeSource AncestorType={x:Type local:ColorPicker}}}"/>
+                </Border.Background>
+            </Border>
+        </Viewbox>
+
+        <TextBox Grid.Column="1" Text="{Binding Color, Converter={StaticResource ColorTextConverter}, RelativeSource={RelativeSource AncestorType={x:Type local:ColorPicker}}, UpdateSourceTrigger=PropertyChanged}" ToolTip="A, B, G, R"/>
+    </Grid>
+</UserControl>

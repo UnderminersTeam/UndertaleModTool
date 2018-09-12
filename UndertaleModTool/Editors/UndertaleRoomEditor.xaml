@@ -9,6 +9,7 @@
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleRoom}" x:Name="StupidBug">
     <UserControl.Resources>
         <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
+        <local:ColorConverter x:Key="ColorConverter"/>
         <CompositeCollection x:Key="AllObjects">
             <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.Tiles}"/>
@@ -69,11 +70,11 @@
             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Persistent</TextBlock>
             <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Persistent}"/>
 
-            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">ARGB</TextBlock>
-            <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding Argb}"/>
+            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Background color</TextBlock>
+            <local:ColorPicker Grid.Row="5" Grid.Column="1" Margin="3" Color="{Binding BackgroundColor}"/>
 
             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Draw background color</TextBlock>
-            <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding DrawBGColor}"/>
+            <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding DrawBackgroundColor}"/>
 
             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Unknown</TextBlock>
             <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding Unknown}"/>
@@ -226,8 +227,8 @@
                                 <TextBox Grid.Column="1" Margin="3" Text="{Binding SpeedY}" ToolTip="Y"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">ObjectId</TextBlock>
-                            <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding ObjectId}"/>
+                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Object id</TextBlock>
+                            <local:UndertaleObjectReference Grid.Row="6" Grid.Column="1" Margin="3" ObjectReference="{Binding ObjectId}" ObjectType="{x:Type undertale:UndertaleGameObject}"/>
                         </Grid>
                     </DataTemplate>
 
@@ -296,9 +297,9 @@
                                 <TextBox Grid.Column="0" Margin="3" Text="{Binding SpeedX}" ToolTip="X"/>
                                 <TextBox Grid.Column="1" Margin="3" Text="{Binding SpeedY}" ToolTip="Y"/>
                             </Grid>
-
-                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">ObjectId</TextBlock>
-                            <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding ObjectId}"/>
+                            
+                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Follows object</TextBlock>
+                            <local:UndertaleObjectReference Grid.Row="5" Grid.Column="1" Margin="3" ObjectReference="{Binding ObjectId}" ObjectType="{x:Type undertale:UndertaleGameObject}"/>
                         </Grid>
                     </DataTemplate>
 
@@ -336,7 +337,7 @@
                             <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding InstanceID}"/>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Creation code</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding CreationCodeID}" ObjectType="{x:Type undertale:UndertaleCode}"/>
+                            <local:UndertaleObjectReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding CreationCode}" ObjectType="{x:Type undertale:UndertaleCode}"/>
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Scale</TextBlock>
                             <Grid Grid.Row="4" Grid.Column="1">
@@ -348,8 +349,8 @@
                                 <TextBox Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">ArgbTint</TextBlock>
-                            <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding ArgbTint}"/>
+                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Color</TextBlock>
+                            <local:ColorPicker Grid.Row="5" Grid.Column="1" Margin="3" Color="{Binding Color}"/>
 
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Rotation</TextBlock>
                             <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Rotation}"/>
@@ -418,8 +419,8 @@
                                 <TextBox Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">ArgbTint</TextBlock>
-                            <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding ArgbTint}"/>
+                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Color</TextBlock>
+                            <local:ColorPicker Grid.Row="6" Grid.Column="1" Margin="3" Color="{Binding Color}"/>
                         </Grid>
                     </DataTemplate>
                 </ContentControl.Resources>
@@ -427,7 +428,7 @@
         </Grid>
 
         <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
-            <ItemsControl Name="RoomGraphics">
+            <ItemsControl Name="RoomGraphics" Background="Black">
                 <ItemsControl.ItemsSource>
                     <CompositeCollection>
                         <CollectionContainer Collection="{Binding Source={StaticResource AllObjects}}"/>
@@ -435,12 +436,15 @@
                 </ItemsControl.ItemsSource>
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Canvas Width="{Binding Width}" Height="{Binding Height}" Background="Black" IsItemsHost="True" UseLayoutRounding="True" AllowDrop="True" DragOver="Canvas_DragOver" Drop="Canvas_Drop">
+                        <Canvas Width="{Binding Width}" Height="{Binding Height}" IsItemsHost="True" UseLayoutRounding="True" AllowDrop="True" DragOver="Canvas_DragOver" Drop="Canvas_Drop">
                             <Canvas.CacheMode>
                                 <BitmapCache EnableClearType="False" 
                                      RenderAtScale="1" 
                                      SnapsToDevicePixels="True"  />
                             </Canvas.CacheMode>
+                            <Canvas.Background>
+                                <SolidColorBrush Color="{Binding BackgroundColor, Converter={StaticResource ColorConverter}}"/>
+                            </Canvas.Background>
                         </Canvas>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
