@@ -249,6 +249,22 @@
                             <DataTemplate DataType="{x:Type undertale:UndertaleCode}">
                                 <local:UndertaleCodeEditor/>
                             </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleString}">
+                                <local:UndertaleStringEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleVariable}">
+                                <local:UndertaleVariableEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleFunction}">
+                                <local:UndertaleFunctionEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleAction}">
+                                <local:UndertaleActionEditor/>
+                            </DataTemplate>
                         </ContentControl.Resources>
                     </ContentControl>
                 </ScrollViewer>

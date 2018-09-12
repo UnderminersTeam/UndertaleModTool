@@ -25,6 +25,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
@@ -83,18 +84,42 @@
         </Grid>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Textures</TextBlock>
-        <ListBox Grid.Row="8" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures}" Name="TextureList" IsSynchronizedWithCurrentItem="True">
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <DataGrid Grid.Row="8" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures}" Name="TextureList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
+            <DataGrid.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                <Style TargetType="{x:Type DataGridCell}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                <Grid Background="{TemplateBinding Background}">
+                                    <ContentPresenter VerticalAlignment="Center" />
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
                 </Style>
-            </ListBox.ItemContainerStyle>
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding TextureId}" ObjectType="{x:Type undertale:UndertaleTexturePage}"/>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding TextureId}" ObjectType="{x:Type undertale:UndertaleTexturePage}" CanRemove="False"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
 
         <Viewbox Grid.Row="9" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
             <Border>
@@ -112,29 +137,102 @@
             </Border>
         </Viewbox>
 
-        <!-- TODO: Editor for the masks -->
         <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Collision masks</TextBlock>
-        <ItemsControl Grid.Row="11" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMaskData}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Viewbox Stretch="None">
-                        <Border BorderThickness="2" BorderBrush="Gray">
-                            <Image Stretch="None">
-                                <Image.Source>
-                                    <MultiBinding>
-                                        <MultiBinding.Converter>
-                                            <local:MaskImageConverer/>
-                                        </MultiBinding.Converter>
-                                        <Binding RelativeSource="{RelativeSource AncestorType=ItemsControl}" Path="DataContext.Width"/>
-                                        <Binding RelativeSource="{RelativeSource AncestorType=ItemsControl}" Path="DataContext.Height"/>
-                                        <Binding Path="."/>
-                                    </MultiBinding>
-                                </Image.Source>
-                            </Image>
-                        </Border>
-                    </Viewbox>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <DataGrid Grid.Row="10" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks}" Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
+            <DataGrid.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                <Style TargetType="{x:Type DataGridCell}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                <Grid Background="{TemplateBinding Background}">
+                                    <ContentPresenter VerticalAlignment="Center" />
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Margin="20,0,0,0" Text="(CollisionMask)"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <ContentControl Grid.Row="11" Grid.Column="1" Margin="3" DataContext="{Binding SelectedItem, ElementName=MaskList}">
+            <ContentControl.Template>
+                <ControlTemplate>
+                    <StackPanel Name="MaskEditor">
+                        <Viewbox Stretch="None">
+                            <Border BorderThickness="2" BorderBrush="Gray" Name="MaskBorder">
+                                <Image Stretch="None" Name="MaskImage">
+                                    <Image.Source>
+                                        <MultiBinding>
+                                            <MultiBinding.Converter>
+                                                <local:MaskImageConverer/>
+                                            </MultiBinding.Converter>
+                                            <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="DataContext.Width"/>
+                                            <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="DataContext.Height"/>
+                                            <Binding Path="Data"/>
+                                        </MultiBinding>
+                                    </Image.Source>
+                                </Image>
+                            </Border>
+                        </Viewbox>
+                        <TextBlock Text="Invalid mask data!" Foreground="Red" Name="MaskIsInvalid" Visibility="Hidden"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Button Grid.Row="0" Grid.Column="0" Content="Import mask" Click="MaskImport_Click" Name="MaskImport"/>
+                            <Button Grid.Row="0" Grid.Column="3" Content="Export mask" Click="MaskExport_Click" Name="MaskExport"/>
+                        </Grid>
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger SourceName="MaskImage" Property="Source" Value="{x:Null}">
+                            <Trigger.Setters>
+                                <Setter TargetName="MaskBorder" Property="BorderBrush" Value="Red"/>
+                                <Setter TargetName="MaskIsInvalid" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="MaskExport" Property="IsEnabled" Value="False"/>
+                            </Trigger.Setters>
+                        </Trigger>
+                        <Trigger Property="DataContext" Value="{x:Null}">
+                            <Trigger.Setters>
+                                <Setter TargetName="MaskEditor" Property="Visibility" Value="Hidden"/>
+                            </Trigger.Setters>
+                        </Trigger>
+                        <Trigger Property="DataContext" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                            <Trigger.Setters>
+                                <Setter TargetName="MaskEditor" Property="Visibility" Value="Hidden"/>
+                            </Trigger.Setters>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </ContentControl.Template>
+        </ContentControl>
     </Grid>
 </UserControl>

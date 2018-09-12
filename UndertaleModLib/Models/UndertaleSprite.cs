@@ -43,7 +43,7 @@ namespace UndertaleModLib.Models
         public uint OriginX { get => _OriginX; set { _OriginX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OriginX")); } }
         public uint OriginY { get => _OriginY; set { _OriginY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OriginY")); } }
         public UndertaleSimpleList<TextureEntry> Textures { get => _Textures; set { _Textures = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Textures")); } }
-        private ObservableCollection<byte[]> CollisionMaskData { get; } = new ObservableCollection<byte[]>();
+        public ObservableCollection<MaskEntry> CollisionMasks { get; } = new ObservableCollection<MaskEntry>();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -52,9 +52,12 @@ namespace UndertaleModLib.Models
             return Name.Content + " (" + GetType().Name + ")";
         }
 
-        public class TextureEntry : UndertaleObject
+        public class TextureEntry : UndertaleObject, INotifyPropertyChanged
         {
-            public UndertaleTexturePage TextureId { get; set; }
+            private UndertaleTexturePage _TextureId;
+            public UndertaleTexturePage TextureId { get => _TextureId; set { _TextureId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureId")); } }
+
+            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -64,6 +67,23 @@ namespace UndertaleModLib.Models
             public void Unserialize(UndertaleReader reader)
             {
                 TextureId = reader.ReadUndertaleObjectPointer<UndertaleTexturePage>();
+            }
+        }
+
+        public class MaskEntry : INotifyPropertyChanged
+        {
+            private byte[] _Data;
+            public byte[] Data { get => _Data; set { _Data = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data")); } }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            public MaskEntry()
+            {
+            }
+
+            public MaskEntry(byte[] data)
+            {
+                this.Data = data;
             }
         }
 
@@ -84,19 +104,19 @@ namespace UndertaleModLib.Models
             writer.Write(OriginX);
             writer.Write(OriginY);
             writer.WriteUndertaleObject(Textures);
-            writer.Write((uint)CollisionMaskData.Count);
+            writer.Write((uint)CollisionMasks.Count);
             uint total = 0;
-            foreach(byte[] mask in CollisionMaskData)
+            foreach(var mask in CollisionMasks)
             {
-                writer.Write(mask);
-                total += (uint)mask.Length;
+                writer.Write(mask.Data);
+                total += (uint)mask.Data.Length;
             }
             while(total % 4 != 0)
             {
                 writer.Write((byte)0);
                 total++;
             }
-            Debug.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMaskData.Count));
+            Debug.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count));
         }
         
         public void Unserialize(UndertaleReader reader)
@@ -117,12 +137,12 @@ namespace UndertaleModLib.Models
             OriginY = reader.ReadUInt32();
             Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
             uint MaskCount = reader.ReadUInt32();
-            CollisionMaskData.Clear();
+            CollisionMasks.Clear();
             uint total = 0;
             for(uint i = 0; i < MaskCount; i++)
             {
                 uint len = (Width + 7) / 8 * Height;
-                CollisionMaskData.Add(reader.ReadBytes((int)len));
+                CollisionMasks.Add(new MaskEntry(reader.ReadBytes((int)len)));
                 total += len;
             }
             while(total % 4 != 0)

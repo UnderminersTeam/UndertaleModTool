@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using UndertaleModLib.Models;
 
 namespace UndertaleModTool
 {
@@ -22,7 +23,7 @@ namespace UndertaleModTool
             uint width = (uint)values[0];
             uint height = (uint)values[1];
             byte[] data = (byte[])values[2];
-            if (data == null)
+            if (data == null || data.Length != (width + 7) / 8 * height || width == 0 || height == 0)
                 return null;
             return BitmapSource.Create((int)width, (int)height, 96, 96, PixelFormats.BlackWhite, null, data, (int)((width + 7) / 8));
         }

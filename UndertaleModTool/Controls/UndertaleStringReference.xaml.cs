@@ -42,8 +42,6 @@ namespace UndertaleModTool
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            if (ObjectReference == null)
-                return; // TODO: disable the button
             (Application.Current.MainWindow as MainWindow).Selected = ObjectReference;
         }
 
@@ -78,20 +76,27 @@ namespace UndertaleModTool
             var binding = BindingOperations.GetBindingExpression(tb, TextBox.TextProperty);
             if (binding.IsDirty)
             {
-                StringUpdateWindow dialog = new StringUpdateWindow();
-                dialog.Owner = Window.GetWindow(this);
-                dialog.ShowDialog();
-                switch(dialog.Result)
+                if (ObjectReference != null)
                 {
-                    case StringUpdateWindow.ResultType.ChangeOneValue:
-                        ObjectReference = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString(tb.Text);
-                        break;
-                    case StringUpdateWindow.ResultType.ChangeReferencedValue:
-                        binding.UpdateSource();
-                        break;
-                    case StringUpdateWindow.ResultType.Cancel:
-                        binding.UpdateTarget();
-                        break;
+                    StringUpdateWindow dialog = new StringUpdateWindow();
+                    dialog.Owner = Window.GetWindow(this);
+                    dialog.ShowDialog();
+                    switch (dialog.Result)
+                    {
+                        case StringUpdateWindow.ResultType.ChangeOneValue:
+                            ObjectReference = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString(tb.Text);
+                            break;
+                        case StringUpdateWindow.ResultType.ChangeReferencedValue:
+                            binding.UpdateSource();
+                            break;
+                        case StringUpdateWindow.ResultType.Cancel:
+                            binding.UpdateTarget();
+                            break;
+                    }
+                }
+                else
+                {
+                    ObjectReference = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString(tb.Text);
                 }
             }
         }

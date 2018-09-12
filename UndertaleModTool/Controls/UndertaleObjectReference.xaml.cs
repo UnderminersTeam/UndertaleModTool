@@ -64,8 +64,6 @@ namespace UndertaleModTool
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            if (ObjectReference == null)
-                return; // TODO: disable the button
             (Application.Current.MainWindow as MainWindow).Selected = ObjectReference;
         }
 

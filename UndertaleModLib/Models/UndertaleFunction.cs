@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -62,9 +63,8 @@ namespace UndertaleModLib.Models
 
     public class UndertaleAction : UndertaleNamedResource
     {
-        public uint ArgumentsCount => (uint)Arguments.Count;
         public UndertaleString Name { get; set; }
-        public List<Argument> Arguments { get; private set; } = new List<Argument>();
+        public ObservableCollection<Argument> Arguments { get; } = new ObservableCollection<Argument>();
 
         public void Serialize(UndertaleWriter writer)
         {

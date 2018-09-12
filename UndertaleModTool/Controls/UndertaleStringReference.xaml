@@ -12,6 +12,16 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <TextBox Grid.Column="0" ToolTip="This is an string reference. Change the value here to edit this just this value of all referenced values, or drag and drop another string instance from the tree on the left to change the reference" AllowDrop="True" PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" Text="{Binding ObjectReference.Content, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=Explicit}" LostFocus="TextBox_LostFocus"/>
-        <Button Grid.Column="1" Click="Details_Click" Content=" ... " ToolTip="Open referenced object"/>
+        <Button Grid.Column="1" Click="Details_Click" Content=" ... " ToolTip="Open referenced object">
+            <Button.Style>
+                <Style TargetType="{x:Type Button}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Null}">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
     </Grid>
 </UserControl>
