@@ -38,8 +38,8 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Debug (?)</TextBlock>
-            <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.Debug}"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Disable debugger</TextBlock>
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.DisableDebugger}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Bytecode version</TextBlock>
             <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.BytecodeVersion}"/>

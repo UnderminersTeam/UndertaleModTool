@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
+    // TODO: INotifyPropertyChanged
     public class UndertaleGeneralInfo : UndertaleObject
     {
         [Flags]
@@ -30,7 +31,7 @@ namespace UndertaleModLib.Models
             BorderlessWindow = 0x4000,
         }
 
-        public byte Debug { get; set; }
+        public byte DisableDebugger { get; set; }
         public byte BytecodeVersion { get; set; }
         public ushort Unknown { get; set; }
         public UndertaleString Filename { get; set; }
@@ -65,7 +66,7 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
-            writer.Write(Debug);
+            writer.Write(DisableDebugger);
             writer.Write(BytecodeVersion);
             writer.Write(Unknown);
             writer.WriteUndertaleString(Filename);
@@ -105,7 +106,7 @@ namespace UndertaleModLib.Models
 
         public void Unserialize(UndertaleReader reader)
         {
-            Debug = reader.ReadByte();
+            DisableDebugger = reader.ReadByte();
             BytecodeVersion = reader.ReadByte();
             Unknown = reader.ReadUInt16();
             Filename = reader.ReadUndertaleString();
