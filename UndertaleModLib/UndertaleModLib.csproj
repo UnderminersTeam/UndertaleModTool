@@ -42,7 +42,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DebugData\DebugDataGenerator.cs" />
     <Compile Include="Decompiler\Decompiler.cs" />
+    <Compile Include="ModelsDebug\UndertaleDebugInfo.cs" />
+    <Compile Include="ModelsDebug\UndertaleInstanceVars.cs" />
+    <Compile Include="ModelsDebug\UndertaleScriptSource.cs" />
     <Compile Include="Models\UndertaleBackground.cs" />
     <Compile Include="Models\UndertaleCode.cs" />
     <Compile Include="Models\UndertaleEmbeddedAudio.cs" />
@@ -62,6 +66,8 @@
     <Compile Include="Models\UndertaleVariable.cs" />
     <Compile Include="UndertaleChunks.cs" />
     <Compile Include="UndertaleChunkTypes.cs" />
+    <Compile Include="UndertaleDebugChunks.cs" />
+    <Compile Include="UndertaleDebugData.cs" />
     <Compile Include="UndertaleLists.cs" />
     <Compile Include="UndertaleBaseTypes.cs" />
     <Compile Include="UndertaleData.cs" />
