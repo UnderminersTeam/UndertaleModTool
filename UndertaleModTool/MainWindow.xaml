@@ -265,6 +265,10 @@
                             <DataTemplate DataType="{x:Type undertale:UndertaleCodeLocals}">
                                 <local:UndertaleCodeLocalsEditor/>
                             </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertalelib:UndertaleChunkVARI}">
+                                <local:UndertaleVariableChunkEditor/>
+                            </DataTemplate>
                         </ContentControl.Resources>
                     </ContentControl>
                 </ScrollViewer>

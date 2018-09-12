@@ -45,7 +45,7 @@
                         </DrawingBrush>
                     </Border.Background>
 
-                    <Image Source="{Binding TextureData.TextureBlob}"/>
+                    <Image Source="{Binding TextureData.TextureBlob}" MouseLeftButtonDown="Image_MouseLeftButtonDown"/>
                 </Border>
             </Viewbox>
 

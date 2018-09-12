@@ -10,8 +10,8 @@ namespace UndertaleModLib.Models
 {
     public class UndertaleEmbeddedTexture : UndertaleResource, INotifyPropertyChanged
     {
-        private uint _UnknownAlwaysZero;
-        private TexData _TextureData;
+        private uint _UnknownAlwaysZero = 0;
+        private TexData _TextureData = new TexData();
 
         public uint UnknownAlwaysZero { get => _UnknownAlwaysZero; set { _UnknownAlwaysZero = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UnknownAlwaysZero")); } }
         public TexData TextureData { get => _TextureData; set { _TextureData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureData")); } }

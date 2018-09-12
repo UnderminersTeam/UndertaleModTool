@@ -11,7 +11,7 @@ namespace UndertaleModLib.Models
 {
     public class UndertaleEmbeddedAudio : UndertaleResource, PaddedObject, INotifyPropertyChanged
     {
-        private byte[] _Data;
+        private byte[] _Data = new byte[0];
 
         public byte[] Data { get => _Data; set { _Data = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data")); } }
 

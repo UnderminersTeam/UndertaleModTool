@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
+    // TODO: INotifyPropertyChanged
     public class UndertaleFunction : UndertaleNamedResource
     {
         public UndertaleString Name { get; set; }
@@ -63,6 +64,7 @@ namespace UndertaleModLib.Models
 
     // Seems to be unused. You can remove all entries and the game still works normally.
     // Maybe the GM:S debugger uses this data?
+    // TODO: INotifyPropertyChanged
     public class UndertaleCodeLocals : UndertaleNamedResource
     {
         public UndertaleString Name { get; set; }
@@ -89,7 +91,8 @@ namespace UndertaleModLib.Models
             }
             Debug.Assert(Locals.Count == count);
         }
-
+        
+        // TODO: INotifyPropertyChanged
         public class LocalVar : UndertaleObject
         {
             public uint Index { get; set; }

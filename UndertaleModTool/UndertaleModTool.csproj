@@ -184,6 +184,9 @@
     <Compile Include="Editors\UndertaleFunctionEditor.xaml.cs">
       <DependentUpon>UndertaleFunctionEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Editors\UndertaleVariableChunkEditor.xaml.cs">
+      <DependentUpon>UndertaleVariableChunkEditor.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Editors\UndertaleVariableEditor.xaml.cs">
       <DependentUpon>UndertaleVariableEditor.xaml</DependentUpon>
     </Compile>
@@ -253,6 +256,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Editors\UndertaleFunctionEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editors\UndertaleVariableChunkEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

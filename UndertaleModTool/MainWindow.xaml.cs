@@ -87,17 +87,28 @@ namespace UndertaleModTool
             dialog.Owner = this;
             Task t = Task.Run(() =>
             {
-                UndertaleData data;
-                using (var stream = new FileStream(filename, FileMode.Open))
+                UndertaleData data = null;
+                try
                 {
-                    data = UndertaleIO.Read(stream);
+                    using (var stream = new FileStream(filename, FileMode.Open))
+                    {
+                        data = UndertaleIO.Read(stream);
+                    }
                 }
-                
+                catch (Exception e)
+                {
+                    MessageBox.Show("An error occured while trying to load:\n" + e.Message, "Load error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
                 Dispatcher.Invoke(() =>
                 {
-                    this.Data = data;
-                    this.FilePath = filename;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
+                    if (data != null)
+                    {
+                        this.Data = data;
+                        this.FilePath = filename;
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
+                        Selected = Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
+                    }
                     dialog.Hide();
                 });
             });
@@ -113,13 +124,20 @@ namespace UndertaleModTool
             dialog.Owner = this;
             Task t = Task.Run(() =>
             {
-                using (var stream = new FileStream(filename, FileMode.Create))
+                try
                 {
-                    UndertaleIO.Write(stream, Data);
+                    using (var stream = new FileStream(filename, FileMode.Create))
+                    {
+                        UndertaleIO.Write(stream, Data);
+                    }
+                }
+                catch(Exception e)
+                {
+                    MessageBox.Show("An error occured while trying to save:\n" + e.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
                 Dispatcher.Invoke(() =>
-                {// TODO: fix exception handling
+                {
                     dialog.Hide();
                 });
             });
@@ -139,6 +157,14 @@ namespace UndertaleModTool
                 else if (item == "Data")
                 {
                     Highlighted = new DescriptionView("Welcome to UndertaleModTool!", Data != null ? "Double click on the items on the left to view them" : "Open data.win file to get started");
+                }
+                else if (item == "Code locals (unused?)")
+                {
+                    Highlighted = new DescriptionView(item, Data != null ? "This seems to be unused as far as I can tell - you can remove the whole list and nothing happens" : "Load data.win file first");
+                }
+                else if (item == "Variables")
+                {
+                    Highlighted = Data != null ? (object)Data.FORM.Chunks["VARI"] : new DescriptionView(item, "Load data.win file first");
                 }
                 else
                 {
@@ -370,6 +396,11 @@ namespace UndertaleModTool
             Type t = list.GetType().GetGenericArguments()[0];
             Debug.Assert(typeof(UndertaleResource).IsAssignableFrom(t));
             UndertaleResource obj = Activator.CreateInstance(t) as UndertaleResource;
+            if (obj is UndertaleNamedResource)
+            {
+                string newname = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
+                (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newname);
+            }
             list.Add(obj);
             // TODO: change highlighted
             Selected = obj;

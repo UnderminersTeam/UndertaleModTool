@@ -9,7 +9,7 @@ namespace UndertaleModLib
 {
     public class UndertaleData
     {
-        internal UndertaleChunkFORM FORM;
+        public UndertaleChunkFORM FORM;
 
         public UndertaleGeneralInfo GeneralInfo => FORM.GEN8.Object;
         public UndertaleOptions Options => FORM.OPTN.Object;

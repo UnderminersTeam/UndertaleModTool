@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -189,13 +190,14 @@ namespace UndertaleModLib
         public override string Name => "CODE";
     }
 
+    // TODO: INotifyPropertyChanged
     public class UndertaleChunkVARI : UndertaleChunk
     {
         public override string Name => "VARI";
 
-        public uint Unknown1; // max value of UndertaleVariable.Unknown
-        public uint Unknown1Again;
-        public uint Unknown2;
+        public uint Unknown1 { get; set; } // max value of UndertaleVariable.Unknown
+        public uint Unknown1Again { get; set; }
+        public uint Unknown2 { get; set; }
         public List<UndertaleVariable> List = new List<UndertaleVariable>();
 
         internal override void SerializeChunk(UndertaleWriter writer)

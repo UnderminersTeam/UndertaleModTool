@@ -33,8 +33,14 @@ namespace Test
                 }
             }*/
 
+            foreach(var vari in data.Variables)
+            {
+                if ((int)vari.InstanceType >= 0)
+                    Debug.WriteLine(vari.Name.Content);
+            }
+
             //Directory.CreateDirectory("code");
-            Directory.CreateDirectory("decomp");
+            //Directory.CreateDirectory("decomp");
             foreach (var code in data.Code)
             {
                 //if (code.Name.Content == "gml_Object_obj_sans_shift_tester_Keyboard_32")
@@ -45,7 +51,7 @@ namespace Test
                     Debug.Write(Decompiler.Decompile(code));
                 }*/
 
-                Debug.WriteLine(code.Name.Content);
+                /*Debug.WriteLine(code.Name.Content);
                 using (StreamWriter writer = new StreamWriter("decomp/" + code.Name.Content + ".txt"))
                 {
                     try
@@ -58,7 +64,7 @@ namespace Test
                         writer.WriteLine("EXCEPTION!");
                         writer.Write(e.ToString());
                     }
-                }
+                }*/
 
 
                 //Debug.WriteLine(code.Name.Content);

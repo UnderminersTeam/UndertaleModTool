@@ -20,24 +20,24 @@ namespace UndertaleModLib.Models
     {
         private UndertaleString _Name;
         private UndertaleResourceById<UndertaleSprite> _Sprite { get; } = new UndertaleResourceById<UndertaleSprite>("SPRT");
-        private bool _Visible;
-        private bool _Solid;
-        private int _Depth;
-        private bool _Persistent;
+        private bool _Visible = true;
+        private bool _Solid = false;
+        private int _Depth = 0;
+        private bool _Persistent = false;
         private UndertaleResourceById<UndertaleGameObject> _ParentId { get; } = new UndertaleResourceById<UndertaleGameObject>("OBJT");
-        private UndertaleResourceById<UndertaleSprite> _TextureMaskId { get; } = new UndertaleResourceById<UndertaleSprite>("SPRT");
-        private bool _UsesPhysics;
-        private bool _IsSensor;
-        private CollisionShapeFlags _CollisionShape;
-        private float _Density;
-        private float _Restitution;
-        private uint _Group;
-        private float _LinearDamping;
-        private float _AngularDamping;
-        private float _Unknown1;
-        private float _Friction;
-        private uint _Unknown2;
-        private bool _Kinematic;
+        private UndertaleResourceById<UndertaleSprite> _TextureMaskId { get; } = new UndertaleResourceById<UndertaleSprite>("SPRT"); // TODO: ?
+        private bool _UsesPhysics = false;
+        private bool _IsSensor = false;
+        private CollisionShapeFlags _CollisionShape = CollisionShapeFlags.Circle;
+        private float _Density = 0.5f;
+        private float _Restitution = 0.1f;
+        private uint _Group = 0;
+        private float _LinearDamping = 0.1f;
+        private float _AngularDamping = 0.1f;
+        private float _Unknown1 = 0.0f;
+        private float _Friction = 0.2f;
+        private uint _Unknown2 = 1;
+        private bool _Kinematic = false;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sprite")); } }
@@ -62,6 +62,12 @@ namespace UndertaleModLib.Models
         public UndertalePointerList<UndertalePointerList<Event>> Events { get; private set; } = new UndertalePointerList<UndertalePointerList<Event>>();
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public UndertaleGameObject()
+        {
+            for (int i = 0; i < Enum.GetValues(typeof(EventType)).Length; i++)
+                Events.Add(new UndertalePointerList<Event>());
+        }
 
         public void Serialize(UndertaleWriter writer)
         {

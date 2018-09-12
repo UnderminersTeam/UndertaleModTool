@@ -30,6 +30,6 @@ namespace UndertaleModLib
 
     public interface UndertaleNamedResource : UndertaleResource
     {
-        UndertaleString Name { get; }
+        UndertaleString Name { get; set; }
     }
 }

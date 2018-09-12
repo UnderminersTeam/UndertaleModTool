@@ -10,9 +10,9 @@ namespace UndertaleModLib.Models
     public class UndertalePath : UndertaleNamedResource, INotifyPropertyChanged
     {
         private UndertaleString _Name;
-        private bool _IsSmooth;
-        private bool _IsClosed;
-        private uint _Precision;
+        private bool _IsSmooth = false;
+        private bool _IsClosed = false;
+        private uint _Precision = 4;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public bool IsSmooth { get => _IsSmooth; set { _IsSmooth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsSmooth")); } }

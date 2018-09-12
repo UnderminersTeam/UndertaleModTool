@@ -20,22 +20,22 @@ namespace UndertaleModLib.Models
 
         private UndertaleString _Name;
         private UndertaleString _Caption;
-        private uint _Width;
-        private uint _Height;
-        private uint _Speed;
-        private bool _Persistent;
-        private uint _BackgroundColor;
-        private bool _DrawBackgroundColor;
-        private int _Unknown;
-        private RoomEntryFlags _Flags;
-        private uint _World;
-        private uint _Top;
-        private uint _Left;
-        private uint _Right;
-        private uint _Bottom;
-        private float _GravityX;
-        private float _GravityY;
-        private float _MetersPerPixel;
+        private uint _Width = 320;
+        private uint _Height = 240;
+        private uint _Speed = 30;
+        private bool _Persistent = false;
+        private uint _BackgroundColor = 0x00000000;
+        private bool _DrawBackgroundColor = true;
+        private int _Unknown = -1;
+        private RoomEntryFlags _Flags = RoomEntryFlags.EnableViews;
+        private uint _World = 0;
+        private uint _Top = 0;
+        private uint _Left = 0;
+        private uint _Right = 1024;
+        private uint _Bottom = 768;
+        private float _GravityX = 0;
+        private float _GravityY = 10;
+        private float _MetersPerPixel = 0.1f;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public UndertaleString Caption { get => _Caption; set { _Caption = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Caption")); } }
@@ -61,6 +61,14 @@ namespace UndertaleModLib.Models
         public UndertalePointerList<Tile> Tiles { get; private set; } = new UndertalePointerList<Tile>();
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public UndertaleRoom()
+        {
+            for (int i = 0; i < 8; i++)
+                Backgrounds.Add(new Background());
+            for (int i = 0; i < 8; i++)
+                Views.Add(new View());
+        }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -133,15 +141,15 @@ namespace UndertaleModLib.Models
 
         public class Background : UndertaleObject, INotifyPropertyChanged
         {
-            private bool _Enabled;
-            private bool _Foreground;
+            private bool _Enabled = false;
+            private bool _Foreground = false;
             private UndertaleResourceById<UndertaleBackground> _BackgroundDefinition { get; } = new UndertaleResourceById<UndertaleBackground>("BGND");
-            private uint _X;
-            private uint _Y;
-            private uint _TileX;
-            private uint _TileY;
-            private int _SpeedX;
-            private int _SpeedY;
+            private uint _X = 0;
+            private uint _Y = 0;
+            private uint _TileX = 1;
+            private uint _TileY = 1;
+            private int _SpeedX = 0;
+            private int _SpeedY = 0;
             private UndertaleResourceById<UndertaleGameObject> _ObjectId { get; } = new UndertaleResourceById<UndertaleGameObject>("OBJT");
 
             public bool Enabled { get => _Enabled; set { _Enabled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Enabled")); } }
@@ -188,19 +196,19 @@ namespace UndertaleModLib.Models
 
         public class View : UndertaleObject, INotifyPropertyChanged
         {
-            private bool _Enabled;
-            private int _ViewX;
-            private int _ViewY;
-            private int _ViewWidth;
-            private int _ViewHeight;
-            private int _PortX;
-            private int _PortY;
-            private int _PortWidth;
-            private int _PortHeight;
-            private uint _BorderX;
-            private uint _BorderY;
-            private int _SpeedX;
-            private int _SpeedY;
+            private bool _Enabled = false;
+            private int _ViewX = 0;
+            private int _ViewY = 0;
+            private int _ViewWidth = 640;
+            private int _ViewHeight = 480;
+            private int _PortX = 0;
+            private int _PortY = 0;
+            private int _PortWidth = 640;
+            private int _PortHeight = 480;
+            private uint _BorderX = 32;
+            private uint _BorderY = 32;
+            private int _SpeedX = -1;
+            private int _SpeedY = -1;
             private UndertaleResourceById<UndertaleGameObject> _ObjectId { get; } = new UndertaleResourceById<UndertaleGameObject>("OBJT");
 
             public bool Enabled { get => _Enabled; set { _Enabled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Enabled")); } }

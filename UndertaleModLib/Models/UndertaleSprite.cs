@@ -26,7 +26,6 @@ namespace UndertaleModLib.Models
         private uint _SepMasks;
         private uint _OriginX;
         private uint _OriginY;
-        private UndertaleSimpleList<TextureEntry> _Textures;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public uint Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
@@ -42,7 +41,7 @@ namespace UndertaleModLib.Models
         public uint SepMasks { get => _SepMasks; set { _SepMasks = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SepMasks")); } }
         public uint OriginX { get => _OriginX; set { _OriginX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OriginX")); } }
         public uint OriginY { get => _OriginY; set { _OriginY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OriginY")); } }
-        public UndertaleSimpleList<TextureEntry> Textures { get => _Textures; set { _Textures = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Textures")); } }
+        public UndertaleSimpleList<TextureEntry> Textures { get; private set; } = new UndertaleSimpleList<TextureEntry>();
         public ObservableCollection<MaskEntry> CollisionMasks { get; } = new ObservableCollection<MaskEntry>();
 
         public event PropertyChangedEventHandler PropertyChanged;

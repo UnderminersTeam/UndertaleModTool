@@ -546,12 +546,12 @@ namespace UndertaleModLib.Models
     {
         private UndertaleString _Name;
         internal uint _Length;
-        private uint _ArgumentCount;
+        private uint _LocalsCount; // Seems related do UndertaleCodeLocals, TODO: does it also seem unused?
         internal uint _BytecodeAbsoluteAddress;
         private uint _UnknownProbablyZero;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public uint ArgumentCount { get => _ArgumentCount; set { _ArgumentCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ArgumentCount")); } }
+        public uint LocalsCount { get => _LocalsCount; set { _LocalsCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LocalsCount")); } }
         public uint UnknownProbablyZero { get => _UnknownProbablyZero; set { _UnknownProbablyZero = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UnknownProbablyZero")); } }
         public List<UndertaleInstruction> Instructions { get; } = new List<UndertaleInstruction>();
 
@@ -570,7 +570,7 @@ namespace UndertaleModLib.Models
         {
             writer.WriteUndertaleString(Name);
             writer.Write(_Length);
-            writer.Write(ArgumentCount);
+            writer.Write(LocalsCount);
             int BytecodeRelativeAddress = (int)_BytecodeAbsoluteAddress - (int)writer.Position;
             writer.Write(BytecodeRelativeAddress);
             writer.Write(UnknownProbablyZero);
@@ -580,7 +580,7 @@ namespace UndertaleModLib.Models
         {
             Name = reader.ReadUndertaleString();
             _Length = reader.ReadUInt32();
-            ArgumentCount = reader.ReadUInt32();
+            LocalsCount = reader.ReadUInt32();
             int BytecodeRelativeAddress = reader.ReadInt32();
             _BytecodeAbsoluteAddress = (uint)((int)reader.Position - 4 + BytecodeRelativeAddress);
             uint here = reader.Position;

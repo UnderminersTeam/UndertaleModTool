@@ -8,11 +8,12 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
+    // TODO: INotifyPropertyChanged
     public class UndertaleVariable : UndertaleResource
     {
         public UndertaleString Name { get; set; }
-        public int InstanceType { get; set; }
-        public uint Unknown { get; set; } // some kind of 'parent object' identifier? either 0 or increasing numbers, with the exception of a couple -10
+        public UndertaleInstruction.InstanceType InstanceType { get; set; }
+        public int Unknown { get; set; } // some kind of 'parent object' identifier? either 0 or increasing numbers, with the exception of a couple -10
         public int UnknownChainEndingValue { get; set; } // looks like an identifier or counter of some kind. Increases in every variable, but I can't find the pattern
 
         internal uint Occurrences;
@@ -21,7 +22,7 @@ namespace UndertaleModLib.Models
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
-            writer.Write(InstanceType);
+            writer.Write((int)InstanceType);
             writer.Write(Unknown);
             writer.Write(Occurrences);
             if (Occurrences > 0)
@@ -34,8 +35,8 @@ namespace UndertaleModLib.Models
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
-            InstanceType = reader.ReadInt32();
-            Unknown = reader.ReadUInt32();
+            InstanceType = (UndertaleInstruction.InstanceType)reader.ReadInt32();
+            Unknown = reader.ReadInt32();
             Occurrences = reader.ReadUInt32();
             //Debug.WriteLine("Variable " + (id++) + " at " + reader.GetAddressForUndertaleObject(Name).ToString("X8") + " child of " + Unknown);
             if (Occurrences > 0)

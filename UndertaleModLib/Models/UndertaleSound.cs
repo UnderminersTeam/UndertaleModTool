@@ -18,13 +18,13 @@ namespace UndertaleModLib.Models
         }
 
         private UndertaleString _Name;
-        private AudioEntryFlags _Flags;
+        private AudioEntryFlags _Flags = AudioEntryFlags.IsEmbedded;
         private UndertaleString _Type;
         private UndertaleString _File;
-        private uint _Unknown;
-        private float _Volume;
-        private float _Pitch;
-        private uint _GroupID;
+        private uint _Unknown = 0;
+        private float _Volume = 1;
+        private float _Pitch = 0;
+        private uint _GroupID = 0;
         private UndertaleResourceById<UndertaleEmbeddedAudio> _AudioID { get; } = new UndertaleResourceById<UndertaleEmbeddedAudio>("AUDO");
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
