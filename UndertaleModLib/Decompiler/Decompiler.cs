@@ -803,7 +803,7 @@ namespace UndertaleModLib.Decompiler
 
             public string ToString(bool canSkipBrackets = true)
             {
-                if (Statements.Count == 1 && !(Statements[0] is IfHLStatement) && !(Statements[0] is LoopHLStatement) && canSkipBrackets)
+                if (Statements.Count == 1 && !(Statements[0] is IfHLStatement) && !(Statements[0] is LoopHLStatement) && !(Statements[0] is WithHLStatement) && canSkipBrackets)
                     return "    " + Statements[0].ToString().Replace("\n", "\n    ");
                 else
                 {

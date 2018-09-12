@@ -147,7 +147,7 @@ namespace UndertaleModTool
                             par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run(" "));
                             Run valueRun = new Run(instr.Value.ToString()) { Foreground = argBrush, Cursor = (instr.Value is UndertaleObject || instr.Value is UndertaleResourceRef) ? Cursors.Hand : Cursors.Arrow };
-                            if (instr.Value is UndertaleResourceRef) // TODO: to be removed
+                            if (instr.Value is UndertaleResourceRef)
                             {
                                 valueRun.MouseDown += (sender, e) =>
                                 {
@@ -214,9 +214,7 @@ namespace UndertaleModTool
 
             UndertaleCode gettextCode = null;
             if (gettext == null)
-                foreach (var c in (Application.Current.MainWindow as MainWindow).Data.Code)
-                    if (c.Name.Content == "gml_Script_textdata_en")
-                        gettextCode = c;
+                gettextCode = (Application.Current.MainWindow as MainWindow).Data.Code.ByName("gml_Script_textdata_en");
 
             Task t = Task.Run(() =>
             {
@@ -332,35 +330,45 @@ namespace UndertaleModTool
                                                     usedObjects.Add(id, (Application.Current.MainWindow as MainWindow).Data.Strings[gettext[id]]);
                                             }
                                         }
-                                        if (token == "instance_exists")
+                                    }
+                                    else if (Char.IsDigit(token[0]))
+                                    {
+                                        par.Inlines.Add(new Run(token) { Cursor = Cursors.Hand });
+                                        par.Inlines.LastInline.MouseDown += (sender, ev) =>
                                         {
-                                            if (split[i + 1] == "(" && split[i + 3] == ")")
+                                            // TODO: Add type resolving to the decompiler so that this is handled mostly automatically
+
+                                            UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
+                                            int id = Int32.Parse(token);
+                                            List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
+                                            if (id < data.Sprites.Count)
+                                                possibleObjects.Add(data.Sprites[id]);
+                                            if (id < data.Rooms.Count)
+                                                possibleObjects.Add(data.Rooms[id]);
+                                            if (id < data.GameObjects.Count)
+                                                possibleObjects.Add(data.GameObjects[id]);
+                                            if (id < data.Backgrounds.Count)
+                                                possibleObjects.Add(data.Backgrounds[id]);
+                                            if (id < data.Scripts.Count)
+                                                possibleObjects.Add(data.Scripts[id]);
+
+                                            ContextMenu contextMenu = new ContextMenu();
+                                            foreach(UndertaleObject obj in possibleObjects)
                                             {
-                                                int id;
-                                                if (Int32.TryParse(split[i + 2], out id))
-                                                {
-                                                    if(!usedObjects.ContainsKey(split[i + 2]))
-                                                        usedObjects.Add(split[i + 2], (Application.Current.MainWindow as MainWindow).Data.GameObjects[id]);
-                                                }
+                                                MenuItem item = new MenuItem();
+                                                item.Header = obj.ToString();
+                                                item.Click += (sender2, ev2) => (Application.Current.MainWindow as MainWindow).Selected = obj;
+                                                contextMenu.Items.Add(item);
                                             }
-                                        }
-                                        if (token == "instance_create")
-                                        {
-                                            if (split[i + 1] == "(")
+                                            if (id > 0x00050000)
                                             {
-                                                int end;
-                                                for (end = i; split[end] != ")"; end++) ;
-                                                if (split[end-2].Trim() == "" && split[end-3] == ",")
-                                                {
-                                                    int id;
-                                                    if (Int32.TryParse(split[end - 1], out id))
-                                                    {
-                                                        if (!usedObjects.ContainsKey(split[end - 1]))
-                                                            usedObjects.Add(split[end - 1], (Application.Current.MainWindow as MainWindow).Data.GameObjects[id]);
-                                                    }
-                                                }
+                                                contextMenu.Items.Add(new MenuItem() { Header = "#" + id.ToString("X6") + " (color)", IsEnabled = false });
                                             }
-                                        }
+                                            contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
+                                            (sender as Run).ContextMenu = contextMenu;
+                                            contextMenu.IsOpen = true;
+                                            ev.Handled = true;
+                                        };
                                     }
                                     else
                                         par.Inlines.Add(new Run(token));
