@@ -154,9 +154,9 @@
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Actions" ItemsSource="{Binding Actions}">
+                        <TreeViewItem Header="Code locals (unused?)" ItemsSource="{Binding CodeLocals}" Foreground="Gray">
                             <TreeViewItem.ItemTemplate>
-                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleAction}">
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleCodeLocals}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
@@ -262,8 +262,8 @@
                                 <local:UndertaleFunctionEditor/>
                             </DataTemplate>
 
-                            <DataTemplate DataType="{x:Type undertale:UndertaleAction}">
-                                <local:UndertaleActionEditor/>
+                            <DataTemplate DataType="{x:Type undertale:UndertaleCodeLocals}">
+                                <local:UndertaleCodeLocalsEditor/>
                             </DataTemplate>
                         </ContentControl.Resources>
                     </ContentControl>

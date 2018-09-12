@@ -175,8 +175,8 @@
     <Compile Include="Editors\UndertaleStringEditor.xaml.cs">
       <DependentUpon>UndertaleStringEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Editors\UndertaleActionEditor.xaml.cs">
-      <DependentUpon>UndertaleActionEditor.xaml</DependentUpon>
+    <Compile Include="Editors\UndertaleCodeLocalsEditor.xaml.cs">
+      <DependentUpon>UndertaleCodeLocalsEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="Editors\UndertaleFunctionEditor.xaml.cs">
       <DependentUpon>UndertaleFunctionEditor.xaml</DependentUpon>
@@ -241,7 +241,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Editors\UndertaleActionEditor.xaml">
+    <Page Include="Editors\UndertaleCodeLocalsEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

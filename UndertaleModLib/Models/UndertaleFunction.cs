@@ -61,16 +61,18 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleAction : UndertaleNamedResource
+    // Seems to be unused. You can remove all entries and the game still works normally.
+    // Maybe the GM:S debugger uses this data?
+    public class UndertaleCodeLocals : UndertaleNamedResource
     {
         public UndertaleString Name { get; set; }
-        public ObservableCollection<Argument> Arguments { get; } = new ObservableCollection<Argument>();
+        public ObservableCollection<LocalVar> Locals { get; } = new ObservableCollection<LocalVar>();
 
         public void Serialize(UndertaleWriter writer)
         {
-            writer.Write((uint)Arguments.Count);
+            writer.Write((uint)Locals.Count);
             writer.WriteUndertaleString(Name);
-            foreach (Argument var in Arguments)
+            foreach (LocalVar var in Locals)
             {
                 writer.WriteUndertaleObject(var);
             }
@@ -80,15 +82,15 @@ namespace UndertaleModLib.Models
         {
             uint count = reader.ReadUInt32();
             Name = reader.ReadUndertaleString();
-            Arguments.Clear();
+            Locals.Clear();
             for (uint i = 0; i < count; i++)
             {
-                Arguments.Add(reader.ReadUndertaleObject<Argument>());
+                Locals.Add(reader.ReadUndertaleObject<LocalVar>());
             }
-            Debug.Assert(Arguments.Count == count);
+            Debug.Assert(Locals.Count == count);
         }
 
-        public class Argument : UndertaleObject
+        public class LocalVar : UndertaleObject
         {
             public uint Index { get; set; }
             public UndertaleString Name { get; set; }

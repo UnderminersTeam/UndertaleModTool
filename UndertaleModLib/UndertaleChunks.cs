@@ -258,7 +258,7 @@ namespace UndertaleModLib
         public override string Name => "FUNC";
 
         public UndertaleSimpleList<UndertaleFunction> Functions = new UndertaleSimpleList<UndertaleFunction>();
-        public UndertaleSimpleList<UndertaleAction> Actions = new UndertaleSimpleList<UndertaleAction>();
+        public UndertaleSimpleList<UndertaleCodeLocals> CodeLocals = new UndertaleSimpleList<UndertaleCodeLocals>();
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
@@ -298,13 +298,13 @@ namespace UndertaleModLib
             writer.Position = pos;
 
             writer.WriteUndertaleObject(Functions);
-            writer.WriteUndertaleObject(Actions);
+            writer.WriteUndertaleObject(CodeLocals);
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
             Functions = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleFunction>>();
-            Actions = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleAction>>();
+            CodeLocals = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleCodeLocals>>();
         }
     }
 

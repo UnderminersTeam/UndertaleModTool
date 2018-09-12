@@ -17,19 +17,19 @@ using UndertaleModLib.Models;
 namespace UndertaleModTool
 {
     /// <summary>
-    /// Logika interakcji dla klasy UndertaleActionEditor.xaml
+    /// Logika interakcji dla klasy UndertaleCodeLocalsEditor.xaml
     /// </summary>
-    public partial class UndertaleActionEditor : UserControl
+    public partial class UndertaleCodeLocalsEditor : UserControl
     {
-        public UndertaleActionEditor()
+        public UndertaleCodeLocalsEditor()
         {
             InitializeComponent();
         }
 
         private void DataGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
         {
-            UndertaleAction.Argument obj = new UndertaleAction.Argument();
-            obj.Index = (uint)((sender as DataGrid).ItemsSource as IList<UndertaleAction.Argument>).Count;
+            UndertaleCodeLocals.LocalVar obj = new UndertaleCodeLocals.LocalVar();
+            obj.Index = (uint)((sender as DataGrid).ItemsSource as IList<UndertaleCodeLocals.LocalVar>).Count;
             e.NewItem = obj;
         }
     }

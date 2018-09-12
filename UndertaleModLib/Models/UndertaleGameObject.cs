@@ -139,8 +139,8 @@ namespace UndertaleModLib.Models
         {
             private uint _EventSubtype;
 
-            public uint EventSubtype { get => _EventSubtype; set { _EventSubtype = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("EventSubtype")); } } // the ID at the end of name, subtype for some events, 0 if unused
-            public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>(); // seems to always have 1 entry, maybe the games using drag-and-drop code are different // TODO: this is actually an index into UndertaleActions (probably)
+            public uint EventSubtype { get => _EventSubtype; set { _EventSubtype = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("EventSubtype")); } } // (the same as the ID at the end of name)
+            public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>(); // seems to always have 1 entry, maybe the games using drag-and-drop code are different
 
             public EventSubtypeKey EventSubtypeKey
             {
@@ -183,19 +183,19 @@ namespace UndertaleModLib.Models
 
         public enum EventType : uint
         {
-            Create = 0, // no subtypes
-            Destroy = 1, // no subtypes
+            Create = 0, // no subtypes, always 0
+            Destroy = 1, // no subtypes, always 0
             Alarm = 2, // subtype is alarm id (0-11)
             Step = 3, // subtype is EventSubtypeStep
             Collision = 4, // subtype is other game object ID
             Keyboard = 5, // subtype is key ID, see EventSubtypeKey
-            Mouse = 6, // subtypes not really known (see game maker studio for possible values)
+            Mouse = 6, // TODO: subtypes (see game maker studio for possible values)
             Other = 7, // subtype is EventSubtypeOther
             Draw = 8, // subtype is EventSubtypeDraw
             KeyPress = 9, // subtype is key ID, see EventSubtypeKey
             KeyRelease = 10, // subtype is key ID, values unknown
-            Gesture = 11, // TODO: mapping is a guess
-            Asynchronous = 12, // TODO: mapping is a guess
+            Gesture = 11, // TODO: mapping is a guess // TODO: subtypes
+            Asynchronous = 12, // TODO: mapping is a guess // TODO: subtypes
         }
         
         public enum EventSubtypeStep : uint
