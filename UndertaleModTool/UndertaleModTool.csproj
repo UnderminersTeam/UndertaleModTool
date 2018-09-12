@@ -166,69 +166,69 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="EqualityConverter.cs" />
-    <Compile Include="EventNameConverter.cs" />
-    <Compile Include="GameObjectByIdConverter.cs" />
-    <Compile Include="ImplementsInterfaceConverter.cs" />
-    <Compile Include="MaskImageConverter.cs" />
-    <Compile Include="RectConverter.cs" />
-    <Compile Include="StringUpdateWindow.xaml.cs">
+    <Compile Include="Converters\EqualityConverter.cs" />
+    <Compile Include="Converters\EventNameConverter.cs" />
+    <Compile Include="Converters\GameObjectByIdConverter.cs" />
+    <Compile Include="Converters\ImplementsInterfaceConverter.cs" />
+    <Compile Include="Converters\MaskImageConverter.cs" />
+    <Compile Include="Converters\RectConverter.cs" />
+    <Compile Include="Windows\StringUpdateWindow.xaml.cs">
       <DependentUpon>StringUpdateWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SumRectConverter.cs" />
-    <Compile Include="UndertaleBackgroundEditor.xaml.cs">
+    <Compile Include="Converters\SumRectConverter.cs" />
+    <Compile Include="Editors\UndertaleBackgroundEditor.xaml.cs">
       <DependentUpon>UndertaleBackgroundEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleCodeEditor.xaml.cs">
+    <Compile Include="Editors\UndertaleCodeEditor.xaml.cs">
       <DependentUpon>UndertaleCodeEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleEmbeddedAudioEditor.xaml.cs">
+    <Compile Include="Editors\UndertaleEmbeddedAudioEditor.xaml.cs">
       <DependentUpon>UndertaleEmbeddedAudioEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleEmbeddedTextureEditor.xaml.cs">
+    <Compile Include="Editors\UndertaleEmbeddedTextureEditor.xaml.cs">
       <DependentUpon>UndertaleEmbeddedTextureEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleFontEditor.xaml.cs">
+    <Compile Include="Editors\UndertaleFontEditor.xaml.cs">
       <DependentUpon>UndertaleFontEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleGameObjectEditor.xaml.cs">
+    <Compile Include="Editors\UndertaleGameObjectEditor.xaml.cs">
       <DependentUpon>UndertaleGameObjectEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleGeneralInfoEditor.xaml.cs">
+    <Compile Include="Editors\UndertaleGeneralInfoEditor.xaml.cs">
       <DependentUpon>UndertaleGeneralInfoEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleObjectReference.xaml.cs">
+    <Compile Include="Controls\UndertaleObjectReference.xaml.cs">
       <DependentUpon>UndertaleObjectReference.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertalePathEditor.xaml.cs">
+    <Compile Include="Editors\UndertalePathEditor.xaml.cs">
       <DependentUpon>UndertalePathEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleRoomEditor.xaml.cs">
+    <Compile Include="Editors\UndertaleRoomEditor.xaml.cs">
       <DependentUpon>UndertaleRoomEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleCachedImageLoader.cs" />
-    <Compile Include="UndertaleScriptEditor.xaml.cs">
+    <Compile Include="Converters\UndertaleCachedImageLoader.cs" />
+    <Compile Include="Editors\UndertaleScriptEditor.xaml.cs">
       <DependentUpon>UndertaleScriptEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleSoundEditor.xaml.cs">
+    <Compile Include="Editors\UndertaleSoundEditor.xaml.cs">
       <DependentUpon>UndertaleSoundEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleSpriteEditor.xaml.cs">
+    <Compile Include="Editors\UndertaleSpriteEditor.xaml.cs">
       <DependentUpon>UndertaleSpriteEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleStringReference.xaml.cs">
+    <Compile Include="Controls\UndertaleStringReference.xaml.cs">
       <DependentUpon>UndertaleStringReference.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleTexturePageDisplay.xaml.cs">
+    <Compile Include="Controls\UndertaleTexturePageDisplay.xaml.cs">
       <DependentUpon>UndertaleTexturePageDisplay.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleTexturePageDisplayCropped.xaml.cs">
+    <Compile Include="Controls\UndertaleTexturePageDisplayCropped.xaml.cs">
       <DependentUpon>UndertaleTexturePageDisplayCropped.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UndertaleTexturePageEditor.xaml.cs">
+    <Compile Include="Editors\UndertaleTexturePageEditor.xaml.cs">
       <DependentUpon>UndertaleTexturePageEditor.xaml</DependentUpon>
     </Compile>
-    <Page Include="LoaderDialog.xaml">
+    <Page Include="Windows\LoaderDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -240,82 +240,82 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="LoaderDialog.xaml.cs">
+    <Compile Include="Windows\LoaderDialog.xaml.cs">
       <DependentUpon>LoaderDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="StringUpdateWindow.xaml">
+    <Page Include="Windows\StringUpdateWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleBackgroundEditor.xaml">
+    <Page Include="Editors\UndertaleBackgroundEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleCodeEditor.xaml">
+    <Page Include="Editors\UndertaleCodeEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleEmbeddedAudioEditor.xaml">
+    <Page Include="Editors\UndertaleEmbeddedAudioEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleEmbeddedTextureEditor.xaml">
+    <Page Include="Editors\UndertaleEmbeddedTextureEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleFontEditor.xaml">
+    <Page Include="Editors\UndertaleFontEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleGameObjectEditor.xaml">
+    <Page Include="Editors\UndertaleGameObjectEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleGeneralInfoEditor.xaml">
+    <Page Include="Editors\UndertaleGeneralInfoEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleObjectReference.xaml">
+    <Page Include="Controls\UndertaleObjectReference.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertalePathEditor.xaml">
+    <Page Include="Editors\UndertalePathEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleRoomEditor.xaml">
+    <Page Include="Editors\UndertaleRoomEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleScriptEditor.xaml">
+    <Page Include="Editors\UndertaleScriptEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleSoundEditor.xaml">
+    <Page Include="Editors\UndertaleSoundEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleSpriteEditor.xaml">
+    <Page Include="Editors\UndertaleSpriteEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleStringReference.xaml">
+    <Page Include="Controls\UndertaleStringReference.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleTexturePageDisplay.xaml">
+    <Page Include="Controls\UndertaleTexturePageDisplay.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleTexturePageDisplayCropped.xaml">
+    <Page Include="Controls\UndertaleTexturePageDisplayCropped.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UndertaleTexturePageEditor.xaml">
+    <Page Include="Editors\UndertaleTexturePageEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -357,5 +357,6 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.2.6.1\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.2.6.1\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
