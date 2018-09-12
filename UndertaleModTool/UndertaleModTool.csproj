@@ -231,14 +231,11 @@
     <Compile Include="Controls\UndertaleStringReference.xaml.cs">
       <DependentUpon>UndertaleStringReference.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\UndertaleTexturePageDisplay.xaml.cs">
-      <DependentUpon>UndertaleTexturePageDisplay.xaml</DependentUpon>
+    <Compile Include="Controls\UndertaleTexturePageItemDisplay.xaml.cs">
+      <DependentUpon>UndertaleTexturePageItemDisplay.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\UndertaleTexturePageDisplayCropped.xaml.cs">
-      <DependentUpon>UndertaleTexturePageDisplayCropped.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Editors\UndertaleTexturePageEditor.xaml.cs">
-      <DependentUpon>UndertaleTexturePageEditor.xaml</DependentUpon>
+    <Compile Include="Editors\UndertaleTexturePageItemEditor.xaml.cs">
+      <DependentUpon>UndertaleTexturePageItemEditor.xaml</DependentUpon>
     </Compile>
     <Page Include="Editors\UndertaleStringEditor.xaml">
       <SubType>Designer</SubType>
@@ -335,15 +332,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\UndertaleTexturePageDisplay.xaml">
+    <Page Include="Controls\UndertaleTexturePageItemDisplay.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\UndertaleTexturePageDisplayCropped.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Editors\UndertaleTexturePageEditor.xaml">
+    <Page Include="Editors\UndertaleTexturePageItemEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

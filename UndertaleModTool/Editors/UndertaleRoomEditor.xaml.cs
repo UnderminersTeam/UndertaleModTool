@@ -138,7 +138,7 @@ namespace UndertaleModTool
                 var obj = new UndertaleRoom.GameObject();
                 obj.X = (int)mousePos.X;
                 obj.Y = (int)mousePos.Y;
-                obj.ObjDefIndex = droppedObject;
+                obj.ObjectDefinition = droppedObject;
                 obj.InstanceID = ++(Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj; // TODO: kinda ugly...
                 obj.CreationCodeID = -1;
                 obj.ScaleX = 1;
@@ -164,7 +164,7 @@ namespace UndertaleModTool
                 {
                     UndertaleRoom.Background bg = selectedObj as UndertaleRoom.Background;
                     bg.Enabled = false;
-                    bg.BgDefIndex = null;
+                    bg.BackgroundDefinition = null;
                     ObjectEditor.Content = null;
                 }
                 else if (selectedObj is UndertaleRoom.View)
@@ -192,9 +192,9 @@ namespace UndertaleModTool
         {
             object sel = (sender as TreeView).SelectedItem;
             if (sel is UndertaleRoom.GameObject)
-                (Application.Current.MainWindow as MainWindow).Selected = (sel as UndertaleRoom.GameObject).ObjDefIndex;
+                (Application.Current.MainWindow as MainWindow).Selected = (sel as UndertaleRoom.GameObject).ObjectDefinition;
             if (sel is UndertaleRoom.Background)
-                (Application.Current.MainWindow as MainWindow).Selected = (sel as UndertaleRoom.Background).BgDefIndex;
+                (Application.Current.MainWindow as MainWindow).Selected = (sel as UndertaleRoom.Background).BackgroundDefinition;
         }
 
         private UndertaleObject copied;
@@ -229,7 +229,7 @@ namespace UndertaleModTool
                     var obj = new UndertaleRoom.GameObject();
                     obj.X = other.X;
                     obj.Y = other.Y;
-                    obj.ObjDefIndex = other.ObjDefIndex;
+                    obj.ObjectDefinition = other.ObjectDefinition;
                     obj.InstanceID = ++(Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj;
                     obj.CreationCodeID = other.CreationCodeID;
                     obj.ScaleX = other.ScaleX;
@@ -246,7 +246,7 @@ namespace UndertaleModTool
                     var obj = new UndertaleRoom.Tile();
                     obj.X = other.X;
                     obj.Y = other.Y;
-                    obj.BgDefIndex = other.BgDefIndex;
+                    obj.BackgroundDefinition = other.BackgroundDefinition;
                     obj.SourceX = other.SourceX;
                     obj.SourceY = other.SourceY;
                     obj.Width = other.Width;

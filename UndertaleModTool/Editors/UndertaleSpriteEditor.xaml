@@ -114,7 +114,7 @@
                 <DataGridTemplateColumn Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding TextureId}" ObjectType="{x:Type undertale:UndertaleTexturePage}" CanRemove="False"/>
+                            <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}" CanRemove="False"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -133,7 +133,7 @@
                         </DrawingBrush.Drawing>
                     </DrawingBrush>
                 </Border.Background>
-                <local:UndertaleTexturePageDisplayCropped DataContext="{Binding SelectedItem.TextureId, ElementName=TextureList}"/>
+                <local:UndertaleTexturePageItemDisplay DataContext="{Binding SelectedItem.Texture, ElementName=TextureList}"/>
             </Border>
         </Viewbox>
 

@@ -35,7 +35,7 @@
         </Grid>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Texture</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePage}"/>
+        <local:UndertaleObjectReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
 
         <Viewbox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly">
             <Border>
@@ -49,7 +49,7 @@
                         </DrawingBrush.Drawing>
                     </DrawingBrush>
                 </Border.Background>
-                <local:UndertaleTexturePageDisplayCropped DataContext="{Binding Texture}"/>
+                <local:UndertaleTexturePageItemDisplay DataContext="{Binding Texture}"/>
             </Border>
         </Viewbox>
     </Grid>

@@ -21,6 +21,6 @@
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Code</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Code}" ObjectType="{x:Type undertale:UndertaleTexturePage}"/>
+        <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Code}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
     </Grid>
 </UserControl>

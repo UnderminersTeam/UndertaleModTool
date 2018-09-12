@@ -77,10 +77,10 @@ namespace Test
                     Console.WriteLine(room.Name);
                     Console.WriteLine("=============");
                     foreach (var bg in room.Backgrounds)
-                        if(bg.BgDefIndex != null)
-                            Console.WriteLine(bg.BgDefIndex.Name);
+                        if(bg.BackgroundDefinition != null)
+                            Console.WriteLine(bg.BackgroundDefinition.Name);
                     foreach (var go in room.GameObjects)
-                        Console.WriteLine(go.ObjDefIndex.Name);
+                        Console.WriteLine(go.ObjectDefinition.Name);
                     Console.WriteLine();
                 }
             }*/
@@ -139,7 +139,7 @@ namespace Test
                 Name = data.Functions[0].Name
             });*/
 
-            /*UndertaleTexturePage texpage = new UndertaleTexturePage();
+            /*UndertaleTexturePageItem texpage = new UndertaleTexturePageItem();
             texpage.X = data.TexturePage[0].X;
             texpage.Y = data.TexturePage[0].Y;
             texpage.Width = data.TexturePage[0].Width;
@@ -150,7 +150,7 @@ namespace Test
             texpage.BoundingY = data.TexturePage[0].BoundingY;
             texpage.BoundingWidth = data.TexturePage[0].BoundingWidth;
             texpage.BoundingHeight = data.TexturePage[0].BoundingHeight;
-            texpage.SpritesheetId = data.TexturePage[0].SpritesheetId;
+            texpage.TexturePage = data.TexturePage[0].TexturePage;
             data.TexturePage.Add(texpage);*/
 
             /*UndertaleString name = new UndertaleString("NewAddedSound");

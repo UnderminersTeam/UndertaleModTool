@@ -18,7 +18,7 @@ namespace UndertaleModLib.Models
         private byte _Charset;
         private byte _AntiAliasing;
         private uint _RangeEnd;
-        private UndertaleTexturePage _TPagId;
+        private UndertaleTexturePageItem _Texture;
         private float _ScaleX;
         private float _ScaleY;
 
@@ -31,7 +31,7 @@ namespace UndertaleModLib.Models
         public byte Charset { get => _Charset; set { _Charset = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Charset")); } }
         public byte AntiAliasing { get => _AntiAliasing; set { _AntiAliasing = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AntiAliasing")); } }
         public uint RangeEnd { get => _RangeEnd; set { _RangeEnd = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("RangeEnd")); } }
-        public UndertaleTexturePage TPagId { get => _TPagId; set { _TPagId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TPagId")); } }
+        public UndertaleTexturePageItem Texture { get => _Texture; set { _Texture = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Texture")); } }
         public float ScaleX { get => _ScaleX; set { _ScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleX")); } }
         public float ScaleY { get => _ScaleY; set { _ScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleY")); } }
         public UndertalePointerList<Glyph> Glyphs { get; private set; } = new UndertalePointerList<Glyph>();
@@ -92,7 +92,7 @@ namespace UndertaleModLib.Models
             writer.Write(Charset);
             writer.Write(AntiAliasing);
             writer.Write(RangeEnd);
-            writer.WriteUndertaleObjectPointer(TPagId);
+            writer.WriteUndertaleObjectPointer(Texture);
             writer.Write(ScaleX);
             writer.Write(ScaleY);
             writer.WriteUndertaleObject(Glyphs);
@@ -109,7 +109,7 @@ namespace UndertaleModLib.Models
             Charset = reader.ReadByte();
             AntiAliasing = reader.ReadByte();
             RangeEnd = reader.ReadUInt32();
-            TPagId = reader.ReadUndertaleObjectPointer<UndertaleTexturePage>();
+            Texture = reader.ReadUndertaleObjectPointer<UndertaleTexturePageItem>();
             ScaleX = reader.ReadSingle();
             ScaleY = reader.ReadSingle();
             Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();

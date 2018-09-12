@@ -14,13 +14,13 @@ namespace UndertaleModLib.Models
         private uint _Unknown1;
         private uint _Unknown2;
         private uint _Unknown3;
-        private UndertaleTexturePage _Texture;
+        private UndertaleTexturePageItem _Texture;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public uint Unknown1 { get => _Unknown1; set { _Unknown1 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown1")); } }
         public uint Unknown2 { get => _Unknown2; set { _Unknown2 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown2")); } }
         public uint Unknown3 { get => _Unknown3; set { _Unknown3 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown3")); } }
-        public UndertaleTexturePage Texture { get => _Texture; set { _Texture = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Texture")); } }
+        public UndertaleTexturePageItem Texture { get => _Texture; set { _Texture = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Texture")); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -39,7 +39,7 @@ namespace UndertaleModLib.Models
             Unknown1 = reader.ReadUInt32();
             Unknown2 = reader.ReadUInt32();
             Unknown3 = reader.ReadUInt32();
-            Texture = reader.ReadUndertaleObjectPointer<UndertaleTexturePage>();
+            Texture = reader.ReadUndertaleObjectPointer<UndertaleTexturePageItem>();
         }
 
         public override string ToString()

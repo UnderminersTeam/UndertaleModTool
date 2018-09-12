@@ -34,7 +34,7 @@ namespace UndertaleModLib
         public IList<UndertaleRoom> Rooms => FORM.ROOM.List;
         //[Obsolete("Unused")]
         // DataFile
-        public IList<UndertaleTexturePage> TexturePages => FORM.TPAG.List;
+        public IList<UndertaleTexturePageItem> TexturePageItems => FORM.TPAG.List;
         public IList<UndertaleCode> Code => FORM.CODE.List;
         public IList<UndertaleVariable> Variables => FORM.VARI.List;
         public uint Variables_Unknown1 => FORM.VARI.Unknown1;

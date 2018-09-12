@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace UndertaleModTool
 {
     /// <summary>
-    /// Logika interakcji dla klasy UndertaleTexturePageEditor.xaml
+    /// Logika interakcji dla klasy UndertaleTexturePageItemDisplay.xaml
     /// </summary>
-    public partial class UndertaleTexturePageEditor : UserControl
+    public partial class UndertaleTexturePageItemDisplay : UserControl
     {
-        public UndertaleTexturePageEditor()
+        public UndertaleTexturePageItemDisplay()
         {
             InitializeComponent();
         }

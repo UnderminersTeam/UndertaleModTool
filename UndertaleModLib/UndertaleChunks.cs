@@ -174,7 +174,7 @@ namespace UndertaleModLib
         public override string Name => "DAFL";
     }
 
-    public class UndertaleChunkTPAG : UndertaleListChunk<UndertaleTexturePage>
+    public class UndertaleChunkTPAG : UndertaleListChunk<UndertaleTexturePageItem>
     {
         public override string Name => "TPAG";
 

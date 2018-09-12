@@ -122,7 +122,7 @@
                 <TreeViewItem Header="Backgrounds" ItemsSource="{Binding Backgrounds}" IsExpanded="True">
                     <TreeViewItem.ItemTemplate>
                         <HierarchicalDataTemplate>
-                            <TextBlock Text="{Binding BgDefIndex, TargetNullValue='(no name)'}">
+                            <TextBlock Text="{Binding BackgroundDefinition, TargetNullValue='(no name)'}">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Style.Triggers>
@@ -156,14 +156,14 @@
                 <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects}" IsExpanded="True">
                     <TreeViewItem.ItemTemplate>
                         <HierarchicalDataTemplate>
-                            <TextBlock Text="{Binding ObjDefIndex, TargetNullValue='(no name)'}" />
+                            <TextBlock Text="{Binding ObjectDefinition, TargetNullValue='(no name)'}" />
                         </HierarchicalDataTemplate>
                     </TreeViewItem.ItemTemplate>
                 </TreeViewItem>
                 <TreeViewItem Header="Tiles" ItemsSource="{Binding Tiles}" IsExpanded="True">
                     <TreeViewItem.ItemTemplate>
                         <HierarchicalDataTemplate>
-                            <TextBlock Text="{Binding BgDefIndex, TargetNullValue='(no name)'}" />
+                            <TextBlock Text="{Binding BackgroundDefinition, TargetNullValue='(no name)'}" />
                         </HierarchicalDataTemplate>
                     </TreeViewItem.ItemTemplate>
                 </TreeViewItem>
@@ -194,7 +194,7 @@
                             <CheckBox Grid.Row="1" Grid.Column="1" Margin="3" IsChecked="{Binding Foreground}"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Definition</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding BgDefIndex}" ObjectType="{x:Type undertale:UndertaleBackground}" CanRemove="False"/>
+                            <local:UndertaleObjectReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding BackgroundDefinition}" ObjectType="{x:Type undertale:UndertaleBackground}" CanRemove="False"/>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Position</TextBlock>
                             <Grid Grid.Row="3" Grid.Column="1">
@@ -330,7 +330,7 @@
                             </Grid>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Definition</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding ObjDefIndex}" ObjectType="{x:Type undertale:UndertaleGameObject}" CanRemove="False"/>
+                            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding ObjectDefinition}" ObjectType="{x:Type undertale:UndertaleGameObject}" CanRemove="False"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Instance ID</TextBlock>
                             <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding InstanceID}"/>
@@ -387,7 +387,7 @@
                             </Grid>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">BG Definition</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding BgDefIndex}" ObjectType="{x:Type undertale:UndertaleBackground}" CanRemove="False"/>
+                            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding BackgroundDefinition}" ObjectType="{x:Type undertale:UndertaleBackground}" CanRemove="False"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Source</TextBlock>
                             <Grid Grid.Row="2" Grid.Column="1">
@@ -455,7 +455,7 @@
                     </Storyboard>
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Background}">
-                        <Rectangle Width="{Binding BgDefIndex.Texture.SourceWidth}" Height="{Binding BgDefIndex.Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
+                        <Rectangle Width="{Binding BackgroundDefinition.Texture.SourceWidth}" Height="{Binding BackgroundDefinition.Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
                             <Rectangle.RenderTransform>
                                 <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
                             </Rectangle.RenderTransform>
@@ -484,7 +484,7 @@
                             </Rectangle.Style>
                             <Rectangle.Fill>
                                 <ImageBrush
-                                ImageSource="{Binding BgDefIndex.Texture.SpritesheetId.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
+                                ImageSource="{Binding BackgroundDefinition.Texture.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
                                 ViewboxUnits="Absolute"
                                 TileMode="None"
                                 Stretch="UniformToFill">
@@ -493,10 +493,10 @@
                                             <MultiBinding.Converter>
                                                 <local:RectConverter/>
                                             </MultiBinding.Converter>
-                                            <Binding Path="BgDefIndex.Texture.SourceX"/>
-                                            <Binding Path="BgDefIndex.Texture.SourceY"/>
-                                            <Binding Path="BgDefIndex.Texture.SourceWidth"/>
-                                            <Binding Path="BgDefIndex.Texture.SourceHeight"/>
+                                            <Binding Path="BackgroundDefinition.Texture.SourceX"/>
+                                            <Binding Path="BackgroundDefinition.Texture.SourceY"/>
+                                            <Binding Path="BackgroundDefinition.Texture.SourceWidth"/>
+                                            <Binding Path="BackgroundDefinition.Texture.SourceHeight"/>
                                         </MultiBinding>
                                     </ImageBrush.Viewbox>
                                 </ImageBrush>
@@ -533,7 +533,7 @@
                             </Rectangle.Style>
                             <Rectangle.Fill>
                                 <ImageBrush
-                                ImageSource="{Binding BgDefIndex.Texture.SpritesheetId.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
+                                ImageSource="{Binding BackgroundDefinition.Texture.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
                                 ViewboxUnits="Absolute"
                                 TileMode="None"
                                 Stretch="UniformToFill">
@@ -542,9 +542,9 @@
                                             <MultiBinding.Converter>
                                                 <local:SumRectConverter/>
                                             </MultiBinding.Converter>
-                                            <Binding Path="BgDefIndex.Texture.SourceX"/>
+                                            <Binding Path="BackgroundDefinition.Texture.SourceX"/>
                                             <Binding Path="SourceX"/>
-                                            <Binding Path="BgDefIndex.Texture.SourceY"/>
+                                            <Binding Path="BackgroundDefinition.Texture.SourceY"/>
                                             <Binding Path="SourceY"/>
                                             <Binding Path="Width"/>
                                             <Binding Path="Height"/>
@@ -555,11 +555,11 @@
                         </Rectangle>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
-                        <Rectangle Width="{Binding ObjDefIndex.Sprite.Textures[0].TextureId.SourceWidth}" Height="{Binding ObjDefIndex.Sprite.Textures[0].TextureId.SourceHeight}" Canvas.ZIndex="{Binding ObjDefIndex.Depth}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
+                        <Rectangle Width="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth}" Height="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight}" Canvas.ZIndex="{Binding ObjectDefinition.Depth}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
                             <Rectangle.Style>
                                 <Style TargetType="Rectangle">
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ObjDefIndex.Visible}" Value="False">
+                                        <DataTrigger Binding="{Binding ObjectDefinition.Visible}" Value="False">
                                             <Setter Property="Opacity"  Value=".35"/>
                                         </DataTrigger>
 
@@ -589,7 +589,7 @@
                             </Rectangle.RenderTransform>
                             <Rectangle.Fill>
                                 <ImageBrush
-                                ImageSource="{Binding ObjDefIndex.Sprite.Textures[0].TextureId.SpritesheetId.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
+                                ImageSource="{Binding ObjectDefinition.Sprite.Textures[0].Texture.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
                                 ViewboxUnits="Absolute"
                                 TileMode="None"
                                 Stretch="UniformToFill">
@@ -598,10 +598,10 @@
                                             <MultiBinding.Converter>
                                                 <local:RectConverter/>
                                             </MultiBinding.Converter>
-                                            <Binding Path="ObjDefIndex.Sprite.Textures[0].TextureId.SourceX"/>
-                                            <Binding Path="ObjDefIndex.Sprite.Textures[0].TextureId.SourceY"/>
-                                            <Binding Path="ObjDefIndex.Sprite.Textures[0].TextureId.SourceWidth"/>
-                                            <Binding Path="ObjDefIndex.Sprite.Textures[0].TextureId.SourceHeight"/>
+                                            <Binding Path="ObjectDefinition.Sprite.Textures[0].Texture.SourceX"/>
+                                            <Binding Path="ObjectDefinition.Sprite.Textures[0].Texture.SourceY"/>
+                                            <Binding Path="ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth"/>
+                                            <Binding Path="ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight"/>
                                         </MultiBinding>
                                     </ImageBrush.Viewbox>
                                 </ImageBrush>

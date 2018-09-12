@@ -1,0 +1,124 @@
+﻿<UserControl x:Class="UndertaleModTool.UndertaleTexturePageItemEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UndertaleModTool"
+		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleTexturePageItem}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Source position/size</TextBlock>
+        <Grid Grid.Row="0" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding SourceX}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding SourceY}"/>
+            <TextBox Grid.Column="2" Margin="3" Text="{Binding SourceWidth}"/>
+            <TextBox Grid.Column="3" Margin="3" Text="{Binding SourceHeight}"/>
+        </Grid>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Target position/size</TextBlock>
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding TargetX}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding TargetY}"/>
+            <TextBox Grid.Column="2" Margin="3" Text="{Binding TargetWidth}"/>
+            <TextBox Grid.Column="3" Margin="3" Text="{Binding TargetHeight}"/>
+        </Grid>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Bounding size</TextBlock>
+        <Grid Grid.Row="2" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding BoundingWidth}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding BoundingHeight}"/>
+        </Grid>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Texture</TextBlock>
+        <local:UndertaleObjectReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding TexturePage}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
+
+        <Viewbox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly" Margin="0,0,0,20">
+            <Border>
+                <Border.Background>
+                    <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
+                        <DrawingBrush.Drawing>
+                            <DrawingGroup>
+                                <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
+                                <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
+                            </DrawingGroup>
+                        </DrawingBrush.Drawing>
+                    </DrawingBrush>
+                </Border.Background>
+                
+                <local:UndertaleTexturePageItemDisplay/>
+            </Border>
+        </Viewbox>
+
+        <Viewbox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <Grid.Background>
+                    <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
+                        <DrawingBrush.Drawing>
+                            <DrawingGroup>
+                                <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
+                                <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
+                            </DrawingGroup>
+                        </DrawingBrush.Drawing>
+                    </DrawingBrush>
+                </Grid.Background>
+
+                <Image Grid.Row="0" Grid.Column="1" Source="{Binding TexturePage.TextureData.TextureBlob}" Opacity="0.2"/>
+
+                <Image Grid.Row="0" Grid.Column="1" Source="{Binding TexturePage.TextureData.TextureBlob}">
+                    <Image.Clip>
+                        <RectangleGeometry>
+                            <RectangleGeometry.Rect>
+                                <MultiBinding>
+                                    <MultiBinding.Converter>
+                                        <local:RectConverter/>
+                                    </MultiBinding.Converter>
+                                    <Binding Path="SourceX"/>
+                                    <Binding Path="SourceY"/>
+                                    <Binding Path="SourceWidth"/>
+                                    <Binding Path="SourceHeight"/>
+                                </MultiBinding>
+                            </RectangleGeometry.Rect>
+                        </RectangleGeometry>
+                    </Image.Clip>
+                </Image>
+            </Grid>
+        </Viewbox>
+    </Grid>
+</UserControl>

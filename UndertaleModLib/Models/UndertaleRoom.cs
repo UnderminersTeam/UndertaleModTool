@@ -116,7 +116,6 @@ namespace UndertaleModLib.Models
             GravityX = reader.ReadSingle();
             GravityY = reader.ReadSingle();
             MetersPerPixel = reader.ReadSingle();
-            //reader.ReadUInt32();//
             if (reader.ReadUndertaleObject<UndertalePointerList<Background>>() != Backgrounds)
                 throw new IOException();
             if (reader.ReadUndertaleObject<UndertalePointerList<View>>() != Views)
@@ -136,7 +135,7 @@ namespace UndertaleModLib.Models
         {
             private bool _Enabled;
             private bool _Foreground;
-            private UndertaleResourceById<UndertaleBackground> _BgDefIndex { get; } = new UndertaleResourceById<UndertaleBackground>("BGND");
+            private UndertaleResourceById<UndertaleBackground> _BackgroundDefinition { get; } = new UndertaleResourceById<UndertaleBackground>("BGND");
             private uint _X;
             private uint _Y;
             private uint _TileX;
@@ -147,7 +146,7 @@ namespace UndertaleModLib.Models
 
             public bool Enabled { get => _Enabled; set { _Enabled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Enabled")); } }
             public bool Foreground { get => _Foreground; set { _Foreground = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Foreground")); } }
-            public UndertaleBackground BgDefIndex { get => _BgDefIndex.Resource; set { _BgDefIndex.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BgDefIndex")); } }
+            public UndertaleBackground BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BackgroundDefinition")); } }
             public uint X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
             public uint Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
             public uint TileX { get => _TileX; set { _TileX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileX")); } }
@@ -162,7 +161,7 @@ namespace UndertaleModLib.Models
             {
                 writer.Write(Enabled);
                 writer.Write(Foreground);
-                writer.Write(_BgDefIndex.Serialize(writer));
+                writer.Write(_BackgroundDefinition.Serialize(writer));
                 writer.Write(X);
                 writer.Write(Y);
                 writer.Write(TileX);
@@ -176,7 +175,7 @@ namespace UndertaleModLib.Models
             {
                 Enabled = reader.ReadBoolean();
                 Foreground = reader.ReadBoolean();
-                _BgDefIndex.Unserialize(reader, reader.ReadInt32());
+                _BackgroundDefinition.Unserialize(reader, reader.ReadInt32());
                 X = reader.ReadUInt32();
                 Y = reader.ReadUInt32();
                 TileX = reader.ReadUInt32();
@@ -262,7 +261,7 @@ namespace UndertaleModLib.Models
         {
             private int _X;
             private int _Y;
-            private UndertaleResourceById<UndertaleGameObject> _ObjDefIndex { get; } = new UndertaleResourceById<UndertaleGameObject>("OBJT");
+            private UndertaleResourceById<UndertaleGameObject> _ObjectDefinition { get; } = new UndertaleResourceById<UndertaleGameObject>("OBJT");
             private uint _InstanceID;
             private int _CreationCodeID; // gml_RoomCC_<name>_<CreationCodeID> (TODO: damn, we need a 'by name' thing now)
             private float _ScaleX;
@@ -273,7 +272,7 @@ namespace UndertaleModLib.Models
 
             public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
             public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
-            public UndertaleGameObject ObjDefIndex { get => _ObjDefIndex.Resource; set { _ObjDefIndex.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ObjDefIndex")); } }
+            public UndertaleGameObject ObjectDefinition { get => _ObjectDefinition.Resource; set { _ObjectDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ObjectDefinition")); } }
             public uint InstanceID { get => _InstanceID; set { _InstanceID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("InstanceID")); } }
             public int CreationCodeID { get => _CreationCodeID; set { _CreationCodeID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CreationCodeID")); } }
             public float ScaleX { get => _ScaleX; set { _ScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleX")); } }
@@ -288,7 +287,7 @@ namespace UndertaleModLib.Models
             {
                 writer.Write(X);
                 writer.Write(Y);
-                writer.Write(_ObjDefIndex.Serialize(writer));
+                writer.Write(_ObjectDefinition.Serialize(writer));
                 writer.Write(InstanceID);
                 writer.Write(CreationCodeID);
                 writer.Write(ScaleX);
@@ -302,7 +301,7 @@ namespace UndertaleModLib.Models
             {
                 X = reader.ReadInt32();
                 Y = reader.ReadInt32();
-                _ObjDefIndex.Unserialize(reader, reader.ReadInt32());
+                _ObjectDefinition.Unserialize(reader, reader.ReadInt32());
                 InstanceID = reader.ReadUInt32();
                 CreationCodeID = reader.ReadInt32();
                 ScaleX = reader.ReadSingle();
@@ -317,7 +316,7 @@ namespace UndertaleModLib.Models
         {
             private int _X;
             private int _Y;
-            private UndertaleResourceById<UndertaleBackground> _BgDefIndex { get; } = new UndertaleResourceById<UndertaleBackground>("BGND");
+            private UndertaleResourceById<UndertaleBackground> _BackgroundDefinition { get; } = new UndertaleResourceById<UndertaleBackground>("BGND");
             private uint _SourceX;
             private uint _SourceY;
             private uint _Width;
@@ -330,7 +329,7 @@ namespace UndertaleModLib.Models
 
             public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
             public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
-            public UndertaleBackground BgDefIndex { get => _BgDefIndex.Resource; set { _BgDefIndex.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BgDefIndex")); } }
+            public UndertaleBackground BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BackgroundDefinition")); } }
             public uint SourceX { get => _SourceX; set { _SourceX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceX")); } }
             public uint SourceY { get => _SourceY; set { _SourceY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceY")); } }
             public uint Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
@@ -342,13 +341,12 @@ namespace UndertaleModLib.Models
             public uint ArgbTint { get => _ArgbTint; set { _ArgbTint = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ArgbTint")); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
-
-
+            
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(X);
                 writer.Write(Y);
-                writer.Write(_BgDefIndex.Serialize(writer));
+                writer.Write(_BackgroundDefinition.Serialize(writer));
                 writer.Write(SourceX);
                 writer.Write(SourceY);
                 writer.Write(Width);
@@ -364,7 +362,7 @@ namespace UndertaleModLib.Models
             {
                 X = reader.ReadInt32();
                 Y = reader.ReadInt32();
-                _BgDefIndex.Unserialize(reader, reader.ReadInt32());
+                _BackgroundDefinition.Unserialize(reader, reader.ReadInt32());
                 SourceX = reader.ReadUInt32();
                 SourceY = reader.ReadUInt32();
                 Width = reader.ReadUInt32();

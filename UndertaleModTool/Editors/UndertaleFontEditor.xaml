@@ -24,6 +24,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
@@ -32,8 +33,15 @@
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Display name</TextBlock>
         <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding DisplayName}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Font size (em)</TextBlock>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding EmSize}"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Font size</TextBlock>
+        <Grid Grid.Row="2" Grid.Column="1" Margin="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Text="{Binding EmSize}"/>
+            <TextBlock Grid.Column="1" Text=" em"/>
+        </Grid>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Bold</TextBlock>
         <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Bold}"/>
@@ -60,7 +68,7 @@
         <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding AntiAliasing}"/>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Texture</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding TPagId}" ObjectType="{x:Type undertale:UndertaleTexturePage}"/>
+        <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
 
         <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Scale</TextBlock>
         <Grid Grid.Row="9" Grid.Column="1">
@@ -72,8 +80,17 @@
             <TextBox Grid.Column="1" Margin="3" Text="{Binding ScaleY}"/>
         </Grid>
 
-        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Glyphs</TextBlock>
-        <ListView Grid.Row="10" Grid.Column="1" Margin="3" ItemsSource="{Binding Glyphs}">
+        <Viewbox Grid.Row="10" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
+            <Border>
+                <Border.Background>
+                    <SolidColorBrush Color="Black"/>
+                </Border.Background>
+                <local:UndertaleTexturePageItemDisplay DataContext="{Binding Texture}"/>
+            </Border>
+        </Viewbox>
+
+        <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Glyphs</TextBlock>
+        <ListView Grid.Row="11" Grid.Column="1" Margin="3" ItemsSource="{Binding Glyphs}">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />

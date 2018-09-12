@@ -54,19 +54,19 @@ namespace UndertaleModLib.Models
 
         public class TextureEntry : UndertaleObject, INotifyPropertyChanged
         {
-            private UndertaleTexturePage _TextureId;
-            public UndertaleTexturePage TextureId { get => _TextureId; set { _TextureId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureId")); } }
+            private UndertaleTexturePageItem _Texture;
+            public UndertaleTexturePageItem Texture { get => _Texture; set { _Texture = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Texture")); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {
-                writer.WriteUndertaleObjectPointer(TextureId);
+                writer.WriteUndertaleObjectPointer(Texture);
             }
 
             public void Unserialize(UndertaleReader reader)
             {
-                TextureId = reader.ReadUndertaleObjectPointer<UndertaleTexturePage>();
+                Texture = reader.ReadUndertaleObjectPointer<UndertaleTexturePageItem>();
             }
         }
 

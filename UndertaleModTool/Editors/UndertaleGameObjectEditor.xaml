@@ -183,22 +183,33 @@
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Sprite</TextBlock>
             <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
 
-            <Viewbox Grid.Row="2" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
-                <Border>
-                    <Border.Background>
-                        <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
-                            <DrawingBrush.Drawing>
-                                <DrawingGroup>
-                                    <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
-                                    <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
-                                </DrawingGroup>
-                            </DrawingBrush.Drawing>
-                        </DrawingBrush>
-                    </Border.Background>
-                    <local:UndertaleTexturePageDisplayCropped DataContext="{Binding Sprite.Textures[0].TextureId}"/>
-                    <!-- TODO: animate through all textures? -->
-                </Border>
-            </Viewbox>
+            <ListView Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Sprite.Textures}" Background="Transparent" BorderThickness="0">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
+                            <Border>
+                                <Border.Background>
+                                    <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
+                                        <DrawingBrush.Drawing>
+                                            <DrawingGroup>
+                                                <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
+                                                <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
+                                            </DrawingGroup>
+                                        </DrawingBrush.Drawing>
+                                    </DrawingBrush>
+                                </Border.Background>
+                                <local:UndertaleTexturePageItemDisplay DataContext="{Binding Texture}"/>
+                            </Border>
+                        </Viewbox>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
 
             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Visible</TextBlock>
             <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Visible}"/>

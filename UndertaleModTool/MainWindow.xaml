@@ -126,9 +126,9 @@
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Texture pages" ItemsSource="{Binding TexturePages}">
+                        <TreeViewItem Header="Texture page items" ItemsSource="{Binding TexturePageItems}">
                             <TreeViewItem.ItemTemplate>
-                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleTexturePage}">
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleTexturePageItem}">
                                     <TextBlock Text="{Binding .}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
@@ -218,8 +218,8 @@
                                 <local:UndertaleEmbeddedAudioEditor/>
                             </DataTemplate>
 
-                            <DataTemplate DataType="{x:Type undertale:UndertaleTexturePage}">
-                                <local:UndertaleTexturePageEditor/>
+                            <DataTemplate DataType="{x:Type undertale:UndertaleTexturePageItem}">
+                                <local:UndertaleTexturePageItemEditor/>
                             </DataTemplate>
 
                             <DataTemplate DataType="{x:Type undertale:UndertaleSprite}">
