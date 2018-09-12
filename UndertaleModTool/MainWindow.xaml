@@ -11,11 +11,15 @@
         <CommandBinding Command="Open" Executed="Command_Open" />
         <CommandBinding Command="Save" Executed="Command_Save" />
         <CommandBinding Command="Close" Executed="Command_Close" />
+        <CommandBinding Command="Copy" Executed="Command_Copy" />
+        <CommandBinding Command="Paste" Executed="Command_Paste" />
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="O" Command="Open"/>
         <KeyBinding Modifiers="Control" Key="S" Command="Save"/>
         <KeyBinding Modifiers="Control" Key="W" Command="Close"/>
+        <KeyBinding Modifiers="Control" Key="C" Command="Copy"/>
+        <KeyBinding Modifiers="Control" Key="P" Command="Paste"/>
     </Window.InputBindings>
     <Grid>
         <DockPanel>

@@ -323,7 +323,7 @@ namespace UndertaleModLib.Models
             private uint _Width;
             private uint _Height;
             private int _TileDepth;
-            private int _InstanceID;
+            private uint _InstanceID;
             private float _ScaleX;
             private float _ScaleY;
             private uint _ArgbTint;
@@ -336,7 +336,7 @@ namespace UndertaleModLib.Models
             public uint Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
             public uint Height { get => _Height; set { _Height = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Height")); } }
             public int TileDepth { get => _TileDepth; set { _TileDepth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileDepth")); } }
-            public int InstanceID { get => _InstanceID; set { _InstanceID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("InstanceID")); } }
+            public uint InstanceID { get => _InstanceID; set { _InstanceID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("InstanceID")); } }
             public float ScaleX { get => _ScaleX; set { _ScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleX")); } }
             public float ScaleY { get => _ScaleY; set { _ScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleY")); } }
             public uint ArgbTint { get => _ArgbTint; set { _ArgbTint = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ArgbTint")); } }
@@ -370,7 +370,7 @@ namespace UndertaleModLib.Models
                 Width = reader.ReadUInt32();
                 Height = reader.ReadUInt32();
                 TileDepth = reader.ReadInt32();
-                InstanceID = reader.ReadInt32();
+                InstanceID = reader.ReadUInt32();
                 ScaleX = reader.ReadSingle();
                 ScaleY = reader.ReadSingle();
                 ArgbTint = reader.ReadUInt32();

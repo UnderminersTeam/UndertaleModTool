@@ -239,6 +239,36 @@ namespace UndertaleModTool
             return parent as T;
         }
 
+        public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+                    if (child != null && child is T)
+                    {
+                        yield return (T)child;
+                    }
+
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                    {
+                        yield return childOfChild;
+                    }
+                }
+            }
+        }
+
+        public static childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
+        {
+            foreach (childItem child in FindVisualChildren<childItem>(obj))
+            {
+                return child;
+            }
+
+            return null;
+        }
+
         private TreeViewItem GetTreeViewItemFor(UndertaleObject obj)
         {
             foreach (var child in (MainTree.Items[0] as TreeViewItem).Items)
@@ -294,6 +324,22 @@ namespace UndertaleModTool
                 CommandBox.Text = result != null ? result.ToString() : "";
                 CommandBox.IsEnabled = true;
             }
+        }
+
+        private void Command_Copy(object sender, ExecutedRoutedEventArgs e)
+        {
+            // TODO: ugly, but I can't get focus to work properly
+            /*var command = FindVisualChild<UndertaleRoomEditor>(DataEditor)?.CommandBindings.OfType<CommandBinding>()
+                .FirstOrDefault(cmd => cmd.Command == e.Command);
+
+            if (command != null && command.Command.CanExecute(e.Parameter))
+                command.Command.Execute(e.Parameter);*/
+            FindVisualChild<UndertaleRoomEditor>(DataEditor)?.Command_Copy(sender, e);
+        }
+
+        private void Command_Paste(object sender, ExecutedRoutedEventArgs e)
+        {
+            FindVisualChild<UndertaleRoomEditor>(DataEditor)?.Command_Paste(sender, e);
         }
     }
 

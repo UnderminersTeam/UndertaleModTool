@@ -39,34 +39,71 @@ namespace UndertaleModTool
                 ObjectEditor.Content = sel;
             }
         }
+
+        private UndertaleObject movingObj;
+        private double hotpointX, hotpointY;
         
         private void Rectangle_MouseDown(object sender, MouseButtonEventArgs e)
         {
             UndertaleObject clickedObj = (sender as Rectangle).DataContext as UndertaleObject;
             UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
 
-            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
-            {
-                if (selectedObj is UndertaleRoom.GameObject || selectedObj is UndertaleRoom.Tile)
-                {
-                    var mousePos = e.GetPosition(RoomGraphics);
+            SelectObject(clickedObj);
 
-                    if (selectedObj is UndertaleRoom.GameObject)
-                    {
-                        (selectedObj as UndertaleRoom.GameObject).X = (int)mousePos.X;
-                        (selectedObj as UndertaleRoom.GameObject).Y = (int)mousePos.Y;
-                    }
-                    else if (selectedObj is UndertaleRoom.Tile)
-                    {
-                        (selectedObj as UndertaleRoom.Tile).X = (int)mousePos.X;
-                        (selectedObj as UndertaleRoom.Tile).Y = (int)mousePos.Y;
-                    }
+            var mousePos = e.GetPosition(RoomGraphics);
+            if (selectedObj is UndertaleRoom.GameObject || selectedObj is UndertaleRoom.Tile)
+            {
+                movingObj = clickedObj;
+                if (movingObj is UndertaleRoom.GameObject)
+                {
+                    hotpointX = mousePos.X - (movingObj as UndertaleRoom.GameObject).X;
+                    hotpointY = mousePos.Y - (movingObj as UndertaleRoom.GameObject).Y;
+                }
+                else if (movingObj is UndertaleRoom.Tile)
+                {
+                    hotpointX = mousePos.X - (movingObj as UndertaleRoom.Tile).X;
+                    hotpointY = mousePos.Y - (movingObj as UndertaleRoom.Tile).Y;
                 }
             }
-            else
+        }
+
+        private void Rectangle_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (movingObj != null)
             {
-                SelectObject(clickedObj);
+                var mousePos = e.GetPosition(RoomGraphics);
+
+                int tgtX = (int)(mousePos.X - hotpointX);
+                int tgtY = (int)(mousePos.Y - hotpointY);
+
+                int gridSize = 5;
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+                    gridSize = 20;
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+                    gridSize = 10;
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+                    gridSize = 1;
+
+                // Snap to grid
+                tgtX = ((tgtX + gridSize / 2) / gridSize) * gridSize;
+                tgtY = ((tgtY + gridSize / 2) / gridSize) * gridSize;
+
+                if (movingObj is UndertaleRoom.GameObject)
+                {
+                    (movingObj as UndertaleRoom.GameObject).X = tgtX;
+                    (movingObj as UndertaleRoom.GameObject).Y = tgtY;
+                }
+                else if (movingObj is UndertaleRoom.Tile)
+                {
+                    (movingObj as UndertaleRoom.Tile).X = tgtX;
+                    (movingObj as UndertaleRoom.Tile).Y = tgtY;
+                }
             }
+        }
+
+        private void Rectangle_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            movingObj = null;
         }
 
         private void SelectObject(UndertaleObject obj)
@@ -147,6 +184,80 @@ namespace UndertaleModTool
                     UndertaleRoom.GameObject gameObj = selectedObj as UndertaleRoom.GameObject;
                     room.GameObjects.Remove(gameObj);
                     ObjectEditor.Content = null;
+                }
+            }
+        }
+
+        private void RoomObjectsTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            object sel = (sender as TreeView).SelectedItem;
+            if (sel is UndertaleRoom.GameObject)
+                (Application.Current.MainWindow as MainWindow).Selected = (sel as UndertaleRoom.GameObject).ObjDefIndex;
+            if (sel is UndertaleRoom.Background)
+                (Application.Current.MainWindow as MainWindow).Selected = (sel as UndertaleRoom.Background).BgDefIndex;
+        }
+
+        private UndertaleObject copied;
+
+        public void Command_Copy(object sender, ExecutedRoutedEventArgs e)
+        {
+            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+            if (selectedObj != null)
+            {
+                Debug.WriteLine("Copy");
+                /*Clipboard.Clear();
+                Clipboard.SetDataObject(new DataObject(selectedObj));*/
+                copied = selectedObj;
+            }
+        }
+
+        public void Command_Paste(object sender, ExecutedRoutedEventArgs e)
+        {
+            /*IDataObject data = Clipboard.GetDataObject();
+            UndertaleObject obj = data.GetData(data.GetFormats()[0]) as UndertaleObject;
+            if (obj != null)
+            {
+                Debug.WriteLine("Paste");
+                Debug.WriteLine(obj);
+            }*/
+            if (copied != null)
+            {
+                UndertaleRoom room = this.DataContext as UndertaleRoom;
+                if (copied is UndertaleRoom.GameObject)
+                {
+                    var other = copied as UndertaleRoom.GameObject;
+                    var obj = new UndertaleRoom.GameObject();
+                    obj.X = other.X;
+                    obj.Y = other.Y;
+                    obj.ObjDefIndex = other.ObjDefIndex;
+                    obj.InstanceID = ++(Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj;
+                    obj.CreationCodeID = other.CreationCodeID;
+                    obj.ScaleX = other.ScaleX;
+                    obj.ScaleY = other.ScaleY;
+                    obj.ArgbTint = other.ArgbTint;
+                    obj.Rotation = other.Rotation;
+                    obj.Unknown = other.Unknown;
+                    room.GameObjects.Add(obj);
+                    SelectObject(obj);
+                }
+                if (copied is UndertaleRoom.Tile)
+                {
+                    var other = copied as UndertaleRoom.Tile;
+                    var obj = new UndertaleRoom.Tile();
+                    obj.X = other.X;
+                    obj.Y = other.Y;
+                    obj.BgDefIndex = other.BgDefIndex;
+                    obj.SourceX = other.SourceX;
+                    obj.SourceY = other.SourceY;
+                    obj.Width = other.Width;
+                    obj.Height = other.Height;
+                    obj.TileDepth = other.TileDepth;
+                    obj.InstanceID = ++(Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastTile;
+                    obj.ScaleX = other.ScaleX;
+                    obj.ScaleY = other.ScaleY;
+                    obj.ArgbTint = other.ArgbTint;
+                    room.Tiles.Add(obj);
+                    SelectObject(obj);
                 }
             }
         }

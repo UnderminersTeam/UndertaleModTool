@@ -16,6 +16,15 @@
         </CompositeCollection>
     </UserControl.Resources>
 
+    <UserControl.CommandBindings>
+        <CommandBinding Command="Copy" Executed="Command_Copy" />
+        <CommandBinding Command="Paste" Executed="Command_Paste" />
+    </UserControl.CommandBindings>
+    <UserControl.InputBindings>
+        <KeyBinding Modifiers="Control" Key="C" Command="Copy"/>
+        <KeyBinding Modifiers="Control" Key="P" Command="Paste"/>
+    </UserControl.InputBindings>
+
     <StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -109,7 +118,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TreeView Grid.Column="0" Margin="3" SelectedItemChanged="TreeView_SelectedItemChanged" Name="RoomObjectsTree" KeyDown="RoomObjectsTree_KeyDown">
+            <TreeView Grid.Column="0" Margin="3" SelectedItemChanged="TreeView_SelectedItemChanged" Name="RoomObjectsTree" KeyDown="RoomObjectsTree_KeyDown" MouseDoubleClick="RoomObjectsTree_MouseDoubleClick">
                 <TreeViewItem Header="Backgrounds" ItemsSource="{Binding Backgrounds}" IsExpanded="True">
                     <TreeViewItem.ItemTemplate>
                         <HierarchicalDataTemplate>
@@ -446,7 +455,7 @@
                     </Storyboard>
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Background}">
-                        <Rectangle Width="{Binding BgDefIndex.Texture.SourceWidth}" Height="{Binding BgDefIndex.Texture.SourceHeight}" MouseDown="Rectangle_MouseDown">
+                        <Rectangle Width="{Binding BgDefIndex.Texture.SourceWidth}" Height="{Binding BgDefIndex.Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
                             <Rectangle.RenderTransform>
                                 <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
                             </Rectangle.RenderTransform>
@@ -495,7 +504,7 @@
                         </Rectangle>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Tile}">
-                        <Rectangle Width="{Binding Width}" Height="{Binding Height}" Canvas.ZIndex="{Binding TileDepth}" MouseDown="Rectangle_MouseDown">
+                        <Rectangle Width="{Binding Width}" Height="{Binding Height}" Canvas.ZIndex="{Binding TileDepth}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
                             <Rectangle.RenderTransform>
                                 <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
                             </Rectangle.RenderTransform>
@@ -546,7 +555,7 @@
                         </Rectangle>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
-                        <Rectangle Width="{Binding ObjDefIndex.Sprite.Textures[0].TextureId.SourceWidth}" Height="{Binding ObjDefIndex.Sprite.Textures[0].TextureId.SourceHeight}" Canvas.ZIndex="{Binding ObjDefIndex.Depth}" MouseDown="Rectangle_MouseDown">
+                        <Rectangle Width="{Binding ObjDefIndex.Sprite.Textures[0].TextureId.SourceWidth}" Height="{Binding ObjDefIndex.Sprite.Textures[0].TextureId.SourceHeight}" Canvas.ZIndex="{Binding ObjDefIndex.Depth}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
                             <Rectangle.Style>
                                 <Style TargetType="Rectangle">
                                     <Style.Triggers>
