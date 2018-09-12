@@ -256,8 +256,8 @@ namespace UndertaleModTool
                             Brush commentBrush = new SolidColorBrush(Color.FromRgb(0, 150, 0));
                             Brush funcBrush = new SolidColorBrush(Color.FromRgb(100, 100, 0));
 
-                            Dictionary<string, UndertaleFunctionDeclaration> funcs = new Dictionary<string, UndertaleFunctionDeclaration>();
-                            foreach (var x in (Application.Current.MainWindow as MainWindow).Data.FunctionDeclarations)
+                            Dictionary<string, UndertaleFunction> funcs = new Dictionary<string, UndertaleFunction>();
+                            foreach (var x in (Application.Current.MainWindow as MainWindow).Data.Functions)
                                 funcs.Add(x.Name.Content, x);
 
                             foreach (var line in lines)

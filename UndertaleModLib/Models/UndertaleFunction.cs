@@ -8,9 +8,7 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    // TODO: I'm not fully sure about the naming of these...
-
-    public class UndertaleFunctionDeclaration : UndertaleNamedResource
+    public class UndertaleFunction : UndertaleNamedResource
     {
         public UndertaleString Name { get; set; }
         public int UnknownChainEndingValue { get; set; }
@@ -37,11 +35,11 @@ namespace UndertaleModLib.Models
                 FirstAddress = reader.ReadUndertaleObjectPointer<UndertaleInstruction>();
 
                 // Parse the chain of references
-                UndertaleInstruction.Reference<UndertaleFunctionDeclaration> reference = null;
+                UndertaleInstruction.Reference<UndertaleFunction> reference = null;
                 uint addr = reader.GetAddressForUndertaleObject(FirstAddress);
                 for (int i = 0; i < Occurrences; i++)
                 {
-                    reference = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(addr).GetReference<UndertaleFunctionDeclaration>();
+                    reference = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(addr).GetReference<UndertaleFunction>();
                     if (reference == null)
                         throw new IOException("Failed to find reference at " + addr);
                     reference.Target = this;
@@ -62,7 +60,7 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleFunctionDefinition : UndertaleNamedResource
+    public class UndertaleAction : UndertaleNamedResource
     {
         public uint ArgumentsCount => (uint)Arguments.Count;
         public UndertaleString Name { get; set; }

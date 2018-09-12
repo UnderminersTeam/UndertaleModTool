@@ -40,8 +40,8 @@ namespace UndertaleModLib
         public uint Variables_Unknown1 => FORM.VARI.Unknown1;
         public uint Variables_Unknown1Again => FORM.VARI.Unknown1Again;
         public uint Variables_Unknown2 => FORM.VARI.Unknown2;
-        public IList<UndertaleFunctionDeclaration> FunctionDeclarations => FORM.FUNC.Declarations;
-        public IList<UndertaleFunctionDefinition> FunctionDefinitions => FORM.FUNC.Definitions;
+        public IList<UndertaleFunction> Functions => FORM.FUNC.Functions;
+        public IList<UndertaleAction> Actions => FORM.FUNC.Actions;
         public IList<UndertaleString> Strings => FORM.STRG.List;
         public IList<UndertaleEmbeddedTexture> EmbeddedTextures => FORM.TXTR.List;
         public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO.List;

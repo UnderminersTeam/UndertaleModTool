@@ -257,16 +257,16 @@ namespace UndertaleModLib
     {
         public override string Name => "FUNC";
 
-        public UndertaleSimpleList<UndertaleFunctionDeclaration> Declarations = new UndertaleSimpleList<UndertaleFunctionDeclaration>();
-        public UndertaleSimpleList<UndertaleFunctionDefinition> Definitions = new UndertaleSimpleList<UndertaleFunctionDefinition>();
+        public UndertaleSimpleList<UndertaleFunction> Functions = new UndertaleSimpleList<UndertaleFunction>();
+        public UndertaleSimpleList<UndertaleAction> Actions = new UndertaleSimpleList<UndertaleAction>();
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
             // Update references
-            Dictionary<UndertaleFunctionDeclaration, List<UndertaleInstruction>> references = UndertaleInstruction.Reference<UndertaleFunctionDeclaration>.CollectReferences(writer.undertaleData.Code);
+            Dictionary<UndertaleFunction, List<UndertaleInstruction>> references = UndertaleInstruction.Reference<UndertaleFunction>.CollectReferences(writer.undertaleData.Code);
             uint pos = writer.Position;
             // TODO: don't repeat the code from VARI, I spent 6 hours debugging the fact that I didn't copy one change from 0 to 1 between them :P
-            foreach (UndertaleFunctionDeclaration var in Declarations)
+            foreach (UndertaleFunction var in Functions)
             {
                 var.Occurrences = references.ContainsKey(var) ? (uint)references[var].Count : 0;
                 if (var.Occurrences > 0)
@@ -283,10 +283,10 @@ namespace UndertaleModLib
                         }
                         else
                             addrDiff = var.UnknownChainEndingValue;
-                        // references[var][i].GetReference<UndertaleFunctionDeclaration>().NextOccurrenceOffset = addrDiff;
-                        /*if (addrDiff != references[var][i].GetReference<UndertaleFunctionDeclaration>().NextOccurrenceOffset)
-                            Debug.WriteLine("FUNC Changes at " + writer.GetAddressForUndertaleObject(references[var][i].GetReference<UndertaleFunctionDeclaration>()) + ": " + references[var][i].GetReference<UndertaleFunctionDeclaration>().NextOccurrenceOffset + " to " + addrDiff);*/
-                        writer.Position = writer.GetAddressForUndertaleObject(references[var][i].GetReference<UndertaleFunctionDeclaration>());
+                        // references[var][i].GetReference<UndertaleFunction>().NextOccurrenceOffset = addrDiff;
+                        /*if (addrDiff != references[var][i].GetReference<UndertaleFunction>().NextOccurrenceOffset)
+                            Debug.WriteLine("FUNC Changes at " + writer.GetAddressForUndertaleObject(references[var][i].GetReference<UndertaleFunction>()) + ": " + references[var][i].GetReference<UndertaleFunction>().NextOccurrenceOffset + " to " + addrDiff);*/
+                        writer.Position = writer.GetAddressForUndertaleObject(references[var][i].GetReference<UndertaleFunction>());
                         writer.WriteInt24(addrDiff);
                     }
                 }
@@ -297,14 +297,14 @@ namespace UndertaleModLib
             }
             writer.Position = pos;
 
-            writer.WriteUndertaleObject(Declarations);
-            writer.WriteUndertaleObject(Definitions);
+            writer.WriteUndertaleObject(Functions);
+            writer.WriteUndertaleObject(Actions);
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
-            Declarations = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleFunctionDeclaration>>();
-            Definitions = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleFunctionDefinition>>();
+            Functions = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleFunction>>();
+            Actions = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleAction>>();
         }
     }
 

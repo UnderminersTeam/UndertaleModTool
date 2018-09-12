@@ -1,8 +1,8 @@
 // Replaces the debug mode "Create system_information_962" option with "Go to room"
 
-if (Data.FunctionDeclarations.ByName("get_integer") == null)
+if (Data.Functions.ByName("get_integer") == null)
 {
-	Data.FunctionDeclarations.Add(new UndertaleFunctionDeclaration() {
+	Data.Functions.Add(new UndertaleFunctionDeclaration() {
 		Name = Data.Strings.MakeString("get_integer"),
 		UnknownChainEndingValue = 0 // TODO
 	});
@@ -29,13 +29,13 @@ code.Instructions.Add(new UndertaleInstruction() {
 code.Instructions.Add(new UndertaleInstruction() {
 	Kind = UndertaleInstruction.Opcode.Call,
 	Type1 = UndertaleInstruction.DataType.Int32,
-	Function = new UndertaleInstruction.Reference<UndertaleFunctionDeclaration>(Data.FunctionDeclarations.ByName("get_integer")),
+	Function = new UndertaleInstruction.Reference<UndertaleFunctionDeclaration>(Data.Functions.ByName("get_integer")),
 	ArgumentsCount = 2
 });
 code.Instructions.Add(new UndertaleInstruction() {
 	Kind = UndertaleInstruction.Opcode.Call,
 	Type1 = UndertaleInstruction.DataType.Int32,
-	Function = new UndertaleInstruction.Reference<UndertaleFunctionDeclaration>(Data.FunctionDeclarations.ByName("room_goto")),
+	Function = new UndertaleInstruction.Reference<UndertaleFunctionDeclaration>(Data.Functions.ByName("room_goto")),
 	ArgumentsCount = 1
 });
 code.Instructions.Add(new UndertaleInstruction() {

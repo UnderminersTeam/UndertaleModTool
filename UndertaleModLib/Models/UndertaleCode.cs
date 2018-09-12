@@ -171,7 +171,7 @@ namespace UndertaleModLib.Models
         public InstanceType TypeInst { get; set; }
         public object Value { get; set; }
         public Reference<UndertaleVariable> Destination { get; set; }
-        public Reference<UndertaleFunctionDeclaration> Function { get; set; }
+        public Reference<UndertaleFunction> Function { get; set; }
         public int JumpOffset { get; set; }
         public bool JumpOffsetIsWeird { get; set; }
         public ushort ArgumentsCount { get; set; }
@@ -459,7 +459,7 @@ namespace UndertaleModLib.Models
                         ArgumentsCount = reader.ReadUInt16();
                         Type1 = (DataType)reader.ReadByte();
                         Debug.Assert(reader.ReadByte() == (byte)Kind);
-                        Function = reader.ReadUndertaleObject<Reference<UndertaleFunctionDeclaration>>();
+                        Function = reader.ReadUndertaleObject<Reference<UndertaleFunction>>();
                     }
                     break;
 

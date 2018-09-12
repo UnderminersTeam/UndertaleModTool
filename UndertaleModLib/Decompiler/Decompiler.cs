@@ -337,11 +337,11 @@ namespace UndertaleModLib.Decompiler
 
         public class FunctionCall : Expression
         {
-            private UndertaleFunctionDeclaration Function;
+            private UndertaleFunction Function;
             private UndertaleInstruction.DataType ReturnType;
             private List<Expression> Arguments;
 
-            public FunctionCall(UndertaleFunctionDeclaration function, UndertaleInstruction.DataType returnType, List<Expression> args)
+            public FunctionCall(UndertaleFunction function, UndertaleInstruction.DataType returnType, List<Expression> args)
             {
                 this.Function = function;
                 this.ReturnType = returnType;

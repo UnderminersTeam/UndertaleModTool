@@ -32,7 +32,7 @@ code.Instructions.Add(new UndertaleInstruction() {
 code.Instructions.Add(new UndertaleInstruction() {
 	Kind = UndertaleInstruction.Opcode.Call,
 	Type1 = UndertaleInstruction.DataType.Int32,
-	Function = new UndertaleInstruction.Reference<UndertaleFunctionDeclaration>(Data.FunctionDeclarations.ByName("scr_drawtext_centered")),
+	Function = new UndertaleInstruction.Reference<UndertaleFunctions>(Data.Functions.ByName("scr_drawtext_centered")),
 	ArgumentsCount = 3
 });
 code.Instructions.Add(new UndertaleInstruction() {

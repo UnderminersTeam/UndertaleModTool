@@ -15,7 +15,7 @@ code.Instructions.Add(new UndertaleInstruction() {
 code.Instructions.Add(new UndertaleInstruction() {
 	Kind = UndertaleInstruction.Opcode.Call,
 	Type1 = UndertaleInstruction.DataType.Int32,
-	Function = new UndertaleInstruction.Reference<UndertaleFunctionDeclaration>(Data.FunctionDeclarations.ByName("draw_set_color")),
+	Function = new UndertaleInstruction.Reference<UndertaleFunction>(Data.Functions.ByName("draw_set_color")),
 	ArgumentsCount = 1
 });
 code.Instructions.Add(new UndertaleInstruction() {
@@ -52,7 +52,7 @@ code.Instructions.Add(new UndertaleInstruction() {
 code.Instructions.Add(new UndertaleInstruction() {
 	Kind = UndertaleInstruction.Opcode.Call,
 	Type1 = UndertaleInstruction.DataType.Int32,
-	Function = new UndertaleInstruction.Reference<UndertaleFunctionDeclaration>(Data.FunctionDeclarations.ByName("draw_text")),
+	Function = new UndertaleInstruction.Reference<UndertaleFunction>(Data.Functions.ByName("draw_text")),
 	ArgumentsCount = 3
 });
 code.Instructions.Add(new UndertaleInstruction() {
@@ -69,7 +69,7 @@ code.Instructions.Add(new UndertaleInstruction() {
 code.Instructions.Add(new UndertaleInstruction() {
 	Kind = UndertaleInstruction.Opcode.Call,
 	Type1 = UndertaleInstruction.DataType.Int32,
-	Function = new UndertaleInstruction.Reference<UndertaleFunctionDeclaration>(Data.FunctionDeclarations.ByName("room_get_name")),
+	Function = new UndertaleInstruction.Reference<UndertaleFunction>(Data.Functions.ByName("room_get_name")),
 	ArgumentsCount = 1
 });
 code.Instructions.Add(new UndertaleInstruction() {
@@ -95,7 +95,7 @@ code.Instructions.Add(new UndertaleInstruction() {
 code.Instructions.Add(new UndertaleInstruction() {
 	Kind = UndertaleInstruction.Opcode.Call,
 	Type1 = UndertaleInstruction.DataType.Int32,
-	Function = new UndertaleInstruction.Reference<UndertaleFunctionDeclaration>(Data.FunctionDeclarations.ByName("draw_text")),
+	Function = new UndertaleInstruction.Reference<UndertaleFunction>(Data.Functions.ByName("draw_text")),
 	ArgumentsCount = 3
 });
 code.Instructions.Add(new UndertaleInstruction() {

@@ -169,6 +169,7 @@
     <Compile Include="EqualityConverter.cs" />
     <Compile Include="EventNameConverter.cs" />
     <Compile Include="GameObjectByIdConverter.cs" />
+    <Compile Include="ImplementsInterfaceConverter.cs" />
     <Compile Include="MaskImageConverter.cs" />
     <Compile Include="RectConverter.cs" />
     <Compile Include="StringUpdateWindow.xaml.cs">

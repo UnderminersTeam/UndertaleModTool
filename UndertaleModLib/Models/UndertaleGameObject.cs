@@ -140,7 +140,7 @@ namespace UndertaleModLib.Models
             private uint _EventSubtype;
 
             public uint EventSubtype { get => _EventSubtype; set { _EventSubtype = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("EventSubtype")); } } // the ID at the end of name, subtype for some events, 0 if unused
-            public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>(); // seems to always have 1 entry, maybe the games using drag-and-drop code are different // TODO: this is actually an index into FunctionDefinitions
+            public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>(); // seems to always have 1 entry, maybe the games using drag-and-drop code are different // TODO: this is actually an index into UndertaleActions (probably)
 
             public EventSubtypeKey EventSubtypeKey
             {

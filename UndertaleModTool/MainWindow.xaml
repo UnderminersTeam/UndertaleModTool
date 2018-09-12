@@ -5,8 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
 		xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+		xmlns:undertalelib="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
+        xmlns:scol="clr-namespace:System.Collections;assembly=mscorlib" 
         mc:Ignorable="d"
         Title="UndertaleModTool" Height="450" Width="800">
+    <Window.Resources>
+        <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
+    </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="Open" Executed="Command_Open" />
         <CommandBinding Command="Save" Executed="Command_Save" />
@@ -38,16 +43,31 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
-                <TreeView Grid.Column="0" Margin="5" DataContext="{Binding Data}" SelectedItemChanged="TreeView_SelectedItemChanged" MouseDoubleClick="MainTree_MouseDoubleClick" AllowDrop="True" Name="MainTree" KeyDown="MainTree_KeyDown"
+                <TreeView Grid.Column="0" Margin="5" DataContext="{Binding Data}" SelectedItemChanged="TreeView_SelectedItemChanged" MouseDoubleClick="MainTree_MouseDoubleClick" AllowDrop="True" Name="MainTree" KeyDown="MainTree_KeyDown" PreviewMouseRightButtonDown="MainTree_PreviewMouseRightButtonDown"
                     VirtualizingStackPanel.IsVirtualizing="True"
                     VirtualizingStackPanel.VirtualizationMode="Recycling">
-                    <TreeView.ItemContainerStyle>
+                    <TreeView.Resources>
+                        <ContextMenu x:Key="AddMenu">
+                            <MenuItem Header="Add" Click="MenuItem_Add_Click"/>
+                        </ContextMenu>
+                        <ContextMenu x:Key="DeleteMenu">
+                            <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                        </ContextMenu>
+
                         <Style TargetType="{x:Type TreeViewItem}">
                             <EventSetter Event="TreeViewItem.DragOver" Handler="TreeView_DragOver"/>
                             <EventSetter Event="TreeViewItem.Drop" Handler="TreeView_Drop"/>
                             <EventSetter Event="TreeViewItem.MouseMove" Handler="TreeView_MouseMove"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ., Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type undertalelib:UndertaleResource}}" Value="True">
+                                    <Setter Property="ContextMenu" Value="{StaticResource DeleteMenu}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ItemsSource, RelativeSource={RelativeSource Self}, Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type scol:IList}}" Value="True">
+                                    <Setter Property="ContextMenu" Value="{StaticResource AddMenu}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
                         </Style>
-                    </TreeView.ItemContainerStyle>
+                    </TreeView.Resources>
                     <TreeViewItem Header="Data" IsExpanded="True">
                         <TreeViewItem Header="General info"/>
                         <TreeViewItem Header="Sounds" ItemsSource="{Binding Sounds}">
@@ -127,16 +147,16 @@
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Function declarations" ItemsSource="{Binding FunctionDeclarations}">
+                        <TreeViewItem Header="Functions" ItemsSource="{Binding Functions}">
                             <TreeViewItem.ItemTemplate>
-                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleFunctionDeclaration}">
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleFunction}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Function definitions" ItemsSource="{Binding FunctionDefinitions}">
+                        <TreeViewItem Header="Actions" ItemsSource="{Binding Actions}">
                             <TreeViewItem.ItemTemplate>
-                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleFunctionDefinition}">
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleAction}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
@@ -181,9 +201,11 @@
                             <DataTemplate DataType="{x:Type local:GeneralInfoEditor}">
                                 <local:UndertaleGeneralInfoEditor/>
                             </DataTemplate>
+                            
                             <DataTemplate DataType="{x:Type undertale:UndertaleSound}">
                                 <local:UndertaleSoundEditor/>
                             </DataTemplate>
+                            
                             <DataTemplate DataType="{x:Type undertale:UndertaleBackground}">
                                 <local:UndertaleBackgroundEditor/>
                             </DataTemplate>

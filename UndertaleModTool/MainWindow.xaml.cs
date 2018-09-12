@@ -189,7 +189,7 @@ namespace UndertaleModTool
             foreach (var s in e.Data.GetFormats())
                 Debug.WriteLine(s);
 
-            TreeViewItem targetTreeItem = GetNearestContainer<TreeViewItem>(e.OriginalSource as UIElement);
+            TreeViewItem targetTreeItem = VisualUpwardSearch<TreeViewItem>(e.OriginalSource as UIElement);
             UndertaleObject targetItem = targetTreeItem.DataContext as UndertaleObject;
 
             e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Move) && sourceItem != null && targetItem != null && sourceItem != targetItem && sourceItem.GetType() == targetItem.GetType() ? DragDropEffects.Move : DragDropEffects.None;
@@ -200,7 +200,7 @@ namespace UndertaleModTool
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[e.Data.GetFormats().Length - 1]) as UndertaleObject;
 
-            TreeViewItem targetTreeItem = GetNearestContainer<TreeViewItem>(e.OriginalSource as UIElement);
+            TreeViewItem targetTreeItem = VisualUpwardSearch<TreeViewItem>(e.OriginalSource as UIElement);
             UndertaleObject targetItem = targetTreeItem.DataContext as UndertaleObject;
 
             e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Move) && sourceItem != null && targetItem != null && sourceItem != targetItem && sourceItem.GetType() == targetItem.GetType() ? DragDropEffects.Move : DragDropEffects.None;
@@ -215,20 +215,19 @@ namespace UndertaleModTool
             }
             e.Handled = true;
         }
-
-        // Walk up the element tree to the nearest tree view item.
-        private static T GetNearestContainer<T>(UIElement element) where T : class
+        
+        private static T VisualUpwardSearch<T>(DependencyObject element) where T : class
         {
             T container = element as T;
             while (container == null && element != null)
             {
-                element = VisualTreeHelper.GetParent(element) as UIElement;
+                element = VisualTreeHelper.GetParent(element) as DependencyObject;
                 container = element as T;
             }
             return container;
         }
 
-        private static T GetNearestParent<T>(UIElement item) where T : class
+        private static T GetNearestParent<T>(DependencyObject item) where T : class
         {
             DependencyObject parent = VisualTreeHelper.GetParent(item);
             while (!(parent is T))
@@ -280,6 +279,20 @@ namespace UndertaleModTool
             return null;
         }
 
+        private void DeleteItem(UndertaleObject obj)
+        {
+            TreeViewItem container = GetNearestParent<TreeViewItem>(GetTreeViewItemFor(obj));
+            IList list = container.ItemsSource as IList;
+            bool isLast = list.IndexOf(obj) == list.Count-1;
+            if (MessageBox.Show("Delete " + Selected.ToString() + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), "Confirmation", MessageBoxButton.YesNo, isLast ? MessageBoxImage.Question : MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            {
+                list.Remove(obj);
+                Selected = null;
+                if (Highlighted == obj)
+                    Highlighted = null;
+            }
+        }
+
         private void MainTree_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Delete)
@@ -287,15 +300,7 @@ namespace UndertaleModTool
                 if (Selected != null && Selected is UndertaleObject)
                 {
                     UndertaleObject obj = Selected as UndertaleObject;
-                    TreeViewItem container = GetNearestParent<TreeViewItem>(GetTreeViewItemFor(obj));
-                    IList list = container.ItemsSource as IList;
-                    if (MessageBox.Show("Delete " + Selected.ToString() + "?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-                    {
-                        list.Remove(obj);
-                        Selected = null;
-                        if (Highlighted == obj)
-                            Highlighted = null;
-                    }
+                    DeleteItem(obj);
                 }
             }
         }
@@ -340,6 +345,34 @@ namespace UndertaleModTool
         private void Command_Paste(object sender, ExecutedRoutedEventArgs e)
         {
             FindVisualChild<UndertaleRoomEditor>(DataEditor)?.Command_Paste(sender, e);
+        }
+
+        private void MainTree_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            TreeViewItem treeViewItem = VisualUpwardSearch<TreeViewItem>(e.OriginalSource as DependencyObject);
+
+            if (treeViewItem != null)
+            {
+                treeViewItem.Focus();
+                e.Handled = true;
+            }
+        }
+
+        private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
+        {
+            if (Highlighted != null && Highlighted is UndertaleObject)
+                DeleteItem(Highlighted as UndertaleObject);
+        }
+
+        private void MenuItem_Add_Click(object sender, RoutedEventArgs e)
+        {
+            IList list = (MainTree.SelectedItem as TreeViewItem).ItemsSource as IList;
+            Type t = list.GetType().GetGenericArguments()[0];
+            Debug.Assert(typeof(UndertaleResource).IsAssignableFrom(t));
+            UndertaleResource obj = Activator.CreateInstance(t) as UndertaleResource;
+            list.Add(obj);
+            // TODO: change highlighted
+            Selected = obj;
         }
     }
 
