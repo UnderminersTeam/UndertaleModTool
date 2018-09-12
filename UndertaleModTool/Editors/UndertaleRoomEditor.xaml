@@ -10,10 +10,12 @@
     <UserControl.Resources>
         <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
         <local:ColorConverter x:Key="ColorConverter"/>
+        <local:SimplePointsDisplayConverter x:Key="SimplePointsDisplayConverter"/>
         <CompositeCollection x:Key="AllObjects">
             <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.Tiles}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.GameObjects}"/>
+            <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=PreviewPath, Converter={StaticResource SimplePointsDisplayConverter}}"/>
         </CompositeCollection>
     </UserControl.Resources>
 
@@ -610,6 +612,9 @@
                                 </ImageBrush>
                             </Rectangle.Fill>
                         </Rectangle>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type local:UndertalePathEditor+LineData}">
+                        <Line X1="{Binding From.X}" Y1="{Binding From.Y}" X2="{Binding To.X}" Y2="{Binding To.Y}" Stroke="Green" StrokeThickness="2"/>
                     </DataTemplate>
                 </ItemsControl.Resources>
             </ItemsControl>

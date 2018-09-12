@@ -351,6 +351,8 @@ namespace UndertaleModTool
                                                 possibleObjects.Add(data.Backgrounds[id]);
                                             if (id < data.Scripts.Count)
                                                 possibleObjects.Add(data.Scripts[id]);
+                                            if (id < data.Paths.Count)
+                                                possibleObjects.Add(data.Paths[id]);
 
                                             ContextMenu contextMenu = new ContextMenu();
                                             foreach(UndertaleObject obj in possibleObjects)

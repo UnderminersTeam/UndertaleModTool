@@ -24,6 +24,17 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleRoomEditor : UserControl
     {
+        public static DependencyProperty PreviewPathProperty =
+            DependencyProperty.Register("PreviewPath", typeof(UndertalePath),
+                typeof(UndertaleRoomEditor),
+                new FrameworkPropertyMetadata(null));
+
+        public UndertalePath PreviewPath
+        {
+            get { return (UndertalePath)GetValue(PreviewPathProperty); }
+            set { SetValue(PreviewPathProperty, value); }
+        }
+
         public UndertaleRoomEditor()
         {
             InitializeComponent();
@@ -120,7 +131,7 @@ namespace UndertaleModTool
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[e.Data.GetFormats().Length - 1]) as UndertaleObject; // TODO: make this more reliable
 
-            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && sourceItem is UndertaleGameObject ? DragDropEffects.Link : DragDropEffects.None;
+            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && (sourceItem is UndertaleGameObject || sourceItem is UndertalePath) ? DragDropEffects.Link : DragDropEffects.None;
             e.Handled = true;
         }
 
@@ -128,27 +139,35 @@ namespace UndertaleModTool
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[e.Data.GetFormats().Length - 1]) as UndertaleObject;
             
-            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && sourceItem is UndertaleGameObject ? DragDropEffects.Link : DragDropEffects.None;
+            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && (sourceItem is UndertaleGameObject || sourceItem is UndertalePath) ? DragDropEffects.Link : DragDropEffects.None;
             if (e.Effects == DragDropEffects.Link)
             {
-                UndertaleGameObject droppedObject = sourceItem as UndertaleGameObject;
-                var mousePos = e.GetPosition(RoomGraphics);
+                if (sourceItem is UndertaleGameObject)
+                {
+                    UndertaleGameObject droppedObject = sourceItem as UndertaleGameObject;
+                    var mousePos = e.GetPosition(RoomGraphics);
 
-                UndertaleRoom room = this.DataContext as UndertaleRoom;
-                var obj = new UndertaleRoom.GameObject();
-                obj.X = (int)mousePos.X;
-                obj.Y = (int)mousePos.Y;
-                obj.ObjectDefinition = droppedObject;
-                obj.InstanceID = ++(Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj; // TODO: kinda ugly...
-                obj.CreationCode = null;
-                obj.ScaleX = 1;
-                obj.ScaleY = 1;
-                obj.Color = 0xFFFFFFFF;
-                obj.Rotation = 0;
-                obj.Unknown = -1;
-                room.GameObjects.Add(obj);
+                    UndertaleRoom room = this.DataContext as UndertaleRoom;
+                    var obj = new UndertaleRoom.GameObject();
+                    obj.X = (int)mousePos.X;
+                    obj.Y = (int)mousePos.Y;
+                    obj.ObjectDefinition = droppedObject;
+                    obj.InstanceID = ++(Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj; // TODO: kinda ugly...
+                    obj.CreationCode = null;
+                    obj.ScaleX = 1;
+                    obj.ScaleY = 1;
+                    obj.Color = 0xFFFFFFFF;
+                    obj.Rotation = 0;
+                    obj.Unknown = -1;
+                    room.GameObjects.Add(obj);
 
-                SelectObject(obj);
+                    SelectObject(obj);
+                }
+
+                if (sourceItem is UndertalePath)
+                {
+                    PreviewPath = sourceItem as UndertalePath;
+                }
             }
             e.Handled = true;
         }

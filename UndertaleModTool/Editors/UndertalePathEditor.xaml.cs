@@ -35,6 +35,43 @@ namespace UndertaleModTool
     }
 
     [ValueConversion(typeof(UndertalePath), typeof(List<UndertalePathEditor.LineData>))]
+    public class SimplePointsDisplayConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            UndertalePath path = value as UndertalePath;
+            if (path == null)
+                return null;
+
+            List<UndertalePathEditor.LineData> target = new List<UndertalePathEditor.LineData>();
+
+            for (int i = 0; i < path.Points.Count - 1; i++)
+            {
+                target.Add(new UndertalePathEditor.LineData()
+                {
+                    From = new Point(path.Points[i].X, path.Points[i].Y),
+                    To = new Point(path.Points[i + 1].X, path.Points[i + 1].Y)
+                });
+            }
+            if (path.IsClosed && path.Points.Count > 0)
+            {
+                target.Add(new UndertalePathEditor.LineData()
+                {
+                    From = new Point(path.Points[path.Points.Count - 1].X, path.Points[path.Points.Count - 1].Y),
+                    To = new Point(path.Points[0].X, path.Points[0].Y)
+                });
+            }
+
+            return target;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    [ValueConversion(typeof(UndertalePath), typeof(List<UndertalePathEditor.LineData>))]
     public class PointsDisplayConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
