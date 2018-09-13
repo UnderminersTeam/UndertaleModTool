@@ -597,6 +597,24 @@ namespace UndertaleModLib.Models
             UnknownProbablyZero = reader.ReadUInt32();
         }
 
+        public void UpdateAddresses()
+        {
+            uint addr = 0;
+            foreach(UndertaleInstruction instr in Instructions)
+            {
+                instr.Address = addr;
+                addr++;
+                if (instr.GetReference<UndertaleVariable>() != null || instr.GetReference<UndertaleFunction>() != null)
+                    addr++;
+                else if (UndertaleInstruction.GetInstructionType(instr.Kind) == UndertaleInstruction.InstructionType.PushInstruction)
+                    if (instr.Type1 == UndertaleInstruction.DataType.Double || instr.Type1 == UndertaleInstruction.DataType.Int64)
+                        addr += 2;
+                    else if (instr.Type1 != UndertaleInstruction.DataType.Int16)
+                        addr++;
+            }
+            _Length = addr * 4;
+        }
+
         public string Disassembly
         {
             get

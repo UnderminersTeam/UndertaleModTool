@@ -77,7 +77,7 @@ namespace UndertaleModTool
 
         private void DisassembleCode(UndertaleCode code)
         {
-            string disasm = code.Disassembly;
+            code.UpdateAddresses();
 
             FlowDocument document = new FlowDocument();
             document.PagePadding = new Thickness(0);
@@ -353,6 +353,8 @@ namespace UndertaleModTool
                                                 possibleObjects.Add(data.Scripts[id]);
                                             if (id < data.Paths.Count)
                                                 possibleObjects.Add(data.Paths[id]);
+                                            if (id < data.Fonts.Count)
+                                                possibleObjects.Add(data.Fonts[id]);
 
                                             ContextMenu contextMenu = new ContextMenu();
                                             foreach(UndertaleObject obj in possibleObjects)
@@ -417,6 +419,7 @@ namespace UndertaleModTool
                 ImageSource image = null;
                 try
                 {
+                    code.UpdateAddresses();
                     var blocks = Decompiler.DecompileFlowGraph(code);
                     string dot = Decompiler.ExportFlowGraph(blocks);
 

@@ -455,7 +455,7 @@ namespace UndertaleModLib.Decompiler
             bool end = false;
             foreach(var instr in block.Instructions)
             {
-                //Debug.Assert(!end);
+                Debug.Assert(!end);
                 switch(instr.Kind)
                 {
                     case UndertaleInstruction.Opcode.Neg:
@@ -550,10 +550,12 @@ namespace UndertaleModLib.Decompiler
 
                     case UndertaleInstruction.Opcode.PushEnv:
                         statements.Add(new PushEnvStatement(stack.Pop()));
+                        end = true;
                         break;
 
                     case UndertaleInstruction.Opcode.PopEnv:
                         statements.Add(new PopEnvStatement());
+                        end = true;
                         break;
 
                     case UndertaleInstruction.Opcode.Pop:
@@ -622,7 +624,8 @@ namespace UndertaleModLib.Decompiler
                 if (i < tempvars.Count)
                 {
                     Expression val = stack.Pop();
-                    statements.Add(new TempVarAssigmentStatement(tempvars[i], val));
+                    if (!(val is ExpressionTempVar) || (val as ExpressionTempVar).Var != tempvars[i] )
+                        statements.Add(new TempVarAssigmentStatement(tempvars[i], val));
                     leftovers.Add(tempvars[i]);
                 }
                 else
@@ -1128,6 +1131,7 @@ namespace UndertaleModLib.Decompiler
 
         public static string Decompile(UndertaleCode code)
         {
+            code.UpdateAddresses();
             Dictionary<uint, Block> blocks = DecompileFlowGraph(code);
 
             // Throw away unreachable blocks

@@ -112,12 +112,27 @@ for(int i = 0; i < gml_Object_obj_time_Step_1.Instructions.Count; i++)
 		gml_Object_obj_time_Step_1.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushI   && (short)gml_Object_obj_time_Step_1.Instructions[i-3].Value == 4 &&
 		gml_Object_obj_time_Step_1.Instructions[i-4].Kind == UndertaleInstruction.Opcode.PushGlb && (gml_Object_obj_time_Step_1.Instructions[i-4].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "osflavor")
 	{
-		gml_Object_obj_time_Step_1.Instructions[i-1].Kind = UndertaleInstruction.Opcode.PushI;
-		gml_Object_obj_time_Step_1.Instructions[i-1].Type1 = UndertaleInstruction.DataType.Int16;
-		gml_Object_obj_time_Step_1.Instructions[i-1].Type2 = (byte)0;
-		gml_Object_obj_time_Step_1.Instructions[i-1].Value = (short)1;
+		gml_Object_obj_time_Step_1.Instructions[i-2].Kind = UndertaleInstruction.Opcode.PushI;
+		gml_Object_obj_time_Step_1.Instructions[i-2].Type1 = UndertaleInstruction.DataType.Int16;
+		gml_Object_obj_time_Step_1.Instructions[i-2].Type2 = (byte)0;
+		gml_Object_obj_time_Step_1.Instructions[i-2].Value = (short)1;
 		// TODO: junk on stack again
 	}
+
+// Also resize the window so that the border can be seen without going fullscreen
+if (Data.Functions.ByName("window_set_size") == null)
+{
+	Data.Functions.Add(new UndertaleFunction() {
+		Name = Data.Strings.MakeString("window_set_size"),
+		UnknownChainEndingValue = 0 // TODO: seems to work...
+	});
+}
+gml_Object_obj_time_Create_0.Instructions.Add(new UndertaleInstruction() { Kind = UndertaleInstruction.Opcode.PushI,   Type1 = UndertaleInstruction.DataType.Int16,    Value = (short)540 });
+gml_Object_obj_time_Create_0.Instructions.Add(new UndertaleInstruction() { Kind = UndertaleInstruction.Opcode.Conv,    Type1 = UndertaleInstruction.DataType.Int32,    Type2 = UndertaleInstruction.DataType.Variable });
+gml_Object_obj_time_Create_0.Instructions.Add(new UndertaleInstruction() { Kind = UndertaleInstruction.Opcode.PushI,   Type1 = UndertaleInstruction.DataType.Int16,    Value = (short)960 });
+gml_Object_obj_time_Create_0.Instructions.Add(new UndertaleInstruction() { Kind = UndertaleInstruction.Opcode.Conv,    Type1 = UndertaleInstruction.DataType.Int32,    Type2 = UndertaleInstruction.DataType.Variable });
+gml_Object_obj_time_Create_0.Instructions.Add(new UndertaleInstruction() { Kind = UndertaleInstruction.Opcode.Call,    Type1 = UndertaleInstruction.DataType.Int32,    Function = new UndertaleInstruction.Reference<UndertaleFunction>(Data.Functions.ByName("window_set_size")), ArgumentsCount = 2 });
+gml_Object_obj_time_Create_0.Instructions.Add(new UndertaleInstruction() { Kind = UndertaleInstruction.Opcode.Popz,    Type1 = UndertaleInstruction.DataType.Int32 });
 
 // Load border textures
 Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, UndertaleEmbeddedTexture>();
