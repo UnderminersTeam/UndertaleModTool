@@ -13,6 +13,7 @@
         <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
     </Window.Resources>
     <Window.CommandBindings>
+        <CommandBinding Command="New" Executed="Command_New" />
         <CommandBinding Command="Open" Executed="Command_Open" />
         <CommandBinding Command="Save" Executed="Command_Save" />
         <CommandBinding Command="Close" Executed="Command_Close" />
@@ -20,6 +21,7 @@
         <CommandBinding Command="Paste" Executed="Command_Paste" />
     </Window.CommandBindings>
     <Window.InputBindings>
+        <KeyBinding Modifiers="Control" Key="N" Command="New"/>
         <KeyBinding Modifiers="Control" Key="O" Command="Open"/>
         <KeyBinding Modifiers="Control" Key="S" Command="Save"/>
         <KeyBinding Modifiers="Control" Key="W" Command="Close"/>
@@ -30,10 +32,21 @@
         <DockPanel>
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
+                    <MenuItem Header="_New" Command="New" InputGestureText="Ctrl+N"/>
                     <MenuItem Header="_Open" Command="Open" InputGestureText="Ctrl+O"/>
                     <MenuItem Header="_Save" Command="Save" InputGestureText="Ctrl+S"/>
                     <Separator/>
                     <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+W"/>
+                </MenuItem>
+                <MenuItem Header="_Scripts">
+                    <MenuItem Header="_Run builtin script" SubmenuOpened="MenuItem_RunBuiltinScript_SubmenuOpened">
+                        <MenuItem Header="(...loading...)" IsEnabled="False"/>
+                    </MenuItem>
+                    <MenuItem Header="Run _other script..." Click="MenuItem_RunOtherScript_Click"/>
+                </MenuItem>
+                <MenuItem Header="_Help">
+                    <MenuItem Header="_GitHub" Click="MenuItem_GitHub_Click"/>
+                    <MenuItem Header="_About" Click="MenuItem_About_Click"/>
                 </MenuItem>
             </Menu>
             <TextBox DockPanel.Dock="Bottom" Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown"/>

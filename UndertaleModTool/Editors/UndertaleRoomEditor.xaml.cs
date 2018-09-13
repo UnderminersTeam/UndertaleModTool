@@ -152,7 +152,7 @@ namespace UndertaleModTool
                     obj.X = (int)mousePos.X;
                     obj.Y = (int)mousePos.Y;
                     obj.ObjectDefinition = droppedObject;
-                    obj.InstanceID = ++(Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj; // TODO: kinda ugly...
+                    obj.InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj++;
                     obj.CreationCode = null;
                     obj.ScaleX = 1;
                     obj.ScaleY = 1;
@@ -249,7 +249,7 @@ namespace UndertaleModTool
                     obj.X = other.X;
                     obj.Y = other.Y;
                     obj.ObjectDefinition = other.ObjectDefinition;
-                    obj.InstanceID = ++(Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj;
+                    obj.InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj++;
                     obj.CreationCode = other.CreationCode;
                     obj.ScaleX = other.ScaleX;
                     obj.ScaleY = other.ScaleY;
@@ -271,7 +271,7 @@ namespace UndertaleModTool
                     obj.Width = other.Width;
                     obj.Height = other.Height;
                     obj.TileDepth = other.TileDepth;
-                    obj.InstanceID = ++(Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastTile;
+                    obj.InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastTile++;
                     obj.ScaleX = other.ScaleX;
                     obj.ScaleY = other.ScaleY;
                     obj.Color = other.Color;

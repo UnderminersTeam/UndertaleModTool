@@ -36,10 +36,11 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Disable debugger</TextBlock>
-            <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.DisableDebugger}"/>
+            <CheckBox Grid.Row="0" Grid.Column="1" Margin="3" IsChecked="{Binding GeneralInfo.DisableDebugger}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Bytecode version</TextBlock>
             <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.BytecodeVersion}"/>
@@ -139,7 +140,7 @@
             </TextBox>
 
             <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">License CRC32</TextBlock>
-            <TextBox Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.LicenseCRC32, StringFormat={}{0:X2}}"/>
+            <TextBox Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.LicenseCRC32, StringFormat={}{0:X8}}"/>
 
             <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Timestamp</TextBlock>
             <TextBox Grid.Row="15" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.Timestamp}"/>
@@ -158,18 +159,19 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0" Margin="3" Text="{Binding GeneralInfo.Unknown5}"/>
                 <TextBox Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.Unknown6}"/>
                 <TextBox Grid.Column="2" Margin="3" Text="{Binding GeneralInfo.Unknown7}"/>
                 <TextBox Grid.Column="3" Margin="3" Text="{Binding GeneralInfo.Unknown8}"/>
                 <TextBox Grid.Column="4" Margin="3" Text="{Binding GeneralInfo.Unknown9}"/>
-                <TextBox Grid.Column="5" Margin="3" Text="{Binding GeneralInfo.Unknown10}"/>
             </Grid>
 
-            <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Padding numbers count</TextBlock>
-            <TextBox Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.UnknownPaddingNumbersCount}"/>
+            <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Debugger port</TextBlock>
+            <TextBox Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.DebuggerPort}"/>
+
+            <TextBlock Grid.Row="20" Grid.Column="0" Margin="3">Padding numbers count</TextBlock>
+            <TextBox Grid.Row="20" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.UnknownPaddingNumbersCount}"/>
         </Grid>
 
         <TextBlock Text="Options" FontWeight="Bold"/>

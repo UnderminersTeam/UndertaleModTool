@@ -68,6 +68,8 @@ namespace UndertaleModLib.Models
                 Backgrounds.Add(new Background());
             for (int i = 0; i < 8; i++)
                 Views.Add(new View());
+            if (Flags.HasFlag(RoomEntryFlags.EnableViews))
+                Views[0].Enabled = true;
         }
 
         public void Serialize(UndertaleWriter writer)

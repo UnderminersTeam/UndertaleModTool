@@ -1,5 +1,12 @@
 // Adds room ID and name display under the debug mode timer display
 
+if (Data == null)
+	throw new Exception("Please load data.win first!");
+
+MessageBox.Show("Show room name and ID in debug mode\nby krzys_h", "ShowRoomName", MessageBoxButton.OK, MessageBoxImage.Information);
+
+// TODO: enable only if in debug mode
+
 var code = Data.Code.ByName("gml_Object_obj_time_Draw_64");
 
 code.Instructions.Add(new UndertaleInstruction() {
@@ -102,3 +109,6 @@ code.Instructions.Add(new UndertaleInstruction() {
 	Kind = UndertaleInstruction.Opcode.Popz,
 	Type1 = UndertaleInstruction.DataType.Variable
 });
+
+Selected = code;
+MessageBox.Show("Patched!", "ShowRoomName", MessageBoxButton.OK, MessageBoxImage.Information);

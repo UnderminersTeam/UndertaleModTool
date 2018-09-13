@@ -1,3 +1,8 @@
+// Adds a text on the main menu! :D
+
+if (Data == null)
+	throw new Exception("Please load data.win first!");
+
 var code = Data.Code.ByName("gml_Object_obj_intromenu_Draw_0");
 code.Instructions.Add(new UndertaleInstruction() {
 	Kind = UndertaleInstruction.Opcode.Push,
@@ -32,7 +37,7 @@ code.Instructions.Add(new UndertaleInstruction() {
 code.Instructions.Add(new UndertaleInstruction() {
 	Kind = UndertaleInstruction.Opcode.Call,
 	Type1 = UndertaleInstruction.DataType.Int32,
-	Function = new UndertaleInstruction.Reference<UndertaleFunctions>(Data.Functions.ByName("scr_drawtext_centered")),
+	Function = new UndertaleInstruction.Reference<UndertaleFunction>(Data.Functions.ByName("scr_drawtext_centered")),
 	ArgumentsCount = 3
 });
 code.Instructions.Add(new UndertaleInstruction() {

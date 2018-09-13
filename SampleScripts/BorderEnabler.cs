@@ -1,3 +1,10 @@
+// Imports and unlocks border images into PC version of the game
+
+if (Data == null)
+	throw new Exception("Please load data.win first!");
+
+MessageBox.Show("Border enabler\nby krzys_h", "ShowRoomName", MessageBoxButton.OK, MessageBoxImage.Information);
+
 // Change os_type == 14 checks in scr_draw_screen_border to always pass
 // This:
 // 00028: pushvar.v os_type
@@ -132,3 +139,6 @@ AssignBorderBackground("bg_border_truelab", textures["18.png"]);
 AssignBorderBackground("bg_border_tundra", textures["19.png"]);
 AssignBorderBackground("bg_border_water1", textures["20.png"]);
 AssignBorderBackground("bg_border_water2", textures["20.png"]); // TODO: are we missing one...?
+
+Selected = Data.Backgrounds.ByName("bg_border_water2_1080");
+MessageBox.Show("Borders loaded and enabled!", "BorderEnabler", MessageBoxButton.OK, MessageBoxImage.Information);

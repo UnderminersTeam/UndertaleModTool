@@ -49,6 +49,13 @@ namespace UndertaleModTool
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private void Command_New(object sender, ExecutedRoutedEventArgs e)
+        {
+            Data = UndertaleData.CreateNew();
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
+            Selected = Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P");
+        }
+
         private void Command_Open(object sender, ExecutedRoutedEventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
@@ -342,8 +349,8 @@ namespace UndertaleModTool
                 try
                 {
                     result = await CSharpScript.EvaluateAsync(CommandBox.Text, ScriptOptions.Default
-                        .WithReferences(typeof(UndertaleObject).Assembly)
-                        .WithImports("UndertaleModLib", "UndertaleModLib.Models", "System", "System.IO", "System.Collections.Generic"), this);
+                        .WithReferences(typeof(UndertaleObject).Assembly, typeof(MessageBox).Assembly)
+                        .WithImports("UndertaleModLib", "UndertaleModLib.Models", "System", "System.IO", "System.Collections.Generic", "System.Windows"), this);
                 }
                 catch (CompilationErrorException exc)
                 {
@@ -402,10 +409,83 @@ namespace UndertaleModTool
             {
                 string newname = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
                 (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newname);
+                if (obj is UndertaleRoom)
+                    (obj as UndertaleRoom).Caption = Data.Strings.MakeString("");
             }
             list.Add(obj);
-            // TODO: change highlighted
+            // TODO: change highlighted too
             Selected = obj;
+        }
+
+        private void MenuItem_RunBuiltinScript_SubmenuOpened(object sender, RoutedEventArgs e)
+        {
+            MenuItem item = sender as MenuItem;
+            item.Items.Clear();
+            foreach(var path in Directory.EnumerateFiles(@"C:\Users\krzys\Documents\Visual Studio 2017\Projects\UndertaleModTool\SampleScripts"))
+            {
+                var filename = System.IO.Path.GetFileName(path);
+                MenuItem subitem = new MenuItem() { Header = filename };
+                subitem.Click += MenuItem_RunBuiltinScript_Item_Click;
+                subitem.CommandParameter = path;
+                item.Items.Add(subitem);
+            }
+            if (item.Items.Count == 0)
+                item.Items.Add(new MenuItem() { Header = "(whoops, no scripts found?)", IsEnabled = false });
+        }
+
+        private async Task RunScript(string path)
+        {
+            Debug.WriteLine(path);
+
+            CommandBox.Text = "Running " + System.IO.Path.GetFileName(path) + " ...";
+            try
+            {
+                object result = await CSharpScript.EvaluateAsync(File.ReadAllText(path), ScriptOptions.Default
+                    .WithReferences(typeof(UndertaleObject).Assembly, typeof(MessageBox).Assembly)
+                    .WithImports("UndertaleModLib", "UndertaleModLib.Models", "System", "System.IO", "System.Collections.Generic", "System.Windows"), this);
+                CommandBox.Text = result != null ? result.ToString() : System.IO.Path.GetFileName(path) + " finished!";
+            }
+            catch (CompilationErrorException exc)
+            {
+                Debug.WriteLine(exc.ToString());
+                CommandBox.Text = exc.Message;
+                MessageBox.Show(exc.Message, "Script compile error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception exc)
+            {
+                Debug.WriteLine(exc.ToString());
+                CommandBox.Text = exc.Message;
+                MessageBox.Show(exc.Message, "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async void MenuItem_RunBuiltinScript_Item_Click(object sender, RoutedEventArgs e)
+        {
+            string path = (string)(sender as MenuItem).CommandParameter;
+            await RunScript(path);
+        }
+
+        private async void MenuItem_RunOtherScript_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.DefaultExt = "cs";
+            dlg.Filter = "Scripts (.cs)|*.cs|All files|*";
+
+            if (dlg.ShowDialog() == true)
+            {
+                await RunScript(dlg.FileName);
+            }
+        }
+
+        private void MenuItem_GitHub_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://github.com/krzys-h/UndertaleModTool");
+        }
+
+        private void MenuItem_About_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("UndertaleModTool by krzys_h\nVersion i-have-no-versions-yet", "About", MessageBoxButton.OK);
         }
     }
 

@@ -31,42 +31,42 @@ namespace UndertaleModLib.Models
             BorderlessWindow = 0x4000,
         }
 
-        public byte DisableDebugger { get; set; }
-        public byte BytecodeVersion { get; set; }
-        public ushort Unknown { get; set; }
+        public bool DisableDebugger { get; set; } = true;
+        public byte BytecodeVersion { get; set; } = 0x10;
+        public ushort Unknown { get; set; } = 0;
         public UndertaleString Filename { get; set; }
         public UndertaleString Config { get; set; }
-        public uint LastObj { get; set; }
-        public uint LastTile { get; set; }
-        public uint GameID { get; set; }
-        public uint Unknown1 { get; set; }
-        public uint Unknown2 { get; set; }
-        public uint Unknown3 { get; set; }
-        public uint Unknown4 { get; set; }
+        public uint LastObj { get; set; } = 100000;
+        public uint LastTile { get; set; } = 10000000;
+        public uint GameID { get; set; } = 13371337;
+        public uint Unknown1 { get; set; } = 0;
+        public uint Unknown2 { get; set; } = 0;
+        public uint Unknown3 { get; set; } = 0;
+        public uint Unknown4 { get; set; } = 0;
         public UndertaleString Name { get; set; }
-        public uint Major { get; set; }
-        public uint Minor { get; set; }
-        public uint Release { get; set; }
-        public uint Build { get; set; }
-        public uint DefaultWindowWidth { get; set; }
-        public uint DefaultWindowHeight { get; set; }
-        public InfoFlags Info { get; set; }
+        public uint Major { get; set; } = 1;
+        public uint Minor { get; set; } = 0;
+        public uint Release { get; set; } = 0;
+        public uint Build { get; set; } = 1337;
+        public uint DefaultWindowWidth { get; set; } = 1024;
+        public uint DefaultWindowHeight { get; set; } = 768;
+        public InfoFlags Info { get; set; } = InfoFlags.Interpolate | InfoFlags.unknown | InfoFlags.ShowCursor | InfoFlags.ScreenKey | InfoFlags.StudioVersionB3;
         public byte[] LicenseMD5 { get; set; } = new byte[16];
         public uint LicenseCRC32 { get; set; }
-        public uint Timestamp { get; set; }
-        public uint ActiveTargets { get; set; }
+        public uint Timestamp { get; set; } = 0;
+        public uint ActiveTargets { get; set; } = 0;
         public UndertaleString DisplayName { get; set; }
-        public uint Unknown5 { get; set; }
-        public uint Unknown6 { get; set; }
-        public uint Unknown7 { get; set; }
-        public uint Unknown8 { get; set; }
-        public uint Unknown9 { get; set; }
-        public uint Unknown10 { get; set; }
-        public uint UnknownPaddingNumbersCount { get; set; }
+        public uint Unknown5 { get; set; } = 0;
+        public uint Unknown6 { get; set; } = 0;
+        public uint Unknown7 { get; set; } = 0;
+        public uint Unknown8 { get; set; } = 0;
+        public uint Unknown9 { get; set; } = 0;
+        public uint DebuggerPort { get; set; } = 6502;
+        public uint UnknownPaddingNumbersCount { get; set; } = 336;
 
         public void Serialize(UndertaleWriter writer)
         {
-            writer.Write(DisableDebugger);
+            writer.Write(DisableDebugger ? (byte)1 : (byte)0);
             writer.Write(BytecodeVersion);
             writer.Write(Unknown);
             writer.WriteUndertaleString(Filename);
@@ -98,7 +98,7 @@ namespace UndertaleModLib.Models
             writer.Write(Unknown7);
             writer.Write(Unknown8);
             writer.Write(Unknown9);
-            writer.Write(Unknown10);
+            writer.Write(DebuggerPort);
             writer.Write(UnknownPaddingNumbersCount);
             for (uint i = 0; i < UnknownPaddingNumbersCount; i++)
                 writer.Write(i);
@@ -106,7 +106,7 @@ namespace UndertaleModLib.Models
 
         public void Unserialize(UndertaleReader reader)
         {
-            DisableDebugger = reader.ReadByte();
+            DisableDebugger = reader.ReadByte() != 0 ? true : false;
             BytecodeVersion = reader.ReadByte();
             Unknown = reader.ReadUInt16();
             Filename = reader.ReadUndertaleString();
@@ -136,7 +136,7 @@ namespace UndertaleModLib.Models
             Unknown7 = reader.ReadUInt32();
             Unknown8 = reader.ReadUInt32();
             Unknown9 = reader.ReadUInt32();
-            Unknown10 = reader.ReadUInt32();
+            DebuggerPort = reader.ReadUInt32();
             UnknownPaddingNumbersCount = reader.ReadUInt32();
             for (uint i = 0; i < UnknownPaddingNumbersCount; i++)
                 if (reader.ReadUInt32() != i)
@@ -151,21 +151,21 @@ namespace UndertaleModLib.Models
 
     public class UndertaleOptions : UndertaleObject
     {
-        public uint Unknown1 { get; set; }
-        public uint Unknown2 { get; set; }
-        public UndertaleGeneralInfo.InfoFlags Info { get; set; }
-        public uint Unknown3 { get; set; }
-        public uint Unknown4 { get; set; }
-        public uint Unknown5 { get; set; }
-        public uint Unknown6 { get; set; }
-        public uint Unknown7 { get; set; }
-        public uint Unknown8 { get; set; }
-        public uint Unknown9 { get; set; }
-        public uint Unknown10 { get; set; }
-        public uint Unknown11 { get; set; }
-        public uint Unknown12 { get; set; }
-        public uint Unknown13 { get; set; }
-        public uint Unknown14 { get; set; }
+        public uint Unknown1 { get; set; } = 0x80000000;
+        public uint Unknown2 { get; set; } = 0x00000002;
+        public uint Info { get; set; } = 0x00CC7A16; // was supposed to be a copy of UndertaleGeneralInfo.InfoFlags but it doesn't seem like it
+        public uint Unknown3 { get; set; } = 0;
+        public int Unknown4 { get; set; } = -1;
+        public uint Unknown5 { get; set; } = 0;
+        public uint Unknown6 { get; set; } = 0;
+        public uint Unknown7 { get; set; } = 0;
+        public uint Unknown8 { get; set; } = 0;
+        public uint Unknown9 { get; set; } = 0;
+        public uint Unknown10 { get; set; } = 0;
+        public uint Unknown11 { get; set; } = 0;
+        public uint Unknown12 { get; set; } = 0;
+        public uint Unknown13 { get; set; } = 0;
+        public uint Unknown14 { get; set; } = 255;
         public UndertaleSimpleList<Constant> Constants { get; private set; } = new UndertaleSimpleList<Constant>();
 
         public class Constant : UndertaleObject
@@ -190,7 +190,7 @@ namespace UndertaleModLib.Models
         {
             writer.Write(Unknown1);
             writer.Write(Unknown2);
-            writer.Write((uint)Info);
+            writer.Write(Info);
             writer.Write(Unknown3);
             writer.Write(Unknown4);
             writer.Write(Unknown5);
@@ -210,9 +210,9 @@ namespace UndertaleModLib.Models
         {
             Unknown1 = reader.ReadUInt32();
             Unknown2 = reader.ReadUInt32();
-            Info = (UndertaleGeneralInfo.InfoFlags)reader.ReadUInt32();
+            Info = reader.ReadUInt32();
             Unknown3 = reader.ReadUInt32();
-            Unknown4 = reader.ReadUInt32();
+            Unknown4 = reader.ReadInt32();
             Unknown5 = reader.ReadUInt32();
             Unknown6 = reader.ReadUInt32();
             Unknown7 = reader.ReadUInt32();
@@ -229,9 +229,9 @@ namespace UndertaleModLib.Models
     
     public class UndertaleLanguage : UndertaleObject
     {
-        public uint Unknown1 { get; set; }
-        public uint Unknown2 { get; set; }
-        public uint Unknown3 { get; set; }
+        public uint Unknown1 { get; set; } = 1;
+        public uint Unknown2 { get; set; } = 0;
+        public uint Unknown3 { get; set; } = 0;
 
         public void Serialize(UndertaleWriter writer)
         {

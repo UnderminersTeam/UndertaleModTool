@@ -45,6 +45,49 @@ namespace UndertaleModLib
         public IList<UndertaleString> Strings => FORM.STRG.List;
         public IList<UndertaleEmbeddedTexture> EmbeddedTextures => FORM.TXTR.List;
         public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO.List;
+
+        public static UndertaleData CreateNew()
+        {
+            UndertaleData data = new UndertaleData();
+            data.FORM = new UndertaleChunkFORM();
+            data.FORM.Chunks["GEN8"] = new UndertaleChunkGEN8();
+            data.FORM.Chunks["OPTN"] = new UndertaleChunkOPTN();
+            data.FORM.Chunks["LANG"] = new UndertaleChunkLANG();
+            data.FORM.Chunks["EXTN"] = new UndertaleChunkEXTN();
+            data.FORM.Chunks["SOND"] = new UndertaleChunkSOND();
+            data.FORM.Chunks["AGRP"] = new UndertaleChunkAGRP();
+            data.FORM.Chunks["SPRT"] = new UndertaleChunkSPRT();
+            data.FORM.Chunks["BGND"] = new UndertaleChunkBGND();
+            data.FORM.Chunks["PATH"] = new UndertaleChunkPATH();
+            data.FORM.Chunks["SCPT"] = new UndertaleChunkSCPT();
+            data.FORM.Chunks["GLOB"] = new UndertaleChunkGLOB();
+            data.FORM.Chunks["SHDR"] = new UndertaleChunkSHDR();
+            data.FORM.Chunks["FONT"] = new UndertaleChunkFONT();
+            data.FORM.Chunks["TMLN"] = new UndertaleChunkTMLN();
+            data.FORM.Chunks["OBJT"] = new UndertaleChunkOBJT();
+            data.FORM.Chunks["ROOM"] = new UndertaleChunkROOM();
+            data.FORM.Chunks["DAFL"] = new UndertaleChunkDAFL();
+            data.FORM.Chunks["TPAG"] = new UndertaleChunkTPAG();
+            data.FORM.Chunks["CODE"] = new UndertaleChunkCODE();
+            data.FORM.Chunks["VARI"] = new UndertaleChunkVARI();
+            data.FORM.Chunks["FUNC"] = new UndertaleChunkFUNC();
+            data.FORM.Chunks["STRG"] = new UndertaleChunkSTRG();
+            data.FORM.Chunks["TXTR"] = new UndertaleChunkTXTR();
+            data.FORM.Chunks["AUDO"] = new UndertaleChunkAUDO();
+            data.FORM.GEN8.Object = new UndertaleGeneralInfo();
+            data.FORM.OPTN.Object = new UndertaleOptions();
+            data.FORM.LANG.Object = new UndertaleLanguage();
+            data.GeneralInfo.Filename = data.Strings.MakeString("NewGame");
+            data.GeneralInfo.Config = data.Strings.MakeString("Default");
+            data.GeneralInfo.Name = data.Strings.MakeString("NewGame");
+            data.GeneralInfo.DisplayName = data.Strings.MakeString("New UndertaleModTool Game");
+            data.GeneralInfo.GameID = (uint)new Random().Next();
+            data.GeneralInfo.Timestamp = (uint)new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+            data.Options.Constants.Add(new UndertaleOptions.Constant() { Name = data.Strings.MakeString("@@SleepMargin"), Value = data.Strings.MakeString(1.ToString()) });
+            data.Options.Constants.Add(new UndertaleOptions.Constant() { Name = data.Strings.MakeString("@@DrawColour"), Value = data.Strings.MakeString(0xFFFFFFFF.ToString()) });
+            data.Rooms.Add(new UndertaleRoom() { Name = data.Strings.MakeString("room0"), Caption = data.Strings.MakeString("") });
+            return data;
+        }
     }
 
     public static class UndertaleDataExtensionMethods

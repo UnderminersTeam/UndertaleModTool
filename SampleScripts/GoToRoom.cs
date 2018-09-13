@@ -1,10 +1,15 @@
 // Replaces the debug mode "Create system_information_962" option with "Go to room"
 
+if (Data == null)
+	throw new Exception("Please load data.win first!");
+
+MessageBox.Show("Add 'Go to room' dialog under F3\nby krzys_h", "GoToRoom", MessageBoxButton.OK, MessageBoxImage.Information);
+
 if (Data.Functions.ByName("get_integer") == null)
 {
 	Data.Functions.Add(new UndertaleFunction() {
 		Name = Data.Strings.MakeString("get_integer"),
-		UnknownChainEndingValue = 0 // TODO
+		UnknownChainEndingValue = 0 // TODO: seems to work...
 	});
 }
 
@@ -42,3 +47,6 @@ code.Instructions.Add(new UndertaleInstruction() {
 	Kind = UndertaleInstruction.Opcode.Popz,
 	Type1 = UndertaleInstruction.DataType.Int32
 });
+
+Selected = code;
+MessageBox.Show("Patched!", "GoToRoom", MessageBoxButton.OK, MessageBoxImage.Information);
