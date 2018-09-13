@@ -19,6 +19,8 @@
         <CommandBinding Command="Close" Executed="Command_Close" />
         <CommandBinding Command="Copy" Executed="Command_Copy" />
         <CommandBinding Command="Paste" Executed="Command_Paste" />
+        <CommandBinding Command="Print" Executed="Command_Run" />
+        <CommandBinding Command="PrintPreview" Executed="Command_RunDebug" />
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="N" Command="New"/>
@@ -27,6 +29,8 @@
         <KeyBinding Modifiers="Control" Key="W" Command="Close"/>
         <KeyBinding Modifiers="Control" Key="C" Command="Copy"/>
         <KeyBinding Modifiers="Control" Key="P" Command="Paste"/>
+        <KeyBinding Key="F5" Command="Print"/>
+        <KeyBinding Modifiers="Shift" Key="F5" Command="PrintPreview"/>
     </Window.InputBindings>
     <Grid>
         <DockPanel>
@@ -35,6 +39,9 @@
                     <MenuItem Header="_New" Command="New" InputGestureText="Ctrl+N"/>
                     <MenuItem Header="_Open" Command="Open" InputGestureText="Ctrl+O"/>
                     <MenuItem Header="_Save" Command="Save" InputGestureText="Ctrl+S"/>
+                    <Separator/>
+                    <MenuItem Header="_Run game" Command="Print" InputGestureText="F5"/> <!-- TODO: I think I need a custom command for that... -->
+                    <MenuItem Header="_Run game under debugger" Command="PrintPreview" InputGestureText="Shift+F5"/>
                     <Separator/>
                     <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+W"/>
                 </MenuItem>

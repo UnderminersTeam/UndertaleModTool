@@ -99,6 +99,26 @@ for(int i = 0; i < gml_Object_obj_settingsmenu_Draw_0.Instructions.Count; i++)
 	}
 }
 
+// 00188: pushglb.v osflavor
+// 00190: pushi.e 4
+// 00191: cmp.i.v GTE
+// 00192: conv.b.v 
+// 00193: call.i scr_enable_screen_border(argc=1)
+var gml_Object_obj_time_Step_1 = Data.Code.ByName("gml_Object_obj_time_Step_1");
+for(int i = 0; i < gml_Object_obj_time_Step_1.Instructions.Count; i++)
+	if (gml_Object_obj_time_Step_1.Instructions[i  ].Kind == UndertaleInstruction.Opcode.Call    && gml_Object_obj_time_Step_1.Instructions[i  ].Function.Target.Name.Content == "scr_enable_screen_border" &&
+		gml_Object_obj_time_Step_1.Instructions[i-1].Kind == UndertaleInstruction.Opcode.Conv    &&
+		gml_Object_obj_time_Step_1.Instructions[i-2].Kind == UndertaleInstruction.Opcode.Cmp     && gml_Object_obj_time_Step_1.Instructions[i-2].ComparisonKind == UndertaleInstruction.ComparisonType.GTE &&
+		gml_Object_obj_time_Step_1.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushI   && (short)gml_Object_obj_time_Step_1.Instructions[i-3].Value == 4 &&
+		gml_Object_obj_time_Step_1.Instructions[i-4].Kind == UndertaleInstruction.Opcode.PushGlb && (gml_Object_obj_time_Step_1.Instructions[i-4].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "osflavor")
+	{
+		gml_Object_obj_time_Step_1.Instructions[i-1].Kind = UndertaleInstruction.Opcode.PushI;
+		gml_Object_obj_time_Step_1.Instructions[i-1].Type1 = UndertaleInstruction.DataType.Int16;
+		gml_Object_obj_time_Step_1.Instructions[i-1].Type2 = (byte)0;
+		gml_Object_obj_time_Step_1.Instructions[i-1].Value = (short)1;
+		// TODO: junk on stack again
+	}
+
 // Load border textures
 // https://www.reddit.com/r/Underminers/comments/99bxxz/after_days_of_searching_i_finally_managed_to_find/e4nnx6s/
 Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, UndertaleEmbeddedTexture>();

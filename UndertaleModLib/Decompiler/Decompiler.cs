@@ -288,21 +288,6 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
-        public class ThrowStatement : Statement
-        {
-            public short Value;
-
-            public ThrowStatement(short value)
-            {
-                Value = value;
-            }
-
-            public override string ToString()
-            {
-                return "throw " + Value;
-            }
-        }
-
         public class AssignmentStatement : Statement
         {
             public Expression Destination;
@@ -470,7 +455,7 @@ namespace UndertaleModLib.Decompiler
             bool end = false;
             foreach(var instr in block.Instructions)
             {
-                Debug.Assert(!end);
+                //Debug.Assert(!end);
                 switch(instr.Kind)
                 {
                     case UndertaleInstruction.Opcode.Neg:
@@ -514,6 +499,7 @@ namespace UndertaleModLib.Decompiler
                         foreach (var expr in stack.Reverse())
                             if (!(expr is ExpressionTempVar))
                                 statements.Add(expr);
+                        stack.Clear();
                         statements.Add(stmt);
                         end = true;
                         break;
@@ -621,11 +607,10 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.Break:
-                        foreach (var expr in stack.Reverse())
-                            if (!(expr is ExpressionTempVar))
-                                statements.Add(expr);
-                        statements.Add(new ThrowStatement((short)instr.Value));
-                        end = true;
+                        //statements.Add(new CommentStatement("// TODO: BREAK " + (short)instr.Value));
+                        // This is used for checking bounds in 2D arrays
+                        // I'm not sure of the specifics but I guess it causes a debug breakpoint if the top of the stack is >= 32000
+                        // anyway, that's not important when decompiling to high-level code so just ignore it
                         break;
                 }
             }
@@ -771,7 +756,7 @@ namespace UndertaleModLib.Decompiler
                     currentBlock.nextBlockFalse = nextBlock;
                     currentBlock = null;
                 }
-                else if (instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit || instr.Kind == UndertaleInstruction.Opcode.Break)
+                else if (instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit)
                 {
                     currentBlock.nextBlockTrue = finalBlock;
                     currentBlock.nextBlockFalse = finalBlock;

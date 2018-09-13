@@ -16,7 +16,7 @@ namespace UndertaleModLib.DebugData
 
             foreach (var code in data.Code)
             {
-                Debug.WriteLine(code.Name);
+                Debug.WriteLine("Decompiling " + code.Name.Content);
                 string output;
                 try
                 {

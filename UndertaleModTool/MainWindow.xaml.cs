@@ -22,6 +22,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using UndertaleModLib;
+using UndertaleModLib.DebugData;
 using UndertaleModLib.Models;
 
 namespace UndertaleModTool
@@ -56,31 +57,44 @@ namespace UndertaleModTool
             Selected = Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P");
         }
 
-        private void Command_Open(object sender, ExecutedRoutedEventArgs e)
+        private async Task<bool> DoOpenDialog()
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.DefaultExt = "win";
             dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios)|*.win;*.unx;*.ios|All files|*";
-            
+
             if (dlg.ShowDialog() == true)
             {
-                LoadFile(dlg.FileName);
+                await LoadFile(dlg.FileName);
+                return true;
             }
+            return false;
         }
-
-        private void Command_Save(object sender, ExecutedRoutedEventArgs e)
+        private async Task<bool> DoSaveDialog()
         {
             SaveFileDialog dlg = new SaveFileDialog();
-            
+
             dlg.DefaultExt = "win";
             dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios)|*.win;*.unx;*.ios|All files|*";
             dlg.FileName = FilePath;
 
             if (dlg.ShowDialog() == true)
             {
-                SaveFile(dlg.FileName);
+                await SaveFile(dlg.FileName);
+                return true;
             }
+            return false;
+        }
+
+        private void Command_Open(object sender, ExecutedRoutedEventArgs e)
+        {
+            DoOpenDialog();
+        }
+
+        private void Command_Save(object sender, ExecutedRoutedEventArgs e)
+        {
+            DoSaveDialog();
         }
 
         private void Command_Close(object sender, ExecutedRoutedEventArgs e)
@@ -88,7 +102,7 @@ namespace UndertaleModTool
             Close();
         }
 
-        private async void LoadFile(string filename)
+        private async Task LoadFile(string filename)
         {
             LoaderDialog dialog = new LoaderDialog("Loading", "Loading, please wait...");
             dialog.Owner = this;
@@ -123,12 +137,13 @@ namespace UndertaleModTool
             await t;
         }
 
-        private async void SaveFile(string filename)
+        private async Task SaveFile(string filename)
         {
             if (Data == null)
                 return; // TODO: lock save button
             LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
             dialog.Owner = this;
+            FilePath = filename;
             Task t = Task.Run(() =>
             {
                 try
@@ -136,6 +151,19 @@ namespace UndertaleModTool
                     using (var stream = new FileStream(filename, FileMode.Create))
                     {
                         UndertaleIO.Write(stream, Data);
+                    }
+
+                    if (!Data.GeneralInfo.DisableDebugger)
+                    {
+                        Debug.WriteLine("Generating debugger data...");
+                        UndertaleDebugData debugData = DebugDataGenerator.GenerateDebugData(Data);
+                        using (FileStream stream = new FileStream(System.IO.Path.ChangeExtension(FilePath, ".yydebug"), FileMode.Create))
+                        {
+                            using (UndertaleWriter writer = new UndertaleWriter(stream))
+                            {
+                                debugData.FORM.Serialize(writer);
+                            }
+                        }
                     }
                 }
                 catch(Exception e)
@@ -486,6 +514,33 @@ namespace UndertaleModTool
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("UndertaleModTool by krzys_h\nVersion i-have-no-versions-yet", "About", MessageBoxButton.OK);
+        }
+
+        private async void Command_Run(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Data == null)
+                return;
+            bool origDbg = Data.GeneralInfo.DisableDebugger;
+            Data.GeneralInfo.DisableDebugger = true;
+            if (await DoSaveDialog())
+            {
+                Process.Start(@"C:\Users\krzys\AppData\Roaming\GameMaker-Studio\Runner.exe", "-game \"" + FilePath + "\" -debugoutput \"" + System.IO.Path.ChangeExtension(FilePath, ".game.log") + "\"");
+            }
+            Data.GeneralInfo.DisableDebugger = origDbg;
+        }
+        
+        private async void Command_RunDebug(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Data == null)
+                return;
+            bool origDbg = Data.GeneralInfo.DisableDebugger;
+            Data.GeneralInfo.DisableDebugger = false;
+            if (await DoSaveDialog())
+            {
+                Process.Start(@"C:\Users\krzys\AppData\Roaming\GameMaker-Studio\Runner.exe", "-game \"" + FilePath + "\" -debugoutput \"" + System.IO.Path.ChangeExtension(FilePath, ".game.log") + "\"");
+                Process.Start(@"C:\Users\krzys\AppData\Roaming\GameMaker-Studio\GMDebug\GMDebug.exe", "-d=\"" + System.IO.Path.ChangeExtension(FilePath, ".yydebug") + "\" -t=\"127.0.0.1\" -p=" + Data.GeneralInfo.DebuggerPort + " -p=\"" + @"C:\Users\krzys\Documents\GameMaker\Projects\Project4.gmx\Project4.project.gmx" + "\"");
+            }
+            Data.GeneralInfo.DisableDebugger = origDbg;
         }
     }
 
