@@ -2,7 +2,7 @@
 
 if (Data.Functions.ByName("get_integer") == null)
 {
-	Data.Functions.Add(new UndertaleFunctionDeclaration() {
+	Data.Functions.Add(new UndertaleFunction() {
 		Name = Data.Strings.MakeString("get_integer"),
 		UnknownChainEndingValue = 0 // TODO
 	});
@@ -29,13 +29,13 @@ code.Instructions.Add(new UndertaleInstruction() {
 code.Instructions.Add(new UndertaleInstruction() {
 	Kind = UndertaleInstruction.Opcode.Call,
 	Type1 = UndertaleInstruction.DataType.Int32,
-	Function = new UndertaleInstruction.Reference<UndertaleFunctionDeclaration>(Data.Functions.ByName("get_integer")),
+	Function = new UndertaleInstruction.Reference<UndertaleFunction>(Data.Functions.ByName("get_integer")),
 	ArgumentsCount = 2
 });
 code.Instructions.Add(new UndertaleInstruction() {
 	Kind = UndertaleInstruction.Opcode.Call,
 	Type1 = UndertaleInstruction.DataType.Int32,
-	Function = new UndertaleInstruction.Reference<UndertaleFunctionDeclaration>(Data.Functions.ByName("room_goto")),
+	Function = new UndertaleInstruction.Reference<UndertaleFunction>(Data.Functions.ByName("room_goto")),
 	ArgumentsCount = 1
 });
 code.Instructions.Add(new UndertaleInstruction() {

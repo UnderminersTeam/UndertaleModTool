@@ -60,7 +60,7 @@
         </Grid>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Texture</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding TexturePage}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
+        <local:UndertaleObjectReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding TexturePage}" ObjectType="{x:Type undertale:UndertaleEmbeddedTexture}"/>
 
         <Viewbox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly" Margin="0,0,0,20">
             <Border>

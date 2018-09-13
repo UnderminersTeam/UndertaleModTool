@@ -61,7 +61,7 @@
     <Compile Include="Models\UndertaleSound.cs" />
     <Compile Include="Models\UndertaleSprite.cs" />
     <Compile Include="Models\UndertaleString.cs" />
-    <Compile Include="Models\UndertaleTexturePage.cs" />
+    <Compile Include="Models\UndertaleTexturePageItem.cs" />
     <Compile Include="Models\UndertaleUnused.cs" />
     <Compile Include="Models\UndertaleVariable.cs" />
     <Compile Include="UndertaleChunks.cs" />

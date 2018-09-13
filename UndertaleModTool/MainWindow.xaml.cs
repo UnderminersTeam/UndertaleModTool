@@ -341,7 +341,9 @@ namespace UndertaleModTool
                 object result;
                 try
                 {
-                    result = await CSharpScript.EvaluateAsync(CommandBox.Text, ScriptOptions.Default.WithReferences(typeof(UndertaleObject).Assembly).WithImports("UndertaleModLib", "UndertaleModLib.Models"), this);
+                    result = await CSharpScript.EvaluateAsync(CommandBox.Text, ScriptOptions.Default
+                        .WithReferences(typeof(UndertaleObject).Assembly)
+                        .WithImports("UndertaleModLib", "UndertaleModLib.Models", "System", "System.IO", "System.Collections.Generic"), this);
                 }
                 catch (CompilationErrorException exc)
                 {
