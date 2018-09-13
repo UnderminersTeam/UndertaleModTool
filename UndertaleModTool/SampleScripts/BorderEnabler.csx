@@ -120,9 +120,14 @@ for(int i = 0; i < gml_Object_obj_time_Step_1.Instructions.Count; i++)
 	}
 
 // Load border textures
-// https://www.reddit.com/r/Underminers/comments/99bxxz/after_days_of_searching_i_finally_managed_to_find/e4nnx6s/
 Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, UndertaleEmbeddedTexture>();
-foreach(var path in Directory.EnumerateFiles(@"C:\Users\krzys\Documents\Visual Studio 2017\Projects\UndertaleModTool\Test\bin\Debug\Borders"))
+const string bordersUrl = "https://www.reddit.com/r/Underminers/comments/99bxxz/after_days_of_searching_i_finally_managed_to_find/e4nnx6s/";
+if (!Directory.Exists("SampleScripts/Borders/"))
+{
+	Process.Start(bordersUrl);
+	throw new Exception("Please download the borders from " + bordersUrl + " and put them inside SampleScripts/Borders/");
+}
+foreach(var path in Directory.EnumerateFiles("SampleScripts/Borders/"))
 {
 	UndertaleEmbeddedTexture newtex = new UndertaleEmbeddedTexture();
 	newtex.TextureData.TextureBlob = File.ReadAllBytes(path);

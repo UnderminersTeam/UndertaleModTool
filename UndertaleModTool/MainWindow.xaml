@@ -21,6 +21,7 @@
         <CommandBinding Command="Paste" Executed="Command_Paste" />
         <CommandBinding Command="Print" Executed="Command_Run" />
         <CommandBinding Command="PrintPreview" Executed="Command_RunDebug" />
+        <CommandBinding Command="Properties" Executed="Command_Settings"/>
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="N" Command="New"/>
@@ -43,6 +44,7 @@
                     <MenuItem Header="_Run game" Command="Print" InputGestureText="F5"/> <!-- TODO: I think I need a custom command for that... -->
                     <MenuItem Header="_Run game under debugger" Command="PrintPreview" InputGestureText="Shift+F5"/>
                     <Separator/>
+                    <MenuItem Header="S_ettings" Command="Properties"/>
                     <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+W"/>
                 </MenuItem>
                 <MenuItem Header="_Scripts">

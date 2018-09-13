@@ -1,0 +1,25 @@
+﻿<Window x:Class="UndertaleModTool.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UndertaleModTool"
+        mc:Ignorable="d"
+        Title="Settings" Height="Auto" Width="800" SizeToContent="Height" WindowStartupLocation="CenterOwner">
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="GraphViz path" ToolTip="Required if you want code decompile graphs"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GraphVizPath}"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="Game Maker: Studio 1.4 path" ToolTip="Tested to work with v1.4.1173, which is close to release date of latest Undertale patch. Required only if you want to run the game under debugger."/>
+        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GameMakerStudioPath}"/>
+    </Grid>
+</Window>

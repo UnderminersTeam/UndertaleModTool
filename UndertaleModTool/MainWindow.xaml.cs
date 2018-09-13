@@ -378,7 +378,7 @@ namespace UndertaleModTool
                 {
                     result = await CSharpScript.EvaluateAsync(CommandBox.Text, ScriptOptions.Default
                         .WithReferences(typeof(UndertaleObject).Assembly, typeof(MessageBox).Assembly)
-                        .WithImports("UndertaleModLib", "UndertaleModLib.Models", "System", "System.IO", "System.Collections.Generic", "System.Windows"), this);
+                        .WithImports("UndertaleModLib", "UndertaleModLib.Models", "System", "System.IO", "System.Collections.Generic", "System.Windows", "System.Diagnostics"), this);
                 }
                 catch (CompilationErrorException exc)
                 {
@@ -449,7 +449,7 @@ namespace UndertaleModTool
         {
             MenuItem item = sender as MenuItem;
             item.Items.Clear();
-            foreach(var path in Directory.EnumerateFiles(@"C:\Users\krzys\Documents\Visual Studio 2017\Projects\UndertaleModTool\SampleScripts"))
+            foreach(var path in Directory.EnumerateFiles("SampleScripts"))
             {
                 var filename = System.IO.Path.GetFileName(path);
                 MenuItem subitem = new MenuItem() { Header = filename };
@@ -470,7 +470,7 @@ namespace UndertaleModTool
             {
                 object result = await CSharpScript.EvaluateAsync(File.ReadAllText(path), ScriptOptions.Default
                     .WithReferences(typeof(UndertaleObject).Assembly, typeof(MessageBox).Assembly)
-                    .WithImports("UndertaleModLib", "UndertaleModLib.Models", "System", "System.IO", "System.Collections.Generic", "System.Windows"), this);
+                    .WithImports("UndertaleModLib", "UndertaleModLib.Models", "System", "System.IO", "System.Collections.Generic", "System.Windows", "System.Diagnostics"), this);
                 CommandBox.Text = result != null ? result.ToString() : System.IO.Path.GetFileName(path) + " finished!";
             }
             catch (CompilationErrorException exc)
@@ -497,8 +497,8 @@ namespace UndertaleModTool
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.DefaultExt = "cs";
-            dlg.Filter = "Scripts (.cs)|*.cs|All files|*";
+            dlg.DefaultExt = "csx";
+            dlg.Filter = "Scripts (.csx)|*.csx|All files|*";
 
             if (dlg.ShowDialog() == true)
             {
@@ -516,15 +516,44 @@ namespace UndertaleModTool
             MessageBox.Show("UndertaleModTool by krzys_h\nVersion i-have-no-versions-yet", "About", MessageBoxButton.OK);
         }
 
+        private string FindRunner()
+        {
+            string studioRunner = System.IO.Path.Combine(Environment.ExpandEnvironmentVariables(SettingsWindow.GameMakerStudioPath), "Runner.exe");
+            Debug.WriteLine(studioRunner);
+            if (File.Exists(studioRunner))
+                return studioRunner;
+            string gameRunner = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(FilePath), Data.GeneralInfo.Filename.Content + ".exe");
+            Debug.WriteLine(gameRunner);
+            if (File.Exists(gameRunner))
+                return gameRunner;
+            MessageBox.Show("Unable to find game runner at " + gameRunner + " or GM:S installation directory. Please check the paths.", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
+            return null;
+        }
+
+        private string FindDebugger()
+        {
+            string studioDebugger = System.IO.Path.Combine(Environment.ExpandEnvironmentVariables(SettingsWindow.GameMakerStudioPath), @"GMDebug\GMDebug.exe");
+            Debug.WriteLine(studioDebugger);
+            if (File.Exists(studioDebugger))
+                return studioDebugger;
+            MessageBox.Show("Unable to find Game Maker: Studio debugger at " + studioDebugger + ". Please install GM:S and check the paths.", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
+            return null;
+        }
+
         private async void Command_Run(object sender, ExecutedRoutedEventArgs e)
         {
             if (Data == null)
                 return;
+
+            string runnerPath = FindRunner();
+            if (runnerPath == null)
+                return;
+
             bool origDbg = Data.GeneralInfo.DisableDebugger;
             Data.GeneralInfo.DisableDebugger = true;
             if (await DoSaveDialog())
             {
-                Process.Start(@"C:\Users\krzys\AppData\Roaming\GameMaker-Studio\Runner.exe", "-game \"" + FilePath + "\" -debugoutput \"" + System.IO.Path.ChangeExtension(FilePath, ".game.log") + "\"");
+                Process.Start(runnerPath, "-game \"" + FilePath + "\" -debugoutput \"" + System.IO.Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
             }
             Data.GeneralInfo.DisableDebugger = origDbg;
         }
@@ -533,14 +562,48 @@ namespace UndertaleModTool
         {
             if (Data == null)
                 return;
+            
+            string runnerPath = FindRunner();
+            string debuggerPath = FindDebugger();
+            if (runnerPath == null || debuggerPath == null)
+                return;
+
             bool origDbg = Data.GeneralInfo.DisableDebugger;
             Data.GeneralInfo.DisableDebugger = false;
             if (await DoSaveDialog())
             {
-                Process.Start(@"C:\Users\krzys\AppData\Roaming\GameMaker-Studio\Runner.exe", "-game \"" + FilePath + "\" -debugoutput \"" + System.IO.Path.ChangeExtension(FilePath, ".game.log") + "\"");
-                Process.Start(@"C:\Users\krzys\AppData\Roaming\GameMaker-Studio\GMDebug\GMDebug.exe", "-d=\"" + System.IO.Path.ChangeExtension(FilePath, ".yydebug") + "\" -t=\"127.0.0.1\" -p=" + Data.GeneralInfo.DebuggerPort + " -p=\"" + @"C:\Users\krzys\Documents\GameMaker\Projects\Project4.gmx\Project4.project.gmx" + "\"");
+                string tempProject = System.IO.Path.GetTempFileName().Replace(".tmp", ".gmx");
+                File.WriteAllText(tempProject, @"<!-- Without this file the debugger crashes, but it doesn't actually need to contain anything! -->
+<assets>
+  <Configs name=""configs"">
+    <Config>Configs\Default</Config>
+  </Configs>
+  <NewExtensions/>
+  <sounds name=""sound""/>
+  <sprites name=""sprites""/>
+  <backgrounds name=""background""/>
+  <paths name=""paths""/>
+  <objects name=""objects""/>
+  <rooms name=""rooms""/>
+  <help/>
+  <TutorialState>
+    <IsTutorial>0</IsTutorial>
+    <TutorialName></TutorialName>
+    <TutorialPage>0</TutorialPage>
+  </TutorialState>
+</assets>");
+
+                Process.Start(runnerPath, "-game \"" + FilePath + "\" -debugoutput \"" + System.IO.Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
+                Process.Start(debuggerPath, "-d=\"" + System.IO.Path.ChangeExtension(FilePath, ".yydebug") + "\" -t=\"127.0.0.1\" -tp=" + Data.GeneralInfo.DebuggerPort + " -p=\"" + tempProject + "\"");
             }
             Data.GeneralInfo.DisableDebugger = origDbg;
+        }
+
+        private void Command_Settings(object sender, ExecutedRoutedEventArgs e)
+        {
+            SettingsWindow settings = new SettingsWindow();
+            settings.Owner = this;
+            settings.ShowDialog();
         }
     }
 
