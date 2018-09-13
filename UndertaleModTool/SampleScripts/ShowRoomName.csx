@@ -3,7 +3,7 @@
 if (Data == null)
 	throw new Exception("Please load data.win first!");
 
-MessageBox.Show("Show room name and ID in debug mode\nby krzys_h", "ShowRoomName", MessageBoxButton.OK, MessageBoxImage.Information);
+ScriptMessage("Show room name and ID in debug mode\nby krzys_h");
 
 // TODO: enable only if in debug mode
 
@@ -111,4 +111,4 @@ code.Instructions.Add(new UndertaleInstruction() {
 });
 
 Selected = code;
-MessageBox.Show("Patched!", "ShowRoomName", MessageBoxButton.OK, MessageBoxImage.Information);
+ScriptMessage("Patched!");

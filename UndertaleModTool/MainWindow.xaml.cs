@@ -1,5 +1,7 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.Win32;
 using System;
 using System.Collections;
@@ -8,6 +10,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -376,9 +379,17 @@ namespace UndertaleModTool
                 object result;
                 try
                 {
-                    result = await CSharpScript.EvaluateAsync(CommandBox.Text, ScriptOptions.Default
-                        .WithReferences(typeof(UndertaleObject).Assembly, typeof(MessageBox).Assembly)
-                        .WithImports("UndertaleModLib", "UndertaleModLib.Models", "System", "System.IO", "System.Collections.Generic", "System.Windows", "System.Diagnostics"), this);
+                    using (var loader = new InteractiveAssemblyLoader())
+                    {
+                        loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
+
+                        var script = CSharpScript.Create<object>(CommandBox.Text, ScriptOptions.Default
+                            .WithImports("UndertaleModLib", "UndertaleModLib.Models", "System", "System.IO", "System.Collections.Generic")
+                            .WithReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly)),
+                            this.GetType(), loader);
+
+                        result = (await script.RunAsync(this)).ReturnValue;
+                    }
                 }
                 catch (CompilationErrorException exc)
                 {
@@ -468,10 +479,18 @@ namespace UndertaleModTool
             CommandBox.Text = "Running " + System.IO.Path.GetFileName(path) + " ...";
             try
             {
-                object result = await CSharpScript.EvaluateAsync(File.ReadAllText(path), ScriptOptions.Default
-                    .WithReferences(typeof(UndertaleObject).Assembly, typeof(MessageBox).Assembly)
-                    .WithImports("UndertaleModLib", "UndertaleModLib.Models", "System", "System.IO", "System.Collections.Generic", "System.Windows", "System.Diagnostics"), this);
-                CommandBox.Text = result != null ? result.ToString() : System.IO.Path.GetFileName(path) + " finished!";
+                using (var loader = new InteractiveAssemblyLoader())
+                {
+                    loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
+
+                    var script = CSharpScript.Create<object>(File.ReadAllText(path), ScriptOptions.Default
+                        .WithImports("UndertaleModLib", "UndertaleModLib.Models", "System", "System.IO", "System.Collections.Generic")
+                        .WithReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly)),
+                        this.GetType(), loader);
+
+                    object result = (await script.RunAsync(this)).ReturnValue;
+                    CommandBox.Text = result != null ? result.ToString() : System.IO.Path.GetFileName(path) + " finished!";
+                }
             }
             catch (CompilationErrorException exc)
             {
@@ -485,6 +504,21 @@ namespace UndertaleModTool
                 CommandBox.Text = exc.Message;
                 MessageBox.Show(exc.Message, "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        public void ScriptMessage(string message)
+        {
+            MessageBox.Show(message, "Script mesage", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        public bool ScriptQuestion(string message)
+        {
+            return MessageBox.Show(message, "Script message", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+        }
+
+        public void ScriptOpenURL(string url)
+        {
+            Process.Start(url);
         }
 
         private async void MenuItem_RunBuiltinScript_Item_Click(object sender, RoutedEventArgs e)

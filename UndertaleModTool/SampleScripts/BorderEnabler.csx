@@ -3,7 +3,7 @@
 if (Data == null)
 	throw new Exception("Please load data.win first!");
 
-MessageBox.Show("Border enabler\nby krzys_h", "ShowRoomName", MessageBoxButton.OK, MessageBoxImage.Information);
+ScriptMessage("Border enabler\nby krzys_h");
 
 // Change os_type == 14 checks in scr_draw_screen_border to always pass
 // This:
@@ -124,7 +124,7 @@ Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, U
 const string bordersUrl = "https://www.reddit.com/r/Underminers/comments/99bxxz/after_days_of_searching_i_finally_managed_to_find/e4nnx6s/";
 if (!Directory.Exists("SampleScripts/Borders/"))
 {
-	Process.Start(bordersUrl);
+	ScriptOpenURL(bordersUrl);
 	throw new Exception("Please download the borders from " + bordersUrl + " and put them inside SampleScripts/Borders/");
 }
 foreach(var path in Directory.EnumerateFiles("SampleScripts/Borders/"))
@@ -166,4 +166,4 @@ AssignBorderBackground("bg_border_water1", textures["20.png"]);
 AssignBorderBackground("bg_border_water2", textures["20.png"]); // TODO: are we missing one...?
 
 Selected = Data.Backgrounds.ByName("bg_border_water2_1080");
-MessageBox.Show("Borders loaded and enabled!", "BorderEnabler", MessageBoxButton.OK, MessageBoxImage.Information);
+ScriptMessage("Borders loaded and enabled!");

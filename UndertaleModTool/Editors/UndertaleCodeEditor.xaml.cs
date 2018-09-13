@@ -417,17 +417,26 @@ namespace UndertaleModTool
                 ImageSource image = null;
                 try
                 {
-                    var getStartProcessQuery = new GetStartProcessQuery();
-                    var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
-                    var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
-                    var wrapper = new GraphGeneration(getStartProcessQuery, getProcessStartInfoQuery, registerLayoutPluginCommand);
-
                     var blocks = Decompiler.DecompileFlowGraph(code);
                     string dot = Decompiler.ExportFlowGraph(blocks);
-                    Debug.WriteLine(dot);
-                    byte[] output = wrapper.GenerateGraph(dot, Enums.GraphReturnType.Png); // TODO: Use SVG instead
 
-                    image = new ImageSourceConverter().ConvertFrom(output) as ImageSource;
+                    try
+                    {
+                        var getStartProcessQuery = new GetStartProcessQuery();
+                        var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
+                        var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
+                        var wrapper = new GraphGeneration(getStartProcessQuery, getProcessStartInfoQuery, registerLayoutPluginCommand);
+                        
+                        byte[] output = wrapper.GenerateGraph(dot, Enums.GraphReturnType.Png); // TODO: Use SVG instead
+
+                        image = new ImageSourceConverter().ConvertFrom(output) as ImageSource;
+                    }
+                    catch(Exception e)
+                    {
+                        Debug.WriteLine(e.ToString());
+                        if (MessageBox.Show("Unable to execute GraphViz: " + e.Message + "\nMake sure you have downloaded it and set the path in settings.\nDo you want to open the download page now?", "Graph generation failed", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.Yes)
+                            Process.Start("https://graphviz.gitlab.io/_pages/Download/Download_windows.html");
+                    }
                 }
                 catch(Exception e)
                 {

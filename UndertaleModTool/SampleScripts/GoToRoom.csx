@@ -3,7 +3,7 @@
 if (Data == null)
 	throw new Exception("Please load data.win first!");
 
-MessageBox.Show("Add 'Go to room' dialog under F3\nby krzys_h", "GoToRoom", MessageBoxButton.OK, MessageBoxImage.Information);
+ScriptMessage("Add 'Go to room' dialog under F3\nby krzys_h");
 
 if (Data.Functions.ByName("get_integer") == null)
 {
@@ -49,4 +49,4 @@ code.Instructions.Add(new UndertaleInstruction() {
 });
 
 Selected = code;
-MessageBox.Show("Patched!", "GoToRoom", MessageBoxButton.OK, MessageBoxImage.Information);
+ScriptMessage("Patched!");
