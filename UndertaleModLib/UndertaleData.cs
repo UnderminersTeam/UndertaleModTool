@@ -114,5 +114,20 @@ namespace UndertaleModLib
             list.Add(newString);
             return newString;
         }
+
+        public static UndertaleFunction EnsureDefined(this IList<UndertaleFunction> list, string name, IList<UndertaleString> strg)
+        {
+            UndertaleFunction func = list.ByName(name);
+            if (func == null)
+            {
+                func = new UndertaleFunction()
+                {
+                    Name = strg.MakeString(name),
+                    UnknownChainEndingValue = 0 // TODO: seems to work...
+                };
+                list.Add(func);
+            }
+            return func;
+        }
     }
 }

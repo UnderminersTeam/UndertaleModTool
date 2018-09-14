@@ -1,114 +1,41 @@
 // Adds room ID and name display under the debug mode timer display
 
-if (Data == null)
-	throw new Exception("Please load data.win first!");
+EnsureDataLoaded();
 
 ScriptMessage("Show room name and ID in debug mode\nby krzys_h");
 
-// TODO: enable only if in debug mode
+var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings);
 
-var code = Data.Code.ByName("gml_Object_obj_time_Draw_64");
+code.Append(Assembler.Assemble(@"
+; if debug disabled, jump to end
+pushglb.v global.debug@395
+pushi.e 1
+cmp.i.v EQ
+bf func_end
 
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.Push,
-	Type1 = UndertaleInstruction.DataType.Int32,
-	Value = (int)0xFFFF00
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.Conv,
-	Type1 = UndertaleInstruction.DataType.Int32,
-	Type2 = UndertaleInstruction.DataType.Variable
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.Call,
-	Type1 = UndertaleInstruction.DataType.Int32,
-	Function = new UndertaleInstruction.Reference<UndertaleFunction>(Data.Functions.ByName("draw_set_color")),
-	ArgumentsCount = 1
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.Popz,
-	Type1 = UndertaleInstruction.DataType.Variable
-});
+; draw room id at x=10 y=30
+push.i " + 0xFFFF00.ToString() /* TODO: add this syntax to the assembler */ + @"
+conv.i.v
+call.i draw_set_color(argc=1)
+popz.v
+pushvar.v room@23
+pushi.e 30
+conv.i.v
+pushi.e 10
+conv.i.v
+call.i draw_text(argc=3)
+popz.v
 
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.PushVar,
-	Type1 = UndertaleInstruction.DataType.Variable,
-	//Value = new UndertaleInstruction.Reference<UndertaleVariable>(Data.Variables.ByName("room"))
-	Value = new UndertaleInstruction.Reference<UndertaleVariable>(Data.Variables[23], UndertaleInstruction.VariableType.Normal)
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.PushI,
-	Type1 = UndertaleInstruction.DataType.Int16,
-	Value = (short)30
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.Conv,
-	Type1 = UndertaleInstruction.DataType.Int32,
-	Type2 = UndertaleInstruction.DataType.Variable
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.PushI,
-	Type1 = UndertaleInstruction.DataType.Int16,
-	Value = (short)10
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.Conv,
-	Type1 = UndertaleInstruction.DataType.Int32,
-	Type2 = UndertaleInstruction.DataType.Variable
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.Call,
-	Type1 = UndertaleInstruction.DataType.Int32,
-	Function = new UndertaleInstruction.Reference<UndertaleFunction>(Data.Functions.ByName("draw_text")),
-	ArgumentsCount = 3
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.Popz,
-	Type1 = UndertaleInstruction.DataType.Variable
-});
-
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.PushVar,
-	Type1 = UndertaleInstruction.DataType.Variable,
-	//Value = new UndertaleInstruction.Reference<UndertaleVariable>(Data.Variables.ByName("room"))
-	Value = new UndertaleInstruction.Reference<UndertaleVariable>(Data.Variables[23], UndertaleInstruction.VariableType.Normal)
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.Call,
-	Type1 = UndertaleInstruction.DataType.Int32,
-	Function = new UndertaleInstruction.Reference<UndertaleFunction>(Data.Functions.ByName("room_get_name")),
-	ArgumentsCount = 1
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.PushI,
-	Type1 = UndertaleInstruction.DataType.Int16,
-	Value = (short)30
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.Conv,
-	Type1 = UndertaleInstruction.DataType.Int32,
-	Type2 = UndertaleInstruction.DataType.Variable
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.PushI,
-	Type1 = UndertaleInstruction.DataType.Int16,
-	Value = (short)50
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.Conv,
-	Type1 = UndertaleInstruction.DataType.Int32,
-	Type2 = UndertaleInstruction.DataType.Variable
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.Call,
-	Type1 = UndertaleInstruction.DataType.Int32,
-	Function = new UndertaleInstruction.Reference<UndertaleFunction>(Data.Functions.ByName("draw_text")),
-	ArgumentsCount = 3
-});
-code.Instructions.Add(new UndertaleInstruction() {
-	Kind = UndertaleInstruction.Opcode.Popz,
-	Type1 = UndertaleInstruction.DataType.Variable
-});
+; draw room name at x=50 y=30
+pushvar.v room@23
+call.i room_get_name(argc=1)
+pushi.e 30
+conv.i.v
+pushi.e 50
+conv.i.v
+call.i draw_text(argc=3)
+popz.v
+", Data.Functions, Data.Variables, Data.Strings));
 
 ChangeSelection(code);
 ScriptMessage("Patched!");

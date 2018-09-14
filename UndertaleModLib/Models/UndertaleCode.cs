@@ -476,42 +476,96 @@ namespace UndertaleModLib.Models
             }
         }
 
-        // TODO: Change this to use GM:S syntax
         public override string ToString()
         {
-            switch(GetInstructionType(Kind))
+            return ToString(null, null);
+        }
+
+        public string ToString(UndertaleCode code, IList<UndertaleVariable> vars)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Address.ToString("D5") + ": ");
+            sb.Append(Kind.ToString().ToLower());
+
+            switch (GetInstructionType(Kind))
             {
                 case InstructionType.SingleTypeInstruction:
+                    sb.Append("." + Type1.ToOpcodeParam());
+
                     if (Kind == Opcode.Dup)
-                        return String.Format("{0:D5}: {1} ({2}), {3}", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower(), DupExtra);
-                    else
-                        return String.Format("{0:D5}: {1} ({2})", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower());
+                    {
+                        sb.Append(" ");
+                        sb.Append(DupExtra.ToString());
+                    }
+                    break;
 
                 case InstructionType.DoubleTypeInstruction:
-                    return String.Format("{0:D5}: {1} ({2}), ({3})", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower(), Type2.ToString().ToLower());
+                    sb.Append("." + Type1.ToOpcodeParam());
+                    sb.Append("." + Type2.ToOpcodeParam());
+                    break;
 
                 case InstructionType.ComparisonInstruction:
-                    return String.Format("{0:D5}: {1} ({2}) {3} ({4})", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower(), ComparisonKind.ToString(), Type2.ToString().ToLower());
+                    sb.Append("." + Type1.ToOpcodeParam());
+                    sb.Append("." + Type2.ToOpcodeParam());
+                    sb.Append(" ");
+                    sb.Append(ComparisonKind.ToString());
+                    break;
 
                 case InstructionType.GotoInstruction:
-                    return String.Format("{0:D5}: {1} ${2:+#;-#;0}", Address, Kind.ToString().ToUpper(), JumpOffset);
-                    //return String.Format("{0:D5}: {1} {2:D5}", Address, Kind.ToString().ToUpper(), Address + JumpOffset);
+                    sb.Append(" ");
+                    string tgt = (Address + JumpOffset).ToString("D5");
+                    if (code != null && Address + JumpOffset == code.Length / 4)
+                        tgt = "func_end";
+                    sb.Append(tgt);
+                    break;
 
                 case InstructionType.PopInstruction:
-                    return String.Format("{0:D5}: {1} ({2}){3}, ({4})", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower(), Destination, Type2.ToString().ToLower());
+                    sb.Append("." + Type1.ToOpcodeParam());
+                    sb.Append("." + Type2.ToOpcodeParam());
+                    sb.Append(" ");
+                    if (Type1 == DataType.Variable && TypeInst != InstanceType.StackTopOrGlobal)
+                    {
+                        sb.Append(TypeInst.ToString().ToLower());
+                        sb.Append(".");
+                    }
+                    sb.Append(Destination.ToString());
+                    if (Destination is Reference<UndertaleVariable> && vars != null)
+                    {
+                        sb.Append("@" + vars.IndexOf((Destination as Reference<UndertaleVariable>).Target));
+                    }
+                    break;
 
                 case InstructionType.PushInstruction:
-                    return String.Format("{0:D5}: {1} ({2}){3}", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower(), Value);
+                    sb.Append("." + Type1.ToOpcodeParam());
+                    sb.Append(" ");
+                    if (Type1 == DataType.Variable && TypeInst != InstanceType.StackTopOrGlobal)
+                    {
+                        sb.Append(TypeInst.ToString().ToLower());
+                        sb.Append(".");
+                    }
+                    sb.Append(Value.ToString());
+                    if (Value is Reference<UndertaleVariable> && vars != null)
+                    {
+                        sb.Append("@" + vars.IndexOf((Value as Reference<UndertaleVariable>).Target));
+                    }
+                    break;
 
                 case InstructionType.CallInstruction:
-                    return String.Format("{0:D5}: {1} ({2}), {3}, {4}", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower(), Function, ArgumentsCount);
+                    sb.Append("." + Type1.ToOpcodeParam());
+                    sb.Append(" ");
+                    sb.Append(Function.ToString());
+                    sb.Append("(argc=");
+                    sb.Append(ArgumentsCount.ToString());
+                    sb.Append(")");
+                    break;
 
                 case InstructionType.BreakInstruction:
-                    return String.Format("{0:D5}: {1} ({2}){3}", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower(), Value);
-
-                default:
-                    return Kind.ToString().ToUpper();
+                    sb.Append("." + Type1.ToOpcodeParam());
+                    sb.Append(" ");
+                    sb.Append(Value.ToString());
+                    break;
             }
+            return sb.ToString();
         }
 
         public uint CalculateInstructionSize()
@@ -584,9 +638,9 @@ namespace UndertaleModLib.Models
     {
         private UndertaleString _Name;
         private uint _Length;
-        private uint _LocalsCount; // Seems related do UndertaleCodeLocals, TODO: does it also seem unused?
+        private uint _LocalsCount = 0; // Seems related do UndertaleCodeLocals, TODO: does it also seem unused?
         internal uint _BytecodeAbsoluteAddress;
-        private uint _UnknownProbablyZero;
+        private uint _UnknownProbablyZero = 0;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public uint Length { get => _Length; internal set { _Length = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Length")); } }
@@ -647,18 +701,27 @@ namespace UndertaleModLib.Models
             Length = addr * 4;
         }
 
-        public string Disassembly
+        public string Disassemble(IList<UndertaleVariable> vars)
         {
-            get
+            StringBuilder sb = new StringBuilder();
+            foreach (var inst in Instructions)
             {
-                StringBuilder sb = new StringBuilder();
-                foreach (var inst in Instructions)
-                {
-                    sb.Append(inst.ToString());
-                    sb.AppendLine();
-                }
-                return sb.ToString();
+                sb.Append(inst.ToString(this, vars));
+                sb.AppendLine();
             }
+            return sb.ToString();
+        }
+        
+        public void Append(IList<UndertaleInstruction> instructions)
+        {
+            Instructions.AddRange(instructions);
+            UpdateAddresses();
+        }
+
+        public void Replace(IList<UndertaleInstruction> instructions)
+        {
+            Instructions.Clear();
+            Append(instructions);
         }
 
         public override string ToString()

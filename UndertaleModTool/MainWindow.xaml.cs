@@ -46,6 +46,8 @@ namespace UndertaleModTool
 
         public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
 
+        // TODO: extract the scripting interface into a separate class
+
         public MainWindow()
         {
             InitializeComponent();
@@ -394,7 +396,7 @@ namespace UndertaleModTool
                         loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
 
                         var script = CSharpScript.Create<object>(CommandBox.Text, ScriptOptions.Default
-                            .WithImports("UndertaleModLib", "UndertaleModLib.Models", "System", "System.IO", "System.Collections.Generic")
+                            .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "System", "System.IO", "System.Collections.Generic")
                             .WithReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly)),
                             this.GetType(), loader);
 
@@ -495,7 +497,7 @@ namespace UndertaleModTool
                     loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
 
                     var script = CSharpScript.Create<object>(File.ReadAllText(path), ScriptOptions.Default
-                        .WithImports("UndertaleModLib", "UndertaleModLib.Models", "System", "System.IO", "System.Collections.Generic")
+                        .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "System", "System.IO", "System.Collections.Generic")
                         .WithReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly)),
                         this.GetType(), loader);
 
@@ -563,15 +565,15 @@ namespace UndertaleModTool
 
         private string FindRunner()
         {
-            string studioRunner = System.IO.Path.Combine(Environment.ExpandEnvironmentVariables(SettingsWindow.GameMakerStudioPath), "Runner.exe");
-            Debug.WriteLine(studioRunner);
-            if (File.Exists(studioRunner))
-                return studioRunner;
             string gameRunner = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(FilePath), Data.GeneralInfo.Filename.Content + ".exe");
             Debug.WriteLine(gameRunner);
             if (File.Exists(gameRunner))
                 return gameRunner;
-            MessageBox.Show("Unable to find game runner at " + gameRunner + " or GM:S installation directory. Please check the paths.", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
+            string studioRunner = System.IO.Path.Combine(Environment.ExpandEnvironmentVariables(SettingsWindow.GameMakerStudioPath), "Runner.exe");
+            Debug.WriteLine(studioRunner);
+            if (File.Exists(studioRunner))
+                return studioRunner;
+            MessageBox.Show("Unable to find game runner at " + gameRunner + " nor GM:S installation directory. Please check the paths.", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
             return null;
         }
 
@@ -669,6 +671,12 @@ namespace UndertaleModTool
         {
             Selected = SelectionHistory.Last();
             SelectionHistory.RemoveAt(SelectionHistory.Count - 1);
+        }
+
+        public void EnsureDataLoaded()
+        {
+            if (Data == null)
+                throw new Exception("Please load data.win first!");
         }
     }
 

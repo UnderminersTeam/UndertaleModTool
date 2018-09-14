@@ -13,6 +13,133 @@ namespace UndertaleModLib.Decompiler
     {
         // TODO: Improve the error messages
 
+        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg)
+        {
+            string label;
+            UndertaleInstruction instr = AssembleOne(source, funcs, vars, strg, out label);
+            if (label != null)
+                throw new Exception("Cannot use labels in this context");
+            return instr;
+        }
+
+        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, out string label)
+        {
+            label = null;
+            string line = source;
+            UndertaleInstruction instr = new UndertaleInstruction();
+
+            string opcode = line;
+            int space = opcode.IndexOf(' ');
+            if (space >= 0)
+            {
+                opcode = line.Substring(0, space);
+                line = line.Substring(space + 1).Trim();
+            }
+            else
+                line = "";
+            string[] types = opcode.Split('.');
+            if (types.Length > 3)
+                throw new Exception("Too many type parameters");
+
+            instr.Kind = (UndertaleInstruction.Opcode)Enum.Parse(typeof(UndertaleInstruction.Opcode), types[0], true);
+            if (types.Length >= 2)
+                instr.Type1 = UndertaleInstructionUtil.FromOpcodeParam(types[1]);
+            if (types.Length >= 3)
+                instr.Type2 = UndertaleInstructionUtil.FromOpcodeParam(types[2]);
+
+            switch (UndertaleInstruction.GetInstructionType(instr.Kind))
+            {
+                case UndertaleInstruction.InstructionType.SingleTypeInstruction:
+                    if (instr.Kind == UndertaleInstruction.Opcode.Dup)
+                    {
+                        instr.DupExtra = Byte.Parse(line);
+                        line = "";
+                    }
+                    break;
+
+                case UndertaleInstruction.InstructionType.DoubleTypeInstruction:
+                    break;
+
+                case UndertaleInstruction.InstructionType.ComparisonInstruction:
+                    instr.ComparisonKind = (UndertaleInstruction.ComparisonType)Enum.Parse(typeof(UndertaleInstruction.ComparisonType), line, true);
+                    line = "";
+                    break;
+
+                case UndertaleInstruction.InstructionType.GotoInstruction:
+                    if (line[0] == '$')
+                    {
+                        instr.JumpOffset = Int32.Parse(line.Substring(1));
+                    }
+                    else
+                    {
+                        label = line;
+                    }
+                    line = "";
+                    break;
+
+                case UndertaleInstruction.InstructionType.PopInstruction:
+                    UndertaleInstruction.InstanceType inst = instr.TypeInst;
+                    instr.Destination = ParseVariableReference(line, vars, ref inst);
+                    instr.TypeInst = inst;
+                    line = "";
+                    break;
+
+                case UndertaleInstruction.InstructionType.PushInstruction:
+                    switch (instr.Type1)
+                    {
+                        case UndertaleInstruction.DataType.Double:
+                            instr.Value = Double.Parse(line);
+                            break;
+                        case UndertaleInstruction.DataType.Float:
+                            instr.Value = Single.Parse(line);
+                            break;
+                        case UndertaleInstruction.DataType.Int32:
+                            instr.Value = Int32.Parse(line);
+                            break;
+                        case UndertaleInstruction.DataType.Int64:
+                            instr.Value = Int64.Parse(line);
+                            break;
+                        case UndertaleInstruction.DataType.Boolean:
+                            instr.Value = Boolean.Parse(line);
+                            break;
+                        case UndertaleInstruction.DataType.Variable:
+                            UndertaleInstruction.InstanceType inst2 = instr.TypeInst;
+                            instr.Value = ParseVariableReference(line, vars, ref inst2);
+                            instr.TypeInst = inst2;
+                            break;
+                        case UndertaleInstruction.DataType.String:
+                            instr.Value = ParseStringReference(line, strg);
+                            break;
+                        case UndertaleInstruction.DataType.Int16:
+                            instr.Value = Int16.Parse(line);
+                            break;
+                    }
+                    line = "";
+                    break;
+
+                case UndertaleInstruction.InstructionType.CallInstruction:
+                    Match match = Regex.Match(line, @"^(.*)\(argc=(.*)\)$");
+                    if (!match.Success)
+                        throw new Exception("Call instruction format error");
+
+                    UndertaleFunction func = funcs.ByName(match.Groups[1].Value);
+                    if (func == null)
+                        throw new Exception("Function not found");
+                    instr.Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = func };
+                    instr.ArgumentsCount = UInt16.Parse(match.Groups[2].Value);
+                    line = "";
+                    break;
+
+                case UndertaleInstruction.InstructionType.BreakInstruction:
+                    instr.Value = Int16.Parse(line);
+                    line = "";
+                    break;
+            }
+            if (line != "")
+                throw new Exception("Excess parameters");
+            return instr;
+        }
+
         public static List<UndertaleInstruction> Assemble(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg)
         {
             var lines = source.Split('\n');
@@ -23,6 +150,8 @@ namespace UndertaleModLib.Decompiler
             foreach(var fullline in lines)
             {
                 string line = fullline;
+                if (line.Length > 0 && line[0] == ';')
+                    continue;
                 string label = null;
                 int labelEnd = line.IndexOf(':');
                 if (labelEnd >= 0)
@@ -41,111 +170,11 @@ namespace UndertaleModLib.Decompiler
                         continue;
                 }
 
-                UndertaleInstruction instr = new UndertaleInstruction();
+                string labelTgt;
+                UndertaleInstruction instr = AssembleOne(line, funcs, vars, strg, out labelTgt);
                 instr.Address = addr;
-
-                string opcode = line;
-                int space = opcode.IndexOf(' ');
-                if (space >= 0)
-                {
-                    opcode = line.Substring(0, space);
-                    line = line.Substring(space + 1).Trim();
-                }
-                else
-                    line = "";
-                string[] types = opcode.Split('.');
-                if (types.Length > 3)
-                    throw new Exception("Too many type parameters");
-
-                instr.Kind = (UndertaleInstruction.Opcode)Enum.Parse(typeof(UndertaleInstruction.Opcode), types[0], true);
-                if (types.Length >= 2)
-                    instr.Type1 = UndertaleInstructionUtil.FromOpcodeParam(types[1]);
-                if (types.Length >= 3)
-                    instr.Type2 = UndertaleInstructionUtil.FromOpcodeParam(types[2]);
-
-                switch (UndertaleInstruction.GetInstructionType(instr.Kind))
-                {
-                    case UndertaleInstruction.InstructionType.SingleTypeInstruction:
-                        if (instr.Kind == UndertaleInstruction.Opcode.Dup)
-                        {
-                            instr.DupExtra = Byte.Parse(line);
-                            line = "";
-                        }
-                        break;
-
-                    case UndertaleInstruction.InstructionType.DoubleTypeInstruction:
-                        break;
-
-                    case UndertaleInstruction.InstructionType.ComparisonInstruction:
-                        instr.ComparisonKind = (UndertaleInstruction.ComparisonType)Enum.Parse(typeof(UndertaleInstruction.ComparisonType), line, true);
-                        line = "";
-                        break;
-
-                    case UndertaleInstruction.InstructionType.GotoInstruction:
-                        labelTargets.Add(instr, line);
-                        line = "";
-                        break;
-
-                    case UndertaleInstruction.InstructionType.PopInstruction:
-                        UndertaleInstruction.InstanceType inst = instr.TypeInst;
-                        instr.Destination = ParseVariableReference(line, vars, ref inst);
-                        instr.TypeInst = inst;
-                        line = "";
-                        break;
-
-                    case UndertaleInstruction.InstructionType.PushInstruction:
-                        switch (instr.Type1)
-                        {
-                            case UndertaleInstruction.DataType.Double:
-                                instr.Value = Double.Parse(line);
-                                break;
-                            case UndertaleInstruction.DataType.Float:
-                                instr.Value = Single.Parse(line);
-                                break;
-                            case UndertaleInstruction.DataType.Int32:
-                                instr.Value = Int32.Parse(line);
-                                break;
-                            case UndertaleInstruction.DataType.Int64:
-                                instr.Value = Int64.Parse(line);
-                                break;
-                            case UndertaleInstruction.DataType.Boolean:
-                                instr.Value = Boolean.Parse(line);
-                                break;
-                            case UndertaleInstruction.DataType.Variable:
-                                UndertaleInstruction.InstanceType inst2 = instr.TypeInst;
-                                instr.Value = ParseVariableReference(line, vars, ref inst2);
-                                instr.TypeInst = inst2;
-                                break;
-                            case UndertaleInstruction.DataType.String:
-                                instr.Value = ParseStringReference(line, strg);
-                                break;
-                            case UndertaleInstruction.DataType.Int16:
-                                instr.Value = Int16.Parse(line);
-                                break;
-                        }
-                        line = "";
-                        break;
-
-                    case UndertaleInstruction.InstructionType.CallInstruction:
-                        Match match = Regex.Match(line, @"^(.*)\(argc=(.*)\)$");
-                        if (match == null)
-                            throw new Exception("Call instruction format error");
-
-                        UndertaleFunction func = funcs.ByName(match.Groups[1].Value);
-                        if (func == null)
-                            throw new Exception("Function not found");
-                        instr.Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = func };
-                        instr.ArgumentsCount = UInt16.Parse(match.Groups[2].Value);
-                        line = "";
-                        break;
-
-                    case UndertaleInstruction.InstructionType.BreakInstruction:
-                        instr.Value = Int16.Parse(line);
-                        line = "";
-                        break;
-                }
-                if (line != "")
-                    throw new Exception("Excess parameters");
+                if (labelTgt != null)
+                    labelTargets.Add(instr, labelTgt);
 
                 if (!String.IsNullOrEmpty(label))
                     labels.Add(label, instr.Address);

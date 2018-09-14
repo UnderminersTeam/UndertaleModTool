@@ -87,7 +87,7 @@ namespace UndertaleModTool
             if (code.Instructions.Count > 5000)
             {
                 // Disable syntax highlighting. Loading it can take a few MINUTES on large scripts.
-                par.Inlines.Add(new Run(code.Disassembly));
+                par.Inlines.Add(new Run(code.Disassemble((Application.Current.MainWindow as MainWindow).Data.Variables)));
             }
             else
             {
@@ -104,7 +104,6 @@ namespace UndertaleModTool
                     {
                         case UndertaleInstruction.InstructionType.SingleTypeInstruction:
                             par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run(" "));
 
                             if (instr.Kind == UndertaleInstruction.Opcode.Dup)
                             {
@@ -498,8 +497,7 @@ namespace UndertaleModTool
             try
             {
                 var instructions = Assembler.Assemble(DisassemblyEditor.Text, data.Functions, data.Variables, data.Strings);
-                code.Instructions.Clear();
-                code.Instructions.AddRange(instructions);
+                code.Replace(instructions);
             }
             catch(Exception ex)
             {

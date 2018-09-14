@@ -1,7 +1,6 @@
 // Enables debug mode
 
-if (Data == null)
-	throw new Exception("Please load data.win first!");
+EnsureDataLoaded();
 
 ScriptMessage("Debug mode enabler\nby krzys_h");
 

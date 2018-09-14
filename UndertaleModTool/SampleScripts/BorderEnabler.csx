@@ -1,7 +1,6 @@
 // Imports and unlocks border images into PC version of the game
 
-if (Data == null)
-	throw new Exception("Please load data.win first!");
+EnsureDataLoaded();
 
 ScriptMessage("Border enabler\nby krzys_h");
 
@@ -24,8 +23,8 @@ for(int i = 0; i < scr_draw_screen_border.Instructions.Count; i++)
 		scr_draw_screen_border.Instructions[i-2].Kind == UndertaleInstruction.Opcode.PushI   && (short)scr_draw_screen_border.Instructions[i-2].Value == 14 &&
 		scr_draw_screen_border.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushVar && (scr_draw_screen_border.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "os_type")
 	{
-		scr_draw_screen_border.Instructions[i-1].Kind = UndertaleInstruction.Opcode.Popz; scr_draw_screen_border.Instructions[i-1].Type1 = UndertaleInstruction.DataType.Int32;
-		scr_draw_screen_border.Instructions[i  ].Kind = UndertaleInstruction.Opcode.Popz; scr_draw_screen_border.Instructions[i  ].Type1 = UndertaleInstruction.DataType.Variable;
+        scr_draw_screen_border.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data.Functions, Data.Variables, Data.Strings);
+        scr_draw_screen_border.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data.Functions, Data.Variables, Data.Strings);
 	}
 
 // Same for the code that calls it
@@ -35,10 +34,10 @@ for(int i = 0; i < gml_Object_obj_time_Draw_77.Instructions.Count; i++)
 		gml_Object_obj_time_Draw_77.Instructions[i-1].Kind == UndertaleInstruction.Opcode.Cmp     && gml_Object_obj_time_Draw_77.Instructions[i-1].ComparisonKind == UndertaleInstruction.ComparisonType.GTE &&
 		gml_Object_obj_time_Draw_77.Instructions[i-2].Kind == UndertaleInstruction.Opcode.PushI   && (short)gml_Object_obj_time_Draw_77.Instructions[i-2].Value == 3 &&
 		gml_Object_obj_time_Draw_77.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushGlb && (gml_Object_obj_time_Draw_77.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "osflavor")
-	{
-		gml_Object_obj_time_Draw_77.Instructions[i-1].Kind = UndertaleInstruction.Opcode.Popz; gml_Object_obj_time_Draw_77.Instructions[i-1].Type1 = UndertaleInstruction.DataType.Int32;
-		gml_Object_obj_time_Draw_77.Instructions[i  ].Kind = UndertaleInstruction.Opcode.Popz; gml_Object_obj_time_Draw_77.Instructions[i  ].Type1 = UndertaleInstruction.DataType.Variable;
-	}
+    {
+        gml_Object_obj_time_Draw_77.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data.Functions, Data.Variables, Data.Strings);
+        gml_Object_obj_time_Draw_77.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data.Functions, Data.Variables, Data.Strings);
+    }
 
 var gml_Object_obj_time_Create_0 = Data.Code.ByName("gml_Object_obj_time_Create_0");
 for(int i = 0; i < gml_Object_obj_time_Create_0.Instructions.Count; i++)
@@ -46,10 +45,10 @@ for(int i = 0; i < gml_Object_obj_time_Create_0.Instructions.Count; i++)
 		gml_Object_obj_time_Create_0.Instructions[i-1].Kind == UndertaleInstruction.Opcode.Cmp     && gml_Object_obj_time_Create_0.Instructions[i-1].ComparisonKind == UndertaleInstruction.ComparisonType.GTE &&
 		gml_Object_obj_time_Create_0.Instructions[i-2].Kind == UndertaleInstruction.Opcode.PushI   && (short)gml_Object_obj_time_Create_0.Instructions[i-2].Value == 3 &&
 		gml_Object_obj_time_Create_0.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushGlb && (gml_Object_obj_time_Create_0.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "osflavor")
-	{
-		gml_Object_obj_time_Create_0.Instructions[i-1].Kind = UndertaleInstruction.Opcode.Popz; gml_Object_obj_time_Create_0.Instructions[i-1].Type1 = UndertaleInstruction.DataType.Int32;
-		gml_Object_obj_time_Create_0.Instructions[i  ].Kind = UndertaleInstruction.Opcode.Popz; gml_Object_obj_time_Create_0.Instructions[i  ].Type1 = UndertaleInstruction.DataType.Variable;
-	}
+    {
+        gml_Object_obj_time_Create_0.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data.Functions, Data.Variables, Data.Strings);
+        gml_Object_obj_time_Create_0.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data.Functions, Data.Variables, Data.Strings);
+    }
 
 var gml_Object_obj_time_Draw_76 = Data.Code.ByName("gml_Object_obj_time_Draw_76");
 for(int i = 0; i < gml_Object_obj_time_Draw_76.Instructions.Count; i++)
@@ -57,10 +56,10 @@ for(int i = 0; i < gml_Object_obj_time_Draw_76.Instructions.Count; i++)
 		gml_Object_obj_time_Draw_76.Instructions[i-1].Kind == UndertaleInstruction.Opcode.Cmp     && gml_Object_obj_time_Draw_76.Instructions[i-1].ComparisonKind == UndertaleInstruction.ComparisonType.GTE &&
 		gml_Object_obj_time_Draw_76.Instructions[i-2].Kind == UndertaleInstruction.Opcode.PushI   && (short)gml_Object_obj_time_Draw_76.Instructions[i-2].Value == 4 &&
 		gml_Object_obj_time_Draw_76.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushGlb && (gml_Object_obj_time_Draw_76.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "osflavor")
-	{
-		gml_Object_obj_time_Draw_76.Instructions[i-1].Kind = UndertaleInstruction.Opcode.Popz; gml_Object_obj_time_Draw_76.Instructions[i-1].Type1 = UndertaleInstruction.DataType.Int32;
-		gml_Object_obj_time_Draw_76.Instructions[i  ].Kind = UndertaleInstruction.Opcode.Popz; gml_Object_obj_time_Draw_76.Instructions[i  ].Type1 = UndertaleInstruction.DataType.Variable;
-	}
+    {
+        gml_Object_obj_time_Draw_76.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data.Functions, Data.Variables, Data.Strings);
+        gml_Object_obj_time_Draw_76.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data.Functions, Data.Variables, Data.Strings);
+    }
 
 var scr_draw_background_ps4 = Data.Scripts.ByName("scr_draw_background_ps4").Code;
 for(int i = 0; i < scr_draw_background_ps4.Instructions.Count; i++)
@@ -68,10 +67,10 @@ for(int i = 0; i < scr_draw_background_ps4.Instructions.Count; i++)
 		scr_draw_background_ps4.Instructions[i-1].Kind == UndertaleInstruction.Opcode.Cmp     && scr_draw_background_ps4.Instructions[i-1].ComparisonKind == UndertaleInstruction.ComparisonType.EQ &&
 		scr_draw_background_ps4.Instructions[i-2].Kind == UndertaleInstruction.Opcode.PushI   && (short)scr_draw_background_ps4.Instructions[i-2].Value == 14 &&
 		scr_draw_background_ps4.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushVar && (scr_draw_background_ps4.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "os_type")
-	{
-		scr_draw_background_ps4.Instructions[i-1].Kind = UndertaleInstruction.Opcode.Popz; scr_draw_background_ps4.Instructions[i-1].Type1 = UndertaleInstruction.DataType.Int32;
-		scr_draw_background_ps4.Instructions[i  ].Kind = UndertaleInstruction.Opcode.Popz; scr_draw_background_ps4.Instructions[i  ].Type1 = UndertaleInstruction.DataType.Variable;
-	}
+    {
+        scr_draw_background_ps4.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data.Functions, Data.Variables, Data.Strings);
+        scr_draw_background_ps4.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data.Functions, Data.Variables, Data.Strings);
+    }
 
 // Now, patch the settings menu!
 var gml_Object_obj_settingsmenu_Draw_0 = Data.Code.ByName("gml_Object_obj_settingsmenu_Draw_0");
@@ -81,10 +80,10 @@ for(int i = 0; i < gml_Object_obj_settingsmenu_Draw_0.Instructions.Count; i++)
 		gml_Object_obj_settingsmenu_Draw_0.Instructions[i-1].Kind == UndertaleInstruction.Opcode.Cmp     && gml_Object_obj_settingsmenu_Draw_0.Instructions[i-1].ComparisonKind == UndertaleInstruction.ComparisonType.GTE &&
 		gml_Object_obj_settingsmenu_Draw_0.Instructions[i-2].Kind == UndertaleInstruction.Opcode.PushI   && (short)gml_Object_obj_settingsmenu_Draw_0.Instructions[i-2].Value == 4 &&
 		gml_Object_obj_settingsmenu_Draw_0.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushGlb && (gml_Object_obj_settingsmenu_Draw_0.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "osflavor")
-	{
-		gml_Object_obj_settingsmenu_Draw_0.Instructions[i-1].Kind = UndertaleInstruction.Opcode.Popz; gml_Object_obj_settingsmenu_Draw_0.Instructions[i-1].Type1 = UndertaleInstruction.DataType.Int32;
-		gml_Object_obj_settingsmenu_Draw_0.Instructions[i  ].Kind = UndertaleInstruction.Opcode.Popz; gml_Object_obj_settingsmenu_Draw_0.Instructions[i  ].Type1 = UndertaleInstruction.DataType.Variable;
-	}
+    {
+        gml_Object_obj_settingsmenu_Draw_0.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data.Functions, Data.Variables, Data.Strings);
+        gml_Object_obj_settingsmenu_Draw_0.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data.Functions, Data.Variables, Data.Strings);
+    }
 	
 	//00568: pushglb.v osflavor
 	//00570: pushi.e 2
@@ -111,28 +110,21 @@ for(int i = 0; i < gml_Object_obj_time_Step_1.Instructions.Count; i++)
 		gml_Object_obj_time_Step_1.Instructions[i-2].Kind == UndertaleInstruction.Opcode.Cmp     && gml_Object_obj_time_Step_1.Instructions[i-2].ComparisonKind == UndertaleInstruction.ComparisonType.GTE &&
 		gml_Object_obj_time_Step_1.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushI   && (short)gml_Object_obj_time_Step_1.Instructions[i-3].Value == 4 &&
 		gml_Object_obj_time_Step_1.Instructions[i-4].Kind == UndertaleInstruction.Opcode.PushGlb && (gml_Object_obj_time_Step_1.Instructions[i-4].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "osflavor")
-	{
-		gml_Object_obj_time_Step_1.Instructions[i-2].Kind = UndertaleInstruction.Opcode.PushI;
-		gml_Object_obj_time_Step_1.Instructions[i-2].Type1 = UndertaleInstruction.DataType.Int16;
-		gml_Object_obj_time_Step_1.Instructions[i-2].Type2 = (byte)0;
-		gml_Object_obj_time_Step_1.Instructions[i-2].Value = (short)1;
+    {
+        gml_Object_obj_time_Step_1.Instructions[i-2] = Assembler.AssembleOne("pushi.e 1", Data.Functions, Data.Variables, Data.Strings);
 		// TODO: junk on stack again
 	}
 
 // Also resize the window so that the border can be seen without going fullscreen
-if (Data.Functions.ByName("window_set_size") == null)
-{
-	Data.Functions.Add(new UndertaleFunction() {
-		Name = Data.Strings.MakeString("window_set_size"),
-		UnknownChainEndingValue = 0 // TODO: seems to work...
-	});
-}
-gml_Object_obj_time_Create_0.Instructions.Add(new UndertaleInstruction() { Kind = UndertaleInstruction.Opcode.PushI,   Type1 = UndertaleInstruction.DataType.Int16,    Value = (short)540 });
-gml_Object_obj_time_Create_0.Instructions.Add(new UndertaleInstruction() { Kind = UndertaleInstruction.Opcode.Conv,    Type1 = UndertaleInstruction.DataType.Int32,    Type2 = UndertaleInstruction.DataType.Variable });
-gml_Object_obj_time_Create_0.Instructions.Add(new UndertaleInstruction() { Kind = UndertaleInstruction.Opcode.PushI,   Type1 = UndertaleInstruction.DataType.Int16,    Value = (short)960 });
-gml_Object_obj_time_Create_0.Instructions.Add(new UndertaleInstruction() { Kind = UndertaleInstruction.Opcode.Conv,    Type1 = UndertaleInstruction.DataType.Int32,    Type2 = UndertaleInstruction.DataType.Variable });
-gml_Object_obj_time_Create_0.Instructions.Add(new UndertaleInstruction() { Kind = UndertaleInstruction.Opcode.Call,    Type1 = UndertaleInstruction.DataType.Int32,    Function = new UndertaleInstruction.Reference<UndertaleFunction>(Data.Functions.ByName("window_set_size")), ArgumentsCount = 2 });
-gml_Object_obj_time_Create_0.Instructions.Add(new UndertaleInstruction() { Kind = UndertaleInstruction.Opcode.Popz,    Type1 = UndertaleInstruction.DataType.Int32 });
+Data.Functions.EnsureDefined("window_set_size", Data.Strings);
+gml_Object_obj_time_Create_0.Append(Assembler.Assemble(@"
+pushi.e 540
+conv.i.v
+pushi.e 960
+conv.i.v
+call.i window_set_size(argc=2)
+popz.i
+", Data.Functions, Data.Variables, Data.Strings));
 
 // Load border textures
 Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, UndertaleEmbeddedTexture>();

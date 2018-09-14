@@ -16,22 +16,22 @@
         </ObjectDataProvider>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeKey">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="undertale:UndertaleGameObject+EventSubtypeKey" />
+                <x:Type TypeName="undertale:EventSubtypeKey" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeStep">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="undertale:UndertaleGameObject+EventSubtypeStep" />
+                <x:Type TypeName="undertale:EventSubtypeStep" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeOther">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="undertale:UndertaleGameObject+EventSubtypeOther" />
+                <x:Type TypeName="undertale:EventSubtypeOther" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeDraw">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="undertale:UndertaleGameObject+EventSubtypeDraw" />
+                <x:Type TypeName="undertale:EventSubtypeDraw" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
         <local:EventNameConverter x:Key="EventNameConverter"/>
