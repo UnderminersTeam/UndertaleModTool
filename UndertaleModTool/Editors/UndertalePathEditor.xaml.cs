@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -71,7 +73,46 @@ namespace UndertaleModTool
         }
     }
 
-    [ValueConversion(typeof(UndertalePath), typeof(List<UndertalePathEditor.LineData>))]
+    public class PointConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Any(e => e == DependencyProperty.UnsetValue))
+            {
+                return null;
+            }
+            return new Point((float)values[0], (float)values[1]);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+    [ValueConversion(typeof(ObservableCollection<UndertalePath.PathPoint>), typeof(PointCollection))]
+    public class PointListConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            ObservableCollection<UndertalePath.PathPoint> coll = value as ObservableCollection<UndertalePath.PathPoint>;
+            if (coll == null)
+                return null;
+
+            PointCollection outp = new PointCollection();
+            foreach (var a in coll)
+                outp.Add(new Point(a.X, a.Y));
+            return outp;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    // TODO: Finish fixing the path converter when I figure out how to do it https://stackoverflow.com/questions/52334480/binding-observablecollectionpoint-to-pathfigure
+
+    [ValueConversion(typeof(UndertalePath), typeof(PathGeometry))]
     public class PointsDisplayConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -79,8 +120,8 @@ namespace UndertaleModTool
             UndertalePath path = value as UndertalePath;
             if (path == null)
                 return null;
-
-            List<UndertalePathEditor.LineData> target = new List<UndertalePathEditor.LineData>();
+            if (path.Points.Count == 0)
+                return null;
 
             Point boundingLow = new Point(Double.PositiveInfinity, Double.PositiveInfinity);
             Point boundingHigh = new Point(Double.NegativeInfinity, Double.NegativeInfinity);
@@ -97,35 +138,24 @@ namespace UndertaleModTool
                     boundingHigh.Y = point.Y;
             }
 
-            for(int i = 0; i < path.Points.Count-1; i++)
+            PathFigure target = new PathFigure();
+            target.StartPoint = new Point(path.Points[0].X, path.Points[0].Y);
+            target.Segments = new PathSegmentCollection(); 
+            for (int i = 1; i < path.Points.Count; i++)
             {
-                target.Add(new UndertalePathEditor.LineData()
-                {
-                    From = ConvertPoint(boundingLow, boundingHigh, new Point(path.Points[i].X, path.Points[i].Y)),
-                    To = ConvertPoint(boundingLow, boundingHigh, new Point(path.Points[i+1].X, path.Points[i+1].Y))
-                });
+                LineSegment segment = new LineSegment();
+                segment.Point = new Point(path.Points[i].X, path.Points[i].Y);
+                target.Segments.Add(segment);
             }
-            if (path.IsClosed && path.Points.Count > 0)
-            {
-                target.Add(new UndertalePathEditor.LineData()
-                {
-                    From = ConvertPoint(boundingLow, boundingHigh, new Point(path.Points[path.Points.Count-1].X, path.Points[path.Points.Count - 1].Y)),
-                    To = ConvertPoint(boundingLow, boundingHigh, new Point(path.Points[0].X, path.Points[0].Y))
-                });
-            }
+            target.IsClosed = path.IsClosed;
+            target.Freeze();
 
-            return target;
-        }
+            PathGeometry myPathGeometry = new PathGeometry();
+            myPathGeometry.Figures = new PathFigureCollection();
+            myPathGeometry.Figures.Add(target);
+            myPathGeometry.Freeze();
 
-        private Point ConvertPoint(Point boundingLow, Point boundingHigh, Point p)
-        {
-            double scaleX = (boundingHigh.X - boundingLow.X);
-            double scaleY = (boundingHigh.Y - boundingLow.Y);
-            double scale = Math.Max(scaleX, scaleY);
-            return new Point(
-                (p.X - boundingLow.X) / scale * 300,
-                (p.Y - boundingLow.Y) / scale * 300
-                );
+            return myPathGeometry;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

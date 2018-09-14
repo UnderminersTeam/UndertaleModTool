@@ -9,6 +9,7 @@
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertalePath}">
     <UserControl.Resources>
         <local:PointsDisplayConverter x:Key="PointsDisplayConverter" />
+        <local:PointListConverter x:Key="PointListConverter" />
     </UserControl.Resources>
     
     <Grid>
@@ -38,52 +39,84 @@
         <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Precision}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Points</TextBlock>
-        <ListView Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Points}">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <DataGrid Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Points}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+            <DataGrid.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                <Style TargetType="{x:Type DataGridCell}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                <Grid Background="{TemplateBinding Background}">
+                                    <ContentPresenter VerticalAlignment="Center" />
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
                 </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="X" Width="100">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBox Text="{Binding X}" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Y" Width="100">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBox Text="{Binding Y}" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Speed" Width="100">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBox Text="{Binding Speed}" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="X" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Y" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Speed" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Speed, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
 
-        <ItemsControl Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding ., Converter={StaticResource PointsDisplayConverter}}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Canvas Width="300" Height="300"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Line X1="{Binding From.X}" Y1="{Binding From.Y}"
-                      X2="{Binding To.X}" Y2="{Binding To.Y}"
-                      Stroke="Green" StrokeThickness="2"/>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <Viewbox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Width="300" Height="300">
+            <Path Stroke="Green" StrokeThickness="2" Stretch="Fill">
+                <Path.Data>
+                    <PathGeometry>
+                        <PathGeometry.Figures>
+                            <PathFigure>
+                                <PathFigure.StartPoint>
+                                    <MultiBinding>
+                                        <MultiBinding.Converter>
+                                            <local:PointConverter/>
+                                        </MultiBinding.Converter>
+                                        <MultiBinding.Bindings>
+                                            <Binding Path="Points[0].X"/>
+                                            <Binding Path="Points[0].Y"/>
+                                        </MultiBinding.Bindings>
+                                    </MultiBinding>
+                                </PathFigure.StartPoint>
+                                <PathFigure.Segments>
+                                    <PathSegmentCollection>
+                                        <PolyLineSegment Points="{Binding Points, Converter={StaticResource PointListConverter}}"/>
+                                    </PathSegmentCollection>
+                                </PathFigure.Segments>
+                            </PathFigure>
+                        </PathGeometry.Figures>
+                    </PathGeometry>
+                </Path.Data>
+            </Path>
+        </Viewbox>
     </Grid>
 </UserControl>

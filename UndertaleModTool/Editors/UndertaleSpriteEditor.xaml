@@ -114,7 +114,7 @@
                 <DataGridTemplateColumn Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}" CanRemove="False"/>
+                            <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Texture, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}" CanRemove="False"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

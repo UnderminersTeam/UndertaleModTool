@@ -319,8 +319,8 @@
                                                                     <Setter.Value>
                                                                         <DataTemplate>
                                                                             <StackPanel>
-                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey}" />
-                                                                                <TextBox Text="{Binding DataContext.EventSubtype}" />
+                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                                <TextBox Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
@@ -331,8 +331,8 @@
                                                                     <Setter.Value>
                                                                         <DataTemplate>
                                                                             <StackPanel>
-                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey}" />
-                                                                                <TextBox Text="{Binding DataContext.EventSubtype}" />
+                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                                <TextBox Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
@@ -343,8 +343,8 @@
                                                                     <Setter.Value>
                                                                         <DataTemplate>
                                                                             <StackPanel>
-                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey}" />
-                                                                                <TextBox Text="{Binding DataContext.EventSubtype}" />
+                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                                <TextBox Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
@@ -372,7 +372,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeStep}}" SelectedItem="{Binding DataContext.EventSubtypeStep}" />
+                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeStep}}" SelectedItem="{Binding DataContext.EventSubtypeStep, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -381,7 +381,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeOther}}" SelectedItem="{Binding DataContext.EventSubtypeOther}" />
+                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeOther}}" SelectedItem="{Binding DataContext.EventSubtypeOther, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -390,7 +390,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeDraw}}" SelectedItem="{Binding DataContext.EventSubtypeDraw}" />
+                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeDraw}}" SelectedItem="{Binding DataContext.EventSubtypeDraw, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -399,7 +399,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <local:UndertaleObjectReference ObjectReference="{Binding DataContext.EventSubtype, Converter={StaticResource GameObjectByIdConverter}}" ObjectType="{x:Type undertale:UndertaleGameObject}" CanRemove="False"/>
+                                                                            <local:UndertaleObjectReference ObjectReference="{Binding DataContext.EventSubtype, Converter={StaticResource GameObjectByIdConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleGameObject}" CanRemove="False"/>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -407,7 +407,7 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </ContentControl.Style>
-                                                <TextBox Text="{Binding EventSubtype}" />
+                                                <TextBox Text="{Binding EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                             </ContentControl>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -420,7 +420,7 @@
                                                     <DataGridTemplateColumn Header="Code" Width="*">
                                                         <DataGridTemplateColumn.CellTemplate>
                                                             <DataTemplate>
-                                                                <local:UndertaleObjectReference ObjectReference="{Binding CodeId}" ObjectType="{x:Type undertale:UndertaleCode}" Margin="23,3,3,3" CanRemove="False"/>
+                                                                <local:UndertaleObjectReference ObjectReference="{Binding CodeId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleCode}" Margin="23,3,3,3" CanRemove="False"/>
                                                             </DataTemplate>
                                                         </DataGridTemplateColumn.CellTemplate>
                                                     </DataGridTemplateColumn>

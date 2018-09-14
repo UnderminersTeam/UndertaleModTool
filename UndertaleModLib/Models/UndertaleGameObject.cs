@@ -199,7 +199,7 @@ namespace UndertaleModLib.Models
             Other = 7, // subtype is EventSubtypeOther
             Draw = 8, // subtype is EventSubtypeDraw
             KeyPress = 9, // subtype is key ID, see EventSubtypeKey
-            KeyRelease = 10, // subtype is key ID, values unknown
+            KeyRelease = 10, // subtype is key ID, see EventSubtypeKey
             Gesture = 11, // TODO: mapping is a guess // TODO: subtypes
             Asynchronous = 12, // TODO: mapping is a guess // TODO: subtypes
         }
