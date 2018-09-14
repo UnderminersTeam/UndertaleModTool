@@ -32,4 +32,9 @@ namespace UndertaleModLib
     {
         UndertaleString Name { get; set; }
     }
+
+    public interface ISearchable
+    {
+        bool SearchMatches(string filter);
+    }
 }

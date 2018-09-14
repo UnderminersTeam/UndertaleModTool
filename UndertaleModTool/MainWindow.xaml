@@ -7,10 +7,12 @@
 		xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
 		xmlns:undertalelib="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
         xmlns:scol="clr-namespace:System.Collections;assembly=mscorlib" 
+        xmlns:cmod="clr-namespace:System.ComponentModel;assembly=WindowsBase" 
         mc:Ignorable="d"
         Title="UndertaleModTool" Height="450" Width="800">
     <Window.Resources>
         <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
+        <local:FilteredViewConverter x:Key="FilteredViewConverter" Filter="{Binding Text, Source={x:Reference SearchBox}, UpdateSourceTrigger=PropertyChanged}"/>
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="New" Executed="Command_New" />
@@ -60,12 +62,17 @@
             </Menu>
             <TextBox DockPanel.Dock="Bottom" Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown"/>
             <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
-                <TreeView Grid.Column="0" Margin="5" DataContext="{Binding Data}" SelectedItemChanged="TreeView_SelectedItemChanged" MouseDoubleClick="MainTree_MouseDoubleClick" AllowDrop="True" Name="MainTree" KeyDown="MainTree_KeyDown" PreviewMouseRightButtonDown="MainTree_PreviewMouseRightButtonDown"
+                <TextBox Grid.Column="0" Grid.Row="0" Margin="5,5,5,0" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"/>
+                <TreeView Grid.Column="0" Grid.Row="1" Margin="5" DataContext="{Binding Data}" SelectedItemChanged="TreeView_SelectedItemChanged" MouseDoubleClick="MainTree_MouseDoubleClick" AllowDrop="True" Name="MainTree" KeyDown="MainTree_KeyDown" PreviewMouseRightButtonDown="MainTree_PreviewMouseRightButtonDown"
                     VirtualizingStackPanel.IsVirtualizing="True"
                     VirtualizingStackPanel.VirtualizationMode="Recycling">
                     <TreeView.Resources>
@@ -87,117 +94,120 @@
                                 <DataTrigger Binding="{Binding ItemsSource, RelativeSource={RelativeSource Self}, Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type scol:IList}}" Value="True">
                                     <Setter Property="ContextMenu" Value="{StaticResource AddMenu}"/>
                                 </DataTrigger>
+                                <DataTrigger Binding="{Binding ItemsSource, RelativeSource={RelativeSource Self}, Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type cmod:ICollectionView}}" Value="True">
+                                    <Setter Property="ContextMenu" Value="{StaticResource AddMenu}"/>
+                                </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </TreeView.Resources>
                     <TreeViewItem Header="Data" IsExpanded="True">
                         <TreeViewItem Header="General info"/>
-                        <TreeViewItem Header="Sounds" ItemsSource="{Binding Sounds}">
+                        <TreeViewItem Header="Sounds" ItemsSource="{Binding Sounds, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleSound}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Sprites" ItemsSource="{Binding Sprites}">
+                        <TreeViewItem Header="Sprites" ItemsSource="{Binding Sprites, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleSprite}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Backgrounds" ItemsSource="{Binding Backgrounds}">
+                        <TreeViewItem Header="Backgrounds" ItemsSource="{Binding Backgrounds, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleBackground}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Paths" ItemsSource="{Binding Paths}">
+                        <TreeViewItem Header="Paths" ItemsSource="{Binding Paths, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertalePath}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Scripts" ItemsSource="{Binding Scripts}">
+                        <TreeViewItem Header="Scripts" ItemsSource="{Binding Scripts, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleScript}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Fonts" ItemsSource="{Binding Fonts}">
+                        <TreeViewItem Header="Fonts" ItemsSource="{Binding Fonts, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleFont}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects}">
+                        <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Rooms" ItemsSource="{Binding Rooms}">
+                        <TreeViewItem Header="Rooms" ItemsSource="{Binding Rooms, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleRoom}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Texture page items" ItemsSource="{Binding TexturePageItems}">
+                        <TreeViewItem Header="Texture page items" ItemsSource="{Binding TexturePageItems, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleTexturePageItem}">
                                     <TextBlock Text="{Binding .}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Code" ItemsSource="{Binding Code}">
+                        <TreeViewItem Header="Code" ItemsSource="{Binding Code, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleCode}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Variables" ItemsSource="{Binding Variables}">
+                        <TreeViewItem Header="Variables" ItemsSource="{Binding Variables, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleVariable}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Functions" ItemsSource="{Binding Functions}">
+                        <TreeViewItem Header="Functions" ItemsSource="{Binding Functions, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleFunction}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Code locals (unused?)" ItemsSource="{Binding CodeLocals}" Foreground="Gray">
+                        <TreeViewItem Header="Code locals (unused?)" ItemsSource="{Binding CodeLocals, Converter={StaticResource FilteredViewConverter}}" Foreground="Gray">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleCodeLocals}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Strings" ItemsSource="{Binding Strings}">
+                        <TreeViewItem Header="Strings" ItemsSource="{Binding Strings, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleString}">
                                     <TextBlock Text="{Binding Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Embedded textures" ItemsSource="{Binding EmbeddedTextures}">
+                        <TreeViewItem Header="Embedded textures" ItemsSource="{Binding EmbeddedTextures, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleEmbeddedTexture}">
                                     <TextBlock Text="{Binding .}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Embedded audio" ItemsSource="{Binding EmbeddedAudio}">
+                        <TreeViewItem Header="Embedded audio" ItemsSource="{Binding EmbeddedAudio, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleEmbeddedAudio}">
                                     <TextBlock Text="{Binding .}" />
@@ -207,9 +217,9 @@
                     </TreeViewItem>
                 </TreeView>
                 
-                <GridSplitter Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
+                <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
 
-                <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer Grid.Column="2" Grid.RowSpan="2" VerticalScrollBarVisibility="Auto">
                     <ContentControl Margin="10" Content="{Binding Selected}" Name="DataEditor">
                         <ContentControl.Resources>
                             <DataTemplate DataType="{x:Type local:DescriptionView}">

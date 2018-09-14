@@ -190,6 +190,7 @@
     </Compile>
     <Compile Include="Converters\EqualityConverter.cs" />
     <Compile Include="Converters\EventNameConverter.cs" />
+    <Compile Include="Converters\FilteredViewConverter.cs" />
     <Compile Include="Converters\GameObjectByIdConverter.cs" />
     <Compile Include="Converters\ImplementsInterfaceConverter.cs" />
     <Compile Include="Converters\MaskImageConverter.cs" />

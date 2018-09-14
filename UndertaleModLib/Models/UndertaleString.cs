@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleString : UndertaleResource, INotifyPropertyChanged
+    public class UndertaleString : UndertaleResource, INotifyPropertyChanged, ISearchable
     {
         private string _Content;
 
@@ -45,6 +45,11 @@ namespace UndertaleModLib.Models
         public override string ToString()
         {
             return "\"" + Content + "\"";
+        }
+
+        public bool SearchMatches(string filter)
+        {
+            return Content?.ToLower().Contains(filter.ToLower()) ?? false;
         }
     }
 }

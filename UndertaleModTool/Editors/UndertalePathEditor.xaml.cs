@@ -34,6 +34,11 @@ namespace UndertaleModTool
             public Point From { get; set; }
             public Point To { get; set; }
         }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(e.Uri.ToString());
+        }
     }
 
     [ValueConversion(typeof(UndertalePath), typeof(List<UndertalePathEditor.LineData>))]

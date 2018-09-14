@@ -440,7 +440,8 @@ namespace UndertaleModTool
 
         private void MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
-            IList list = (MainTree.SelectedItem as TreeViewItem).ItemsSource as IList;
+            object source = (MainTree.SelectedItem as TreeViewItem).ItemsSource;
+            IList list = ((source as ICollectionView)?.SourceCollection as IList) ?? (source as IList);
             Type t = list.GetType().GetGenericArguments()[0];
             Debug.Assert(typeof(UndertaleResource).IsAssignableFrom(t));
             UndertaleResource obj = Activator.CreateInstance(t) as UndertaleResource;
@@ -638,6 +639,14 @@ namespace UndertaleModTool
             SettingsWindow settings = new SettingsWindow();
             settings.Owner = this;
             settings.ShowDialog();
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            foreach (var child in (MainTree.Items[0] as TreeViewItem).Items)
+            {
+                ((child as TreeViewItem).ItemsSource as ICollectionView)?.Refresh();
+            }
         }
     }
 
