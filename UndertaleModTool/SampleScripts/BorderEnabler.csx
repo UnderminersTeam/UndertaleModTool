@@ -180,5 +180,5 @@ AssignBorderBackground("bg_border_tundra", textures["19.png"]);
 AssignBorderBackground("bg_border_water1", textures["20.png"]);
 AssignBorderBackground("bg_border_water2", textures["20.png"]); // TODO: are we missing one...?
 
-Selected = Data.Backgrounds.ByName("bg_border_water2_1080");
+ChangeSelection(Data.Backgrounds.ByName("bg_border_water2_1080"));
 ScriptMessage("Borders loaded and enabled!");

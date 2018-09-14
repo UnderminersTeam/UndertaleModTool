@@ -92,7 +92,7 @@ namespace UndertaleModTool
                 return pos.X > x.SourceX && pos.X < x.SourceX + x.SourceWidth && pos.Y > x.SourceY && pos.Y < x.SourceY + x.SourceHeight;
             }).FirstOrDefault();
             if (tpag != null)
-                (Application.Current.MainWindow as MainWindow).Selected = tpag;
+                (Application.Current.MainWindow as MainWindow).ChangeSelection(tpag);
         }
     }
 }

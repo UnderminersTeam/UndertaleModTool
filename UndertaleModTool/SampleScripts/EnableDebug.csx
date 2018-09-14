@@ -21,4 +21,4 @@ for(int i = 0; i < SCR_GAMESTART.Instructions.Count; i++)
 }
 if (!ok)
 	throw new Exception("Patch point not found?");
-Selected = SCR_GAMESTART;
+ChangeSelection(SCR_GAMESTART);

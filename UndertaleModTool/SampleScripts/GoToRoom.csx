@@ -48,5 +48,5 @@ code.Instructions.Add(new UndertaleInstruction() {
 	Type1 = UndertaleInstruction.DataType.Int32
 });
 
-Selected = code;
+ChangeSelection(code);
 ScriptMessage("Patched!");

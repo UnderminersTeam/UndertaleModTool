@@ -211,9 +211,11 @@ namespace UndertaleModTool
         {
             object sel = (sender as TreeView).SelectedItem;
             if (sel is UndertaleRoom.GameObject)
-                (Application.Current.MainWindow as MainWindow).Selected = (sel as UndertaleRoom.GameObject).ObjectDefinition;
+                (Application.Current.MainWindow as MainWindow).ChangeSelection((sel as UndertaleRoom.GameObject).ObjectDefinition);
             if (sel is UndertaleRoom.Background)
-                (Application.Current.MainWindow as MainWindow).Selected = (sel as UndertaleRoom.Background).BackgroundDefinition;
+                (Application.Current.MainWindow as MainWindow).ChangeSelection((sel as UndertaleRoom.Background).BackgroundDefinition);
+            if (sel is UndertaleRoom.Tile)
+                (Application.Current.MainWindow as MainWindow).ChangeSelection((sel as UndertaleRoom.Tile).BackgroundDefinition);
         }
 
         private UndertaleObject copied;

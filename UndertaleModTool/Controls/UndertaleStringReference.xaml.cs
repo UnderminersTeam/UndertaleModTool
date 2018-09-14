@@ -42,7 +42,7 @@ namespace UndertaleModTool
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            (Application.Current.MainWindow as MainWindow).Selected = ObjectReference;
+            (Application.Current.MainWindow as MainWindow).ChangeSelection(ObjectReference);
         }
 
         private void Remove_Click(object sender, RoutedEventArgs e)

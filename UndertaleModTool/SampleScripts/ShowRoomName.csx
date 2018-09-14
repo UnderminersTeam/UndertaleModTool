@@ -110,5 +110,5 @@ code.Instructions.Add(new UndertaleInstruction() {
 	Type1 = UndertaleInstruction.DataType.Variable
 });
 
-Selected = code;
+ChangeSelection(code);
 ScriptMessage("Patched!");

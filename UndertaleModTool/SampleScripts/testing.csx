@@ -44,4 +44,4 @@ code.Instructions.Add(new UndertaleInstruction() {
 	Kind = UndertaleInstruction.Opcode.Popz,
 	Type1 = UndertaleInstruction.DataType.Variable
 });
-Selected = code;
+ChangeSelection(code);

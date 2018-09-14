@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -41,14 +42,17 @@ namespace UndertaleModTool
         private object _Highlighted;
         public object Highlighted { get { return _Highlighted; } set { _Highlighted = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Highlighted")); } }
         private object _Selected;
-        public object Selected { get { return _Selected; } set { _Selected = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Selected")); } }
+        public object Selected { get { return _Selected; } private set { _Selected = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Selected")); } }
+
+        public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
 
         public MainWindow()
         {
             InitializeComponent();
             this.DataContext = this;
 
-            Selected = Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them");
+            ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"));
+            SelectionHistory.Clear();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -57,7 +61,8 @@ namespace UndertaleModTool
         {
             Data = UndertaleData.CreateNew();
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
-            Selected = Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P");
+            ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P"));
+            SelectionHistory.Clear();
         }
 
         private async Task<bool> DoOpenDialog()
@@ -131,7 +136,8 @@ namespace UndertaleModTool
                         this.Data = data;
                         this.FilePath = filename;
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
-                        Selected = Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
+                        ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"));
+                        SelectionHistory.Clear();
                     }
                     dialog.Hide();
                 });
@@ -217,7 +223,7 @@ namespace UndertaleModTool
 
         private void MainTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            Selected = Highlighted;
+            ChangeSelection(Highlighted);
         }
 
         private void TreeView_MouseMove(object sender, MouseEventArgs e)
@@ -351,7 +357,8 @@ namespace UndertaleModTool
             if (MessageBox.Show("Delete " + obj.ToString() + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), "Confirmation", MessageBoxButton.YesNo, isLast ? MessageBoxImage.Question : MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
                 list.Remove(obj);
-                Selected = null;
+                while (SelectionHistory.Remove(obj)) ;
+                ChangeSelection(null);
                 if (Highlighted == obj)
                     Highlighted = null;
             }
@@ -454,7 +461,7 @@ namespace UndertaleModTool
             }
             list.Add(obj);
             // TODO: change highlighted too
-            Selected = obj;
+            ChangeSelection(obj);
         }
 
         private void MenuItem_RunBuiltinScript_SubmenuOpened(object sender, RoutedEventArgs e)
@@ -647,6 +654,18 @@ namespace UndertaleModTool
             {
                 ((child as TreeViewItem).ItemsSource as ICollectionView)?.Refresh();
             }
+        }
+
+        public void ChangeSelection(object newsel)
+        {
+            SelectionHistory.Add(Selected);
+            Selected = newsel;
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            Selected = SelectionHistory.Last();
+            SelectionHistory.RemoveAt(SelectionHistory.Count - 1);
         }
     }
 

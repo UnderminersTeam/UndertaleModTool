@@ -138,7 +138,7 @@ namespace UndertaleModTool
                             Run runDest = new Run(instr.Destination.ToString()) { Foreground = argBrush, Cursor = Cursors.Hand };
                             runDest.MouseDown += (sender, e) =>
                             {
-                                (Application.Current.MainWindow as MainWindow).Selected = instr.Destination;
+                                (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Destination);
                             };
                             par.Inlines.Add(runDest);
                             break;
@@ -151,14 +151,14 @@ namespace UndertaleModTool
                             {
                                 valueRun.MouseDown += (sender, e) =>
                                 {
-                                    (Application.Current.MainWindow as MainWindow).Selected = (instr.Value as UndertaleResourceRef).Resource;
+                                    (Application.Current.MainWindow as MainWindow).ChangeSelection((instr.Value as UndertaleResourceRef).Resource);
                                 };
                             }
                             else if (instr.Value is UndertaleObject)
                             {
                                 valueRun.MouseDown += (sender, e) =>
                                 {
-                                    (Application.Current.MainWindow as MainWindow).Selected = instr.Value;
+                                    (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Value);
                                 };
                             }
                             par.Inlines.Add(valueRun);
@@ -314,13 +314,13 @@ namespace UndertaleModTool
                                         par.Inlines.LastInline.MouseDown += (sender, ev) =>
                                         {
                                             MainWindow mw = Application.Current.MainWindow as MainWindow;
-                                            mw.Selected = mw.Data.Strings[Int32.Parse(token.Substring(1))];
+                                            mw.ChangeSelection(mw.Data.Strings[Int32.Parse(token.Substring(1))]);
                                         };
                                     }
                                     else if (funcs.ContainsKey(token))
                                     {
                                         par.Inlines.Add(new Run(token) { Foreground = funcBrush, Cursor = Cursors.Hand });
-                                        par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).Selected = funcs[token];
+                                        par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(funcs[token]);
                                         if (token == "scr_gettext" && gettext != null)
                                         {
                                             if (split[i + 1] == "(" && split[i + 2].StartsWith("\"") && split[i + 3].StartsWith("@") && split[i + 4] == ")")
@@ -361,7 +361,7 @@ namespace UndertaleModTool
                                             {
                                                 MenuItem item = new MenuItem();
                                                 item.Header = obj.ToString();
-                                                item.Click += (sender2, ev2) => (Application.Current.MainWindow as MainWindow).Selected = obj;
+                                                item.Click += (sender2, ev2) => (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
                                                 contextMenu.Items.Add(item);
                                             }
                                             if (id > 0x00050000)
@@ -393,7 +393,7 @@ namespace UndertaleModTool
                                     par.Inlines.Add(new Run(gt.Key) { Foreground = commentBrush });
                                     par.Inlines.Add(new Run(" = ") { Foreground = commentBrush });
                                     par.Inlines.Add(new Run(gt.Value.ToString()) { Foreground = commentBrush, Cursor = Cursors.Hand });
-                                    par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).Selected = gt.Value;
+                                    par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(gt.Value);
                                 }
                                 par.Inlines.Add(new Run("\n"));
                             }
