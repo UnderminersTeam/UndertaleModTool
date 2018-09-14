@@ -276,7 +276,8 @@ namespace UndertaleModTool
             e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Move) && sourceItem != null && targetItem != null && sourceItem != targetItem && sourceItem.GetType() == targetItem.GetType() ? DragDropEffects.Move : DragDropEffects.None;
             if (e.Effects == DragDropEffects.Move)
             {
-                IList list = GetNearestParent<TreeViewItem>(targetTreeItem).ItemsSource as IList;
+                object source = GetNearestParent<TreeViewItem>(targetTreeItem).ItemsSource;
+                IList list = ((source as ICollectionView)?.SourceCollection as IList) ?? (source as IList);
                 int sourceIndex = list.IndexOf(sourceItem);
                 int targetIndex = list.IndexOf(targetItem);
                 Debug.Assert(sourceIndex >= 0 && targetIndex >= 0);
@@ -352,13 +353,15 @@ namespace UndertaleModTool
         private void DeleteItem(UndertaleObject obj)
         {
             TreeViewItem container = GetNearestParent<TreeViewItem>(GetTreeViewItemFor(obj));
-            IList list = container.ItemsSource as IList;
+            object source = container.ItemsSource;
+            IList list = ((source as ICollectionView)?.SourceCollection as IList) ?? (source as IList);
             bool isLast = list.IndexOf(obj) == list.Count-1;
             if (MessageBox.Show("Delete " + obj.ToString() + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), "Confirmation", MessageBoxButton.YesNo, isLast ? MessageBoxImage.Question : MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
                 list.Remove(obj);
                 while (SelectionHistory.Remove(obj)) ;
-                ChangeSelection(null);
+                if (Selected == obj)
+                    ChangeSelection(null);
                 if (Highlighted == obj)
                     Highlighted = null;
             }

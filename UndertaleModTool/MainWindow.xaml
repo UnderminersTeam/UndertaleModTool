@@ -76,7 +76,7 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Content=" &lt;- " ToolTip="Back" Margin="0,0,5,0" Click="BackButton_Click">
+                    <Button Grid.Column="0" ToolTip="Back" Margin="0,0,5,0" Name="BackButton" Click="BackButton_Click">
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Style.Triggers>
@@ -86,6 +86,23 @@
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
+                        <Image Name="BackButtonImage">
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Opacity" Value="0.5" />
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="False">
+                                            <Setter Property="Source" Value="/Resources/arrow_blue.png" />
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Source" Value="/Resources/arrow_red.png" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
                     </Button>
                     <TextBox Grid.Column="1" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"/>
                 </Grid>
