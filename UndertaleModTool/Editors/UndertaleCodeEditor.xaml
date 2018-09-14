@@ -30,7 +30,10 @@
         
         <TabControl Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
             <TabItem Header="Disassembly" Name="DisassemblyTab">
-                <RichTextBox IsReadOnly="True" IsDocumentEnabled="True" Name="DisassemblyView" Padding="-5,0,-5,0"/>
+                <Grid>
+                    <RichTextBox IsReadOnly="True" IsDocumentEnabled="True" Name="DisassemblyView" Padding="-5,0,-5,0" MouseDoubleClick="DisassemblyView_MouseDoubleClick"/>
+                    <TextBox Name="DisassemblyEditor" LostFocus="DisassemblyEditor_LostFocus" Visibility="Collapsed" FontFamily="Lucida Console" Padding="-2,0,-2,0" AcceptsReturn="True"/>
+                </Grid>
             </TabItem>
             <TabItem Header="Graph view" Name="GraphTab">
                 <Viewbox Stretch="UniformToFill" StretchDirection="DownOnly">

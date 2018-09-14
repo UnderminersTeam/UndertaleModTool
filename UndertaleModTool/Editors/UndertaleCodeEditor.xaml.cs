@@ -116,7 +116,6 @@ namespace UndertaleModTool
                         case UndertaleInstruction.InstructionType.DoubleTypeInstruction:
                             par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run("." + instr.Type2.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run(" "));
                             break;
 
                         case UndertaleInstruction.InstructionType.ComparisonInstruction:
@@ -128,24 +127,41 @@ namespace UndertaleModTool
 
                         case UndertaleInstruction.InstructionType.GotoInstruction:
                             par.Inlines.Add(new Run(" "));
-                            par.Inlines.Add(new Run("$" + instr.JumpOffset.ToString("+#;-#;0")) { Foreground = argBrush, ToolTip = (instr.Address + instr.JumpOffset).ToString("D5") });
+                            string tgt = (instr.Address + instr.JumpOffset).ToString("D5");
+                            if (instr.Address + instr.JumpOffset == code.Length / 4)
+                                tgt = "func_end";
+                            par.Inlines.Add(new Run(tgt) { Foreground = argBrush, ToolTip = "$" + instr.JumpOffset.ToString("+#;-#;0") });
                             break;
 
                         case UndertaleInstruction.InstructionType.PopInstruction:
                             par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run("." + instr.Type2.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run(" "));
+                            if (instr.Type1 == UndertaleInstruction.DataType.Variable && instr.TypeInst != UndertaleInstruction.InstanceType.StackTopOrGlobal)
+                            {
+                                par.Inlines.Add(new Run(instr.TypeInst.ToString().ToLower()) { Foreground = typeBrush });
+                                par.Inlines.Add(new Run("."));
+                            }
                             Run runDest = new Run(instr.Destination.ToString()) { Foreground = argBrush, Cursor = Cursors.Hand };
                             runDest.MouseDown += (sender, e) =>
                             {
                                 (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Destination);
                             };
                             par.Inlines.Add(runDest);
+                            if (instr.Destination is UndertaleInstruction.Reference<UndertaleVariable>)
+                            {
+                                par.Inlines.Add(new Run("@" + (Application.Current.MainWindow as MainWindow).Data.Variables.IndexOf((instr.Destination as UndertaleInstruction.Reference<UndertaleVariable>).Target)) { Foreground = argBrush });
+                            }
                             break;
 
                         case UndertaleInstruction.InstructionType.PushInstruction:
                             par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run(" "));
+                            if (instr.Type1 == UndertaleInstruction.DataType.Variable && instr.TypeInst != UndertaleInstruction.InstanceType.StackTopOrGlobal)
+                            {
+                                par.Inlines.Add(new Run(instr.TypeInst.ToString().ToLower()) { Foreground = typeBrush });
+                                par.Inlines.Add(new Run("."));
+                            }
                             Run valueRun = new Run(instr.Value.ToString()) { Foreground = argBrush, Cursor = (instr.Value is UndertaleObject || instr.Value is UndertaleResourceRef) ? Cursors.Hand : Cursors.Arrow };
                             if (instr.Value is UndertaleResourceRef)
                             {
@@ -162,6 +178,10 @@ namespace UndertaleModTool
                                 };
                             }
                             par.Inlines.Add(valueRun);
+                            if (instr.Value is UndertaleInstruction.Reference<UndertaleVariable>)
+                            {
+                                par.Inlines.Add(new Run("@" + (Application.Current.MainWindow as MainWindow).Data.Variables.IndexOf((instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Target)) { Foreground = argBrush });
+                            }
                             break;
 
                         case UndertaleInstruction.InstructionType.CallInstruction:
@@ -456,6 +476,44 @@ namespace UndertaleModTool
             });
             dialog.ShowDialog();
             await t;
+        }
+
+        private void DisassemblyView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            DisassemblyView.Visibility = Visibility.Collapsed;
+            DisassemblyEditor.Visibility = Visibility.Visible;
+            DisassemblyEditor.Text = new TextRange(DisassemblyView.Document.ContentStart, DisassemblyView.Document.ContentEnd).Text;
+            int index = DisassemblyEditor.GetCharacterIndexFromPoint(Mouse.GetPosition(DisassemblyView), true);
+            if (index >= 0)
+                DisassemblyEditor.CaretIndex = index;
+            DisassemblyEditor.Focus();
+        }
+
+        private void DisassemblyEditor_LostFocus(object sender, RoutedEventArgs e)
+        {
+            UndertaleCode code = this.DataContext as UndertaleCode;
+            Debug.Assert(code != null);
+
+            UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
+            try
+            {
+                var instructions = Assembler.Assemble(DisassemblyEditor.Text, data.Functions, data.Variables, data.Strings);
+                code.Instructions.Clear();
+                code.Instructions.AddRange(instructions);
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            
+            CurrentDisassembled = null;
+            CurrentDecompiled = null;
+            CurrentGraphed = null;
+            DisassembleCode(code);
+
+            DisassemblyView.Visibility = Visibility.Visible;
+            DisassemblyEditor.Visibility = Visibility.Collapsed;
         }
     }
 }

@@ -38,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DebugData\DebugDataGenerator.cs" />
+    <Compile Include="Decompiler\Assembler.cs" />
     <Compile Include="Decompiler\Decompiler.cs" />
     <Compile Include="ModelsDebug\UndertaleDebugInfo.cs" />
     <Compile Include="ModelsDebug\UndertaleInstanceVars.cs" />

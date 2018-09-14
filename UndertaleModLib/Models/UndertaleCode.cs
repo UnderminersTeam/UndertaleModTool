@@ -476,6 +476,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        // TODO: Change this to use GM:S syntax
         public override string ToString()
         {
             switch(GetInstructionType(Kind))
@@ -497,13 +498,13 @@ namespace UndertaleModLib.Models
                     //return String.Format("{0:D5}: {1} {2:D5}", Address, Kind.ToString().ToUpper(), Address + JumpOffset);
 
                 case InstructionType.PopInstruction:
-                    return String.Format("{0:D5}: {1} ({2}){3}, ({4}), 0x{5:X2}", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower(), Destination.ToString(), Type2.ToString().ToLower(), DupExtra);
+                    return String.Format("{0:D5}: {1} ({2}){3}, ({4})", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower(), Destination, Type2.ToString().ToLower());
 
                 case InstructionType.PushInstruction:
-                    return String.Format("{0:D5}: {1} ({2}){3}", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower(), Value.ToString());
+                    return String.Format("{0:D5}: {1} ({2}){3}", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower(), Value);
 
                 case InstructionType.CallInstruction:
-                    return String.Format("{0:D5}: {1} ({2}), {3}, {4}", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower(), Function.ToString(), ArgumentsCount);
+                    return String.Format("{0:D5}: {1} ({2}), {3}, {4}", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower(), Function, ArgumentsCount);
 
                 case InstructionType.BreakInstruction:
                     return String.Format("{0:D5}: {1} ({2}){3}", Address, Kind.ToString().ToUpper(), Type1.ToString().ToLower(), Value);
@@ -512,9 +513,21 @@ namespace UndertaleModLib.Models
                     return Kind.ToString().ToUpper();
             }
         }
+
+        public uint CalculateInstructionSize()
+        {
+            if (GetReference<UndertaleVariable>() != null || GetReference<UndertaleFunction>() != null)
+                return 2;
+            else if (GetInstructionType(Kind) == InstructionType.PushInstruction)
+                if (Type1 == DataType.Double || Type1 == DataType.Int64)
+                    return 3;
+                else if (Type1 != DataType.Int16)
+                    return 2;
+            return 1;
+        }
     }
 
-    public static class UndertaleInstructionExtensions
+    public static class UndertaleInstructionUtil
     {
         public static string ToOpcodeParam(this UndertaleInstruction.DataType type)
         {
@@ -540,17 +553,43 @@ namespace UndertaleModLib.Models
                     return type.ToString().ToLower();
             }
         }
+
+        public static UndertaleInstruction.DataType FromOpcodeParam(string type)
+        {
+            switch (type)
+            {
+                case "d":
+                    return UndertaleInstruction.DataType.Double;
+                case "f":
+                    return UndertaleInstruction.DataType.Float;
+                case "i":
+                    return UndertaleInstruction.DataType.Int32;
+                case "l":
+                    return UndertaleInstruction.DataType.Int64;
+                case "b":
+                    return UndertaleInstruction.DataType.Boolean;
+                case "v":
+                    return UndertaleInstruction.DataType.Variable;
+                case "s":
+                    return UndertaleInstruction.DataType.String;
+                case "e":
+                    return UndertaleInstruction.DataType.Int16;
+                default:
+                    return (UndertaleInstruction.DataType)Enum.Parse(typeof(UndertaleInstruction.DataType), type, true);
+            }
+        }
     }
 
     public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, INotifyPropertyChanged
     {
         private UndertaleString _Name;
-        internal uint _Length;
+        private uint _Length;
         private uint _LocalsCount; // Seems related do UndertaleCodeLocals, TODO: does it also seem unused?
         internal uint _BytecodeAbsoluteAddress;
         private uint _UnknownProbablyZero;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+        public uint Length { get => _Length; internal set { _Length = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Length")); } }
         public uint LocalsCount { get => _LocalsCount; set { _LocalsCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LocalsCount")); } }
         public uint UnknownProbablyZero { get => _UnknownProbablyZero; set { _UnknownProbablyZero = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UnknownProbablyZero")); } }
         public List<UndertaleInstruction> Instructions { get; } = new List<UndertaleInstruction>();
@@ -563,13 +602,13 @@ namespace UndertaleModLib.Models
             uint start = writer.Position;
             foreach (UndertaleInstruction instr in Instructions)
                 writer.WriteUndertaleObject(instr);
-            _Length = writer.Position - start;
+            Length = writer.Position - start;
         }
 
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
-            writer.Write(_Length);
+            writer.Write(Length);
             writer.Write(LocalsCount);
             int BytecodeRelativeAddress = (int)_BytecodeAbsoluteAddress - (int)writer.Position;
             writer.Write(BytecodeRelativeAddress);
@@ -579,14 +618,14 @@ namespace UndertaleModLib.Models
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
-            _Length = reader.ReadUInt32();
+            Length = reader.ReadUInt32();
             LocalsCount = reader.ReadUInt32();
             int BytecodeRelativeAddress = reader.ReadInt32();
             _BytecodeAbsoluteAddress = (uint)((int)reader.Position - 4 + BytecodeRelativeAddress);
             uint here = reader.Position;
             reader.Position = _BytecodeAbsoluteAddress;
             Instructions.Clear();
-            while (reader.Position < _BytecodeAbsoluteAddress + _Length)
+            while (reader.Position < _BytecodeAbsoluteAddress + Length)
             {
                 uint a = (reader.Position - _BytecodeAbsoluteAddress) / 4;
                 UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
@@ -603,16 +642,9 @@ namespace UndertaleModLib.Models
             foreach(UndertaleInstruction instr in Instructions)
             {
                 instr.Address = addr;
-                addr++;
-                if (instr.GetReference<UndertaleVariable>() != null || instr.GetReference<UndertaleFunction>() != null)
-                    addr++;
-                else if (UndertaleInstruction.GetInstructionType(instr.Kind) == UndertaleInstruction.InstructionType.PushInstruction)
-                    if (instr.Type1 == UndertaleInstruction.DataType.Double || instr.Type1 == UndertaleInstruction.DataType.Int64)
-                        addr += 2;
-                    else if (instr.Type1 != UndertaleInstruction.DataType.Int16)
-                        addr++;
+                addr += instr.CalculateInstructionSize();
             }
-            _Length = addr * 4;
+            Length = addr * 4;
         }
 
         public string Disassembly
