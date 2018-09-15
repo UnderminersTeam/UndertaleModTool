@@ -20,6 +20,10 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
+            if (writer.undertaleData.GeneralInfo.Major >= 2)
+            {
+                throw new NotImplementedException();
+            }
             writer.Write(UnknownAlwaysZero);
             writer.WriteUndertaleObjectPointer(TextureData);
         }

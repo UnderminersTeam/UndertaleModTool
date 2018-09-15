@@ -26,6 +26,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
@@ -73,8 +74,12 @@
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">SepMasks (?)</TextBlock>
         <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding SepMasks}"/>
 
-        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Origin</TextBlock>
-        <Grid Grid.Row="7" Grid.Column="1">
+        <Border Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">More GMS2 params go here</TextBlock>
+        </Border>
+
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Origin</TextBlock>
+        <Grid Grid.Row="8" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -83,8 +88,8 @@
             <TextBox Grid.Column="1" Margin="3" Text="{Binding OriginY}"/>
         </Grid>
 
-        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Textures</TextBlock>
-        <DataGrid Grid.Row="8" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures}" Name="TextureList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
+        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Textures</TextBlock>
+        <DataGrid Grid.Row="9" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures}" Name="TextureList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -121,7 +126,7 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <Viewbox Grid.Row="9" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
+        <Viewbox Grid.Row="10" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
             <Border>
                 <Border.Background>
                     <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
@@ -137,8 +142,8 @@
             </Border>
         </Viewbox>
 
-        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Collision masks</TextBlock>
-        <DataGrid Grid.Row="10" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks}" Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
+        <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Collision masks</TextBlock>
+        <DataGrid Grid.Row="11" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks}" Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -175,7 +180,7 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <ContentControl Grid.Row="11" Grid.Column="1" Margin="3" DataContext="{Binding SelectedItem, ElementName=MaskList}">
+        <ContentControl Grid.Row="12" Grid.Column="1" Margin="3" DataContext="{Binding SelectedItem, ElementName=MaskList}">
             <ContentControl.Template>
                 <ControlTemplate>
                     <StackPanel Name="MaskEditor">

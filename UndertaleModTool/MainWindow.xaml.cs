@@ -43,6 +43,7 @@ namespace UndertaleModTool
         public object Highlighted { get { return _Highlighted; } set { _Highlighted = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Highlighted")); } }
         private object _Selected;
         public object Selected { get { return _Selected; } private set { _Selected = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Selected")); } }
+        public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
 
         public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
 
@@ -65,6 +66,7 @@ namespace UndertaleModTool
         {
             Data = UndertaleData.CreateNew();
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsGMS2"));
             ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P"));
             SelectionHistory.Clear();
         }
@@ -121,17 +123,17 @@ namespace UndertaleModTool
             Task t = Task.Run(() =>
             {
                 UndertaleData data = null;
-                /*try
-                {*/
+                try
+                {
                     using (var stream = new FileStream(filename, FileMode.Open))
                     {
                         data = UndertaleIO.Read(stream);
                     }
-                /*}
+                }
                 catch (Exception e)
                 {
                     MessageBox.Show("An error occured while trying to load:\n" + e.Message, "Load error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }*/
+                }
 
                 Dispatcher.Invoke(() =>
                 {
@@ -139,11 +141,12 @@ namespace UndertaleModTool
                     {
                         if (data.GeneralInfo.Major >= 2)
                         {
-                            MessageBox.Show("Game Maker: Studio 2 game loaded! I just hacked this together quickly for the Switch release of Undertale, so some things may be broken (saving definitely is). Expect a release with fixes soon!", "GMS2 game loaded", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            MessageBox.Show("LOL it worked :O\n\nGame Maker: Studio 2 game loaded! I just hacked this together quickly for the Nintendo Switch release of Undertale, so some things may be broken (saving definitely is). Expect a release with fixes soon!", "GMS2 game loaded", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
                         this.Data = data;
                         this.FilePath = filename;
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsGMS2"));
                         ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"));
                         SelectionHistory.Clear();
                     }
@@ -158,6 +161,20 @@ namespace UndertaleModTool
         {
             if (Data == null)
                 return; // TODO: lock save button
+
+            if (IsGMS2 == Visibility.Visible)
+            {
+                if (MessageBox.Show("heya, I told you this is not going to work.\nAre you that *DETERMINED* to see this error message?", "nope", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                {
+                    MessageBox.Show("HA! I knew it", "nope", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+                else
+                {
+                    MessageBox.Show("okay, here it goes ;)", "nope", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+
             LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
             dialog.Owner = this;
             FilePath = filename;
@@ -196,6 +213,10 @@ namespace UndertaleModTool
                 catch(Exception e)
                 {
                     MessageBox.Show("An error occured while trying to save:\n" + e.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    if (IsGMS2 == Visibility.Visible)
+                    {
+                        MessageBox.Show("Are you happy now?", "nope", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                 }
 
                 Dispatcher.Invoke(() =>

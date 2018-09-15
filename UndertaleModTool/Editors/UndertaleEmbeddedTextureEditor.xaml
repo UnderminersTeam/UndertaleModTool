@@ -15,12 +15,17 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Unknown</TextBlock>
-        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding UnknownAlwaysZero}"/>
+        <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">GMS2 adds one new unknown param that is not displayed yet</TextBlock>
+        </Border>
 
-        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="3">
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Unknown</TextBlock>
+        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding UnknownAlwaysZero}"/>
+
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>

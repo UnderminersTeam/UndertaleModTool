@@ -17,6 +17,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
@@ -37,7 +38,11 @@
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Texture</TextBlock>
         <local:UndertaleObjectReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
 
-        <Viewbox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly">
+        <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">These is some more data in this object for GMS2 but I didn't add it to the editor yet</TextBlock>
+        </Border>
+
+        <Viewbox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly">
             <Border>
                 <Border.Background>
                     <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">

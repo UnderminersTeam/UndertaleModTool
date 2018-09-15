@@ -115,6 +115,10 @@
             <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding MetersPerPixel}"/>
         </Grid>
 
+        <Border Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">IMPORTANT: Game Maker: Studio 2 totally changed how tiles and backgrounds work by introducing Layers. If you are seeing this, I can already partially parse the data but the editor is not done yet!</TextBlock>
+        </Border>
+
         <Grid Height="300">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>

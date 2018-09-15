@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -97,10 +98,14 @@ namespace UndertaleModLib.Models
             writer.Write(GravityX);
             writer.Write(GravityY);
             writer.Write(MetersPerPixel);
+            if (writer.undertaleData.GeneralInfo.Major >= 2)
+                writer.WriteUndertaleObjectPointer(Layers);
             writer.WriteUndertaleObject(Backgrounds);
             writer.WriteUndertaleObject(Views);
             writer.WriteUndertaleObject(GameObjects);
             writer.WriteUndertaleObject(Tiles);
+            if (writer.undertaleData.GeneralInfo.Major >= 2)
+                writer.WriteUndertaleObject(Layers);
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -127,7 +132,7 @@ namespace UndertaleModLib.Models
             GravityX = reader.ReadSingle();
             GravityY = reader.ReadSingle();
             MetersPerPixel = reader.ReadSingle();
-            if (reader.undertaleData.GeneralInfo.Major >= 2) // TODO
+            if (reader.undertaleData.GeneralInfo.Major >= 2)
                 Layers = reader.ReadUndertaleObjectPointer<UndertalePointerList<Layer>>();
             if (reader.ReadUndertaleObject<UndertalePointerList<Background>>() != Backgrounds)
                 throw new IOException();
@@ -137,7 +142,7 @@ namespace UndertaleModLib.Models
                 throw new IOException();
             if (reader.ReadUndertaleObject<UndertalePointerList<Tile>>() != Tiles)
                 throw new IOException();
-            if (reader.undertaleData.GeneralInfo.Major >= 2) // TODO
+            if (reader.undertaleData.GeneralInfo.Major >= 2)
                 if (reader.ReadUndertaleObject<UndertalePointerList<Layer>>() != Layers)
                     throw new IOException();
         }
@@ -396,14 +401,15 @@ namespace UndertaleModLib.Models
         {
             Instances = 2,
             Tiles = 4,
-            Backgrounds = 1
+            Backgrounds = 1,
+            Assets = 3
         }
         public class Layer : UndertaleObject // TODO
         {
             public UndertaleString LayerName; // "Instances" // "Tiles_1" // "Backgrounds"
             public uint LayerId; // 0 // 1 // 2 // <- layer id
             public LayerType LayerType; // 2 // 4 // 1
-            public uint Unknown3; // 0 // 100 // 200
+            public uint LayerDepth; // 0 // 100 // 200
             public uint Unknown4; // 0 // 0 // 0
             public uint Unknown5; // 0 // 0 // 0
             public uint Unknown6; // 0 // 0 // 0
@@ -411,7 +417,10 @@ namespace UndertaleModLib.Models
             public uint Unknown8; // 1 // 1 // 1
             public uint Unknown9Count; // 1 // 0 // 1 
             public uint[] Unknown9; // [100000] // [] // [0]
-            public uint[] Data; // 100000 // RepeatsX, RepeatsY, Repeats[RepeatsX*RepeatsY] // 8 bytes, see below
+            public uint[] Data; // 100000 // TilesX, TilesY, Tiles[TilesX*TilesY] // 8 bytes, see below
+
+            public UndertalePointerList<AssetListItem1> Assets1;
+            public UndertalePointerList<AssetListItem2> Assets2;
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -423,22 +432,23 @@ namespace UndertaleModLib.Models
                 LayerName = reader.ReadUndertaleString();
                 LayerId = reader.ReadUInt32();
                 LayerType = (LayerType)reader.ReadUInt32();
-                Unknown3 = reader.ReadUInt32();
+                LayerDepth = reader.ReadUInt32(); // depth
                 Unknown4 = reader.ReadUInt32();
                 Unknown5 = reader.ReadUInt32();
                 Unknown6 = reader.ReadUInt32();
                 Unknown7 = reader.ReadUInt32();
                 Unknown8 = reader.ReadUInt32();
-                Unknown9Count = reader.ReadUInt32();
-                Unknown9 = new uint[Unknown9Count];
-                for (uint i = 0; i < Unknown9Count; i++)
-                    Unknown9[i] = reader.ReadUInt32(); // 100000, 100001, 100002, 100003
                 if (LayerType == LayerType.Instances)
                 {
+                    Unknown9Count = reader.ReadUInt32();
+                    Unknown9 = new uint[Unknown9Count];
+                    for (uint i = 0; i < Unknown9Count; i++)
+                        Unknown9[i] = reader.ReadUInt32(); // 100000, 100001, 100002, 100003
                     Data = null;
                 }
                 else if (LayerType == LayerType.Tiles)
                 {
+                    Unknown9Count = reader.ReadUInt32();
                     uint RepeatsX = reader.ReadUInt32();
                     uint RepeatsY = reader.ReadUInt32();
                     Data = new uint[RepeatsX * RepeatsY];
@@ -447,6 +457,10 @@ namespace UndertaleModLib.Models
                 }
                 else if (LayerType == LayerType.Backgrounds)
                 {
+                    Unknown9Count = reader.ReadUInt32();
+                    Unknown9 = new uint[Unknown9Count];
+                    for (uint i = 0; i < Unknown9Count; i++)
+                        Unknown9[i] = reader.ReadUInt32(); // 100000, 100001, 100002, 100003
                     Data = new uint[8];
                     Data[0] = reader.ReadUInt32(); // 0
                     Data[1] = reader.ReadUInt32(); // 0
@@ -457,9 +471,64 @@ namespace UndertaleModLib.Models
                     Data[6] = reader.ReadUInt32(); // 0x41700000
                     Data[7] = reader.ReadUInt32(); // 0
                 }
+                else if (LayerType == LayerType.Assets)
+                {
+                    Assets1 = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetListItem1>>();
+                    Assets2 = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetListItem2>>();
+                    Debug.Assert(reader.ReadUndertaleObject<UndertalePointerList<AssetListItem1>>() == Assets1);
+                    Debug.Assert(reader.ReadUndertaleObject<UndertalePointerList<AssetListItem2>>() == Assets2);
+                }
                 else
                     throw new Exception();
             }
+        }
+    }
+
+    public class AssetListItem1 : UndertaleObject
+    {
+        public void Serialize(UndertaleWriter writer)
+        {
+            throw new NotImplementedException("AssetListItem1 reading");
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class AssetListItem2 : UndertaleObject
+    {
+        public UndertaleString Name;
+        public uint Unknown1; // 3
+        public uint Unknown2; // 0x1a0 beginning of SPRT?!?! / 0x360 / 0x3c0 / 0x5c0
+        public uint Unknown3; // 0x280 / 0x380 / 0x600 / 0x6c0
+        public uint Unknown4; // 0x3f800000
+        public uint Unknown5; // 0x3f800000
+        public int Unknown6; // -1
+        public uint Unknown7; // 0x41700000
+        public uint Unknown8; // 0
+        public uint Unknown9; // 0
+        public uint Unknown10; // 0
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            Name = reader.ReadUndertaleString();
+            Unknown1 = reader.ReadUInt32();
+            Unknown2 = reader.ReadUInt32();
+            Unknown3 = reader.ReadUInt32();
+            Unknown4 = reader.ReadUInt32();
+            Unknown5 = reader.ReadUInt32();
+            Unknown6 = reader.ReadInt32();
+            Unknown7 = reader.ReadUInt32();
+            Unknown8 = reader.ReadUInt32();
+            Unknown9 = reader.ReadUInt32();
+            Unknown10 = reader.ReadUInt32();
         }
     }
 }

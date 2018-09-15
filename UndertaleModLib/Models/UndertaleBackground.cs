@@ -31,6 +31,10 @@ namespace UndertaleModLib.Models
             writer.Write(Unknown2);
             writer.Write(Unknown3);
             writer.WriteUndertaleObjectPointer(Texture);
+            if (writer.undertaleData.GeneralInfo.Major >= 2)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -40,6 +44,22 @@ namespace UndertaleModLib.Models
             Unknown2 = reader.ReadUInt32();
             Unknown3 = reader.ReadUInt32();
             Texture = reader.ReadUndertaleObjectPointer<UndertaleTexturePageItem>();
+            if (reader.undertaleData.GeneralInfo.Major >= 2)
+            {
+                reader.ReadUInt32(); // 2/2
+                reader.ReadUInt32(); // TileWidth = 32/64
+                reader.ReadUInt32(); // TileHeight = 32/64
+                reader.ReadUInt32(); // OutputBorderX = 2/2
+                reader.ReadUInt32(); // OutputBorderY = 2/2
+                reader.ReadUInt32(); // 32/23
+                uint ItemsPerTileCount = reader.ReadUInt32(); // 1/32
+                uint TileCount = reader.ReadUInt32(); // 1024/1024 = 32*32? = TileCount?
+                reader.ReadUInt32(); // 0
+                reader.ReadUInt32(); // 66666
+                reader.ReadUInt32(); // 0
+                for (int i = 0; i < TileCount*ItemsPerTileCount; i++)
+                    reader.ReadUInt32(); // TileId?
+            }
         }
 
         public override string ToString()
