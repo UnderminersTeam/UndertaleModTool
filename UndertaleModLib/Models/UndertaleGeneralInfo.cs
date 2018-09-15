@@ -7,6 +7,30 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
+    public enum TargetPlatform : int
+    {
+        os_windows = 0,
+        os_uwp = 18,
+        os_linux = 6,
+        os_macosx = 1,
+        os_ios = 3,
+        os_android = 4,
+        os_ps3 = 16,
+        os_ps4 = 14,
+        os_psvita = 12,
+        os_xbox = 15,
+        os_unknown = -1,
+        os_3ds = 11,
+        os_bb10 = 13,
+        os_psp = 2,
+        os_symbian = 5,
+        os_tizen = 8,
+        os_wiiu = 10,
+        os_win8native = 9,
+        os_xbox360 = 17,
+        os_xboxone = 15
+    }
+
     // TODO: INotifyPropertyChanged
     public class UndertaleGeneralInfo : UndertaleObject
     {

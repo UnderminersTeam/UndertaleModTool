@@ -55,6 +55,8 @@ namespace UndertaleModTool
 
             ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"));
             SelectionHistory.Clear();
+
+            Title = "UndertaleModTool by krzys_h v" + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -119,22 +121,26 @@ namespace UndertaleModTool
             Task t = Task.Run(() =>
             {
                 UndertaleData data = null;
-                try
-                {
+                /*try
+                {*/
                     using (var stream = new FileStream(filename, FileMode.Open))
                     {
                         data = UndertaleIO.Read(stream);
                     }
-                }
+                /*}
                 catch (Exception e)
                 {
                     MessageBox.Show("An error occured while trying to load:\n" + e.Message, "Load error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                }*/
 
                 Dispatcher.Invoke(() =>
                 {
                     if (data != null)
                     {
+                        if (data.GeneralInfo.Major >= 2)
+                        {
+                            MessageBox.Show("Game Maker: Studio 2 game loaded! I just hacked this together quickly for the Switch release of Undertale, so some things may be broken (saving definitely is). Expect a release with fixes soon!", "GMS2 game loaded", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
                         this.Data = data;
                         this.FilePath = filename;
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
@@ -570,7 +576,8 @@ namespace UndertaleModTool
 
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("UndertaleModTool by krzys_h\nVersion i-have-no-versions-yet", "About", MessageBoxButton.OK);
+            string version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
+            MessageBox.Show("UndertaleModTool by krzys_h\nVersion " + version, "About", MessageBoxButton.OK);
         }
 
         private string FindRunner()

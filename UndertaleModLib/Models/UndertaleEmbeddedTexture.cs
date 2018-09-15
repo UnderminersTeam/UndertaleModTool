@@ -26,6 +26,8 @@ namespace UndertaleModLib.Models
 
         public void Unserialize(UndertaleReader reader)
         {
+            if (reader.undertaleData.GeneralInfo.Major >= 2)
+                reader.ReadUInt32(); // TODO
             UnknownAlwaysZero = reader.ReadUInt32();
             TextureData = reader.ReadUndertaleObjectPointer<TexData>();
         }
@@ -41,7 +43,6 @@ namespace UndertaleModLib.Models
 
         public void UnserializeBlob(UndertaleReader reader)
         {
-            // padding
             while (reader.Position % 0x80 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");

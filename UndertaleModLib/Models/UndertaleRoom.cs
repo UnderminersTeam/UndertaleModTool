@@ -59,6 +59,7 @@ namespace UndertaleModLib.Models
         public UndertalePointerList<View> Views { get; private set; } = new UndertalePointerList<View>();
         public UndertalePointerList<GameObject> GameObjects { get; private set; } = new UndertalePointerList<GameObject>();
         public UndertalePointerList<Tile> Tiles { get; private set; } = new UndertalePointerList<Tile>();
+        public UndertalePointerList<Layer> Layers { get; private set; } = new UndertalePointerList<Layer>();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -126,6 +127,8 @@ namespace UndertaleModLib.Models
             GravityX = reader.ReadSingle();
             GravityY = reader.ReadSingle();
             MetersPerPixel = reader.ReadSingle();
+            if (reader.undertaleData.GeneralInfo.Major >= 2) // TODO
+                Layers = reader.ReadUndertaleObjectPointer<UndertalePointerList<Layer>>();
             if (reader.ReadUndertaleObject<UndertalePointerList<Background>>() != Backgrounds)
                 throw new IOException();
             if (reader.ReadUndertaleObject<UndertalePointerList<View>>() != Views)
@@ -134,6 +137,9 @@ namespace UndertaleModLib.Models
                 throw new IOException();
             if (reader.ReadUndertaleObject<UndertalePointerList<Tile>>() != Tiles)
                 throw new IOException();
+            if (reader.undertaleData.GeneralInfo.Major >= 2) // TODO
+                if (reader.ReadUndertaleObject<UndertalePointerList<Layer>>() != Layers)
+                    throw new IOException();
         }
 
         public override string ToString()
@@ -351,7 +357,7 @@ namespace UndertaleModLib.Models
             public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
-            
+
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(X);
@@ -382,6 +388,77 @@ namespace UndertaleModLib.Models
                 ScaleX = reader.ReadSingle();
                 ScaleY = reader.ReadSingle();
                 Color = reader.ReadUInt32();
+            }
+        }
+
+        // For GMS2, Backgrounds and Tiles are empty and this is used instead
+        public enum LayerType
+        {
+            Instances = 2,
+            Tiles = 4,
+            Backgrounds = 1
+        }
+        public class Layer : UndertaleObject // TODO
+        {
+            public UndertaleString LayerName; // "Instances" // "Tiles_1" // "Backgrounds"
+            public uint LayerId; // 0 // 1 // 2 // <- layer id
+            public LayerType LayerType; // 2 // 4 // 1
+            public uint Unknown3; // 0 // 100 // 200
+            public uint Unknown4; // 0 // 0 // 0
+            public uint Unknown5; // 0 // 0 // 0
+            public uint Unknown6; // 0 // 0 // 0
+            public uint Unknown7; // 0 // 0 // 0
+            public uint Unknown8; // 1 // 1 // 1
+            public uint Unknown9Count; // 1 // 0 // 1 
+            public uint[] Unknown9; // [100000] // [] // [0]
+            public uint[] Data; // 100000 // RepeatsX, RepeatsY, Repeats[RepeatsX*RepeatsY] // 8 bytes, see below
+
+            public void Serialize(UndertaleWriter writer)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Unserialize(UndertaleReader reader)
+            {
+                LayerName = reader.ReadUndertaleString();
+                LayerId = reader.ReadUInt32();
+                LayerType = (LayerType)reader.ReadUInt32();
+                Unknown3 = reader.ReadUInt32();
+                Unknown4 = reader.ReadUInt32();
+                Unknown5 = reader.ReadUInt32();
+                Unknown6 = reader.ReadUInt32();
+                Unknown7 = reader.ReadUInt32();
+                Unknown8 = reader.ReadUInt32();
+                Unknown9Count = reader.ReadUInt32();
+                Unknown9 = new uint[Unknown9Count];
+                for (uint i = 0; i < Unknown9Count; i++)
+                    Unknown9[i] = reader.ReadUInt32(); // 100000, 100001, 100002, 100003
+                if (LayerType == LayerType.Instances)
+                {
+                    Data = null;
+                }
+                else if (LayerType == LayerType.Tiles)
+                {
+                    uint RepeatsX = reader.ReadUInt32();
+                    uint RepeatsY = reader.ReadUInt32();
+                    Data = new uint[RepeatsX * RepeatsY];
+                    for (uint i = 0; i < RepeatsX * RepeatsY; i++)
+                        Data[i] = reader.ReadUInt32();
+                }
+                else if (LayerType == LayerType.Backgrounds)
+                {
+                    Data = new uint[8];
+                    Data[0] = reader.ReadUInt32(); // 0
+                    Data[1] = reader.ReadUInt32(); // 0
+                    Data[2] = reader.ReadUInt32(); // 0
+                    Data[3] = reader.ReadUInt32(); // 0
+                    Data[4] = reader.ReadUInt32(); // -1
+                    Data[5] = reader.ReadUInt32(); // 0
+                    Data[6] = reader.ReadUInt32(); // 0x41700000
+                    Data[7] = reader.ReadUInt32(); // 0
+                }
+                else
+                    throw new Exception();
             }
         }
     }

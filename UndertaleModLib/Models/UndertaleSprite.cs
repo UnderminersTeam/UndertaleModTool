@@ -134,6 +134,16 @@ namespace UndertaleModLib.Models
             SepMasks = reader.ReadUInt32();
             OriginX = reader.ReadUInt32();
             OriginY = reader.ReadUInt32();
+            if (reader.undertaleData.GeneralInfo.Major >= 2)
+            {
+                // TODO
+                reader.ReadInt32(); // -1
+                uint cnt = reader.ReadUInt32(); // 1
+                reader.ReadUInt32(); // 0
+                reader.ReadUInt16(); // 0
+                reader.ReadUInt16(); // 0x4170
+                reader.ReadUInt32(); // 0
+            }
             Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
             uint MaskCount = reader.ReadUInt32();
             CollisionMasks.Clear();

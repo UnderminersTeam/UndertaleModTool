@@ -371,4 +371,18 @@ namespace UndertaleModLib
     {
         public override string Name => "AUDO";
     }
+
+    // TODO: GMS2 specific
+    public class UndertaleChunkEMBI : UndertaleChunk
+    {
+        public override string Name => "EMBI";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+        }
+    }
 }
