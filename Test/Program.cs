@@ -24,7 +24,7 @@ namespace Test
 
             //UndertaleIO.Write(new FileStream("newdata.win", FileMode.Create), data);
 
-            UndertaleDebugData debug = DebugDataGenerator.GenerateDebugData(data);
+            UndertaleDebugData debug = DebugDataGenerator.GenerateDebugData(data, DebugDataMode.Decompiled);
             using (FileStream stream = new FileStream("data.yydebug", FileMode.Create))
             {
                 using (UndertaleWriter writer = new UndertaleWriter(stream))

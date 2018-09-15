@@ -155,6 +155,16 @@ namespace UndertaleModTool
             LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
             dialog.Owner = this;
             FilePath = filename;
+
+            DebugDataMode debugMode = DebugDataMode.NoDebug;
+            if (!Data.GeneralInfo.DisableDebugger) // TODO: I think the game itself can also use the .yydebug file on crash reports
+            {
+                DebugDataDialog debugDialog = new DebugDataDialog();
+                debugDialog.Owner = this;
+                debugDialog.ShowDialog();
+                debugMode = debugDialog.Result;
+                // TODO: Add an option to generate debug data for just selected scripts (to make running faster / make the full assembly not take forever to load)
+            }
             Task t = Task.Run(() =>
             {
                 try
@@ -164,10 +174,10 @@ namespace UndertaleModTool
                         UndertaleIO.Write(stream, Data);
                     }
 
-                    if (!Data.GeneralInfo.DisableDebugger)
+                    if (debugMode != DebugDataMode.NoDebug)
                     {
                         Debug.WriteLine("Generating debugger data...");
-                        UndertaleDebugData debugData = DebugDataGenerator.GenerateDebugData(Data);
+                        UndertaleDebugData debugData = DebugDataGenerator.GenerateDebugData(Data, debugMode);
                         using (FileStream stream = new FileStream(System.IO.Path.ChangeExtension(FilePath, ".yydebug"), FileMode.Create))
                         {
                             using (UndertaleWriter writer = new UndertaleWriter(stream))
