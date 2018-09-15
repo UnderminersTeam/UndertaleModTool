@@ -14,7 +14,7 @@ heya. I heard you like digging deep into Undertale data so I made a tool just fo
 * Allows for code disassembly and EDITING. This means you can add any custom code to the game, as long as you are determined enough to write it in GML assembly.
 * Experimental high-level decompiler. The output is accurate and I've not seen it totally break in a long time, but it could use some more cleaning up of the high-level structures.
 * Support for running scripts that automatically modify your data file - this is the way to distribute mods, but creating them is manual job for now. It also serves as a replacement for sharing hex editor offsets - if you make it into a file-format-aware script instead, there is much smaller change of it breaking after an update.
-* All code IO functionality extracted into a library for use in external tools
+* All core IO functionality extracted into a library for use in external tools
 * Can generate an .yydebug file for the GM:S debugger so that you can edit variables live [EXPERIMENTAL]
 * Some hacks to make it work with GM:S 2. May or may not be able to load the latest Nintendo Switch release.
 
