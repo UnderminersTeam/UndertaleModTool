@@ -460,7 +460,7 @@ namespace UndertaleModLib.Models
                     Unknown9Count = reader.ReadUInt32();
                     Unknown9 = new uint[Unknown9Count];
                     for (uint i = 0; i < Unknown9Count; i++)
-                        Unknown9[i] = reader.ReadUInt32(); // 100000, 100001, 100002, 100003
+                        Unknown9[i] = reader.ReadUInt32();
                     Data = new uint[8];
                     Data[0] = reader.ReadUInt32(); // 0
                     Data[1] = reader.ReadUInt32(); // 0
