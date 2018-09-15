@@ -136,50 +136,54 @@ namespace UndertaleModLib.Models
             Events = reader.ReadUndertaleObject<UndertalePointerList<UndertalePointerList<Event>>>();
         }
 
-        public UndertaleCode EventHandlerFor(EventType type, uint subtype, IList<UndertaleString> strg)
+        public UndertaleCode EventHandlerFor(EventType type, uint subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
         {
             Event subtypeObj = Events[(int)type].Where((x) => x.EventSubtype == subtype).FirstOrDefault();
             if (subtypeObj == null)
                 Events[(int)type].Add(subtypeObj = new Event() { EventSubtype = subtype });
             EventAction action = subtypeObj.Actions.FirstOrDefault();
             if (action == null)
+            {
                 subtypeObj.Actions.Add(action = new EventAction());
+                action.Unknown8 = strg.MakeString("");
+            }
             UndertaleCode code = action.CodeId;
             if (code == null)
             {
                 code = action.CodeId = new UndertaleCode();
                 code.Name = strg.MakeString("gml_Object_" + Name.Content + "_" + type.ToString() + "_" + subtype);
+                codelist.Add(code);
             }
             return code;
         }
 
-        public UndertaleCode EventHandlerFor(EventType type, IList<UndertaleString> strg)
+        public UndertaleCode EventHandlerFor(EventType type, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
         {
-            return EventHandlerFor(type, 0u, strg);
+            return EventHandlerFor(type, 0u, strg, codelist);
         }
 
-        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, IList<UndertaleString> strg)
+        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
         {
             Debug.Assert(type == EventType.Keyboard || type == EventType.KeyPress || type == EventType.KeyRelease);
-            return EventHandlerFor(type, (uint)subtype, strg);
+            return EventHandlerFor(type, (uint)subtype, strg, codelist);
         }
 
-        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, IList<UndertaleString> strg)
+        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
         {
             Debug.Assert(type == EventType.Step);
-            return EventHandlerFor(type, (uint)subtype, strg);
+            return EventHandlerFor(type, (uint)subtype, strg, codelist);
         }
 
-        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, IList<UndertaleString> strg)
+        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
         {
             Debug.Assert(type == EventType.Other);
-            return EventHandlerFor(type, (uint)subtype, strg);
+            return EventHandlerFor(type, (uint)subtype, strg, codelist);
         }
         
-        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, IList<UndertaleString> strg)
+        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
         {
             Debug.Assert(type == EventType.Draw);
-            return EventHandlerFor(type, (uint)subtype, strg);
+            return EventHandlerFor(type, (uint)subtype, strg, codelist);
         }
 
         public override string ToString()

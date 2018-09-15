@@ -4,7 +4,7 @@ EnsureDataLoaded();
 
 ScriptMessage("Show room name and ID in debug mode\nby krzys_h");
 
-var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings);
+var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings, Data.Code);
 
 code.Append(Assembler.Assemble(@"
 ; if debug disabled, jump to end
