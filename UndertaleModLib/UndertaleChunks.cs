@@ -116,7 +116,7 @@ namespace UndertaleModLib
         public override string Name => "SCPT";
     }
     
-    public class UndertaleChunkGLOB : UndertaleListChunk<UndertaleGlobal>
+    public class UndertaleChunkGLOB : UndertaleSimpleListChunk<UndertaleGlobal>
     {
         public override string Name => "GLOB";
     }

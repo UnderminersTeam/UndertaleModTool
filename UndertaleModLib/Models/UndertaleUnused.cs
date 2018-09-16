@@ -11,7 +11,7 @@ namespace UndertaleModLib.Models
     public class UndertaleGlobal : UndertaleObject, INotifyPropertyChanged
     {
         private UndertaleResourceById<UndertaleCode> _Code { get; } = new UndertaleResourceById<UndertaleCode>("CODE");
-        public UndertaleCode BackgroundDefinition { get => _Code.Resource; set { _Code.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Code")); } }
+        public UndertaleCode Code { get => _Code.Resource; set { _Code.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Code")); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
