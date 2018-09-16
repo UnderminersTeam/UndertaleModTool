@@ -1,26 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleGlobal : UndertaleObject
+    // NOTE: Never seen in GMS1.4 so I'm not sure if the structure was the same
+    public class UndertaleGlobal : UndertaleObject, INotifyPropertyChanged
     {
-        public UndertaleGlobal()
-        {
-            throw new NotImplementedException();
-        }
+        private UndertaleResourceById<UndertaleCode> _Code { get; } = new UndertaleResourceById<UndertaleCode>("CODE");
+        public UndertaleCode BackgroundDefinition { get => _Code.Resource; set { _Code.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Code")); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {
-            throw new NotImplementedException();
+            writer.Write((int)_Code.Serialize(writer));
         }
 
         public void Unserialize(UndertaleReader reader)
         {
-            throw new NotImplementedException();
+            _Code.Unserialize(reader, reader.ReadInt32());
         }
     }
 
