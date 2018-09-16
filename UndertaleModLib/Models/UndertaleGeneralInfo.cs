@@ -165,6 +165,8 @@ namespace UndertaleModLib.Models
             for (uint i = 0; i < UnknownPaddingNumbersCount; i++)
                 if (reader.ReadUInt32() != i)
                     throw new IOException("GEN8 padding error");
+            if (BytecodeVersion != 0x10)
+                throw new Exception("Only bytecode version " + 0x10 + " is supported for now, you are trying to load " + BytecodeVersion);
         }
 
         public override string ToString()
