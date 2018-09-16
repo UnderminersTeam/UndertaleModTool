@@ -1098,7 +1098,7 @@ namespace UndertaleModLib.Decompiler
                 if (block.conditionalExit)
                 {
                     Block meetPoint = FindFirstMeetPoint(block, reverseDominators);
-                    if (meetPoint != null)
+                    if (meetPoint == null)
                         throw new Exception("End of if not found");
 
                     IfHLStatement cond = new IfHLStatement();
