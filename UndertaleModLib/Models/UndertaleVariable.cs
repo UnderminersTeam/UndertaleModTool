@@ -60,7 +60,8 @@ namespace UndertaleModLib.Models
             }
             else
             {
-                Debug.Assert(reader.ReadInt32() == -1);
+                if (reader.ReadInt32() != -1)
+                    throw new Exception("Variable with no occurrences, but still has a first occurrence address");
                 FirstAddress = null;
             }
         }

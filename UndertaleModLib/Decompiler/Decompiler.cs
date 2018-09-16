@@ -455,7 +455,8 @@ namespace UndertaleModLib.Decompiler
             bool end = false;
             foreach(var instr in block.Instructions)
             {
-                Debug.Assert(!end);
+                if (end)
+                    throw new Exception("Excepted end of block, but still has instructions");
                 switch(instr.Kind)
                 {
                     case UndertaleInstruction.Opcode.Neg:
@@ -561,7 +562,8 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.Pop:
                         ExpressionVar target = new ExpressionVar(instr.Destination.Target, new ExpressionConstant(UndertaleInstruction.DataType.Int16, instr.TypeInst), instr.Destination.Type);
                         Expression val = null;
-                        Debug.Assert(instr.Type1 == UndertaleInstruction.DataType.Int32 || instr.Type1 == UndertaleInstruction.DataType.Variable);
+                        if (instr.Type1 != UndertaleInstruction.DataType.Int32 && instr.Type1 != UndertaleInstruction.DataType.Variable)
+                            throw new Exception("Oh no, what do I do with this POP? OH NOOOOOOOoooooooooo");
                         if (instr.Type1 == UndertaleInstruction.DataType.Int32)
                             val = stack.Pop();
                         if (target.NeedsInstanceParameters)
@@ -1011,7 +1013,7 @@ namespace UndertaleModLib.Decompiler
                 if (b.nextBlockFalse != null && !visited.Contains(b.nextBlockFalse) && !q.Contains(b.nextBlockFalse))
                     q.Enqueue(b.nextBlockFalse);
             }
-            throw new Exception("End of if not found");
+            return null;
         }
 
         /*public class ExpressionCollapsedCondition : Expression
@@ -1096,7 +1098,8 @@ namespace UndertaleModLib.Decompiler
                 if (block.conditionalExit)
                 {
                     Block meetPoint = FindFirstMeetPoint(block, reverseDominators);
-                    Debug.Assert(meetPoint != null);
+                    if (meetPoint != null)
+                        throw new Exception("End of if not found");
 
                     IfHLStatement cond = new IfHLStatement();
                     cond.condition = block.ConditionStatement;

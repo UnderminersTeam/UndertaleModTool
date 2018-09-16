@@ -18,41 +18,64 @@ namespace UndertaleModLib
 
         public void Serialize(UndertaleWriter writer)
         {
-            Debug.Assert(Name != null);
-            writer.Write(Name.ToCharArray());
-            var lenWriter = writer.WriteLengthHere();
+            try
+            {
+                Debug.Assert(Name != null);
+                writer.Write(Name.ToCharArray());
+                var lenWriter = writer.WriteLengthHere();
 
-            Debug.WriteLine("Writing chunk " + Name);
-            lenWriter.FromHere();
-            SerializeChunk(writer);
-            Length = lenWriter.ToHere();
+                Debug.WriteLine("Writing chunk " + Name);
+                lenWriter.FromHere();
+                SerializeChunk(writer);
+                Length = lenWriter.ToHere();
+            }
+            catch (UndertaleSerializationException e)
+            {
+                throw new UndertaleSerializationException(e.Message + " in chunk " + Name);
+            }
+            catch (Exception e)
+            {
+                throw new UndertaleSerializationException(e.Message + "\nat " + writer.Position.ToString("X8") + " while reading chunk " + Name, e);
+            }
         }
 
         public static UndertaleChunk Unserialize(UndertaleReader reader)
         {
-            string name = new string(reader.ReadChars(4));
-            uint length = reader.ReadUInt32();
-
-            // TODO: I can't think of a cleaner way to do this...
-            Type type = Type.GetType(typeof(UndertaleChunk).FullName + name);
-            if (type == null)
+            string name = "(unknown)";
+            try
             {
-                throw new IOException("Unknown chunk " + name + "!!!");
-                /*Debug.WriteLine("Unknown chunk " + name + "!!!");
-                reader.Position = reader.Position + length;
-                return null;*/
+                name = new string(reader.ReadChars(4));
+                uint length = reader.ReadUInt32();
+
+                // TODO: I can't think of a cleaner way to do this...
+                Type type = Type.GetType(typeof(UndertaleChunk).FullName + name);
+                if (type == null)
+                {
+                    throw new IOException("Unknown chunk " + name + "!!!");
+                    /*Debug.WriteLine("Unknown chunk " + name + "!!!");
+                    reader.Position = reader.Position + length;
+                    return null;*/
+                }
+
+                UndertaleChunk chunk = (UndertaleChunk)Activator.CreateInstance(type);
+                Debug.Assert(chunk.Name == name);
+                chunk.Length = length;
+
+                Debug.WriteLine("Reading chunk " + chunk.Name);
+                var lenReader = reader.EnsureLengthFromHere(chunk.Length);
+                chunk.UnserializeChunk(reader);
+                lenReader.ToHere();
+
+                return chunk;
             }
-
-            UndertaleChunk chunk = (UndertaleChunk)Activator.CreateInstance(type);
-            Debug.Assert(chunk.Name == name);
-            chunk.Length = length;
-
-            Debug.WriteLine("Reading chunk " + chunk.Name);
-            var lenReader = reader.EnsureLengthFromHere(chunk.Length);
-            chunk.UnserializeChunk(reader);
-            lenReader.ToHere();
-
-            return chunk;
+            catch (UndertaleSerializationException e)
+            {
+                throw new UndertaleSerializationException(e.Message + " in chunk " + name);
+            }
+            catch (Exception e)
+            {
+                throw new UndertaleSerializationException(e.Message + "\nat " + reader.Position.ToString("X8") + " while reading chunk " + name, e);
+            }
         }
     }
 

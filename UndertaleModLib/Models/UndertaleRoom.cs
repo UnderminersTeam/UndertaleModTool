@@ -475,8 +475,10 @@ namespace UndertaleModLib.Models
                 {
                     Assets1 = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetListItem1>>();
                     Assets2 = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetListItem2>>();
-                    Debug.Assert(reader.ReadUndertaleObject<UndertalePointerList<AssetListItem1>>() == Assets1);
-                    Debug.Assert(reader.ReadUndertaleObject<UndertalePointerList<AssetListItem2>>() == Assets2);
+                    if (reader.ReadUndertaleObject<UndertalePointerList<AssetListItem1>>() != Assets1)
+                        throw new IOException("Assets1 misaligned");
+                    if (reader.ReadUndertaleObject<UndertalePointerList<AssetListItem2>>() != Assets2)
+                        throw new IOException("Assets2 misaligned");
                 }
                 else
                     throw new Exception();
@@ -488,7 +490,7 @@ namespace UndertaleModLib.Models
     {
         public void Serialize(UndertaleWriter writer)
         {
-            throw new NotImplementedException("AssetListItem1 reading");
+            throw new NotImplementedException("AssetListItem1 is currently unknown");
         }
 
         public void Unserialize(UndertaleReader reader)

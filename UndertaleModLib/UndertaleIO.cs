@@ -160,9 +160,16 @@ namespace UndertaleModLib
 
         public T ReadUndertaleObject<T>() where T : UndertaleObject, new()
         {
-            T obj = GetUndertaleObjectAtAddress<T>(Position);
-            obj.Unserialize(this);
-            return obj;
+            try
+            {
+                T obj = GetUndertaleObjectAtAddress<T>(Position);
+                obj.Unserialize(this);
+                return obj;
+            }
+            catch(Exception e)
+            {
+                throw new UndertaleSerializationException(e.Message + "\nat " + Position.ToString("X8") + " while reading object " + typeof(T).FullName, e);
+            }
         }
 
         public T ReadUndertaleObjectPointer<T>() where T : UndertaleObject, new()
@@ -265,30 +272,36 @@ namespace UndertaleModLib
 
         public void WriteUndertaleObject<T>(T obj) where T : UndertaleObject, new()
         {
-            if (objectPool.ContainsKey(obj))
-                throw new IOException("Writing object twice");
-            uint objectAddr = Position;
-            objectPool.Add(obj, objectAddr);
-            obj.Serialize(this);
-            if (pendingWrites.ContainsKey(obj))
-            {
-                uint currentPos = Position;
-                foreach (uint pointerAddr in pendingWrites[obj])
+            try {
+                if (objectPool.ContainsKey(obj))
+                    throw new IOException("Writing object twice");
+                uint objectAddr = Position;
+                objectPool.Add(obj, objectAddr);
+                obj.Serialize(this);
+                if (pendingWrites.ContainsKey(obj))
                 {
-                    Position = pointerAddr;
-                    Write(objectAddr);
+                    uint currentPos = Position;
+                    foreach (uint pointerAddr in pendingWrites[obj])
+                    {
+                        Position = pointerAddr;
+                        Write(objectAddr);
+                    }
+                    Position = currentPos;
                 }
-                Position = currentPos;
+                if (pendingStringWrites.ContainsKey(obj))
+                {
+                    uint currentPos = Position;
+                    foreach (uint pointerAddr in pendingStringWrites[obj])
+                    {
+                        Position = pointerAddr;
+                        Write(objectAddr + 4);
+                    }
+                    Position = currentPos;
+                }
             }
-            if (pendingStringWrites.ContainsKey(obj))
+            catch (Exception e)
             {
-                uint currentPos = Position;
-                foreach (uint pointerAddr in pendingStringWrites[obj])
-                {
-                    Position = pointerAddr;
-                    Write(objectAddr + 4);
-                }
-                Position = currentPos;
+                throw new UndertaleSerializationException(e.Message + "\nat " + Position.ToString("X8") + " while writing object " + typeof(T).FullName, e);
             }
         }
 

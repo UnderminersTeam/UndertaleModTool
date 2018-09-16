@@ -117,7 +117,8 @@ namespace UndertaleModLib.Models
             }
             else
             {
-                Debug.Assert(parent >= 0);
+                if (parent < 0)
+                    throw new Exception("Invalid value for parent - should be -100 or object id, got " + parent);
                 _ParentId.Unserialize(reader, parent);
             }
             _TextureMaskId.Unserialize(reader, reader.ReadInt32());
@@ -164,25 +165,29 @@ namespace UndertaleModLib.Models
 
         public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
         {
-            Debug.Assert(type == EventType.Keyboard || type == EventType.KeyPress || type == EventType.KeyRelease);
+            if (type != EventType.Keyboard && type != EventType.KeyPress && type != EventType.KeyRelease)
+                throw new InvalidOperationException();
             return EventHandlerFor(type, (uint)subtype, strg, codelist);
         }
 
         public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
         {
-            Debug.Assert(type == EventType.Step);
+            if (type != EventType.Step)
+                throw new InvalidOperationException();
             return EventHandlerFor(type, (uint)subtype, strg, codelist);
         }
 
         public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
         {
-            Debug.Assert(type == EventType.Other);
+            if (type != EventType.Other)
+                throw new InvalidOperationException();
             return EventHandlerFor(type, (uint)subtype, strg, codelist);
         }
         
         public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
         {
-            Debug.Assert(type == EventType.Draw);
+            if (type != EventType.Draw)
+                throw new InvalidOperationException();
             return EventHandlerFor(type, (uint)subtype, strg, codelist);
         }
 
