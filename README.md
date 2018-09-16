@@ -27,6 +27,18 @@ I also included some of my test scripts. They are:
 * ShowRoomName: Displays the current room name and ID on screen in debug mode
 * testing: nothing important, just displays random text on the main menu - the first script I ever made
 
+### Bug reports, contributing
+All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is my current list of stuff that needs to be worked on:
+* Discover all missing stuff in the GML2 file format so that Nintendo Switch edition can be fully loaded, finish updating editors, add saving code
+* Finish writing the decompiler:
+  * add support for resolving resource types (requires propagating information from builtin function calls backwards, possibly across different code fragments)
+  * decompile other loop types than just while(true)
+  * decompile compound if expressions (things like `a || b` are decomposed into multiple ifs internally because GML has short-circuit evaluation)
+  * make sure the output syntax is fully GML-compatible
+* Write a matching GML compiler, so that edits of high-level code are possible
+* Add support for other bytecode versions
+* Maybe try to write a GameMaker Project output module, should be technically possible after decompiler is done but I'm not sure I really want to do that for legal reasons...
+
 ### data.win file format
 Interested in the file and instruction format research I've done while working on this? Check out these:
 * https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-Game-Maker:-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions
