@@ -384,7 +384,7 @@ namespace UndertaleModLib.Models
                         Type2 = (DataType)(TypePair >> 4);
                         if (GetInstructionType(Kind) == InstructionType.SingleTypeInstruction && Type2 != (byte)0)
                             throw new IOException("Second type should be 0 in " + Kind.ToString().ToUpper());
-                        Debug.Assert(reader.ReadByte() == (byte)Kind);
+                        if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
                     }
                     break;
 
@@ -401,7 +401,7 @@ namespace UndertaleModLib.Models
                         JumpOffset = (int)r;
                         JumpOffsetIsWeird = (v & 0x00800000) != 0;
 
-                        Debug.Assert(reader.ReadByte() == (byte)Kind);
+                        if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
                     }
                     break;
 
@@ -411,7 +411,7 @@ namespace UndertaleModLib.Models
                         byte TypePair = reader.ReadByte();
                         Type1 = (DataType)(TypePair & 0xf);
                         Type2 = (DataType)(TypePair >> 4);
-                        Debug.Assert(reader.ReadByte() == (byte)Kind);
+                        if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
                         Destination = reader.ReadUndertaleObject<Reference<UndertaleVariable>>();
                     }
                     break;
@@ -420,7 +420,7 @@ namespace UndertaleModLib.Models
                     {
                         short val = reader.ReadInt16();
                         Type1 = (DataType)reader.ReadByte();
-                        Debug.Assert(reader.ReadByte() == (byte)Kind);
+                        if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
                         switch (Type1)
                         {
                             case DataType.Double:
@@ -458,7 +458,7 @@ namespace UndertaleModLib.Models
                     {
                         ArgumentsCount = reader.ReadUInt16();
                         Type1 = (DataType)reader.ReadByte();
-                        Debug.Assert(reader.ReadByte() == (byte)Kind);
+                        if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
                         Function = reader.ReadUndertaleObject<Reference<UndertaleFunction>>();
                     }
                     break;
@@ -467,7 +467,7 @@ namespace UndertaleModLib.Models
                     {
                         Value = reader.ReadInt16();
                         Type1 = (DataType)reader.ReadByte();
-                        Debug.Assert(reader.ReadByte() == (byte)Kind);
+                        if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
                     }
                     break;
 

@@ -432,7 +432,7 @@ namespace UndertaleModLib.Models
                 LayerName = reader.ReadUndertaleString();
                 LayerId = reader.ReadUInt32();
                 LayerType = (LayerType)reader.ReadUInt32();
-                LayerDepth = reader.ReadUInt32(); // depth
+                LayerDepth = reader.ReadUInt32();
                 Unknown4 = reader.ReadUInt32();
                 Unknown5 = reader.ReadUInt32();
                 Unknown6 = reader.ReadUInt32();
