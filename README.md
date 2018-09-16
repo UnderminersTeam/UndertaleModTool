@@ -7,7 +7,7 @@
 heya. I heard you like digging deep into Undertale data so I made a tool just for you! Downloads are here: https://github.com/krzys-h/UndertaleModTool/releases
 
 ### Main features
-* Can read every single byte from the lastest PC version Undertale data.win file and then recreate a byte-for-byte exact copy from the decoded data.
+* Can read every single byte from the lastest PC version Undertale data.win file (bytecode version 16 = 0x10 only, at least for now) and then recreate a byte-for-byte exact copy from the decoded data.
 * Properly handles all of the pointers in the file so that if you add/remove stuff, make things longer/shorter, move them around etc. the file format won't break.
 * An editor which lets you change (almost) every single value, including unknown ones. A lot better than a hex editor, huh?
 * Includes a (very) simple level editor
