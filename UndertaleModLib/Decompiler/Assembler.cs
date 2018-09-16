@@ -147,7 +147,7 @@ namespace UndertaleModLib.Decompiler
             Dictionary<string, uint> labels = new Dictionary<string, uint>();
             Dictionary<UndertaleInstruction, string> labelTargets = new Dictionary<UndertaleInstruction, string>();
             List<UndertaleInstruction> instructions = new List<UndertaleInstruction>();
-            foreach(var fullline in lines)
+            foreach (var fullline in lines)
             {
                 string line = fullline;
                 if (line.Length > 0 && line[0] == ';')
@@ -177,11 +177,17 @@ namespace UndertaleModLib.Decompiler
                     labelTargets.Add(instr, labelTgt);
 
                 if (!String.IsNullOrEmpty(label))
+                {
+                    if (labels.ContainsKey(label))
+                        throw new Exception("Duplicate label: " + label);
                     labels.Add(label, instr.Address);
+                }
                 instructions.Add(instr);
 
                 addr += instr.CalculateInstructionSize();
             }
+            if (labels.ContainsKey("func_end"))
+                throw new Exception("func_end is a reserved label name");
             labels.Add("func_end", addr);
             foreach(var pair in labelTargets)
             {
