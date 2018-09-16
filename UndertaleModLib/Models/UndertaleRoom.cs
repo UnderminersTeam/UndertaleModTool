@@ -419,8 +419,8 @@ namespace UndertaleModLib.Models
             public uint[] Unknown9; // [100000] // [] // [0]
             public uint[] Data; // 100000 // TilesX, TilesY, Tiles[TilesX*TilesY] // 8 bytes, see below
 
-            public UndertalePointerList<AssetListItem1> Assets1;
-            public UndertalePointerList<AssetListItem2> Assets2;
+            public UndertalePointerList<Tile> LegacyTiles;
+            public UndertalePointerList<AssetSpriteItem> Sprites;
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -468,17 +468,17 @@ namespace UndertaleModLib.Models
                     Data[3] = reader.ReadUInt32(); // 0
                     Data[4] = reader.ReadUInt32(); // -1
                     Data[5] = reader.ReadUInt32(); // 0
-                    Data[6] = reader.ReadUInt32(); // 0x41700000
+                    Data[6] = reader.ReadUInt32(); // 15.0 // AnimationSpeed
                     Data[7] = reader.ReadUInt32(); // 0
                 }
                 else if (LayerType == LayerType.Assets)
                 {
-                    Assets1 = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetListItem1>>();
-                    Assets2 = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetListItem2>>();
-                    if (reader.ReadUndertaleObject<UndertalePointerList<AssetListItem1>>() != Assets1)
-                        throw new IOException("Assets1 misaligned");
-                    if (reader.ReadUndertaleObject<UndertalePointerList<AssetListItem2>>() != Assets2)
-                        throw new IOException("Assets2 misaligned");
+                    LegacyTiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<Tile>>();
+                    Sprites = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetSpriteItem>>();
+                    if (reader.ReadUndertaleObject<UndertalePointerList<Tile>>() != LegacyTiles)
+                        throw new IOException("LegacyTiles misaligned");
+                    if (reader.ReadUndertaleObject<UndertalePointerList<AssetSpriteItem>>() != Sprites)
+                        throw new IOException("Sprites misaligned");
                 }
                 else
                     throw new Exception();
@@ -486,29 +486,16 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class AssetListItem1 : UndertaleObject
-    {
-        public void Serialize(UndertaleWriter writer)
-        {
-            throw new NotImplementedException("AssetListItem1 is currently unknown");
-        }
-
-        public void Unserialize(UndertaleReader reader)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class AssetListItem2 : UndertaleObject
+    public class AssetSpriteItem : UndertaleObject
     {
         public UndertaleString Name;
         public uint Unknown1; // 3
         public uint Unknown2; // 0x1a0 beginning of SPRT?!?! / 0x360 / 0x3c0 / 0x5c0
         public uint Unknown3; // 0x280 / 0x380 / 0x600 / 0x6c0
-        public uint Unknown4; // 0x3f800000
-        public uint Unknown5; // 0x3f800000
+        public float ScaleX; // 1.0
+        public float ScaleY; // 1.0
         public int Unknown6; // -1
-        public uint Unknown7; // 0x41700000
+        public float AnimationSpeed; // 15.0
         public uint Unknown8; // 0
         public uint Unknown9; // 0
         public uint Unknown10; // 0
@@ -524,10 +511,10 @@ namespace UndertaleModLib.Models
             Unknown1 = reader.ReadUInt32();
             Unknown2 = reader.ReadUInt32();
             Unknown3 = reader.ReadUInt32();
-            Unknown4 = reader.ReadUInt32();
-            Unknown5 = reader.ReadUInt32();
+            ScaleX = reader.ReadSingle();
+            ScaleY = reader.ReadSingle();
             Unknown6 = reader.ReadInt32();
-            Unknown7 = reader.ReadUInt32();
+            AnimationSpeed = reader.ReadSingle();
             Unknown8 = reader.ReadUInt32();
             Unknown9 = reader.ReadUInt32();
             Unknown10 = reader.ReadUInt32();
