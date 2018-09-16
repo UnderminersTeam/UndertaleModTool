@@ -32,6 +32,17 @@ Interested in the file and instruction format research I've done while working o
 * https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-Game-Maker:-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions
 * https://github.com/krzys-h/UndertaleModTool/wiki/Changes-in-Game-Maker:-Studio-2
 
+### Special thanks
+Undertale has a special thanks section so I will have one to! No minigame here, though.
+
+Special thanks to everybody who did previous research on unpacking and decompiling Undertale, it was a really huge help:
+* https://pcy.ulyssis.be/undertale/
+* https://github.com/donkeybonks/acolyte/wiki/Bytecode
+* https://github.com/PoroCYon/Altar.NET
+* https://github.com/WarlockD/GMdsam
+
+And of course, special thanks to Toby Fox and the whole Undertale team for making the game ;)
+
 How about a random screenshot because I'm bad at writing READMEs? NYEH HEH HEH HEH!
 
 ![screenshot](screenshot.png)
