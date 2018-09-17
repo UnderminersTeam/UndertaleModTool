@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,6 +28,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using UndertaleModLib;
 using UndertaleModLib.DebugData;
+using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 
 namespace UndertaleModTool
@@ -715,6 +717,48 @@ namespace UndertaleModTool
         {
             if (Data == null)
                 throw new Exception("Please load data.win first!");
+        }
+
+        private async void MenuItem_BatchDecompile_Click(object sender, RoutedEventArgs e)
+        {
+            if (Data == null)
+                return; // TODO: disable menu item
+            
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.IsFolderPicker = true;
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                await BatchDecompile(dialog.FileName);
+            }
+        }
+        private async Task BatchDecompile(string outdir)
+        {
+            LoaderDialog dialog = new LoaderDialog("Decompiling", "Decompiling, please wait...");
+            dialog.Owner = this;
+            Task t = Task.Run(() =>
+            {
+                foreach(var code in Data.Code)
+                {
+                    Debug.WriteLine(code.Name.Content);
+                    string path = System.IO.Path.Combine(outdir, code.Name.Content + ".gml");
+                    try
+                    {
+                        string decomp = Decompiler.Decompile(code);
+                        File.WriteAllText(path, decomp);
+                    }
+                    catch(Exception e)
+                    {
+                        File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
+                    }
+                }
+
+                Dispatcher.Invoke(() =>
+                {
+                    dialog.Hide();
+                });
+            });
+            dialog.ShowDialog();
+            await t;
         }
     }
 
