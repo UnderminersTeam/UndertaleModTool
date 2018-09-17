@@ -23,7 +23,7 @@ namespace UndertaleModLib
         public IList<UndertaleBackground> Backgrounds => FORM.BGND.List;
         public IList<UndertalePath> Paths => FORM.PATH.List;
         public IList<UndertaleScript> Scripts => FORM.SCPT.List;
-        public IList<UndertaleGlobal> Globals => FORM.GLOB.List;
+        public IList<UndertaleGlobalInit> GlobalInitScripts => FORM.GLOB.List;
         [Obsolete("Unused")]
         public IList<UndertaleShader> Shaders => FORM.SHDR.List;
         public IList<UndertaleFont> Fonts => FORM.FONT.List;
