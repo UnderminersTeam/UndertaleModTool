@@ -14,7 +14,6 @@ namespace UndertaleModLib
         public UndertaleGeneralInfo GeneralInfo => FORM.GEN8.Object;
         public UndertaleOptions Options => FORM.OPTN.Object;
         public UndertaleLanguage Language => FORM.LANG.Object;
-        [Obsolete("Unused")]
         public IList<UndertaleExtension> Extensions => FORM.EXTN.List;
         public IList<UndertaleSound> Sounds => FORM.SOND.List;
         [Obsolete("Unused")]
