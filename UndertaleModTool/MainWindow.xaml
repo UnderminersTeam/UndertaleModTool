@@ -46,6 +46,8 @@
                     <MenuItem Header="_Run game" Command="Print" InputGestureText="F5"/> <!-- TODO: I think I need a custom command for that... -->
                     <MenuItem Header="_Run game under debugger" Command="PrintPreview" InputGestureText="Shift+F5"/>
                     <Separator/>
+                    <MenuItem Header="_Batch decompile" Click="MenuItem_BatchDecompile_Click"/>
+                    <Separator/>
                     <MenuItem Header="S_ettings" Command="Properties"/>
                     <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+W"/>
                 </MenuItem>

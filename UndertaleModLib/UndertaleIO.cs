@@ -179,9 +179,14 @@ namespace UndertaleModLib
 
         public UndertaleString ReadUndertaleString()
         {
+            uint addr = ReadUInt32();
+
+            if (addr == 0)
+                return null;
+
             // Normally, the strings point directly to the string content
             // This may be done that way because it's faster when the game accesses them, but for our purposes it's better to access the whole string resource object
-            return GetUndertaleObjectAtAddress<UndertaleString>(ReadUInt32() - 4);
+            return GetUndertaleObjectAtAddress<UndertaleString>(addr - 4);
         }
 
         public class EnsureLengthOperation
@@ -328,6 +333,12 @@ namespace UndertaleModLib
 
         public void WriteUndertaleString(UndertaleString obj)
         {
+            if (obj == null)
+            {
+                Write((uint)0x0000000u);
+                return;
+            }
+
             if (objectPool.ContainsKey(obj))
             {
                 Write(objectPool[obj] + 4);

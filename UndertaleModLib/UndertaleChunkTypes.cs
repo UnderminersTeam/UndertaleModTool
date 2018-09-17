@@ -114,6 +114,21 @@ namespace UndertaleModLib
         }
     }
 
+    public abstract class UndertaleSimpleListChunk<T> : UndertaleChunk where T : UndertaleObject, new()
+    {
+        public UndertaleSimpleList<T> List = new UndertaleSimpleList<T>();
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            List.Serialize(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            List.Unserialize(reader);
+        }
+    }
+
     public abstract class UndertaleEmptyChunk : UndertaleChunk
     {
         internal override void SerializeChunk(UndertaleWriter writer)

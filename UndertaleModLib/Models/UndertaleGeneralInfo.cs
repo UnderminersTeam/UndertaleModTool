@@ -273,22 +273,4 @@ namespace UndertaleModLib.Models
             Unknown3 = reader.ReadUInt32();
         }
     }
-
-    public class UndertaleExtension : UndertaleObject
-    {
-        void UndertaleGlobal()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Serialize(UndertaleWriter writer)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Unserialize(UndertaleReader reader)
-        {
-            throw new NotImplementedException();
-        }
-    }
 }

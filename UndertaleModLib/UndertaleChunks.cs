@@ -116,19 +116,9 @@ namespace UndertaleModLib
         public override string Name => "SCPT";
     }
     
-    public class UndertaleChunkGLOB : UndertaleListChunk<UndertaleGlobal>
+    public class UndertaleChunkGLOB : UndertaleSimpleListChunk<UndertaleGlobalInit>
     {
         public override string Name => "GLOB";
-
-        internal override void UnserializeChunk(UndertaleReader reader)
-        {
-            if (reader.undertaleData.GeneralInfo.Major >= 2)
-            {
-                Debug.WriteLine("Ignoring the GLOB chunk in GMS2 for now as apparently Undertale started using it");
-                return;
-            }
-            base.UnserializeChunk(reader);
-        }
     }
 
     public class UndertaleChunkSHDR : UndertaleListChunk<UndertaleShader>

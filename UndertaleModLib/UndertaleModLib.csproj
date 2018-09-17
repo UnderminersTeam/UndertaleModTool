@@ -43,6 +43,7 @@
     <Compile Include="ModelsDebug\UndertaleDebugInfo.cs" />
     <Compile Include="ModelsDebug\UndertaleInstanceVars.cs" />
     <Compile Include="ModelsDebug\UndertaleScriptSource.cs" />
+    <Compile Include="Models\UndertaleExtension.cs" />
     <Compile Include="Models\UndertaleBackground.cs" />
     <Compile Include="Models\UndertaleCode.cs" />
     <Compile Include="Models\UndertaleEmbeddedAudio.cs" />
@@ -51,6 +52,7 @@
     <Compile Include="Models\UndertaleFunction.cs" />
     <Compile Include="Models\UndertaleGameObject.cs" />
     <Compile Include="Models\UndertaleGeneralInfo.cs" />
+    <Compile Include="Models\UndertaleGlobalInit.cs" />
     <Compile Include="Models\UndertalePath.cs" />
     <Compile Include="Models\UndertaleRoom.cs" />
     <Compile Include="Models\UndertaleScript.cs" />
