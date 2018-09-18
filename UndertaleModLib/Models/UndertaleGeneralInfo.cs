@@ -89,6 +89,11 @@ namespace UndertaleModLib.Models
         public uint DebuggerPort { get; set; } = 6502;
         public UndertaleSimpleList<RoomOrderEntry> RoomOrder { get; private set; } = new UndertaleSimpleList<RoomOrderEntry>();
         
+        public byte[] GMS2License1 { get; set; } = new byte[40]; // License data or encrypted something? Has quite high entropy
+        public float GMS2Unknown1MaybeFPS { get; set; } = 30.0f;
+        public uint GMS2Unknown2 { get; set; } = 1;
+        public byte[] GMS2License2 { get; set; } = new byte[16]; // more high entropy data
+        
         public class RoomOrderEntry : UndertaleObject, INotifyPropertyChanged
         {
             private UndertaleResourceById<UndertaleRoom> _Room = new UndertaleResourceById<UndertaleRoom>("ROOM");
@@ -143,6 +148,17 @@ namespace UndertaleModLib.Models
             writer.Write(Unknown9);
             writer.Write(DebuggerPort);
             writer.WriteUndertaleObject(RoomOrder);
+            if (Major >= 2)
+            {
+                if (GMS2License1.Length != 40)
+                    throw new IOException("GMS2License1 has invalid length");
+                writer.Write(GMS2License1);
+                writer.Write(GMS2Unknown1MaybeFPS);
+                if (GMS2License2.Length != 16)
+                    throw new IOException("GMS2License2 has invalid length");
+                writer.Write(GMS2Unknown2);
+                writer.Write(GMS2License2);
+            }
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -181,10 +197,10 @@ namespace UndertaleModLib.Models
             RoomOrder = reader.ReadUndertaleObject<UndertaleSimpleList<RoomOrderEntry>>();
             if (Major >= 2)
             {
-                reader.ReadBytes(40); // License data or encrypted something? Has quite high entropy
-                reader.ReadSingle(); // 30.0, maybe FPS?
-                reader.ReadUInt32(); // 1
-                reader.ReadBytes(16); // more high entropy data
+                GMS2License1 = reader.ReadBytes(40);
+                GMS2Unknown1MaybeFPS = reader.ReadSingle();
+                GMS2Unknown2 = reader.ReadUInt32();
+                GMS2License2 = reader.ReadBytes(16);
             }
             if (BytecodeVersion != 0x10)
                 throw new Exception("Only bytecode version " + 0x10 + " is supported for now, you are trying to load " + BytecodeVersion);

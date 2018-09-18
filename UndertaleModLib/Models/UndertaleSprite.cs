@@ -26,6 +26,11 @@ namespace UndertaleModLib.Models
         private uint _SepMasks;
         private uint _OriginX;
         private uint _OriginY;
+        private int _GMS2Unknown1 = -1;
+        private uint _GMS2Unknown2 = 1;
+        private uint _GMS2Unknown3 = 0;
+        private float _GMS2Unknown4 = 15.0f; // maybe animation speed?
+        private uint _GMS2Unknown5 = 0;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public uint Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
@@ -43,6 +48,12 @@ namespace UndertaleModLib.Models
         public uint OriginY { get => _OriginY; set { _OriginY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OriginY")); } }
         public UndertaleSimpleList<TextureEntry> Textures { get; private set; } = new UndertaleSimpleList<TextureEntry>();
         public ObservableCollection<MaskEntry> CollisionMasks { get; } = new ObservableCollection<MaskEntry>();
+        
+        public int GMS2Unknown1 { get => _GMS2Unknown1; set { _GMS2Unknown1 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2Unknown1")); } }
+        public uint GMS2Unknown2 { get => _GMS2Unknown2; set { _GMS2Unknown2 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2Unknown2")); } }
+        public uint GMS2Unknown3 { get => _GMS2Unknown3; set { _GMS2Unknown3 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2Unknown3")); } }
+        public float GMS2Unknown4 { get => _GMS2Unknown4; set { _GMS2Unknown4 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2Unknown4")); } }
+        public uint GMS2Unknown5 { get => _GMS2Unknown5; set { _GMS2Unknown5 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2Unknown5")); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -102,6 +113,14 @@ namespace UndertaleModLib.Models
             writer.Write(SepMasks);
             writer.Write(OriginX);
             writer.Write(OriginY);
+            if (writer.undertaleData.GeneralInfo.Major >= 2)
+            {
+                writer.Write(GMS2Unknown1);
+                writer.Write(GMS2Unknown2);
+                writer.Write(GMS2Unknown3);
+                writer.Write(GMS2Unknown4);
+                writer.Write(GMS2Unknown5);
+            }
             writer.WriteUndertaleObject(Textures);
             writer.Write((uint)CollisionMasks.Count);
             uint total = 0;
@@ -136,13 +155,11 @@ namespace UndertaleModLib.Models
             OriginY = reader.ReadUInt32();
             if (reader.undertaleData.GeneralInfo.Major >= 2)
             {
-                // TODO
-                reader.ReadInt32(); // -1
-                uint cnt = reader.ReadUInt32(); // 1
-                reader.ReadUInt32(); // 0
-                reader.ReadUInt16(); // 0
-                reader.ReadUInt16(); // 0x4170
-                reader.ReadUInt32(); // 0
+                GMS2Unknown1 = reader.ReadInt32();
+                GMS2Unknown2 = reader.ReadUInt32();
+                GMS2Unknown3 = reader.ReadUInt32();
+                GMS2Unknown4 = reader.ReadSingle();
+                GMS2Unknown5 = reader.ReadUInt32();
             }
             Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
             uint MaskCount = reader.ReadUInt32();

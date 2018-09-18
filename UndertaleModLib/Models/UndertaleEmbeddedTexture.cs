@@ -21,9 +21,7 @@ namespace UndertaleModLib.Models
         public void Serialize(UndertaleWriter writer)
         {
             if (writer.undertaleData.GeneralInfo.Major >= 2)
-            {
-                throw new NotImplementedException();
-            }
+                writer.Write((uint)1u);
             writer.Write(UnknownAlwaysZero);
             writer.WriteUndertaleObjectPointer(TextureData);
         }
@@ -31,7 +29,8 @@ namespace UndertaleModLib.Models
         public void Unserialize(UndertaleReader reader)
         {
             if (reader.undertaleData.GeneralInfo.Major >= 2)
-                reader.ReadUInt32(); // TODO
+                if (reader.ReadUInt32() != 1)
+                    throw new Exception("Should be 1");
             UnknownAlwaysZero = reader.ReadUInt32();
             TextureData = reader.ReadUndertaleObjectPointer<TexData>();
         }

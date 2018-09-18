@@ -371,7 +371,7 @@ namespace UndertaleModLib
     {
         public override string Name => "AUDO";
     }
-
+    
     // GMS2 only
     public class UndertaleChunkEMBI : UndertaleSimpleListChunk<UndertaleEmbeddedISomething>
     {
@@ -380,7 +380,7 @@ namespace UndertaleModLib
         internal override void SerializeChunk(UndertaleWriter writer)
         {
             if (writer.undertaleData.GeneralInfo.Major < 2)
-                throw new NotImplementedException();
+                throw new InvalidOperationException();
             writer.Write((uint)1); // apparently hardcoded 1, see https://github.com/krzys-h/UndertaleModTool/issues/4#issuecomment-421844420
             base.SerializeChunk(writer);
         }
@@ -388,7 +388,7 @@ namespace UndertaleModLib
         internal override void UnserializeChunk(UndertaleReader reader)
         {
             if (reader.undertaleData.GeneralInfo.Major < 2)
-                throw new NotImplementedException();
+                throw new InvalidOperationException();
             if (reader.ReadUInt32() != 1)
                 throw new Exception("Should be hardcoded 1");
             base.UnserializeChunk(reader);

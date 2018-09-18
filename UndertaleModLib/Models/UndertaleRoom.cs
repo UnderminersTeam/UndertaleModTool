@@ -408,13 +408,14 @@ namespace UndertaleModLib.Models
         {
             Instances = 2,
             Tiles = 4,
-            Backgrounds = 1,
+            Background = 1,
             Assets = 3
         }
-        public class Layer : UndertaleObject // TODO
+
+        public class Layer : UndertaleObject
         {
-            public UndertaleString LayerName; // "Instances" // "Tiles_1" // "Backgrounds"
-            public uint LayerId; // 0 // 1 // 2 // <- layer id
+            public UndertaleString LayerName; // "Instances" // "Tiles_1" // "Background"
+            public uint LayerId; // 0 // 1 // 2
             public LayerType LayerType; // 2 // 4 // 1
             public uint LayerDepth; // 0 // 100 // 200
             public uint Unknown4; // 0 // 0 // 0
@@ -422,16 +423,43 @@ namespace UndertaleModLib.Models
             public uint Unknown6; // 0 // 0 // 0
             public uint Unknown7; // 0 // 0 // 0
             public uint Unknown8; // 1 // 1 // 1
-            public uint Unknown9Count; // 1 // 0 // 1 
-            public uint[] Unknown9; // [100000] // [] // [0]
-            public uint[] Data; // 100000 // TilesX, TilesY, Tiles[TilesX*TilesY] // 8 bytes, see below
 
-            public UndertalePointerList<AssetLegacyTileItem> LegacyTiles;
-            public UndertalePointerList<AssetSpriteItem> Sprites;
+            public LayerInstancesData InstancesData;
+            public LayerTilesData TilesData;
+            public LayerBackgroundData BackgroundData;
+            public LayerAssetsData AssetsData;
 
             public void Serialize(UndertaleWriter writer)
             {
-                throw new NotImplementedException();
+                writer.WriteUndertaleString(LayerName);
+                writer.Write(LayerId);
+                writer.Write((uint)LayerType);
+                writer.Write(LayerDepth);
+                writer.Write(Unknown4);
+                writer.Write(Unknown5);
+                writer.Write(Unknown6);
+                writer.Write(Unknown7);
+                writer.Write(Unknown8);
+                if (LayerType == LayerType.Instances)
+                {
+                    writer.WriteUndertaleObject(InstancesData);
+                }
+                else if (LayerType == LayerType.Tiles)
+                {
+                    writer.WriteUndertaleObject(TilesData);
+                }
+                else if (LayerType == LayerType.Background)
+                {
+                    writer.WriteUndertaleObject(BackgroundData);
+                }
+                else if (LayerType == LayerType.Assets)
+                {
+                    writer.WriteUndertaleObject(AssetsData);
+                }
+                else
+                {
+                    throw new Exception("Unsupported layer type " + LayerType);
+                }
             }
 
             public void Unserialize(UndertaleReader reader)
@@ -447,49 +475,142 @@ namespace UndertaleModLib.Models
                 Unknown8 = reader.ReadUInt32();
                 if (LayerType == LayerType.Instances)
                 {
-                    Unknown9Count = reader.ReadUInt32();
-                    Unknown9 = new uint[Unknown9Count];
-                    for (uint i = 0; i < Unknown9Count; i++)
-                        Unknown9[i] = reader.ReadUInt32(); // 100000, 100001, 100002, 100003
-                    Data = null;
+                    InstancesData = reader.ReadUndertaleObject<LayerInstancesData>();
                 }
                 else if (LayerType == LayerType.Tiles)
                 {
-                    Unknown9Count = reader.ReadUInt32();
-                    uint RepeatsX = reader.ReadUInt32();
-                    uint RepeatsY = reader.ReadUInt32();
-                    Data = new uint[RepeatsX * RepeatsY];
-                    for (uint i = 0; i < RepeatsX * RepeatsY; i++)
-                        Data[i] = reader.ReadUInt32();
+                    TilesData = reader.ReadUndertaleObject<LayerTilesData>();
                 }
-                else if (LayerType == LayerType.Backgrounds)
+                else if (LayerType == LayerType.Background)
                 {
-                    Unknown9Count = reader.ReadUInt32();
-                    Unknown9 = new uint[Unknown9Count];
-                    for (uint i = 0; i < Unknown9Count; i++)
-                        Unknown9[i] = reader.ReadUInt32();
-                    Data = new uint[8];
-                    Data[0] = reader.ReadUInt32(); // 0
-                    Data[1] = reader.ReadUInt32(); // 0
-                    Data[2] = reader.ReadUInt32(); // 0
-                    Data[3] = reader.ReadUInt32(); // 0
-                    Data[4] = reader.ReadUInt32(); // -1
-                    Data[5] = reader.ReadUInt32(); // 0
-                    Data[6] = reader.ReadUInt32(); // 15.0 // AnimationSpeed
-                    Data[7] = reader.ReadUInt32(); // 0
+                    BackgroundData = reader.ReadUndertaleObject<LayerBackgroundData>();
                 }
                 else if (LayerType == LayerType.Assets)
                 {
-                    LegacyTiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetLegacyTileItem>>();
-                    Sprites = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetSpriteItem>>();
-                    if (reader.ReadUndertaleObject<UndertalePointerList<AssetLegacyTileItem>>() != LegacyTiles)
-                        throw new IOException("LegacyTiles misaligned");
-                    if (reader.ReadUndertaleObject<UndertalePointerList<AssetSpriteItem>>() != Sprites)
-                        throw new IOException("Sprites misaligned");
+                    AssetsData = reader.ReadUndertaleObject<LayerAssetsData>();
                 }
                 else
-                    throw new Exception();
+                {
+                    throw new Exception("Unsupported layer type " + LayerType);
+                }
             }
+        }
+    }
+
+    public class LayerInstancesData : UndertaleObject
+    {
+        uint[] InstanceIds; // 100000, 100001, 100002, 100003 - probably instance ids from GameObjects list in the room
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write((uint)InstanceIds.Length);
+            foreach (var id in InstanceIds)
+                writer.Write(id);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            uint InstanceCount = reader.ReadUInt32();
+            InstanceIds = new uint[InstanceCount];
+            for (uint i = 0; i < InstanceCount; i++)
+                InstanceIds[i] = reader.ReadUInt32();
+        }
+    }
+
+    public class LayerTilesData : UndertaleObject
+    {
+        uint Unknown9; // if I had to guess this is probably tile set id (i.e. ID into BGND)
+        uint TilesX;
+        uint TilesY;
+        uint[] TileData; // values unknown, but I'm guessing they are related to the big array at the end of backgrounds
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write(Unknown9);
+            writer.Write(TilesX);
+            writer.Write(TilesY);
+            if (TileData.Length != TilesX * TilesY)
+                throw new Exception("Invalid TileData length");
+            foreach (var tile in TileData)
+                writer.Write(tile);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            Unknown9 = reader.ReadUInt32();
+            TilesX = reader.ReadUInt32();
+            TilesY = reader.ReadUInt32();
+            TileData = new uint[TilesX * TilesY];
+            for (uint i = 0; i < TilesX * TilesY; i++)
+                TileData[i] = reader.ReadUInt32();
+        }
+    }
+
+    public class LayerBackgroundData : UndertaleObject
+    {
+        uint[] Background; // probably ID in SPRT (!!!)
+        uint Unknown10; // 0
+        uint Unknown11; // 0
+        uint Unknown12; // 0
+        uint Unknown13; // 0
+        int Unknown14; // -1
+        uint Unknown15; // 0
+        float AnimationSpeed; // 15.0
+        uint Unknown17; // 0
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write((uint)Background.Length);
+            foreach (var bg in Background)
+                writer.Write(bg);
+            writer.Write(Unknown10);
+            writer.Write(Unknown11);
+            writer.Write(Unknown12);
+            writer.Write(Unknown13);
+            writer.Write(Unknown14);
+            writer.Write(Unknown15);
+            writer.Write(AnimationSpeed);
+            writer.Write(Unknown17);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            uint BackgroundCount = reader.ReadUInt32();
+            Background = new uint[BackgroundCount];
+            for (uint i = 0; i < BackgroundCount; i++)
+                Background[i] = reader.ReadUInt32();
+            Unknown10 = reader.ReadUInt32();
+            Unknown11 = reader.ReadUInt32();
+            Unknown12 = reader.ReadUInt32();
+            Unknown13 = reader.ReadUInt32();
+            Unknown14 = reader.ReadInt32();
+            Unknown15 = reader.ReadUInt32();
+            AnimationSpeed = reader.ReadSingle();
+            Unknown17 = reader.ReadUInt32();
+        }
+    }
+
+    public class LayerAssetsData : UndertaleObject
+    {
+        UndertalePointerList<AssetLegacyTileItem> LegacyTiles;
+        UndertalePointerList<AssetSpriteItem> Sprites;
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.WriteUndertaleObjectPointer(LegacyTiles);
+            writer.WriteUndertaleObjectPointer(Sprites);
+            writer.WriteUndertaleObject(LegacyTiles);
+            writer.WriteUndertaleObject(Sprites);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            LegacyTiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetLegacyTileItem>>();
+            Sprites = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetSpriteItem>>();
+            if (reader.ReadUndertaleObject<UndertalePointerList<AssetLegacyTileItem>>() != LegacyTiles)
+                throw new IOException("LegacyTiles misaligned");
+            if (reader.ReadUndertaleObject<UndertalePointerList<AssetSpriteItem>>() != Sprites)
+                throw new IOException("Sprites misaligned");
         }
     }
 
@@ -573,7 +694,17 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
-            throw new NotImplementedException();
+            writer.WriteUndertaleString(Name);
+            writer.Write(Unknown1);
+            writer.Write(Unknown2);
+            writer.Write(Unknown3);
+            writer.Write(ScaleX);
+            writer.Write(ScaleY);
+            writer.Write(Unknown6);
+            writer.Write(AnimationSpeed);
+            writer.Write(Unknown8);
+            writer.Write(Unknown9);
+            writer.Write(Unknown10);
         }
 
         public void Unserialize(UndertaleReader reader)

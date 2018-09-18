@@ -16,7 +16,7 @@ heya. I heard you like digging deep into Undertale data so I made a tool just fo
 * Support for running scripts that automatically modify your data file - this is the way to distribute mods, but creating them is manual job for now. It also serves as a replacement for sharing hex editor offsets - if you make it into a file-format-aware script instead, there is much smaller change of it breaking after an update.
 * All core IO functionality extracted into a library for use in external tools
 * Can generate an .yydebug file for the GM:S debugger so that you can edit variables live [EXPERIMENTAL]
-* Some hacks to make it work with GM:S 2. Should be able to load (but not yet save or fully display) the latest Nintendo Switch release.
+* Some hacks to make it work with GM:S 2. Should be able to load and maybe save (but not yet fully display) the latest Nintendo Switch release.
 
 ### Included scripts
 I also included some of my test scripts. They are:
