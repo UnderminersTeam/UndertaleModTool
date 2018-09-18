@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -86,7 +87,30 @@ namespace UndertaleModLib.Models
         public uint Unknown8 { get; set; } = 0;
         public uint Unknown9 { get; set; } = 0;
         public uint DebuggerPort { get; set; } = 6502;
-        public uint UnknownPaddingNumbersCount { get; set; } = 336;
+        public UndertaleSimpleList<RoomOrderEntry> RoomOrder { get; private set; } = new UndertaleSimpleList<RoomOrderEntry>();
+        
+        public byte[] GMS2License1 { get; set; } = new byte[40]; // License data or encrypted something? Has quite high entropy
+        public float GMS2Unknown1MaybeFPS { get; set; } = 30.0f;
+        public uint GMS2Unknown2 { get; set; } = 1;
+        public byte[] GMS2License2 { get; set; } = new byte[16]; // more high entropy data
+        
+        public class RoomOrderEntry : UndertaleObject, INotifyPropertyChanged
+        {
+            private UndertaleResourceById<UndertaleRoom> _Room = new UndertaleResourceById<UndertaleRoom>("ROOM");
+            public UndertaleRoom Room { get => _Room.Resource; set { _Room.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Room")); } }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            public void Serialize(UndertaleWriter writer)
+            {
+                writer.Write(_Room.Serialize(writer));
+            }
+
+            public void Unserialize(UndertaleReader reader)
+            {
+                _Room.Unserialize(reader, reader.ReadInt32());
+            }
+        }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -123,9 +147,18 @@ namespace UndertaleModLib.Models
             writer.Write(Unknown8);
             writer.Write(Unknown9);
             writer.Write(DebuggerPort);
-            writer.Write(UnknownPaddingNumbersCount);
-            for (uint i = 0; i < UnknownPaddingNumbersCount; i++)
-                writer.Write(i);
+            writer.WriteUndertaleObject(RoomOrder);
+            if (Major >= 2)
+            {
+                if (GMS2License1.Length != 40)
+                    throw new IOException("GMS2License1 has invalid length");
+                writer.Write(GMS2License1);
+                writer.Write(GMS2Unknown1MaybeFPS);
+                if (GMS2License2.Length != 16)
+                    throw new IOException("GMS2License2 has invalid length");
+                writer.Write(GMS2Unknown2);
+                writer.Write(GMS2License2);
+            }
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -161,10 +194,14 @@ namespace UndertaleModLib.Models
             Unknown8 = reader.ReadUInt32();
             Unknown9 = reader.ReadUInt32();
             DebuggerPort = reader.ReadUInt32();
-            UnknownPaddingNumbersCount = reader.ReadUInt32();
-            for (uint i = 0; i < UnknownPaddingNumbersCount; i++)
-                if (reader.ReadUInt32() != i)
-                    throw new IOException("GEN8 padding error");
+            RoomOrder = reader.ReadUndertaleObject<UndertaleSimpleList<RoomOrderEntry>>();
+            if (Major >= 2)
+            {
+                GMS2License1 = reader.ReadBytes(40);
+                GMS2Unknown1MaybeFPS = reader.ReadSingle();
+                GMS2Unknown2 = reader.ReadUInt32();
+                GMS2License2 = reader.ReadBytes(16);
+            }
             if (BytecodeVersion != 0x10)
                 throw new Exception("Only bytecode version " + 0x10 + " is supported for now, you are trying to load " + BytecodeVersion);
         }

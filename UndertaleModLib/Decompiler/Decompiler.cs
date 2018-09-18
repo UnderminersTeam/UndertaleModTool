@@ -1074,7 +1074,8 @@ namespace UndertaleModLib.Decompiler
                     output.Statements.Add(new BreakHLStatement());
                     break;
                 }
-                
+
+                //output.Statements.Add(new CommentStatement("At block " + block.Address));
                 foreach (var stmt in block.Statements)
                     if (!(stmt is PushEnvStatement) && !(stmt is PopEnvStatement))
                         output.Statements.Add(stmt);
@@ -1090,7 +1091,7 @@ namespace UndertaleModLib.Decompiler
                         Block = HLDecompileBlocks(ref block, blocks, loops, reverseDominators, currentLoop, false, stopAt)
                     });
                 }
-                if (block.Statements.Count > 0 && block.Statements.Last() is PopEnvStatement)
+                else if (block.Statements.Count > 0 && block.Statements.Last() is PopEnvStatement)
                 {
                     Debug.Assert(!block.conditionalExit);
                     break;

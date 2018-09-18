@@ -143,7 +143,7 @@ namespace UndertaleModTool
                     {
                         if (data.GeneralInfo.Major >= 2)
                         {
-                            MessageBox.Show("LOL it worked :O\n\nGame Maker: Studio 2 game loaded! I just hacked this together quickly for the Nintendo Switch release of Undertale, so some things may be broken (saving definitely is). Expect a release with fixes soon!", "GMS2 game loaded", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            MessageBox.Show("Game Maker: Studio 2 game loaded! I just hacked this together quickly for the Nintendo Switch release of Undertale, so some things may be broken. Saving should work, but not all editors have the new data. Expect a release with fixes soon!", "GMS2 game loaded", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
                         this.Data = data;
                         this.FilePath = filename;
@@ -166,15 +166,7 @@ namespace UndertaleModTool
 
             if (IsGMS2 == Visibility.Visible)
             {
-                if (MessageBox.Show("heya, I told you this is not going to work.\nAre you that *DETERMINED* to see this error message?", "nope", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
-                {
-                    MessageBox.Show("HA! I knew it", "nope", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
-                }
-                else
-                {
-                    MessageBox.Show("okay, here it goes ;)", "nope", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
+                MessageBox.Show("This is not yet tested and may break. You have been warned.", "GMS2 game", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             }
 
             LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
@@ -215,10 +207,6 @@ namespace UndertaleModTool
                 catch(Exception e)
                 {
                     MessageBox.Show("An error occured while trying to save:\n" + e.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    if (IsGMS2 == Visibility.Visible)
-                    {
-                        MessageBox.Show("Are you happy now?", "nope", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
                 }
 
                 Dispatcher.Invoke(() =>

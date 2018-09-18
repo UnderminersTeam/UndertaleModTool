@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UndertaleModLib.Models;
 
 namespace UndertaleModLib
 {
@@ -27,6 +28,22 @@ namespace UndertaleModLib
                 Debug.WriteLine("Writing chunk " + Name);
                 lenWriter.FromHere();
                 SerializeChunk(writer);
+                
+                if (Name != "FORM" && Name != "AUDO") // TODO: needs a better way to detect last chunk
+                {
+                    UndertaleGeneralInfo generalInfo = Name == "GEN8" ? ((UndertaleChunkGEN8)this).Object : writer.undertaleData.GeneralInfo;
+                    // These versions introduced new padding
+                    // all chunks now start on 16-byte boundaries
+                    // (but the padding is included with length of previous chunk)
+                    if (generalInfo.Major >= 2 || (generalInfo.Major == 1 && generalInfo.Build >= 9999))
+                    {
+                        while (writer.Position % 16 != 0)
+                        {
+                            writer.Write((byte)0);
+                        }
+                    }
+                }
+
                 Length = lenWriter.ToHere();
             }
             catch (UndertaleSerializationException e)
@@ -64,6 +81,23 @@ namespace UndertaleModLib
                 Debug.WriteLine("Reading chunk " + chunk.Name);
                 var lenReader = reader.EnsureLengthFromHere(chunk.Length);
                 chunk.UnserializeChunk(reader);
+
+                if (name != "FORM" && name != "AUDO") // TODO: needs a better way to detect last chunk
+                {
+                    UndertaleGeneralInfo generalInfo = name == "GEN8" ? ((UndertaleChunkGEN8)chunk).Object : reader.undertaleData.GeneralInfo;
+                    // These versions introduced new padding
+                    // all chunks now start on 16-byte boundaries
+                    // (but the padding is included with length of previous chunk)
+                    if (generalInfo.Major >= 2 || (generalInfo.Major == 1 && generalInfo.Build >= 9999))
+                    {
+                        while (reader.Position % 16 != 0)
+                        {
+                            if (reader.ReadByte() != 0)
+                                throw new Exception("Chunk padding error");
+                        }
+                    }
+                }
+
                 lenReader.ToHere();
 
                 return chunk;

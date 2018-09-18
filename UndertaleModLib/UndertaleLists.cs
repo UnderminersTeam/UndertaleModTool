@@ -111,13 +111,13 @@ namespace UndertaleModLib
                 {
                     T obj = reader.ReadUndertaleObject<T>();
                     if (!obj.Equals(this[(int)i]))
-                        throw new IOException("Something got misaligned...");
+                        throw new UndertaleSerializationException("Something got misaligned...");
                     if (i != count - 1)
                         (obj as PaddedObject)?.UnserializePadding(reader);
                 }
                 catch (UndertaleSerializationException e)
                 {
-                    throw new UndertaleSerializationException(e.Message + "\nwhile reading pointer to item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
+                    throw new UndertaleSerializationException(e.Message + "\nwhile reading item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
                 }
             }
         }
