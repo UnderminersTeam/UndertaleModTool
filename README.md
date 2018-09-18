@@ -7,7 +7,7 @@
 heya. I heard you like digging deep into Undertale data so I made a tool just for you! Downloads are here: https://github.com/krzys-h/UndertaleModTool/releases
 
 ### Main features
-* Can read every single byte from the lastest PC version Undertale data.win file (bytecode version 16 = 0x10 only, at least for now) and then recreate a byte-for-byte exact copy from the decoded data.
+* Can read every single byte from the data file for lastest version of Undertale, and probably other GameMaker: Studio games (GM:S 1.4 bytecode version 16 = 0x10 only, at least for now, GM:S2 support is being worked on) for every platform and then recreate a byte-for-byte exact copy from the decoded data.
 * Properly handles all of the pointers in the file so that if you add/remove stuff, make things longer/shorter, move them around etc. the file format won't break.
 * An editor which lets you change (almost) every single value, including unknown ones. A lot better than a hex editor, huh?
 * Includes a (very) simple level editor
@@ -29,8 +29,8 @@ I also included some of my test scripts. They are:
 
 ### Bug reports, contributing
 All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is my current list of stuff that needs to be worked on:
-* Discover all missing stuff in the GML2 file format so that Nintendo Switch edition can be fully loaded, finish updating editors, add saving code
-* Add support for missing chunks so that games other than Undertale can be loaded: Timelines, [Extensions](https://www.reddit.com/r/Underminers/comments/9g51wd/so_today_im_releasing_the_tool_i_promised_a_few/e62hbu1/) and Shaders
+* Discover meaning of the new stuff in GML2 file format so that editors can be updated
+* Add support for missing chunks so that more games other than Undertale can be loaded: Timelines and Shaders
 * Finish writing the decompiler:
   * add support for resolving resource types (requires propagating information from builtin function calls backwards, possibly across different code fragments)
   * decompile other loop types than just while(true)
