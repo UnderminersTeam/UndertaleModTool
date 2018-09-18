@@ -148,17 +148,13 @@ namespace UndertaleModTool
                     var mousePos = e.GetPosition(RoomGraphics);
 
                     UndertaleRoom room = this.DataContext as UndertaleRoom;
-                    var obj = new UndertaleRoom.GameObject();
-                    obj.X = (int)mousePos.X;
-                    obj.Y = (int)mousePos.Y;
-                    obj.ObjectDefinition = droppedObject;
-                    obj.InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj++;
-                    obj.CreationCode = null;
-                    obj.ScaleX = 1;
-                    obj.ScaleY = 1;
-                    obj.Color = 0xFFFFFFFF;
-                    obj.Rotation = 0;
-                    obj.Unknown = -1;
+                    var obj = new UndertaleRoom.GameObject()
+                    {
+                        X = (int)mousePos.X,
+                        Y = (int)mousePos.Y,
+                        ObjectDefinition = droppedObject,
+                        InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj++
+                    };
                     room.GameObjects.Add(obj);
 
                     SelectObject(obj);

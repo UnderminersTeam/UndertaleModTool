@@ -372,17 +372,26 @@ namespace UndertaleModLib
         public override string Name => "AUDO";
     }
 
-    // TODO: GMS2 specific
-    public class UndertaleChunkEMBI : UndertaleChunk
+    // GMS2 only
+    public class UndertaleChunkEMBI : UndertaleSimpleListChunk<UndertaleEmbeddedISomething>
     {
         public override string Name => "EMBI";
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
+            if (writer.undertaleData.GeneralInfo.Major < 2)
+                throw new NotImplementedException();
+            writer.Write((uint)1); // apparently hardcoded 1, see https://github.com/krzys-h/UndertaleModTool/issues/4#issuecomment-421844420
+            base.SerializeChunk(writer);
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
+            if (reader.undertaleData.GeneralInfo.Major < 2)
+                throw new NotImplementedException();
+            if (reader.ReadUInt32() != 1)
+                throw new Exception("Should be hardcoded 1");
+            base.UnserializeChunk(reader);
         }
     }
 }

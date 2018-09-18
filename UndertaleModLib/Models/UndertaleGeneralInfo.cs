@@ -165,6 +165,13 @@ namespace UndertaleModLib.Models
             for (uint i = 0; i < UnknownPaddingNumbersCount; i++)
                 if (reader.ReadUInt32() != i)
                     throw new IOException("GEN8 padding error");
+            if (Major >= 2)
+            {
+                reader.ReadBytes(40); // License data or encrypted something? Has quite high entropy
+                reader.ReadSingle(); // 30.0, maybe FPS?
+                reader.ReadUInt32(); // 1
+                reader.ReadBytes(16); // more high entropy data
+            }
             if (BytecodeVersion != 0x10)
                 throw new Exception("Only bytecode version " + 0x10 + " is supported for now, you are trying to load " + BytecodeVersion);
         }

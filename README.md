@@ -44,6 +44,7 @@ All contributions are welcome! If you find a bug, a data file that does not load
 Interested in the file and instruction format research I've done while working on this? Check out these:
 * https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-Game-Maker:-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions
 * https://github.com/krzys-h/UndertaleModTool/wiki/Changes-in-Game-Maker:-Studio-2
+* https://github.com/krzys-h/UndertaleModTool/wiki/Extensions,-Shaders,-Timelines-format
 
 ### Special thanks
 Undertale has a special thanks section so I will have one to! No minigame here, though.
@@ -54,6 +55,7 @@ Special thanks to everybody who did previous research on unpacking and decompili
 * https://github.com/PoroCYon/Altar.NET
 * https://github.com/WarlockD/GMdsam
 * [@NarryG](https://github.com/NarryG) for [helping me figure out](https://github.com/krzys-h/UndertaleModTool/issues/3) the missing stuff for GMS2 and Nintendo Switch release
+* [@colinator27](https://github.com/colinator27) for [figuring out Extensions](https://github.com/krzys-h/UndertaleModTool/issues/4)
 
 And of course, special thanks to Toby Fox and the whole Undertale team for making the game ;)
 

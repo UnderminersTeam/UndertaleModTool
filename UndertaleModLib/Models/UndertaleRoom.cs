@@ -152,6 +152,13 @@ namespace UndertaleModLib.Models
             return Name.Content + " (" + GetType().Name + ")";
         }
 
+        public interface RoomObject
+        {
+            int X { get; }
+            int Y { get; }
+            uint InstanceID { get; }
+        }
+
         public class Background : UndertaleObject, INotifyPropertyChanged
         {
             private bool _Enabled = false;
@@ -278,18 +285,18 @@ namespace UndertaleModLib.Models
             }
         }
 
-        public class GameObject : UndertaleObject, INotifyPropertyChanged
+        public class GameObject : UndertaleObject, RoomObject, INotifyPropertyChanged
         {
             private int _X;
             private int _Y;
             private UndertaleResourceById<UndertaleGameObject> _ObjectDefinition { get; } = new UndertaleResourceById<UndertaleGameObject>("OBJT");
             private uint _InstanceID;
             private UndertaleResourceById<UndertaleCode> _CreationCode { get; } = new UndertaleResourceById<UndertaleCode>("CODE");
-            private float _ScaleX;
-            private float _ScaleY;
-            private uint _Color;
-            private float _Rotation;
-            private int _Unknown;
+            private float _ScaleX = 1;
+            private float _ScaleY = 1;
+            private uint _Color = 0xFFFFFFFF;
+            private float _Rotation = 0;
+            private int _Unknown = -1;
 
             public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
             public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
@@ -333,7 +340,7 @@ namespace UndertaleModLib.Models
             }
         }
 
-        public class Tile : UndertaleObject, INotifyPropertyChanged
+        public class Tile : UndertaleObject, RoomObject, INotifyPropertyChanged
         {
             private int _X;
             private int _Y;
@@ -342,11 +349,11 @@ namespace UndertaleModLib.Models
             private uint _SourceY;
             private uint _Width;
             private uint _Height;
-            private int _TileDepth;
+            private int _TileDepth = 0;
             private uint _InstanceID;
-            private float _ScaleX;
-            private float _ScaleY;
-            private uint _Color;
+            private float _ScaleX = 1;
+            private float _ScaleY = 1;
+            private uint _Color = 0xFFFFFFFF;
 
             public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
             public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
@@ -582,6 +589,14 @@ namespace UndertaleModLib.Models
             Unknown8 = reader.ReadUInt32();
             Unknown9 = reader.ReadUInt32();
             Unknown10 = reader.ReadUInt32();
+        }
+    }
+
+    public static class UndertaleRoomExtensions
+    {
+        public static T ByInstanceID<T>(this IList<T> list, uint instance) where T : UndertaleRoom.RoomObject
+        {
+            return list.Where((x) => x.InstanceID == instance).FirstOrDefault();
         }
     }
 }

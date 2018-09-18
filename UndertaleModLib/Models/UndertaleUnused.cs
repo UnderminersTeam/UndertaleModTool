@@ -42,4 +42,23 @@ namespace UndertaleModLib.Models
             throw new NotImplementedException();
         }
     }
+
+    // See https://github.com/krzys-h/UndertaleModTool/issues/4#issuecomment-421844420 for rough structure, but doesn't appear commonly used
+    public class UndertaleEmbeddedISomething : UndertaleObject
+    {
+        public UndertaleEmbeddedISomething()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
