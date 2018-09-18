@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UndertaleModLib.Models;
 
 namespace UndertaleModTool
 {
@@ -23,6 +24,15 @@ namespace UndertaleModTool
         public UndertaleGeneralInfoEditor()
         {
             InitializeComponent();
+        }
+
+        private void SyncRoomList_Click(object sender, RoutedEventArgs e)
+        {
+            IList<UndertaleRoom> rooms = (Application.Current.MainWindow as MainWindow).Data.Rooms;
+            IList<UndertaleGeneralInfo.RoomOrderEntry> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
+            roomOrder.Clear();
+            foreach(var room in rooms)
+                roomOrder.Add(new UndertaleGeneralInfo.RoomOrderEntry() { Room = room });
         }
     }
 }
