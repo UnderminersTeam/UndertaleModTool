@@ -10,9 +10,11 @@ namespace UndertaleModLib.Models
 {
     public class UndertaleEmbeddedTexture : UndertaleResource, INotifyPropertyChanged
     {
+        private uint _GMS2Unknown;
         private uint _UnknownAlwaysZero = 0;
         private TexData _TextureData = new TexData();
 
+        public uint GMS2Unknown { get => _GMS2Unknown; set { _GMS2Unknown = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2Unknown")); } }
         public uint UnknownAlwaysZero { get => _UnknownAlwaysZero; set { _UnknownAlwaysZero = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UnknownAlwaysZero")); } }
         public TexData TextureData { get => _TextureData; set { _TextureData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureData")); } }
 
@@ -21,7 +23,7 @@ namespace UndertaleModLib.Models
         public void Serialize(UndertaleWriter writer)
         {
             if (writer.undertaleData.GeneralInfo.Major >= 2)
-                writer.Write((uint)1u);
+                writer.Write(GMS2Unknown);
             writer.Write(UnknownAlwaysZero);
             writer.WriteUndertaleObjectPointer(TextureData);
         }
@@ -29,8 +31,7 @@ namespace UndertaleModLib.Models
         public void Unserialize(UndertaleReader reader)
         {
             if (reader.undertaleData.GeneralInfo.Major >= 2)
-                if (reader.ReadUInt32() != 1)
-                    throw new Exception("Should be 1");
+                GMS2Unknown = reader.ReadUInt32();
             UnknownAlwaysZero = reader.ReadUInt32();
             TextureData = reader.ReadUndertaleObjectPointer<TexData>();
         }
