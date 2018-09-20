@@ -137,6 +137,11 @@ namespace UndertaleModLib
         private Dictionary<uint, UndertaleObject> objectPool = new Dictionary<uint, UndertaleObject>();
         private Dictionary<UndertaleObject, uint> objectPoolRev = new Dictionary<UndertaleObject, uint>();
 
+        public Dictionary<uint, UndertaleObject> GetOffsetMap()
+        {
+            return objectPool;
+        }
+
         public T GetUndertaleObjectAtAddress<T>(uint address) where T : UndertaleObject, new()
         {
             if (address == 0)
@@ -407,6 +412,13 @@ namespace UndertaleModLib
         {
             UndertaleWriter writer = new UndertaleWriter(stream);
             writer.WriteUndertaleData(data);
+        }
+
+        public static Dictionary<uint, UndertaleObject> GenerateOffsetMap(Stream stream)
+        {
+            UndertaleReader reader = new UndertaleReader(stream);
+            reader.ReadUndertaleData();
+            return reader.GetOffsetMap();
         }
     }
 }

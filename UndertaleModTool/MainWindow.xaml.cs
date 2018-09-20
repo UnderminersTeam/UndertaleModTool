@@ -748,6 +748,57 @@ namespace UndertaleModTool
             dialog.ShowDialog();
             await t;
         }
+
+        private async void MenuItem_OffsetMap_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.DefaultExt = "win";
+            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios)|*.win;*.unx;*.ios|All files|*";
+
+            if (dlg.ShowDialog() == true)
+            {
+                SaveFileDialog dlgout = new SaveFileDialog();
+
+                dlgout.DefaultExt = "txt";
+                dlgout.Filter = "Text files (.txt)|*.txt|All files|*";
+                dlgout.FileName = dlg.FileName + ".offsetmap.txt";
+
+                if (dlgout.ShowDialog() == true)
+                {
+                    LoaderDialog dialog = new LoaderDialog("Generating", "Loading, please wait...");
+                    dialog.Owner = this;
+                    Task t = Task.Run(() =>
+                    {
+                        try
+                        {
+                            using (var stream = new FileStream(dlg.FileName, FileMode.Open))
+                            {
+                                var offsets = UndertaleIO.GenerateOffsetMap(stream);
+                                using (var writer = File.CreateText(dlgout.FileName))
+                                {
+                                    foreach(var off in offsets.OrderBy((x) => x.Key))
+                                    {
+                                        writer.WriteLine(off.Key.ToString("X8") + " " + off.Value.ToString().Replace("\n", "\\\n"));
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("An error occured while trying to load:\n" + ex.Message, "Load error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+
+                        Dispatcher.Invoke(() =>
+                        {
+                            dialog.Hide();
+                        });
+                    });
+                    dialog.ShowDialog();
+                    await t;
+                }
+            }
+        }
     }
 
     public class GeneralInfoEditor

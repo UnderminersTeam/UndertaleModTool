@@ -44,9 +44,10 @@
                     <MenuItem Header="_Save" Command="Save" InputGestureText="Ctrl+S"/>
                     <Separator/>
                     <MenuItem Header="_Run game" Command="Print" InputGestureText="F5"/> <!-- TODO: I think I need a custom command for that... -->
-                    <MenuItem Header="_Run game under debugger" Command="PrintPreview" InputGestureText="Shift+F5"/>
+                    <MenuItem Header="Run game under _debugger" Command="PrintPreview" InputGestureText="Shift+F5"/>
                     <Separator/>
                     <MenuItem Header="_Batch decompile" Click="MenuItem_BatchDecompile_Click"/>
+                    <MenuItem Header="Generate o_ffset map" Click="MenuItem_OffsetMap_Click"/>
                     <Separator/>
                     <MenuItem Header="S_ettings" Command="Properties"/>
                     <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+W"/>
