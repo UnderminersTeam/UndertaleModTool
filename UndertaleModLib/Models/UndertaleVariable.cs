@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace UndertaleModLib.Models
 {
     // TODO: INotifyPropertyChanged
-    public class UndertaleVariable : UndertaleResource
+    public class UndertaleVariable : UndertaleResource, ISearchable
     {
         public UndertaleString Name { get; set; }
         public UndertaleInstruction.InstanceType InstanceType { get; set; }
@@ -69,6 +69,11 @@ namespace UndertaleModLib.Models
         public override string ToString()
         {
             return Name.Content;
+        }
+
+        public bool SearchMatches(string filter)
+        {
+            return Name?.SearchMatches(filter) ?? false;
         }
     }
 }

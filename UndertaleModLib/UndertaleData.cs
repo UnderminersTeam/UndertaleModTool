@@ -35,9 +35,9 @@ namespace UndertaleModLib
         public IList<UndertaleTexturePageItem> TexturePageItems => FORM.TPAG.List;
         public IList<UndertaleCode> Code => FORM.CODE.List;
         public IList<UndertaleVariable> Variables => FORM.VARI.List;
-        public uint Variables_Unknown1 => FORM.VARI.Unknown1;
-        public uint Variables_Unknown1Again => FORM.VARI.Unknown1Again;
-        public uint Variables_Unknown2 => FORM.VARI.Unknown2;
+        public uint Variables_Unknown1 { get => FORM.VARI.Unknown1; set => FORM.VARI.Unknown1 = value; }
+        public uint Variables_Unknown1Again { get => FORM.VARI.Unknown1Again; set => FORM.VARI.Unknown1Again = value; }
+        public uint Variables_Unknown2 { get => FORM.VARI.Unknown2; set => FORM.VARI.Unknown2 = value; }
         public IList<UndertaleFunction> Functions => FORM.FUNC.Functions;
         public IList<UndertaleCodeLocals> CodeLocals => FORM.FUNC.CodeLocals;
         public IList<UndertaleString> Strings => FORM.STRG.List;
