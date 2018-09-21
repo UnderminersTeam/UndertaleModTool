@@ -503,7 +503,7 @@ namespace UndertaleModTool
             foreach(var path in Directory.EnumerateFiles("SampleScripts"))
             {
                 var filename = System.IO.Path.GetFileName(path);
-                MenuItem subitem = new MenuItem() { Header = filename };
+                MenuItem subitem = new MenuItem() { Header = filename.Replace("_", "__") };
                 subitem.Click += MenuItem_RunBuiltinScript_Item_Click;
                 subitem.CommandParameter = path;
                 item.Items.Add(subitem);

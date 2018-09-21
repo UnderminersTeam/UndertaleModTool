@@ -375,12 +375,14 @@ namespace UndertaleModTool
                                                 possibleObjects.Add(data.Paths[id]);
                                             if (id < data.Fonts.Count)
                                                 possibleObjects.Add(data.Fonts[id]);
+                                            if (id < data.Sounds.Count)
+                                                possibleObjects.Add(data.Sounds[id]);
 
                                             ContextMenu contextMenu = new ContextMenu();
                                             foreach(UndertaleObject obj in possibleObjects)
                                             {
                                                 MenuItem item = new MenuItem();
-                                                item.Header = obj.ToString();
+                                                item.Header = obj.ToString().Replace("_", "__");
                                                 item.Click += (sender2, ev2) => (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
                                                 contextMenu.Items.Add(item);
                                             }
