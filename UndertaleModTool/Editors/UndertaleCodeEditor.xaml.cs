@@ -397,7 +397,7 @@ namespace UndertaleModTool
                                     else
                                         par.Inlines.Add(new Run(token));
 
-                                    if (token == ".")
+                                    if (token == "." && (Char.IsLetter(split[i + 1][0]) || split[i + 1][0] == '_'))
                                     {
                                         int id;
                                         if (Int32.TryParse(split[i - 1], out id))
