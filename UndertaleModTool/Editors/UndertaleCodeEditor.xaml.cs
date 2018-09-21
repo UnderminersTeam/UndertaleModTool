@@ -4,6 +4,7 @@ using GraphVizWrapper.Queries;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -161,7 +162,7 @@ namespace UndertaleModTool
                                 par.Inlines.Add(new Run(instr.TypeInst.ToString().ToLower()) { Foreground = typeBrush });
                                 par.Inlines.Add(new Run("."));
                             }
-                            Run valueRun = new Run(instr.Value.ToString()) { Foreground = argBrush, Cursor = (instr.Value is UndertaleObject || instr.Value is UndertaleResourceRef) ? Cursors.Hand : Cursors.Arrow };
+                            Run valueRun = new Run((instr.Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? instr.Value.ToString()) { Foreground = argBrush, Cursor = (instr.Value is UndertaleObject || instr.Value is UndertaleResourceRef) ? Cursors.Hand : Cursors.Arrow };
                             if (instr.Value is UndertaleResourceRef)
                             {
                                 valueRun.MouseDown += (sender, e) =>

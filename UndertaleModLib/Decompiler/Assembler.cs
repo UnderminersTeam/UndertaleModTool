@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -88,10 +89,10 @@ namespace UndertaleModLib.Decompiler
                     switch (instr.Type1)
                     {
                         case UndertaleInstruction.DataType.Double:
-                            instr.Value = Double.Parse(line);
+                            instr.Value = Double.Parse(line, CultureInfo.InvariantCulture);
                             break;
                         case UndertaleInstruction.DataType.Float:
-                            instr.Value = Single.Parse(line);
+                            instr.Value = Single.Parse(line, CultureInfo.InvariantCulture);
                             break;
                         case UndertaleInstruction.DataType.Int32:
                             instr.Value = Int32.Parse(line);

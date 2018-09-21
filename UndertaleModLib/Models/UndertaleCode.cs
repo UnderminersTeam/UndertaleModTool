@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -543,7 +544,7 @@ namespace UndertaleModLib.Models
                         sb.Append(TypeInst.ToString().ToLower());
                         sb.Append(".");
                     }
-                    sb.Append(Value.ToString());
+                    sb.Append((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
                     if (Value is Reference<UndertaleVariable> && vars != null)
                     {
                         sb.Append("@" + vars.IndexOf((Value as Reference<UndertaleVariable>).Target));
