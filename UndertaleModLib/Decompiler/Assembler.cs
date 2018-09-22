@@ -17,13 +17,13 @@ namespace UndertaleModLib.Decompiler
         public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars = null)
         {
             string label;
-            UndertaleInstruction instr = AssembleOne(source, funcs, vars, strg, localvars, out label);
+            UndertaleInstruction instr = AssembleOne(source, funcs, vars, strg, localvars, out label, null);
             if (label != null)
                 throw new Exception("Cannot use labels in this context");
             return instr;
         }
 
-        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars, out string label)
+        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars, out string label, UndertaleInstruction.InstanceType? prevInstType)
         {
             label = null;
             string line = source;
@@ -80,7 +80,7 @@ namespace UndertaleModLib.Decompiler
 
                 case UndertaleInstruction.InstructionType.PopInstruction:
                     UndertaleInstruction.InstanceType inst = instr.TypeInst;
-                    instr.Destination = ParseVariableReference(line, vars, localvars, ref inst);
+                    instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, prevInstType);
                     instr.TypeInst = inst;
                     line = "";
                     break;
@@ -105,7 +105,7 @@ namespace UndertaleModLib.Decompiler
                             break;
                         case UndertaleInstruction.DataType.Variable:
                             UndertaleInstruction.InstanceType inst2 = instr.TypeInst;
-                            instr.Value = ParseVariableReference(line, vars, localvars, ref inst2);
+                            instr.Value = ParseVariableReference(line, vars, localvars, ref inst2, prevInstType);
                             instr.TypeInst = inst2;
                             break;
                         case UndertaleInstruction.DataType.String:
@@ -197,7 +197,7 @@ namespace UndertaleModLib.Decompiler
                 }
 
                 string labelTgt;
-                UndertaleInstruction instr = AssembleOne(line, funcs, vars, strg, localvars, out labelTgt);
+                UndertaleInstruction instr = AssembleOne(line, funcs, vars, strg, localvars, out labelTgt, instructions.Count >= 2 && instructions[instructions.Count - 2].Kind == UndertaleInstruction.Opcode.PushI ? (UndertaleInstruction.InstanceType?)(short)instructions[instructions.Count - 2].Value : null);
                 instr.Address = addr;
                 if (labelTgt != null)
                     labelTargets.Add(instr, labelTgt);
@@ -248,7 +248,7 @@ namespace UndertaleModLib.Decompiler
             return new UndertaleResourceById<UndertaleString>("STRG") { Resource = strobj, CachedId = (int)id.Value };
         }
 
-        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance)
+        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance, UndertaleInstruction.InstanceType? prevInstType)
         {
             string str = line;
             string inst = null;
@@ -274,7 +274,7 @@ namespace UndertaleModLib.Decompiler
             }
             else
             {
-                instance = UndertaleInstruction.InstanceType.StackTopOrGlobal; // TODO: I think this isn't a thing that exists, 0 would be just object index 0
+                instance = UndertaleInstruction.InstanceType.Undefined;
             }
             UndertaleInstruction.VariableType type = UndertaleInstruction.VariableType.Normal;
             if (str[0] == '[')
@@ -288,15 +288,23 @@ namespace UndertaleModLib.Decompiler
                 }
             }
 
+            UndertaleInstruction.InstanceType realinstance = instance;
+            // for arrays, the type is on the stack which totally breaks things
+            // This is an ugly hack to handle that
+            if (type == UndertaleInstruction.VariableType.Array && prevInstType.HasValue)
+                realinstance = prevInstType.Value;
+            if (realinstance >= 0)
+                realinstance = UndertaleInstruction.InstanceType.Self;
+
+
             UndertaleVariable varobj;
-            if (instance == UndertaleInstruction.InstanceType.Local)
+            if (realinstance == UndertaleInstruction.InstanceType.Local)
             {
                 varobj = localvars.ContainsKey(str) ? localvars[str] : null;
             }
             else
             {
-                UndertaleInstruction.InstanceType i = instance; // ugh
-                varobj = vars.Where((x) => x.Name.Content == str && x.InstanceType == i).FirstOrDefault();
+                varobj = vars.Where((x) => x.Name.Content == str && x.InstanceType == realinstance).FirstOrDefault();
             }
             if (varobj == null)
                 throw new Exception("Bad variable!");

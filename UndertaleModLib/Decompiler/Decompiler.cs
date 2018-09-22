@@ -384,7 +384,7 @@ namespace UndertaleModLib.Decompiler
                 var instTypeVal = TryGetInstType();
                 if (instTypeVal.HasValue)
                 {
-                    if (instTypeVal.Value != UndertaleInstruction.InstanceType.StackTopOrGlobal)
+                    if (instTypeVal.Value != UndertaleInstruction.InstanceType.Undefined)
                     {
                         name = instTypeVal.Value.ToString().ToLower() + "." + name;
                     }

@@ -133,14 +133,14 @@ namespace UndertaleModLib.Models
 
         public enum InstanceType : short
         {
-            StackTopOrGlobal = 0,
+            Undefined = 0, // actually, this is just object 0, but also occurs in places where no instance type was set
 
             Self = -1,
             Other = -2,
             All = -3,
             Noone = -4,
             Global = -5,
-            Unknown = -6,
+            Builtin = -6, // Note: Used only in UndertaleVariable.VarID (which is not really even InstanceType)
             Local = -7,
 
             // anything > 0 => GameObjectIndex
@@ -524,7 +524,7 @@ namespace UndertaleModLib.Models
                     sb.Append("." + Type1.ToOpcodeParam());
                     sb.Append("." + Type2.ToOpcodeParam());
                     sb.Append(" ");
-                    if (Type1 == DataType.Variable && TypeInst != InstanceType.StackTopOrGlobal)
+                    if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
                     {
                         sb.Append(TypeInst.ToString().ToLower());
                         sb.Append(".");
@@ -535,7 +535,7 @@ namespace UndertaleModLib.Models
                 case InstructionType.PushInstruction:
                     sb.Append("." + Type1.ToOpcodeParam());
                     sb.Append(" ");
-                    if (Type1 == DataType.Variable && TypeInst != InstanceType.StackTopOrGlobal)
+                    if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
                     {
                         sb.Append(TypeInst.ToString().ToLower());
                         sb.Append(".");

@@ -134,7 +134,7 @@ namespace UndertaleModLib
             return func;
         }
 
-        public static UndertaleVariable EnsureDefined(this IList<UndertaleVariable> list, string name, UndertaleInstruction.InstanceType inst, IList<UndertaleString> strg, UndertaleData data)
+        public static UndertaleVariable EnsureDefined(this IList<UndertaleVariable> list, string name, UndertaleInstruction.InstanceType inst, bool isBuiltin, IList<UndertaleString> strg, UndertaleData data)
         {
             if (inst == UndertaleInstruction.InstanceType.Local)
                 throw new InvalidOperationException("Use DefineLocal instead");
@@ -147,7 +147,7 @@ namespace UndertaleModLib
                 {
                     Name = strg.MakeString(name),
                     InstanceType = inst,
-                    VarID = (int)data.InstanceVarCount++,
+                    VarID = isBuiltin ? (int)UndertaleInstruction.InstanceType.Builtin : (int)data.InstanceVarCount++,
                     UnknownChainEndingValue = 0 // TODO: seems to work...
                 };
                 data.InstanceVarCountAgain = data.InstanceVarCount;
@@ -167,6 +167,7 @@ namespace UndertaleModLib
             };
             if (idx >= data.MaxLocalVarCount)
                 data.MaxLocalVarCount = idx + 1;
+            list.Add(vari);
             return vari;
         }
     }
