@@ -2,7 +2,7 @@
 
 EnsureDataLoaded();
 
-var code = Data.GameObjects.ByName("obj_intromenu").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code);
+var code = Data.GameObjects.ByName("obj_intromenu").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals);
 code.Append(Assembler.Assemble(@"
 push.s ""This is a test#I can put whatever I want here now#hehe, this thing is working!""
 conv.s.v

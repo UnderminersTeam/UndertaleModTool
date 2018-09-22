@@ -88,7 +88,8 @@ namespace UndertaleModTool
             if (code.Instructions.Count > 5000)
             {
                 // Disable syntax highlighting. Loading it can take a few MINUTES on large scripts.
-                par.Inlines.Add(new Run(code.Disassemble((Application.Current.MainWindow as MainWindow).Data.Variables)));
+                var data = (Application.Current.MainWindow as MainWindow).Data;
+                par.Inlines.Add(new Run(code.Disassemble(data.Variables, data.CodeLocals.For(code))));
             }
             else
             {
@@ -96,6 +97,8 @@ namespace UndertaleModTool
                 Brush opcodeBrush = new SolidColorBrush(Color.FromRgb(0, 100, 0));
                 Brush argBrush = new SolidColorBrush(Color.FromRgb(0, 0, 150));
                 Brush typeBrush = new SolidColorBrush(Color.FromRgb(0, 0, 50));
+                var data = (Application.Current.MainWindow as MainWindow).Data;
+                par.Inlines.Add(new Run(code.GenerateLocalVarDefinitions(data.Variables, data.CodeLocals.For(code))) { Foreground = addressBrush });
                 foreach (var instr in code.Instructions)
                 {
                     par.Inlines.Add(new Run(instr.Address.ToString("D5") + ": ") { Foreground = addressBrush });
@@ -148,10 +151,6 @@ namespace UndertaleModTool
                                 (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Destination);
                             };
                             par.Inlines.Add(runDest);
-                            if (instr.Destination is UndertaleInstruction.Reference<UndertaleVariable>)
-                            {
-                                par.Inlines.Add(new Run("@" + (Application.Current.MainWindow as MainWindow).Data.Variables.IndexOf((instr.Destination as UndertaleInstruction.Reference<UndertaleVariable>).Target)) { Foreground = argBrush });
-                            }
                             break;
 
                         case UndertaleInstruction.InstructionType.PushInstruction:
@@ -178,10 +177,6 @@ namespace UndertaleModTool
                                 };
                             }
                             par.Inlines.Add(valueRun);
-                            if (instr.Value is UndertaleInstruction.Reference<UndertaleVariable>)
-                            {
-                                par.Inlines.Add(new Run("@" + (Application.Current.MainWindow as MainWindow).Data.Variables.IndexOf((instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Target)) { Foreground = argBrush });
-                            }
                             break;
 
                         case UndertaleInstruction.InstructionType.CallInstruction:

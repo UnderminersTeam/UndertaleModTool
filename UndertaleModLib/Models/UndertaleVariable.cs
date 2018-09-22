@@ -13,7 +13,7 @@ namespace UndertaleModLib.Models
     {
         public UndertaleString Name { get; set; }
         public UndertaleInstruction.InstanceType InstanceType { get; set; }
-        public int Unknown { get; set; } // some kind of 'parent object' identifier? either 0 or increasing numbers, with the exception of a couple -10
+        public int VarID { get; set; }
         public int UnknownChainEndingValue { get; set; } // looks like an identifier or counter of some kind. Increases in every variable, but I can't find the pattern
 
         internal uint Occurrences;
@@ -23,7 +23,7 @@ namespace UndertaleModLib.Models
         {
             writer.WriteUndertaleString(Name);
             writer.Write((int)InstanceType);
-            writer.Write(Unknown);
+            writer.Write(VarID);
             writer.Write(Occurrences);
             if (Occurrences > 0)
                 writer.Write(writer.GetAddressForUndertaleObject(FirstAddress));
@@ -36,7 +36,7 @@ namespace UndertaleModLib.Models
         {
             Name = reader.ReadUndertaleString();
             InstanceType = (UndertaleInstruction.InstanceType)reader.ReadInt32();
-            Unknown = reader.ReadInt32();
+            VarID = reader.ReadInt32();
             Occurrences = reader.ReadUInt32();
             //Debug.WriteLine("Variable " + (id++) + " at " + reader.GetAddressForUndertaleObject(Name).ToString("X8") + " child of " + Unknown);
             if (Occurrences > 0)

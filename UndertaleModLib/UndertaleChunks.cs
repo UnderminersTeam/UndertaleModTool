@@ -195,9 +195,9 @@ namespace UndertaleModLib
     {
         public override string Name => "VARI";
 
-        public uint Unknown1 { get; set; } // max value of UndertaleVariable.Unknown
-        public uint Unknown1Again { get; set; }
-        public uint Unknown2 { get; set; }
+        public uint InstanceVarCount { get; set; }
+        public uint InstanceVarCountAgain { get; set; }
+        public uint MaxLocalVarCount { get; set; }
         public List<UndertaleVariable> List = new List<UndertaleVariable>();
 
         internal override void SerializeChunk(UndertaleWriter writer)
@@ -236,9 +236,9 @@ namespace UndertaleModLib
             }
             writer.Position = pos;
 
-            writer.Write(Unknown1);
-            writer.Write(Unknown1Again);
-            writer.Write(Unknown2);
+            writer.Write(InstanceVarCount);
+            writer.Write(InstanceVarCountAgain);
+            writer.Write(MaxLocalVarCount);
             foreach (UndertaleVariable var in List)
                 writer.WriteUndertaleObject(var);
         }
@@ -246,9 +246,9 @@ namespace UndertaleModLib
         internal override void UnserializeChunk(UndertaleReader reader)
         {
             uint startPosition = reader.Position;
-            Unknown1 = reader.ReadUInt32();
-            Unknown1Again = reader.ReadUInt32();
-            Unknown2 = reader.ReadUInt32();
+            InstanceVarCount = reader.ReadUInt32();
+            InstanceVarCountAgain = reader.ReadUInt32();
+            MaxLocalVarCount = reader.ReadUInt32();
             List.Clear();
             while (reader.Position + 20 <= startPosition + Length)
                 List.Add(reader.ReadUndertaleObject<UndertaleVariable>());

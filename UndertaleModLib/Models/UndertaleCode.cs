@@ -530,10 +530,6 @@ namespace UndertaleModLib.Models
                         sb.Append(".");
                     }
                     sb.Append(Destination.ToString());
-                    if (Destination is Reference<UndertaleVariable> && vars != null)
-                    {
-                        sb.Append("@" + vars.IndexOf((Destination as Reference<UndertaleVariable>).Target));
-                    }
                     break;
 
                 case InstructionType.PushInstruction:
@@ -545,10 +541,6 @@ namespace UndertaleModLib.Models
                         sb.Append(".");
                     }
                     sb.Append((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
-                    if (Value is Reference<UndertaleVariable> && vars != null)
-                    {
-                        sb.Append("@" + vars.IndexOf((Value as Reference<UndertaleVariable>).Target));
-                    }
                     break;
 
                 case InstructionType.CallInstruction:
@@ -702,13 +694,54 @@ namespace UndertaleModLib.Models
             Length = addr * 4;
         }
 
-        public string Disassemble(IList<UndertaleVariable> vars)
+        public IList<UndertaleVariable> FindReferencedVars()
+        {
+            List<UndertaleVariable> vars = new List<UndertaleVariable>();
+            foreach (UndertaleInstruction instr in Instructions)
+            {
+                var v = instr.GetReference<UndertaleVariable>()?.Target;
+                if (v == null)
+                    continue;
+                if (!vars.Contains(v))
+                    vars.Add(v);
+            }
+            return vars;
+        }
+
+        public IList<UndertaleVariable> FindReferencedLocalVars()
+        {
+            return FindReferencedVars().Where((x) => x.InstanceType == UndertaleInstruction.InstanceType.Local).ToList();
+        }
+
+        public string GenerateLocalVarDefinitions(IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
         {
             StringBuilder sb = new StringBuilder();
+
+            var referenced = FindReferencedLocalVars();
+            if (locals.Name != Name)
+                throw new Exception("Name of the locals block does not match name of the code block");
+            foreach (var arg in locals.Locals)
+            {
+                sb.Append(".localvar " + arg.Index + " " + arg.Name.Content);
+                var refvar = referenced.Where((x) => x.Name == arg.Name && x.VarID == arg.Index).FirstOrDefault();
+                if (refvar != null)
+                {
+                    sb.Append(" " + vars.IndexOf(refvar));
+                }
+                sb.Append("\n");
+            }
+
+            return sb.ToString();
+        }
+
+        public string Disassemble(IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(GenerateLocalVarDefinitions(vars, locals));
             foreach (var inst in Instructions)
             {
                 sb.Append(inst.ToString(this, vars));
-                sb.AppendLine();
+                sb.Append("\n");
             }
             return sb.ToString();
         }

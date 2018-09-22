@@ -14,16 +14,16 @@ namespace UndertaleModLib.Decompiler
     {
         // TODO: Improve the error messages
 
-        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg)
+        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars = null)
         {
             string label;
-            UndertaleInstruction instr = AssembleOne(source, funcs, vars, strg, out label);
+            UndertaleInstruction instr = AssembleOne(source, funcs, vars, strg, localvars, out label);
             if (label != null)
                 throw new Exception("Cannot use labels in this context");
             return instr;
         }
 
-        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, out string label)
+        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars, out string label)
         {
             label = null;
             string line = source;
@@ -80,7 +80,7 @@ namespace UndertaleModLib.Decompiler
 
                 case UndertaleInstruction.InstructionType.PopInstruction:
                     UndertaleInstruction.InstanceType inst = instr.TypeInst;
-                    instr.Destination = ParseVariableReference(line, vars, ref inst);
+                    instr.Destination = ParseVariableReference(line, vars, localvars, ref inst);
                     instr.TypeInst = inst;
                     line = "";
                     break;
@@ -105,7 +105,7 @@ namespace UndertaleModLib.Decompiler
                             break;
                         case UndertaleInstruction.DataType.Variable:
                             UndertaleInstruction.InstanceType inst2 = instr.TypeInst;
-                            instr.Value = ParseVariableReference(line, vars, ref inst2);
+                            instr.Value = ParseVariableReference(line, vars, localvars, ref inst2);
                             instr.TypeInst = inst2;
                             break;
                         case UndertaleInstruction.DataType.String:
@@ -148,6 +148,7 @@ namespace UndertaleModLib.Decompiler
             Dictionary<string, uint> labels = new Dictionary<string, uint>();
             Dictionary<UndertaleInstruction, string> labelTargets = new Dictionary<UndertaleInstruction, string>();
             List<UndertaleInstruction> instructions = new List<UndertaleInstruction>();
+            Dictionary<string, UndertaleVariable> localvars = new Dictionary<string, UndertaleVariable>();
             foreach (var fullline in lines)
             {
                 string line = fullline;
@@ -171,8 +172,32 @@ namespace UndertaleModLib.Decompiler
                         continue;
                 }
 
+                if (line.StartsWith("."))
+                {
+                    // Assembler directive
+                    // TODO: Does not update the CodeLocals block yet!!
+                    string[] aaa = line.Split(' ');
+                    if (aaa[0] == ".localvar")
+                    {
+                        if (aaa.Length >= 4)
+                        {
+                            var varii = vars[Int32.Parse(aaa[3])];
+                            if (varii.InstanceType != UndertaleInstruction.InstanceType.Local)
+                                throw new Exception("Not a local var");
+                            if (varii.Name.Content != aaa[2])
+                                throw new Exception("Name mismatch");
+                            localvars.Add(aaa[2], varii);
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("Unknown assembler directive: " + aaa[0]);
+                    }
+                    continue;
+                }
+
                 string labelTgt;
-                UndertaleInstruction instr = AssembleOne(line, funcs, vars, strg, out labelTgt);
+                UndertaleInstruction instr = AssembleOne(line, funcs, vars, strg, localvars, out labelTgt);
                 instr.Address = addr;
                 if (labelTgt != null)
                     labelTargets.Add(instr, labelTgt);
@@ -223,16 +248,9 @@ namespace UndertaleModLib.Decompiler
             return new UndertaleResourceById<UndertaleString>("STRG") { Resource = strobj, CachedId = (int)id.Value };
         }
 
-        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, ref UndertaleInstruction.InstanceType instance)
+        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance)
         {
             string str = line;
-            int at = str.LastIndexOf('@');
-            uint? id = null;
-            if (at >= 0)
-            {
-                id = UInt32.Parse(str.Substring(at + 1));
-                str = str.Substring(0, at);
-            }
             string inst = null;
             int instdot = str.IndexOf('.');
             if (instdot >= 0)
@@ -256,7 +274,7 @@ namespace UndertaleModLib.Decompiler
             }
             else
             {
-                instance = UndertaleInstruction.InstanceType.StackTopOrGlobal;
+                instance = UndertaleInstruction.InstanceType.StackTopOrGlobal; // TODO: I think this isn't a thing that exists, 0 would be just object index 0
             }
             UndertaleInstruction.VariableType type = UndertaleInstruction.VariableType.Normal;
             if (str[0] == '[')
@@ -269,11 +287,19 @@ namespace UndertaleModLib.Decompiler
                     type = (UndertaleInstruction.VariableType)Enum.Parse(typeof(UndertaleInstruction.VariableType), typestr, true);
                 }
             }
-            UndertaleVariable varobj = id.HasValue ? vars[(int)id.Value] : null;
+
+            UndertaleVariable varobj;
+            if (instance == UndertaleInstruction.InstanceType.Local)
+            {
+                varobj = localvars.ContainsKey(str) ? localvars[str] : null;
+            }
+            else
+            {
+                UndertaleInstruction.InstanceType i = instance; // ugh
+                varobj = vars.Where((x) => x.Name.Content == str && x.InstanceType == i).FirstOrDefault();
+            }
             if (varobj == null)
                 throw new Exception("Bad variable!");
-            if (!String.IsNullOrEmpty(str) && varobj.Name.Content != str)
-                throw new Exception("Variable name mismatch!");
             return new UndertaleInstruction.Reference<UndertaleVariable>(varobj, type);
         }
     }
