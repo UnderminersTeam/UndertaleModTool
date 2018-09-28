@@ -24,13 +24,13 @@
         <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Variables" FontWeight="Bold"/>
         <Separator Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Unknown1</TextBlock>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding Unknown1}"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Instance/global variable count</TextBlock>
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding InstanceVarCount}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Unknown1Again</TextBlock>
-        <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Unknown1Again}"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Instance/global variable count (again)</TextBlock>
+        <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding InstanceVarCountAgain}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Unknown2</TextBlock>
-        <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding Unknown2}"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Max local variable count</TextBlock>
+        <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding MaxLocalVarCount}"/>
     </Grid>
 </UserControl>

@@ -35,9 +35,9 @@ namespace UndertaleModLib
         public IList<UndertaleTexturePageItem> TexturePageItems => FORM.TPAG.List;
         public IList<UndertaleCode> Code => FORM.CODE.List;
         public IList<UndertaleVariable> Variables => FORM.VARI.List;
-        public uint Variables_Unknown1 => FORM.VARI.Unknown1;
-        public uint Variables_Unknown1Again => FORM.VARI.Unknown1Again;
-        public uint Variables_Unknown2 => FORM.VARI.Unknown2;
+        public uint InstanceVarCount { get => FORM.VARI.InstanceVarCount; set => FORM.VARI.InstanceVarCount = value; }
+        public uint InstanceVarCountAgain { get => FORM.VARI.InstanceVarCountAgain; set => FORM.VARI.InstanceVarCountAgain = value; }
+        public uint MaxLocalVarCount { get => FORM.VARI.MaxLocalVarCount; set => FORM.VARI.MaxLocalVarCount = value; }
         public IList<UndertaleFunction> Functions => FORM.FUNC.Functions;
         public IList<UndertaleCodeLocals> CodeLocals => FORM.FUNC.CodeLocals;
         public IList<UndertaleString> Strings => FORM.STRG.List;
@@ -100,6 +100,12 @@ namespace UndertaleModLib
             return default(T);
         }
 
+        public static UndertaleCodeLocals For(this IList<UndertaleCodeLocals> list, UndertaleCode code)
+        {
+            // TODO: I'm not sure if the runner looks these up by name or by index
+            return list.Where((x) => code.Name == x.Name).FirstOrDefault();
+        }
+
         public static UndertaleString MakeString(this IList<UndertaleString> list, string content)
         {
             // TODO: without reference counting the strings, this may leave unused strings in the array
@@ -126,6 +132,43 @@ namespace UndertaleModLib
                 list.Add(func);
             }
             return func;
+        }
+
+        public static UndertaleVariable EnsureDefined(this IList<UndertaleVariable> list, string name, UndertaleInstruction.InstanceType inst, bool isBuiltin, IList<UndertaleString> strg, UndertaleData data)
+        {
+            if (inst == UndertaleInstruction.InstanceType.Local)
+                throw new InvalidOperationException("Use DefineLocal instead");
+            UndertaleVariable vari = list.Where((x) => x.Name.Content == name && x.InstanceType == inst).FirstOrDefault();
+            if (vari == null)
+            {
+                if (data.InstanceVarCount != data.InstanceVarCountAgain)
+                    throw new Exception("Integrity error - instance var count broken");
+                vari = new UndertaleVariable()
+                {
+                    Name = strg.MakeString(name),
+                    InstanceType = inst,
+                    VarID = isBuiltin ? (int)UndertaleInstruction.InstanceType.Builtin : (int)data.InstanceVarCount++,
+                    UnknownChainEndingValue = 0 // TODO: seems to work...
+                };
+                data.InstanceVarCountAgain = data.InstanceVarCount;
+                list.Add(vari);
+            }
+            return vari;
+        }
+
+        public static UndertaleVariable DefineLocal(this IList<UndertaleVariable> list, uint idx, string name, IList<UndertaleString> strg, UndertaleData data)
+        {
+            UndertaleVariable vari = new UndertaleVariable()
+            {
+                Name = strg.MakeString(name),
+                InstanceType = UndertaleInstruction.InstanceType.Local,
+                VarID = (int)idx,
+                UnknownChainEndingValue = 0 // TODO: seems to work...
+            };
+            if (idx >= data.MaxLocalVarCount)
+                data.MaxLocalVarCount = idx + 1;
+            list.Add(vari);
+            return vari;
         }
     }
 }

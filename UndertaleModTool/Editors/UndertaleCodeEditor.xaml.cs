@@ -4,6 +4,7 @@ using GraphVizWrapper.Queries;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -87,7 +88,8 @@ namespace UndertaleModTool
             if (code.Instructions.Count > 5000)
             {
                 // Disable syntax highlighting. Loading it can take a few MINUTES on large scripts.
-                par.Inlines.Add(new Run(code.Disassemble((Application.Current.MainWindow as MainWindow).Data.Variables)));
+                var data = (Application.Current.MainWindow as MainWindow).Data;
+                par.Inlines.Add(new Run(code.Disassemble(data.Variables, data.CodeLocals.For(code))));
             }
             else
             {
@@ -95,6 +97,8 @@ namespace UndertaleModTool
                 Brush opcodeBrush = new SolidColorBrush(Color.FromRgb(0, 100, 0));
                 Brush argBrush = new SolidColorBrush(Color.FromRgb(0, 0, 150));
                 Brush typeBrush = new SolidColorBrush(Color.FromRgb(0, 0, 50));
+                var data = (Application.Current.MainWindow as MainWindow).Data;
+                par.Inlines.Add(new Run(code.GenerateLocalVarDefinitions(data.Variables, data.CodeLocals.For(code))) { Foreground = addressBrush });
                 foreach (var instr in code.Instructions)
                 {
                     par.Inlines.Add(new Run(instr.Address.ToString("D5") + ": ") { Foreground = addressBrush });
@@ -136,7 +140,7 @@ namespace UndertaleModTool
                             par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run("." + instr.Type2.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run(" "));
-                            if (instr.Type1 == UndertaleInstruction.DataType.Variable && instr.TypeInst != UndertaleInstruction.InstanceType.StackTopOrGlobal)
+                            if (instr.Type1 == UndertaleInstruction.DataType.Variable && instr.TypeInst != UndertaleInstruction.InstanceType.Undefined)
                             {
                                 par.Inlines.Add(new Run(instr.TypeInst.ToString().ToLower()) { Foreground = typeBrush });
                                 par.Inlines.Add(new Run("."));
@@ -147,21 +151,17 @@ namespace UndertaleModTool
                                 (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Destination);
                             };
                             par.Inlines.Add(runDest);
-                            if (instr.Destination is UndertaleInstruction.Reference<UndertaleVariable>)
-                            {
-                                par.Inlines.Add(new Run("@" + (Application.Current.MainWindow as MainWindow).Data.Variables.IndexOf((instr.Destination as UndertaleInstruction.Reference<UndertaleVariable>).Target)) { Foreground = argBrush });
-                            }
                             break;
 
                         case UndertaleInstruction.InstructionType.PushInstruction:
                             par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run(" "));
-                            if (instr.Type1 == UndertaleInstruction.DataType.Variable && instr.TypeInst != UndertaleInstruction.InstanceType.StackTopOrGlobal)
+                            if (instr.Type1 == UndertaleInstruction.DataType.Variable && instr.TypeInst != UndertaleInstruction.InstanceType.Undefined)
                             {
                                 par.Inlines.Add(new Run(instr.TypeInst.ToString().ToLower()) { Foreground = typeBrush });
                                 par.Inlines.Add(new Run("."));
                             }
-                            Run valueRun = new Run(instr.Value.ToString()) { Foreground = argBrush, Cursor = (instr.Value is UndertaleObject || instr.Value is UndertaleResourceRef) ? Cursors.Hand : Cursors.Arrow };
+                            Run valueRun = new Run((instr.Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? instr.Value.ToString()) { Foreground = argBrush, Cursor = (instr.Value is UndertaleObject || instr.Value is UndertaleResourceRef) ? Cursors.Hand : Cursors.Arrow };
                             if (instr.Value is UndertaleResourceRef)
                             {
                                 valueRun.MouseDown += (sender, e) =>
@@ -177,10 +177,6 @@ namespace UndertaleModTool
                                 };
                             }
                             par.Inlines.Add(valueRun);
-                            if (instr.Value is UndertaleInstruction.Reference<UndertaleVariable>)
-                            {
-                                par.Inlines.Add(new Run("@" + (Application.Current.MainWindow as MainWindow).Data.Variables.IndexOf((instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Target)) { Foreground = argBrush });
-                            }
                             break;
 
                         case UndertaleInstruction.InstructionType.CallInstruction:
@@ -374,12 +370,14 @@ namespace UndertaleModTool
                                                 possibleObjects.Add(data.Paths[id]);
                                             if (id < data.Fonts.Count)
                                                 possibleObjects.Add(data.Fonts[id]);
+                                            if (id < data.Sounds.Count)
+                                                possibleObjects.Add(data.Sounds[id]);
 
                                             ContextMenu contextMenu = new ContextMenu();
                                             foreach(UndertaleObject obj in possibleObjects)
                                             {
                                                 MenuItem item = new MenuItem();
-                                                item.Header = obj.ToString();
+                                                item.Header = obj.ToString().Replace("_", "__");
                                                 item.Click += (sender2, ev2) => (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
                                                 contextMenu.Items.Add(item);
                                             }
@@ -396,7 +394,7 @@ namespace UndertaleModTool
                                     else
                                         par.Inlines.Add(new Run(token));
 
-                                    if (token == ".")
+                                    if (token == "." && (Char.IsLetter(split[i + 1][0]) || split[i + 1][0] == '_'))
                                     {
                                         int id;
                                         if (Int32.TryParse(split[i - 1], out id))

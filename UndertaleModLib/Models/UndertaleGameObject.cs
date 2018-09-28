@@ -137,7 +137,7 @@ namespace UndertaleModLib.Models
             Events = reader.ReadUndertaleObject<UndertalePointerList<UndertalePointerList<Event>>>();
         }
 
-        public UndertaleCode EventHandlerFor(EventType type, uint subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
+        public UndertaleCode EventHandlerFor(EventType type, uint subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
         {
             Event subtypeObj = Events[(int)type].Where((x) => x.EventSubtype == subtype).FirstOrDefault();
             if (subtypeObj == null)
@@ -151,44 +151,49 @@ namespace UndertaleModLib.Models
             UndertaleCode code = action.CodeId;
             if (code == null)
             {
+                var name = strg.MakeString("gml_Object_" + Name.Content + "_" + type.ToString() + "_" + subtype);
                 code = action.CodeId = new UndertaleCode();
-                code.Name = strg.MakeString("gml_Object_" + Name.Content + "_" + type.ToString() + "_" + subtype);
+                code.Name = name;
                 codelist.Add(code);
+                localslist.Add(new UndertaleCodeLocals()
+                {
+                    Name = name
+                });
             }
             return code;
         }
 
-        public UndertaleCode EventHandlerFor(EventType type, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
+        public UndertaleCode EventHandlerFor(EventType type, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
         {
-            return EventHandlerFor(type, 0u, strg, codelist);
+            return EventHandlerFor(type, 0u, strg, codelist, localslist);
         }
 
-        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
+        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
         {
             if (type != EventType.Keyboard && type != EventType.KeyPress && type != EventType.KeyRelease)
                 throw new InvalidOperationException();
-            return EventHandlerFor(type, (uint)subtype, strg, codelist);
+            return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
         }
 
-        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
+        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
         {
             if (type != EventType.Step)
                 throw new InvalidOperationException();
-            return EventHandlerFor(type, (uint)subtype, strg, codelist);
+            return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
         }
 
-        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
+        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
         {
             if (type != EventType.Other)
                 throw new InvalidOperationException();
-            return EventHandlerFor(type, (uint)subtype, strg, codelist);
+            return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
         }
         
-        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist)
+        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
         {
             if (type != EventType.Draw)
                 throw new InvalidOperationException();
-            return EventHandlerFor(type, (uint)subtype, strg, codelist);
+            return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
         }
 
         public override string ToString()

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -119,7 +120,7 @@ namespace UndertaleModLib.Decompiler
             public override string ToString()
             {
                 //return String.Format("{0}({1})", Type.ToString().ToLower(), Value.ToString());
-                return Value.ToString();
+                return (Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString();
             }
         }
 
@@ -383,7 +384,7 @@ namespace UndertaleModLib.Decompiler
                 var instTypeVal = TryGetInstType();
                 if (instTypeVal.HasValue)
                 {
-                    if (instTypeVal.Value != UndertaleInstruction.InstanceType.StackTopOrGlobal)
+                    if (instTypeVal.Value != UndertaleInstruction.InstanceType.Undefined)
                     {
                         name = instTypeVal.Value.ToString().ToLower() + "." + name;
                     }

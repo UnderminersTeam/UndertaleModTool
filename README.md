@@ -26,6 +26,7 @@ I also included some of my test scripts. They are:
 * GoToRoom: Replaces the debug mode functionality of the F3 button with a dialog that lets you jump to any room by ID
 * ShowRoomName: Displays the current room name and ID on screen in debug mode
 * testing: nothing important, just displays random text on the main menu - the first script I ever made
+* TTFFonts: Makes the game load fonts in TTF format from current directory instead of using the spritesheet fonts. You will need to track down all the font files yourself, I can't host them here for licensing reasons :(
 
 ### Bug reports, contributing
 All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is my current list of stuff that needs to be worked on:

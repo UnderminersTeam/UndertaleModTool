@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -132,14 +133,14 @@ namespace UndertaleModLib.Models
 
         public enum InstanceType : short
         {
-            StackTopOrGlobal = 0,
+            Undefined = 0, // actually, this is just object 0, but also occurs in places where no instance type was set
 
             Self = -1,
             Other = -2,
             All = -3,
             Noone = -4,
             Global = -5,
-            Unknown = -6,
+            Builtin = -6, // Note: Used only in UndertaleVariable.VarID (which is not really even InstanceType)
             Local = -7,
 
             // anything > 0 => GameObjectIndex
@@ -523,31 +524,23 @@ namespace UndertaleModLib.Models
                     sb.Append("." + Type1.ToOpcodeParam());
                     sb.Append("." + Type2.ToOpcodeParam());
                     sb.Append(" ");
-                    if (Type1 == DataType.Variable && TypeInst != InstanceType.StackTopOrGlobal)
+                    if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
                     {
                         sb.Append(TypeInst.ToString().ToLower());
                         sb.Append(".");
                     }
                     sb.Append(Destination.ToString());
-                    if (Destination is Reference<UndertaleVariable> && vars != null)
-                    {
-                        sb.Append("@" + vars.IndexOf((Destination as Reference<UndertaleVariable>).Target));
-                    }
                     break;
 
                 case InstructionType.PushInstruction:
                     sb.Append("." + Type1.ToOpcodeParam());
                     sb.Append(" ");
-                    if (Type1 == DataType.Variable && TypeInst != InstanceType.StackTopOrGlobal)
+                    if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
                     {
                         sb.Append(TypeInst.ToString().ToLower());
                         sb.Append(".");
                     }
-                    sb.Append(Value.ToString());
-                    if (Value is Reference<UndertaleVariable> && vars != null)
-                    {
-                        sb.Append("@" + vars.IndexOf((Value as Reference<UndertaleVariable>).Target));
-                    }
+                    sb.Append((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
                     break;
 
                 case InstructionType.CallInstruction:
@@ -701,13 +694,54 @@ namespace UndertaleModLib.Models
             Length = addr * 4;
         }
 
-        public string Disassemble(IList<UndertaleVariable> vars)
+        public IList<UndertaleVariable> FindReferencedVars()
+        {
+            List<UndertaleVariable> vars = new List<UndertaleVariable>();
+            foreach (UndertaleInstruction instr in Instructions)
+            {
+                var v = instr.GetReference<UndertaleVariable>()?.Target;
+                if (v == null)
+                    continue;
+                if (!vars.Contains(v))
+                    vars.Add(v);
+            }
+            return vars;
+        }
+
+        public IList<UndertaleVariable> FindReferencedLocalVars()
+        {
+            return FindReferencedVars().Where((x) => x.InstanceType == UndertaleInstruction.InstanceType.Local).ToList();
+        }
+
+        public string GenerateLocalVarDefinitions(IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
         {
             StringBuilder sb = new StringBuilder();
+
+            var referenced = FindReferencedLocalVars();
+            if (locals.Name != Name)
+                throw new Exception("Name of the locals block does not match name of the code block");
+            foreach (var arg in locals.Locals)
+            {
+                sb.Append(".localvar " + arg.Index + " " + arg.Name.Content);
+                var refvar = referenced.Where((x) => x.Name == arg.Name && x.VarID == arg.Index).FirstOrDefault();
+                if (refvar != null)
+                {
+                    sb.Append(" " + vars.IndexOf(refvar));
+                }
+                sb.Append("\n");
+            }
+
+            return sb.ToString();
+        }
+
+        public string Disassemble(IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(GenerateLocalVarDefinitions(vars, locals));
             foreach (var inst in Instructions)
             {
                 sb.Append(inst.ToString(this, vars));
-                sb.AppendLine();
+                sb.Append("\n");
             }
             return sb.ToString();
         }
