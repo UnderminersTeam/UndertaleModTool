@@ -120,10 +120,48 @@ namespace UndertaleModLib
     {
         public override string Name => "GLOB";
     }
-
+    
     public class UndertaleChunkSHDR : UndertaleListChunk<UndertaleShader>
     {
         public override string Name => "SHDR";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            base.SerializeChunk(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            reader.Position -= 4;
+            int chunkLength = reader.ReadInt32();
+            uint chunkEnd = reader.Position + (uint)chunkLength;
+
+            uint beginPosition = reader.Position;
+
+            // Figure out where the starts/ends of each shader object are
+            int count = reader.ReadInt32();
+            uint[] objectLocations = new uint[count + 1];
+            for (int i = 0; i < count; i++)
+            {
+                objectLocations[i] = (uint)reader.ReadInt32();
+            }
+            objectLocations[count] = chunkEnd;
+
+            Dictionary<uint, UndertaleObject> objPool = reader.GetOffsetMap();
+            Dictionary<UndertaleObject, uint> objPoolRev = reader.GetOffsetMapRev();
+
+            // Setup base shader objects with boundaries set. Load into object pool
+            // so that they don't immediately discard.
+            for (int i = 0; i < count; i++)
+            {
+                UndertaleShader s = new UndertaleShader { _EntryEnd = objectLocations[i + 1] };
+                objPool.Add(objectLocations[i], s);
+                objPoolRev.Add(s, objectLocations[i]);
+            }
+
+            reader.Position = beginPosition;
+            base.UnserializeChunk(reader);
+        }
     }
 
     public class UndertaleChunkFONT : UndertaleListChunk<UndertaleFont>
