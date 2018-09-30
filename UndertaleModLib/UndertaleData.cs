@@ -170,5 +170,22 @@ namespace UndertaleModLib
             list.Add(vari);
             return vari;
         }
+
+        public static UndertaleExtension.ExtensionFunction DefineExtensionFunction(this IList<UndertaleExtension.ExtensionFunction> extfuncs, IList<UndertaleFunction> funcs, IList<UndertaleString> strg, uint id, uint kind, string name, UndertaleExtension.ExtensionVarType rettype, string extname, params UndertaleExtension.ExtensionVarType[] args)
+        {
+            var func = new UndertaleExtension.ExtensionFunction()
+            {
+                ID = id,
+                Name = strg.MakeString(name),
+                ExtName = strg.MakeString(extname),
+                Kind = kind,
+                RetType = rettype
+            };
+	        foreach(var a in args)
+                func.Arguments.Add(new UndertaleExtension.ExtensionFunctionArg() { Type = a });
+            extfuncs.Add(func);
+            funcs.EnsureDefined(name, strg);
+            return func;
+        }
     }
 }
