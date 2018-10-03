@@ -23,7 +23,7 @@ namespace UndertaleModLib.Decompiler
             return instr;
         }
 
-        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars, out string label, UndertaleInstruction.InstanceType? prevInstType)
+        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars, out string label, UndertaleInstruction.InstanceType? instTypeOnStack)
         {
             label = null;
             string line = source;
@@ -80,7 +80,7 @@ namespace UndertaleModLib.Decompiler
 
                 case UndertaleInstruction.InstructionType.PopInstruction:
                     UndertaleInstruction.InstanceType inst = instr.TypeInst;
-                    instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, prevInstType);
+                    instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, instTypeOnStack);
                     instr.TypeInst = inst;
                     line = "";
                     break;
@@ -105,7 +105,7 @@ namespace UndertaleModLib.Decompiler
                             break;
                         case UndertaleInstruction.DataType.Variable:
                             UndertaleInstruction.InstanceType inst2 = instr.TypeInst;
-                            instr.Value = ParseVariableReference(line, vars, localvars, ref inst2, prevInstType);
+                            instr.Value = ParseVariableReference(line, vars, localvars, ref inst2, instTypeOnStack);
                             instr.TypeInst = inst2;
                             break;
                         case UndertaleInstruction.DataType.String:
@@ -196,8 +196,13 @@ namespace UndertaleModLib.Decompiler
                     continue;
                 }
 
+                // Really ugly hack for compiling array variable references
+                // See https://github.com/krzys-h/UndertaleModTool/issues/27#issuecomment-426637438
+                UndertaleInstruction instTypePush = instructions.Cast<UndertaleInstruction>().Reverse().Where((x) => UndertaleInstruction.GetInstructionType(x.Kind) == UndertaleInstruction.InstructionType.PushInstruction).ElementAtOrDefault(1);
+                UndertaleInstruction.InstanceType? instTypeOnStack = instTypePush != null && instTypePush.Kind == UndertaleInstruction.Opcode.PushI ? (UndertaleInstruction.InstanceType?)(short)instTypePush.Value : null;
+
                 string labelTgt;
-                UndertaleInstruction instr = AssembleOne(line, funcs, vars, strg, localvars, out labelTgt, instructions.Count >= 2 && instructions[instructions.Count - 2].Kind == UndertaleInstruction.Opcode.PushI ? (UndertaleInstruction.InstanceType?)(short)instructions[instructions.Count - 2].Value : null);
+                UndertaleInstruction instr = AssembleOne(line, funcs, vars, strg, localvars, out labelTgt, instTypeOnStack);
                 instr.Address = addr;
                 if (labelTgt != null)
                     labelTargets.Add(instr, labelTgt);
@@ -248,7 +253,7 @@ namespace UndertaleModLib.Decompiler
             return new UndertaleResourceById<UndertaleString>("STRG") { Resource = strobj, CachedId = (int)id.Value };
         }
 
-        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance, UndertaleInstruction.InstanceType? prevInstType)
+        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance, UndertaleInstruction.InstanceType? instTypeOnStack)
         {
             string str = line;
             string inst = null;
@@ -291,8 +296,9 @@ namespace UndertaleModLib.Decompiler
             UndertaleInstruction.InstanceType realinstance = instance;
             // for arrays, the type is on the stack which totally breaks things
             // This is an ugly hack to handle that
-            if (type == UndertaleInstruction.VariableType.Array && prevInstType.HasValue)
-                realinstance = prevInstType.Value;
+            // see https://github.com/krzys-h/UndertaleModTool/issues/27#issuecomment-426637438
+            if (type == UndertaleInstruction.VariableType.Array && instTypeOnStack.HasValue)
+                realinstance = instTypeOnStack.Value;
             if (realinstance >= 0)
                 realinstance = UndertaleInstruction.InstanceType.Self;
 

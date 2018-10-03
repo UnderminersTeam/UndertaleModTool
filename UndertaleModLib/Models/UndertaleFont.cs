@@ -46,7 +46,7 @@ namespace UndertaleModLib.Models
             private ushort _SourceWidth;
             private ushort _SourceHeight;
             private ushort _Shift;
-            private uint _Offset;
+            private uint _Offset; // TODO: probably signed
 
             public ushort Character { get => _Character; set { _Character = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Character")); } }
             public ushort SourceX { get => _SourceX; set { _SourceX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceX")); } }
