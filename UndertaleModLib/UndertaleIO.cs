@@ -64,7 +64,10 @@ namespace UndertaleModLib
 
         public void PostUnserialize(UndertaleReader reader)
         {
-            Resource = CachedId >= 0 ? ((UndertaleListChunk<T>)reader.undertaleData.FORM.Chunks[ResourceChunkType]).List[CachedId] : default(T);
+            IList<T> list = ((UndertaleListChunk<T>)reader.undertaleData.FORM.Chunks[ResourceChunkType]).List;
+            if (CachedId >= list.Count)
+                throw new IOException("Invalid value for resource ID of type " + ResourceChunkType + ": " + CachedId + " (there are only " + list.Count + ")");
+            Resource = CachedId >= 0 ? list[CachedId] : default(T);
         }
 
         public override string ToString()

@@ -38,7 +38,8 @@ All contributions are welcome! If you find a bug, a data file that does not load
   * decompile compound if expressions (things like `a || b` are decomposed into multiple ifs internally because GML has short-circuit evaluation)
   * make sure the output syntax is fully GML-compatible
 * Write a matching GML compiler, so that edits of high-level code are possible
-* Add support for other bytecode versions
+* Add support for other bytecode versions, at least for bytecode 14 so that Undertale 1.00 can be opened as well
+* Add support for YYC games - you won't be able to edit code, but everything else should technically work
 * Maybe try to write a GameMaker Project output module, should be technically possible after decompiler is done but I'm not sure I really want to do that for legal reasons...
 
 ### data.win file format
@@ -47,6 +48,7 @@ Interested in the file and instruction format research I've done while working o
 * https://github.com/krzys-h/UndertaleModTool/wiki/Changes-in-Game-Maker:-Studio-2
 * https://github.com/krzys-h/UndertaleModTool/wiki/Extensions,-Shaders,-Timelines-format
 * https://github.com/krzys-h/UndertaleModTool/wiki/Bytecode-version-differences
+* https://github.com/krzys-h/UndertaleModTool/wiki/YYC-games
 
 ### Special thanks
 Undertale has a special thanks section so I will have one to! No minigame here, though.

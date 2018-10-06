@@ -189,6 +189,18 @@ namespace UndertaleModLib
     public class UndertaleChunkCODE : UndertaleListChunk<UndertaleCode>
     {
         public override string Name => "CODE";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            base.SerializeChunk(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            if (Length == 0)
+                throw new Exception("This game uses YYC (YoYo Compiler). This is currently not supported.");
+            base.UnserializeChunk(reader);
+        }
     }
 
     // TODO: INotifyPropertyChanged
@@ -214,6 +226,8 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
+            if (Length == 0)
+                throw new Exception("This game uses YYC (YoYo Compiler). This is currently not supported.");
             uint startPosition = reader.Position;
             InstanceVarCount = reader.ReadUInt32();
             InstanceVarCountAgain = reader.ReadUInt32();
@@ -241,6 +255,8 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
+            if (Length == 0)
+                throw new Exception("This game uses YYC (YoYo Compiler). This is currently not supported.");
             Functions = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleFunction>>();
             CodeLocals = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleCodeLocals>>();
         }
