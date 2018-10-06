@@ -499,7 +499,7 @@ namespace UndertaleModLib.Models
 
     public class LayerInstancesData : UndertaleObject
     {
-        uint[] InstanceIds; // 100000, 100001, 100002, 100003 - probably instance ids from GameObjects list in the room
+        public uint[] InstanceIds; // 100000, 100001, 100002, 100003 - probably instance ids from GameObjects list in the room
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -519,10 +519,10 @@ namespace UndertaleModLib.Models
 
     public class LayerTilesData : UndertaleObject
     {
-        uint Unknown9; // if I had to guess this is probably tile set id (i.e. ID into BGND)
-        uint TilesX;
-        uint TilesY;
-        uint[] TileData; // values unknown, but I'm guessing they are related to the big array at the end of backgrounds
+        public uint Unknown9; // if I had to guess this is probably tile set id (i.e. ID into BGND)
+        public uint TilesX;
+        public uint TilesY;
+        public uint[] TileData; // values unknown, but I'm guessing they are related to the big array at the end of backgrounds
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -548,15 +548,15 @@ namespace UndertaleModLib.Models
 
     public class LayerBackgroundData : UndertaleObject
     {
-        uint[] Background; // probably ID in SPRT (!!!)
-        uint Unknown10; // 0
-        uint Unknown11; // 0
-        uint Unknown12; // 0
-        uint Unknown13; // 0
-        int Unknown14; // -1
-        uint Unknown15; // 0
-        float AnimationSpeed; // 15.0
-        uint Unknown17; // 0
+        public uint[] Background; // probably ID in SPRT (!!!)
+        public uint Unknown10; // 0
+        public uint Unknown11; // 0
+        public uint Unknown12; // 0
+        public uint Unknown13; // 0
+        public int Unknown14; // -1
+        public uint Unknown15; // 0
+        public float AnimationSpeed; // 15.0
+        public uint Unknown17; // 0
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -592,8 +592,8 @@ namespace UndertaleModLib.Models
 
     public class LayerAssetsData : UndertaleObject
     {
-        UndertalePointerList<AssetLegacyTileItem> LegacyTiles;
-        UndertalePointerList<AssetSpriteItem> Sprites;
+        public UndertalePointerList<AssetLegacyTileItem> LegacyTiles;
+        public UndertalePointerList<AssetSpriteItem> Sprites;
 
         public void Serialize(UndertaleWriter writer)
         {
