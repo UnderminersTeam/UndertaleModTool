@@ -197,12 +197,14 @@
     <Compile Include="Controls\ColorPicker.xaml.cs">
       <DependentUpon>ColorPicker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\EqualityConverter.cs" />
     <Compile Include="Converters\EventNameConverter.cs" />
     <Compile Include="Converters\FilteredViewConverter.cs" />
     <Compile Include="Converters\GameObjectByIdConverter.cs" />
     <Compile Include="Converters\ImplementsInterfaceConverter.cs" />
     <Compile Include="Converters\MaskImageConverter.cs" />
+    <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Converters\RectConverter.cs" />
     <Compile Include="Editors\UndertaleStringEditor.xaml.cs">
       <DependentUpon>UndertaleStringEditor.xaml</DependentUpon>

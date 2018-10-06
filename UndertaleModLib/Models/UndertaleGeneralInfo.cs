@@ -202,8 +202,8 @@ namespace UndertaleModLib.Models
                 GMS2Unknown2 = reader.ReadUInt32();
                 GMS2License2 = reader.ReadBytes(16);
             }
-            if (BytecodeVersion != 0x10)
-                throw new Exception("Only bytecode version " + 0x10 + " is supported for now, you are trying to load " + BytecodeVersion);
+            if (BytecodeVersion != 15 && BytecodeVersion != 16)
+                throw new Exception("Only bytecode version 15 and 16 are supported for now, you are trying to load " + BytecodeVersion);
         }
 
         public override string ToString()

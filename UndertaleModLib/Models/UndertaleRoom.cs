@@ -322,7 +322,8 @@ namespace UndertaleModLib.Models
                 writer.Write(ScaleY);
                 writer.Write(Color);
                 writer.Write(Rotation);
-                writer.Write(Unknown);
+                if (writer.undertaleData.GeneralInfo.BytecodeVersion >= 16) // TODO: is that dependent on bytecode or something else?
+                    writer.Write(Unknown);
             }
 
             public void Unserialize(UndertaleReader reader)
@@ -336,7 +337,8 @@ namespace UndertaleModLib.Models
                 ScaleY = reader.ReadSingle();
                 Color = reader.ReadUInt32();
                 Rotation = reader.ReadSingle();
-                Unknown = reader.ReadInt32();
+                if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 16) // TODO: is that dependent on bytecode or something else?
+                    Unknown = reader.ReadInt32();
             }
         }
 

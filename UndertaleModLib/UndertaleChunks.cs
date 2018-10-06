@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModLib
 {
@@ -16,30 +17,30 @@ namespace UndertaleModLib
 
         public Dictionary<string, UndertaleChunk> Chunks = new Dictionary<string, UndertaleChunk>();
 
-        public UndertaleChunkGEN8 GEN8 => Chunks["GEN8"] as UndertaleChunkGEN8;
-        public UndertaleChunkOPTN OPTN => Chunks["OPTN"] as UndertaleChunkOPTN;
-        public UndertaleChunkLANG LANG => Chunks["LANG"] as UndertaleChunkLANG;
-        public UndertaleChunkEXTN EXTN => Chunks["EXTN"] as UndertaleChunkEXTN;
-        public UndertaleChunkSOND SOND => Chunks["SOND"] as UndertaleChunkSOND;
-        public UndertaleChunkAGRP AGRP => Chunks["AGRP"] as UndertaleChunkAGRP;
-        public UndertaleChunkSPRT SPRT => Chunks["SPRT"] as UndertaleChunkSPRT;
-        public UndertaleChunkBGND BGND => Chunks["BGND"] as UndertaleChunkBGND;
-        public UndertaleChunkPATH PATH => Chunks["PATH"] as UndertaleChunkPATH;
-        public UndertaleChunkSCPT SCPT => Chunks["SCPT"] as UndertaleChunkSCPT;
-        public UndertaleChunkGLOB GLOB => Chunks["GLOB"] as UndertaleChunkGLOB;
-        public UndertaleChunkSHDR SHDR => Chunks["SHDR"] as UndertaleChunkSHDR;
-        public UndertaleChunkFONT FONT => Chunks["FONT"] as UndertaleChunkFONT;
-        public UndertaleChunkTMLN TMLN => Chunks["TMLN"] as UndertaleChunkTMLN;
-        public UndertaleChunkOBJT OBJT => Chunks["OBJT"] as UndertaleChunkOBJT;
-        public UndertaleChunkROOM ROOM => Chunks["ROOM"] as UndertaleChunkROOM;
-        public UndertaleChunkDAFL DAFL => Chunks["DAFL"] as UndertaleChunkDAFL;
-        public UndertaleChunkTPAG TPAG => Chunks["TPAG"] as UndertaleChunkTPAG;
-        public UndertaleChunkCODE CODE => Chunks["CODE"] as UndertaleChunkCODE;
-        public UndertaleChunkVARI VARI => Chunks["VARI"] as UndertaleChunkVARI;
-        public UndertaleChunkFUNC FUNC => Chunks["FUNC"] as UndertaleChunkFUNC;
-        public UndertaleChunkSTRG STRG => Chunks["STRG"] as UndertaleChunkSTRG;
-        public UndertaleChunkTXTR TXTR => Chunks["TXTR"] as UndertaleChunkTXTR;
-        public UndertaleChunkAUDO AUDO => Chunks["AUDO"] as UndertaleChunkAUDO;
+        public UndertaleChunkGEN8 GEN8 => Chunks.GetValueOrDefault("GEN8") as UndertaleChunkGEN8;
+        public UndertaleChunkOPTN OPTN => Chunks.GetValueOrDefault("OPTN") as UndertaleChunkOPTN;
+        public UndertaleChunkLANG LANG => Chunks.GetValueOrDefault("LANG") as UndertaleChunkLANG;
+        public UndertaleChunkEXTN EXTN => Chunks.GetValueOrDefault("EXTN") as UndertaleChunkEXTN;
+        public UndertaleChunkSOND SOND => Chunks.GetValueOrDefault("SOND") as UndertaleChunkSOND;
+        public UndertaleChunkAGRP AGRP => Chunks.GetValueOrDefault("AGRP") as UndertaleChunkAGRP;
+        public UndertaleChunkSPRT SPRT => Chunks.GetValueOrDefault("SPRT") as UndertaleChunkSPRT;
+        public UndertaleChunkBGND BGND => Chunks.GetValueOrDefault("BGND") as UndertaleChunkBGND;
+        public UndertaleChunkPATH PATH => Chunks.GetValueOrDefault("PATH") as UndertaleChunkPATH;
+        public UndertaleChunkSCPT SCPT => Chunks.GetValueOrDefault("SCPT") as UndertaleChunkSCPT;
+        public UndertaleChunkGLOB GLOB => Chunks.GetValueOrDefault("GLOB") as UndertaleChunkGLOB;
+        public UndertaleChunkSHDR SHDR => Chunks.GetValueOrDefault("SHDR") as UndertaleChunkSHDR;
+        public UndertaleChunkFONT FONT => Chunks.GetValueOrDefault("FONT") as UndertaleChunkFONT;
+        public UndertaleChunkTMLN TMLN => Chunks.GetValueOrDefault("TMLN") as UndertaleChunkTMLN;
+        public UndertaleChunkOBJT OBJT => Chunks.GetValueOrDefault("OBJT") as UndertaleChunkOBJT;
+        public UndertaleChunkROOM ROOM => Chunks.GetValueOrDefault("ROOM") as UndertaleChunkROOM;
+        public UndertaleChunkDAFL DAFL => Chunks.GetValueOrDefault("DAFL") as UndertaleChunkDAFL;
+        public UndertaleChunkTPAG TPAG => Chunks.GetValueOrDefault("TPAG") as UndertaleChunkTPAG;
+        public UndertaleChunkCODE CODE => Chunks.GetValueOrDefault("CODE") as UndertaleChunkCODE;
+        public UndertaleChunkVARI VARI => Chunks.GetValueOrDefault("VARI") as UndertaleChunkVARI;
+        public UndertaleChunkFUNC FUNC => Chunks.GetValueOrDefault("FUNC") as UndertaleChunkFUNC;
+        public UndertaleChunkSTRG STRG => Chunks.GetValueOrDefault("STRG") as UndertaleChunkSTRG;
+        public UndertaleChunkTXTR TXTR => Chunks.GetValueOrDefault("TXTR") as UndertaleChunkTXTR;
+        public UndertaleChunkAUDO AUDO => Chunks.GetValueOrDefault("AUDO") as UndertaleChunkAUDO;
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {

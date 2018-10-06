@@ -105,7 +105,7 @@ namespace UndertaleModLib
             }
             catch (UndertaleSerializationException e)
             {
-                throw new UndertaleSerializationException(e.Message + " in chunk " + name);
+                throw new UndertaleSerializationException(e.Message + " in chunk " + name, e);
             }
             catch (Exception e)
             {
