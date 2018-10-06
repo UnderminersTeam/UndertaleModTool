@@ -202,39 +202,7 @@ namespace UndertaleModLib
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
-            // Update references
-            Dictionary<UndertaleVariable, List<UndertaleInstruction>> references = UndertaleInstruction.Reference<UndertaleVariable>.CollectReferences(writer.undertaleData.Code);
-            uint pos = writer.Position;
-            foreach(UndertaleVariable var in List)
-            {
-                var.Occurrences = references.ContainsKey(var) ? (uint)references[var].Count : 0;
-                if (var.Occurrences > 0)
-                {
-                    var.FirstAddress = references[var][0];
-                    for (int i = 0; i < references[var].Count; i++)
-                    {
-                        uint thisAddr = writer.GetAddressForUndertaleObject(references[var][i]);
-                        int addrDiff;
-                        if (i < references[var].Count - 1)
-                        {
-                            uint nextAddr = writer.GetAddressForUndertaleObject(references[var][i + 1]);
-                            addrDiff = (int)(nextAddr - thisAddr);
-                        }
-                        else
-                            addrDiff = var.UnknownChainEndingValue;
-                        // references[var][i].GetReference<UndertaleVariable>().NextOccurrenceOffset = addrDiff;
-                        /*if (addrDiff != references[var][i].GetReference<UndertaleVariable>().NextOccurrenceOffset)
-                            Debug.WriteLine("VARI Changes at " + writer.GetAddressForUndertaleObject(references[var][i].GetReference<UndertaleVariable>()) + ": " + references[var][i].GetReference<UndertaleVariable>().NextOccurrenceOffset + " to " + addrDiff);*/
-                        writer.Position = writer.GetAddressForUndertaleObject(references[var][i].GetReference<UndertaleVariable>());
-                        writer.WriteInt24(addrDiff);
-                    }
-                }
-                else
-                {
-                    var.FirstAddress = null;
-                }
-            }
-            writer.Position = pos;
+            UndertaleInstruction.Reference<UndertaleVariable>.SerializeReferenceChain(writer, writer.undertaleData.Code, List);
 
             writer.Write(InstanceVarCount);
             writer.Write(InstanceVarCountAgain);
@@ -264,40 +232,7 @@ namespace UndertaleModLib
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
-            // Update references
-            Dictionary<UndertaleFunction, List<UndertaleInstruction>> references = UndertaleInstruction.Reference<UndertaleFunction>.CollectReferences(writer.undertaleData.Code);
-            uint pos = writer.Position;
-            // TODO: don't repeat the code from VARI, I spent 6 hours debugging the fact that I didn't copy one change from 0 to 1 between them :P
-            foreach (UndertaleFunction var in Functions)
-            {
-                var.Occurrences = references.ContainsKey(var) ? (uint)references[var].Count : 0;
-                if (var.Occurrences > 0)
-                {
-                    var.FirstAddress = references[var][0];
-                    for (int i = 0; i < references[var].Count; i++)
-                    {
-                        uint thisAddr = writer.GetAddressForUndertaleObject(references[var][i]);
-                        int addrDiff;
-                        if (i < references[var].Count - 1)
-                        {
-                            uint nextAddr = writer.GetAddressForUndertaleObject(references[var][i + 1]);
-                            addrDiff = (int)(nextAddr - thisAddr);
-                        }
-                        else
-                            addrDiff = var.UnknownChainEndingValue;
-                        // references[var][i].GetReference<UndertaleFunction>().NextOccurrenceOffset = addrDiff;
-                        /*if (addrDiff != references[var][i].GetReference<UndertaleFunction>().NextOccurrenceOffset)
-                            Debug.WriteLine("FUNC Changes at " + writer.GetAddressForUndertaleObject(references[var][i].GetReference<UndertaleFunction>()) + ": " + references[var][i].GetReference<UndertaleFunction>().NextOccurrenceOffset + " to " + addrDiff);*/
-                        writer.Position = writer.GetAddressForUndertaleObject(references[var][i].GetReference<UndertaleFunction>());
-                        writer.WriteInt24(addrDiff);
-                    }
-                }
-                else
-                {
-                    var.FirstAddress = null;
-                }
-            }
-            writer.Position = pos;
+            UndertaleInstruction.Reference<UndertaleFunction>.SerializeReferenceChain(writer, writer.undertaleData.Code, Functions);
 
             writer.WriteUndertaleObject(Functions);
             writer.WriteUndertaleObject(CodeLocals);

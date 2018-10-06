@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 namespace UndertaleModLib.Models
 {
     // TODO: INotifyPropertyChanged
-    public class UndertaleFunction : UndertaleNamedResource
+    public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject
     {
         public UndertaleString Name { get; set; }
         public int UnknownChainEndingValue { get; set; }
 
-        internal uint Occurrences;
-        internal UndertaleInstruction FirstAddress;
+        public uint Occurrences { get; set; }
+        public UndertaleInstruction FirstAddress { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -35,19 +35,7 @@ namespace UndertaleModLib.Models
             if (Occurrences > 0)
             {
                 FirstAddress = reader.ReadUndertaleObjectPointer<UndertaleInstruction>();
-
-                // Parse the chain of references
-                UndertaleInstruction.Reference<UndertaleFunction> reference = null;
-                uint addr = reader.GetAddressForUndertaleObject(FirstAddress);
-                for (int i = 0; i < Occurrences; i++)
-                {
-                    reference = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(addr).GetReference<UndertaleFunction>();
-                    if (reference == null)
-                        throw new IOException("Failed to find reference at " + addr);
-                    reference.Target = this;
-                    addr += (uint)reference.NextOccurrenceOffset;
-                }
-                UnknownChainEndingValue = reference.NextOccurrenceOffset;
+                UndertaleInstruction.Reference<UndertaleFunction>.ParseReferenceChain(reader, this);
             }
             else
             {
