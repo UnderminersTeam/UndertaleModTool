@@ -145,6 +145,11 @@ namespace UndertaleModLib
             return objectPool;
         }
 
+        public Dictionary<UndertaleObject, uint> GetOffsetMapRev()
+        {
+            return objectPoolRev;
+        }
+
         public T GetUndertaleObjectAtAddress<T>(uint address) where T : UndertaleObject, new()
         {
             if (address == 0)

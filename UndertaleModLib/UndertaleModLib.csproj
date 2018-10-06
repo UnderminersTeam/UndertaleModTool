@@ -56,6 +56,7 @@
     <Compile Include="Models\UndertalePath.cs" />
     <Compile Include="Models\UndertaleRoom.cs" />
     <Compile Include="Models\UndertaleScript.cs" />
+    <Compile Include="Models\UndertaleShader.cs" />
     <Compile Include="Models\UndertaleSound.cs" />
     <Compile Include="Models\UndertaleSprite.cs" />
     <Compile Include="Models\UndertaleString.cs" />
