@@ -29,6 +29,70 @@ namespace UndertaleModTool
             InitializeComponent();
         }
 
+        private void ExportAll_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleSprite sprite = this.DataContext as UndertaleSprite;
+
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.FileName = sprite.Name.Content + ".png";
+            dlg.DefaultExt = ".png";
+            dlg.Filter = "PNG files (.png)|*.png|All files|*";
+
+            if (dlg.ShowDialog() == true)
+            {
+                try
+                {
+                    if (sprite.Textures.Count > 1)
+                    {
+                        string dir = System.IO.Path.GetDirectoryName(dlg.FileName);
+                        string name = System.IO.Path.GetFileNameWithoutExtension(dlg.FileName);
+                        string path = System.IO.Path.Combine(dir, name);
+                        string ext = System.IO.Path.GetExtension(dlg.FileName);
+
+                        Directory.CreateDirectory(path);
+                        foreach (var tex in sprite.Textures.Select((tex, id) => new { id, tex }))
+                        {
+                            try
+                            {
+                                TextureList.SelectedItem = tex.tex;
+                                using (var file = File.OpenWrite(System.IO.Path.Combine(path, tex.id + ext)))
+                                {
+                                    TextureDisplay.SaveImagePNG(file);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                        }
+                    }
+                    else if (sprite.Textures.Count == 1)
+                    {
+                        try
+                        {
+                            using (var file = File.OpenWrite(dlg.FileName))
+                            {
+                                TextureDisplay.SaveImagePNG(file);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("No frames to export", "Failed to export sprite", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to export: " + ex.Message, "Failed to export sprite", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
         private void MaskList_AddingNewItem(object sender, AddingNewItemEventArgs e)
         {
             UndertaleSprite.MaskEntry obj = new UndertaleSprite.MaskEntry();

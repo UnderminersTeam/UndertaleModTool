@@ -1091,6 +1091,8 @@ namespace UndertaleModLib.Decompiler
                         NewEnv = stmt.NewEnv,
                         Block = HLDecompileBlocks(ref block, blocks, loops, reverseDominators, currentLoop, false, stopAt)
                     });
+                    if (block == null)
+                        break;
                 }
                 else if (block.Statements.Count > 0 && block.Statements.Last() is PopEnvStatement)
                 {

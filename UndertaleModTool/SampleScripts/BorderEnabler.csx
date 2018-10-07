@@ -2,7 +2,7 @@
 
 EnsureDataLoaded();
 
-ScriptMessage("Border enabler\nby krzys_h");
+ScriptMessage("Border enabler (1080p edition)\nby krzys_h");
 
 // Change os_type == 14 checks in scr_draw_screen_border to always pass
 // This:
@@ -128,11 +128,9 @@ popz.i
 
 // Load border textures
 Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, UndertaleEmbeddedTexture>();
-const string bordersUrl = "https://www.reddit.com/r/Underminers/comments/99bxxz/after_days_of_searching_i_finally_managed_to_find/e4nnx6s/";
 if (!Directory.Exists("SampleScripts/Borders/"))
 {
-	ScriptOpenURL(bordersUrl);
-	throw new Exception("Please download the borders from " + bordersUrl + " and put them inside SampleScripts/Borders/");
+	throw new Exception("Border textures not found??");
 }
 foreach(var path in Directory.EnumerateFiles("SampleScripts/Borders/"))
 {
@@ -143,34 +141,51 @@ foreach(var path in Directory.EnumerateFiles("SampleScripts/Borders/"))
 }
 
 // Create texture fragments and assign them to existing (but empty) backgrounds
-Action<string, UndertaleEmbeddedTexture> AssignBorderBackground = (name, tex) => {
+Action<string, UndertaleEmbeddedTexture, ushort, ushort, ushort, ushort> AssignBorderBackground = (name, tex, x, y, width, height) => {
+	var bg = Data.Backgrounds.ByName(name);
+	if (bg == null) {
+		// The anime border does not exist on PC yet ;)
+		return;
+	}
 	UndertaleTexturePageItem tpag = new UndertaleTexturePageItem();
-	tpag.SourceX = 4; tpag.SourceY = 4; tpag.SourceWidth = 960; tpag.SourceHeight = 544;
-	tpag.TargetX = 0; tpag.TargetY = 0; tpag.TargetWidth = 960; tpag.TargetHeight = 544;
-	tpag.BoundingWidth = 960; tpag.BoundingHeight = 544;
+	tpag.SourceX = x; tpag.SourceY = y; tpag.SourceWidth = width; tpag.SourceHeight = height;
+	tpag.TargetX = 0; tpag.TargetY = 0; tpag.TargetWidth = width; tpag.TargetHeight = height;
+	tpag.BoundingWidth = width; tpag.BoundingHeight = height;
 	tpag.TexturePage = tex;
 	Data.TexturePageItems.Add(tpag);
-	Data.Backgrounds.ByName(name + "_544").Texture = tpag;
-	
-	UndertaleTexturePageItem tpag2 = new UndertaleTexturePageItem();
-	tpag2.SourceX = 4; tpag2.SourceY = 4; tpag2.SourceWidth = 960; tpag2.SourceHeight = 544;
-	tpag2.TargetX = 0; tpag2.TargetY = 0; tpag2.TargetWidth = 1920; tpag2.TargetHeight = 1080;
-	tpag2.BoundingWidth = 1920; tpag2.BoundingHeight = 1080;
-	tpag2.TexturePage = tex;
-	Data.TexturePageItems.Add(tpag2);
-	Data.Backgrounds.ByName(name + "_1080").Texture = tpag2;
+	bg.Texture = tpag;
 };
 
-AssignBorderBackground("bg_border_castle", textures["12.png"]);
-AssignBorderBackground("bg_border_fire", textures["13.png"]);
-AssignBorderBackground("bg_border_line", textures["14.png"]);
-AssignBorderBackground("bg_border_rad", textures["15.png"]);
-AssignBorderBackground("bg_border_ruins", textures["16.png"]);
-AssignBorderBackground("bg_border_sepia", textures["17.png"]); // TODO: the small thingies
-AssignBorderBackground("bg_border_truelab", textures["18.png"]);
-AssignBorderBackground("bg_border_tundra", textures["19.png"]);
-AssignBorderBackground("bg_border_water1", textures["20.png"]);
-AssignBorderBackground("bg_border_water2", textures["20.png"]); // TODO: are we missing one...?
+AssignBorderBackground("bg_border_anime_1080",      textures["bg_border_anime.png"],   0, 0, 1920, 1080);
+AssignBorderBackground("bg_border_castle_1080",     textures["bg_border_castle.png"],  0, 0, 1920, 1080);
+AssignBorderBackground("bg_border_dog_1080",        textures["bg_border_dog.png"],     0, 0, 1920, 1080);
+AssignBorderBackground("bg_border_fire_1080",       textures["bg_border_fire.png"],    0, 0, 1920, 1080);
+AssignBorderBackground("bg_border_line_1080",       textures["bg_border_line.png"],    0, 0, 1920, 1080);
+AssignBorderBackground("bg_border_rad_1080",        textures["bg_border_rad.png"],     0, 0, 1920, 1080);
+AssignBorderBackground("bg_border_ruins_1080",      textures["bg_border_ruins.png"],   0, 0, 1920, 1080);
+AssignBorderBackground("bg_border_sepia_1080",      textures["bg_border_sepia.png"],   114, 38, 1920, 1080);
+AssignBorderBackground("bg_border_sepia_1080_1a",   textures["bg_border_sepia.png"],   2, 1750, 137, 137);
+AssignBorderBackground("bg_border_sepia_1080_1b",   textures["bg_border_sepia.png"],   2, 1606, 137, 137);
+AssignBorderBackground("bg_border_sepia_1080_2a",   textures["bg_border_sepia.png"],   2, 562, 92, 87);
+AssignBorderBackground("bg_border_sepia_1080_2b",   textures["bg_border_sepia.png"],   2, 470, 92, 87);
+AssignBorderBackground("bg_border_sepia_1080_3a",   textures["bg_border_sepia.png"],   2, 162, 47, 117);
+AssignBorderBackground("bg_border_sepia_1080_3b",   textures["bg_border_sepia.png"],   2, 38, 47, 117);
+AssignBorderBackground("bg_border_sepia_1080_4a",   textures["bg_border_sepia.png"],   2, 1150, 91, 107);
+AssignBorderBackground("bg_border_sepia_1080_4b",   textures["bg_border_sepia.png"],   2, 1038, 91, 107);
+AssignBorderBackground("bg_border_sepia_1080_5a",   textures["bg_border_sepia.png"],   2, 750, 97, 92);
+AssignBorderBackground("bg_border_sepia_1080_5b",   textures["bg_border_sepia.png"],   2, 654, 97, 92);
+AssignBorderBackground("bg_border_sepia_1080_6a",   textures["bg_border_sepia.png"],   2, 942, 107, 91);
+AssignBorderBackground("bg_border_sepia_1080_6b",   textures["bg_border_sepia.png"],   2, 846, 107, 91);
+AssignBorderBackground("bg_border_sepia_1080_7a",   textures["bg_border_sepia.png"],   2, 378, 87, 87);
+AssignBorderBackground("bg_border_sepia_1080_7b",   textures["bg_border_sepia.png"],   2, 286, 87, 87);
+AssignBorderBackground("bg_border_sepia_1080_8a",   textures["bg_border_sepia.png"],   2, 1366, 102, 97);
+AssignBorderBackground("bg_border_sepia_1080_8b",   textures["bg_border_sepia.png"],   2, 1262, 102, 97);
+AssignBorderBackground("bg_border_sepia_1080_9a",   textures["bg_border_sepia.png"],   118, 2, 112, 31);
+AssignBorderBackground("bg_border_sepia_1080_9b",   textures["bg_border_sepia.png"],   2, 2, 112, 31);
+AssignBorderBackground("bg_border_sepia_1080_glow", textures["bg_border_sepia.png"],   2, 1470, 137, 132);
+AssignBorderBackground("bg_border_truelab_1080",    textures["bg_border_truelab.png"], 0, 0, 1920, 1080);
+AssignBorderBackground("bg_border_tundra_1080",     textures["bg_border_tundra.png"],  0, 0, 1920, 1080);
+AssignBorderBackground("bg_border_water1_1080",     textures["bg_border_water1.png"],  0, 0, 1920, 1080);
 
-ChangeSelection(Data.Backgrounds.ByName("bg_border_water2_1080"));
+ChangeSelection(Data.Backgrounds.ByName("bg_border_water1_1080"));
 ScriptMessage("Borders loaded and enabled!");

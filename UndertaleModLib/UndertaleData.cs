@@ -11,38 +11,38 @@ namespace UndertaleModLib
     {
         public UndertaleChunkFORM FORM;
 
-        public UndertaleGeneralInfo GeneralInfo => FORM.GEN8.Object;
-        public UndertaleOptions Options => FORM.OPTN.Object;
-        public UndertaleLanguage Language => FORM.LANG.Object;
-        public IList<UndertaleExtension> Extensions => FORM.EXTN.List;
-        public IList<UndertaleSound> Sounds => FORM.SOND.List;
+        public UndertaleGeneralInfo GeneralInfo => FORM.GEN8?.Object;
+        public UndertaleOptions Options => FORM.OPTN?.Object;
+        public UndertaleLanguage Language => FORM.LANG?.Object;
+        public IList<UndertaleExtension> Extensions => FORM.EXTN?.List;
+        public IList<UndertaleSound> Sounds => FORM.SOND?.List;
         [Obsolete("Unused")]
-        public IList<UndertaleAudioGroup> AudioGroups => FORM.AGRP.List;
-        public IList<UndertaleSprite> Sprites => FORM.SPRT.List;
-        public IList<UndertaleBackground> Backgrounds => FORM.BGND.List;
-        public IList<UndertalePath> Paths => FORM.PATH.List;
-        public IList<UndertaleScript> Scripts => FORM.SCPT.List;
-        public IList<UndertaleGlobalInit> GlobalInitScripts => FORM.GLOB.List;
+        public IList<UndertaleAudioGroup> AudioGroups => FORM.AGRP?.List;
+        public IList<UndertaleSprite> Sprites => FORM.SPRT?.List;
+        public IList<UndertaleBackground> Backgrounds => FORM.BGND?.List;
+        public IList<UndertalePath> Paths => FORM.PATH?.List;
+        public IList<UndertaleScript> Scripts => FORM.SCPT?.List;
+        public IList<UndertaleGlobalInit> GlobalInitScripts => FORM.GLOB?.List;
         [Obsolete("Unused")]
-        public IList<UndertaleShader> Shaders => FORM.SHDR.List;
-        public IList<UndertaleFont> Fonts => FORM.FONT.List;
+        public IList<UndertaleShader> Shaders => FORM.SHDR?.List;
+        public IList<UndertaleFont> Fonts => FORM.FONT?.List;
         [Obsolete("Unused")]
-        public IList<UndertaleTimeline> Timelines => FORM.TMLN.List;
-        public IList<UndertaleGameObject> GameObjects => FORM.OBJT.List;
-        public IList<UndertaleRoom> Rooms => FORM.ROOM.List;
+        public IList<UndertaleTimeline> Timelines => FORM.TMLN?.List;
+        public IList<UndertaleGameObject> GameObjects => FORM.OBJT?.List;
+        public IList<UndertaleRoom> Rooms => FORM.ROOM?.List;
         //[Obsolete("Unused")]
         // DataFile
-        public IList<UndertaleTexturePageItem> TexturePageItems => FORM.TPAG.List;
-        public IList<UndertaleCode> Code => FORM.CODE.List;
-        public IList<UndertaleVariable> Variables => FORM.VARI.List;
+        public IList<UndertaleTexturePageItem> TexturePageItems => FORM.TPAG?.List;
+        public IList<UndertaleCode> Code => FORM.CODE?.List;
+        public IList<UndertaleVariable> Variables => FORM.VARI?.List;
         public uint InstanceVarCount { get => FORM.VARI.InstanceVarCount; set => FORM.VARI.InstanceVarCount = value; }
         public uint InstanceVarCountAgain { get => FORM.VARI.InstanceVarCountAgain; set => FORM.VARI.InstanceVarCountAgain = value; }
         public uint MaxLocalVarCount { get => FORM.VARI.MaxLocalVarCount; set => FORM.VARI.MaxLocalVarCount = value; }
-        public IList<UndertaleFunction> Functions => FORM.FUNC.Functions;
-        public IList<UndertaleCodeLocals> CodeLocals => FORM.FUNC.CodeLocals;
-        public IList<UndertaleString> Strings => FORM.STRG.List;
-        public IList<UndertaleEmbeddedTexture> EmbeddedTextures => FORM.TXTR.List;
-        public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO.List;
+        public IList<UndertaleFunction> Functions => FORM.FUNC?.Functions;
+        public IList<UndertaleCodeLocals> CodeLocals => FORM.FUNC?.CodeLocals;
+        public IList<UndertaleString> Strings => FORM.STRG?.List;
+        public IList<UndertaleEmbeddedTexture> EmbeddedTextures => FORM.TXTR?.List;
+        public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO?.List;
 
         public static UndertaleData CreateNew()
         {
@@ -169,6 +169,23 @@ namespace UndertaleModLib
                 data.MaxLocalVarCount = idx + 1;
             list.Add(vari);
             return vari;
+        }
+
+        public static UndertaleExtension.ExtensionFunction DefineExtensionFunction(this IList<UndertaleExtension.ExtensionFunction> extfuncs, IList<UndertaleFunction> funcs, IList<UndertaleString> strg, uint id, uint kind, string name, UndertaleExtension.ExtensionVarType rettype, string extname, params UndertaleExtension.ExtensionVarType[] args)
+        {
+            var func = new UndertaleExtension.ExtensionFunction()
+            {
+                ID = id,
+                Name = strg.MakeString(name),
+                ExtName = strg.MakeString(extname),
+                Kind = kind,
+                RetType = rettype
+            };
+	        foreach(var a in args)
+                func.Arguments.Add(new UndertaleExtension.ExtensionFunctionArg() { Type = a });
+            extfuncs.Add(func);
+            funcs.EnsureDefined(name, strg);
+            return func;
         }
     }
 }

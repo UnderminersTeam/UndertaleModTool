@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModLib
 {
@@ -16,30 +17,30 @@ namespace UndertaleModLib
 
         public Dictionary<string, UndertaleChunk> Chunks = new Dictionary<string, UndertaleChunk>();
 
-        public UndertaleChunkGEN8 GEN8 => Chunks["GEN8"] as UndertaleChunkGEN8;
-        public UndertaleChunkOPTN OPTN => Chunks["OPTN"] as UndertaleChunkOPTN;
-        public UndertaleChunkLANG LANG => Chunks["LANG"] as UndertaleChunkLANG;
-        public UndertaleChunkEXTN EXTN => Chunks["EXTN"] as UndertaleChunkEXTN;
-        public UndertaleChunkSOND SOND => Chunks["SOND"] as UndertaleChunkSOND;
-        public UndertaleChunkAGRP AGRP => Chunks["AGRP"] as UndertaleChunkAGRP;
-        public UndertaleChunkSPRT SPRT => Chunks["SPRT"] as UndertaleChunkSPRT;
-        public UndertaleChunkBGND BGND => Chunks["BGND"] as UndertaleChunkBGND;
-        public UndertaleChunkPATH PATH => Chunks["PATH"] as UndertaleChunkPATH;
-        public UndertaleChunkSCPT SCPT => Chunks["SCPT"] as UndertaleChunkSCPT;
-        public UndertaleChunkGLOB GLOB => Chunks["GLOB"] as UndertaleChunkGLOB;
-        public UndertaleChunkSHDR SHDR => Chunks["SHDR"] as UndertaleChunkSHDR;
-        public UndertaleChunkFONT FONT => Chunks["FONT"] as UndertaleChunkFONT;
-        public UndertaleChunkTMLN TMLN => Chunks["TMLN"] as UndertaleChunkTMLN;
-        public UndertaleChunkOBJT OBJT => Chunks["OBJT"] as UndertaleChunkOBJT;
-        public UndertaleChunkROOM ROOM => Chunks["ROOM"] as UndertaleChunkROOM;
-        public UndertaleChunkDAFL DAFL => Chunks["DAFL"] as UndertaleChunkDAFL;
-        public UndertaleChunkTPAG TPAG => Chunks["TPAG"] as UndertaleChunkTPAG;
-        public UndertaleChunkCODE CODE => Chunks["CODE"] as UndertaleChunkCODE;
-        public UndertaleChunkVARI VARI => Chunks["VARI"] as UndertaleChunkVARI;
-        public UndertaleChunkFUNC FUNC => Chunks["FUNC"] as UndertaleChunkFUNC;
-        public UndertaleChunkSTRG STRG => Chunks["STRG"] as UndertaleChunkSTRG;
-        public UndertaleChunkTXTR TXTR => Chunks["TXTR"] as UndertaleChunkTXTR;
-        public UndertaleChunkAUDO AUDO => Chunks["AUDO"] as UndertaleChunkAUDO;
+        public UndertaleChunkGEN8 GEN8 => Chunks.GetValueOrDefault("GEN8") as UndertaleChunkGEN8;
+        public UndertaleChunkOPTN OPTN => Chunks.GetValueOrDefault("OPTN") as UndertaleChunkOPTN;
+        public UndertaleChunkLANG LANG => Chunks.GetValueOrDefault("LANG") as UndertaleChunkLANG;
+        public UndertaleChunkEXTN EXTN => Chunks.GetValueOrDefault("EXTN") as UndertaleChunkEXTN;
+        public UndertaleChunkSOND SOND => Chunks.GetValueOrDefault("SOND") as UndertaleChunkSOND;
+        public UndertaleChunkAGRP AGRP => Chunks.GetValueOrDefault("AGRP") as UndertaleChunkAGRP;
+        public UndertaleChunkSPRT SPRT => Chunks.GetValueOrDefault("SPRT") as UndertaleChunkSPRT;
+        public UndertaleChunkBGND BGND => Chunks.GetValueOrDefault("BGND") as UndertaleChunkBGND;
+        public UndertaleChunkPATH PATH => Chunks.GetValueOrDefault("PATH") as UndertaleChunkPATH;
+        public UndertaleChunkSCPT SCPT => Chunks.GetValueOrDefault("SCPT") as UndertaleChunkSCPT;
+        public UndertaleChunkGLOB GLOB => Chunks.GetValueOrDefault("GLOB") as UndertaleChunkGLOB;
+        public UndertaleChunkSHDR SHDR => Chunks.GetValueOrDefault("SHDR") as UndertaleChunkSHDR;
+        public UndertaleChunkFONT FONT => Chunks.GetValueOrDefault("FONT") as UndertaleChunkFONT;
+        public UndertaleChunkTMLN TMLN => Chunks.GetValueOrDefault("TMLN") as UndertaleChunkTMLN;
+        public UndertaleChunkOBJT OBJT => Chunks.GetValueOrDefault("OBJT") as UndertaleChunkOBJT;
+        public UndertaleChunkROOM ROOM => Chunks.GetValueOrDefault("ROOM") as UndertaleChunkROOM;
+        public UndertaleChunkDAFL DAFL => Chunks.GetValueOrDefault("DAFL") as UndertaleChunkDAFL;
+        public UndertaleChunkTPAG TPAG => Chunks.GetValueOrDefault("TPAG") as UndertaleChunkTPAG;
+        public UndertaleChunkCODE CODE => Chunks.GetValueOrDefault("CODE") as UndertaleChunkCODE;
+        public UndertaleChunkVARI VARI => Chunks.GetValueOrDefault("VARI") as UndertaleChunkVARI;
+        public UndertaleChunkFUNC FUNC => Chunks.GetValueOrDefault("FUNC") as UndertaleChunkFUNC;
+        public UndertaleChunkSTRG STRG => Chunks.GetValueOrDefault("STRG") as UndertaleChunkSTRG;
+        public UndertaleChunkTXTR TXTR => Chunks.GetValueOrDefault("TXTR") as UndertaleChunkTXTR;
+        public UndertaleChunkAUDO AUDO => Chunks.GetValueOrDefault("AUDO") as UndertaleChunkAUDO;
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
@@ -226,6 +227,18 @@ namespace UndertaleModLib
     public class UndertaleChunkCODE : UndertaleListChunk<UndertaleCode>
     {
         public override string Name => "CODE";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            base.SerializeChunk(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            if (Length == 0)
+                throw new Exception("This game uses YYC (YoYo Compiler). This is currently not supported.");
+            base.UnserializeChunk(reader);
+        }
     }
 
     // TODO: INotifyPropertyChanged
@@ -240,39 +253,7 @@ namespace UndertaleModLib
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
-            // Update references
-            Dictionary<UndertaleVariable, List<UndertaleInstruction>> references = UndertaleInstruction.Reference<UndertaleVariable>.CollectReferences(writer.undertaleData.Code);
-            uint pos = writer.Position;
-            foreach(UndertaleVariable var in List)
-            {
-                var.Occurrences = references.ContainsKey(var) ? (uint)references[var].Count : 0;
-                if (var.Occurrences > 0)
-                {
-                    var.FirstAddress = references[var][0];
-                    for (int i = 0; i < references[var].Count; i++)
-                    {
-                        uint thisAddr = writer.GetAddressForUndertaleObject(references[var][i]);
-                        int addrDiff;
-                        if (i < references[var].Count - 1)
-                        {
-                            uint nextAddr = writer.GetAddressForUndertaleObject(references[var][i + 1]);
-                            addrDiff = (int)(nextAddr - thisAddr);
-                        }
-                        else
-                            addrDiff = var.UnknownChainEndingValue;
-                        // references[var][i].GetReference<UndertaleVariable>().NextOccurrenceOffset = addrDiff;
-                        /*if (addrDiff != references[var][i].GetReference<UndertaleVariable>().NextOccurrenceOffset)
-                            Debug.WriteLine("VARI Changes at " + writer.GetAddressForUndertaleObject(references[var][i].GetReference<UndertaleVariable>()) + ": " + references[var][i].GetReference<UndertaleVariable>().NextOccurrenceOffset + " to " + addrDiff);*/
-                        writer.Position = writer.GetAddressForUndertaleObject(references[var][i].GetReference<UndertaleVariable>());
-                        writer.WriteInt24(addrDiff);
-                    }
-                }
-                else
-                {
-                    var.FirstAddress = null;
-                }
-            }
-            writer.Position = pos;
+            UndertaleInstruction.Reference<UndertaleVariable>.SerializeReferenceChain(writer, writer.undertaleData.Code, List);
 
             writer.Write(InstanceVarCount);
             writer.Write(InstanceVarCountAgain);
@@ -283,6 +264,8 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
+            if (Length == 0)
+                throw new Exception("This game uses YYC (YoYo Compiler). This is currently not supported.");
             uint startPosition = reader.Position;
             InstanceVarCount = reader.ReadUInt32();
             InstanceVarCountAgain = reader.ReadUInt32();
@@ -302,40 +285,7 @@ namespace UndertaleModLib
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
-            // Update references
-            Dictionary<UndertaleFunction, List<UndertaleInstruction>> references = UndertaleInstruction.Reference<UndertaleFunction>.CollectReferences(writer.undertaleData.Code);
-            uint pos = writer.Position;
-            // TODO: don't repeat the code from VARI, I spent 6 hours debugging the fact that I didn't copy one change from 0 to 1 between them :P
-            foreach (UndertaleFunction var in Functions)
-            {
-                var.Occurrences = references.ContainsKey(var) ? (uint)references[var].Count : 0;
-                if (var.Occurrences > 0)
-                {
-                    var.FirstAddress = references[var][0];
-                    for (int i = 0; i < references[var].Count; i++)
-                    {
-                        uint thisAddr = writer.GetAddressForUndertaleObject(references[var][i]);
-                        int addrDiff;
-                        if (i < references[var].Count - 1)
-                        {
-                            uint nextAddr = writer.GetAddressForUndertaleObject(references[var][i + 1]);
-                            addrDiff = (int)(nextAddr - thisAddr);
-                        }
-                        else
-                            addrDiff = var.UnknownChainEndingValue;
-                        // references[var][i].GetReference<UndertaleFunction>().NextOccurrenceOffset = addrDiff;
-                        /*if (addrDiff != references[var][i].GetReference<UndertaleFunction>().NextOccurrenceOffset)
-                            Debug.WriteLine("FUNC Changes at " + writer.GetAddressForUndertaleObject(references[var][i].GetReference<UndertaleFunction>()) + ": " + references[var][i].GetReference<UndertaleFunction>().NextOccurrenceOffset + " to " + addrDiff);*/
-                        writer.Position = writer.GetAddressForUndertaleObject(references[var][i].GetReference<UndertaleFunction>());
-                        writer.WriteInt24(addrDiff);
-                    }
-                }
-                else
-                {
-                    var.FirstAddress = null;
-                }
-            }
-            writer.Position = pos;
+            UndertaleInstruction.Reference<UndertaleFunction>.SerializeReferenceChain(writer, writer.undertaleData.Code, Functions);
 
             writer.WriteUndertaleObject(Functions);
             writer.WriteUndertaleObject(CodeLocals);
@@ -343,6 +293,8 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
+            if (Length == 0)
+                throw new Exception("This game uses YYC (YoYo Compiler). This is currently not supported.");
             Functions = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleFunction>>();
             CodeLocals = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleCodeLocals>>();
         }

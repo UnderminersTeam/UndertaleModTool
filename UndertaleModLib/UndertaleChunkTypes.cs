@@ -31,11 +31,12 @@ namespace UndertaleModLib
                 
                 if (Name != "FORM" && Name != "AUDO") // TODO: needs a better way to detect last chunk
                 {
-                    UndertaleGeneralInfo generalInfo = Name == "GEN8" ? ((UndertaleChunkGEN8)this).Object : writer.undertaleData.GeneralInfo;
+                    UndertaleGeneralInfo generalInfo = Name == "GEN8" ? ((UndertaleChunkGEN8)this).Object : writer.undertaleData?.GeneralInfo;
                     // These versions introduced new padding
                     // all chunks now start on 16-byte boundaries
                     // (but the padding is included with length of previous chunk)
-                    if (generalInfo.Major >= 2 || (generalInfo.Major == 1 && generalInfo.Build >= 9999))
+                    // TODO: what about the debug data??
+                    if (generalInfo != null && (generalInfo.Major >= 2 || (generalInfo.Major == 1 && generalInfo.Build >= 9999)))
                     {
                         while (writer.Position % 16 != 0)
                         {
@@ -48,7 +49,7 @@ namespace UndertaleModLib
             }
             catch (UndertaleSerializationException e)
             {
-                throw new UndertaleSerializationException(e.Message + " in chunk " + Name);
+                throw new UndertaleSerializationException(e.Message + " in chunk " + Name, e);
             }
             catch (Exception e)
             {
@@ -104,7 +105,7 @@ namespace UndertaleModLib
             }
             catch (UndertaleSerializationException e)
             {
-                throw new UndertaleSerializationException(e.Message + " in chunk " + name);
+                throw new UndertaleSerializationException(e.Message + " in chunk " + name, e);
             }
             catch (Exception e)
             {

@@ -9,7 +9,7 @@
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleTexturePageItem}">
 
     <Canvas Width="{Binding BoundingWidth}" Height="{Binding BoundingHeight}">
-        <Border Canvas.Left="{Binding TargetX}" Canvas.Top="{Binding TargetY}"  Width="{Binding TargetWidth}" Height="{Binding TargetHeight}" BorderBrush="DarkCyan" BorderThickness="1">
+        <Border Canvas.Left="{Binding TargetX}" Canvas.Top="{Binding TargetY}"  Width="{Binding TargetWidth}" Height="{Binding TargetHeight}" BorderBrush="DarkCyan" BorderThickness="1" Name="RenderAreaBorder">
             <Border.Background>
                 <ImageBrush
                     ImageSource="{Binding TexturePage.TextureData.TextureBlob}" 

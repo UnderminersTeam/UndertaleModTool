@@ -178,7 +178,14 @@ namespace UndertaleModLib.Models
         public ushort ArgumentsCount { get; set; }
         public byte DupExtra { get; set; }
 
-        public class Reference<T> : UndertaleObject where T : class, UndertaleObject
+        public interface ReferencedObject
+        {
+            uint Occurrences { get; set; }
+            UndertaleInstruction FirstAddress { get; set; }
+            int UnknownChainEndingValue { get; set; }
+        }
+
+        public class Reference<T> : UndertaleObject where T : class, UndertaleObject, ReferencedObject
         {
             public int NextOccurrenceOffset { get; set; } = 0xdead;
             public VariableType Type { get; set; }
@@ -238,9 +245,64 @@ namespace UndertaleModLib.Models
                 }
                 return list;
             }
+
+            /// <summary>
+            ///  Serialize the reference chain. This functions assumes that the Reference objects have already been written to file (i.e. the CODE chunk was before FUNC/VARI,
+            ///  which is normally always the case)
+            /// </summary>
+            public static void SerializeReferenceChain(UndertaleWriter writer, IList<UndertaleCode> codeList, IList<T> varList)
+            {
+                Dictionary<T, List<UndertaleInstruction>> references = CollectReferences(codeList);
+                uint pos = writer.Position;
+                foreach (T var in varList)
+                {
+                    var.Occurrences = references.ContainsKey(var) ? (uint)references[var].Count : 0;
+                    if (var.Occurrences > 0)
+                    {
+                        var.FirstAddress = references[var][0];
+                        for (int i = 0; i < references[var].Count; i++)
+                        {
+                            uint thisAddr = writer.GetAddressForUndertaleObject(references[var][i]);
+                            int addrDiff;
+                            if (i < references[var].Count - 1)
+                            {
+                                uint nextAddr = writer.GetAddressForUndertaleObject(references[var][i + 1]);
+                                addrDiff = (int)(nextAddr - thisAddr);
+                            }
+                            else
+                                addrDiff = var.UnknownChainEndingValue;
+                            writer.Position = writer.GetAddressForUndertaleObject(references[var][i].GetReference<T>());
+                            writer.WriteInt24(addrDiff);
+                        }
+                    }
+                    else
+                    {
+                        var.FirstAddress = null;
+                    }
+                }
+                writer.Position = pos;
+            }
+
+            /// <summary>
+            ///  Parse the reference chain. This function assumes that all of the object data was read already, it only fills in the "Target" field of Reference objects
+            /// </summary>
+            public static void ParseReferenceChain(UndertaleReader reader, T obj)
+            {
+                Reference<T> reference = null;
+                uint addr = reader.GetAddressForUndertaleObject(obj.FirstAddress);
+                for (int i = 0; i < obj.Occurrences; i++)
+                {
+                    reference = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(addr).GetReference<T>();
+                    if (reference == null)
+                        throw new IOException("Failed to find reference at " + addr);
+                    reference.Target = obj;
+                    addr += (uint)reference.NextOccurrenceOffset;
+                }
+                obj.UnknownChainEndingValue = reference.NextOccurrenceOffset;
+            }
         }
 
-        public Reference<T> GetReference<T>() where T : class, UndertaleObject
+        public Reference<T> GetReference<T>() where T : class, UndertaleObject, ReferencedObject
         {
             return (Destination as Reference<T>) ?? (Function as Reference<T>) ?? (Value as Reference<T>);
         }

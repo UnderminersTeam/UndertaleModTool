@@ -166,7 +166,7 @@ namespace UndertaleModTool
 
             if (IsGMS2 == Visibility.Visible)
             {
-                MessageBox.Show("This is not yet tested and may break. You have been warned.", "GMS2 game", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                MessageBox.Show("This is not yet tested and may break. You have been warned.", "GMS2 game", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
 
             LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
@@ -503,6 +503,8 @@ namespace UndertaleModTool
             foreach(var path in Directory.EnumerateFiles("SampleScripts"))
             {
                 var filename = System.IO.Path.GetFileName(path);
+                if (!filename.EndsWith(".csx"))
+                    continue;
                 MenuItem subitem = new MenuItem() { Header = filename.Replace("_", "__") };
                 subitem.Click += MenuItem_RunBuiltinScript_Item_Click;
                 subitem.CommandParameter = path;

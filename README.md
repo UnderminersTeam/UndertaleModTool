@@ -7,7 +7,7 @@
 heya. I heard you like digging deep into Undertale data so I made a tool just for you! Downloads are here: https://github.com/krzys-h/UndertaleModTool/releases
 
 ### Main features
-* Can read every single byte from the data file for lastest version of Undertale, and probably other GameMaker: Studio games (GM:S 1.4 bytecode version 16 = 0x10 only, at least for now, GM:S2 support is being worked on) for every platform and then recreate a byte-for-byte exact copy from the decoded data.
+* Can read every single byte from the data file for lastest version of Undertale, and probably other GameMaker: Studio games (GM:S 1.4 bytecode version 15 or 16 only, version 14 may be supported at some point but not yet, partial GM:S2 support is done) for every platform and then recreate a byte-for-byte exact copy from the decoded data.
 * Properly handles all of the pointers in the file so that if you add/remove stuff, make things longer/shorter, move them around etc. the file format won't break.
 * An editor which lets you change (almost) every single value, including unknown ones. A lot better than a hex editor, huh?
 * Includes a (very) simple level editor
@@ -16,7 +16,7 @@ heya. I heard you like digging deep into Undertale data so I made a tool just fo
 * Support for running scripts that automatically modify your data file - this is the way to distribute mods, but creating them is manual job for now. It also serves as a replacement for sharing hex editor offsets - if you make it into a file-format-aware script instead, there is much smaller change of it breaking after an update.
 * All core IO functionality extracted into a library for use in external tools
 * Can generate an .yydebug file for the GM:S debugger so that you can edit variables live [EXPERIMENTAL]
-* Some hacks to make it work with GM:S 2. Should be able to load and maybe save (but not yet fully display) the latest Nintendo Switch release.
+* Partial GM:S 2 support. Loading and saving should work fine, although not all editors are updated yet. Should work with the latest Nintendo Switch release of Undertale.
 
 ### Included scripts
 I also included some of my test scripts. They are:
@@ -38,7 +38,8 @@ All contributions are welcome! If you find a bug, a data file that does not load
   * decompile compound if expressions (things like `a || b` are decomposed into multiple ifs internally because GML has short-circuit evaluation)
   * make sure the output syntax is fully GML-compatible
 * Write a matching GML compiler, so that edits of high-level code are possible
-* Add support for other bytecode versions
+* Add support for other bytecode versions, at least for bytecode 14 so that Undertale 1.00 can be opened as well
+* Add support for YYC games - you won't be able to edit code, but everything else should technically work
 * Maybe try to write a GameMaker Project output module, should be technically possible after decompiler is done but I'm not sure I really want to do that for legal reasons...
 
 ### data.win file format
@@ -46,6 +47,8 @@ Interested in the file and instruction format research I've done while working o
 * https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-Game-Maker:-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions
 * https://github.com/krzys-h/UndertaleModTool/wiki/Changes-in-Game-Maker:-Studio-2
 * https://github.com/krzys-h/UndertaleModTool/wiki/Extensions,-Shaders,-Timelines-format
+* https://github.com/krzys-h/UndertaleModTool/wiki/Bytecode-version-differences
+* https://github.com/krzys-h/UndertaleModTool/wiki/YYC-games
 
 ### Special thanks
 Undertale has a special thanks section so I will have one to! No minigame here, though.
@@ -56,7 +59,7 @@ Special thanks to everybody who did previous research on unpacking and decompili
 * https://github.com/PoroCYon/Altar.NET
 * https://github.com/WarlockD/GMdsam
 * [@NarryG](https://github.com/NarryG) for [helping me figure out](https://github.com/krzys-h/UndertaleModTool/issues/3) the missing stuff for GMS2 and Nintendo Switch release
-* [@colinator27](https://github.com/colinator27) for [figuring out Extensions](https://github.com/krzys-h/UndertaleModTool/issues/4)
+* [@colinator27](https://github.com/colinator27) for [figuring out Extensions](https://github.com/krzys-h/UndertaleModTool/issues/4) and [Sha](https://github.com/krzys-h/UndertaleModTool/issues/13)[ders](https://github.com/krzys-h/UndertaleModTool/pull/25)
 
 And of course, special thanks to Toby Fox and the whole Undertale team for making the game ;)
 
