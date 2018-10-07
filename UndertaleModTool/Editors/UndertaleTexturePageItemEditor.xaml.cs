@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +25,29 @@ namespace UndertaleModTool
         public UndertaleTexturePageItemEditor()
         {
             InitializeComponent();
+        }
+
+        private void Export_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog dlg = new SaveFileDialog();
+            
+            dlg.DefaultExt = ".png";
+            dlg.Filter = "PNG files (.png)|*.png|All files|*";
+
+            if (dlg.ShowDialog() == true)
+            {
+                try
+                {
+                    using (var file = File.OpenWrite(dlg.FileName))
+                    {
+                        ItemDisplay.SaveImagePNG(file);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
     }
 }

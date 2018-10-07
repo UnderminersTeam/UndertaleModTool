@@ -27,6 +27,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
@@ -138,12 +139,14 @@
                         </DrawingBrush.Drawing>
                     </DrawingBrush>
                 </Border.Background>
-                <local:UndertaleTexturePageItemDisplay DataContext="{Binding SelectedItem.Texture, ElementName=TextureList}"/>
+                <local:UndertaleTexturePageItemDisplay DataContext="{Binding SelectedItem.Texture, ElementName=TextureList}" x:Name="TextureDisplay"/>
             </Border>
         </Viewbox>
 
-        <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Collision masks</TextBlock>
-        <DataGrid Grid.Row="11" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks}" Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
+        <Button Grid.Row="11" Grid.Column="1" Content="Export all frames" Click="ExportAll_Click"/>
+
+        <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Collision masks</TextBlock>
+        <DataGrid Grid.Row="12" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks}" Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -180,7 +183,7 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <ContentControl Grid.Row="12" Grid.Column="1" Margin="3" DataContext="{Binding SelectedItem, ElementName=MaskList}">
+        <ContentControl Grid.Row="13" Grid.Column="1" Margin="3" DataContext="{Binding SelectedItem, ElementName=MaskList}">
             <ContentControl.Template>
                 <ControlTemplate>
                     <StackPanel Name="MaskEditor">
