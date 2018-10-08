@@ -372,6 +372,12 @@ namespace UndertaleModTool
                                                 possibleObjects.Add(data.Fonts[id]);
                                             if (id < data.Sounds.Count)
                                                 possibleObjects.Add(data.Sounds[id]);
+                                            if (id < data.Shaders.Count)
+                                                possibleObjects.Add(data.Shaders[id]);
+                                            if (id < data.Extensions.Count)
+                                                possibleObjects.Add(data.Extensions[id]);
+                                            if (id < data.Timelines.Count)
+                                                possibleObjects.Add(data.Timelines[id]);
 
                                             ContextMenu contextMenu = new ContextMenu();
                                             foreach(UndertaleObject obj in possibleObjects)

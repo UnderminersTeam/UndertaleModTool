@@ -174,9 +174,23 @@
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
+                        <TreeViewItem Header="Shaders" ItemsSource="{Binding Shaders, Converter={StaticResource FilteredViewConverter}}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleShader}">
+                                    <TextBlock Text="{Binding Name.Content}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
                         <TreeViewItem Header="Fonts" ItemsSource="{Binding Fonts, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleFont}">
+                                    <TextBlock Text="{Binding Name.Content}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Timelines" ItemsSource="{Binding Timelines, Converter={StaticResource FilteredViewConverter}}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleTimeline}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
@@ -191,6 +205,13 @@
                         <TreeViewItem Header="Rooms" ItemsSource="{Binding Rooms, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleRoom}">
+                                    <TextBlock Text="{Binding Name.Content}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Extensions" ItemsSource="{Binding Extensions, Converter={StaticResource FilteredViewConverter}}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleExtension}">
                                     <TextBlock Text="{Binding Name.Content}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
@@ -299,6 +320,10 @@
                                 <local:UndertaleScriptEditor/>
                             </DataTemplate>
 
+                            <DataTemplate DataType="{x:Type undertale:UndertaleShader}">
+                                <local:UndertaleShaderEditor/>
+                            </DataTemplate>
+
                             <DataTemplate DataType="{x:Type undertale:UndertalePath}">
                                 <local:UndertalePathEditor/>
                             </DataTemplate>
@@ -307,12 +332,20 @@
                                 <local:UndertaleFontEditor/>
                             </DataTemplate>
 
+                            <DataTemplate DataType="{x:Type undertale:UndertaleTimeline}">
+                                <local:UndertaleTimelineEditor/>
+                            </DataTemplate>
+
                             <DataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
                                 <local:UndertaleGameObjectEditor/>
                             </DataTemplate>
 
                             <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
                                 <local:UndertaleRoomEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleExtension}">
+                                <local:UndertaleExtensionEditor/>
                             </DataTemplate>
 
                             <DataTemplate DataType="{x:Type undertale:UndertaleCode}">

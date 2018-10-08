@@ -3,16 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace UndertaleModLib.Models
 {
-    // TODO: INotifyPropertyChanged
-    public class UndertaleExtension : UndertaleObject
+    public class UndertaleExtension : UndertaleNamedResource, INotifyPropertyChanged
     {
-        public UndertaleString EmptyString;
-        public UndertaleString Name;
-        public UndertaleString ClassName;
-        public UndertalePointerList<ExtensionFile> Files = new UndertalePointerList<ExtensionFile>();
+        private UndertaleString _EmptyString;
+        private UndertaleString _Name;
+        private UndertaleString _ClassName;
+        private UndertalePointerList<ExtensionFile> _Files = new UndertalePointerList<ExtensionFile>();
+
+        public UndertaleString EmptyString { get => _EmptyString; set { _EmptyString = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("EmptyString")); } }
+        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+        public UndertaleString ClassName { get => _ClassName; set { _ClassName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ClassName")); } }
+
+        public UndertalePointerList<ExtensionFile> Files { get => _Files; set { _Files = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Files")); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public override string ToString()
+        {
+            return Name.Content + " (" + GetType().Name + ")";
+        }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -48,13 +61,21 @@ namespace UndertaleModLib.Models
             Double = 2
         }
 
-        public class ExtensionFile : UndertaleObject
+        public class ExtensionFile : UndertaleObject, INotifyPropertyChanged
         {
-            public UndertaleString Filename;
-            public UndertaleString CleanupScript;
-            public UndertaleString InitScript;
-            public ExtensionKind Kind;
-            public UndertalePointerList<ExtensionFunction> Functions = new UndertalePointerList<ExtensionFunction>();
+            private UndertaleString _Filename;
+            private UndertaleString _CleanupScript;
+            private UndertaleString _InitScript;
+            private ExtensionKind _Kind;
+            private UndertalePointerList<ExtensionFunction> _Functions = new UndertalePointerList<ExtensionFunction>();
+
+            public UndertaleString Filename { get => _Filename; set { _Filename = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Filename")); } }
+            public UndertaleString CleanupScript { get => _CleanupScript; set { _CleanupScript = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CleanupScript")); } }
+            public UndertaleString InitScript { get => _InitScript; set { _InitScript = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("InitScript")); } }
+            public ExtensionKind Kind { get => _Kind; set { _Kind = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Kind")); } }
+            public UndertalePointerList<ExtensionFunction> Functions { get => _Functions; set { _Functions = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Functions")); } }
+
+            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -75,14 +96,23 @@ namespace UndertaleModLib.Models
             }
         }
 
-        public class ExtensionFunction : UndertaleObject
+        public class ExtensionFunction : UndertaleObject, INotifyPropertyChanged
         {
-            public UndertaleString Name;
-            public uint ID;
-            public uint Kind;
-            public ExtensionVarType RetType;
-            public UndertaleString ExtName;
-            public UndertaleSimpleList<ExtensionFunctionArg> Arguments = new UndertaleSimpleList<ExtensionFunctionArg>();
+            private UndertaleString _Name;
+            private uint _ID;
+            private uint _Kind;
+            private ExtensionVarType _RetType;
+            private UndertaleString _ExtName;
+            private UndertaleSimpleList<ExtensionFunctionArg> _Arguments = new UndertaleSimpleList<ExtensionFunctionArg>();
+
+            public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+            public uint ID { get => _ID; set { _ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ID")); } }
+            public uint Kind { get => _Kind; set { _Kind = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Kind")); } }
+            public ExtensionVarType RetType { get => _RetType; set { _RetType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("RetType")); } }
+            public UndertaleString ExtName { get => _ExtName; set { _ExtName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ExtName")); } }
+            public UndertaleSimpleList<ExtensionFunctionArg> Arguments { get => _Arguments; set { _Arguments = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Arguments")); } }
+
+            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -105,9 +135,13 @@ namespace UndertaleModLib.Models
             }
         }
 
-        public class ExtensionFunctionArg : UndertaleObject
+        public class ExtensionFunctionArg : UndertaleObject, INotifyPropertyChanged
         {
-            public ExtensionVarType Type;
+            private ExtensionVarType _Type;
+
+            public ExtensionVarType Type { get => _Type; set { _Type = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Type")); } }
+
+            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {

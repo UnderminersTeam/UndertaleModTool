@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
+             xmlns:x1="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
              d:DesignHeight="20" d:DesignWidth="300">
     <Grid>
@@ -11,12 +12,42 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <TextBox Grid.Column="0" ToolTip="This is an string reference. Change the value here to edit this just this value of all referenced values, or drag and drop another string instance from the tree on the left to change the reference" AllowDrop="True" PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" Text="{Binding ObjectReference.Content, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=Explicit}" LostFocus="TextBox_LostFocus"/>
+        <TextBox Grid.Column="0" ToolTip="This is an string reference. Change the value here to edit this just this value of all referenced values, or drag and drop another string instance from the tree on the left to change the reference" AllowDrop="True" PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" Text="{Binding ObjectReference.Content, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=Explicit}" LostFocus="TextBox_LostFocus">
+            <TextBox.Style>
+                <Style TargetType="{x:Type TextBox}">
+                    <Style.Resources>
+                        <VisualBrush x:Key="EmptyBrush" AlignmentX="Left" AlignmentY="Top" Stretch="None">
+                            <VisualBrush.Visual>
+                                <Label Padding="2, 0" Content="(empty)" Foreground="DarkGray"/>
+                            </VisualBrush.Visual>
+                        </VisualBrush>
+                        <VisualBrush x:Key="NullBrush" AlignmentX="Left" AlignmentY="Top" Stretch="None">
+                            <VisualBrush.Visual>
+                                <Label Padding="2, 0" Content="(null)" Foreground="DarkGray"/>
+                            </VisualBrush.Visual>
+                        </VisualBrush>
+                    </Style.Resources>
+                    <Style.Triggers>
+                        <Trigger Property="Text" Value="">
+                            <Setter Property="Background" Value="{StaticResource EmptyBrush}"/>
+                        </Trigger>
+
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="{x:Null}"/>
+                                <Condition Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value=""/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Background" Value="{StaticResource NullBrush}"/>
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBox.Style>
+        </TextBox>
         <Button Grid.Column="1" Click="Details_Click" Content=" ... " ToolTip="Open referenced object">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Null}">
+                        <DataTrigger Binding="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="{x:Null}">
                             <Setter Property="IsEnabled" Value="False"/>
                         </DataTrigger>
                     </Style.Triggers>

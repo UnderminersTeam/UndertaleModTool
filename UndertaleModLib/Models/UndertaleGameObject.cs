@@ -34,9 +34,8 @@ namespace UndertaleModLib.Models
         private uint _Group = 0;
         private float _LinearDamping = 0.1f;
         private float _AngularDamping = 0.1f;
-        private float _Unknown1 = 0.0f;
         private float _Friction = 0.2f;
-        private uint _Unknown2 = 1;
+        private bool _Awake = false;
         private bool _Kinematic = false;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
@@ -55,10 +54,10 @@ namespace UndertaleModLib.Models
         public uint Group { get => _Group; set { _Group = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Group")); } }
         public float LinearDamping { get => _LinearDamping; set { _LinearDamping = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LinearDamping")); } }
         public float AngularDamping { get => _AngularDamping; set { _AngularDamping = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AngularDamping")); } }
-        public float Unknown1 { get => _Unknown1; set { _Unknown1 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown1")); } }
         public float Friction { get => _Friction; set { _Friction = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Friction")); } }
-        public uint Unknown2 { get => _Unknown2; set { _Unknown2 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown2")); } }
+        public bool Awake { get => _Awake; set { _Awake = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Awake")); } }
         public bool Kinematic { get => _Kinematic; set { _Kinematic = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Kinematic")); } }
+        public List<UndertalePhysicsVertex> PhysicsVertices { get; private set; } = new List<UndertalePhysicsVertex>();
         public UndertalePointerList<UndertalePointerList<Event>> Events { get; private set; } = new UndertalePointerList<UndertalePointerList<Event>>();
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -95,10 +94,15 @@ namespace UndertaleModLib.Models
             writer.Write(Group);
             writer.Write(LinearDamping);
             writer.Write(AngularDamping);
-            writer.Write(Unknown1); // possible meaning: https://github.com/WarlockD/GMdsam/blob/26aefe3e90a7a7a1891cb83f468079546f32b4b7/GMdsam/GameMaker/ChunkTypes.cs#L553
+            writer.Write(PhysicsVertices.Count); // possible (now confirmed) meaning: https://github.com/WarlockD/GMdsam/blob/26aefe3e90a7a7a1891cb83f468079546f32b4b7/GMdsam/GameMaker/ChunkTypes.cs#L553
             writer.Write(Friction);
-            writer.Write(Unknown2);
+            writer.Write(Awake);
             writer.Write(Kinematic);
+            // Need to write these manually because the count is unfortunately separated
+            foreach (UndertalePhysicsVertex v in PhysicsVertices)
+            {
+                v.Serialize(writer);
+            }
             writer.WriteUndertaleObject(Events);
         }
 
@@ -117,7 +121,7 @@ namespace UndertaleModLib.Models
             }
             else
             {
-                if (parent < 0)
+                if (parent < 0 && parent != -1) // Technically can be -100 (undefined), -2 (other), or -1 (self). Other makes no sense here though
                     throw new Exception("Invalid value for parent - should be -100 or object id, got " + parent);
                 _ParentId.Unserialize(reader, parent);
             }
@@ -130,10 +134,17 @@ namespace UndertaleModLib.Models
             Group = reader.ReadUInt32();
             LinearDamping = reader.ReadSingle();
             AngularDamping = reader.ReadSingle();
-            Unknown1 = reader.ReadSingle();
+            int physicsShapeVertexCount = reader.ReadInt32();
             Friction = reader.ReadSingle();
-            Unknown2 = reader.ReadUInt32();
+            Awake = reader.ReadBoolean();
             Kinematic = reader.ReadBoolean();
+            // Needs to be done manually because count is separated
+            for (int i = 0; i < physicsShapeVertexCount; i++)
+            {
+                UndertalePhysicsVertex v = new UndertalePhysicsVertex();
+                v.Unserialize(reader);
+                PhysicsVertices.Add(v);
+            }
             Events = reader.ReadUndertaleObject<UndertalePointerList<UndertalePointerList<Event>>>();
         }
 
@@ -146,7 +157,7 @@ namespace UndertaleModLib.Models
             if (action == null)
             {
                 subtypeObj.Actions.Add(action = new EventAction());
-                action.Unknown8 = strg.MakeString("");
+                action.ActionName = strg.MakeString("");
             }
             UndertaleCode code = action.CodeId;
             if (code == null)
@@ -253,72 +264,95 @@ namespace UndertaleModLib.Models
             // but newer versions compile them down to GML bytecode anyway
             // Possible meaning of values: https://github.com/WarlockD/GMdsam/blob/26aefe3e90a7a7a1891cb83f468079546f32b4b7/GMdsam/GameMaker/ChunkTypes.cs#L466
 
-            private uint _Unknown1;
-            private uint _Unknown2;
-            private uint _Unknown3;
-            private uint _Unknown4;
-            private uint _Unknown5;
-            private uint _Unknown6;
-            private uint _Unknown7;
-            private UndertaleString _Unknown8;
+            private uint _LibID;
+            private uint _ID;
+            private uint _Kind;
+            private bool _UseRelative;
+            private bool _IsQuestion;
+            private bool _UseApplyTo;
+            private uint _ExeType;
+            private UndertaleString _ActionName;
             private UndertaleResourceById<UndertaleCode> _CodeId { get; } = new UndertaleResourceById<UndertaleCode>("CODE");
-            private uint _Unknown10;
-            private int _Unknown11;
-            private uint _Unknown12;
-            private uint _Unknown13;
-            private uint _Unknown14;
+            private uint _ArgumentCount;
+            private int _Who;
+            private bool _Relative;
+            private bool _IsNot;
+            private uint _UnknownAlwaysZero;
 
-            public uint Unknown1 { get => _Unknown1; set { _Unknown1 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown1")); } } // always 1
-            public uint Unknown2 { get => _Unknown2; set { _Unknown2 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown2")); } } // always 603
-            public uint Unknown3 { get => _Unknown3; set { _Unknown3 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown3")); } } // always 7
-            public uint Unknown4 { get => _Unknown4; set { _Unknown4 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown4")); } } // always 0
-            public uint Unknown5 { get => _Unknown5; set { _Unknown5 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown5")); } } // always 0
-            public uint Unknown6 { get => _Unknown6; set { _Unknown6 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown6")); } } // always 1
-            public uint Unknown7 { get => _Unknown7; set { _Unknown7 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown7")); } } // always 2
-            public UndertaleString Unknown8 { get => _Unknown8; set { _Unknown8 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown8")); } } // always ""
+            public uint LibID { get => _LibID; set { _LibID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LibID")); } } // always 1
+            public uint ID { get => _ID; set { _ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ID")); } } // always 603
+            public uint Kind { get => _Kind; set { _Kind = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Kind")); } } // always 7
+            public bool UseRelative { get => _UseRelative; set { _UseRelative = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UseRelative")); } } // always 0
+            public bool IsQuestion { get => _IsQuestion; set { _IsQuestion = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsQuestion")); } } // always 0
+            public bool UseApplyTo { get => _UseApplyTo; set { _UseApplyTo = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UseApplyTo")); } } // always 1
+            public uint ExeType { get => _ExeType; set { _ExeType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ExeType")); } } // always 2
+            public UndertaleString ActionName { get => _ActionName; set { _ActionName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ActionName")); } } // always ""
             public UndertaleCode CodeId { get => _CodeId.Resource; set { _CodeId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CodeId")); } }
-            public uint Unknown10 { get => _Unknown10; set { _Unknown10 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown10")); } } // always 1
-            public int Unknown11 { get => _Unknown11; set { _Unknown11 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown11")); } } // always -1
-            public uint Unknown12 { get => _Unknown12; set { _Unknown12 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown12")); } } // always 0
-            public uint Unknown13 { get => _Unknown13; set { _Unknown13 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown13")); } } // always 0
-            public uint Unknown14 { get => _Unknown14; set { _Unknown14 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown14")); } } // always 0
+            public uint ArgumentCount { get => _ArgumentCount; set { _ArgumentCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ArgumentCount")); } } // always 1
+            public int Who { get => _Who; set { _Who = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Who")); } } // always -1
+            public bool Relative { get => _Relative; set { _Relative = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Relative")); } } // always 0
+            public bool IsNot { get => _IsNot; set { _IsNot = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsNot")); } } // always 0
+            public uint UnknownAlwaysZero { get => _UnknownAlwaysZero; set { _UnknownAlwaysZero = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UnknownAlwaysZero")); } } // always 0
 
             public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {
-                writer.Write(Unknown1);
-                writer.Write(Unknown2);
-                writer.Write(Unknown3);
-                writer.Write(Unknown4);
-                writer.Write(Unknown5);
-                writer.Write(Unknown6);
-                writer.Write(Unknown7);
-                writer.WriteUndertaleString(Unknown8);
+                writer.Write(LibID);
+                writer.Write(ID);
+                writer.Write(Kind);
+                writer.Write(UseRelative);
+                writer.Write(IsQuestion);
+                writer.Write(UseApplyTo);
+                writer.Write(ExeType);
+                writer.WriteUndertaleString(ActionName);
                 writer.Write(_CodeId.Serialize(writer));
-                writer.Write(Unknown10);
-                writer.Write(Unknown11);
-                writer.Write(Unknown12);
-                writer.Write(Unknown13);
-                writer.Write(Unknown14);
+                writer.Write(ArgumentCount);
+                writer.Write(Who);
+                writer.Write(Relative);
+                writer.Write(IsNot);
+                writer.Write(UnknownAlwaysZero);
             }
 
             public void Unserialize(UndertaleReader reader)
             {
-                Unknown1 = reader.ReadUInt32();
-                Unknown2 = reader.ReadUInt32();
-                Unknown3 = reader.ReadUInt32();
-                Unknown4 = reader.ReadUInt32();
-                Unknown5 = reader.ReadUInt32();
-                Unknown6 = reader.ReadUInt32();
-                Unknown7 = reader.ReadUInt32();
-                Unknown8 = reader.ReadUndertaleString();
+                LibID = reader.ReadUInt32();
+                ID = reader.ReadUInt32();
+                Kind = reader.ReadUInt32();
+                UseRelative = reader.ReadBoolean();
+                IsQuestion = reader.ReadBoolean();
+                UseApplyTo = reader.ReadBoolean();
+                ExeType = reader.ReadUInt32();
+                ActionName = reader.ReadUndertaleString();
                 _CodeId.Unserialize(reader, reader.ReadInt32());
-                Unknown10 = reader.ReadUInt32();
-                Unknown11 = reader.ReadInt32();
-                Unknown12 = reader.ReadUInt32();
-                Unknown13 = reader.ReadUInt32();
-                Unknown14 = reader.ReadUInt32();
+                ArgumentCount = reader.ReadUInt32();
+                Who = reader.ReadInt32();
+                Relative = reader.ReadBoolean();
+                IsNot = reader.ReadBoolean();
+                UnknownAlwaysZero = reader.ReadUInt32();
+            }
+        }
+
+        public class UndertalePhysicsVertex : UndertaleObject, INotifyPropertyChanged
+        {
+            private float _X;
+            private float _Y;
+
+            public float X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
+            public float Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            public void Serialize(UndertaleWriter writer)
+            {
+                writer.Write(X);
+                writer.Write(Y);
+            }
+
+            public void Unserialize(UndertaleReader reader)
+            {
+                X = reader.ReadSingle();
+                Y = reader.ReadSingle();
             }
         }
     }
