@@ -57,14 +57,10 @@
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">HLSL9 fragment source</TextBlock>
         <local:UndertaleStringReference Grid.Row="7" Grid.Column="1" Margin="3" Height="40" ObjectReference="{Binding HLSL9_Fragment}"/>
 
-        <Border Grid.Row="8" Grid.Column="0" Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3">
-            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">NOTE: The vertex shader attributes editor is currently buggy and may not work as expected.</TextBlock>
-        </Border>
-        
-        <!-- TODO: Fix this editor -->
+        <!-- TODO: Fix this editor some more -->
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Vertex shader attributes</TextBlock>
-        <DataGrid Grid.Row="8" Grid.Column="1" Margin="3" ItemsSource="{Binding VertexShaderAttributes}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+        <DataGrid Grid.Row="8" Grid.Column="1" Margin="8" ItemsSource="{Binding VertexShaderAttributes}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -94,7 +90,7 @@
                 <DataGridTemplateColumn Header="Name" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <local:UndertaleStringReference Margin="3" ObjectReference="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}"/>
+                            <local:UndertaleStringReference Margin="20,0,0,0" ObjectReference="{Binding Path=., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

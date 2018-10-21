@@ -139,6 +139,7 @@
                     </TreeView.Resources>
                     <TreeViewItem Header="Data" IsExpanded="True">
                         <TreeViewItem Header="General info"/>
+                        <TreeViewItem Header="Global init"/>
                         <TreeViewItem Header="Sounds" ItemsSource="{Binding Sounds, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleSound}">
@@ -290,6 +291,10 @@
 
                             <DataTemplate DataType="{x:Type local:GeneralInfoEditor}">
                                 <local:UndertaleGeneralInfoEditor/>
+                            </DataTemplate>
+                            
+                            <DataTemplate DataType="{x:Type undertale:UndertaleGlobalInit}">
+                                <local:UndertaleGlobalInitEditor/>
                             </DataTemplate>
                             
                             <DataTemplate DataType="{x:Type undertale:UndertaleSound}">

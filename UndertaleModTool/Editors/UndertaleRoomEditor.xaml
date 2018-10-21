@@ -11,6 +11,8 @@
         <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
         <local:ColorConverter x:Key="ColorConverter"/>
         <local:SimplePointsDisplayConverter x:Key="SimplePointsDisplayConverter"/>
+        <local:ObjCenterXConverter x:Key="ObjCenterXConverter" />
+        <local:ObjCenterYConverter x:Key="ObjCenterYConverter" />
         <CompositeCollection x:Key="AllObjects">
             <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.Tiles}"/>
@@ -593,7 +595,10 @@
                                 </Style>
                             </Rectangle.Style>
                             <Rectangle.RenderTransform>
-                                <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
+                                <TransformGroup>
+                                    <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
+                                    <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}" CenterX="{Binding Converter={StaticResource ObjCenterXConverter}}" CenterY="{Binding Converter={StaticResource ObjCenterYConverter}}"/>
+                                </TransformGroup>
                                 <!-- TODO: X + TargetX? -->
                             </Rectangle.RenderTransform>
                             <Rectangle.Fill>

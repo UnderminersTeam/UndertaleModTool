@@ -374,8 +374,8 @@ namespace UndertaleModTool
                                                 possibleObjects.Add(data.Sounds[id]);
                                             if (id < data.Shaders.Count)
                                                 possibleObjects.Add(data.Shaders[id]);
-                                            if (id < data.Extensions.Count)
-                                                possibleObjects.Add(data.Extensions[id]);
+                                            // if (id < data.Extensions.Count)
+                                            //    possibleObjects.Add(data.Extensions[id]);
                                             if (id < data.Timelines.Count)
                                                 possibleObjects.Add(data.Timelines[id]);
 

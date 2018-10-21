@@ -19,7 +19,7 @@ namespace UndertaleModLib.Models
         private UndertaleString _GLSL_Fragment;
         private UndertaleString _HLSL9_Vertex;
         private UndertaleString _HLSL9_Fragment;
-        private List<UndertaleString> _VertexShaderAttributes;
+        private List<UndertaleString> _VertexShaderAttributes = new List<UndertaleString>();
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public ShaderType Type { get => _Type; set { _Type = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Type")); } }
