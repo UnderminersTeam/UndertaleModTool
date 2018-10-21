@@ -255,7 +255,7 @@ namespace UndertaleModTool
                     obj.ScaleY = other.ScaleY;
                     obj.Color = other.Color;
                     obj.Rotation = other.Rotation;
-                    obj.Unknown = other.Unknown;
+                    obj.PreCreateCode = other.PreCreateCode;
                     room.GameObjects.Add(obj);
                     SelectObject(obj);
                 }
