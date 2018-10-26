@@ -9,6 +9,25 @@ namespace UndertaleModLib.Models
 {
     public class UndertaleShader : UndertaleNamedResource, INotifyPropertyChanged
     {
+        public class VertexShaderAttribute : UndertaleObject, INotifyPropertyChanged
+        {
+            private UndertaleString _Name;
+
+            public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            public void Serialize(UndertaleWriter writer)
+            {
+                writer.WriteUndertaleString(Name);
+            }
+
+            public void Unserialize(UndertaleReader reader)
+            {
+                Name = reader.ReadUndertaleString();
+            }
+        }
+
         public uint _EntryEnd;
 
         private UndertaleString _Name;
@@ -19,7 +38,7 @@ namespace UndertaleModLib.Models
         private UndertaleString _GLSL_Fragment;
         private UndertaleString _HLSL9_Vertex;
         private UndertaleString _HLSL9_Fragment;
-        private List<UndertaleString> _VertexShaderAttributes = new List<UndertaleString>();
+        private UndertaleSimpleList<VertexShaderAttribute> _VertexShaderAttributes = new UndertaleSimpleList<VertexShaderAttribute>();
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public ShaderType Type { get => _Type; set { _Type = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Type")); } }
@@ -40,8 +59,7 @@ namespace UndertaleModLib.Models
         public UndertaleRawShaderData Cg_PS3_VertexData;
         public UndertaleRawShaderData Cg_PS3_PixelData;
 
-        // Unfortunately SimpleList does not support string serialization... (need to do it manually)
-        public List<UndertaleString> VertexShaderAttributes { get => _VertexShaderAttributes; set { _VertexShaderAttributes = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("VertexAttributes")); } }
+        public UndertaleSimpleList<VertexShaderAttribute> VertexShaderAttributes { get => _VertexShaderAttributes; set { _VertexShaderAttributes = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("VertexAttributes")); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -94,12 +112,7 @@ namespace UndertaleModLib.Models
             HLSL11_VertexData.Serialize(writer, false);
             HLSL11_PixelData.Serialize(writer, false);
 
-            // Need to serialize the array manually: UndertaleString has special serialization needs
-            writer.Write(VertexShaderAttributes.Count);
-            for (int i = 0; i < VertexShaderAttributes.Count; i++)
-            {
-                writer.WriteUndertaleString(VertexShaderAttributes[i]);
-            }
+            writer.WriteUndertaleObject(VertexShaderAttributes);
 
             writer.Write((int)2);
 
@@ -178,14 +191,7 @@ namespace UndertaleModLib.Models
             HLSL11_VertexData.Unserialize(reader, false);
             HLSL11_PixelData.Unserialize(reader, false);
 
-            // Need to parse the Array/SimpleList manually here because UndertaleString
-            // has a special serialization
-            int count = reader.ReadInt32();
-            VertexShaderAttributes = new List<UndertaleString>(count);
-            for (int i = 0; i < count; i++)
-            {
-                VertexShaderAttributes.Add(reader.ReadUndertaleString());
-            }
+            VertexShaderAttributes = reader.ReadUndertaleObject<UndertaleSimpleList<VertexShaderAttribute>>();
 
             if (reader.ReadInt32() != 2)
                 throw new UndertaleSerializationException("Value in shader should be 2 at all times");

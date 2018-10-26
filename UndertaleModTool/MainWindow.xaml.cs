@@ -223,25 +223,36 @@ namespace UndertaleModTool
             if (e.NewValue is TreeViewItem)
             {
                 string item = (e.NewValue as TreeViewItem)?.Header?.ToString();
-                if (item == "General info" && Data != null)
-                {
-                    Highlighted = new GeneralInfoEditor(Data?.GeneralInfo, Data?.Options, Data?.Language);
-                }
-                else if (item == "Data")
+
+                if (item == "Data")
                 {
                     Highlighted = new DescriptionView("Welcome to UndertaleModTool!", Data != null ? "Double click on the items on the left to view them" : "Open data.win file to get started");
+                    return;
                 }
-                else if (item == "Code locals (unused?)")
+
+                if (Data == null)
                 {
-                    Highlighted = new DescriptionView(item, Data != null ? "This seems to be unused as far as I can tell - you can remove the whole list and nothing happens" : "Load data.win file first");
+                    Highlighted = new DescriptionView(item, "Load data.win file first");
+                    return;
                 }
-                else if (item == "Variables")
+
+                switch (item)
                 {
-                    Highlighted = Data != null ? (object)Data.FORM.Chunks["VARI"] : new DescriptionView(item, "Load data.win file first");
-                }
-                else
-                {
-                    Highlighted = new DescriptionView(item, Data != null ? "Expand the list on the left to edit items" : "Load data.win file first");
+                    case "General info":
+                        Highlighted = new GeneralInfoEditor(Data?.GeneralInfo, Data?.Options, Data?.Language);
+                        break;
+                    case "Global init":
+                        Highlighted = new GlobalInitEditor(Data?.GlobalInitScripts);
+                        break;
+                    case "Code locals (unused?)":
+                        Highlighted = new DescriptionView(item, "This seems to be unused as far as I can tell - you can remove the whole list and nothing happens");
+                        break;
+                    case "Variables":
+                        Highlighted = (object)Data.FORM.Chunks["VARI"];
+                        break;
+                    default:
+                        Highlighted = new DescriptionView(item, "Expand the list on the left to edit items");
+                        break;
                 }
             }
             else
@@ -814,6 +825,16 @@ namespace UndertaleModTool
             this.GeneralInfo = generalInfo;
             this.Options = options;
             this.Language = language;
+        }
+    }
+
+    public class GlobalInitEditor
+    {
+        public IList<UndertaleGlobalInit> GlobalInits { get; private set; }
+
+        public GlobalInitEditor(IList<UndertaleGlobalInit> globalInits)
+        {
+            this.GlobalInits = globalInits;
         }
     }
 

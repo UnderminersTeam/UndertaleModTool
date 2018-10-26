@@ -293,7 +293,7 @@
                                 <local:UndertaleGeneralInfoEditor/>
                             </DataTemplate>
                             
-                            <DataTemplate DataType="{x:Type undertale:UndertaleGlobalInit}">
+                            <DataTemplate DataType="{x:Type local:GlobalInitEditor}">
                                 <local:UndertaleGlobalInitEditor/>
                             </DataTemplate>
                             
