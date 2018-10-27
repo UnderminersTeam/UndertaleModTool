@@ -54,6 +54,21 @@ namespace UndertaleModLib
         {
             Chunks.Clear();
             uint startPos = reader.Position;
+
+            // First, find the last chunk in the file because of padding changes
+            string lastChunk = "";
+            while (reader.Position < reader.BaseStream.Length)
+            {
+                lastChunk = new string(reader.ReadChars(4));
+                uint length = reader.ReadUInt32();
+                reader.Position += length;
+                while (reader.Position < reader.BaseStream.Length && reader.Position % 16 != 0)
+                    reader.ReadByte();
+            }
+            reader.LastChunkName = lastChunk;
+            reader.Position = startPos;
+
+            // Now, parse the chunks
             while (reader.Position < startPos + Length)
             {
                 UndertaleChunk chunk = reader.ReadUndertaleChunk();
@@ -85,6 +100,31 @@ namespace UndertaleModLib
     public class UndertaleChunkEXTN : UndertaleListChunk<UndertaleExtension>
     {
         public override string Name => "EXTN";
+        public List<byte[]> productIdData;
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            base.UnserializeChunk(reader);
+
+            // Strange data for each extension, some kind of unique identifier based on
+            // the product ID for each of them
+            productIdData = new List<byte[]>();
+            for (int i = 0; i < List.Count; i++)
+            {
+                productIdData.Add(reader.ReadBytes(16));
+            }
+        }
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            base.SerializeChunk(writer);
+
+            // (read above comment)
+            foreach (byte[] data in productIdData)
+            {
+                writer.Write(data);
+            }
+        }
     }
 
     public class UndertaleChunkSOND : UndertaleListChunk<UndertaleSound>
