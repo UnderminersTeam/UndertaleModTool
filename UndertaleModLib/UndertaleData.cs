@@ -42,6 +42,8 @@ namespace UndertaleModLib
         public IList<UndertaleEmbeddedTexture> EmbeddedTextures => FORM.TXTR?.List;
         public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO?.List;
 
+        public bool UnsupportedBytecodeVersion = false;
+
         public static UndertaleData CreateNew()
         {
             UndertaleData data = new UndertaleData();

@@ -304,6 +304,8 @@ namespace UndertaleModLib
         {
             if (Length == 0)
                 throw new Exception("This game uses YYC (YoYo Compiler). This is currently not supported.");
+            if (reader.undertaleData.UnsupportedBytecodeVersion)
+                return;
             uint startPosition = reader.Position;
             InstanceVarCount = reader.ReadUInt32();
             InstanceVarCountAgain = reader.ReadUInt32();
@@ -333,6 +335,8 @@ namespace UndertaleModLib
         {
             if (Length == 0)
                 throw new Exception("This game uses YYC (YoYo Compiler). This is currently not supported.");
+            if (reader.undertaleData.UnsupportedBytecodeVersion)
+                return;
             Functions = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleFunction>>();
             CodeLocals = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleCodeLocals>>();
         }

@@ -288,6 +288,8 @@ namespace UndertaleModLib.Models
             /// </summary>
             public static void ParseReferenceChain(UndertaleReader reader, T obj)
             {
+                if (reader.undertaleData.UnsupportedBytecodeVersion)
+                    return;
                 Reference<T> reference = null;
                 uint addr = reader.GetAddressForUndertaleObject(obj.FirstAddress);
                 for (int i = 0; i < obj.Occurrences; i++)
@@ -728,21 +730,27 @@ namespace UndertaleModLib.Models
         {
             Name = reader.ReadUndertaleString();
             Length = reader.ReadUInt32();
-            LocalsCount = reader.ReadUInt32();
-            int BytecodeRelativeAddress = reader.ReadInt32();
-            _BytecodeAbsoluteAddress = (uint)((int)reader.Position - 4 + BytecodeRelativeAddress);
-            uint here = reader.Position;
-            reader.Position = _BytecodeAbsoluteAddress;
-            Instructions.Clear();
-            while (reader.Position < _BytecodeAbsoluteAddress + Length)
+            if (reader.undertaleData.UnsupportedBytecodeVersion && reader.undertaleData.GeneralInfo.BytecodeVersion < 15)
             {
-                uint a = (reader.Position - _BytecodeAbsoluteAddress) / 4;
-                UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
-                instr.Address = a;
-                Instructions.Add(instr);
+                reader.ReadBytes((int)Length);
+            } else
+            {
+                LocalsCount = reader.ReadUInt32();
+                int BytecodeRelativeAddress = reader.ReadInt32();
+                _BytecodeAbsoluteAddress = (uint)((int)reader.Position - 4 + BytecodeRelativeAddress);
+                uint here = reader.Position;
+                reader.Position = _BytecodeAbsoluteAddress;
+                Instructions.Clear();
+                while (reader.Position < _BytecodeAbsoluteAddress + Length)
+                {
+                    uint a = (reader.Position - _BytecodeAbsoluteAddress) / 4;
+                    UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
+                    instr.Address = a;
+                    Instructions.Add(instr);
+                }
+                reader.Position = here;
+                UnknownProbablyZero = reader.ReadUInt32();
             }
-            reader.Position = here;
-            UnknownProbablyZero = reader.ReadUInt32();
         }
 
         public void UpdateAddresses()
@@ -777,6 +785,10 @@ namespace UndertaleModLib.Models
 
         public string GenerateLocalVarDefinitions(IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
         {
+            // Detection for if the code is not disassembled
+            if (locals == null)
+                return "Code failed to disassemble- likely due to unsupported bytecode version.";
+
             StringBuilder sb = new StringBuilder();
 
             var referenced = FindReferencedLocalVars();
