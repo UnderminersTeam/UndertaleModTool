@@ -62,8 +62,6 @@ namespace UndertaleModLib
                 lastChunk = new string(reader.ReadChars(4));
                 uint length = reader.ReadUInt32();
                 reader.Position += length;
-                while (reader.Position < reader.BaseStream.Length && reader.Position % 16 != 0)
-                    reader.ReadByte();
             }
             reader.LastChunkName = lastChunk;
             reader.Position = startPos;
