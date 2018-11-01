@@ -7,10 +7,45 @@
 		     xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
 		     xmlns:undertaleModels="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleData}">
-    <Grid>
-        <Border Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3">
-            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">TODO: Make this Global Init Script editor</TextBlock>
-        </Border>
-    </Grid>
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance local:GlobalInitEditor}">
+    <StackPanel>
+        <TextBlock Text="Global initialization scripts" FontWeight="Bold"/>
+        <Separator/>
+        <DataGrid Grid.Row="20" Grid.Column="1" Margin="3" ItemsSource="{Binding GlobalInits}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
+            <DataGrid.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                <Style TargetType="{x:Type DataGridCell}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                <Grid Background="{TemplateBinding Background}">
+                                    <ContentPresenter VerticalAlignment="Center" />
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Code, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertaleModels:UndertaleCode}" CanRemove="False"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </StackPanel>
 </UserControl>
