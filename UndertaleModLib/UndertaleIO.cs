@@ -49,7 +49,10 @@ namespace UndertaleModLib
             }
             else
             {
-                CachedId = -1;
+                if (ResourceChunkType == "AGRP")
+                    CachedId = 0;
+                else
+                    CachedId = -1;
             }
             return CachedId;
         }
@@ -65,6 +68,11 @@ namespace UndertaleModLib
         public void PostUnserialize(UndertaleReader reader)
         {
             IList<T> list = ((UndertaleListChunk<T>)reader.undertaleData.FORM.Chunks[ResourceChunkType]).List;
+            if (ResourceChunkType == "AGRP" && CachedId == 0 && list.Count == 0) // I won't even ask why this works like that
+            {
+                Resource = default(T);
+                return;
+            }
             if (CachedId >= list.Count)
             {
                 reader.SubmitWarning("Invalid value for resource ID of type " + ResourceChunkType + ": " + CachedId + " (there are only " + list.Count + ")");

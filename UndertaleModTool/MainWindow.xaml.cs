@@ -168,9 +168,9 @@ namespace UndertaleModTool
                         {
                             CanSave = true;
                         }
-                        if (data.GeneralInfo.Major >= 2)
+                        if (data.GeneralInfo?.Major >= 2)
                         {
-                            MessageBox.Show("Game Maker: Studio 2 game loaded! I just hacked this together quickly for the Nintendo Switch release of Undertale, so some things may be broken. Saving should work, but not all editors have the new data. Expect a release with fixes soon!", "GMS2 game loaded", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            MessageBox.Show("Game Maker: Studio 2 game loaded! I just hacked this together quickly for the Nintendo Switch release of Undertale. Most things work, but some editors don't display all the data.", "GMS2 game loaded", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
                         this.Data = data;
                         this.FilePath = filename;

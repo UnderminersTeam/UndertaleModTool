@@ -45,10 +45,10 @@
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Pitch</TextBlock>
         <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Pitch}"/>
 
-        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Group ID (?)</TextBlock>
-        <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GroupID}"/>
+        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Audio group</TextBlock>
+        <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding AudioGroup}" ObjectType="{x:Type undertale:UndertaleAudioGroup}"/>
 
-        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Embedded audio</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding AudioID}" ObjectType="{x:Type undertale:UndertaleEmbeddedAudio}"/>
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Audio file</TextBlock>
+        <local:AudioFileReference Grid.Row="8" Grid.Column="1" Margin="3" AudioReference="{Binding AudioFile}" GroupReference="{Binding AudioGroup}" AudioID="{Binding AudioID}" GroupID="{Binding GroupID}"/>
     </Grid>
 </UserControl>

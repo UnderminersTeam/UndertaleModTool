@@ -194,6 +194,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\AudioFileReference.xaml.cs">
+      <DependentUpon>AudioFileReference.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ColorPicker.xaml.cs">
       <DependentUpon>ColorPicker.xaml</DependentUpon>
     </Compile>
@@ -206,6 +209,9 @@
     <Compile Include="Converters\MaskImageConverter.cs" />
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Converters\RectConverter.cs" />
+    <Compile Include="Editors\UndertaleAudioGroupEditor.xaml.cs">
+      <DependentUpon>UndertaleAudioGroupEditor.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Editors\UndertaleExtensionEditor.xaml.cs">
       <DependentUpon>UndertaleExtensionEditor.xaml</DependentUpon>
     </Compile>
@@ -320,7 +326,15 @@
     <None Include="SampleScripts\TTFFonts.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Include="Controls\AudioFileReference.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\ColorPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editors\UndertaleAudioGroupEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

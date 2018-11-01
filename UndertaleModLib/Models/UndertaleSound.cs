@@ -24,8 +24,8 @@ namespace UndertaleModLib.Models
         private uint _Unknown = 0;
         private float _Volume = 1;
         private float _Pitch = 0;
-        private uint _GroupID = 0;
-        private UndertaleResourceById<UndertaleEmbeddedAudio> _AudioID { get; } = new UndertaleResourceById<UndertaleEmbeddedAudio>("AUDO");
+        private UndertaleResourceById<UndertaleAudioGroup> _AudioGroup { get; } = new UndertaleResourceById<UndertaleAudioGroup>("AGRP");
+        private UndertaleResourceById<UndertaleEmbeddedAudio> _AudioFile { get; } = new UndertaleResourceById<UndertaleEmbeddedAudio>("AUDO");
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public AudioEntryFlags Flags { get => _Flags; set { _Flags = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Flags")); } }
@@ -34,8 +34,10 @@ namespace UndertaleModLib.Models
         public uint Unknown { get => _Unknown; set { _Unknown = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown")); } }
         public float Volume { get => _Volume; set { _Volume = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Volume")); } }
         public float Pitch { get => _Pitch; set { _Pitch = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Pitch")); } }
-        public uint GroupID { get => _GroupID; set { _GroupID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GroupID")); } } // ID of audio group in AGRP, seems to be always 0 and AGRP is totally empty
-        public UndertaleEmbeddedAudio AudioID { get => _AudioID.Resource; set { _AudioID.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AudioID")); } }
+        public UndertaleAudioGroup AudioGroup { get => _AudioGroup.Resource; set { _AudioGroup.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AudioGroup")); } }
+        public UndertaleEmbeddedAudio AudioFile { get => _AudioFile.Resource; set { _AudioFile.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AudioFile")); } }
+        public int AudioID { get => _AudioFile.CachedId; set { _AudioFile.CachedId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AudioID")); } }
+        public int GroupID { get => _AudioGroup.CachedId; set { _AudioGroup.CachedId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GroupID")); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -48,8 +50,11 @@ namespace UndertaleModLib.Models
             writer.Write(Unknown);
             writer.Write(Volume);
             writer.Write(Pitch);
-            writer.Write(GroupID);
-            writer.Write(_AudioID.Serialize(writer));
+            writer.Write(_AudioGroup.Serialize(writer));
+            if (GroupID == 0)
+                writer.Write(_AudioFile.Serialize(writer));
+            else
+                writer.Write(_AudioFile.CachedId);
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -61,8 +66,11 @@ namespace UndertaleModLib.Models
             Unknown = reader.ReadUInt32();
             Volume = reader.ReadSingle();
             Pitch = reader.ReadSingle();
-            GroupID = reader.ReadUInt32();
-            _AudioID.Unserialize(reader, reader.ReadInt32());
+            _AudioGroup.Unserialize(reader, reader.ReadInt32());
+            if (GroupID == 0)
+                _AudioFile.Unserialize(reader, reader.ReadInt32());
+            else
+                _AudioFile.CachedId = reader.ReadInt32();
         }
 
         public override string ToString()
@@ -70,11 +78,13 @@ namespace UndertaleModLib.Models
             return Name.Content + " (" + GetType().Name + ")";
         }
     }
-
-    // Unused, but was documented for some reason
-    public class UndertaleAudioGroup : UndertaleObject
+    
+    public class UndertaleAudioGroup : INotifyPropertyChanged, UndertaleNamedResource
     {
-        public UndertaleString Name { get; set; }
+        private UndertaleString _Name;
+        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {

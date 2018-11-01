@@ -16,7 +16,6 @@ namespace UndertaleModLib
         public UndertaleLanguage Language => FORM.LANG?.Object;
         public IList<UndertaleExtension> Extensions => FORM.EXTN?.List;
         public IList<UndertaleSound> Sounds => FORM.SOND?.List;
-        [Obsolete("Unused")]
         public IList<UndertaleAudioGroup> AudioGroups => FORM.AGRP?.List;
         public IList<UndertaleSprite> Sprites => FORM.SPRT?.List;
         public IList<UndertaleBackground> Backgrounds => FORM.BGND?.List;
