@@ -8,7 +8,8 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleTimeline}">
     <Grid>
-        <!-- TODO: Make this editor. -->
-        <Label>Timeline editor TODO</Label>
+        <Border Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3">
+            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">TODO: Make this Timeline editor</TextBlock>
+        </Border>
     </Grid>
 </UserControl>

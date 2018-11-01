@@ -57,8 +57,6 @@
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">HLSL9 fragment source</TextBlock>
         <local:UndertaleStringReference Grid.Row="7" Grid.Column="1" Margin="3" Height="40" ObjectReference="{Binding HLSL9_Fragment}"/>
 
-        <!-- TODO: Fix this editor some more -->
-
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Vertex shader attributes</TextBlock>
         <DataGrid Grid.Row="8" Grid.Column="1" Margin="3" ItemsSource="{Binding VertexShaderAttributes}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Resources>
