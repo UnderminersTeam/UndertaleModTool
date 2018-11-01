@@ -257,17 +257,62 @@
             <TextBlock Grid.Row="18" Grid.Column="0" Margin="3">Angular damping</TextBlock>
             <TextBox Grid.Row="18" Grid.Column="1" Margin="3" Text="{Binding AngularDamping}"/>
 
-            <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Unknown</TextBlock>
-            <TextBox Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding Unknown1}"/>
+            <!--TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Physics shape vertex count</>
+            <TextBox Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding PhysicsShapeVertexCount}"/-->
 
-            <TextBlock Grid.Row="20" Grid.Column="0" Margin="3">Friction</TextBlock>
-            <TextBox Grid.Row="20" Grid.Column="1" Margin="3" Text="{Binding Friction}"/>
+            <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Friction</TextBlock>
+            <TextBox Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding Friction}"/>
 
-            <TextBlock Grid.Row="21" Grid.Column="0" Margin="3">Unknown</TextBlock>
-            <TextBox Grid.Row="21" Grid.Column="1" Margin="3" Text="{Binding Unknown2}"/>
+            <TextBlock Grid.Row="20" Grid.Column="0" Margin="3">Is awake</TextBlock>
+            <CheckBox Grid.Row="20" Grid.Column="1" Margin="3" IsChecked="{Binding Awake}"/>
 
-            <TextBlock Grid.Row="22" Grid.Column="0" Margin="3">Is kinematic</TextBlock>
-            <CheckBox Grid.Row="22" Grid.Column="1" Margin="3" IsChecked="{Binding Kinematic}"/>
+            <TextBlock Grid.Row="21" Grid.Column="0" Margin="3">Is kinematic</TextBlock>
+            <CheckBox Grid.Row="21" Grid.Column="1" Margin="3" IsChecked="{Binding Kinematic}"/>
+
+            <TextBlock Grid.Row="22" Grid.Column="0" Margin="3">Physics shape vertices</TextBlock>
+            <DataGrid Grid.Row="22" Grid.Column="1" Margin="3" ItemsSource="{Binding PhysicsVertices}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+                <DataGrid.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                    <Style TargetType="{x:Type DataGridCell}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                    <Grid Background="{TemplateBinding Background}">
+                                        <ContentPresenter VerticalAlignment="Center" />
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="X" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Y" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
 
             <Separator Grid.Row="23" Grid.Column="0" Grid.ColumnSpan="2"/>
         </Grid>

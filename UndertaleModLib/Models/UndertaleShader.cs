@@ -3,23 +3,52 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace UndertaleModLib.Models
 {
-    // TODO: INotifyPropertyChanged and other cleaning
-    public class UndertaleShader : UndertaleObject
+    public class UndertaleShader : UndertaleNamedResource, INotifyPropertyChanged
     {
+        public class VertexShaderAttribute : UndertaleObject, INotifyPropertyChanged
+        {
+            private UndertaleString _Name;
+
+            public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            public void Serialize(UndertaleWriter writer)
+            {
+                writer.WriteUndertaleString(Name);
+            }
+
+            public void Unserialize(UndertaleReader reader)
+            {
+                Name = reader.ReadUndertaleString();
+            }
+        }
+
         public uint _EntryEnd;
 
-        public UndertaleString Name;
-        public ShaderType Type;
-        
-        public UndertaleString GLSL_ES_Vertex;
-        public UndertaleString GLSL_ES_Fragment;
-        public UndertaleString GLSL_Vertex;
-        public UndertaleString GLSL_Fragment;
-        public UndertaleString HLSL9_Vertex;
-        public UndertaleString HLSL9_Fragment;
+        private UndertaleString _Name;
+        private ShaderType _Type;
+        private UndertaleString _GLSL_ES_Vertex;
+        private UndertaleString _GLSL_ES_Fragment;
+        private UndertaleString _GLSL_Vertex;
+        private UndertaleString _GLSL_Fragment;
+        private UndertaleString _HLSL9_Vertex;
+        private UndertaleString _HLSL9_Fragment;
+        private UndertaleSimpleList<VertexShaderAttribute> _VertexShaderAttributes = new UndertaleSimpleList<VertexShaderAttribute>();
+
+        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+        public ShaderType Type { get => _Type; set { _Type = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Type")); } }
+
+        public UndertaleString GLSL_ES_Vertex { get => _GLSL_ES_Vertex; set { _GLSL_ES_Vertex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GLSL_ES_Vertex")); } }
+        public UndertaleString GLSL_ES_Fragment { get => _GLSL_ES_Fragment; set { _GLSL_ES_Fragment = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GLSL_ES_Fragment")); } }
+        public UndertaleString GLSL_Vertex { get => _GLSL_Vertex; set { _GLSL_Vertex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GLSL_Vertex")); } }
+        public UndertaleString GLSL_Fragment { get => _GLSL_Fragment; set { _GLSL_Fragment = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GLSL_Fragment")); } }
+        public UndertaleString HLSL9_Vertex { get => _HLSL9_Vertex; set { _HLSL9_Vertex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("HLSL9_Vertex")); } }
+        public UndertaleString HLSL9_Fragment { get => _HLSL9_Fragment; set { _HLSL9_Fragment = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("HLSL9_Fragment")); } }
 
         public UndertaleRawShaderData HLSL11_VertexData;
         public UndertaleRawShaderData HLSL11_PixelData;
@@ -30,8 +59,9 @@ namespace UndertaleModLib.Models
         public UndertaleRawShaderData Cg_PS3_VertexData;
         public UndertaleRawShaderData Cg_PS3_PixelData;
 
-        // Unfortunately SimpleList does not support string serialization... (need to do it manually)
-        public List<UndertaleString> VertexShaderAttributes;
+        public UndertaleSimpleList<VertexShaderAttribute> VertexShaderAttributes { get => _VertexShaderAttributes; set { _VertexShaderAttributes = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("VertexAttributes")); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public UndertaleShader()
         {
@@ -43,6 +73,11 @@ namespace UndertaleModLib.Models
             Cg_PixelData = new UndertaleRawShaderData();
             Cg_PS3_VertexData = new UndertaleRawShaderData();
             Cg_PS3_PixelData = new UndertaleRawShaderData();
+        }
+
+        public override string ToString()
+        {
+            return Name.Content + " (" + GetType().Name + ")";
         }
 
         private void WritePadding(UndertaleWriter writer, int amount)
@@ -65,7 +100,7 @@ namespace UndertaleModLib.Models
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
-            writer.Write((uint)Type);
+            writer.Write((uint)Type | 0x80000000u); // in big-endian?
 
             writer.WriteUndertaleString(GLSL_ES_Vertex);
             writer.WriteUndertaleString(GLSL_ES_Fragment);
@@ -77,12 +112,7 @@ namespace UndertaleModLib.Models
             HLSL11_VertexData.Serialize(writer, false);
             HLSL11_PixelData.Serialize(writer, false);
 
-            // Need to serialize the array manually: UndertaleString has special serialization needs
-            writer.Write(VertexShaderAttributes.Count);
-            for (int i = 0; i < VertexShaderAttributes.Count; i++)
-            {
-                writer.WriteUndertaleString(VertexShaderAttributes[i]);
-            }
+            writer.WriteUndertaleObject(VertexShaderAttributes);
 
             writer.Write((int)2);
 
@@ -149,7 +179,7 @@ namespace UndertaleModLib.Models
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
-            Type = (ShaderType)reader.ReadUInt32();
+            Type = (ShaderType)(reader.ReadUInt32() & 0x7FFFFFFFu); // in big endian?
 
             GLSL_ES_Vertex = reader.ReadUndertaleString();
             GLSL_ES_Fragment = reader.ReadUndertaleString();
@@ -161,14 +191,7 @@ namespace UndertaleModLib.Models
             HLSL11_VertexData.Unserialize(reader, false);
             HLSL11_PixelData.Unserialize(reader, false);
 
-            // Need to parse the Array/SimpleList manually here because UndertaleString
-            // has a special serialization
-            int count = reader.ReadInt32();
-            VertexShaderAttributes = new List<UndertaleString>(count);
-            for (int i = 0; i < count; i++)
-            {
-                VertexShaderAttributes.Add(reader.ReadUndertaleString());
-            }
+            VertexShaderAttributes = reader.ReadUndertaleObject<UndertaleSimpleList<VertexShaderAttribute>>();
 
             if (reader.ReadInt32() != 2)
                 throw new UndertaleSerializationException("Value in shader should be 2 at all times");
@@ -287,15 +310,16 @@ namespace UndertaleModLib.Models
 
         // The "unknown" types are actually known, but what they correspond to is unknown.
         // They are PSSL (PlayStation Shader Language), Cg, and Cg_PS3 (for PS3 seemingly)
+        // This enum is not the direct value in the file
         public enum ShaderType : uint
         {
-            GLSL_ES = 0x01000080,
-            GLSL = 0x02000080,
-            Unknown1 = 0x03000080,
-            HLSL = 0x04000080,
-            Unknown2 = 0x05000080,
-            Unknown3 = 0x06000080,
-            Unknown4 = 0x07000080
+            GLSL_ES = 1,
+            GLSL = 2,
+            Unknown1 = 3,
+            HLSL = 4,
+            Unknown2 = 5,
+            Unknown3 = 6,
+            Unknown4 = 7
         }
 
         public class UndertaleRawShaderData

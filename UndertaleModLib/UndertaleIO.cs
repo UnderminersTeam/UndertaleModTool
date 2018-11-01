@@ -88,6 +88,8 @@ namespace UndertaleModLib
             set { BaseStream.Seek((int)value, SeekOrigin.Begin); }
         }
 
+        public string LastChunkName;
+
         public UndertaleChunk ReadUndertaleChunk()
         {
             return UndertaleChunk.Unserialize(this);
@@ -249,6 +251,8 @@ namespace UndertaleModLib
     {
         internal UndertaleData undertaleData;
 
+        public string LastChunkName;
+
         public UndertaleWriter(Stream output) : base(output)
         {
         }
@@ -272,6 +276,11 @@ namespace UndertaleModLib
         public void WriteUndertaleData(UndertaleData data)
         {
             undertaleData = data;
+            // Figure out the last chunk by iterating identically as it does when serializing
+            foreach (var chunk in data.FORM.Chunks)
+            {
+                LastChunkName = chunk.Key;
+            }
             Write(data.FORM);
         }
 

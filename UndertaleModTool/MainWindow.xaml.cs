@@ -49,6 +49,9 @@ namespace UndertaleModTool
 
         public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
 
+        private bool _CanSave = false;
+        public bool CanSave { get { return _CanSave; } private set { _CanSave = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CanSave")); } }
+
         // TODO: extract the scripting interface into a separate class
 
         public MainWindow()
@@ -60,6 +63,8 @@ namespace UndertaleModTool
             SelectionHistory.Clear();
 
             Title = "UndertaleModTool by krzys_h v" + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
+
+            CanSave = false;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -71,6 +76,8 @@ namespace UndertaleModTool
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsGMS2"));
             ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P"));
             SelectionHistory.Clear();
+
+            CanSave = true;
         }
 
         private async Task<bool> DoOpenDialog()
@@ -110,7 +117,8 @@ namespace UndertaleModTool
 
         private void Command_Save(object sender, ExecutedRoutedEventArgs e)
         {
-            DoSaveDialog();
+            if (CanSave)
+                DoSaveDialog();
         }
 
         private void Command_Close(object sender, ExecutedRoutedEventArgs e)
@@ -145,6 +153,14 @@ namespace UndertaleModTool
                         {
                             MessageBox.Show("Game Maker: Studio 2 game loaded! I just hacked this together quickly for the Nintendo Switch release of Undertale, so some things may be broken. Saving should work, but not all editors have the new data. Expect a release with fixes soon!", "GMS2 game loaded", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
+                        if (data.UnsupportedBytecodeVersion)
+                        {
+                            MessageBox.Show("Only bytecode versions 15 and 16 are supported for now, you are trying to load " + data.GeneralInfo.BytecodeVersion + ". A lot of code is disabled and will likely break something. Saving/exporting is disabled.", "Unsupported bytecode version", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            CanSave = false;
+                        } else
+                        {
+                            CanSave = true;
+                        }
                         this.Data = data;
                         this.FilePath = filename;
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
@@ -161,8 +177,8 @@ namespace UndertaleModTool
 
         private async Task SaveFile(string filename)
         {
-            if (Data == null)
-                return; // TODO: lock save button
+            if (Data == null || Data.UnsupportedBytecodeVersion)
+                return;
 
             if (IsGMS2 == Visibility.Visible)
             {
@@ -223,25 +239,36 @@ namespace UndertaleModTool
             if (e.NewValue is TreeViewItem)
             {
                 string item = (e.NewValue as TreeViewItem)?.Header?.ToString();
-                if (item == "General info" && Data != null)
-                {
-                    Highlighted = new GeneralInfoEditor(Data?.GeneralInfo, Data?.Options, Data?.Language);
-                }
-                else if (item == "Data")
+
+                if (item == "Data")
                 {
                     Highlighted = new DescriptionView("Welcome to UndertaleModTool!", Data != null ? "Double click on the items on the left to view them" : "Open data.win file to get started");
+                    return;
                 }
-                else if (item == "Code locals (unused?)")
+
+                if (Data == null)
                 {
-                    Highlighted = new DescriptionView(item, Data != null ? "This seems to be unused as far as I can tell - you can remove the whole list and nothing happens" : "Load data.win file first");
+                    Highlighted = new DescriptionView(item, "Load data.win file first");
+                    return;
                 }
-                else if (item == "Variables")
+
+                switch (item)
                 {
-                    Highlighted = Data != null ? (object)Data.FORM.Chunks["VARI"] : new DescriptionView(item, "Load data.win file first");
-                }
-                else
-                {
-                    Highlighted = new DescriptionView(item, Data != null ? "Expand the list on the left to edit items" : "Load data.win file first");
+                    case "General info":
+                        Highlighted = new GeneralInfoEditor(Data?.GeneralInfo, Data?.Options, Data?.Language);
+                        break;
+                    case "Global init":
+                        Highlighted = new GlobalInitEditor(Data?.GlobalInitScripts);
+                        break;
+                    case "Code locals (unused?)":
+                        Highlighted = new DescriptionView(item, "This seems to be unused as far as I can tell - you can remove the whole list and nothing happens");
+                        break;
+                    case "Variables":
+                        Highlighted = (object)Data.FORM.Chunks["VARI"];
+                        break;
+                    default:
+                        Highlighted = new DescriptionView(item, "Expand the list on the left to edit items");
+                        break;
                 }
             }
             else
@@ -814,6 +841,16 @@ namespace UndertaleModTool
             this.GeneralInfo = generalInfo;
             this.Options = options;
             this.Language = language;
+        }
+    }
+
+    public class GlobalInitEditor
+    {
+        public IList<UndertaleGlobalInit> GlobalInits { get; private set; }
+
+        public GlobalInitEditor(IList<UndertaleGlobalInit> globalInits)
+        {
+            this.GlobalInits = globalInits;
         }
     }
 

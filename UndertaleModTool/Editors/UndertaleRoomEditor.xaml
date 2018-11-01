@@ -11,6 +11,8 @@
         <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
         <local:ColorConverter x:Key="ColorConverter"/>
         <local:SimplePointsDisplayConverter x:Key="SimplePointsDisplayConverter"/>
+        <local:ObjCenterXConverter x:Key="ObjCenterXConverter" />
+        <local:ObjCenterYConverter x:Key="ObjCenterYConverter" />
         <CompositeCollection x:Key="AllObjects">
             <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.Tiles}"/>
@@ -78,8 +80,8 @@
             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Draw background color</TextBlock>
             <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding DrawBackgroundColor}"/>
 
-            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Unknown</TextBlock>
-            <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding Unknown}"/>
+            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Creation Code</TextBlock>
+            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding CreationCodeId}" ObjectType="{x:Type undertale:UndertaleCode}"/>
 
             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Flags</TextBlock>
             <TextBox Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding Flags}"/>
@@ -361,8 +363,8 @@
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Rotation</TextBlock>
                             <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Rotation}"/>
 
-                            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Unknown</TextBlock>
-                            <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding Unknown}"/>
+                            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Pre Create code</TextBlock>
+                            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding PreCreateCode}" ObjectType="{x:Type undertale:UndertaleCode}"/>
                         </Grid>
                     </DataTemplate>
 
@@ -593,7 +595,10 @@
                                 </Style>
                             </Rectangle.Style>
                             <Rectangle.RenderTransform>
-                                <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
+                                <TransformGroup>
+                                    <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
+                                    <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}" CenterX="{Binding Converter={StaticResource ObjCenterXConverter}}" CenterY="{Binding Converter={StaticResource ObjCenterYConverter}}"/>
+                                </TransformGroup>
                                 <!-- TODO: X + TargetX? -->
                             </Rectangle.RenderTransform>
                             <Rectangle.Fill>

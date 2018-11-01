@@ -29,7 +29,7 @@ namespace UndertaleModLib
                 lenWriter.FromHere();
                 SerializeChunk(writer);
                 
-                if (Name != "FORM" && Name != "AUDO") // TODO: needs a better way to detect last chunk
+                if (Name != "FORM" && Name != writer.LastChunkName)
                 {
                     UndertaleGeneralInfo generalInfo = Name == "GEN8" ? ((UndertaleChunkGEN8)this).Object : writer.undertaleData?.GeneralInfo;
                     // These versions introduced new padding
@@ -83,7 +83,7 @@ namespace UndertaleModLib
                 var lenReader = reader.EnsureLengthFromHere(chunk.Length);
                 chunk.UnserializeChunk(reader);
 
-                if (name != "FORM" && name != "AUDO") // TODO: needs a better way to detect last chunk
+                if (name != "FORM" && name != reader.LastChunkName)
                 {
                     UndertaleGeneralInfo generalInfo = name == "GEN8" ? ((UndertaleChunkGEN8)chunk).Object : reader.undertaleData.GeneralInfo;
                     // These versions introduced new padding

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -253,7 +255,7 @@ namespace UndertaleModTool
                     obj.ScaleY = other.ScaleY;
                     obj.Color = other.Color;
                     obj.Rotation = other.Rotation;
-                    obj.Unknown = other.Unknown;
+                    obj.PreCreateCode = other.PreCreateCode;
                     room.GameObjects.Add(obj);
                     SelectObject(obj);
                 }
@@ -277,6 +279,44 @@ namespace UndertaleModTool
                     SelectObject(obj);
                 }
             }
+        }
+    }
+
+    [ValueConversion(typeof(ObservableCollection<UndertaleRoom.GameObject>), typeof(int))]
+    public class ObjCenterXConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            UndertaleRoom.GameObject obj = value as UndertaleRoom.GameObject;
+            if (obj == null)
+                return 0;
+            if (obj.ObjectDefinition == null || obj.ObjectDefinition.Sprite == null)
+                return obj.X;
+            return (obj.X + (obj.ObjectDefinition.Sprite.OriginX * obj.ScaleX));
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    [ValueConversion(typeof(ObservableCollection<UndertaleRoom.GameObject>), typeof(int))]
+    public class ObjCenterYConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            UndertaleRoom.GameObject obj = value as UndertaleRoom.GameObject;
+            if (obj == null)
+                return 0;
+            if (obj.ObjectDefinition == null || obj.ObjectDefinition.Sprite == null)
+                return obj.Y;
+            return (obj.Y + (obj.ObjectDefinition.Sprite.OriginY * obj.ScaleY));
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

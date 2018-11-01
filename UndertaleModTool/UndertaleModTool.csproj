@@ -206,6 +206,15 @@
     <Compile Include="Converters\MaskImageConverter.cs" />
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Converters\RectConverter.cs" />
+    <Compile Include="Editors\UndertaleExtensionEditor.xaml.cs">
+      <DependentUpon>UndertaleExtensionEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editors\UndertaleGlobalInitEditor.xaml.cs">
+      <DependentUpon>UndertaleGlobalInitEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editors\UndertaleShaderEditor.xaml.cs">
+      <DependentUpon>UndertaleShaderEditor.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Editors\UndertaleStringEditor.xaml.cs">
       <DependentUpon>UndertaleStringEditor.xaml</DependentUpon>
     </Compile>
@@ -214,6 +223,9 @@
     </Compile>
     <Compile Include="Editors\UndertaleFunctionEditor.xaml.cs">
       <DependentUpon>UndertaleFunctionEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editors\UndertaleTimelineEditor.xaml.cs">
+      <DependentUpon>UndertaleTimelineEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="Editors\UndertaleVariableChunkEditor.xaml.cs">
       <DependentUpon>UndertaleVariableChunkEditor.xaml</DependentUpon>
@@ -312,6 +324,18 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Editors\UndertaleExtensionEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editors\UndertaleGlobalInitEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editors\UndertaleShaderEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Editors\UndertaleStringEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -321,6 +345,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Editors\UndertaleFunctionEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editors\UndertaleTimelineEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

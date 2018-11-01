@@ -23,10 +23,8 @@ namespace UndertaleModLib
         public IList<UndertalePath> Paths => FORM.PATH?.List;
         public IList<UndertaleScript> Scripts => FORM.SCPT?.List;
         public IList<UndertaleGlobalInit> GlobalInitScripts => FORM.GLOB?.List;
-        [Obsolete("Unused")]
         public IList<UndertaleShader> Shaders => FORM.SHDR?.List;
         public IList<UndertaleFont> Fonts => FORM.FONT?.List;
-        [Obsolete("Unused")]
         public IList<UndertaleTimeline> Timelines => FORM.TMLN?.List;
         public IList<UndertaleGameObject> GameObjects => FORM.OBJT?.List;
         public IList<UndertaleRoom> Rooms => FORM.ROOM?.List;
@@ -43,6 +41,8 @@ namespace UndertaleModLib
         public IList<UndertaleString> Strings => FORM.STRG?.List;
         public IList<UndertaleEmbeddedTexture> EmbeddedTextures => FORM.TXTR?.List;
         public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO?.List;
+
+        public bool UnsupportedBytecodeVersion = false;
 
         public static UndertaleData CreateNew()
         {
