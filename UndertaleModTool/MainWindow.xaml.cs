@@ -193,7 +193,7 @@ namespace UndertaleModTool
 
             if (IsGMS2 == Visibility.Visible)
             {
-                MessageBox.Show("This is not yet tested and may break. You have been warned.", "GMS2 game", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("This is not yet fully stable and may break. You have been warned.", "GMS2 game", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
 
             LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
