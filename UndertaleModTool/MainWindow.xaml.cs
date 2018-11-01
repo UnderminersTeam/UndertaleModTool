@@ -85,7 +85,7 @@ namespace UndertaleModTool
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.DefaultExt = "win";
-            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios)|*.win;*.unx;*.ios|All files|*";
+            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, audiogroup*.dat)|*.win;*.unx;*.ios;audiogroup*.dat|All files|*";
 
             if (dlg.ShowDialog() == true)
             {
@@ -99,7 +99,7 @@ namespace UndertaleModTool
             SaveFileDialog dlg = new SaveFileDialog();
 
             dlg.DefaultExt = "win";
-            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios)|*.win;*.unx;*.ios|All files|*";
+            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, audiogroup*.dat)|*.win;*.unx;*.ios;audiogroup*.dat|All files|*";
             dlg.FileName = FilePath;
 
             if (dlg.ShowDialog() == true)
