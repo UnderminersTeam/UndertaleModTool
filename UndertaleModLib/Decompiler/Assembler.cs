@@ -125,7 +125,7 @@ namespace UndertaleModLib.Decompiler
 
                     UndertaleFunction func = funcs.ByName(match.Groups[1].Value);
                     if (func == null)
-                        throw new Exception("Function not found");
+                        throw new Exception("Function not found: " + match.Groups[1].Value);
                     instr.Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = func };
                     instr.ArgumentsCount = UInt16.Parse(match.Groups[2].Value);
                     line = "";

@@ -4,6 +4,8 @@ EnsureDataLoaded();
 
 ScriptMessage("Show room name and ID in debug mode\nby krzys_h");
 
+Data.Functions.EnsureDefined("room_get_name", Data.Strings); // required for Deltarune
+
 var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings, Data.Code, Data.CodeLocals);
 
 code.Append(Assembler.Assemble(@"
