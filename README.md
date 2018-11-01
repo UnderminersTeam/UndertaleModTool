@@ -17,6 +17,7 @@ heya. I heard you like digging deep into Undertale data so I made a tool just fo
 * All core IO functionality extracted into a library for use in external tools
 * Can generate an .yydebug file for the GM:S debugger so that you can edit variables live [EXPERIMENTAL]
 * Partial GM:S 2 support. Loading and saving should work fine, although not all editors are updated yet. Should work with the latest Nintendo Switch release of Undertale.
+* Supports [DELTARUNE](https://www.deltarune.com/) too!
 
 ### Included scripts
 I also included some of my test scripts. They are:
