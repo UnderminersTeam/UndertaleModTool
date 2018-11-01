@@ -424,7 +424,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
-        internal static void DecompileFromBlock(Block block, List<TempVarReference> tempvars)
+        internal static void DecompileFromBlock(Block block, List<TempVarReference> tempvars, Stack<Tuple<Block, List<TempVarReference>>> workQueue)
         {
             if (block.TempVarsOnEntry != null && (block.nextBlockTrue != null || block.nextBlockFalse != null)) // TODO: RET breaks it?
             {
@@ -644,15 +644,21 @@ namespace UndertaleModLib.Decompiler
             leftovers.Reverse();
 
             block.Statements = statements;
-            if (block.nextBlockTrue != null)
-                DecompileFromBlock(block.nextBlockTrue, leftovers);
             if (block.nextBlockFalse != null)
-                DecompileFromBlock(block.nextBlockFalse, leftovers);
+                workQueue.Push(new Tuple<Block, List<TempVarReference>>(block.nextBlockFalse, leftovers));
+            if (block.nextBlockTrue != null)
+                workQueue.Push(new Tuple<Block, List<TempVarReference>>(block.nextBlockTrue, leftovers));
         }
 
         public static void DecompileFromBlock(Block block)
         {
-            DecompileFromBlock(block, new List<TempVarReference>());
+            Stack<Tuple<Block, List<TempVarReference>>> workQueue = new Stack<Tuple<Block, List<TempVarReference>>>();
+            workQueue.Push(new Tuple<Block, List<TempVarReference>>(block, new List<TempVarReference>()));
+            while(workQueue.Count > 0)
+            {
+                var item = workQueue.Pop();
+                DecompileFromBlock(item.Item1, item.Item2, workQueue);
+            }
         }
 
         public static Dictionary<uint, Block> DecompileFlowGraph(UndertaleCode code)
