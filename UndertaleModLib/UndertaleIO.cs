@@ -66,7 +66,10 @@ namespace UndertaleModLib
         {
             IList<T> list = ((UndertaleListChunk<T>)reader.undertaleData.FORM.Chunks[ResourceChunkType]).List;
             if (CachedId >= list.Count)
-                throw new IOException("Invalid value for resource ID of type " + ResourceChunkType + ": " + CachedId + " (there are only " + list.Count + ")");
+            {
+                reader.SubmitWarning("Invalid value for resource ID of type " + ResourceChunkType + ": " + CachedId + " (there are only " + list.Count + ")");
+                return;
+            }
             Resource = CachedId >= 0 ? list[CachedId] : default(T);
         }
 
@@ -78,8 +81,21 @@ namespace UndertaleModLib
 
     public class UndertaleReader : BinaryReader
     {
-        public UndertaleReader(Stream input) : base(input)
+        public delegate void WarningHandlerDelegate(string warning);
+        private WarningHandlerDelegate WarningHandler;
+
+        public UndertaleReader(Stream input, WarningHandlerDelegate warningHandler = null) : base(input)
         {
+            this.WarningHandler = warningHandler;
+        }
+
+        // TODO: This would be more useful if it reported location like the exceptions did
+        public void SubmitWarning(string warning)
+        {
+            if (WarningHandler != null)
+                WarningHandler.Invoke(warning);
+            else
+                throw new IOException(warning);
         }
 
         public uint Position
@@ -419,9 +435,9 @@ namespace UndertaleModLib
 
     public static class UndertaleIO
     {
-        public static UndertaleData Read(Stream stream)
+        public static UndertaleData Read(Stream stream, UndertaleReader.WarningHandlerDelegate warningHandler = null)
         {
-            UndertaleReader reader = new UndertaleReader(stream);
+            UndertaleReader reader = new UndertaleReader(stream, warningHandler);
             return reader.ReadUndertaleData();
         }
 

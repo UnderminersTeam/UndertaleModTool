@@ -132,12 +132,17 @@ namespace UndertaleModTool
             dialog.Owner = this;
             Task t = Task.Run(() =>
             {
+                bool hadWarnings = false;
                 UndertaleData data = null;
                 try
                 {
                     using (var stream = new FileStream(filename, FileMode.Open))
                     {
-                        data = UndertaleIO.Read(stream);
+                        data = UndertaleIO.Read(stream, warning =>
+                        {
+                            MessageBox.Show(warning, "Loading warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            hadWarnings = true;
+                        });
                     }
                 }
                 catch (Exception e)
@@ -149,17 +154,23 @@ namespace UndertaleModTool
                 {
                     if (data != null)
                     {
-                        if (data.GeneralInfo.Major >= 2)
-                        {
-                            MessageBox.Show("Game Maker: Studio 2 game loaded! I just hacked this together quickly for the Nintendo Switch release of Undertale, so some things may be broken. Saving should work, but not all editors have the new data. Expect a release with fixes soon!", "GMS2 game loaded", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        }
                         if (data.UnsupportedBytecodeVersion)
                         {
                             MessageBox.Show("Only bytecode versions 15 and 16 are supported for now, you are trying to load " + data.GeneralInfo.BytecodeVersion + ". A lot of code is disabled and will likely break something. Saving/exporting is disabled.", "Unsupported bytecode version", MessageBoxButton.OK, MessageBoxImage.Warning);
                             CanSave = false;
-                        } else
+                        }
+                        else if (hadWarnings)
+                        {
+                            MessageBox.Show("Warnings occurred during loading. Saving has been disabled.", "Saving disabled", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            CanSave = false;
+                        }
+                        else
                         {
                             CanSave = true;
+                        }
+                        if (data.GeneralInfo.Major >= 2)
+                        {
+                            MessageBox.Show("Game Maker: Studio 2 game loaded! I just hacked this together quickly for the Nintendo Switch release of Undertale, so some things may be broken. Saving should work, but not all editors have the new data. Expect a release with fixes soon!", "GMS2 game loaded", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
                         this.Data = data;
                         this.FilePath = filename;
