@@ -313,7 +313,7 @@ namespace UndertaleModLib.Decompiler
                 varobj = vars.Where((x) => x.Name.Content == str && x.InstanceType == realinstance).FirstOrDefault();
             }
             if (varobj == null)
-                throw new Exception("Bad variable!");
+                throw new Exception("Bad variable: " + realinstance.ToString().ToLower() + "." + str);
             return new UndertaleInstruction.Reference<UndertaleVariable>(varobj, type);
         }
     }
