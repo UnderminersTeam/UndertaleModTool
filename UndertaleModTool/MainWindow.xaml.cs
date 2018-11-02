@@ -52,6 +52,8 @@ namespace UndertaleModTool
         private bool _CanSave = false;
         public bool CanSave { get { return _CanSave; } private set { _CanSave = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CanSave")); } }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         // TODO: extract the scripting interface into a separate class
 
         public MainWindow()
@@ -67,7 +69,18 @@ namespace UndertaleModTool
             CanSave = false;
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            var args = Environment.GetCommandLineArgs();
+            if (args.Length > 1)
+            {
+                var fileName = args[1];
+                if (File.Exists(fileName))
+                {
+                    await LoadFile(fileName);
+                }
+            }
+        }
 
         private void Command_New(object sender, ExecutedRoutedEventArgs e)
         {

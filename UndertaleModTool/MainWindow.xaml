@@ -9,7 +9,7 @@
         xmlns:scol="clr-namespace:System.Collections;assembly=mscorlib" 
         xmlns:cmod="clr-namespace:System.ComponentModel;assembly=WindowsBase" 
         mc:Ignorable="d"
-        Title="UndertaleModTool" Height="450" Width="800">
+        Title="UndertaleModTool" Height="450" Width="800" Loaded="Window_Loaded">
     <Window.Resources>
         <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
         <local:FilteredViewConverter x:Key="FilteredViewConverter" Filter="{Binding Text, Source={x:Reference SearchBox}, UpdateSourceTrigger=PropertyChanged}"/>
