@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -80,11 +81,77 @@ namespace UndertaleModTool
                     await LoadFile(fileName);
                 }
             }
+            if (args.Length > 2)
+            {
+                ListenChildConnection(args[2]);
+            }
+        }
+
+        public Dictionary<string, NamedPipeServerStream> childFiles = new Dictionary<string, NamedPipeServerStream>();
+
+        public void OpenChildFile(string filename, string chunkName, int itemIndex)
+        {
+            if (childFiles.ContainsKey(filename))
+            {
+                try
+                {
+                    StreamWriter existingwriter = new StreamWriter(childFiles[filename]);
+                    existingwriter.WriteLine(chunkName + ":" + itemIndex);
+                    existingwriter.Flush();
+                    return;
+                }
+                catch(IOException e)
+                {
+                    Debug.WriteLine(e);
+                    childFiles.Remove(filename);
+                }
+            }
+            
+            string key = Guid.NewGuid().ToString();
+
+            string dir = System.IO.Path.GetDirectoryName(FilePath);
+            Process.Start(System.Reflection.Assembly.GetExecutingAssembly().Location, "\"" + System.IO.Path.Combine(dir, filename) + "\" " + key);
+
+            var server = new NamedPipeServerStream(key);
+            server.WaitForConnection();
+            childFiles.Add(filename, server);
+
+            StreamWriter writer = new StreamWriter(childFiles[filename]);
+            writer.WriteLine(chunkName + ":" + itemIndex);
+            writer.Flush();
+        }
+
+        public void CloseChildFiles()
+        {
+            foreach(var pair in childFiles)
+            {
+                pair.Value.Close();
+            }
+            childFiles.Clear();
+        }
+
+        public async Task ListenChildConnection(string key)
+        {
+            var client = new NamedPipeClientStream(key);
+            client.Connect();
+            StreamReader reader = new StreamReader(client);
+            
+            while (true)
+            {
+                string[] thingToOpen = (await reader.ReadLineAsync()).Split(':');
+                if (thingToOpen.Length != 2)
+                    throw new Exception("ummmmm");
+                if (thingToOpen[0] != "AUDO") // Just pretend I'm not hacking it together that poorly
+                    throw new Exception("errrrr");
+                ChangeSelection(Data.EmbeddedAudio[Int32.Parse(thingToOpen[1])]);
+                Activate();
+            }
         }
 
         private void Command_New(object sender, ExecutedRoutedEventArgs e)
         {
             Data = UndertaleData.CreateNew();
+            CloseChildFiles();
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsGMS2"));
             ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P"));
@@ -185,6 +252,8 @@ namespace UndertaleModTool
                         {
                             MessageBox.Show("Game Maker: Studio 2 game loaded! I just hacked this together quickly for the Nintendo Switch release of Undertale. Most things work, but some editors don't display all the data.", "GMS2 game loaded", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
+                        if (System.IO.Path.GetDirectoryName(FilePath) != System.IO.Path.GetDirectoryName(filename))
+                            CloseChildFiles();
                         this.Data = data;
                         this.FilePath = filename;
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
@@ -212,6 +281,8 @@ namespace UndertaleModTool
             LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
             dialog.Owner = this;
             FilePath = filename;
+            if (System.IO.Path.GetDirectoryName(FilePath) != System.IO.Path.GetDirectoryName(filename))
+                CloseChildFiles();
 
             DebugDataMode debugMode = DebugDataMode.NoDebug;
             if (!Data.GeneralInfo.DisableDebugger) // TODO: I think the game itself can also use the .yydebug file on crash reports

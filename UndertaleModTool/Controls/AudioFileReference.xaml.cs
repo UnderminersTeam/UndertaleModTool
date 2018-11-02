@@ -92,8 +92,7 @@ namespace UndertaleModTool
         {
             if (GroupID != 0 && AudioID != -1)
             {
-                // TODO
-                MessageBox.Show("Directly opening references from auxiliary data files is not supported yet, sorry. You will have to look in audiogroup" + GroupID + ".dat manually");
+                (Application.Current.MainWindow as MainWindow).OpenChildFile("audiogroup" + GroupID + ".dat", "AUDO", AudioID);
                 return;
             }
 
