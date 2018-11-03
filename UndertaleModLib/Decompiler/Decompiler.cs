@@ -770,8 +770,10 @@ namespace UndertaleModLib.Decompiler
                 }
                 else if (instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit)
                 {
-                    currentBlock.nextBlockTrue = finalBlock;
-                    currentBlock.nextBlockFalse = finalBlock;
+                    Block nextBlock = GetBlock(instr.Address + 1);
+                    currentBlock.conditionalExit = false;
+                    currentBlock.nextBlockTrue = nextBlock;
+                    currentBlock.nextBlockFalse = nextBlock;
                     currentBlock = null;
                 }
             }
@@ -1056,7 +1058,7 @@ namespace UndertaleModLib.Decompiler
             }
         }*/
 
-        private static BlockHLStatement HLDecompileBlocks(ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, Block currentLoop = null, bool decompileTheLoop = false, Block stopAt = null)
+        private static BlockHLStatement HLDecompileBlocks(ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, List<Block> alreadyVisited, Block currentLoop = null, bool decompileTheLoop = false, Block stopAt = null)
         {
             BlockHLStatement output = new BlockHLStatement();
             while(block != stopAt && block != null)
@@ -1065,7 +1067,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     if (block != currentLoop)
                     {
-                        output.Statements.Add(new LoopHLStatement() { Block = HLDecompileBlocks(ref block, blocks, loops, reverseDominators, block, true, null) });
+                        output.Statements.Add(new LoopHLStatement() { Block = HLDecompileBlocks(ref block, blocks, loops, reverseDominators, alreadyVisited, block, true, null) });
                         continue;
                     }
                     else
@@ -1083,6 +1085,22 @@ namespace UndertaleModLib.Decompiler
                 }
 
                 //output.Statements.Add(new CommentStatement("At block " + block.Address));
+                if (alreadyVisited.Contains(block))
+                {
+                    if (block.Statements.Count == 1 && block.Statements[0] is TempVarAssigmentStatement)
+                    {
+                        // TODO: This is to be expected for now, multi-level ifs are not handled well...
+                    }
+                    else
+                    {
+                        // TODO: Just silence this for now, it also happens of do..while loops which are not handled well either
+                        //output.Statements.Add(new CommentStatement("DECOMPILER BUG!!! Visited block " + block.Address + " multiple times"));
+                    }
+                }
+                else
+                {
+                    alreadyVisited.Add(block);
+                }
                 foreach (var stmt in block.Statements)
                     if (!(stmt is PushEnvStatement) && !(stmt is PopEnvStatement))
                         output.Statements.Add(stmt);
@@ -1095,7 +1113,7 @@ namespace UndertaleModLib.Decompiler
                     output.Statements.Add(new WithHLStatement()
                     {
                         NewEnv = stmt.NewEnv,
-                        Block = HLDecompileBlocks(ref block, blocks, loops, reverseDominators, currentLoop, false, stopAt)
+                        Block = HLDecompileBlocks(ref block, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, stopAt)
                     });
                     if (block == null)
                         break;
@@ -1114,8 +1132,8 @@ namespace UndertaleModLib.Decompiler
                     IfHLStatement cond = new IfHLStatement();
                     cond.condition = block.ConditionStatement;
                     Block blTrue = block.nextBlockTrue, blFalse = block.nextBlockFalse;
-                    cond.trueBlock = HLDecompileBlocks(ref blTrue, blocks, loops, reverseDominators, currentLoop, false, meetPoint);
-                    cond.falseBlock = HLDecompileBlocks(ref blFalse, blocks, loops, reverseDominators, currentLoop, false, meetPoint);
+                    cond.trueBlock = HLDecompileBlocks(ref blTrue, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint);
+                    cond.falseBlock = HLDecompileBlocks(ref blFalse, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint);
                     output.Statements.Add(cond);
 
                     block = meetPoint;
@@ -1139,7 +1157,7 @@ namespace UndertaleModLib.Decompiler
             }*/
             var reverseDominators = ComputeDominators(blocks, rootExitPoint, true);
             Block bl = entryPoint;
-            return HLDecompileBlocks(ref bl, blocks, loops, reverseDominators).Statements;
+            return HLDecompileBlocks(ref bl, blocks, loops, reverseDominators, new List<Block>()).Statements;
         }
 
         public static string Decompile(UndertaleCode code)
