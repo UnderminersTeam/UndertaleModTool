@@ -33,7 +33,7 @@ I also included some of my test scripts. They are:
 ### Bug reports, contributing
 All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is my current list of stuff that needs to be worked on:
 * Discover meaning of the new stuff in GML2 file format so that editors can be updated
-* Add support for missing chunks so that more games other than Undertale can be loaded: Timelines and Shaders
+* Add missing chunk editors for Timelines and Extensions
 * Finish writing the decompiler:
   * add support for resolving resource types (requires propagating information from builtin function calls backwards, possibly across different code fragments)
   * decompile other loop types than just while(true)
