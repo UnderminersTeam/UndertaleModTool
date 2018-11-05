@@ -251,6 +251,7 @@
     <None Include="SampleScripts\DeltaHATE.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="SampleScripts\DeltaMILK.csx" />
     <None Include="SampleScripts\EnableDebug.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
