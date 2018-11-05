@@ -57,6 +57,8 @@ for (int i = 0; i < Data.Sprites.Count; i++)
     var sprite = Data.Sprites[i];
     if (sprite.Name.Content.StartsWith("bg_"))
         continue;
+    if (sprite.Name.Content.StartsWith("spr_kris"))
+        continue; // Sorry but corrypting Kris makes it kinda unplayable
     if (sprite.Width < 50 && sprite.Height < 50)
         tiny.Add(i);
     else if (sprite.Width < 50 && sprite.Height < 100)
