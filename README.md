@@ -22,18 +22,18 @@ heya. I heard you like digging deep into Undertale data so I made a tool just fo
 ### Included scripts
 I also included some of my test scripts. They are:
 * Universal:
-** EnableDebug: does just that, makes the global variable 'debug' be enabled at game start. If you don't know about Undertale's debug mode, check out https://tcrf.net/Undertale/Debug_Mode
-** DebugToggler: similar to the above, but instead toggles the debug mode on and off with F12
-** GoToRoom: Replaces the debug mode functionality of the F3 button with a dialog that lets you jump to any room by ID
-** ShowRoomName: Displays the current room name and ID on screen in debug mode
+  * EnableDebug: does just that, makes the global variable 'debug' be enabled at game start. If you don't know about Undertale's debug mode, check out https://tcrf.net/Undertale/Debug_Mode
+  * DebugToggler: similar to the above, but instead toggles the debug mode on and off with F12
+  * GoToRoom: Replaces the debug mode functionality of the F3 button with a dialog that lets you jump to any room by ID
+  * ShowRoomName: Displays the current room name and ID on screen in debug mode
 * Undertale only:
-** BorderEnabler: lets you import the PlayStation exclusive borders into the PC version and patches all version checks so that they display properly
-** testing: nothing important, just displays random text on the main menu - the first script I ever made
-** TTFFonts: Makes the game load fonts in TTF format from current directory instead of using the spritesheet fonts. You will need to track down all the font files yourself, I can't host them here for licensing reasons :(
-** RoomOfDetermination: Adds a new room to Undertale 1.08. I wanted to add something more to it but never got around to it, so I guess I'm releasing it as is. Just start the game and you'll see. Probably the most complete sample of adding stuff you'll find.
+  * BorderEnabler: lets you import the PlayStation exclusive borders into the PC version and patches all version checks so that they display properly
+  * testing: nothing important, just displays random text on the main menu - the first script I ever made
+  * TTFFonts: Makes the game load fonts in TTF format from current directory instead of using the spritesheet fonts. You will need to track down all the font files yourself, I can't host them here for licensing reasons :(
+  * RoomOfDetermination: Adds a new room to Undertale 1.08. I wanted to add something more to it but never got around to it, so I guess I'm releasing it as is. Just start the game and you'll see. Probably the most complete sample of adding stuff you'll find.
 * Deltarune only:
-** DeltaHATE: [HATE](https://www.reddit.com/r/Undertale/comments/41lb16/hate_the_undertale_corruptor/)-inspired script for corrupting Deltarune
-** DeltaMILK: Replaces every non-background sprite with the K.Round healing milk. Don't ask why.
+  * DeltaHATE: [HATE](https://www.reddit.com/r/Undertale/comments/41lb16/hate_the_undertale_corruptor/)-inspired script for corrupting Deltarune
+  * DeltaMILK: Replaces every non-background sprite with the K.Round healing milk. Don't ask why.
 
 ### Bug reports, contributing
 All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is my current list of stuff that needs to be worked on:
