@@ -251,7 +251,9 @@
     <None Include="SampleScripts\DeltaHATE.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="SampleScripts\DeltaMILK.csx" />
+    <None Include="SampleScripts\DeltaMILK.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="SampleScripts\EnableDebug.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -333,6 +335,9 @@
     <Compile Include="Editors\UndertaleTexturePageItemEditor.xaml.cs">
       <DependentUpon>UndertaleTexturePageItemEditor.xaml</DependentUpon>
     </Compile>
+    <None Include="SampleScripts\TheWholeWorldRevolving.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="SampleScripts\TTFFonts.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
