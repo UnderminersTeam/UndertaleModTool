@@ -12,26 +12,21 @@ using UndertaleModLib.DebugData;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 
-// C:\Users\krzys\AppData\Roaming\GameMaker-Studio\GMDebug\GMDebug.exe -d=data.yydebug -t="127.0.0.1" -tp=6502 -p="C:\Users\krzys\Documents\GameMaker\Projects\Project4.gmx\Project4.project.gmx"
-
 namespace Test
 {
     class Program
     {
         static void Main(string[] args)
         {
-            UndertaleData data = UndertaleIO.Read(new FileStream(@"C:\Program Files (x86)\Steam\steamapps\common\undertale\data.win", FileMode.Open));
+            UndertaleData data = UndertaleIO.Read(new FileStream(@"deltarune\data.win", FileMode.Open));
 
-            //UndertaleIO.Write(new FileStream("newdata.win", FileMode.Create), data);
-
-            UndertaleDebugData debug = DebugDataGenerator.GenerateDebugData(data, DebugDataMode.Decompiled);
-            using (FileStream stream = new FileStream("data.yydebug", FileMode.Create))
+            foreach(var code in data.Code)
             {
-                using (UndertaleWriter writer = new UndertaleWriter(stream))
-                {
-                    debug.FORM.Serialize(writer);
-                }
+                Debug.WriteLine(code.Name.Content);
+                code.Replace(Assembler.Assemble(code.Disassemble(data.Variables, data.CodeLocals.For(code)), data.Functions, data.Variables, data.Strings));
             }
+
+            UndertaleIO.Write(new FileStream(@"deltarune\newdata.win", FileMode.Create), data);
         }
     }
 }

@@ -117,6 +117,84 @@ namespace UndertaleModLib.Models
             }
         }
 
+        public static int CalculateStackDiff(UndertaleInstruction instr)
+        {
+            switch (instr.Kind)
+            {
+                case Opcode.Neg:
+                case Opcode.Not:
+                    return 0;
+
+                case Opcode.Dup:
+                    return 1 + instr.DupExtra;
+
+                case Opcode.Ret:
+                    return -1;
+
+                case Opcode.Exit:
+                    return 0;
+
+                case Opcode.Popz:
+                    return -1;
+
+                case Opcode.Conv:
+                    return 0;
+
+                case Opcode.Mul:
+                case Opcode.Div:
+                case Opcode.Rem:
+                case Opcode.Mod:
+                case Opcode.Add:
+                case Opcode.Sub:
+                case Opcode.And:
+                case Opcode.Or:
+                case Opcode.Xor:
+                case Opcode.Shl:
+                case Opcode.Shr:
+                case Opcode.Cmp:
+                    return -2 + 1;
+
+                case Opcode.B:
+                    return 0;
+                case Opcode.Bt:
+                case Opcode.Bf:
+                case Opcode.PushEnv:
+                    return -1;
+                case Opcode.PopEnv:
+                    return 0;
+
+                case Opcode.Pop:
+                    if (instr.Destination.Type == VariableType.StackTop)
+                        return -1 - 1;
+                    if (instr.Destination.Type == VariableType.Array)
+                        return -1 - 2;
+                    return -1;
+
+                case Opcode.Push:
+                case Opcode.PushLoc:
+                case Opcode.PushGlb:
+                case Opcode.PushVar:
+                case Opcode.PushI:
+                    if (instr.Value is Reference<UndertaleVariable>)
+                    {
+                        if ((instr.Value as Reference<UndertaleVariable>).Type == VariableType.StackTop)
+                            return 1 - 1;
+                        if ((instr.Value as Reference<UndertaleVariable>).Type == VariableType.Array)
+                            return 1 - 2;
+                    }
+                    return 1;
+
+                case Opcode.Call:
+                    return -instr.ArgumentsCount + 1;
+
+                case Opcode.Break:
+                    return 0;
+
+                default:
+                    throw new IOException("Unknown opcode " + instr.Kind.ToString().ToUpper());
+            }
+        }
+
         public enum DataType : byte
         {
             Double,
