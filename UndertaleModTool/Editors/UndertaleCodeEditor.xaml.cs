@@ -334,6 +334,11 @@ namespace UndertaleModTool
                                             mw.ChangeSelection(mw.Data.Strings[Int32.Parse(token.Substring(1))]);
                                         };
                                     }
+                                    else if (dataa.ByName(token) != null)
+                                    {
+                                        par.Inlines.Add(new Run(token) { Foreground = assetBrush, Cursor = Cursors.Hand });
+                                        par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(dataa.ByName(token));
+                                    }
                                     else if (funcs.ContainsKey(token))
                                     {
                                         par.Inlines.Add(new Run(token) { Foreground = funcBrush, Cursor = Cursors.Hand });
@@ -347,11 +352,6 @@ namespace UndertaleModTool
                                                     usedObjects.Add(id, (Application.Current.MainWindow as MainWindow).Data.Strings[gettext[id]]);
                                             }
                                         }
-                                    }
-                                    else if (dataa.ByName(token) != null)
-                                    {
-                                        par.Inlines.Add(new Run(token) { Foreground = assetBrush, Cursor = Cursors.Hand });
-                                        par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(dataa.ByName(token));
                                     }
                                     else if (Char.IsDigit(token[0]))
                                     {

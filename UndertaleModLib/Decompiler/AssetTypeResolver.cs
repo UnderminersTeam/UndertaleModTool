@@ -23,7 +23,7 @@ namespace UndertaleModLib.Decompiler
 
     internal class AssetTypeResolver
     {
-        public static Dictionary<string, AssetIDType[]> builtins = new Dictionary<string, AssetIDType[]>()
+        public static Dictionary<string, AssetIDType[]> builtin_funcs = new Dictionary<string, AssetIDType[]>()
         {
             { "script_exists", new AssetIDType[] { AssetIDType.Script } },
             { "script_get_name", new AssetIDType[] { AssetIDType.Script } },
@@ -76,14 +76,88 @@ namespace UndertaleModLib.Decompiler
             { "sprite_prefetch", new AssetIDType[] { AssetIDType.Sprite } },
             { "sprite_prefetch_multi", new AssetIDType[] { AssetIDType.Sprite } }, // sprite ARRAY
 
-            // TODO: Continue writing this huuuuuuuuuuuge list
+            { "background_get_name", new AssetIDType[] { AssetIDType.Background } },
+            { "background_get_width", new AssetIDType[] { AssetIDType.Background } },
+            { "background_get_height", new AssetIDType[] { AssetIDType.Background } },
+            { "background_get_texture", new AssetIDType[] { AssetIDType.Background } },
+            { "background_get_uvs", new AssetIDType[] { AssetIDType.Background } },
+            { "background_exists", new AssetIDType[] { AssetIDType.Background } },
+            { "background_add", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "background_replace", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "background_duplicate", new AssetIDType[] { AssetIDType.Background } },
+            { "background_assign", new AssetIDType[] { AssetIDType.Background, AssetIDType.Background } },
+            { "background_create_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color } },
+            { "background_create_gradient", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+            { "background_create_from_surface", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "background_set_alpha_from_background", new AssetIDType[] { AssetIDType.Background, AssetIDType.Background } },
+            { "background_save", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other } },
+            { "background_delete", new AssetIDType[] { AssetIDType.Background } },
+            { "background_flush", new AssetIDType[] { AssetIDType.Background } },
+            { "background_flush_multi", new AssetIDType[] { AssetIDType.Background } }, // array
+            { "background_prefetch", new AssetIDType[] { AssetIDType.Background } },
+            { "background_prefetch_multi", new AssetIDType[] { AssetIDType.Background } }, // array
+
+            // only a few relevant ones for tiles
+            { "tile_add", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "tile_set_background", new AssetIDType[] { AssetIDType.Other, AssetIDType.Background } },
+            { "tile_set_blend", new AssetIDType[] { AssetIDType.Other, AssetIDType.Color } },
+
+            { "audio_exists", new AssetIDType[] { AssetIDType.Sound } },
+            { "audio_get_name", new AssetIDType[] { AssetIDType.Sound } },
+            { "audio_get_type", new AssetIDType[] { AssetIDType.Sound } },
+            { "audio_play_sound", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other } },
+            { "audio_play_sound_at", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "audio_pause_sound", new AssetIDType[] { AssetIDType.Sound } },
+            { "audio_pause_all", new AssetIDType[] { } },
+            { "audio_resume_sound", new AssetIDType[] { AssetIDType.Sound } },
+            { "audio_resume_all", new AssetIDType[] { } },
+            { "audio_stop_sound", new AssetIDType[] { AssetIDType.Sound } },
+            { "audio_stop_all", new AssetIDType[] { } },
+            { "audio_is_playing", new AssetIDType[] { AssetIDType.Sound } },
+            { "audio_is_paused", new AssetIDType[] { AssetIDType.Sound } },
+            { "audio_create_streaam", new AssetIDType[] { AssetIDType.Other } },
+            { "audio_destroy_streaam", new AssetIDType[] { AssetIDType.Other } },
+
+            { "audio_sound_set_track_position", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other } },
+            { "audio_sound_get_track_position", new AssetIDType[] { AssetIDType.Sound } },
+            { "audio_sound_length", new AssetIDType[] { AssetIDType.Sound } },
+            { "audio_sound_pitch", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other } },
+            { "audio_sound_get_pitch", new AssetIDType[] { AssetIDType.Sound } },
+            { "audio_falloff_set_model", new AssetIDType[] { AssetIDType.Other } },
+            { "audio_sound_gain", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other } },
+            { "audio_sound_get_gain", new AssetIDType[] { AssetIDType.Sound } },
+            { "audio_master_gain", new AssetIDType[] { AssetIDType.Other } },
+            // TODO: There is a bunch more advanced audio functions but I'm tired and Undertale/Deltarune don't need these afaik
+
+            // Legacy sound functions
+            { "sound_exists", new AssetIDType[] { AssetIDType.Sound } },
+            { "sound_get_name", new AssetIDType[] { AssetIDType.Sound } },
+            { "sound_play", new AssetIDType[] { AssetIDType.Sound } },
+            { "sound_loop", new AssetIDType[] { AssetIDType.Sound } },
+            { "sound_stop", new AssetIDType[] { AssetIDType.Sound } },
+            { "sound_stop_all", new AssetIDType[] { } },
+            { "sound_isplaying", new AssetIDType[] { AssetIDType.Sound } },
+            { "sound_volume", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other } },
+            { "sound_fade", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other } },
+            { "sound_global_volume", new AssetIDType[] { AssetIDType.Other } },
+            // Deprecated legacy functions (wait what)
+            { "sound_add", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "sound_replace", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "sound_delete", new AssetIDType[] { AssetIDType.Sound } },
         };
 
-        internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments)
+        public static Dictionary<string, AssetIDType> builtin_vars = new Dictionary<string, AssetIDType>()
         {
-            if (builtins.ContainsKey(function_name))
+            // only the relevant ones because I'm sick of writing this
+            { "background_index", AssetIDType.Background }, // array
+            { "background_colour", AssetIDType.Color }, // array
+        };
+
+        internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, Dictionary<string, AssetIDType[]> scriptArgs)
+        {
+            if (builtin_funcs.ContainsKey(function_name))
             {
-                var func_types = builtins[function_name];
+                var func_types = builtin_funcs[function_name];
                 if (arguments.Length > func_types.Length)
                     throw new Exception("Bad call to " + function_name + " with " + arguments.Length + " arguments (instead of " + func_types.Length + ")");
                 for (int i = 0; i < arguments.Length; i++)
@@ -92,14 +166,31 @@ namespace UndertaleModLib.Decompiler
             }
             if (function_name == "script_execute")
             {
-                // This needs a special case because it's a vararg
+                // This needs a special case
                 if (arguments.Length < 1)
                     throw new Exception("Bad call to " + function_name + " with " + arguments.Length + " arguments (instead of at least 1)");
                 arguments[0] = AssetIDType.Script;
-                // TODO: Handle cross-script type propagation
+                if (scriptArgs.ContainsKey(function_name) && scriptArgs[function_name] != null)
+                {
+                    for (int i = 0; i < arguments.Length && i < scriptArgs[function_name].Length; i++)
+                        arguments[1 + i] = scriptArgs[function_name][i];
+                }
+                return true;
+            }
+            if (scriptArgs.ContainsKey(function_name) && scriptArgs[function_name] != null)
+            {
+                for (int i = 0; i < arguments.Length && i < scriptArgs[function_name].Length; i++)
+                    arguments[i] = scriptArgs[function_name][i];
                 return true;
             }
             return false;
+        }
+
+        internal static AssetIDType AnnotateTypeForVariable(string variable_name)
+        {
+            if (builtin_vars.ContainsKey(variable_name))
+                return builtin_vars[variable_name];
+            return AssetIDType.Other;
         }
     }
 }

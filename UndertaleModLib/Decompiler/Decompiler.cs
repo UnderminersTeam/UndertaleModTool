@@ -399,7 +399,7 @@ namespace UndertaleModLib.Decompiler
 
             internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
             {
-                return Value.DoTypePropagation(suggestedType);
+                return Value?.DoTypePropagation(suggestedType) ?? suggestedType;
             }
         }
 
@@ -421,7 +421,7 @@ namespace UndertaleModLib.Decompiler
 
             internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
             {
-                return Destination.DoTypePropagation(Value.DoTypePropagation(suggestedType));
+                return Value.DoTypePropagation(Destination.DoTypePropagation(suggestedType));
             }
         }
 
@@ -464,10 +464,30 @@ namespace UndertaleModLib.Decompiler
                 return String.Format("{0}({1})", Function.Name.Content, String.Join(", ", Arguments));
             }
 
+            public static Dictionary<string, AssetIDType[]> scriptArgs = new Dictionary<string, AssetIDType[]>(); // TODO: damnit stop using globals you stupid... this needs a big refactor anyway
+
             internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
             {
+                var script_code = HUGE_HACK_FIX_THIS_SOON?.Scripts.ByName(Function.Name.Content)?.Code;
+                if (script_code != null && !scriptArgs.ContainsKey(Function.Name.Content))
+                {
+                    scriptArgs.Add(Function.Name.Content, null); // stop the recursion from looping
+                    var xxx = ExpressionVar.assetTypes; // TODO: this is going bad
+                    ExpressionVar.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>(); // TODO: don't look at this
+                    Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code);
+                    Decompiler.DecompileFromBlock(blocks[0]);
+                    Decompiler.DoTypePropagation(blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
+                    scriptArgs[Function.Name.Content] = new AssetIDType[15];
+                    for(int i = 0; i < 15; i++)
+                    {
+                        var v = ExpressionVar.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
+                        scriptArgs[Function.Name.Content][i] = v.Count() > 0 ? v.First().Value : AssetIDType.Other;
+                    }
+                    ExpressionVar.assetTypes = xxx; // restore
+                }
+
                 AssetIDType[] args = new AssetIDType[Arguments.Count];
-                AssetTypeResolver.AnnotateTypesForFunctionCall(Function.Name.Content, args);
+                AssetTypeResolver.AnnotateTypesForFunctionCall(Function.Name.Content, args, scriptArgs);
                 for (var i = 0; i < Arguments.Count; i++)
                 {
                     Arguments[i].DoTypePropagation(args[i]);
@@ -511,6 +531,9 @@ namespace UndertaleModLib.Decompiler
                 AssetIDType current = assetTypes.ContainsKey(Var) ? assetTypes[Var] : AssetIDType.Other;
                 if (current == AssetIDType.Other && suggestedType != AssetIDType.Other)
                     current = assetTypes[Var] = suggestedType;
+                AssetIDType builtinSuggest = AssetTypeResolver.AnnotateTypeForVariable(Var.Name.Content);
+                if (builtinSuggest != AssetIDType.Other)
+                    current = assetTypes[Var] = builtinSuggest;
                 return current;
             }
 
@@ -1292,9 +1315,8 @@ namespace UndertaleModLib.Decompiler
             return HLDecompileBlocks(ref bl, blocks, loops, reverseDominators, new List<Block>()).Statements;
         }
 
-        public static string Decompile(UndertaleCode code, UndertaleData data = null)
+        private static Dictionary<uint, Block> PrepareDecompileFlow(UndertaleCode code)
         {
-            HUGE_HACK_FIX_THIS_SOON = data;
             code.UpdateAddresses();
             Dictionary<uint, Block> blocks = DecompileFlowGraph(code);
 
@@ -1316,7 +1338,16 @@ namespace UndertaleModLib.Decompiler
                 }
             } while (changed);
 
+            return blocks;
+        }
+
+        public static string Decompile(UndertaleCode code, UndertaleData data = null)
+        {
+            HUGE_HACK_FIX_THIS_SOON = data;
+            Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
             DecompileFromBlock(blocks[0]);
+            FunctionCall.scriptArgs.Clear();
+            // TODO: add self to scriptArgs
             DoTypePropagation(blocks);
             List<Statement> stmts = HLDecompile(blocks, blocks[0], blocks[code.Length / 4]);
             StringBuilder sb = new StringBuilder();
@@ -1327,7 +1358,7 @@ namespace UndertaleModLib.Decompiler
 
         private static void DoTypePropagation(Dictionary<uint, Block> blocks)
         {
-            ExpressionVar.assetTypes.Clear(); // how is that for fixing the leak I mentioned
+            ExpressionVar.assetTypes.Clear();
             foreach(var b in blocks.Values.Cast<Block>().Reverse())
             {
                 foreach(var s in b.Statements.Cast<Statement>().Reverse())
