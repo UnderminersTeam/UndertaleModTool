@@ -231,13 +231,14 @@ namespace UndertaleModTool
             if (gettext == null)
                 gettextCode = (Application.Current.MainWindow as MainWindow).Data.Code.ByName("gml_Script_textdata_en");
 
+            var dataa = (Application.Current.MainWindow as MainWindow).Data;
             Task t = Task.Run(() =>
             {
                 string decompiled = null;
                 Exception e = null;
                 try
                 {
-                    decompiled = Decompiler.Decompile(code).Replace("\r\n", "\n");
+                    decompiled = Decompiler.Decompile(code, dataa).Replace("\r\n", "\n");
                 }
                 catch (Exception ex)
                 {
@@ -268,6 +269,7 @@ namespace UndertaleModTool
                             Brush stringBrush = new SolidColorBrush(Color.FromRgb(0, 0, 200));
                             Brush commentBrush = new SolidColorBrush(Color.FromRgb(0, 150, 0));
                             Brush funcBrush = new SolidColorBrush(Color.FromRgb(100, 100, 0));
+                            Brush assetBrush = new SolidColorBrush(Color.FromRgb(0, 150, 100));
 
                             Dictionary<string, UndertaleFunction> funcs = new Dictionary<string, UndertaleFunction>();
                             foreach (var x in (Application.Current.MainWindow as MainWindow).Data.Functions)
@@ -346,6 +348,11 @@ namespace UndertaleModTool
                                             }
                                         }
                                     }
+                                    else if (dataa.ByName(token) != null)
+                                    {
+                                        par.Inlines.Add(new Run(token) { Foreground = assetBrush, Cursor = Cursors.Hand });
+                                        par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(dataa.ByName(token));
+                                    }
                                     else if (Char.IsDigit(token[0]))
                                     {
                                         par.Inlines.Add(new Run(token) { Cursor = Cursors.Hand });
@@ -405,8 +412,9 @@ namespace UndertaleModTool
                                         int id;
                                         if (Int32.TryParse(split[i - 1], out id))
                                         {
-                                            if (!usedObjects.ContainsKey(split[i - 1]))
-                                                usedObjects.Add(split[i - 1], (Application.Current.MainWindow as MainWindow).Data.GameObjects[id]);
+                                            var gos = (Application.Current.MainWindow as MainWindow).Data.GameObjects;
+                                            if (!usedObjects.ContainsKey(split[i - 1]) && id >= 0 && id < gos.Count)
+                                                usedObjects.Add(split[i - 1], gos[id]);
                                         }
                                     }
                                 }

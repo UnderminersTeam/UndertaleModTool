@@ -855,7 +855,7 @@ namespace UndertaleModTool
                     string path = System.IO.Path.Combine(outdir, code.Name.Content + ".gml");
                     try
                     {
-                        string decomp = Decompiler.Decompile(code);
+                        string decomp = Decompiler.Decompile(code, Data);
                         File.WriteAllText(path, decomp);
                     }
                     catch(Exception e)

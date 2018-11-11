@@ -18,6 +18,8 @@ namespace UndertaleModLib.Decompiler
          * Howdy! Yeah, I don't know how any of this works anymore either, so... have fun
          */
 
+        internal static UndertaleData HUGE_HACK_FIX_THIS_SOON;
+
         public class Block
         {
             public uint? Address;
@@ -44,6 +46,7 @@ namespace UndertaleModLib.Decompiler
         public abstract class Statement
         {
             public abstract override string ToString();
+            internal abstract AssetIDType DoTypePropagation(AssetIDType suggestedType);
         }
 
         public abstract class Expression : Statement
@@ -110,6 +113,7 @@ namespace UndertaleModLib.Decompiler
         public class ExpressionConstant : Expression
         {
             public object Value;
+            internal AssetIDType AssetType = AssetIDType.Other;
 
             public ExpressionConstant(UndertaleInstruction.DataType type, object value)
             {
@@ -119,8 +123,66 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString()
             {
-                //return String.Format("{0}({1})", Type.ToString().ToLower(), Value.ToString());
-                return (Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString();
+                if (AssetType == AssetIDType.GameObject)
+                {
+                    int val = Convert.ToInt32(Value);
+                    if (val <= 0) // TODO: What about object ID=0?
+                    {
+                        var instType = (UndertaleInstruction.InstanceType)val;
+
+                        if (instType != UndertaleInstruction.InstanceType.Undefined)
+                        {
+                            return instType.ToString().ToLower();
+                        }
+                    }
+                }
+                
+                if (AssetType != AssetIDType.Other && AssetType != AssetIDType.Other && HUGE_HACK_FIX_THIS_SOON != null)
+                {
+                    int val = Convert.ToInt32(Value);
+                    IList assetList = null;
+                    switch(AssetType)
+                    {
+                        case AssetIDType.Sprite:
+                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Sprites;
+                            break;
+                        case AssetIDType.Background:
+                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Backgrounds;
+                            break;
+                        case AssetIDType.Sound:
+                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Sounds;
+                            break;
+                        case AssetIDType.Font:
+                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Fonts;
+                            break;
+                        case AssetIDType.Path:
+                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Paths;
+                            break;
+                        case AssetIDType.Timeline:
+                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Timelines;
+                            break;
+                        case AssetIDType.Room:
+                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Rooms;
+                            break;
+                        case AssetIDType.GameObject:
+                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.GameObjects;
+                            break;
+                        case AssetIDType.Script:
+                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Scripts;
+                            break;
+                    }
+                    if (assetList != null && val >= 0 && val < assetList.Count)
+                        return ((UndertaleNamedResource)assetList[val]).Name.Content;
+                }
+
+                return ((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
+            }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                if (AssetType == AssetIDType.Other)
+                    AssetType = suggestedType;
+                return AssetType;
             }
         }
 
@@ -139,6 +201,11 @@ namespace UndertaleModLib.Decompiler
                 //return String.Format("{0}({1})", Type != Argument.Type ? "(" + Type.ToString().ToLower() + ")" : "", Argument.ToString());
                 return Argument.ToString();
             }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                return Argument.DoTypePropagation(suggestedType);
+            }
         }
 
         public class ExpressionOne : Expression
@@ -156,6 +223,11 @@ namespace UndertaleModLib.Decompiler
             public override string ToString()
             {
                 return String.Format("{0}({1} {2})", Type != Argument.Type ? "(" + Type.ToString().ToLower() + ")" : "", OperationToPrintableString(Opcode), Argument.ToString());
+            }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                return Argument.DoTypePropagation(suggestedType);
             }
         }
         
@@ -178,6 +250,14 @@ namespace UndertaleModLib.Decompiler
                 // TODO: better condition for casts
                 return String.Format("{0}({1} {2} {3})", false && (Type != Argument1.Type || Type != Argument2.Type || Argument1.Type != Argument2.Type) ? "(" + Type.ToString().ToLower() + ")" : "", Argument1.ToString(), OperationToPrintableString(Opcode), Argument2.ToString());
             }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                // The most likely, but probably rarely happens
+                AssetIDType t = Argument1.DoTypePropagation(suggestedType);
+                Argument2.DoTypePropagation(AssetIDType.Other);
+                return t;
+            }
         }
 
         public class ExpressionCompare : Expression
@@ -198,6 +278,13 @@ namespace UndertaleModLib.Decompiler
             {
                 return String.Format("({0} {1} {2})", Argument1.ToString(), OperationToPrintableString(Opcode), Argument2.ToString());
             }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                Argument1.DoTypePropagation(suggestedType);
+                Argument2.DoTypePropagation(suggestedType);
+                return AssetIDType.Other;
+            }
         }
 
         public class OperationStatement : Statement
@@ -213,6 +300,11 @@ namespace UndertaleModLib.Decompiler
             {
                 return Opcode.ToString().ToUpper();
             }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                return suggestedType;
+            }
         }
 
 
@@ -222,6 +314,8 @@ namespace UndertaleModLib.Decompiler
             public UndertaleInstruction.DataType Type;
 
             private static int i = 0;
+            internal AssetIDType AssetType;
+
             public TempVar()
             {
                 Name = "_temp_local_var_" + (++i);
@@ -253,6 +347,14 @@ namespace UndertaleModLib.Decompiler
             {
                 return String.Format("{0} = {1}", Var.Var.Name, Value);
             }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                var t = Value.DoTypePropagation(suggestedType);
+                if (Var.Var.AssetType == AssetIDType.Other)
+                    Var.Var.AssetType = t;
+                return Var.Var.AssetType;
+            }
         }
 
         public class ExpressionTempVar : Expression
@@ -267,7 +369,14 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString()
             {
-                return String.Format("{0}{1}", Type != Var.Var.Type ? "(" + Type.ToString().ToLower() + ")" : "", Var.Var.Name);
+                return String.Format("{0}{1}", /*Type != Var.Var.Type ? "(" + Type.ToString().ToLower() + ")" : ""*/ "", Var.Var.Name);
+            }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                if (Var.Var.AssetType == AssetIDType.Other)
+                    Var.Var.AssetType = suggestedType;
+                return Var.Var.AssetType;
             }
         }
 
@@ -287,6 +396,11 @@ namespace UndertaleModLib.Decompiler
                 else
                     return "return";
             }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                return Value.DoTypePropagation(suggestedType);
+            }
         }
 
         public class AssignmentStatement : Statement
@@ -304,6 +418,11 @@ namespace UndertaleModLib.Decompiler
             {
                 return String.Format("{0} = {1}", Destination.ToString(), Value.ToString());
             }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                return Destination.DoTypePropagation(Value.DoTypePropagation(suggestedType));
+            }
         }
 
         public class CommentStatement : Statement
@@ -319,6 +438,11 @@ namespace UndertaleModLib.Decompiler
             {
                 return "// " + Message;
             }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                return suggestedType;
+            }
         }
 
         public class FunctionCall : Expression
@@ -332,19 +456,23 @@ namespace UndertaleModLib.Decompiler
                 this.Function = function;
                 this.ReturnType = returnType;
                 this.Arguments = args;
-
-                // get these casts out of my way
-                for(int i = 0; i < Arguments.Count; i++)
-                {
-                    if (Arguments[i] is ExpressionCast && (Arguments[i] as ExpressionCast).Type == UndertaleInstruction.DataType.Variable)
-                        Arguments[i] = (Arguments[i] as ExpressionCast).Argument;
-                }
             }
 
             public override string ToString()
             {
                 //return String.Format("({0}){1}({2})", ReturnType.ToString().ToLower(), Function.Name.Content, String.Join(", ", Arguments));
                 return String.Format("{0}({1})", Function.Name.Content, String.Join(", ", Arguments));
+            }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                AssetIDType[] args = new AssetIDType[Arguments.Count];
+                AssetTypeResolver.AnnotateTypesForFunctionCall(Function.Name.Content, args);
+                for (var i = 0; i < Arguments.Count; i++)
+                {
+                    Arguments[i].DoTypePropagation(args[i]);
+                }
+                return suggestedType; // TODO: maybe we should handle returned values too?
             }
         }
 
@@ -354,7 +482,6 @@ namespace UndertaleModLib.Decompiler
             public Expression InstType; // UndertaleInstruction.InstanceType
             public UndertaleInstruction.VariableType VarType;
             public Expression ArrayIndex;
-            public Expression InstanceIndex;
 
             public ExpressionVar(UndertaleVariable var, Expression instType, UndertaleInstruction.VariableType varType)
             {
@@ -363,38 +490,28 @@ namespace UndertaleModLib.Decompiler
                 VarType = varType;
             }
 
-            private UndertaleInstruction.InstanceType? TryGetInstType()
-            {
-                // TODO: this should be handled along with type information propagation
-                if (InstType is ExpressionConstant)
-                    return (UndertaleInstruction.InstanceType)Convert.ToInt32((InstType as ExpressionConstant).Value);
-                else
-                    return null;
-            }
-
             public override string ToString()
             {
                 //Debug.Assert((ArrayIndex != null) == NeedsArrayParameters);
                 //Debug.Assert((InstanceIndex != null) == NeedsInstanceParameters);
                 string name = Var.Name.Content;
-                if (InstanceIndex != null)
-                    name = InstanceIndex.ToString() + "." + name;
                 if (ArrayIndex != null)
                     name = name + "[" + ArrayIndex.ToString() + "]";
-                var instTypeVal = TryGetInstType();
-                if (instTypeVal.HasValue)
-                {
-                    if (instTypeVal.Value != UndertaleInstruction.InstanceType.Undefined)
-                    {
-                        name = instTypeVal.Value.ToString().ToLower() + "." + name;
-                    }
-                }
-                else
-                {
-                    name = InstType.ToString() + "." + name;
-                }
+                name = InstType.ToString() + "." + name;
 
                 return name;
+            }
+
+            public static Dictionary<UndertaleVariable, AssetIDType> assetTypes = new Dictionary<UndertaleVariable, AssetIDType>(); // TODO: huge and ugly memory leak that I may fix one day... nah don't count on it
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                InstType?.DoTypePropagation(AssetIDType.GameObject);
+                ArrayIndex?.DoTypePropagation(AssetIDType.Other);
+
+                AssetIDType current = assetTypes.ContainsKey(Var) ? assetTypes[Var] : AssetIDType.Other;
+                if (current == AssetIDType.Other && suggestedType != AssetIDType.Other)
+                    current = assetTypes[Var] = suggestedType;
+                return current;
             }
 
             public bool NeedsArrayParameters => VarType == UndertaleInstruction.VariableType.Array;
@@ -414,6 +531,12 @@ namespace UndertaleModLib.Decompiler
             {
                 return "pushenv " + NewEnv;
             }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                NewEnv.DoTypePropagation(AssetIDType.GameObject);
+                return suggestedType;
+            }
         }
 
         public class PopEnvStatement : Statement
@@ -421,6 +544,11 @@ namespace UndertaleModLib.Decompiler
             public override string ToString()
             {
                 return "popenv";
+            }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                return suggestedType;
             }
         }
 
@@ -568,7 +696,7 @@ namespace UndertaleModLib.Decompiler
                         if (instr.Type1 == UndertaleInstruction.DataType.Int32)
                             val = stack.Pop();
                         if (target.NeedsInstanceParameters)
-                            target.InstanceIndex = stack.Pop();
+                            target.InstType = stack.Pop();
                         if (target.NeedsArrayParameters)
                         {
                             target.ArrayIndex = stack.Pop();
@@ -589,7 +717,7 @@ namespace UndertaleModLib.Decompiler
                         {
                             ExpressionVar pushTarget = new ExpressionVar((instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Target, new ExpressionConstant(UndertaleInstruction.DataType.Int16, instr.TypeInst), (instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Type);
                             if (pushTarget.NeedsInstanceParameters)
-                                pushTarget.InstanceIndex = stack.Pop();
+                                pushTarget.InstType = stack.Pop();
                             if (pushTarget.NeedsArrayParameters)
                             {
                                 pushTarget.ArrayIndex = stack.Pop();
@@ -794,6 +922,10 @@ namespace UndertaleModLib.Decompiler
 
         public abstract class HLStatement : Statement
         {
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                throw new NotImplementedException();
+            }
         };
 
         public class BlockHLStatement : HLStatement
@@ -1160,8 +1292,9 @@ namespace UndertaleModLib.Decompiler
             return HLDecompileBlocks(ref bl, blocks, loops, reverseDominators, new List<Block>()).Statements;
         }
 
-        public static string Decompile(UndertaleCode code)
+        public static string Decompile(UndertaleCode code, UndertaleData data = null)
         {
+            HUGE_HACK_FIX_THIS_SOON = data;
             code.UpdateAddresses();
             Dictionary<uint, Block> blocks = DecompileFlowGraph(code);
 
@@ -1184,11 +1317,25 @@ namespace UndertaleModLib.Decompiler
             } while (changed);
 
             DecompileFromBlock(blocks[0]);
+            DoTypePropagation(blocks);
             List<Statement> stmts = HLDecompile(blocks, blocks[0], blocks[code.Length / 4]);
             StringBuilder sb = new StringBuilder();
             foreach (var stmt in stmts)
                 sb.Append(stmt.ToString() + "\n");
             return sb.ToString();
+        }
+
+        private static void DoTypePropagation(Dictionary<uint, Block> blocks)
+        {
+            ExpressionVar.assetTypes.Clear(); // how is that for fixing the leak I mentioned
+            foreach(var b in blocks.Values.Cast<Block>().Reverse())
+            {
+                foreach(var s in b.Statements.Cast<Statement>().Reverse())
+                {
+                    s.DoTypePropagation(AssetIDType.Other);
+                }
+                b.ConditionStatement?.DoTypePropagation(AssetIDType.Other);
+            }
         }
 
         public static string ExportFlowGraph(Dictionary<uint, Block> blocks)

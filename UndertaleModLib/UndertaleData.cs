@@ -43,6 +43,20 @@ namespace UndertaleModLib
 
         public bool UnsupportedBytecodeVersion = false;
 
+        public object ByName(string name)
+        {
+            // TODO: Check if those are all possible types
+            return Sounds.ByName(name) ??
+                Sprites.ByName(name) ??
+                Backgrounds.ByName(name) ??
+                Paths.ByName(name) ??
+                Scripts.ByName(name) ??
+                Fonts.ByName(name) ??
+                GameObjects.ByName(name) ??
+                Rooms.ByName(name) ??
+                (object)null;
+        }
+
         public static UndertaleData CreateNew()
         {
             UndertaleData data = new UndertaleData();

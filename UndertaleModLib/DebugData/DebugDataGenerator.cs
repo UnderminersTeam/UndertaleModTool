@@ -34,7 +34,7 @@ namespace UndertaleModLib.DebugData
                     string output;
                     try
                     {
-                        output = Decompiler.Decompiler.Decompile(code);
+                        output = Decompiler.Decompiler.Decompile(code, data);
                     }
                     catch (Exception e)
                     {
