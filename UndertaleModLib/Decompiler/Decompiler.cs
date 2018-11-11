@@ -108,6 +108,11 @@ namespace UndertaleModLib.Decompiler
                         return op.ToString().ToUpper();
                 }
             }
+
+            internal virtual bool IsDuplicationSafe()
+            {
+                return false;
+            }
         }
 
         public class ExpressionConstant : Expression
@@ -119,6 +124,11 @@ namespace UndertaleModLib.Decompiler
             {
                 Type = type;
                 Value = value;
+            }
+            
+            internal override bool IsDuplicationSafe()
+            {
+                return true;
             }
 
             public override string ToString()
@@ -218,6 +228,11 @@ namespace UndertaleModLib.Decompiler
                 this.Argument = argument;
             }
 
+            internal override bool IsDuplicationSafe()
+            {
+                return Argument.IsDuplicationSafe();
+            }
+
             public override string ToString()
             {
                 //return String.Format("{0}({1})", Type != Argument.Type ? "(" + Type.ToString().ToLower() + ")" : "", Argument.ToString());
@@ -240,6 +255,11 @@ namespace UndertaleModLib.Decompiler
                 this.Opcode = opcode;
                 this.Type = targetType;
                 this.Argument = argument;
+            }
+
+            internal override bool IsDuplicationSafe()
+            {
+                return Argument.IsDuplicationSafe();
             }
 
             public override string ToString()
@@ -265,6 +285,11 @@ namespace UndertaleModLib.Decompiler
                 this.Type = targetType;
                 this.Argument1 = argument1;
                 this.Argument2 = argument2;
+            }
+
+            internal override bool IsDuplicationSafe()
+            {
+                return Argument1.IsDuplicationSafe() && Argument2.IsDuplicationSafe();
             }
 
             public override string ToString()
@@ -294,6 +319,11 @@ namespace UndertaleModLib.Decompiler
                 this.Type = UndertaleInstruction.DataType.Boolean;
                 this.Argument1 = argument1;
                 this.Argument2 = argument2;
+            }
+
+            internal override bool IsDuplicationSafe()
+            {
+                return Argument1.IsDuplicationSafe() && Argument2.IsDuplicationSafe();
             }
 
             public override string ToString()
@@ -372,10 +402,9 @@ namespace UndertaleModLib.Decompiler
 
             internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
             {
-                var t = Value.DoTypePropagation(suggestedType);
                 if (Var.Var.AssetType == AssetIDType.Other)
-                    Var.Var.AssetType = t;
-                return Var.Var.AssetType;
+                    Var.Var.AssetType = suggestedType;
+                return Value.DoTypePropagation(Var.Var.AssetType);
             }
         }
 
@@ -532,6 +561,11 @@ namespace UndertaleModLib.Decompiler
                 VarType = varType;
             }
 
+            internal override bool IsDuplicationSafe()
+            {
+                return (InstType?.IsDuplicationSafe() ?? true) && (ArrayIndex?.IsDuplicationSafe() ?? true);
+            }
+
             public override string ToString()
             {
                 //Debug.Assert((ArrayIndex != null) == NeedsArrayParameters);
@@ -639,33 +673,33 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.Dup:
-                        if (stack.Peek() is ExpressionConstant || (stack.Peek() is ExpressionCast && (stack.Peek() as ExpressionCast).Argument is ExpressionConstant)) // TODO: do this better
+                        List<Expression> topExpressions1 = new List<Expression>();
+                        List<Expression> topExpressions2 = new List<Expression>();
+                        for (int i = 0; i < instr.DupExtra + 1; i++)
                         {
-                            List<Expression> topExpressions = new List<Expression>();
-                            for (int i = 0; i < instr.DupExtra + 1; i++)
-                                topExpressions.Add(stack.Pop());
-                            topExpressions.Reverse();
-                            for (int i = 0; i < topExpressions.Count; i++)
-                                stack.Push(topExpressions[i]);
-                            for (int i = 0; i < topExpressions.Count; i++)
-                                stack.Push(topExpressions[i]);
-                        }
-                        else
-                        {
-                            List<TempVarReference> topExpressions = new List<TempVarReference>();
-                            for (int i = 0; i < instr.DupExtra + 1; i++)
+                            var item = stack.Pop();
+                            if (item.IsDuplicationSafe())
+                            {
+                                topExpressions1.Add(item);
+                                topExpressions2.Add(item);
+                            }
+                            else
                             {
                                 TempVar var = new TempVar();
-                                var.Type = stack.Peek().Type;
+                                var.Type = item.Type;
                                 TempVarReference varref = new TempVarReference(var);
-                                statements.Add(new TempVarAssigmentStatement(varref, stack.Pop()));
-                                topExpressions.Add(varref);
+                                statements.Add(new TempVarAssigmentStatement(varref, item));
+
+                                topExpressions1.Add(new ExpressionTempVar(varref, varref.Var.Type));
+                                topExpressions2.Add(new ExpressionTempVar(varref, instr.Type1));
                             }
-                            for (int i = 0; i < topExpressions.Count; i++)
-                                stack.Push(new ExpressionTempVar(topExpressions[i], topExpressions[i].Var.Type));
-                            for (int i = 0; i < topExpressions.Count; i++)
-                                stack.Push(new ExpressionTempVar(topExpressions[i], instr.Type1));
                         }
+                        topExpressions1.Reverse();
+                        topExpressions2.Reverse();
+                        for (int i = 0; i < topExpressions1.Count; i++)
+                            stack.Push(topExpressions1[i]);
+                        for (int i = 0; i < topExpressions2.Count; i++)
+                            stack.Push(topExpressions2[i]);
                         break;
 
                     case UndertaleInstruction.Opcode.Ret:

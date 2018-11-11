@@ -261,7 +261,7 @@ namespace UndertaleModLib.Decompiler
             // only relevant event func
             { "event_perform_object", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
 
-            { "merge_colour", new AssetIDType[] { AssetIDType.Color, AssetIDType.Color } },
+            { "merge_colour", new AssetIDType[] { AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
 
             // only relevant functions listed
             { "draw_clear", new AssetIDType[] { AssetIDType.Color } },
