@@ -323,7 +323,7 @@ namespace UndertaleModTool
                                         par.Inlines.Add(new Run(token) { Foreground = stringBrush });
                                     else if (token.StartsWith("//"))
                                         par.Inlines.Add(new Run(token) { Foreground = commentBrush });
-                                    else if (token.StartsWith("@"))
+                                    else if (token.StartsWith("@") && split[i - 1][0] == '"' && split[i - 1][split[i - 1].Length - 1] == '"')
                                     {
                                         par.Inlines.LastInline.Cursor = Cursors.Hand;
                                         par.Inlines.LastInline.MouseDown += (sender, ev) =>
