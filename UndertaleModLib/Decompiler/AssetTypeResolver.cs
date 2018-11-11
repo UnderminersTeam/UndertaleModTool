@@ -144,6 +144,164 @@ namespace UndertaleModLib.Decompiler
             { "sound_add", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
             { "sound_replace", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
             { "sound_delete", new AssetIDType[] { AssetIDType.Sound } },
+
+            { "font_get_name", new AssetIDType[] { AssetIDType.Font } },
+            { "font_get_fontname", new AssetIDType[] { AssetIDType.Font } },
+            { "font_get_first", new AssetIDType[] { AssetIDType.Font } },
+            { "font_get_last", new AssetIDType[] { AssetIDType.Font } },
+            { "font_get_italic", new AssetIDType[] { AssetIDType.Font } },
+            { "font_get_bold", new AssetIDType[] { AssetIDType.Font } },
+            { "font_get_size", new AssetIDType[] { AssetIDType.Font } },
+            { "font_get_texture", new AssetIDType[] { AssetIDType.Font } },
+            { "font_get_uvs", new AssetIDType[] { AssetIDType.Font } },
+
+            { "font_set_cache_size", new AssetIDType[] { AssetIDType.Font, AssetIDType.Other } },
+            { "font_exists", new AssetIDType[] { AssetIDType.Font } },
+            { "font_add", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "font_add_sprite", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "font_add_sprite_ext", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "font_replace", new AssetIDType[] { AssetIDType.Font, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "font_replace_sprite", new AssetIDType[] { AssetIDType.Font, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "font_replace_sprite_ext", new AssetIDType[] { AssetIDType.Font, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "font_delete", new AssetIDType[] { AssetIDType.Font } },
+
+            { "path_start", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "path_end", new AssetIDType[] { } },
+
+            { "path_exists", new AssetIDType[] { AssetIDType.Path } },
+            { "path_get_closed", new AssetIDType[] { AssetIDType.Path } },
+            { "path_get_kind", new AssetIDType[] { AssetIDType.Path } },
+            { "path_get_length", new AssetIDType[] { AssetIDType.Path } },
+            { "path_get_name", new AssetIDType[] { AssetIDType.Path } },
+            { "path_get_number", new AssetIDType[] { AssetIDType.Path } },
+            { "path_get_point_speed", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
+            { "path_get_point_x", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
+            { "path_get_point_y", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
+            { "path_get_precision", new AssetIDType[] { AssetIDType.Path } },
+            { "path_get_speed", new AssetIDType[] { AssetIDType.Path } },
+            { "path_get_x", new AssetIDType[] { AssetIDType.Path } },
+            { "path_get_y", new AssetIDType[] { AssetIDType.Path } },
+
+            { "path_add", new AssetIDType[] { } },
+            { "path_add_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "path_change_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "path_insert_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "path_delete_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
+            { "path_clear_points", new AssetIDType[] { AssetIDType.Path } },
+            { "path_append", new AssetIDType[] { AssetIDType.Path, AssetIDType.Path } },
+            { "path_assign", new AssetIDType[] { AssetIDType.Path, AssetIDType.Path } },
+            { "path_delete", new AssetIDType[] { AssetIDType.Path } },
+            { "path_duplicate", new AssetIDType[] { AssetIDType.Path } },
+            { "path_flip", new AssetIDType[] { AssetIDType.Path } },
+            { "path_mirror", new AssetIDType[] { AssetIDType.Path } },
+            { "path_reverse", new AssetIDType[] { AssetIDType.Path } },
+            { "path_rotate", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
+            { "path_scale", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other } },
+            { "path_set_closed", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
+            { "path_set_kind", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
+            { "path_set_precision", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
+            { "path_shift", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other } },
+
+            // TODO: timelines
+
+            { "room_exists", new AssetIDType[] { AssetIDType.Room } },
+            { "room_next", new AssetIDType[] { AssetIDType.Room } },
+            { "room_previous", new AssetIDType[] { AssetIDType.Room } },
+            { "room_get_name", new AssetIDType[] { AssetIDType.Room } },
+
+            { "room_goto", new AssetIDType[] { AssetIDType.Room } },
+            { "room_goto_next", new AssetIDType[] { } },
+            { "room_goto_previous", new AssetIDType[] { } },
+            { "room_restart", new AssetIDType[] { } },
+
+            { "room_add", new AssetIDType[] { } },
+            { "room_duplicate", new AssetIDType[] { AssetIDType.Room } },
+            { "room_assign", new AssetIDType[] { AssetIDType.Room, AssetIDType.Room } },
+            { "room_instance_add", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+            { "room_instance_clear", new AssetIDType[] { AssetIDType.Room } },
+            { "room_tile_add", new AssetIDType[] { AssetIDType.Room, AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "room_tile_add_ext", new AssetIDType[] { AssetIDType.Room, AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "room_tile_clear", new AssetIDType[] { AssetIDType.Room } },
+            { "room_set_background", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "room_set_background_colour", new AssetIDType[] { AssetIDType.Room, AssetIDType.Color, AssetIDType.Other } },
+            { "room_set_height", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } },
+            { "room_set_width", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } },
+            { "room_set_persistent", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } },
+            { "room_set_view_enabled", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } },
+
+            { "object_exists", new AssetIDType[] { AssetIDType.GameObject } },
+            { "object_get_depth", new AssetIDType[] { AssetIDType.GameObject } },
+            { "object_get_mask", new AssetIDType[] { AssetIDType.GameObject } },
+            { "object_get_name", new AssetIDType[] { AssetIDType.GameObject } },
+            { "object_get_parent", new AssetIDType[] { AssetIDType.GameObject } },
+            { "object_get_persistent", new AssetIDType[] { AssetIDType.GameObject } },
+            { "object_get_solid", new AssetIDType[] { AssetIDType.GameObject } },
+            { "object_get_sprite", new AssetIDType[] { AssetIDType.GameObject } },
+            { "object_get_visible", new AssetIDType[] { AssetIDType.GameObject } },
+            { "object_get_physics", new AssetIDType[] { AssetIDType.GameObject } },
+            { "object_is_ancestor", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.GameObject } },
+            { "object_set_depth", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
+            { "object_set_mask", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
+            { "object_set_persistent", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
+            { "object_set_solid", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
+            { "object_set_sprite", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
+            { "object_set_visible", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
+
+            // only relevant event func
+            { "event_perform_object", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
+
+            { "merge_colour", new AssetIDType[] { AssetIDType.Color, AssetIDType.Color } },
+
+            // only relevant functions listed
+            { "draw_clear", new AssetIDType[] { AssetIDType.Color } },
+            { "draw_clear_alpha", new AssetIDType[] { AssetIDType.Color, AssetIDType.Other } },
+            { "draw_set_colour", new AssetIDType[] { AssetIDType.Color } },
+
+            { "draw_circle_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_ellipse_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_line_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color } },
+            { "draw_line_width_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color } },
+            { "draw_point_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color } },
+            { "draw_rectangle_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_roundrect_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_roundrect_colour_ext", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_healthbar", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+
+            { "draw_sprite", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "draw_sprite_ext", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_sprite_general", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_sprite_part", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "draw_sprite_part_ext", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_sprite_stretched", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "draw_sprite_stretched_ext", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_sprite_pos", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "draw_sprite_tiled", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "draw_sprite_tiled_ext", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+
+            { "draw_background", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other } },
+            { "draw_background_ext", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_background_part", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "draw_background_part_ext", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_background_stretched", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+            { "draw_background_stretched_ext", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_background_tiled", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other } },
+            { "draw_background_tiled_ext", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_background_general", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+
+            { "draw_set_font", new AssetIDType[] { AssetIDType.Font } },
+            { "draw_text_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_text_ext_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_text_transformed_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_text_transformed_ext_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+
+            { "draw_vertex_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+            { "draw_vertex_texture_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+
+            // TODO: 3D drawing, didn't bother
+
+            // TODO: surface drawing
+
+            // TODO: shaders
         };
 
         public static Dictionary<string, AssetIDType> builtin_vars = new Dictionary<string, AssetIDType>()
@@ -151,10 +309,27 @@ namespace UndertaleModLib.Decompiler
             // only the relevant ones because I'm sick of writing this
             { "background_index", AssetIDType.Background }, // array
             { "background_colour", AssetIDType.Color }, // array
+            { "path_index", AssetIDType.Path },
+            { "room_first", AssetIDType.Room },
+            { "room_last", AssetIDType.Room },
+            { "room", AssetIDType.Room },
+            { "object_index", AssetIDType.GameObject },
+            { "sprite_index", AssetIDType.Sprite },
+            { "event_object", AssetIDType.GameObject },
         };
 
         internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, Dictionary<string, AssetIDType[]> scriptArgs)
         {
+            // Scripts overload builtins because in GMS2 some functions are just backwards-compatibility scripts
+            if (scriptArgs.ContainsKey(function_name) && scriptArgs[function_name] != null)
+            {
+                for (int i = 0; i < arguments.Length && i < scriptArgs[function_name].Length; i++)
+                    arguments[i] = scriptArgs[function_name][i];
+                return true;
+            }
+
+            function_name = function_name.Replace("color", "colour"); // Just GameMaker things... both are valid :o
+
             if (builtin_funcs.ContainsKey(function_name))
             {
                 var func_types = builtin_funcs[function_name];
@@ -175,12 +350,6 @@ namespace UndertaleModLib.Decompiler
                     for (int i = 0; i < arguments.Length && i < scriptArgs[function_name].Length; i++)
                         arguments[1 + i] = scriptArgs[function_name][i];
                 }
-                return true;
-            }
-            if (scriptArgs.ContainsKey(function_name) && scriptArgs[function_name] != null)
-            {
-                for (int i = 0; i < arguments.Length && i < scriptArgs[function_name].Length; i++)
-                    arguments[i] = scriptArgs[function_name][i];
                 return true;
             }
             return false;

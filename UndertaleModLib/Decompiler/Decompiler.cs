@@ -125,7 +125,15 @@ namespace UndertaleModLib.Decompiler
             {
                 if (AssetType == AssetIDType.GameObject)
                 {
-                    int val = Convert.ToInt32(Value);
+                    int val;
+                    try
+                    {
+                        val = Convert.ToInt32(Value);
+                    }
+                    catch(OverflowException e)
+                    {
+                        val = Int32.MaxValue;
+                    }
                     if (val <= 0) // TODO: What about object ID=0?
                     {
                         var instType = (UndertaleInstruction.InstanceType)val;
@@ -137,9 +145,17 @@ namespace UndertaleModLib.Decompiler
                     }
                 }
                 
-                if (AssetType != AssetIDType.Other && AssetType != AssetIDType.Other && HUGE_HACK_FIX_THIS_SOON != null)
+                if (AssetType != AssetIDType.Other && AssetType != AssetIDType.Color && HUGE_HACK_FIX_THIS_SOON != null)
                 {
-                    int val = Convert.ToInt32(Value);
+                    int val;
+                    try
+                    {
+                        val = Convert.ToInt32(Value);
+                    }
+                    catch (OverflowException e) // Toby what did you do
+                    {
+                        val = Int32.MaxValue;
+                    }
                     IList assetList = null;
                     switch(AssetType)
                     {
@@ -173,6 +189,12 @@ namespace UndertaleModLib.Decompiler
                     }
                     if (assetList != null && val >= 0 && val < assetList.Count)
                         return ((UndertaleNamedResource)assetList[val]).Name.Content;
+                }
+
+                if (AssetType == AssetIDType.Color && Value is IFormattable)
+                {
+                    uint val = Convert.ToUInt32(Value);
+                    return "0x" + ((IFormattable)Value).ToString(val > 0xFFFFFF ? "X8" : "X6", CultureInfo.InvariantCulture);
                 }
 
                 return ((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
