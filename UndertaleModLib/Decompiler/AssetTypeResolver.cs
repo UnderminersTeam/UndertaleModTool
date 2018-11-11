@@ -18,7 +18,8 @@ namespace UndertaleModLib.Decompiler
         Timeline,
         Room,
         GameObject, // or GameObjectInstance, these are interchangable
-        Script
+        Script,
+        Layer // GMS2
     };
 
     internal class AssetTypeResolver
@@ -40,6 +41,11 @@ namespace UndertaleModLib.Decompiler
             { "instance_number", new AssetIDType[] { AssetIDType.GameObject } },
             { "instance_place", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
             { "instance_position", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+
+            { "instance_activate_layer", new AssetIDType[] { AssetIDType.Layer } }, // GMS2
+            { "instance_deactivate_layer", new AssetIDType[] { AssetIDType.Layer } }, // GMS2
+            { "instance_create_depth", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } }, // GMS2
+            { "instance_create_layer", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } }, // GMS2
 
             { "sprite_get_name", new AssetIDType[] { AssetIDType.Sprite } },
             { "sprite_get_number", new AssetIDType[] { AssetIDType.Sprite } },
@@ -229,6 +235,11 @@ namespace UndertaleModLib.Decompiler
             { "room_set_persistent", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } },
             { "room_set_view_enabled", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } },
 
+            { "room_set_viewport", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } }, // GMS2 only
+            { "room_get_viewport", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } }, // GMS2 only
+            { "room_get_camera", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } }, // GMS2 only
+            { "room_set_camera", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Other } }, // GMS2 only
+
             { "object_exists", new AssetIDType[] { AssetIDType.GameObject } },
             { "object_get_depth", new AssetIDType[] { AssetIDType.GameObject } },
             { "object_get_mask", new AssetIDType[] { AssetIDType.GameObject } },
@@ -302,6 +313,9 @@ namespace UndertaleModLib.Decompiler
             // TODO: surface drawing
 
             // TODO: shaders
+
+            // TODO: GMS2 tilemaps
+            // TODO: GMS2 layers
         };
 
         public static Dictionary<string, AssetIDType> builtin_vars = new Dictionary<string, AssetIDType>()

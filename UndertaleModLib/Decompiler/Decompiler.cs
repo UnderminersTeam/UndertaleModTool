@@ -303,8 +303,8 @@ namespace UndertaleModLib.Decompiler
 
             internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
             {
-                Argument1.DoTypePropagation(suggestedType);
-                Argument2.DoTypePropagation(suggestedType);
+                // TODO: This should be probably able to go both ways...
+                Argument2.DoTypePropagation(Argument1.DoTypePropagation(suggestedType));
                 return AssetIDType.Other;
             }
         }
