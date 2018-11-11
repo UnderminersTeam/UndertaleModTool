@@ -1,10 +1,12 @@
 ﻿using GraphVizWrapper;
 using GraphVizWrapper.Commands;
 using GraphVizWrapper.Queries;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -217,6 +219,12 @@ namespace UndertaleModTool
             }
         }
 
+        private static Dictionary<string, string> gettextJSON = null;
+        private void UpdateGettextJSON(string json)
+        {
+            gettextJSON = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+        }
+
         private async void DecompileCode(UndertaleCode code)
         {
             LoaderDialog dialog = new LoaderDialog("Decompiling", "Decompiling, please wait... This can take a while on complex scripts");
@@ -230,6 +238,8 @@ namespace UndertaleModTool
             UndertaleCode gettextCode = null;
             if (gettext == null)
                 gettextCode = (Application.Current.MainWindow as MainWindow).Data.Code.ByName("gml_Script_textdata_en");
+
+            string gettextJsonPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), "lang/lang_en.json");
 
             var dataa = (Application.Current.MainWindow as MainWindow).Data;
             Task t = Task.Run(() =>
@@ -247,6 +257,9 @@ namespace UndertaleModTool
 
                 if (gettextCode != null)
                     UpdateGettext(gettextCode);
+
+                if (gettextJSON == null)
+                    UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
 
                 Dispatcher.Invoke(() =>
                 {
@@ -313,7 +326,7 @@ namespace UndertaleModTool
                                 if (tok != "")
                                     split.Add(tok);
 
-                                Dictionary<string, UndertaleObject> usedObjects = new Dictionary<string, UndertaleObject>();
+                                Dictionary<string, object> usedObjects = new Dictionary<string, object>();
                                 for (int i = 0; i < split.Count; i++)
                                 {
                                     string token = split[i];
@@ -338,20 +351,29 @@ namespace UndertaleModTool
                                     {
                                         par.Inlines.Add(new Run(token) { Foreground = assetBrush, Cursor = Cursors.Hand });
                                         par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(dataa.ByName(token));
-                                    }
-                                    else if (funcs.ContainsKey(token))
-                                    {
-                                        par.Inlines.Add(new Run(token) { Foreground = funcBrush, Cursor = Cursors.Hand });
-                                        par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(funcs[token]);
                                         if (token == "scr_gettext" && gettext != null)
                                         {
                                             if (split[i + 1] == "(" && split[i + 2].StartsWith("\"") && split[i + 3].StartsWith("@") && split[i + 4] == ")")
                                             {
                                                 string id = split[i + 2].Substring(1, split[i + 2].Length - 2);
-                                                if(!usedObjects.ContainsKey(id))
+                                                if (!usedObjects.ContainsKey(id))
                                                     usedObjects.Add(id, (Application.Current.MainWindow as MainWindow).Data.Strings[gettext[id]]);
                                             }
                                         }
+                                        if (token == "scr_84_get_lang_string" && gettextJSON != null)
+                                        {
+                                            if (split[i + 1] == "(" && split[i + 2].StartsWith("\"") && split[i + 3].StartsWith("@") && split[i + 4] == ")")
+                                            {
+                                                string id = split[i + 2].Substring(1, split[i + 2].Length - 2);
+                                                if (!usedObjects.ContainsKey(id))
+                                                    usedObjects.Add(id, gettextJSON[id]);
+                                            }
+                                        }
+                                    }
+                                    else if (funcs.ContainsKey(token))
+                                    {
+                                        par.Inlines.Add(new Run(token) { Foreground = funcBrush, Cursor = Cursors.Hand });
+                                        par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(funcs[token]);
                                     }
                                     else if (Char.IsDigit(token[0]))
                                     {
@@ -423,8 +445,9 @@ namespace UndertaleModTool
                                     par.Inlines.Add(new Run(" // ") { Foreground = commentBrush });
                                     par.Inlines.Add(new Run(gt.Key) { Foreground = commentBrush });
                                     par.Inlines.Add(new Run(" = ") { Foreground = commentBrush });
-                                    par.Inlines.Add(new Run(gt.Value.ToString()) { Foreground = commentBrush, Cursor = Cursors.Hand });
-                                    par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(gt.Value);
+                                    par.Inlines.Add(new Run(gt.Value is string ? "\"" + (string)gt.Value + "\"" : gt.Value.ToString()) { Foreground = commentBrush, Cursor = Cursors.Hand });
+                                    if (gt.Value is UndertaleObject)
+                                        par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(gt.Value);
                                 }
                                 par.Inlines.Add(new Run("\n"));
                             }

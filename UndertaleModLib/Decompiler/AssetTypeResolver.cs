@@ -308,6 +308,8 @@ namespace UndertaleModLib.Decompiler
             { "draw_vertex_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
             { "draw_vertex_texture_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
 
+            { "distance_to_object", new AssetIDType[] { AssetIDType.GameObject } },
+
             // TODO: 3D drawing, didn't bother
 
             // TODO: surface drawing
