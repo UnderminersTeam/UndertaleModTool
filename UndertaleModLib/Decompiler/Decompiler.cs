@@ -150,7 +150,7 @@ namespace UndertaleModLib.Decompiler
                     }
                 }
                 
-                if (HUGE_HACK_FIX_THIS_SOON != null && AssetType != AssetIDType.Other && AssetType != AssetIDType.Color && AssetType != AssetIDType.KeyboardKey)
+                if (HUGE_HACK_FIX_THIS_SOON != null && AssetType != AssetIDType.Other && AssetType != AssetIDType.Color && AssetType != AssetIDType.KeyboardKey && AssetType != AssetIDType.e__VW && AssetType != AssetIDType.e__BG)
                 {
                     int val;
                     try
@@ -195,6 +195,11 @@ namespace UndertaleModLib.Decompiler
                     if (assetList != null && val >= 0 && val < assetList.Count)
                         return ((UndertaleNamedResource)assetList[val]).Name.Content;
                 }
+
+                if (AssetType == AssetIDType.e__VW)
+                    return "e__VW." + ((e__VW)Convert.ToUInt32(Value)).ToString();
+                if (AssetType == AssetIDType.e__BG)
+                    return "e__BG." + ((e__BG)Convert.ToUInt32(Value)).ToString();
 
                 if (AssetType == AssetIDType.Color && Value is IFormattable)
                 {
@@ -1428,12 +1433,26 @@ namespace UndertaleModLib.Decompiler
                 }
             } while (changed);
 
+            // TODO: This doesn't propagate to tempvars in broken switch statements but that will be cleaned up at some point
+            AssetIDType propType = AssetIDType.Other;
+            if (code.Name.Content == "gml_Script___view_set_internal" || code.Name.Content == "gml_Script___view_get")
+                propType = AssetIDType.e__VW;
+            if (code.Name.Content == "gml_Script___background_set_internal" || code.Name.Content == "gml_Script___background_get_internal")
+                propType = AssetIDType.e__BG;
+            if (propType != AssetIDType.Other)
+            {
+                var v = code.FindReferencedVars().Where((x) => x.Name.Content == "__prop").FirstOrDefault();
+                if (v != null)
+                    ExpressionVar.assetTypes.Add(v, propType);
+            }
+
             return blocks;
         }
 
         public static string Decompile(UndertaleCode code, UndertaleData data = null)
         {
             HUGE_HACK_FIX_THIS_SOON = data;
+            ExpressionVar.assetTypes.Clear();
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
             DecompileFromBlock(blocks[0]);
             FunctionCall.scriptArgs.Clear();
@@ -1448,7 +1467,6 @@ namespace UndertaleModLib.Decompiler
 
         private static void DoTypePropagation(Dictionary<uint, Block> blocks)
         {
-            ExpressionVar.assetTypes.Clear();
             foreach(var b in blocks.Values.Cast<Block>().Reverse())
             {
                 foreach(var s in b.Statements.Cast<Statement>().Reverse())

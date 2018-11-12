@@ -11,6 +11,8 @@ namespace UndertaleModLib.Decompiler
         Other = 0,
         Color,
         KeyboardKey,
+        e__VW, // The constant used in __view_get and __view_set compatibility scripts
+        e__BG, // The constant used in __background_get and __background_set compatibility scripts
 
         Sprite,
         Background,
@@ -23,6 +25,47 @@ namespace UndertaleModLib.Decompiler
         Script,
 
         Layer // GMS2
+    };
+
+    // TODO: I don't have a GMS2 license to check the actual generated values after import
+    // and the internet is strangely silent about a full list of these so some are just my guesses
+    // If you know what all of these are supposed to be, feel free to submit a pull request to fix these
+    // This is just whatever I managed to find in random compatibility reports on pastebin
+    public enum e__VW : uint
+    {
+        XView = 0,
+        YView = 1,
+        WView = 2,
+        HView = 3,
+        AngleView = 4, // ?
+        XBorder = 5, // ?
+        YBorder = 6, // ?
+        XSpeed = 7,
+        YSpeed = 8,
+        Object = 9,
+        Visible = 10,
+        XPort = 11,
+        YPort = 12,
+        WPort = 13,
+        HPort = 14,
+        Camera = 15, // ?
+        Surface = 16, // ?
+    };
+    public enum e__BG : uint
+    {
+        Visible = 0,
+        Foreground = 1, //?
+        BackgroundSprite = 2, //?
+        XOffset = 3, //?
+        YOffset = 4, //?
+        HTiled = 7, //?
+        VTiled = 8, //?
+        XScale = 9, //?
+        YScale = 10, //?
+        HSpeed = 11, //?
+        VSpeed = 12, //?
+        Blend = 13, //?
+        Alpha = 14, //?
     };
 
     internal class AssetTypeResolver
