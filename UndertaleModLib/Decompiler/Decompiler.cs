@@ -140,29 +140,24 @@ namespace UndertaleModLib.Decompiler
                     {
                         val = Convert.ToInt32(Value);
                     }
-                    catch(OverflowException e)
+                    catch(OverflowException)
                     {
                         val = Int32.MaxValue;
                     }
-                    if (val <= 0) // TODO: What about object ID=0?
+                    if (val < 0) 
                     {
-                        var instType = (UndertaleInstruction.InstanceType)val;
-
-                        if (instType != UndertaleInstruction.InstanceType.Undefined)
-                        {
-                            return instType.ToString().ToLower();
-                        }
+                        return ((UndertaleInstruction.InstanceType)val).ToString().ToLower();
                     }
                 }
                 
-                if (AssetType != AssetIDType.Other && AssetType != AssetIDType.Color && HUGE_HACK_FIX_THIS_SOON != null)
+                if (HUGE_HACK_FIX_THIS_SOON != null && AssetType != AssetIDType.Other && AssetType != AssetIDType.Color && AssetType != AssetIDType.KeyboardKey)
                 {
                     int val;
                     try
                     {
                         val = Convert.ToInt32(Value);
                     }
-                    catch (OverflowException e) // Toby what did you do
+                    catch (OverflowException) // Toby what did you do
                     {
                         val = Int32.MaxValue;
                     }
@@ -205,6 +200,15 @@ namespace UndertaleModLib.Decompiler
                 {
                     uint val = Convert.ToUInt32(Value);
                     return "0x" + ((IFormattable)Value).ToString(val > 0xFFFFFF ? "X8" : "X6", CultureInfo.InvariantCulture);
+                }
+
+                if (AssetType == AssetIDType.KeyboardKey)
+                {
+                    uint val = Convert.ToUInt32(Value);
+                    if (!Char.IsControl((char)val))
+                        return "'" + (char)val + "'";
+                    if (Enum.IsDefined(typeof(EventSubtypeKey), val))
+                        return ((EventSubtypeKey)val).ToString();
                 }
 
                 return ((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());

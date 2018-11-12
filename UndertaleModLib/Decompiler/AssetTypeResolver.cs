@@ -10,6 +10,8 @@ namespace UndertaleModLib.Decompiler
     {
         Other = 0,
         Color,
+        KeyboardKey,
+
         Sprite,
         Background,
         Sound,
@@ -19,6 +21,7 @@ namespace UndertaleModLib.Decompiler
         Room,
         GameObject, // or GameObjectInstance, these are interchangable
         Script,
+
         Layer // GMS2
     };
 
@@ -330,7 +333,7 @@ namespace UndertaleModLib.Decompiler
             { "mp_potential_path_object", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
             // mp_grid only relevant ones because I'm lazy
             { "mp_grid_path", new AssetIDType[] { AssetIDType.Other, AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-            { "mp_grid_add_instances", new AssetIDType[] { AssetIDType.Other, AssetIDType.Path, AssetIDType.Other } },
+            { "mp_grid_add_instances", new AssetIDType[] { AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other } },
 
             // TODO: 3D drawing, didn't bother
 
@@ -340,6 +343,19 @@ namespace UndertaleModLib.Decompiler
 
             // TODO: GMS2 tilemaps
             // TODO: GMS2 layers
+            
+            { "io_clear", new AssetIDType[] { } },
+            { "keyboard_check", new AssetIDType[] { AssetIDType.KeyboardKey } },
+            { "keyboard_check_pressed", new AssetIDType[] { AssetIDType.KeyboardKey } },
+            { "keyboard_check_released", new AssetIDType[] { AssetIDType.KeyboardKey } },
+            { "keyboard_check_direct", new AssetIDType[] { AssetIDType.KeyboardKey } },
+            { "keyboard_key_press", new AssetIDType[] { AssetIDType.KeyboardKey } },
+            { "keyboard_key_release", new AssetIDType[] { AssetIDType.KeyboardKey } },
+            { "keyboard_set_map", new AssetIDType[] { AssetIDType.KeyboardKey, AssetIDType.KeyboardKey } },
+            { "keyboard_get_map", new AssetIDType[] { AssetIDType.KeyboardKey } },
+            { "keyboard_unset_map", new AssetIDType[] { AssetIDType.KeyboardKey } },
+            { "keyboard_set_numlock", new AssetIDType[] { AssetIDType.Other } },
+            { "keyboard_get_numlock", new AssetIDType[] { } },
         };
 
         public static Dictionary<string, AssetIDType> builtin_vars = new Dictionary<string, AssetIDType>()
@@ -353,7 +369,10 @@ namespace UndertaleModLib.Decompiler
             { "room", AssetIDType.Room },
             { "object_index", AssetIDType.GameObject },
             { "sprite_index", AssetIDType.Sprite },
+            { "image_blend", AssetIDType.Color },
             { "event_object", AssetIDType.GameObject },
+            { "keyboard_key", AssetIDType.KeyboardKey },
+            { "keyboard_lastkey", AssetIDType.KeyboardKey },
         };
 
         internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, Dictionary<string, AssetIDType[]> scriptArgs)
