@@ -150,7 +150,7 @@ namespace UndertaleModLib.Decompiler
                     }
                 }
                 
-                if (HUGE_HACK_FIX_THIS_SOON != null && AssetType != AssetIDType.Other && AssetType != AssetIDType.Color && AssetType != AssetIDType.KeyboardKey && AssetType != AssetIDType.e__VW && AssetType != AssetIDType.e__BG)
+                if (HUGE_HACK_FIX_THIS_SOON != null && AssetType != AssetIDType.Other && AssetType != AssetIDType.Color && AssetType != AssetIDType.KeyboardKey && AssetType != AssetIDType.e__VW && AssetType != AssetIDType.e__BG && AssetType != AssetIDType.Enum_HAlign && AssetType != AssetIDType.Enum_VAlign)
                 {
                     int val;
                     try
@@ -200,6 +200,11 @@ namespace UndertaleModLib.Decompiler
                     return "e__VW." + ((e__VW)Convert.ToUInt32(Value)).ToString();
                 if (AssetType == AssetIDType.e__BG)
                     return "e__BG." + ((e__BG)Convert.ToUInt32(Value)).ToString();
+
+                if (AssetType == AssetIDType.Enum_HAlign)
+                    return ((HAlign)Convert.ToUInt32(Value)).ToString();
+                if (AssetType == AssetIDType.Enum_VAlign)
+                    return ((VAlign)Convert.ToUInt32(Value)).ToString();
 
                 if (AssetType == AssetIDType.Color && Value is IFormattable)
                 {

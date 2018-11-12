@@ -11,6 +11,8 @@ namespace UndertaleModLib.Decompiler
         Other = 0,
         Color,
         KeyboardKey,
+        Enum_HAlign,
+        Enum_VAlign,
         e__VW, // The constant used in __view_get and __view_set compatibility scripts
         e__BG, // The constant used in __background_get and __background_set compatibility scripts
 
@@ -26,6 +28,20 @@ namespace UndertaleModLib.Decompiler
 
         Layer // GMS2
     };
+
+    public enum HAlign : uint
+    {
+        fa_left = 0,
+        fa_center = 1,
+        fa_right = 2
+    };
+
+    public enum VAlign : uint
+    {
+        fa_top = 0,
+        fa_middle = 1,
+        fa_bottom = 2
+    }
 
     // TODO: I don't have a GMS2 license to check the actual generated values after import
     // and the internet is strangely silent about a full list of these so some are just my guesses
@@ -346,6 +362,8 @@ namespace UndertaleModLib.Decompiler
             { "draw_background_general", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
 
             { "draw_set_font", new AssetIDType[] { AssetIDType.Font } },
+            { "draw_set_halign", new AssetIDType[] { AssetIDType.Enum_HAlign } },
+            { "draw_set_valign", new AssetIDType[] { AssetIDType.Enum_VAlign } },
             { "draw_text_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
             { "draw_text_ext_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
             { "draw_text_transformed_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
