@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib" 
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleRoom}" x:Name="StupidBug">
     <UserControl.Resources>
@@ -19,6 +20,11 @@
             <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.GameObjects}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=PreviewPath, Converter={StaticResource SimplePointsDisplayConverter}}"/>
         </CompositeCollection>
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="AnimationSpeedType">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="undertale:AnimationSpeedType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
     </UserControl.Resources>
 
     <UserControl.CommandBindings>
@@ -129,6 +135,17 @@
 
             <TreeView Grid.Column="0" Margin="3" SelectedItemChanged="TreeView_SelectedItemChanged" Name="RoomObjectsTree" KeyDown="RoomObjectsTree_KeyDown" MouseDoubleClick="RoomObjectsTree_MouseDoubleClick">
                 <TreeViewItem Header="Backgrounds" ItemsSource="{Binding Backgrounds}" IsExpanded="True">
+                    <TreeViewItem.Style>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
+                                    <DataTrigger.Setters>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger.Setters>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TreeViewItem.Style>
                     <TreeViewItem.ItemTemplate>
                         <HierarchicalDataTemplate>
                             <TextBlock Text="{Binding BackgroundDefinition, TargetNullValue='(no name)'}">
@@ -165,20 +182,56 @@
                 <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects}" IsExpanded="True">
                     <TreeViewItem.ItemTemplate>
                         <HierarchicalDataTemplate>
-                            <TextBlock Text="{Binding ObjectDefinition, TargetNullValue='(no name)'}" />
+                            <TextBlock> <!--  Text="{Binding ObjectDefinition, TargetNullValue='(no name)'}" -->
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}Instance {0} of {1} (UndertaleRoom+GameObject)">
+                                        <Binding Path="InstanceID"/>
+                                        <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
                         </HierarchicalDataTemplate>
                     </TreeViewItem.ItemTemplate>
                 </TreeViewItem>
                 <TreeViewItem Header="Tiles" ItemsSource="{Binding Tiles}" IsExpanded="True">
+                    <TreeViewItem.Style>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
+                                    <DataTrigger.Setters>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger.Setters>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TreeViewItem.Style>
                     <TreeViewItem.ItemTemplate>
                         <HierarchicalDataTemplate>
                             <TextBlock Text="{Binding BackgroundDefinition, TargetNullValue='(no name)'}" />
                         </HierarchicalDataTemplate>
                     </TreeViewItem.ItemTemplate>
                 </TreeViewItem>
+                <TreeViewItem Header="Layers" ItemsSource="{Binding Layers}" IsExpanded="True">
+                    <TreeViewItem.Style>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Collapsed">
+                                    <DataTrigger.Setters>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger.Setters>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TreeViewItem.Style>
+                    <TreeViewItem.ItemTemplate>
+                        <HierarchicalDataTemplate>
+                            <TextBlock Text="{Binding LayerName.Content}" />
+                        </HierarchicalDataTemplate>
+                    </TreeViewItem.ItemTemplate>
+                </TreeViewItem>
             </TreeView>
 
-            <ContentControl Grid.Column="1" Margin="3" Name="ObjectEditor">
+            <ScrollViewer Grid.Column="1" Margin="3" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                 <ContentControl.Resources>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Background}">
                         <Grid>
@@ -382,6 +435,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Position</TextBlock>
@@ -431,8 +485,217 @@
                             <local:ColorPicker Grid.Row="6" Grid.Column="1" Margin="3" Color="{Binding Color}"/>
                         </Grid>
                     </DataTemplate>
+                    
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="3*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Layer name</TextBlock>
+                            <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding LayerName}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Layer id</TextBlock>
+                            <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding LayerId}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Layer type</TextBlock>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding LayerType}" FontWeight="Bold"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Depth</TextBlock>
+                            <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding LayerDepth}"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Offset</TextBlock>
+                            <Grid Grid.Row="4" Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Margin="3" Text="{Binding XOffset}" ToolTip="X"/>
+                                <TextBox Grid.Column="1" Margin="3" Text="{Binding YOffset}" ToolTip="Y"/>
+                            </Grid>
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Speed</TextBlock>
+                            <Grid Grid.Row="5" Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Margin="3" Text="{Binding HSpeed}" ToolTip="Horizontal"/>
+                                <TextBox Grid.Column="1" Margin="3" Text="{Binding VSpeed}" ToolTip="Vertical"/>
+                            </Grid>
+
+                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Visible</TextBlock>
+                            <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding IsVisible}"/>
+
+                            <Separator Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"/>
+
+                            <ContentControl Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Content="{Binding Data}">
+                                <ContentControl.Resources>
+                                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerInstancesData}">
+                                        <DataGrid Margin="3" ItemsSource="{Binding Instances}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
+                                            <DataGrid.Resources>
+                                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                                                <Style TargetType="{x:Type DataGridCell}">
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                                                <Grid Background="{TemplateBinding Background}">
+                                                                    <ContentPresenter VerticalAlignment="Center" />
+                                                                </Grid>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate>
+                                                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </DataGrid.Resources>
+                                            <DataGrid.Columns>
+                                                <DataGridTemplateColumn Width="*">
+                                                    <DataGridTemplateColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding ., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleRoom+GameObject}" CanRemove="False" /> <!-- TODO: with my luck, this . won't update --> <!-- TODO: also, double-click should probably do something different-->
+                                                        </DataTemplate>
+                                                    </DataGridTemplateColumn.CellTemplate>
+                                                </DataGridTemplateColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </DataTemplate>
+                                    
+                                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerTilesData}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1*"/>
+                                                <ColumnDefinition Width="3*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Size</TextBlock>
+                                            <Grid Grid.Row="0" Grid.Column="1">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox Grid.Column="0" Margin="3" Text="{Binding TilesX}" ToolTip="Horizontal"/>
+                                                <TextBox Grid.Column="1" Margin="3" Text="{Binding TilesY}" ToolTip="Vertical"/>
+                                            </Grid>
+
+                                            <Expander Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Header="Tile data">
+                                                <ScrollViewer HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
+                                                    <ItemsControl ItemsSource="{Binding TileData}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel Orientation="Vertical" />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <ItemsControl ItemsSource="{Binding .}">
+                                                                    <ItemsControl.ItemsPanel>
+                                                                        <ItemsPanelTemplate>
+                                                                            <StackPanel Orientation="Horizontal" />
+                                                                        </ItemsPanelTemplate>
+                                                                    </ItemsControl.ItemsPanel>
+                                                                    <ItemsControl.ItemTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBox Text="{Binding .}" Width="30" Height="30"/> <!-- TODO: this is crazy slow -->
+                                                                        </DataTemplate>
+                                                                    </ItemsControl.ItemTemplate>
+                                                                </ItemsControl>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </ScrollViewer>
+                                            </Expander>
+                                        </Grid>
+                                    </DataTemplate>
+
+                                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1*"/>
+                                                <ColumnDefinition Width="3*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Visible</TextBlock>
+                                            <CheckBox Grid.Row="0" Grid.Column="1" Margin="3" IsChecked="{Binding Visible}"/>
+
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Foreground</TextBlock>
+                                            <CheckBox Grid.Row="1" Grid.Column="1" Margin="3" IsChecked="{Binding Foreground}"/>
+
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Sprite</TextBlock>
+                                            <local:UndertaleObjectReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleSprite}" CanRemove="False"/>
+
+                                            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Tiling</TextBlock>
+                                            <Grid Grid.Row="3" Grid.Column="1">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <CheckBox Grid.Column="0" Margin="3" IsChecked="{Binding TiledHorizontally}" ToolTip="Horizontal"/>
+                                                <CheckBox Grid.Column="1" Margin="3" IsChecked="{Binding TiledVertically}" ToolTip="Vertical"/>
+                                            </Grid>
+
+                                            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Stretch</TextBlock>
+                                            <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Stretch}"/>
+
+                                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Color</TextBlock>
+                                            <local:ColorPicker Grid.Row="5" Grid.Column="1" Margin="3" Color="{Binding Color}"/>
+
+                                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">First frame</TextBlock>
+                                            <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding FirstFrame}"/>
+
+                                            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Animation speed</TextBlock>
+                                            <Grid Grid.Row="7" Grid.Column="1" Margin="3">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="2*"/>
+                                                    <ColumnDefinition Width="1*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBox Grid.Column="0" Text="{Binding AnimationSpeed}"/>
+                                                <ComboBox Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
+                                            </Grid>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ContentControl.Resources>
+                            </ContentControl>
+                        </Grid>
+                    </DataTemplate>
                 </ContentControl.Resources>
-            </ContentControl>
+            </ScrollViewer>
         </Grid>
 
         <Viewbox Stretch="Uniform" StretchDirection="DownOnly">

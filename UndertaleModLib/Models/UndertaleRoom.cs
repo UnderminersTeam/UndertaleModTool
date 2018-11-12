@@ -143,8 +143,23 @@ namespace UndertaleModLib.Models
             if (reader.ReadUndertaleObject<UndertalePointerList<Tile>>() != Tiles)
                 throw new IOException();
             if (reader.undertaleData.GeneralInfo.Major >= 2)
+            {
                 if (reader.ReadUndertaleObject<UndertalePointerList<Layer>>() != Layers)
                     throw new IOException();
+
+                // Resolve the object IDs
+                foreach(var layer in Layers)
+                {
+                    if (layer.InstancesData != null)
+                    {
+                        layer.InstancesData.Instances.Clear();
+                        foreach(var id in layer.InstancesData._InstanceIds)
+                        {
+                            layer.InstancesData.Instances.Add(GameObjects.ByInstanceID(id));
+                        }
+                    }
+                }
+            }
         }
 
         public override string ToString()
@@ -340,6 +355,11 @@ namespace UndertaleModLib.Models
                 if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 16) // TODO: is that dependent on bytecode or something else?
                     _PreCreateCode.Unserialize(reader, reader.ReadInt32()); // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
             }
+
+            public override string ToString()
+            {
+                return "Instance " + InstanceID + " of " + (ObjectDefinition?.Name?.Content ?? "?") + " (UndertaleRoom+GameObject)";
+            }
         }
 
         public class Tile : UndertaleObject, RoomObject, INotifyPropertyChanged
@@ -414,22 +434,39 @@ namespace UndertaleModLib.Models
             Assets = 3
         }
 
-        public class Layer : UndertaleObject
+        public class Layer : UndertaleObject, INotifyPropertyChanged
         {
-            public UndertaleString LayerName; // "Instances" // "Tiles_1" // "Background"
-            public uint LayerId; // 0 // 1 // 2
-            public LayerType LayerType; // 2 // 4 // 1
-            public uint LayerDepth; // 0 // 100 // 200
-            public float XOffset; // 0 // 0 // 0
-            public float YOffset; // 0 // 0 // 0
-            public float HSpeed; // 0 // 0 // 0
-            public float VSpeed; // 0 // 0 // 0
-            public bool IsVisible; // 1 // 1 // 1
+            public interface LayerData : UndertaleObject
+            {
+            }
 
-            public LayerInstancesData InstancesData;
-            public LayerTilesData TilesData;
-            public LayerBackgroundData BackgroundData;
-            public LayerAssetsData AssetsData;
+            private UndertaleString _LayerName;
+            private uint _LayerId;
+            private LayerType _LayerType;
+            private int _LayerDepth;
+            private float _XOffset;
+            private float _YOffset;
+            private float _HSpeed;
+            private float _VSpeed;
+            private bool _IsVisible;
+            private LayerData _Data;
+
+            public UndertaleString LayerName { get => _LayerName; set { _LayerName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LayerName")); } }
+            public uint LayerId { get => _LayerId; set { _LayerId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LayerId")); } }
+            public LayerType LayerType { get => _LayerType; set { _LayerType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LayerType")); } }
+            public int LayerDepth { get => _LayerDepth; set { _LayerDepth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LayerDepth")); } }
+            public float XOffset { get => _XOffset; set { _XOffset = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("XOffset")); } }
+            public float YOffset { get => _YOffset; set { _YOffset = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("YOffset")); } }
+            public float HSpeed { get => _HSpeed; set { _HSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("HSpeed")); } }
+            public float VSpeed { get => _VSpeed; set { _VSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("VSpeed")); } }
+            public bool IsVisible { get => _IsVisible; set { _IsVisible = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsVisible")); } }
+            public LayerData Data { get => _Data; set { _Data = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data")); } }
+            public LayerInstancesData InstancesData => _Data as LayerInstancesData;
+            public LayerTilesData TilesData => _Data as LayerTilesData;
+            public LayerBackgroundData BackgroundData => _Data as LayerBackgroundData;
+            public LayerAssetsData AssetsData => _Data as LayerAssetsData;
+
+            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -469,7 +506,7 @@ namespace UndertaleModLib.Models
                 LayerName = reader.ReadUndertaleString();
                 LayerId = reader.ReadUInt32();
                 LayerType = (LayerType)reader.ReadUInt32();
-                LayerDepth = reader.ReadUInt32();
+                LayerDepth = reader.ReadInt32();
                 XOffset = reader.ReadSingle();
                 YOffset = reader.ReadSingle();
                 HSpeed = reader.ReadSingle();
@@ -477,141 +514,197 @@ namespace UndertaleModLib.Models
                 IsVisible = reader.ReadBoolean();
                 if (LayerType == LayerType.Instances)
                 {
-                    InstancesData = reader.ReadUndertaleObject<LayerInstancesData>();
+                    Data = reader.ReadUndertaleObject<LayerInstancesData>();
                 }
                 else if (LayerType == LayerType.Tiles)
                 {
-                    TilesData = reader.ReadUndertaleObject<LayerTilesData>();
+                    Data = reader.ReadUndertaleObject<LayerTilesData>();
                 }
                 else if (LayerType == LayerType.Background)
                 {
-                    BackgroundData = reader.ReadUndertaleObject<LayerBackgroundData>();
+                    Data = reader.ReadUndertaleObject<LayerBackgroundData>();
                 }
                 else if (LayerType == LayerType.Assets)
                 {
-                    AssetsData = reader.ReadUndertaleObject<LayerAssetsData>();
+                    Data = reader.ReadUndertaleObject<LayerAssetsData>();
                 }
                 else
                 {
                     throw new Exception("Unsupported layer type " + LayerType);
                 }
             }
-        }
-    }
 
-    public class LayerInstancesData : UndertaleObject
-    {
-        public uint[] InstanceIds; // 100000, 100001, 100002, 100003 - probably instance ids from GameObjects list in the room
-                                   // confirmed
+            public class LayerInstancesData : LayerData
+            {
+                internal uint[] _InstanceIds { get; private set; } // 100000, 100001, 100002, 100003 - instance ids from GameObjects list in the room
+                public List<UndertaleRoom.GameObject> Instances { get; private set; } = new List<UndertaleRoom.GameObject>();
 
-        public void Serialize(UndertaleWriter writer)
-        {
-            writer.Write((uint)InstanceIds.Length);
-            foreach (var id in InstanceIds)
-                writer.Write(id);
-        }
+                public void Serialize(UndertaleWriter writer)
+                {
+                    writer.Write((uint)Instances.Count);
+                    foreach (var obj in Instances)
+                        writer.Write(obj.InstanceID);
+                }
 
-        public void Unserialize(UndertaleReader reader)
-        {
-            uint InstanceCount = reader.ReadUInt32();
-            InstanceIds = new uint[InstanceCount];
-            for (uint i = 0; i < InstanceCount; i++)
-                InstanceIds[i] = reader.ReadUInt32();
-        }
-    }
+                public void Unserialize(UndertaleReader reader)
+                {
+                    uint InstanceCount = reader.ReadUInt32();
+                    _InstanceIds = new uint[InstanceCount];
+                    Instances.Clear();
+                    for (uint i = 0; i < InstanceCount; i++)
+                        _InstanceIds[i] = reader.ReadUInt32();
+                    // UndertaleRoom.Unserialize resolves these IDs to objects later
+                }
+            }
 
-    public class LayerTilesData : UndertaleObject
-    {
-        public UndertaleResourceById<UndertaleBackground> Background = new UndertaleResourceById<UndertaleBackground>("BGND"); // In GMS2 backgrounds are just tilesets
-        public uint TilesX;
-        public uint TilesY;
-        public uint[] TileData; // Each is simply an ID from the tileset/background/sprite
+            public class LayerTilesData : LayerData, INotifyPropertyChanged
+            {
+                private UndertaleResourceById<UndertaleBackground> _Background = new UndertaleResourceById<UndertaleBackground>("BGND"); // In GMS2 backgrounds are just tilesets
+                private uint _TilesX;
+                private uint _TilesY;
+                private uint[][] _TileData; // Each is simply an ID from the tileset/background/sprite
 
-        public void Serialize(UndertaleWriter writer)
-        {
-            writer.Write(Background.Serialize(writer));
-            writer.Write(TilesX);
-            writer.Write(TilesY);
-            if (TileData.Length != TilesX * TilesY)
-                throw new Exception("Invalid TileData length");
-            foreach (var tile in TileData)
-                writer.Write(tile);
-        }
+                public UndertaleBackground Background { get => _Background.Resource; set { _Background.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Background")); } }
+                public uint TilesX { get => _TilesX; set {
+                        _TilesX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TilesX"));
+                        if (_TileData != null)
+                        {
+                            for(var y = 0; y < _TileData.Length; y++)
+                            {
+                                Array.Resize(ref _TileData[y], (int)value);
+                            }
+                            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileData"));
+                        }
+                    } }
+                public uint TilesY { get => _TilesY; set {
+                        _TilesY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TilesY"));
+                        if (_TileData != null)
+                        {
+                            Array.Resize(ref _TileData, (int)value);
+                            for (var y = 0; y < _TileData.Length; y++)
+                            {
+                                if (_TileData[y] == null)
+                                    _TileData[y] = new uint[TilesX];
+                            }
+                            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileData"));
+                        }
+                    } }
+                public uint[][] TileData { get => _TileData; set { _TileData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileData")); } }
 
-        public void Unserialize(UndertaleReader reader)
-        {
-            Background.Unserialize(reader, reader.ReadInt32());
-            TilesX = reader.ReadUInt32();
-            TilesY = reader.ReadUInt32();
-            TileData = new uint[TilesX * TilesY];
-            for (uint i = 0; i < TilesX * TilesY; i++)
-                TileData[i] = reader.ReadUInt32();
-        }
-    }
+                public event PropertyChangedEventHandler PropertyChanged;
 
-    public class LayerBackgroundData : UndertaleObject
-    {
-        public bool Visible;
-        public bool Foreground;
-        public UndertaleResourceById<UndertaleSprite> Sprite = new UndertaleResourceById<UndertaleSprite>("SPRT"); // Apparently there's a mode where it's a background reference, but probably not necessary
-        public bool TiledHorizontally;
-        public bool TiledVertically;
-        public bool Stretch;
-        public int Color; // includes alpha channel
-        public float FirstFrame;
-        public float AnimationSpeed;
-        public int AnimationSpeedType; // 0 means it's in FPS, 1 means it's in "frames per game frame", I believe
+                public void Serialize(UndertaleWriter writer)
+                {
+                    writer.Write(_Background.Serialize(writer));
+                    writer.Write(TilesX);
+                    writer.Write(TilesY);
+                    if (TileData.Length != TilesY)
+                        throw new Exception("Invalid TileData row length");
+                    foreach (var row in TileData)
+                    {
+                        if (row.Length != TilesX)
+                            throw new Exception("Invalid TileData column length");
+                        foreach (var tile in row)
+                            writer.Write(tile);
+                    }
+                }
 
-        public void Serialize(UndertaleWriter writer)
-        {
-            writer.Write(Visible);
-            writer.Write(Foreground);
-            writer.Write(Sprite.Serialize(writer));
-            writer.Write(TiledHorizontally);
-            writer.Write(TiledVertically);
-            writer.Write(Stretch);
-            writer.Write(Color);
-            writer.Write(FirstFrame);
-            writer.Write(AnimationSpeed);
-            writer.Write(AnimationSpeedType);
-        }
+                public void Unserialize(UndertaleReader reader)
+                {
+                    _Background.Unserialize(reader, reader.ReadInt32());
+                    _TileData = null; // prevent unnecessary resizes
+                    TilesX = reader.ReadUInt32();
+                    TilesY = reader.ReadUInt32();
+                    TileData = new uint[TilesY][];
+                    for (uint y = 0; y < TilesY; y++)
+                    {
+                        TileData[y] = new uint[TilesX];
+                        for (uint x = 0; x < TilesX; x++)
+                        {
+                            TileData[y][x] = reader.ReadUInt32();
+                        }
+                    }
+                }
+            }
 
-        public void Unserialize(UndertaleReader reader)
-        {
-            Visible = reader.ReadBoolean();
-            Foreground = reader.ReadBoolean();
-            Sprite.Unserialize(reader, reader.ReadInt32());
-            TiledHorizontally = reader.ReadBoolean();
-            TiledVertically = reader.ReadBoolean();
-            Stretch = reader.ReadBoolean();
-            Color = reader.ReadInt32();
-            FirstFrame = reader.ReadSingle();
-            AnimationSpeed = reader.ReadSingle();
-            AnimationSpeedType = reader.ReadInt32();
-        }
-    }
+            public class LayerBackgroundData : LayerData, INotifyPropertyChanged
+            {
+                private bool _Visible;
+                private bool _Foreground;
+                private UndertaleResourceById<UndertaleSprite> _Sprite = new UndertaleResourceById<UndertaleSprite>("SPRT"); // Apparently there's a mode where it's a background reference, but probably not necessary
+                private bool _TiledHorizontally;
+                private bool _TiledVertically;
+                private bool _Stretch;
+                private uint _Color; // includes alpha channel
+                private float _FirstFrame;
+                private float _AnimationSpeed;
+                private AnimationSpeedType _AnimationSpeedType; // 0 means it's in FPS, 1 means it's in "frames per game frame", I believe
 
-    public class LayerAssetsData : UndertaleObject
-    {
-        public UndertalePointerList<AssetLegacyTileItem> LegacyTiles;
-        public UndertalePointerList<AssetSpriteItem> Sprites;
+                public bool Visible { get => _Visible; set { _Visible = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Visible")); } }
+                public bool Foreground { get => _Foreground; set { _Foreground = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Foreground")); } }
+                public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sprite")); } }
+                public bool TiledHorizontally { get => _TiledHorizontally; set { _TiledHorizontally = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TiledHorizontally")); } }
+                public bool TiledVertically { get => _TiledVertically; set { _TiledVertically = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TiledVertically")); } }
+                public bool Stretch { get => _Stretch; set { _Stretch = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Stretch")); } }
+                public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
+                public float FirstFrame { get => _FirstFrame; set { _FirstFrame = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FirstFrame")); } }
+                public float AnimationSpeed { get => _AnimationSpeed; set { _AnimationSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AnimationSpeed")); } }
+                public AnimationSpeedType AnimationSpeedType { get => _AnimationSpeedType; set { _AnimationSpeedType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AnimationSpeedType")); } }
 
-        public void Serialize(UndertaleWriter writer)
-        {
-            writer.WriteUndertaleObjectPointer(LegacyTiles);
-            writer.WriteUndertaleObjectPointer(Sprites);
-            writer.WriteUndertaleObject(LegacyTiles);
-            writer.WriteUndertaleObject(Sprites);
-        }
+                public event PropertyChangedEventHandler PropertyChanged;
 
-        public void Unserialize(UndertaleReader reader)
-        {
-            LegacyTiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetLegacyTileItem>>();
-            Sprites = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetSpriteItem>>();
-            if (reader.ReadUndertaleObject<UndertalePointerList<AssetLegacyTileItem>>() != LegacyTiles)
-                throw new IOException("LegacyTiles misaligned");
-            if (reader.ReadUndertaleObject<UndertalePointerList<AssetSpriteItem>>() != Sprites)
-                throw new IOException("Sprites misaligned");
+                public void Serialize(UndertaleWriter writer)
+                {
+                    writer.Write(Visible);
+                    writer.Write(Foreground);
+                    writer.Write(_Sprite.Serialize(writer));
+                    writer.Write(TiledHorizontally);
+                    writer.Write(TiledVertically);
+                    writer.Write(Stretch);
+                    writer.Write(Color);
+                    writer.Write(FirstFrame);
+                    writer.Write(AnimationSpeed);
+                    writer.Write((uint)AnimationSpeedType);
+                }
+
+                public void Unserialize(UndertaleReader reader)
+                {
+                    Visible = reader.ReadBoolean();
+                    Foreground = reader.ReadBoolean();
+                    _Sprite.Unserialize(reader, reader.ReadInt32());
+                    TiledHorizontally = reader.ReadBoolean();
+                    TiledVertically = reader.ReadBoolean();
+                    Stretch = reader.ReadBoolean();
+                    Color = reader.ReadUInt32();
+                    FirstFrame = reader.ReadSingle();
+                    AnimationSpeed = reader.ReadSingle();
+                    AnimationSpeedType = (AnimationSpeedType)reader.ReadUInt32();
+                }
+            }
+
+            public class LayerAssetsData : LayerData
+            {
+                public UndertalePointerList<AssetLegacyTileItem> LegacyTiles;
+                public UndertalePointerList<AssetSpriteItem> Sprites;
+
+                public void Serialize(UndertaleWriter writer)
+                {
+                    writer.WriteUndertaleObjectPointer(LegacyTiles);
+                    writer.WriteUndertaleObjectPointer(Sprites);
+                    writer.WriteUndertaleObject(LegacyTiles);
+                    writer.WriteUndertaleObject(Sprites);
+                }
+
+                public void Unserialize(UndertaleReader reader)
+                {
+                    LegacyTiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetLegacyTileItem>>();
+                    Sprites = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetSpriteItem>>();
+                    if (reader.ReadUndertaleObject<UndertalePointerList<AssetLegacyTileItem>>() != LegacyTiles)
+                        throw new IOException("LegacyTiles misaligned");
+                    if (reader.ReadUndertaleObject<UndertalePointerList<AssetSpriteItem>>() != Sprites)
+                        throw new IOException("Sprites misaligned");
+                }
+            }
         }
     }
 
@@ -689,7 +782,7 @@ namespace UndertaleModLib.Models
         public float ScaleY;
         public int Color;
         public float AnimationSpeed;
-        public int AnimationSpeedType; // 0 is FPS, 1 is "frames per game frame" I believe
+        public AnimationSpeedType AnimationSpeedType;
         public float FrameIndex;
         public float Rotation; 
 
@@ -703,7 +796,7 @@ namespace UndertaleModLib.Models
             writer.Write(ScaleY);
             writer.Write(Color);
             writer.Write(AnimationSpeed);
-            writer.Write(AnimationSpeedType);
+            writer.Write((uint)AnimationSpeedType);
             writer.Write(FrameIndex);
             writer.Write(Rotation);
         }
@@ -718,10 +811,16 @@ namespace UndertaleModLib.Models
             ScaleY = reader.ReadSingle();
             Color = reader.ReadInt32();
             AnimationSpeed = reader.ReadSingle();
-            AnimationSpeedType = reader.ReadInt32();
+            AnimationSpeedType = (AnimationSpeedType)reader.ReadUInt32();
             FrameIndex = reader.ReadSingle();
             Rotation = reader.ReadSingle();
         }
+    }
+
+    public enum AnimationSpeedType : uint
+    {
+        FPS = 0,
+        FramesPerGameFrame = 1,
     }
 
     public static class UndertaleRoomExtensions
