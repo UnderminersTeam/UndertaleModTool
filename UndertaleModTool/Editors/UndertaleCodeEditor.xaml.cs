@@ -258,7 +258,7 @@ namespace UndertaleModTool
                 if (gettextCode != null)
                     UpdateGettext(gettextCode);
 
-                if (gettextJSON == null)
+                if (gettextJSON == null && File.Exists(gettextJsonPath))
                     UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
 
                 Dispatcher.Invoke(() =>
@@ -330,7 +330,7 @@ namespace UndertaleModTool
                                 for (int i = 0; i < split.Count; i++)
                                 {
                                     string token = split[i];
-                                    if (token == "if" || token == "else" || token == "return" || token == "break" || token == "continue" || token == "while" || token == "with")
+                                    if (token == "if" || token == "else" || token == "return" || token == "break" || token == "continue" || token == "while" || token == "with" || token == "switch" || token == "case" || token == "default")
                                         par.Inlines.Add(new Run(token) { Foreground = keywordBrush, FontWeight = FontWeights.Bold });
                                     else if (token == "self" || token == "global" || token == "local" || token == "other" || token == "noone" || token == "true" || token == "false")
                                         par.Inlines.Add(new Run(token) { Foreground = keywordBrush });

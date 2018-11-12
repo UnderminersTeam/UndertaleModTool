@@ -209,10 +209,10 @@ namespace UndertaleModLib.Decompiler
 
                 if (AssetType == AssetIDType.KeyboardKey)
                 {
-                    uint val = Convert.ToUInt32(Value);
+                    int val = Convert.ToInt32(Value);
                     if (!Char.IsControl((char)val) && !Char.IsLower((char)val)) // The special keys overlay with the uppercase letters (ugh)
                         return "'" + (char)val + "'";
-                    if (Enum.IsDefined(typeof(EventSubtypeKey), val))
+                    if (val > 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
                         return ((EventSubtypeKey)val).ToString();
                 }
 
@@ -1137,6 +1137,65 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        public class HLSwitchStatement : HLStatement
+        {
+            private Expression SwitchExpression;
+            private List<HLSwitchCaseStatement> Cases;
+
+            public HLSwitchStatement(Expression switchExpression, List<HLSwitchCaseStatement> cases)
+            {
+                this.SwitchExpression = switchExpression;
+                this.Cases = cases;
+            }
+
+            public override string ToString()
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("switch " + SwitchExpression.ToString() + "\n");
+                sb.Append("{\n");
+                foreach(var casee in Cases)
+                {
+                    sb.Append("    ");
+                    sb.Append(casee.ToString().Replace("\n", "\n    "));
+                    sb.Append("\n");
+                }
+                sb.Append("}\n");
+                return sb.ToString();
+            }
+        }
+
+        public class HLSwitchCaseStatement : HLStatement
+        {
+            private List<Expression> CaseExpressions;
+            private BlockHLStatement Block;
+
+            public HLSwitchCaseStatement(List<Expression> caseExpressions, BlockHLStatement block)
+            {
+                Debug.Assert(caseExpressions.Count > 0);
+                this.CaseExpressions = caseExpressions;
+                this.Block = block;
+            }
+
+            public override string ToString()
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach(Expression caseExpr in CaseExpressions)
+                {
+                    if (caseExpr != null)
+                        sb.Append("case " + caseExpr.ToString() + ":\n");
+                    else
+                        sb.Append("default:\n");
+                }
+                if (Block.Statements.Count > 0)
+                {
+                    sb.Append("    ");
+                    sb.Append(Block.ToString(false).Replace("\n", "\n    ") + "\n");
+                }
+                sb.Append("    break\n");
+                return sb.ToString();
+            }
+        }
+
         // Based on http://www.backerstreet.com/decompiler/loop_analysis.php
         public static Dictionary<Block, List<Block>> ComputeDominators(Dictionary<uint, Block> blocks, Block entryBlock, bool reversed)
         {
@@ -1359,6 +1418,52 @@ namespace UndertaleModLib.Decompiler
                 foreach (var stmt in block.Statements)
                     if (!(stmt is PushEnvStatement) && !(stmt is PopEnvStatement))
                         output.Statements.Add(stmt);
+
+                if (output.Statements.Count >= 1 && output.Statements[output.Statements.Count - 1] is TempVarAssigmentStatement && block.Instructions[block.Instructions.Count - 1].Kind == UndertaleInstruction.Opcode.Bt && block.conditionalExit && block.ConditionStatement is ExpressionCompare && (block.ConditionStatement as ExpressionCompare).Opcode == UndertaleInstruction.ComparisonType.EQ)
+                {
+                    // This is a switch statement!
+                    Expression switchExpression = (output.Statements[output.Statements.Count - 1] as TempVarAssigmentStatement).Value;
+                    TempVar switchTempVar = (output.Statements[output.Statements.Count - 1] as TempVarAssigmentStatement).Var.Var;
+                    output.Statements.RemoveAt(output.Statements.Count - 1);
+
+                    Block meetPoint = FindFirstMeetPoint(block, reverseDominators);
+                    if (meetPoint == null)
+                        throw new Exception("End of switch not found");
+
+                    Dictionary<Block, List<Expression>> caseEntries = new Dictionary<Block, List<Expression>>();
+                    while (block.nextBlockTrue != meetPoint)
+                    {
+                        Expression caseExpr = null;
+                        if (block.ConditionStatement != null)
+                        {
+                            ExpressionCompare cmp = (ExpressionCompare)block.ConditionStatement;
+                            if (cmp.Argument1 != switchExpression &&
+                                (!(cmp.Argument1 is ExpressionTempVar) || !(switchExpression is ExpressionTempVar) || (cmp.Argument1 as ExpressionTempVar).Var.Var != (switchExpression as ExpressionTempVar).Var.Var) &&
+                                (!(cmp.Argument1 is ExpressionTempVar) || (cmp.Argument1 as ExpressionTempVar).Var.Var != switchTempVar))
+                                throw new Exception("Malformed switch statement: bad condition var (" + cmp.Argument1.ToString() + ")");
+                            if (cmp.Opcode != UndertaleInstruction.ComparisonType.EQ)
+                                throw new Exception("Malformed switch statement: bad contition type (" + cmp.Opcode.ToString().ToUpper() + ")");
+                            caseExpr = cmp.Argument2;
+                        }
+                        if (!caseEntries.ContainsKey(block.nextBlockTrue))
+                            caseEntries.Add(block.nextBlockTrue, new List<Expression>());
+                        caseEntries[block.nextBlockTrue].Add(caseExpr);
+                        block = block.nextBlockFalse;
+                    }
+
+                    List<HLSwitchCaseStatement> cases = new List<HLSwitchCaseStatement>();
+                    foreach(var x in caseEntries)
+                    {
+                        Block temp = x.Key;
+                        cases.Add(new HLSwitchCaseStatement(x.Value, HLDecompileBlocks(ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint)));
+                        Debug.Assert(temp == meetPoint);
+                    }
+
+                    output.Statements.Add(new HLSwitchStatement(switchExpression, cases));
+                    Debug.Assert(!block.conditionalExit);
+                    block = block.nextBlockTrue;
+                    continue;
+                }
 
                 if (block.Statements.Count > 0 && block.Statements.Last() is PushEnvStatement)
                 {
