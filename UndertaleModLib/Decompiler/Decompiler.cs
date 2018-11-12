@@ -374,7 +374,7 @@ namespace UndertaleModLib.Decompiler
             public string Name;
             public UndertaleInstruction.DataType Type;
 
-            private static int i = 0;
+            public static int i = 0;
             internal AssetIDType AssetType;
 
             public TempVar()
@@ -1457,6 +1457,7 @@ namespace UndertaleModLib.Decompiler
         public static string Decompile(UndertaleCode code, UndertaleData data = null)
         {
             HUGE_HACK_FIX_THIS_SOON = data;
+            TempVar.i = 0;
             ExpressionVar.assetTypes.Clear();
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
             DecompileFromBlock(blocks[0]);
