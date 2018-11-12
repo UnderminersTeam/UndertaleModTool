@@ -41,7 +41,6 @@ All contributions are welcome! If you find a bug, a data file that does not load
 * Discover meaning of the new stuff in GML2 file format so that editors can be updated
 * Add missing chunk editors for Timelines and Extensions
 * Finish writing the decompiler:
-  * add support for resolving resource types (requires propagating information from builtin function calls backwards, possibly across different code fragments)
   * decompile other loop types than just while(true)
   * decompile compound if expressions (things like `a || b` are decomposed into multiple ifs internally because GML has short-circuit evaluation)
   * make sure the output syntax is fully GML-compatible
