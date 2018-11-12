@@ -205,7 +205,7 @@ namespace UndertaleModLib.Decompiler
                 if (AssetType == AssetIDType.KeyboardKey)
                 {
                     uint val = Convert.ToUInt32(Value);
-                    if (!Char.IsControl((char)val))
+                    if (!Char.IsControl((char)val) && !Char.IsLower((char)val)) // The special keys overlay with the uppercase letters (ugh)
                         return "'" + (char)val + "'";
                     if (Enum.IsDefined(typeof(EventSubtypeKey), val))
                         return ((EventSubtypeKey)val).ToString();
@@ -556,7 +556,8 @@ namespace UndertaleModLib.Decompiler
             public UndertaleVariable Var;
             public Expression InstType; // UndertaleInstruction.InstanceType
             public UndertaleInstruction.VariableType VarType;
-            public Expression ArrayIndex;
+            public Expression ArrayIndex1;
+            public Expression ArrayIndex2;
 
             public ExpressionVar(UndertaleVariable var, Expression instType, UndertaleInstruction.VariableType varType)
             {
@@ -567,7 +568,29 @@ namespace UndertaleModLib.Decompiler
 
             internal override bool IsDuplicationSafe()
             {
-                return (InstType?.IsDuplicationSafe() ?? true) && (ArrayIndex?.IsDuplicationSafe() ?? true);
+                return (InstType?.IsDuplicationSafe() ?? true) && (ArrayIndex1?.IsDuplicationSafe() ?? true) && (ArrayIndex2?.IsDuplicationSafe() ?? true);
+            }
+
+            public static Tuple<Expression, Expression> Decompile2DArrayIndex(Expression index)
+            {
+                Expression ind1 = index;
+                Expression ind2 = null;
+                if (ind1 is ExpressionTwo && (ind1 as ExpressionTwo).Opcode == UndertaleInstruction.Opcode.Add) // Decompile 2D array access
+                {
+                    var arg1 = (ind1 as ExpressionTwo).Argument1;
+                    var arg2 = (ind1 as ExpressionTwo).Argument2;
+                    if (arg1 is ExpressionTwo && (arg1 as ExpressionTwo).Opcode == UndertaleInstruction.Opcode.Mul)
+                    {
+                        var arg11 = (arg1 as ExpressionTwo).Argument1;
+                        var arg12 = (arg1 as ExpressionTwo).Argument2;
+                        if (arg12 is ExpressionConstant && (arg12 as ExpressionConstant).Value.GetType() == typeof(int) && (int)(arg12 as ExpressionConstant).Value == 32000)
+                        {
+                            ind1 = arg11;
+                            ind2 = arg2;
+                        }
+                    }
+                }
+                return new Tuple<Expression, Expression>(ind1, ind2);
             }
 
             public override string ToString()
@@ -575,8 +598,10 @@ namespace UndertaleModLib.Decompiler
                 //Debug.Assert((ArrayIndex != null) == NeedsArrayParameters);
                 //Debug.Assert((InstanceIndex != null) == NeedsInstanceParameters);
                 string name = Var.Name.Content;
-                if (ArrayIndex != null)
-                    name = name + "[" + ArrayIndex.ToString() + "]";
+                if (ArrayIndex1 != null)
+                    name = name + "[" + ArrayIndex1.ToString() + "]";
+                if (ArrayIndex2 != null)
+                    name = name + "[" + ArrayIndex2.ToString() + "]";
                 name = InstType.ToString() + "." + name;
 
                 return name;
@@ -586,7 +611,8 @@ namespace UndertaleModLib.Decompiler
             internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
             {
                 InstType?.DoTypePropagation(AssetIDType.GameObject);
-                ArrayIndex?.DoTypePropagation(AssetIDType.Other);
+                ArrayIndex1?.DoTypePropagation(AssetIDType.Other);
+                ArrayIndex2?.DoTypePropagation(AssetIDType.Other);
 
                 AssetIDType current = assetTypes.ContainsKey(Var) ? assetTypes[Var] : AssetIDType.Other;
                 if (current == AssetIDType.Other && suggestedType != AssetIDType.Other)
@@ -782,7 +808,9 @@ namespace UndertaleModLib.Decompiler
                             target.InstType = stack.Pop();
                         if (target.NeedsArrayParameters)
                         {
-                            target.ArrayIndex = stack.Pop();
+                            Tuple<Expression, Expression> ind = ExpressionVar.Decompile2DArrayIndex(stack.Pop());
+                            target.ArrayIndex1 = ind.Item1;
+                            target.ArrayIndex2 = ind.Item2;
                             target.InstType = stack.Pop();
                         }
                         if (instr.Type1 == UndertaleInstruction.DataType.Variable)
@@ -803,7 +831,9 @@ namespace UndertaleModLib.Decompiler
                                 pushTarget.InstType = stack.Pop();
                             if (pushTarget.NeedsArrayParameters)
                             {
-                                pushTarget.ArrayIndex = stack.Pop();
+                                Tuple<Expression, Expression> ind = ExpressionVar.Decompile2DArrayIndex(stack.Pop());
+                                pushTarget.ArrayIndex1 = ind.Item1;
+                                pushTarget.ArrayIndex2 = ind.Item2;
                                 pushTarget.InstType = stack.Pop();
                             }
                             stack.Push(pushTarget);
