@@ -134,6 +134,38 @@
             </Grid.ColumnDefinitions>
 
             <TreeView Grid.Column="0" Margin="3" SelectedItemChanged="TreeView_SelectedItemChanged" Name="RoomObjectsTree" KeyDown="RoomObjectsTree_KeyDown" MouseDoubleClick="RoomObjectsTree_MouseDoubleClick">
+                <TreeView.Resources>
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}Instance {0} of {1} (UndertaleRoom+GameObject)">
+                                    <Binding Path="InstanceID"/>
+                                    <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Tile}">
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}Tile {0} of {1} (UndertaleRoom+Tile)">
+                                    <Binding Path="InstanceID"/>
+                                    <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+SpriteInstance}">
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}Sprite {0} of {1} (UndertaleRoom+SpriteInstance)">
+                                    <Binding Path="Name.Content"/>
+                                    <Binding Path="Sprite.Name.Content" TargetNullValue="?"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </DataTemplate>
+                </TreeView.Resources>
                 <TreeViewItem Header="Backgrounds" ItemsSource="{Binding Backgrounds}" IsExpanded="True">
                     <TreeViewItem.Style>
                         <Style TargetType="{x:Type TreeViewItem}">
@@ -179,19 +211,23 @@
                         </HierarchicalDataTemplate>
                     </TreeViewItem.ItemTemplate>
                 </TreeViewItem>
-                <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects}" IsExpanded="True">
-                    <TreeViewItem.ItemTemplate>
-                        <HierarchicalDataTemplate>
-                            <TextBlock> <!--  Text="{Binding ObjectDefinition, TargetNullValue='(no name)'}" -->
-                                <TextBlock.Text>
-                                    <MultiBinding StringFormat="{}Instance {0} of {1} (UndertaleRoom+GameObject)">
-                                        <Binding Path="InstanceID"/>
-                                        <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?"/>
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                        </HierarchicalDataTemplate>
-                    </TreeViewItem.ItemTemplate>
+                <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects}">
+                    <TreeViewItem.Style>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
+                                    <DataTrigger.Setters>
+                                        <Setter Property="IsExpanded" Value="False"/>
+                                    </DataTrigger.Setters>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Collapsed">
+                                    <DataTrigger.Setters>
+                                        <Setter Property="IsExpanded" Value="True"/>
+                                    </DataTrigger.Setters>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TreeViewItem.Style>
                 </TreeViewItem>
                 <TreeViewItem Header="Tiles" ItemsSource="{Binding Tiles}" IsExpanded="True">
                     <TreeViewItem.Style>
@@ -207,7 +243,14 @@
                     </TreeViewItem.Style>
                     <TreeViewItem.ItemTemplate>
                         <HierarchicalDataTemplate>
-                            <TextBlock Text="{Binding BackgroundDefinition, TargetNullValue='(no name)'}" />
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}Tile {0} of {1} (UndertaleRoom+Tile)">
+                                        <Binding Path="InstanceID"/>
+                                        <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
                         </HierarchicalDataTemplate>
                     </TreeViewItem.ItemTemplate>
                 </TreeViewItem>
@@ -223,11 +266,39 @@
                             </Style.Triggers>
                         </Style>
                     </TreeViewItem.Style>
-                    <TreeViewItem.ItemTemplate>
-                        <HierarchicalDataTemplate>
-                            <TextBlock Text="{Binding LayerName.Content}" />
-                        </HierarchicalDataTemplate>
-                    </TreeViewItem.ItemTemplate>
+                    <TreeViewItem.ItemTemplateSelector>
+                        <local:LayerDataTemplateSelector>
+                            <local:LayerDataTemplateSelector.InstancesDataTemplate>
+                                <HierarchicalDataTemplate ItemsSource="{Binding InstancesData.Instances}" ItemTemplateSelector="{x:Null}">
+                                    <TextBlock Text="{Binding LayerName.Content}" />
+                                </HierarchicalDataTemplate>
+                            </local:LayerDataTemplateSelector.InstancesDataTemplate>
+                            <local:LayerDataTemplateSelector.TilesDataTemplate>
+                                <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
+                                    <TextBlock Text="{Binding LayerName.Content}" />
+                                </HierarchicalDataTemplate>
+                            </local:LayerDataTemplateSelector.TilesDataTemplate>
+                            <local:LayerDataTemplateSelector.AssetsDataTemplate>
+                                <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
+                                    <HierarchicalDataTemplate.ItemsSource>
+                                        <MultiBinding>
+                                            <MultiBinding.Converter>
+                                                <local:MultiCollectionBinding/> <!-- TODO: hack, may break updates -->
+                                            </MultiBinding.Converter>
+                                            <Binding Path="AssetsData.LegacyTiles"/>
+                                            <Binding Path="AssetsData.Sprites"/>
+                                        </MultiBinding>
+                                    </HierarchicalDataTemplate.ItemsSource>
+                                    <TextBlock Text="{Binding LayerName.Content}" />
+                                </HierarchicalDataTemplate>
+                            </local:LayerDataTemplateSelector.AssetsDataTemplate>
+                            <local:LayerDataTemplateSelector.BackgroundDataTemplate>
+                                <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
+                                    <TextBlock Text="{Binding LayerName.Content}" />
+                                </HierarchicalDataTemplate>
+                            </local:LayerDataTemplateSelector.BackgroundDataTemplate>
+                        </local:LayerDataTemplateSelector>
+                    </TreeViewItem.ItemTemplateSelector>
                 </TreeViewItem>
             </TreeView>
 
@@ -448,8 +519,25 @@
                                 <TextBox Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">BG Definition</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding BackgroundDefinition}" ObjectType="{x:Type undertale:UndertaleBackground}" CanRemove="False"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Definition</TextBlock>
+                            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding ObjectDefinition}" CanRemove="False">
+                                <local:UndertaleObjectReference.Style>
+                                    <Style TargetType="{x:Type local:UndertaleObjectReference}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="ObjectType" Value="{x:Type undertale:UndertaleSprite}"/>
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Collapsed">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="ObjectType" Value="{x:Type undertale:UndertaleBackground}"/>
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </local:UndertaleObjectReference.Style>
+                            </local:UndertaleObjectReference>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Source</TextBlock>
                             <Grid Grid.Row="2" Grid.Column="1">
@@ -544,42 +632,7 @@
                             <ContentControl Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Content="{Binding Data}">
                                 <ContentControl.Resources>
                                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerInstancesData}">
-                                        <DataGrid Margin="3" ItemsSource="{Binding Instances}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
-                                            <DataGrid.Resources>
-                                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                                                <Style TargetType="{x:Type DataGridCell}">
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                                                <Grid Background="{TemplateBinding Background}">
-                                                                    <ContentPresenter VerticalAlignment="Center" />
-                                                                </Grid>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
-                                                            <Setter Property="Template">
-                                                                <Setter.Value>
-                                                                    <ControlTemplate>
-                                                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
-                                                                    </ControlTemplate>
-                                                                </Setter.Value>
-                                                            </Setter>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </DataGrid.Resources>
-                                            <DataGrid.Columns>
-                                                <DataGridTemplateColumn Width="*">
-                                                    <DataGridTemplateColumn.CellTemplate>
-                                                        <DataTemplate>
-                                                            <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding ., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleRoom+GameObject}" CanRemove="False" /> <!-- TODO: with my luck, this . won't update --> <!-- TODO: also, double-click should probably do something different-->
-                                                        </DataTemplate>
-                                                    </DataGridTemplateColumn.CellTemplate>
-                                                </DataGridTemplateColumn>
-                                            </DataGrid.Columns>
-                                        </DataGrid>
+                                        <TextBlock Margin="3" Text="Contains GameObject instances, listed in the tree on the left"/>
                                     </DataTemplate>
                                     
                                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerTilesData}">
@@ -690,8 +743,78 @@
                                             </Grid>
                                         </Grid>
                                     </DataTemplate>
+
+                                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerAssetsData}">
+                                        <TextBlock Margin="3" Text="Contains legacy tiles and sprites, listed in the tree on the left"/>
+                                    </DataTemplate>
                                 </ContentControl.Resources>
                             </ContentControl>
+                        </Grid>
+                    </DataTemplate>
+                    
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+SpriteInstance}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="3*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+                            <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Definition</TextBlock>
+                            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleGameObject}" CanRemove="False"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Position</TextBlock>
+                            <Grid Grid.Row="2" Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
+                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
+                            </Grid>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Scale</TextBlock>
+                            <Grid Grid.Row="3" Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
+                                <TextBox Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
+                            </Grid>
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Color</TextBlock>
+                            <local:ColorPicker Grid.Row="5" Grid.Column="1" Margin="3" Color="{Binding Color}"/>
+                            
+                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Animation speed</TextBlock>
+                            <Grid Grid.Row="6" Grid.Column="1" Margin="3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0" Text="{Binding AnimationSpeed}"/>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
+                            </Grid>
+
+                            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Frame index</TextBlock>
+                            <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding FrameIndex}"/>
+
+                            <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Rotation</TextBlock>
+                            <TextBox Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding Rotation}"/>
                         </Grid>
                     </DataTemplate>
                 </ContentControl.Resources>

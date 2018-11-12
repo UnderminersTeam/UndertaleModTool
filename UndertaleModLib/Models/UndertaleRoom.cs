@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -76,6 +77,20 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
+            if (writer.undertaleData.GeneralInfo.Major >= 2)
+            {
+                foreach (var layer in Layers)
+                {
+                    if (layer.InstancesData != null)
+                    {
+                        foreach (var inst in layer.InstancesData.Instances)
+                        {
+                            if (!GameObjects.Contains(inst))
+                                throw new Exception("Nonexistent instance " + inst.InstanceID);
+                        }
+                    }
+                }
+            }
             writer.WriteUndertaleString(Name);
             writer.WriteUndertaleString(Caption);
             writer.Write(Width);
@@ -366,7 +381,9 @@ namespace UndertaleModLib.Models
         {
             private int _X;
             private int _Y;
+            private bool _SpriteMode = false;
             private UndertaleResourceById<UndertaleBackground> _BackgroundDefinition { get; } = new UndertaleResourceById<UndertaleBackground>("BGND");
+            private UndertaleResourceById<UndertaleSprite> _SpriteDefinition { get; } = new UndertaleResourceById<UndertaleSprite>("SPRT");
             private uint _SourceX;
             private uint _SourceY;
             private uint _Width;
@@ -379,7 +396,9 @@ namespace UndertaleModLib.Models
 
             public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
             public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
-            public UndertaleBackground BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BackgroundDefinition")); } }
+            public UndertaleBackground BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BackgroundDefinition")); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ObjectDefinition")); } }
+            public UndertaleSprite SpriteDefinition { get => _SpriteDefinition.Resource; set { _SpriteDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpriteDefinition")); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ObjectDefinition")); } }
+            public UndertaleNamedResource ObjectDefinition { get => _SpriteMode ? (UndertaleNamedResource)SpriteDefinition : (UndertaleNamedResource)BackgroundDefinition; set { if (_SpriteMode) SpriteDefinition = (UndertaleSprite)value; else BackgroundDefinition = (UndertaleBackground)value; } }
             public uint SourceX { get => _SourceX; set { _SourceX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceX")); } }
             public uint SourceY { get => _SourceY; set { _SourceY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceY")); } }
             public uint Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
@@ -396,7 +415,12 @@ namespace UndertaleModLib.Models
             {
                 writer.Write(X);
                 writer.Write(Y);
-                writer.Write(_BackgroundDefinition.Serialize(writer));
+                if (_SpriteMode != (writer.undertaleData.GeneralInfo.Major >= 2))
+                    throw new Exception("Unsupported in GMS" + writer.undertaleData.GeneralInfo.Major);
+                if (_SpriteMode)
+                    writer.Write(_SpriteDefinition.Serialize(writer));
+                else
+                    writer.Write(_BackgroundDefinition.Serialize(writer));
                 writer.Write(SourceX);
                 writer.Write(SourceY);
                 writer.Write(Width);
@@ -412,7 +436,11 @@ namespace UndertaleModLib.Models
             {
                 X = reader.ReadInt32();
                 Y = reader.ReadInt32();
-                _BackgroundDefinition.Unserialize(reader, reader.ReadInt32());
+                _SpriteMode = reader.undertaleData.GeneralInfo.Major >= 2;
+                if (_SpriteMode)
+                    _SpriteDefinition.Unserialize(reader, reader.ReadInt32());
+                else
+                    _BackgroundDefinition.Unserialize(reader, reader.ReadInt32());
                 SourceX = reader.ReadUInt32();
                 SourceY = reader.ReadUInt32();
                 Width = reader.ReadUInt32();
@@ -422,6 +450,11 @@ namespace UndertaleModLib.Models
                 ScaleX = reader.ReadSingle();
                 ScaleY = reader.ReadSingle();
                 Color = reader.ReadUInt32();
+            }
+
+            public override string ToString()
+            {
+                return "Tile " + InstanceID + " of " + (ObjectDefinition?.Name?.Content ?? "?") + " (UndertaleRoom+Tile)";
             }
         }
 
@@ -537,7 +570,7 @@ namespace UndertaleModLib.Models
             public class LayerInstancesData : LayerData
             {
                 internal uint[] _InstanceIds { get; private set; } // 100000, 100001, 100002, 100003 - instance ids from GameObjects list in the room
-                public List<UndertaleRoom.GameObject> Instances { get; private set; } = new List<UndertaleRoom.GameObject>();
+                public ObservableCollection<UndertaleRoom.GameObject> Instances { get; private set; } = new ObservableCollection<UndertaleRoom.GameObject>();
 
                 public void Serialize(UndertaleWriter writer)
                 {
@@ -682,10 +715,15 @@ namespace UndertaleModLib.Models
                 }
             }
 
-            public class LayerAssetsData : LayerData
+            public class LayerAssetsData : LayerData, INotifyPropertyChanged
             {
-                public UndertalePointerList<AssetLegacyTileItem> LegacyTiles;
-                public UndertalePointerList<AssetSpriteItem> Sprites;
+                private UndertalePointerList<Tile> _LegacyTiles;
+                private UndertalePointerList<SpriteInstance> _Sprites;
+
+                public UndertalePointerList<Tile> LegacyTiles { get => _LegacyTiles; set { _LegacyTiles = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LegacyTiles")); } }
+                public UndertalePointerList<SpriteInstance> Sprites { get => _Sprites; set { _Sprites = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sprites")); } }
+
+                public event PropertyChangedEventHandler PropertyChanged;
 
                 public void Serialize(UndertaleWriter writer)
                 {
@@ -697,123 +735,78 @@ namespace UndertaleModLib.Models
 
                 public void Unserialize(UndertaleReader reader)
                 {
-                    LegacyTiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetLegacyTileItem>>();
-                    Sprites = reader.ReadUndertaleObjectPointer<UndertalePointerList<AssetSpriteItem>>();
-                    if (reader.ReadUndertaleObject<UndertalePointerList<AssetLegacyTileItem>>() != LegacyTiles)
+                    LegacyTiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<Tile>>();
+                    Sprites = reader.ReadUndertaleObjectPointer<UndertalePointerList<SpriteInstance>>();
+                    if (reader.ReadUndertaleObject<UndertalePointerList<Tile>>() != LegacyTiles)
                         throw new IOException("LegacyTiles misaligned");
-                    if (reader.ReadUndertaleObject<UndertalePointerList<AssetSpriteItem>>() != Sprites)
+                    if (reader.ReadUndertaleObject<UndertalePointerList<SpriteInstance>>() != Sprites)
                         throw new IOException("Sprites misaligned");
                 }
             }
         }
-    }
 
-    // TODO: Ugly copy-paste for now
-    public class AssetLegacyTileItem : UndertaleObject, INotifyPropertyChanged
-    {
-        private int _X;
-        private int _Y;
-        private UndertaleResourceById<UndertaleSprite> _BackgroundDefinition { get; } = new UndertaleResourceById<UndertaleSprite>("SPRT");
-        private uint _SourceX;
-        private uint _SourceY;
-        private uint _Width;
-        private uint _Height;
-        private int _TileDepth;
-        private uint _InstanceID;
-        private float _ScaleX;
-        private float _ScaleY;
-        private uint _Color;
-
-        public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
-        public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
-        public UndertaleSprite BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BackgroundDefinition")); } }
-        public uint SourceX { get => _SourceX; set { _SourceX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceX")); } }
-        public uint SourceY { get => _SourceY; set { _SourceY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceY")); } }
-        public uint Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
-        public uint Height { get => _Height; set { _Height = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Height")); } }
-        public int TileDepth { get => _TileDepth; set { _TileDepth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileDepth")); } }
-        public uint InstanceID { get => _InstanceID; set { _InstanceID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("InstanceID")); } }
-        public float ScaleX { get => _ScaleX; set { _ScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleX")); } }
-        public float ScaleY { get => _ScaleY; set { _ScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleY")); } }
-        public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void Serialize(UndertaleWriter writer)
+        public class SpriteInstance : UndertaleObject, INotifyPropertyChanged
         {
-            writer.Write(X);
-            writer.Write(Y);
-            writer.Write(_BackgroundDefinition.Serialize(writer));
-            writer.Write(SourceX);
-            writer.Write(SourceY);
-            writer.Write(Width);
-            writer.Write(Height);
-            writer.Write(TileDepth);
-            writer.Write(InstanceID);
-            writer.Write(ScaleX);
-            writer.Write(ScaleY);
-            writer.Write(Color);
-        }
+            private UndertaleString _Name;
+            private UndertaleResourceById<UndertaleSprite> _Sprite = new UndertaleResourceById<UndertaleSprite>("SPRT");
+            private int _X;
+            private int _Y;
+            private float _ScaleX;
+            private float _ScaleY;
+            private uint _Color;
+            private float _AnimationSpeed;
+            private AnimationSpeedType _AnimationSpeedType;
+            private float _FrameIndex;
+            private float _Rotation;
 
-        public void Unserialize(UndertaleReader reader)
-        {
-            X = reader.ReadInt32();
-            Y = reader.ReadInt32();
-            _BackgroundDefinition.Unserialize(reader, reader.ReadInt32());
-            SourceX = reader.ReadUInt32();
-            SourceY = reader.ReadUInt32();
-            Width = reader.ReadUInt32();
-            Height = reader.ReadUInt32();
-            TileDepth = reader.ReadInt32();
-            InstanceID = reader.ReadUInt32();
-            ScaleX = reader.ReadSingle();
-            ScaleY = reader.ReadSingle();
-            Color = reader.ReadUInt32();
-        }
-    }
+            public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+            public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sprite")); } }
+            public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
+            public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
+            public float ScaleX { get => _ScaleX; set { _ScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleX")); } }
+            public float ScaleY { get => _ScaleY; set { _ScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleY")); } }
+            public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
+            public float AnimationSpeed { get => _AnimationSpeed; set { _AnimationSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AnimationSpeed")); } }
+            public AnimationSpeedType AnimationSpeedType { get => _AnimationSpeedType; set { _AnimationSpeedType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AnimationSpeedType")); } }
+            public float FrameIndex { get => _FrameIndex; set { _FrameIndex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FrameIndex")); } }
+            public float Rotation { get => _Rotation; set { _Rotation = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Rotation")); } }
 
-    public class AssetSpriteItem : UndertaleObject
-    {
-        public UndertaleString Name;
-        public UndertaleResourceById<UndertaleSprite> Sprite = new UndertaleResourceById<UndertaleSprite>("SPRT");
-        public int X;
-        public int Y;
-        public float ScaleX;
-        public float ScaleY;
-        public int Color;
-        public float AnimationSpeed;
-        public AnimationSpeedType AnimationSpeedType;
-        public float FrameIndex;
-        public float Rotation; 
+            public event PropertyChangedEventHandler PropertyChanged;
 
-        public void Serialize(UndertaleWriter writer)
-        {
-            writer.WriteUndertaleString(Name);
-            writer.Write(Sprite.Serialize(writer));
-            writer.Write(X);
-            writer.Write(Y);
-            writer.Write(ScaleX);
-            writer.Write(ScaleY);
-            writer.Write(Color);
-            writer.Write(AnimationSpeed);
-            writer.Write((uint)AnimationSpeedType);
-            writer.Write(FrameIndex);
-            writer.Write(Rotation);
-        }
+            public void Serialize(UndertaleWriter writer)
+            {
+                writer.WriteUndertaleString(Name);
+                writer.Write(_Sprite.Serialize(writer));
+                writer.Write(X);
+                writer.Write(Y);
+                writer.Write(ScaleX);
+                writer.Write(ScaleY);
+                writer.Write(Color);
+                writer.Write(AnimationSpeed);
+                writer.Write((uint)AnimationSpeedType);
+                writer.Write(FrameIndex);
+                writer.Write(Rotation);
+            }
 
-        public void Unserialize(UndertaleReader reader)
-        {
-            Name = reader.ReadUndertaleString();
-            Sprite.Unserialize(reader, reader.ReadInt32());
-            X = reader.ReadInt32();
-            Y = reader.ReadInt32();
-            ScaleX = reader.ReadSingle();
-            ScaleY = reader.ReadSingle();
-            Color = reader.ReadInt32();
-            AnimationSpeed = reader.ReadSingle();
-            AnimationSpeedType = (AnimationSpeedType)reader.ReadUInt32();
-            FrameIndex = reader.ReadSingle();
-            Rotation = reader.ReadSingle();
+            public void Unserialize(UndertaleReader reader)
+            {
+                Name = reader.ReadUndertaleString();
+                _Sprite.Unserialize(reader, reader.ReadInt32());
+                X = reader.ReadInt32();
+                Y = reader.ReadInt32();
+                ScaleX = reader.ReadSingle();
+                ScaleY = reader.ReadSingle();
+                Color = reader.ReadUInt32();
+                AnimationSpeed = reader.ReadSingle();
+                AnimationSpeedType = (AnimationSpeedType)reader.ReadUInt32();
+                FrameIndex = reader.ReadSingle();
+                Rotation = reader.ReadSingle();
+            }
+
+            public override string ToString()
+            {
+                return "Sprite " + Name?.Content + " of " + (Sprite?.Name?.Content ?? "?") + " (UndertaleRoom+SpriteInstance)";
+            }
         }
     }
 

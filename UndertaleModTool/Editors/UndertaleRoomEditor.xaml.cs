@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -317,6 +318,55 @@ namespace UndertaleModTool
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    public class LayerDataTemplateSelector : DataTemplateSelector
+    {
+        public DataTemplate InstancesDataTemplate { get; set; }
+        public DataTemplate TilesDataTemplate { get; set; }
+        public DataTemplate AssetsDataTemplate { get; set; }
+        public DataTemplate BackgroundDataTemplate { get; set; }
+
+        public override DataTemplate SelectTemplate(object item, DependencyObject container)
+        {
+            FrameworkElement element = container as FrameworkElement;
+
+            if (element != null && item != null && item is UndertaleRoom.Layer)
+            {
+                UndertaleRoom.Layer layer = item as UndertaleRoom.Layer;
+                
+                switch(layer.LayerType)
+                {
+                    case UndertaleRoom.LayerType.Instances:
+                        return InstancesDataTemplate;
+                    case UndertaleRoom.LayerType.Tiles:
+                        return TilesDataTemplate;
+                    case UndertaleRoom.LayerType.Assets:
+                        return AssetsDataTemplate;
+                    case UndertaleRoom.LayerType.Background:
+                        return BackgroundDataTemplate;
+                }
+            }
+
+            return null;
+        }
+    }
+
+    public class MultiCollectionBinding : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            CompositeCollection collection = new CompositeCollection();
+            foreach(var v in values)
+                if (v is IEnumerable)
+                    collection.Add(new CollectionContainer() { Collection = (IEnumerable)v });
+            return collection;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotSupportedException();
         }
     }
 }
