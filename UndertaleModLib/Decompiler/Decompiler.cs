@@ -427,6 +427,11 @@ namespace UndertaleModLib.Decompiler
                 this.Type = targetType;
             }
 
+            internal override bool IsDuplicationSafe()
+            {
+                return true;
+            }
+
             public override string ToString()
             {
                 return String.Format("{0}{1}", /*Type != Var.Var.Type ? "(" + Type.ToString().ToLower() + ")" : ""*/ "", Var.Var.Name);

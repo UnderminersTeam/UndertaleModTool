@@ -21,7 +21,7 @@ namespace UndertaleModLib.Decompiler
         Path,
         Timeline,
         Room,
-        GameObject, // or GameObjectInstance, these are interchangable
+        GameObject, // or GameObjectInstance or InstanceType, these are all interchangable
         Script,
 
         Layer // GMS2
