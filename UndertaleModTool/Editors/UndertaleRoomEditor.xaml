@@ -124,7 +124,7 @@
         </Grid>
 
         <Border Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
-            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">IMPORTANT: Game Maker: Studio 2 totally changed how tiles and backgrounds work by introducing Layers. If you are seeing this, I can already partially parse the data but the editor is not done yet!</TextBlock>
+            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">IMPORTANT: The room editor is experimental. The layers data is not displayed in the preview at the bottom yet.</TextBlock>
         </Border>
 
         <Grid Height="300">
@@ -218,6 +218,7 @@
                                 <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
                                     <DataTrigger.Setters>
                                         <Setter Property="IsExpanded" Value="False"/>
+                                        <Setter Property="Foreground"  Value="LightGray"/>
                                     </DataTrigger.Setters>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Collapsed">

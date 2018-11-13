@@ -122,12 +122,35 @@ namespace UndertaleModTool
 
         private void SelectObject(UndertaleObject obj)
         {
-            // TODO: !!! UPDATE THIS !!! probably has to become recursive
+            // TODO: This sometimes fails to open objects in non-expanded tree
+            // Note that this prefers to select the object inside a layer than the 'floating' one in GameObjects
+
+            foreach (var child in RoomObjectsTree.Items)
+            {
+                foreach (var layer in (child as TreeViewItem).Items)
+                {
+                    var layer_twi = (child as TreeViewItem).ItemContainerGenerator.ContainerFromItem(layer) as TreeViewItem;
+                    if (layer_twi == null)
+                        continue;
+                    var obj_twi = layer_twi.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
+                    if (obj_twi != null)
+                    {
+                        obj_twi.BringIntoView();
+                        obj_twi.Focus();
+                        return;
+                    }
+                }
+            }
+
             foreach (var child in RoomObjectsTree.Items)
             {
                 var twi = (child as TreeViewItem).ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
                 if (twi != null)
+                {
+                    twi.BringIntoView();
                     twi.Focus();
+                    return;
+                }
             }
         }
 
@@ -152,6 +175,18 @@ namespace UndertaleModTool
                     var mousePos = e.GetPosition(RoomGraphics);
 
                     UndertaleRoom room = this.DataContext as UndertaleRoom;
+                    UndertaleRoom.Layer layer = ObjectEditor.Content as UndertaleRoom.Layer;
+                    if (room.Layers != null && layer == null)
+                    {
+                        MessageBox.Show("Must have a layer selected", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                    if (layer != null && layer.InstancesData == null)
+                    {
+                        MessageBox.Show("Must be on an instances layer", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
                     var obj = new UndertaleRoom.GameObject()
                     {
                         X = (int)mousePos.X,
@@ -160,7 +195,8 @@ namespace UndertaleModTool
                         InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj++
                     };
                     room.GameObjects.Add(obj);
-                    // TODO: !!! UPDATE THIS !!!
+                    if (layer != null)
+                        layer.InstancesData.Instances.Add(obj);
 
                     SelectObject(obj);
                 }
@@ -179,8 +215,7 @@ namespace UndertaleModTool
             {
                 UndertaleRoom room = this.DataContext as UndertaleRoom;
                 UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-
-                // TODO: !!! UPDATE THIS !!!
+                
                 if (selectedObj is UndertaleRoom.Background)
                 {
                     UndertaleRoom.Background bg = selectedObj as UndertaleRoom.Background;
@@ -197,13 +232,30 @@ namespace UndertaleModTool
                 else if (selectedObj is UndertaleRoom.Tile)
                 {
                     UndertaleRoom.Tile tile = selectedObj as UndertaleRoom.Tile;
+                    if (room.Layers != null)
+                        foreach (var layer in room.Layers)
+                            if (layer.AssetsData != null)
+                                layer.AssetsData.LegacyTiles.Remove(tile);
                     room.Tiles.Remove(tile);
                     ObjectEditor.Content = null;
                 }
                 else if (selectedObj is UndertaleRoom.GameObject)
                 {
                     UndertaleRoom.GameObject gameObj = selectedObj as UndertaleRoom.GameObject;
+                    if (room.Layers != null)
+                        foreach (var layer in room.Layers)
+                            if (layer.InstancesData != null)
+                                layer.InstancesData.Instances.Remove(gameObj);
                     room.GameObjects.Remove(gameObj);
+                    ObjectEditor.Content = null;
+                }
+                else if (selectedObj is UndertaleRoom.Layer)
+                {
+                    UndertaleRoom.Layer layer = selectedObj as UndertaleRoom.Layer;
+                    if (layer.InstancesData != null)
+                        foreach (var go in layer.InstancesData.Instances)
+                            room.GameObjects.Remove(go);
+                    room.Layers.Remove(layer);
                     ObjectEditor.Content = null;
                 }
             }
@@ -245,12 +297,25 @@ namespace UndertaleModTool
                 Debug.WriteLine("Paste");
                 Debug.WriteLine(obj);
             }*/
+
             if (copied != null)
             {
-                // TODO: !!! UPDATE THIS !!!
                 UndertaleRoom room = this.DataContext as UndertaleRoom;
+
+                UndertaleRoom.Layer layer = ObjectEditor.Content as UndertaleRoom.Layer;
+                if (room.Layers != null && layer == null)
+                {
+                    MessageBox.Show("Must paste onto a layer", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                
                 if (copied is UndertaleRoom.GameObject)
                 {
+                    if (layer != null && layer.InstancesData == null)
+                    {
+                        MessageBox.Show("Must be on an instances layer", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
                     var other = copied as UndertaleRoom.GameObject;
                     var obj = new UndertaleRoom.GameObject();
                     obj.X = other.X;
@@ -264,15 +329,23 @@ namespace UndertaleModTool
                     obj.Rotation = other.Rotation;
                     obj.PreCreateCode = other.PreCreateCode;
                     room.GameObjects.Add(obj);
+                    if (layer != null)
+                        layer.InstancesData.Instances.Add(obj);
                     SelectObject(obj);
                 }
                 if (copied is UndertaleRoom.Tile)
                 {
+                    if (layer != null && layer.AssetsData == null)
+                    {
+                        MessageBox.Show("Must be on an assets layer", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
                     var other = copied as UndertaleRoom.Tile;
                     var obj = new UndertaleRoom.Tile();
                     obj.X = other.X;
                     obj.Y = other.Y;
-                    obj.BackgroundDefinition = other.BackgroundDefinition;
+                    obj._SpriteMode = other._SpriteMode;
+                    obj.ObjectDefinition = other.ObjectDefinition;
                     obj.SourceX = other.SourceX;
                     obj.SourceY = other.SourceY;
                     obj.Width = other.Width;
@@ -282,7 +355,10 @@ namespace UndertaleModTool
                     obj.ScaleX = other.ScaleX;
                     obj.ScaleY = other.ScaleY;
                     obj.Color = other.Color;
-                    room.Tiles.Add(obj);
+                    if (layer != null)
+                        layer.AssetsData.LegacyTiles.Add(obj);
+                    else
+                        room.Tiles.Add(obj);
                     SelectObject(obj);
                 }
             }
