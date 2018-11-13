@@ -18,9 +18,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
-            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">GMS2 adds one new unknown param that is not displayed yet</TextBlock>
-        </Border>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Unknown (added in GMS2)</TextBlock>
+        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2Unknown}" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Unknown</TextBlock>
         <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding UnknownAlwaysZero}"/>

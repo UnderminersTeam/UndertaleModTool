@@ -42,7 +42,7 @@ namespace UndertaleModLib.Models
             SyncVertex1 = 0x0002,
             SyncVertex2 = 0x0004,
             Interpolate = 0x0008,
-            unknown = 0x0010,
+            Scale = 0x0010, // Scaling: Keep aspect
             ShowCursor = 0x0020,
             Sizeable = 0x0040,
             ScreenKey = 0x0080,
@@ -54,6 +54,8 @@ namespace UndertaleModLib.Models
             SteamEnabled = 0x1000,
             LocalDataEnabled = 0x2000,
             BorderlessWindow = 0x4000,
+            DefaultCodeKind = 0x8000,
+            LicenseExclusions = 0x10000
         }
 
         public bool DisableDebugger { get; set; } = true;
@@ -75,17 +77,16 @@ namespace UndertaleModLib.Models
         public uint Build { get; set; } = 1337;
         public uint DefaultWindowWidth { get; set; } = 1024;
         public uint DefaultWindowHeight { get; set; } = 768;
-        public InfoFlags Info { get; set; } = InfoFlags.Interpolate | InfoFlags.unknown | InfoFlags.ShowCursor | InfoFlags.ScreenKey | InfoFlags.StudioVersionB3;
+        public InfoFlags Info { get; set; } = InfoFlags.Interpolate | InfoFlags.Scale | InfoFlags.ShowCursor | InfoFlags.ScreenKey | InfoFlags.StudioVersionB3;
         public byte[] LicenseMD5 { get; set; } = new byte[16];
         public uint LicenseCRC32 { get; set; }
-        public uint Timestamp { get; set; } = 0;
-        public uint ActiveTargets { get; set; } = 0;
+        public ulong Timestamp { get; set; } = 0;
         public UndertaleString DisplayName { get; set; }
-        public uint Unknown5 { get; set; } = 0;
-        public uint Unknown6 { get; set; } = 0;
-        public uint Unknown7 { get; set; } = 0;
-        public uint Unknown8 { get; set; } = 0;
-        public uint Unknown9 { get; set; } = 0;
+        public uint ActiveTargets1 { get; set; } = 0;
+        public uint ActiveTargets2 { get; set; } = 0;
+        public uint FunctionClassifications1 { get; set; } = 0;
+        public uint FunctionClassifications2 { get; set; } = 0;
+        public int SteamAppID { get; set; } = 0;
         public uint DebuggerPort { get; set; } = 6502;
         public UndertaleSimpleList<RoomOrderEntry> RoomOrder { get; private set; } = new UndertaleSimpleList<RoomOrderEntry>();
 
@@ -139,13 +140,12 @@ namespace UndertaleModLib.Models
             writer.Write(LicenseMD5);
             writer.Write(LicenseCRC32);
             writer.Write(Timestamp);
-            writer.Write(ActiveTargets);
             writer.WriteUndertaleString(DisplayName);
-            writer.Write(Unknown5);
-            writer.Write(Unknown6);
-            writer.Write(Unknown7);
-            writer.Write(Unknown8);
-            writer.Write(Unknown9);
+            writer.Write(ActiveTargets1);
+            writer.Write(ActiveTargets2);
+            writer.Write(FunctionClassifications1);
+            writer.Write(FunctionClassifications2);
+            writer.Write(SteamAppID);
             writer.Write(DebuggerPort);
             writer.WriteUndertaleObject(RoomOrder);
             if (Major >= 2)
@@ -185,14 +185,13 @@ namespace UndertaleModLib.Models
             Info = (InfoFlags)reader.ReadUInt32();
             LicenseMD5 = reader.ReadBytes(16);
             LicenseCRC32 = reader.ReadUInt32();
-            Timestamp = reader.ReadUInt32();
-            ActiveTargets = reader.ReadUInt32();
+            Timestamp = reader.ReadUInt64();
             DisplayName = reader.ReadUndertaleString();
-            Unknown5 = reader.ReadUInt32();
-            Unknown6 = reader.ReadUInt32();
-            Unknown7 = reader.ReadUInt32();
-            Unknown8 = reader.ReadUInt32();
-            Unknown9 = reader.ReadUInt32();
+            ActiveTargets1 = reader.ReadUInt32();
+            ActiveTargets2 = reader.ReadUInt32();
+            FunctionClassifications1 = reader.ReadUInt32();
+            FunctionClassifications2 = reader.ReadUInt32();
+            SteamAppID = reader.ReadInt32();
             DebuggerPort = reader.ReadUInt32();
             RoomOrder = reader.ReadUndertaleObject<UndertaleSimpleList<RoomOrderEntry>>();
             if (Major >= 2)

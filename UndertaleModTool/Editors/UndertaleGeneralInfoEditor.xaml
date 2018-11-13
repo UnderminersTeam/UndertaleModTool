@@ -48,6 +48,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Disable debugger</TextBlock>
@@ -156,33 +157,37 @@
                 <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Timestamp</TextBlock>
                 <TextBox Grid.Row="15" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.Timestamp}"/>
 
-                <TextBlock Grid.Row="16" Grid.Column="0" Margin="3">Active targets (?)</TextBlock>
-                <TextBox Grid.Row="16" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.ActiveTargets}"/>
+                <TextBlock Grid.Row="16" Grid.Column="0" Margin="3">Display name</TextBlock>
+                <local:UndertaleStringReference Grid.Row="16" Grid.Column="1" Margin="3" ObjectReference="{Binding GeneralInfo.DisplayName}"/>
 
-                <TextBlock Grid.Row="17" Grid.Column="0" Margin="3">Display name</TextBlock>
-                <local:UndertaleStringReference Grid.Row="17" Grid.Column="1" Margin="3" ObjectReference="{Binding GeneralInfo.DisplayName}"/>
+                <TextBlock Grid.Row="17" Grid.Column="0" Margin="3">Active targets</TextBlock>
+                <Grid Grid.Row="17" Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Margin="3" Text="{Binding GeneralInfo.ActiveTargets1}"/>
+                    <TextBox Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.ActiveTargets2}"/>
+                </Grid>
 
-                <TextBlock Grid.Row="18" Grid.Column="0" Margin="3">Unknown</TextBlock>
+                <TextBlock Grid.Row="18" Grid.Column="0" Margin="3">Function classifications</TextBlock>
                 <Grid Grid.Row="18" Grid.Column="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBox Grid.Column="0" Margin="3" Text="{Binding GeneralInfo.Unknown5}"/>
-                    <TextBox Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.Unknown6}"/>
-                    <TextBox Grid.Column="2" Margin="3" Text="{Binding GeneralInfo.Unknown7}"/>
-                    <TextBox Grid.Column="3" Margin="3" Text="{Binding GeneralInfo.Unknown8}"/>
-                    <TextBox Grid.Column="4" Margin="3" Text="{Binding GeneralInfo.Unknown9}"/>
+                    <TextBox Grid.Column="0" Margin="3" Text="{Binding GeneralInfo.FunctionClassifications1}"/>
+                    <TextBox Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.FunctionClassifications2}"/>
                 </Grid>
 
-                <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Debugger port</TextBlock>
-                <TextBox Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.DebuggerPort}"/>
+                <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Steam AppID</TextBlock>
+                <TextBox Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.SteamAppID}"/>
 
-                <TextBlock Grid.Row="20" Grid.Column="0" Margin="3">Room order</TextBlock>
-                <Expander Grid.Row="20" Grid.Column="1" Margin="3" Header="List">
+                <TextBlock Grid.Row="20" Grid.Column="0" Margin="3">Debugger port</TextBlock>
+                <TextBox Grid.Row="20" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.DebuggerPort}"/>
+
+                <TextBlock Grid.Row="21" Grid.Column="0" Margin="3">Room order</TextBlock>
+                <Expander Grid.Row="21" Grid.Column="1" Margin="3" Header="List">
                     <DataGrid ItemsSource="{Binding GeneralInfo.RoomOrder}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
                         <DataGrid.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
@@ -221,9 +226,9 @@
                     </DataGrid>
                 </Expander>
 
-                <Button Grid.Row="21" Grid.Column="1" Margin="3" Content="Sync with room list" Click="SyncRoomList_Click"/>
+                <Button Grid.Row="22" Grid.Column="1" Margin="3" Content="Sync with room list" Click="SyncRoomList_Click"/>
 
-                <Grid Grid.Row="22" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+                <Grid Grid.Row="23" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*"/>
                         <ColumnDefinition Width="3*"/>

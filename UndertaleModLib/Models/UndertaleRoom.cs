@@ -381,7 +381,7 @@ namespace UndertaleModLib.Models
         {
             private int _X;
             private int _Y;
-            private bool _SpriteMode = false;
+            public bool _SpriteMode = false;
             private UndertaleResourceById<UndertaleBackground> _BackgroundDefinition { get; } = new UndertaleResourceById<UndertaleBackground>("BGND");
             private UndertaleResourceById<UndertaleSprite> _SpriteDefinition { get; } = new UndertaleResourceById<UndertaleSprite>("SPRT");
             private uint _SourceX;
