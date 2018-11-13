@@ -151,11 +151,11 @@ namespace UndertaleModLib.Models
             if (Major >= 2)
             {
                 if (GMS2RandomUID.Length != 40)
-                    throw new IOException("GMS2License1 has invalid length");
+                    throw new IOException("GMS2RandomUID has invalid length");
                 writer.Write(GMS2RandomUID);
                 writer.Write(GMS2FPS);
                 if (GMS2GameGUID.Length != 16)
-                    throw new IOException("GMS2License2 has invalid length");
+                    throw new IOException("GMS2GameGUID has invalid length");
                 writer.Write(GMS2AllowStatistics);
                 writer.Write(GMS2GameGUID);
             }
