@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Media;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -922,6 +923,31 @@ namespace UndertaleModTool
                     await t;
                 }
             }
+        }
+
+        private bool scr_dogcheck()
+        {
+            if (Environment.UserName != "The one and only annoying dog!")
+            {
+                // Toby Fox did not autorize you to do this action
+
+                room_dogcheck.Visibility = Visibility.Visible;
+
+                SoundPlayer player = new SoundPlayer(Application.GetResourceStream(new Uri(@"pack://application:,,,/Resources/mus_dance_of_dog.wav")).Stream);
+                player.PlayLooping();
+
+                return false;
+            }
+
+            return true;
+        }
+
+        private void MenuItem_GameMaker_Click(object sender, RoutedEventArgs e)
+        {
+            if (!scr_dogcheck())
+                return;
+
+            // TODO: Don't ever implement this
         }
     }
 

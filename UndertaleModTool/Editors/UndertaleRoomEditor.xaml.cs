@@ -122,6 +122,7 @@ namespace UndertaleModTool
 
         private void SelectObject(UndertaleObject obj)
         {
+            // TODO: !!! UPDATE THIS !!! probably has to become recursive
             foreach (var child in RoomObjectsTree.Items)
             {
                 var twi = (child as TreeViewItem).ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
@@ -159,6 +160,7 @@ namespace UndertaleModTool
                         InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj++
                     };
                     room.GameObjects.Add(obj);
+                    // TODO: !!! UPDATE THIS !!!
 
                     SelectObject(obj);
                 }
@@ -178,6 +180,7 @@ namespace UndertaleModTool
                 UndertaleRoom room = this.DataContext as UndertaleRoom;
                 UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
 
+                // TODO: !!! UPDATE THIS !!!
                 if (selectedObj is UndertaleRoom.Background)
                 {
                     UndertaleRoom.Background bg = selectedObj as UndertaleRoom.Background;
@@ -214,7 +217,9 @@ namespace UndertaleModTool
             if (sel is UndertaleRoom.Background)
                 (Application.Current.MainWindow as MainWindow).ChangeSelection((sel as UndertaleRoom.Background).BackgroundDefinition);
             if (sel is UndertaleRoom.Tile)
-                (Application.Current.MainWindow as MainWindow).ChangeSelection((sel as UndertaleRoom.Tile).BackgroundDefinition);
+                (Application.Current.MainWindow as MainWindow).ChangeSelection((sel as UndertaleRoom.Tile).ObjectDefinition);
+            if (sel is UndertaleRoom.SpriteInstance)
+                (Application.Current.MainWindow as MainWindow).ChangeSelection((sel as UndertaleRoom.SpriteInstance).Sprite);
         }
 
         private UndertaleObject copied;
@@ -242,6 +247,7 @@ namespace UndertaleModTool
             }*/
             if (copied != null)
             {
+                // TODO: !!! UPDATE THIS !!!
                 UndertaleRoom room = this.DataContext as UndertaleRoom;
                 if (copied is UndertaleRoom.GameObject)
                 {

@@ -579,6 +579,13 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\spr_tobdogl\0.png" />
+    <Resource Include="Resources\spr_tobdogl\1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\mus_dance_of_dog.wav" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterResolveReferences">
     <ItemGroup>
