@@ -2,9 +2,11 @@
 *(seeing such an amazing tool...<br/>
 ... fills you with DETERMINATION)*
 
-![flowey](flowey.png)
+![enough](https://i.imgur.com/lwUGMHo.png)
 
-heya. I heard you like digging deep into Undertale data so I made a tool just for you! Downloads are here: https://github.com/krzys-h/UndertaleModTool/releases
+heya. I heard you like digging deep into Undertale data so I made a tool just for you! **Downloads** are **HERE**: :point_right::point_right::point_right: https://github.com/krzys-h/UndertaleModTool/releases :point_left::point_left::point_left:
+
+![flowey](flowey.png)
 
 ### Main features
 * Can read every single byte from the data file for lastest version of Undertale, and probably other GameMaker: Studio games (GM:S 1.4 bytecode version 15 or 16 only, version 14 may be supported at some point but not yet, partial GM:S2 support is done) for every platform and then recreate a byte-for-byte exact copy from the decoded data.
