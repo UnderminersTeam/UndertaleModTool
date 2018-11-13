@@ -24,6 +24,12 @@ namespace UndertaleModLib
         void UnserializePadding(UndertaleReader reader);
     }
 
+    public interface PrePaddedObject
+    {
+        void SerializePrePadding(UndertaleWriter writer);
+        void UnserializePrePadding(UndertaleReader reader);
+    }
+
     public interface UndertaleResource : UndertaleObject
     {
     }

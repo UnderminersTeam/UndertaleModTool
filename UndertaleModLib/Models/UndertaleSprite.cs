@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleSprite : UndertaleNamedResource, INotifyPropertyChanged
+    public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyPropertyChanged
     {
         private UndertaleString _Name;
         private uint _Width;
@@ -19,18 +19,18 @@ namespace UndertaleModLib.Models
         private uint _MarginRight;
         private uint _MarginBottom;
         private uint _MarginTop;
-        private uint _Unknown1;
-        private uint _Unknown2;
-        private uint _Unknown3;
+        private bool _Transparent;
+        private bool _Smooth;
+        private bool _Preload;
         private uint _BBoxMode;
         private uint _SepMasks;
         private uint _OriginX;
         private uint _OriginY;
-        private int _GMS2Unknown1 = -1;
-        private uint _GMS2Unknown2 = 1;
-        private uint _GMS2Unknown3 = 0;
-        private float _GMS2Unknown4 = 15.0f; // maybe animation speed?
-        private uint _GMS2Unknown5 = 0;
+        private uint _GMS2UnknownAlways1 = 1;
+        private SpriteType _SSpriteType = 0;
+        private float _GMS2PlaybackSpeed = 15.0f;
+        private uint _GMS2PlaybackSpeedType = 0;
+        private bool _IsSpecialType = false;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public uint Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
@@ -39,9 +39,9 @@ namespace UndertaleModLib.Models
         public uint MarginRight { get => _MarginRight; set { _MarginRight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginRight")); } }
         public uint MarginBottom { get => _MarginBottom; set { _MarginBottom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginBottom")); } }
         public uint MarginTop { get => _MarginTop; set { _MarginTop = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginTop")); } }
-        public uint Unknown1 { get => _Unknown1; set { _Unknown1 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown1")); } }
-        public uint Unknown2 { get => _Unknown2; set { _Unknown2 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown2")); } }
-        public uint Unknown3 { get => _Unknown3; set { _Unknown3 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown3")); } }
+        public bool Transparent { get => _Transparent; set { _Transparent = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Transparent")); } }
+        public bool Smooth { get => _Smooth; set { _Smooth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Smooth")); } }
+        public bool Preload { get => _Preload; set { _Preload = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Preload")); } }
         public uint BBoxMode { get => _BBoxMode; set { _BBoxMode = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BBoxMode")); } }
         public uint SepMasks { get => _SepMasks; set { _SepMasks = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SepMasks")); } }
         public uint OriginX { get => _OriginX; set { _OriginX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OriginX")); } }
@@ -49,17 +49,28 @@ namespace UndertaleModLib.Models
         public UndertaleSimpleList<TextureEntry> Textures { get; private set; } = new UndertaleSimpleList<TextureEntry>();
         public ObservableCollection<MaskEntry> CollisionMasks { get; } = new ObservableCollection<MaskEntry>();
         
-        public int GMS2Unknown1 { get => _GMS2Unknown1; set { _GMS2Unknown1 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2Unknown1")); } }
-        public uint GMS2Unknown2 { get => _GMS2Unknown2; set { _GMS2Unknown2 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2Unknown2")); } }
-        public uint GMS2Unknown3 { get => _GMS2Unknown3; set { _GMS2Unknown3 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2Unknown3")); } }
-        public float GMS2Unknown4 { get => _GMS2Unknown4; set { _GMS2Unknown4 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2Unknown4")); } }
-        public uint GMS2Unknown5 { get => _GMS2Unknown5; set { _GMS2Unknown5 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2Unknown5")); } }
+        // Special sprite types (always used in GMS2)
+        public uint SUnknownAlways1 { get => _GMS2UnknownAlways1; set { _GMS2UnknownAlways1 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SUnknownAlways1")); } }
+        public SpriteType SSpriteType { get => _SSpriteType; set { _SSpriteType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SSpriteType")); } }
+        public float GMS2PlaybackSpeed { get => _GMS2PlaybackSpeed; set { _GMS2PlaybackSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2PlaybackSpeed")); } }
+        public uint GMS2PlaybackSpeedType { get => _GMS2PlaybackSpeedType; set { _GMS2PlaybackSpeedType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2PlaybackSpeedType")); } }
+        public bool IsSpecialType { get => _IsSpecialType; set { _IsSpecialType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsSpecialType")); } }
+
+        public byte[] S_Spine_Data;
+        public byte[] S_SWF_Data;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";
+        }
+
+        public enum SpriteType : uint
+        {
+            Normal = 0,
+            SWF = 1,
+            Spine = 2
         }
 
         public class TextureEntry : UndertaleObject, INotifyPropertyChanged
@@ -106,37 +117,76 @@ namespace UndertaleModLib.Models
             writer.Write(MarginRight);
             writer.Write(MarginBottom);
             writer.Write(MarginTop);
-            writer.Write(Unknown1);
-            writer.Write(Unknown2);
-            writer.Write(Unknown3);
+            writer.Write(Transparent);
+            writer.Write(Smooth);
+            writer.Write(Preload);
             writer.Write(BBoxMode);
             writer.Write(SepMasks);
             writer.Write(OriginX);
             writer.Write(OriginY);
-            if (writer.undertaleData.GeneralInfo.Major >= 2)
+            if (IsSpecialType)
             {
-                writer.Write(GMS2Unknown1);
-                writer.Write(GMS2Unknown2);
-                writer.Write(GMS2Unknown3);
-                writer.Write(GMS2Unknown4);
-                writer.Write(GMS2Unknown5);
+                writer.Write(-1);
+                writer.Write(SUnknownAlways1);
+                writer.Write((uint)SSpriteType);
+                if (writer.undertaleData.GeneralInfo?.Major >= 2)
+                {
+                    writer.Write(GMS2PlaybackSpeed);
+                    writer.Write(GMS2PlaybackSpeedType);
+                }
+
+                switch (SSpriteType)
+                {
+                    case SpriteType.Normal:
+                        writer.WriteUndertaleObject(Textures);
+                        break;
+                    case SpriteType.SWF:
+                        writer.Write(8);
+                        writer.WriteUndertaleObject(Textures);
+                        Align3(writer);
+                        writer.Write(S_SWF_Data);
+                        break;
+                    case SpriteType.Spine:
+                        Align3(writer);
+                        writer.Write(S_Spine_Data);
+                        break;
+                }
             }
-            writer.WriteUndertaleObject(Textures);
+            else
+            {
+                writer.WriteUndertaleObject(Textures);
+            }
             writer.Write((uint)CollisionMasks.Count);
             uint total = 0;
-            foreach(var mask in CollisionMasks)
+            foreach (var mask in CollisionMasks)
             {
                 writer.Write(mask.Data);
                 total += (uint)mask.Data.Length;
             }
-            while(total % 4 != 0)
+            while (total % 4 != 0)
             {
                 writer.Write((byte)0);
                 total++;
             }
             Debug.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count));
         }
-        
+
+        private void Align3(UndertaleReader reader)
+        {
+            while ((reader.Position % 4) != 0)
+            {
+                Debug.Assert(reader.ReadByte() == 0, "Invalid sprite alignment padding");
+            }
+        }
+
+        private void Align3(UndertaleWriter writer)
+        {
+            while ((writer.Position % 4) != 0)
+            {
+                writer.Write((byte)0);
+            }
+        }
+
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -146,32 +196,99 @@ namespace UndertaleModLib.Models
             MarginRight = reader.ReadUInt32();
             MarginBottom = reader.ReadUInt32();
             MarginTop = reader.ReadUInt32();
-            Unknown1 = reader.ReadUInt32();
-            Unknown2 = reader.ReadUInt32();
-            Unknown3 = reader.ReadUInt32();
+            Transparent = reader.ReadBoolean();
+            Smooth = reader.ReadBoolean();
+            Preload = reader.ReadBoolean();
             BBoxMode = reader.ReadUInt32();
             SepMasks = reader.ReadUInt32();
             OriginX = reader.ReadUInt32();
             OriginY = reader.ReadUInt32();
-            if (reader.undertaleData.GeneralInfo.Major >= 2)
+            if (reader.ReadInt32() == -1) // technically this seems to be able to occur on older versions, for special sprite types
             {
-                GMS2Unknown1 = reader.ReadInt32();
-                GMS2Unknown2 = reader.ReadUInt32();
-                GMS2Unknown3 = reader.ReadUInt32();
-                GMS2Unknown4 = reader.ReadSingle();
-                GMS2Unknown5 = reader.ReadUInt32();
+                IsSpecialType = true;
+                SUnknownAlways1 = reader.ReadUInt32();
+                SSpriteType = (SpriteType)reader.ReadUInt32();
+                if (reader.undertaleData.GeneralInfo?.Major >= 2)
+                {
+                    GMS2PlaybackSpeed = reader.ReadSingle();
+                    GMS2PlaybackSpeedType = reader.ReadUInt32();
+                }
+
+                switch (SSpriteType)
+                {
+                    case SpriteType.Normal:
+                        Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
+                        break;
+                    case SpriteType.SWF:
+                        {
+                            //// ATTENTION: This code does not work for some reason. ////
+                            ////            It's a start, at least...                ////
+
+                            Debug.Assert(reader.ReadUInt32() == 8, "Invalid SWF sprite format");
+                            Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
+                            Align3(reader);
+
+                            // Determining the length of the buffer literally requires the parsing of it... here goes.
+                            uint begin = reader.Position;
+                            Align3(reader);
+                            int length1 = reader.ReadInt32() & 0x7FFFFFFF;
+                            Debug.Assert(reader.ReadUInt32() == 8, "Invalid SWF sprite format after length1");
+                            reader.Position += (uint)length1;
+                            Align3(reader);
+                            reader.Position += (reader.ReadUInt32() * 8) + 4;
+                            uint count1 = reader.ReadUInt32();
+                            reader.Position += 16; // Something messes up here, I think these numbers are wrong
+                            int count2 = reader.ReadInt32();
+                            reader.Position += 12;
+                            for (int i = 0; i < count1; i++)
+                            {
+                                reader.Position += (reader.ReadUInt32() * 96) + 16;
+                            }
+                            for (int i = 0; i < count2; i++)
+                            {
+                                reader.Position += reader.ReadUInt32();
+                                Align3(reader);
+                            }
+                            uint length = reader.Position - begin;
+                            reader.Position = begin;
+
+                            // Now that the length is calculated, read all of it into a buffer
+                            S_SWF_Data = reader.ReadBytes((int)length);
+                        }
+                        break;
+                    case SpriteType.Spine:
+                        {
+                            Align3(reader);
+
+                            uint begin = reader.Position;
+                            reader.ReadUInt32(); // version number
+                            uint jsonLength = reader.ReadUInt32();
+                            uint atlasLength = reader.ReadUInt32();
+                            uint textureLength = reader.ReadUInt32();
+                            reader.ReadUInt32(); // atlas tex width
+                            reader.ReadUInt32(); // atlas tex height
+                            reader.Position = begin;
+
+                            S_Spine_Data = reader.ReadBytes((int)(24 + jsonLength + atlasLength + textureLength));
+                        }
+                        break;
+                }
             }
-            Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
+            else
+            {
+                reader.Position -= 4;
+                Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
+            }
             uint MaskCount = reader.ReadUInt32();
             CollisionMasks.Clear();
             uint total = 0;
-            for(uint i = 0; i < MaskCount; i++)
+            for (uint i = 0; i < MaskCount; i++)
             {
                 uint len = (Width + 7) / 8 * Height;
                 CollisionMasks.Add(new MaskEntry(reader.ReadBytes((int)len)));
                 total += len;
             }
-            while(total % 4 != 0)
+            while (total % 4 != 0)
             {
                 if (reader.ReadByte() != 0)
                     throw new IOException("Mask padding");
@@ -179,7 +296,7 @@ namespace UndertaleModLib.Models
             }
             Debug.Assert(total == CalculateMaskDataSize(Width, Height, MaskCount));
         }
-        
+
         /**
          * This is just a stream of bits, with each row aligned to a full byte
          * and the whole array aligned to 4 bytes
@@ -260,6 +377,16 @@ namespace UndertaleModLib.Models
             uint dataBits = roundedWidth * height * maskcount;
             uint dataBytes = ((dataBits + 31) / 32 * 32) / 8; // round to multiple of 4 bytes
             return dataBytes;
+        }
+
+        public void SerializePrePadding(UndertaleWriter writer)
+        {
+            Align3(writer);
+        }
+
+        public void UnserializePrePadding(UndertaleReader reader)
+        {
+            Align3(reader);
         }
     }
 }

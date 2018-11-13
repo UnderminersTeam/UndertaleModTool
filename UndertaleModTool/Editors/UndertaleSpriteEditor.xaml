@@ -5,15 +5,26 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleSprite}">
-    
+    <UserControl.Resources>
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="SpriteType">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="undertale:UndertaleSprite+SpriteType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -57,30 +68,23 @@
             <TextBox Grid.Column="3" Margin="3" Text="{Binding MarginTop}"/>
         </Grid>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Unknown</TextBlock>
-        <Grid Grid.Row="4" Grid.Column="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Margin="3" Text="{Binding Unknown1}"/>
-            <TextBox Grid.Column="1" Margin="3" Text="{Binding Unknown2}"/>
-            <TextBox Grid.Column="2" Margin="3" Text="{Binding Unknown3}"/>
-        </Grid>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Transparent</TextBlock>
+        <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Transparent}"/>
+        
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Smooth</TextBlock>
+        <CheckBox Grid.Row="5" Grid.Column="1" Margin="3" IsChecked="{Binding Smooth}"/>
+        
+        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Preload</TextBlock>
+        <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Preload}"/>
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Bounding box mode</TextBlock>
-        <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding BBoxMode}"/>
+        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Bounding box mode</TextBlock>
+        <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding BBoxMode}"/>
 
-        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">SepMasks (?)</TextBlock>
-        <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding SepMasks}"/>
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">SepMasks (?)</TextBlock>
+        <TextBox Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding SepMasks}"/>
 
-        <Border Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
-            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">More GMS2 params go here</TextBlock>
-        </Border>
-
-        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Origin</TextBlock>
-        <Grid Grid.Row="8" Grid.Column="1">
+        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Origin</TextBlock>
+        <Grid Grid.Row="9" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -89,8 +93,8 @@
             <TextBox Grid.Column="1" Margin="3" Text="{Binding OriginY}"/>
         </Grid>
 
-        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Textures</TextBlock>
-        <DataGrid Grid.Row="9" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures}" Name="TextureList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
+        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Textures</TextBlock>
+        <DataGrid Grid.Row="10" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures}" Name="TextureList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -127,7 +131,7 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <Viewbox Grid.Row="10" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
+        <Viewbox Grid.Row="11" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
             <Border>
                 <Border.Background>
                     <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
@@ -143,10 +147,10 @@
             </Border>
         </Viewbox>
 
-        <Button Grid.Row="11" Grid.Column="1" Content="Export all frames" Click="ExportAll_Click"/>
+        <Button Grid.Row="12" Grid.Column="1" Content="Export all frames" Click="ExportAll_Click"/>
 
-        <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Collision masks</TextBlock>
-        <DataGrid Grid.Row="12" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks}" Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
+        <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Collision masks</TextBlock>
+        <DataGrid Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks}" Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -183,7 +187,7 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <ContentControl Grid.Row="13" Grid.Column="1" Margin="3" DataContext="{Binding SelectedItem, ElementName=MaskList}">
+        <ContentControl Grid.Row="14" Grid.Column="1" Margin="3" DataContext="{Binding SelectedItem, ElementName=MaskList}">
             <ContentControl.Template>
                 <ControlTemplate>
                     <StackPanel Name="MaskEditor">
@@ -242,5 +246,44 @@
                 </ControlTemplate>
             </ContentControl.Template>
         </ContentControl>
+
+        <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Is special type?</TextBlock>
+        <CheckBox Grid.Row="15" Grid.Column="1" Margin="3" IsChecked="{Binding IsSpecialType}"/>
+
+        <Grid Grid.Row="16" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding Path=IsSpecialType, Converter={StaticResource BoolToVis}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Unknown always 1</TextBlock>
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding SUnknownAlways1}"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Type</TextBlock>
+            <ComboBox ItemsSource="{Binding Source={StaticResource SpriteType}}" SelectedItem="{Binding Path=SSpriteType}"
+                  Grid.Row="1" Grid.Column="1" Margin="3"/>
+
+            <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Playback speed</TextBlock>
+                <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2PlaybackSpeed}"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Playback speed type</TextBlock>
+                <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GMS2PlaybackSpeedType}"/>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

@@ -21,7 +21,7 @@ namespace UndertaleModLib.Models
         private AudioEntryFlags _Flags = AudioEntryFlags.IsEmbedded;
         private UndertaleString _Type;
         private UndertaleString _File;
-        private uint _Unknown = 0;
+        private uint _Effects = 0;
         private float _Volume = 1;
         private float _Pitch = 0;
         private UndertaleResourceById<UndertaleAudioGroup> _AudioGroup { get; } = new UndertaleResourceById<UndertaleAudioGroup>("AGRP");
@@ -31,7 +31,7 @@ namespace UndertaleModLib.Models
         public AudioEntryFlags Flags { get => _Flags; set { _Flags = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Flags")); } }
         public UndertaleString Type { get => _Type; set { _Type = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Type")); } }
         public UndertaleString File { get => _File; set { _File = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("File")); } }
-        public uint Unknown { get => _Unknown; set { _Unknown = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unknown")); } }
+        public uint Effects { get => _Effects; set { _Effects = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Effects")); } }
         public float Volume { get => _Volume; set { _Volume = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Volume")); } }
         public float Pitch { get => _Pitch; set { _Pitch = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Pitch")); } }
         public UndertaleAudioGroup AudioGroup { get => _AudioGroup.Resource; set { _AudioGroup.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AudioGroup")); } }
@@ -47,7 +47,7 @@ namespace UndertaleModLib.Models
             writer.Write((uint)Flags);
             writer.WriteUndertaleString(Type);
             writer.WriteUndertaleString(File);
-            writer.Write(Unknown);
+            writer.Write(Effects);
             writer.Write(Volume);
             writer.Write(Pitch);
             writer.Write(_AudioGroup.Serialize(writer));
@@ -63,7 +63,7 @@ namespace UndertaleModLib.Models
             Flags = (AudioEntryFlags)reader.ReadUInt32();
             Type = reader.ReadUndertaleString();
             File = reader.ReadUndertaleString();
-            Unknown = reader.ReadUInt32();
+            Effects = reader.ReadUInt32();
             Volume = reader.ReadSingle();
             Pitch = reader.ReadSingle();
             _AudioGroup.Unserialize(reader, reader.ReadInt32());

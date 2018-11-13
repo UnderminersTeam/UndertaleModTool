@@ -36,8 +36,8 @@
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">File</TextBlock>
         <local:UndertaleStringReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding File}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Unknown</TextBlock>
-        <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding Unknown}"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Effects</TextBlock>
+        <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding Effects}"/>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Volume</TextBlock>
         <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding Volume}"/>
