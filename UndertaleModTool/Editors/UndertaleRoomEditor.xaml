@@ -37,97 +37,7 @@
     </UserControl.InputBindings>
 
     <StackPanel>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="3*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-
-            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
-            <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
-
-            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Caption</TextBlock>
-            <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Caption}"/>
-
-            <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Size</TextBlock>
-            <Grid Grid.Row="2" Grid.Column="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" Margin="3" Text="{Binding Width}"/>
-                <TextBox Grid.Column="1" Margin="3" Text="{Binding Height}"/>
-            </Grid>
-
-            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Speed</TextBlock>
-            <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Speed}"/>
-
-            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Persistent</TextBlock>
-            <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Persistent}"/>
-
-            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Background color</TextBlock>
-            <local:ColorPicker Grid.Row="5" Grid.Column="1" Margin="3" Color="{Binding BackgroundColor}"/>
-
-            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Draw background color</TextBlock>
-            <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding DrawBackgroundColor}"/>
-
-            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Creation Code</TextBlock>
-            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding CreationCodeId}" ObjectType="{x:Type undertale:UndertaleCode}"/>
-
-            <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Flags</TextBlock>
-            <TextBox Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding Flags}"/>
-
-            <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">World</TextBlock>
-            <TextBox Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding World}"/>
-
-            <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Top/Left/Right/Bottom</TextBlock>
-            <Grid Grid.Row="10" Grid.Column="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" Margin="3" Text="{Binding Top}"/>
-                <TextBox Grid.Column="1" Margin="3" Text="{Binding Left}"/>
-                <TextBox Grid.Column="2" Margin="3" Text="{Binding Right}"/>
-                <TextBox Grid.Column="3" Margin="3" Text="{Binding Bottom}"/>
-            </Grid>
-
-            <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Gravity</TextBlock>
-            <Grid Grid.Row="11" Grid.Column="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" Margin="3" Text="{Binding GravityX}" ToolTip="X"/>
-                <TextBox Grid.Column="1" Margin="3" Text="{Binding GravityY}" ToolTip="Y"/>
-            </Grid>
-
-            <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Meters per pixel</TextBlock>
-            <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding MetersPerPixel}"/>
-        </Grid>
-
-        <Border Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
-            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">IMPORTANT: The room editor is experimental. The layers data is not displayed in the preview at the bottom yet.</TextBlock>
-        </Border>
-
-        <Grid Height="300">
+        <Grid Height="500">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -166,145 +76,237 @@
                         </TextBlock>
                     </DataTemplate>
                 </TreeView.Resources>
-                <TreeViewItem Header="Backgrounds" ItemsSource="{Binding Backgrounds}" IsExpanded="True">
-                    <TreeViewItem.Style>
-                        <Style TargetType="{x:Type TreeViewItem}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
-                                    <DataTrigger.Setters>
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger.Setters>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TreeViewItem.Style>
-                    <TreeViewItem.ItemTemplate>
-                        <HierarchicalDataTemplate>
-                            <TextBlock Text="{Binding BackgroundDefinition, TargetNullValue='(no name)'}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Enabled}" Value="False">
-                                                <Setter Property="Foreground"  Value="LightGray"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </HierarchicalDataTemplate>
-                    </TreeViewItem.ItemTemplate>
-                </TreeViewItem>
-                <TreeViewItem Header="Views" ItemsSource="{Binding Views}" IsExpanded="True">
-                    <TreeViewItem.ItemTemplate>
-                        <HierarchicalDataTemplate>
-                            <TextBlock Text="View">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Enabled}" Value="False">
-                                                <Setter Property="Foreground"  Value="LightGray"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </HierarchicalDataTemplate>
-                    </TreeViewItem.ItemTemplate>
-                </TreeViewItem>
-                <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects}">
-                    <TreeViewItem.Style>
-                        <Style TargetType="{x:Type TreeViewItem}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
-                                    <DataTrigger.Setters>
-                                        <Setter Property="IsExpanded" Value="False"/>
-                                        <Setter Property="Foreground"  Value="LightGray"/>
-                                    </DataTrigger.Setters>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Collapsed">
-                                    <DataTrigger.Setters>
-                                        <Setter Property="IsExpanded" Value="True"/>
-                                    </DataTrigger.Setters>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TreeViewItem.Style>
-                </TreeViewItem>
-                <TreeViewItem Header="Tiles" ItemsSource="{Binding Tiles}" IsExpanded="True">
-                    <TreeViewItem.Style>
-                        <Style TargetType="{x:Type TreeViewItem}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
-                                    <DataTrigger.Setters>
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger.Setters>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TreeViewItem.Style>
-                    <TreeViewItem.ItemTemplate>
-                        <HierarchicalDataTemplate>
-                            <TextBlock>
-                                <TextBlock.Text>
-                                    <MultiBinding StringFormat="{}Tile {0} of {1} (UndertaleRoom+Tile)">
-                                        <Binding Path="InstanceID"/>
-                                        <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?"/>
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                        </HierarchicalDataTemplate>
-                    </TreeViewItem.ItemTemplate>
-                </TreeViewItem>
-                <TreeViewItem Header="Layers" ItemsSource="{Binding Layers}" IsExpanded="True">
-                    <TreeViewItem.Style>
-                        <Style TargetType="{x:Type TreeViewItem}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Collapsed">
-                                    <DataTrigger.Setters>
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger.Setters>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TreeViewItem.Style>
-                    <TreeViewItem.ItemTemplateSelector>
-                        <local:LayerDataTemplateSelector>
-                            <local:LayerDataTemplateSelector.InstancesDataTemplate>
-                                <HierarchicalDataTemplate ItemsSource="{Binding InstancesData.Instances}" ItemTemplateSelector="{x:Null}">
-                                    <TextBlock Text="{Binding LayerName.Content}" />
-                                </HierarchicalDataTemplate>
-                            </local:LayerDataTemplateSelector.InstancesDataTemplate>
-                            <local:LayerDataTemplateSelector.TilesDataTemplate>
-                                <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                    <TextBlock Text="{Binding LayerName.Content}" />
-                                </HierarchicalDataTemplate>
-                            </local:LayerDataTemplateSelector.TilesDataTemplate>
-                            <local:LayerDataTemplateSelector.AssetsDataTemplate>
-                                <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                    <HierarchicalDataTemplate.ItemsSource>
-                                        <MultiBinding>
-                                            <MultiBinding.Converter>
-                                                <local:MultiCollectionBinding/> <!-- TODO: hack, may break updates -->
-                                            </MultiBinding.Converter>
-                                            <Binding Path="AssetsData.LegacyTiles"/>
-                                            <Binding Path="AssetsData.Sprites"/>
+
+                <TreeViewItem Header="{Binding Name.Content}" Name="RoomRootItem" IsExpanded="True">
+                    <TreeViewItem Header="Backgrounds" ItemsSource="{Binding Backgrounds}" IsExpanded="True">
+                        <TreeViewItem.Style>
+                            <Style TargetType="{x:Type TreeViewItem}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
+                                        <DataTrigger.Setters>
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TreeViewItem.Style>
+                        <TreeViewItem.ItemTemplate>
+                            <HierarchicalDataTemplate>
+                                <TextBlock Text="{Binding BackgroundDefinition, TargetNullValue='(no name)'}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Enabled}" Value="False">
+                                                    <Setter Property="Foreground"  Value="LightGray"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </HierarchicalDataTemplate>
+                        </TreeViewItem.ItemTemplate>
+                    </TreeViewItem>
+                    <TreeViewItem Header="Views" ItemsSource="{Binding Views}" IsExpanded="True">
+                        <TreeViewItem.ItemTemplate>
+                            <HierarchicalDataTemplate>
+                                <TextBlock Text="View">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Enabled}" Value="False">
+                                                    <Setter Property="Foreground"  Value="LightGray"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </HierarchicalDataTemplate>
+                        </TreeViewItem.ItemTemplate>
+                    </TreeViewItem>
+                    <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects}">
+                        <TreeViewItem.Style>
+                            <Style TargetType="{x:Type TreeViewItem}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
+                                        <DataTrigger.Setters>
+                                            <Setter Property="IsExpanded" Value="False"/>
+                                            <Setter Property="Foreground"  Value="LightGray"/>
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Collapsed">
+                                        <DataTrigger.Setters>
+                                            <Setter Property="IsExpanded" Value="True"/>
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TreeViewItem.Style>
+                    </TreeViewItem>
+                    <TreeViewItem Header="Tiles" ItemsSource="{Binding Tiles}" IsExpanded="True">
+                        <TreeViewItem.Style>
+                            <Style TargetType="{x:Type TreeViewItem}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
+                                        <DataTrigger.Setters>
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TreeViewItem.Style>
+                        <TreeViewItem.ItemTemplate>
+                            <HierarchicalDataTemplate>
+                                <TextBlock>
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}Tile {0} of {1} (UndertaleRoom+Tile)">
+                                            <Binding Path="InstanceID"/>
+                                            <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?"/>
                                         </MultiBinding>
-                                    </HierarchicalDataTemplate.ItemsSource>
-                                    <TextBlock Text="{Binding LayerName.Content}" />
-                                </HierarchicalDataTemplate>
-                            </local:LayerDataTemplateSelector.AssetsDataTemplate>
-                            <local:LayerDataTemplateSelector.BackgroundDataTemplate>
-                                <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                    <TextBlock Text="{Binding LayerName.Content}" />
-                                </HierarchicalDataTemplate>
-                            </local:LayerDataTemplateSelector.BackgroundDataTemplate>
-                        </local:LayerDataTemplateSelector>
-                    </TreeViewItem.ItemTemplateSelector>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </HierarchicalDataTemplate>
+                        </TreeViewItem.ItemTemplate>
+                    </TreeViewItem>
+                    <TreeViewItem Header="Layers" ItemsSource="{Binding Layers}" IsExpanded="True">
+                        <TreeViewItem.Style>
+                            <Style TargetType="{x:Type TreeViewItem}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Collapsed">
+                                        <DataTrigger.Setters>
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TreeViewItem.Style>
+                        <TreeViewItem.ItemTemplateSelector>
+                            <local:LayerDataTemplateSelector>
+                                <local:LayerDataTemplateSelector.InstancesDataTemplate>
+                                    <HierarchicalDataTemplate ItemsSource="{Binding InstancesData.Instances}" ItemTemplateSelector="{x:Null}">
+                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                    </HierarchicalDataTemplate>
+                                </local:LayerDataTemplateSelector.InstancesDataTemplate>
+                                <local:LayerDataTemplateSelector.TilesDataTemplate>
+                                    <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
+                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                    </HierarchicalDataTemplate>
+                                </local:LayerDataTemplateSelector.TilesDataTemplate>
+                                <local:LayerDataTemplateSelector.AssetsDataTemplate>
+                                    <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
+                                        <HierarchicalDataTemplate.ItemsSource>
+                                            <MultiBinding>
+                                                <MultiBinding.Converter>
+                                                    <local:MultiCollectionBinding/>
+                                                    <!-- TODO: hack, may break updates -->
+                                                </MultiBinding.Converter>
+                                                <Binding Path="AssetsData.LegacyTiles"/>
+                                                <Binding Path="AssetsData.Sprites"/>
+                                            </MultiBinding>
+                                        </HierarchicalDataTemplate.ItemsSource>
+                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                    </HierarchicalDataTemplate>
+                                </local:LayerDataTemplateSelector.AssetsDataTemplate>
+                                <local:LayerDataTemplateSelector.BackgroundDataTemplate>
+                                    <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
+                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                    </HierarchicalDataTemplate>
+                                </local:LayerDataTemplateSelector.BackgroundDataTemplate>
+                            </local:LayerDataTemplateSelector>
+                        </TreeViewItem.ItemTemplateSelector>
+                    </TreeViewItem>
                 </TreeViewItem>
             </TreeView>
 
             <ScrollViewer Grid.Column="1" Margin="3" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                 <ContentControl.Resources>
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="3*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+                            <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Caption</TextBlock>
+                            <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Caption}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Size</TextBlock>
+                            <Grid Grid.Row="2" Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Margin="3" Text="{Binding Width}"/>
+                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Height}"/>
+                            </Grid>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Speed</TextBlock>
+                            <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Speed}"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Persistent</TextBlock>
+                            <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Persistent}"/>
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Background color</TextBlock>
+                            <local:ColorPicker Grid.Row="5" Grid.Column="1" Margin="3" Color="{Binding BackgroundColor}"/>
+
+                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Draw background color</TextBlock>
+                            <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding DrawBackgroundColor}"/>
+
+                            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Creation Code</TextBlock>
+                            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding CreationCodeId}" ObjectType="{x:Type undertale:UndertaleCode}"/>
+
+                            <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Flags</TextBlock>
+                            <TextBox Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding Flags}"/>
+
+                            <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">World</TextBlock>
+                            <TextBox Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding World}"/>
+
+                            <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Top/Left/Right/Bottom</TextBlock>
+                            <Grid Grid.Row="10" Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Margin="3" Text="{Binding Top}"/>
+                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Left}"/>
+                                <TextBox Grid.Column="2" Margin="3" Text="{Binding Right}"/>
+                                <TextBox Grid.Column="3" Margin="3" Text="{Binding Bottom}"/>
+                            </Grid>
+
+                            <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Gravity</TextBlock>
+                            <Grid Grid.Row="11" Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Margin="3" Text="{Binding GravityX}" ToolTip="X"/>
+                                <TextBox Grid.Column="1" Margin="3" Text="{Binding GravityY}" ToolTip="Y"/>
+                            </Grid>
+
+                            <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Meters per pixel</TextBlock>
+                            <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding MetersPerPixel}"/>
+                        </Grid>
+                    </DataTemplate>
+                    
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Background}">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -821,6 +823,10 @@
                 </ContentControl.Resources>
             </ScrollViewer>
         </Grid>
+
+        <Border Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">IMPORTANT: The room editor is experimental. The layers data is not displayed in the preview at the bottom yet.</TextBlock>
+        </Border>
 
         <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
             <ItemsControl Name="RoomGraphics" Background="Black">

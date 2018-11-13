@@ -41,6 +41,19 @@ namespace UndertaleModTool
         public UndertaleRoomEditor()
         {
             InitializeComponent();
+
+            Loaded += UndertaleRoomEditor_Loaded;
+            DataContextChanged += UndertaleRoomEditor_DataContextChanged;
+        }
+
+        private void UndertaleRoomEditor_Loaded(object sender, RoutedEventArgs e)
+        {
+            RoomRootItem.IsSelected = true;
+        }
+
+        private void UndertaleRoomEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            RoomRootItem.IsSelected = true;
         }
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -48,7 +61,11 @@ namespace UndertaleModTool
             // I can't bind it directly because then clicking on the headers makes WPF explode because it tries to attach the header as child of ObjectEditor
             // TODO: find some better workaround
             object sel = e.NewValue;
-            if (sel is UndertaleObject)
+            if (sel == RoomRootItem)
+            {
+                ObjectEditor.Content = DataContext;
+            }
+            else if (sel is UndertaleObject)
             {
                 ObjectEditor.Content = sel;
             }
@@ -125,7 +142,7 @@ namespace UndertaleModTool
             // TODO: This sometimes fails to open objects in non-expanded tree
             // Note that this prefers to select the object inside a layer than the 'floating' one in GameObjects
 
-            foreach (var child in RoomObjectsTree.Items)
+            foreach (var child in (RoomObjectsTree.Items[0] as TreeViewItem).Items)
             {
                 foreach (var layer in (child as TreeViewItem).Items)
                 {
@@ -142,7 +159,7 @@ namespace UndertaleModTool
                 }
             }
 
-            foreach (var child in RoomObjectsTree.Items)
+            foreach (var child in (RoomObjectsTree.Items[0] as TreeViewItem).Items)
             {
                 var twi = (child as TreeViewItem).ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
                 if (twi != null)
