@@ -931,6 +931,8 @@ namespace UndertaleModTool
             {
                 // Toby Fox did not autorize you to do this action
 
+                Title = "UndertaleDogTool by krzys_h v0.1.TOBYFOX";
+
                 room_dogcheck.Visibility = Visibility.Visible;
 
                 SoundPlayer player = new SoundPlayer(Application.GetResourceStream(new Uri(@"pack://application:,,,/Resources/mus_dance_of_dog.wav")).Stream);
