@@ -825,7 +825,7 @@
         </Grid>
 
         <Border Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
-            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">IMPORTANT: The room editor is experimental. The layers data is not displayed in the preview at the bottom yet.</TextBlock>
+            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">IMPORTANT: The GMS2 room editor is experimental. The layers data is not displayed in the preview at the bottom yet.</TextBlock>
         </Border>
 
         <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
