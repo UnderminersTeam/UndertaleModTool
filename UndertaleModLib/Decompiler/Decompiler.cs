@@ -1453,6 +1453,23 @@ namespace UndertaleModLib.Decompiler
                         if (!caseEntries.ContainsKey(block.nextBlockTrue))
                             caseEntries.Add(block.nextBlockTrue, new List<Expression>());
                         caseEntries[block.nextBlockTrue].Add(caseExpr);
+                        if (!block.conditionalExit)
+                        {
+                            // Seems to be "default", and we simply want to go to the exit now.
+                            // This is a little hack, but it should fully work. The compiler always
+                            // emits "default" at the end it looks like. Also this navigates down the
+                            // "false" branching paths over others- this should lead to the correct
+                            // block. Without this, branching at the start of "default" will break
+                            // this switch detection.
+                            while (block.nextBlockTrue != meetPoint)
+                            {
+                                if (block.nextBlockFalse != null)
+                                    block = block.nextBlockFalse;
+                                else
+                                    block = block.nextBlockTrue;
+                            }
+                            break;
+                        }
                         block = block.nextBlockFalse;
                     }
 

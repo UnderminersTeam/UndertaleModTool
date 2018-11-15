@@ -139,6 +139,7 @@ namespace UndertaleModLib.Models
                 {
                     case SpriteType.Normal:
                         writer.WriteUndertaleObject(Textures);
+                        WriteMaskData(writer);
                         break;
                     case SpriteType.SWF:
                         writer.Write(8);
@@ -155,7 +156,12 @@ namespace UndertaleModLib.Models
             else
             {
                 writer.WriteUndertaleObject(Textures);
+                WriteMaskData(writer);
             }
+        }
+
+        private void WriteMaskData(UndertaleWriter writer)
+        {
             writer.Write((uint)CollisionMasks.Count);
             uint total = 0;
             foreach (var mask in CollisionMasks)
@@ -173,7 +179,7 @@ namespace UndertaleModLib.Models
 
         private void Align3(UndertaleReader reader)
         {
-            while ((reader.Position % 4) != 0)
+            while ((reader.Position & 3) != 0)
             {
                 Debug.Assert(reader.ReadByte() == 0, "Invalid sprite alignment padding");
             }
@@ -181,7 +187,7 @@ namespace UndertaleModLib.Models
 
         private void Align3(UndertaleWriter writer)
         {
-            while ((writer.Position % 4) != 0)
+            while ((writer.Position & 3) != 0)
             {
                 writer.Write((byte)0);
             }
@@ -218,11 +224,11 @@ namespace UndertaleModLib.Models
                 {
                     case SpriteType.Normal:
                         Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
+                        ReadMaskData(reader);
                         break;
                     case SpriteType.SWF:
                         {
-                            //// ATTENTION: This code does not work for some reason. ////
-                            ////            It's a start, at least...                ////
+                            //// ATTENTION: This code does not work all the time for some reason. ////
 
                             Debug.Assert(reader.ReadUInt32() == 8, "Invalid SWF sprite format");
                             Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
@@ -235,11 +241,12 @@ namespace UndertaleModLib.Models
                             Debug.Assert(reader.ReadUInt32() == 8, "Invalid SWF sprite format after length1");
                             reader.Position += (uint)length1;
                             Align3(reader);
-                            reader.Position += (reader.ReadUInt32() * 8) + 4;
+                            uint test = reader.ReadUInt32();
+                            reader.Position += (test * 8) + 4;
                             uint count1 = reader.ReadUInt32();
-                            reader.Position += 16; // Something messes up here, I think these numbers are wrong
+                            reader.Position += 16;
                             int count2 = reader.ReadInt32();
-                            reader.Position += 12;
+                            reader.Position += 8;
                             for (int i = 0; i < count1; i++)
                             {
                                 reader.Position += (reader.ReadUInt32() * 96) + 16;
@@ -278,7 +285,12 @@ namespace UndertaleModLib.Models
             {
                 reader.Position -= 4;
                 Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
+                ReadMaskData(reader);
             }
+        }
+
+        private void ReadMaskData(UndertaleReader reader)
+        {
             uint MaskCount = reader.ReadUInt32();
             CollisionMasks.Clear();
             uint total = 0;
