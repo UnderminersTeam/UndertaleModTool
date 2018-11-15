@@ -44,6 +44,7 @@
     <Compile Include="ModelsDebug\UndertaleDebugInfo.cs" />
     <Compile Include="ModelsDebug\UndertaleInstanceVars.cs" />
     <Compile Include="ModelsDebug\UndertaleScriptSource.cs" />
+    <Compile Include="Models\UndertaleEmbeddedImage.cs" />
     <Compile Include="Models\UndertaleExtension.cs" />
     <Compile Include="Models\UndertaleBackground.cs" />
     <Compile Include="Models\UndertaleCode.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="Models\UndertaleSound.cs" />
     <Compile Include="Models\UndertaleSprite.cs" />
     <Compile Include="Models\UndertaleString.cs" />
+    <Compile Include="Models\UndertaleTextureGroupInfo.cs" />
     <Compile Include="Models\UndertaleTexturePageItem.cs" />
     <Compile Include="Models\UndertaleTimeline.cs" />
     <Compile Include="Models\UndertaleUnused.cs" />
