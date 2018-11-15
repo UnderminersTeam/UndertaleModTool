@@ -38,24 +38,24 @@ namespace UndertaleModLib.Models
         [Flags]
         public enum InfoFlags : uint
         {
-            Fullscreen = 0x0001,
-            SyncVertex1 = 0x0002,
+            Fullscreen = 0x0001,        // Start fullscreen
+            SyncVertex1 = 0x0002,       // Use synchronization to avoid tearing
             SyncVertex2 = 0x0004,
-            Interpolate = 0x0008,
-            Scale = 0x0010, // Scaling: Keep aspect
-            ShowCursor = 0x0020,
-            Sizeable = 0x0040,
-            ScreenKey = 0x0080,
+            Interpolate = 0x0008,       // Interpolate colours between pixels
+            Scale = 0x0010,             // Scaling: Keep aspect
+            ShowCursor = 0x0020,        // Display cursor
+            Sizeable = 0x0040,          // Allow window resize
+            ScreenKey = 0x0080,         // Allow fullscreen switching
             SyncVertex3 = 0x0100,
             StudioVersionB1 = 0x0200,
             StudioVersionB2 = 0x0400,
             StudioVersionB3 = 0x0800,
             StudioVersionMask = 0x0E00, // studioVersion = (infoFlags & InfoFlags.StudioVersionMask) >> 9
-            SteamEnabled = 0x1000,
+            SteamEnabled = 0x1000,      // Enable Steam
             LocalDataEnabled = 0x2000,
-            BorderlessWindow = 0x4000,
+            BorderlessWindow = 0x4000,  // Borderless Window
             DefaultCodeKind = 0x8000,
-            LicenseExclusions = 0x10000
+            LicenseExclusions = 0x10000,
         }
 
         public bool DisableDebugger { get; set; } = true;
@@ -212,9 +212,42 @@ namespace UndertaleModLib.Models
 
     public class UndertaleOptions : UndertaleObject
     {
+        [Flags]
+        public enum OptionsFlags : ulong
+        {
+            FullScreen = 0x1,
+            InterpolatePixels = 0x2,
+            UseNewAudio = 0x4,
+            NoBorder = 0x8,
+            ShowCursor = 0x10,
+            Sizeable = 0x20,
+            StayOnTop = 0x40,
+            ChangeResolution = 0x80,
+            NoButtons = 0x100,
+            ScreenKey = 0x200,
+            HelpKey = 0x400,
+            QuitKey = 0x800,
+            SaveKey = 0x1000,
+            ScreenShotKey = 0x2000,
+            CloseSec = 0x4000,
+            Freeze = 0x8000,
+            ShowProgress = 0x10000,
+            LoadTransparent = 0x20000,
+            ScaleProgress = 0x40000,
+            DisplayErrors = 0x80000,
+            WriteErrors = 0x100000,
+            AbortErrors = 0x200000,
+            VariableErrors = 0x400000,
+            CreationEventOrder = 0x800000,
+            UseFrontTouch = 0x1000000,
+            UseRearTouch = 0x2000000,
+            UseFastCollision = 0x4000000,
+            FastCollisionCompatibility = 0x8000000,
+        }
+
         public uint Unknown1 { get; set; } = 0x80000000;
         public uint Unknown2 { get; set; } = 0x00000002;
-        public long Info { get; set; } = 0x00CC7A16; // was supposed to be a copy of UndertaleGeneralInfo.InfoFlags but it doesn't seem like it
+        public OptionsFlags Info { get; set; } = OptionsFlags.InterpolatePixels | OptionsFlags.UseNewAudio | OptionsFlags.ShowCursor | OptionsFlags.ScreenKey | OptionsFlags.QuitKey | OptionsFlags.SaveKey | OptionsFlags.ScreenShotKey | OptionsFlags.CloseSec | OptionsFlags.ScaleProgress | OptionsFlags.DisplayErrors | OptionsFlags.VariableErrors | OptionsFlags.CreationEventOrder;
         public int Scale { get; set; } = -1;
         public uint WindowColor { get; set; } = 0;
         public uint ColorDepth { get; set; } = 0;
@@ -250,7 +283,7 @@ namespace UndertaleModLib.Models
         {
             writer.Write(Unknown1);
             writer.Write(Unknown2);
-            writer.Write(Info);
+            writer.Write((ulong)Info);
             writer.Write(Scale);
             writer.Write(WindowColor);
             writer.Write(ColorDepth);
@@ -269,7 +302,7 @@ namespace UndertaleModLib.Models
         {
             Unknown1 = reader.ReadUInt32();
             Unknown2 = reader.ReadUInt32();
-            Info = reader.ReadInt64();
+            Info = (OptionsFlags)reader.ReadUInt64();
             Scale = reader.ReadInt32();
             WindowColor = reader.ReadUInt32();
             ColorDepth = reader.ReadUInt32();
