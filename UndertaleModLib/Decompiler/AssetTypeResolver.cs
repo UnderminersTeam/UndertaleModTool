@@ -13,6 +13,7 @@ namespace UndertaleModLib.Decompiler
         KeyboardKey,
         Enum_HAlign,
         Enum_VAlign,
+        Enum_OSType,
         e__VW, // The constant used in __view_get and __view_set compatibility scripts
         e__BG, // The constant used in __background_get and __background_set compatibility scripts
 
@@ -41,6 +42,31 @@ namespace UndertaleModLib.Decompiler
         fa_top = 0,
         fa_middle = 1,
         fa_bottom = 2
+    }
+
+    public enum OSType : int
+    {
+        os_windows = 0,
+        os_uwp = 18,
+        os_linux = 6,
+        os_macosx = 1,
+        os_ios = 3,
+        os_android = 4,
+        os_ps3 = 16,
+        os_ps4 = 14,
+        os_psvita = 12,
+        os_xbox = 15,
+        os_unknown = -1,
+        os_3ds = 11,
+        os_bb10 = 13,
+        os_psp = 2,
+        os_symbian = 5,
+        os_tizen = 8,
+        os_wiiu = 10,
+        os_win8native = 9,
+        os_xbox360 = 17,
+        os_xboxone = 15,
+        os_switch = 20,
     }
 
     public enum e__VW : uint
@@ -422,6 +448,7 @@ namespace UndertaleModLib.Decompiler
             // only the relevant ones because I'm sick of writing this
             { "background_index", AssetIDType.Background }, // array
             { "background_colour", AssetIDType.Color }, // array
+            { "view_object", AssetIDType.GameObject }, // array
             { "path_index", AssetIDType.Path },
             { "room_first", AssetIDType.Room },
             { "room_last", AssetIDType.Room },
@@ -432,6 +459,7 @@ namespace UndertaleModLib.Decompiler
             { "event_object", AssetIDType.GameObject },
             { "keyboard_key", AssetIDType.KeyboardKey },
             { "keyboard_lastkey", AssetIDType.KeyboardKey },
+            { "os_type", AssetIDType.Enum_OSType },
         };
 
         internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, Dictionary<string, AssetIDType[]> scriptArgs)

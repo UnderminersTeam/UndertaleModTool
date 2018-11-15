@@ -205,6 +205,8 @@ namespace UndertaleModLib.Decompiler
                     return ((HAlign)Convert.ToUInt32(Value)).ToString();
                 if (AssetType == AssetIDType.Enum_VAlign)
                     return ((VAlign)Convert.ToUInt32(Value)).ToString();
+                if (AssetType == AssetIDType.Enum_OSType)
+                    return ((OSType)Convert.ToUInt32(Value)).ToString();
 
                 if (AssetType == AssetIDType.Color && Value is IFormattable)
                 {
