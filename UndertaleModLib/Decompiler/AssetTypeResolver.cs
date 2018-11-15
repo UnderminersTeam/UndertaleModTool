@@ -30,14 +30,14 @@ namespace UndertaleModLib.Decompiler
         Layer // GMS2
     };
 
-    public enum HAlign : uint
+    public enum HAlign : int
     {
         fa_left = 0,
         fa_center = 1,
         fa_right = 2
     };
 
-    public enum VAlign : uint
+    public enum VAlign : int
     {
         fa_top = 0,
         fa_middle = 1,
@@ -69,7 +69,7 @@ namespace UndertaleModLib.Decompiler
         os_switch = 20,
     }
 
-    public enum e__VW : uint
+    public enum e__VW : int
     {
         XView = 0,
         YView = 1,
@@ -89,7 +89,7 @@ namespace UndertaleModLib.Decompiler
         Camera = 15,
         SurfaceID = 16,
     };
-    public enum e__BG : uint
+    public enum e__BG : int
     {
         Visible = 0,
         Foreground = 1,
@@ -108,7 +108,7 @@ namespace UndertaleModLib.Decompiler
         Alpha = 14
     };
 
-    internal class AssetTypeResolver
+    public class AssetTypeResolver
     {
         public static Dictionary<string, AssetIDType[]> builtin_funcs = new Dictionary<string, AssetIDType[]>()
         {
@@ -504,6 +504,30 @@ namespace UndertaleModLib.Decompiler
             if (builtin_vars.ContainsKey(variable_name))
                 return builtin_vars[variable_name];
             return AssetIDType.Other;
+        }
+
+        public static int? FindConstValue(string const_name)
+        {
+            if (const_name.Length >= 1 && Char.IsDigit(const_name[0]))
+                return null; // that is not a constant
+
+            OSType os_type;
+            if (Enum.TryParse(const_name, out os_type))
+                return (int)os_type;
+            HAlign halign;
+            if (Enum.TryParse(const_name, out halign))
+                return (int)halign;
+            VAlign valign;
+            if (Enum.TryParse(const_name, out valign))
+                return (int)valign;
+            e__VW vw;
+            if (Enum.TryParse(const_name, out vw))
+                return (int)vw;
+            e__BG bg;
+            if (Enum.TryParse(const_name, out bg))
+                return (int)bg;
+
+            return null;
         }
     }
 }

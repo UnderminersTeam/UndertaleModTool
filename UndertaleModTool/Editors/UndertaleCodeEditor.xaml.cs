@@ -279,6 +279,7 @@ namespace UndertaleModTool
                         else
                         {
                             Brush keywordBrush = new SolidColorBrush(Color.FromRgb(0, 0, 150));
+                            Brush constBrush = new SolidColorBrush(Color.FromRgb(0, 100, 150));
                             Brush stringBrush = new SolidColorBrush(Color.FromRgb(0, 0, 200));
                             Brush commentBrush = new SolidColorBrush(Color.FromRgb(0, 150, 0));
                             Brush funcBrush = new SolidColorBrush(Color.FromRgb(100, 100, 0));
@@ -329,11 +330,14 @@ namespace UndertaleModTool
                                 Dictionary<string, object> usedObjects = new Dictionary<string, object>();
                                 for (int i = 0; i < split.Count; i++)
                                 {
+                                    int? val = null;
                                     string token = split[i];
                                     if (token == "if" || token == "else" || token == "return" || token == "break" || token == "continue" || token == "while" || token == "with" || token == "switch" || token == "case" || token == "default")
                                         par.Inlines.Add(new Run(token) { Foreground = keywordBrush, FontWeight = FontWeights.Bold });
                                     else if (token == "self" || token == "global" || token == "local" || token == "other" || token == "noone" || token == "true" || token == "false")
                                         par.Inlines.Add(new Run(token) { Foreground = keywordBrush });
+                                    else if ((val = AssetTypeResolver.FindConstValue(token)) != null)
+                                        par.Inlines.Add(new Run(token) { Foreground = constBrush, FontStyle = FontStyles.Italic, ToolTip = val.ToString() });
                                     else if (token.StartsWith("\""))
                                         par.Inlines.Add(new Run(token) { Foreground = stringBrush });
                                     else if (token.StartsWith("//"))

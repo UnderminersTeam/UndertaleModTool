@@ -197,16 +197,16 @@ namespace UndertaleModLib.Decompiler
                 }
 
                 if (AssetType == AssetIDType.e__VW)
-                    return "e__VW." + ((e__VW)Convert.ToUInt32(Value)).ToString();
+                    return "e__VW." + ((e__VW)Convert.ToInt32(Value)).ToString();
                 if (AssetType == AssetIDType.e__BG)
-                    return "e__BG." + ((e__BG)Convert.ToUInt32(Value)).ToString();
+                    return "e__BG." + ((e__BG)Convert.ToInt32(Value)).ToString();
 
                 if (AssetType == AssetIDType.Enum_HAlign)
-                    return ((HAlign)Convert.ToUInt32(Value)).ToString();
+                    return ((HAlign)Convert.ToInt32(Value)).ToString();
                 if (AssetType == AssetIDType.Enum_VAlign)
-                    return ((VAlign)Convert.ToUInt32(Value)).ToString();
+                    return ((VAlign)Convert.ToInt32(Value)).ToString();
                 if (AssetType == AssetIDType.Enum_OSType)
-                    return ((OSType)Convert.ToUInt32(Value)).ToString();
+                    return ((OSType)Convert.ToInt32(Value)).ToString();
 
                 if (AssetType == AssetIDType.Color && Value is IFormattable)
                 {
