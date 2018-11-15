@@ -510,6 +510,8 @@ namespace UndertaleModLib.Decompiler
         {
             if (const_name.Length >= 1 && Char.IsDigit(const_name[0]))
                 return null; // that is not a constant
+            if (const_name.Length >= 1 && const_name[0] == '-')
+                return null; // that is not a constant either
 
             OSType os_type;
             if (Enum.TryParse(const_name, out os_type))
