@@ -249,7 +249,7 @@ namespace UndertaleModLib.Decompiler
             return instructions;
         }
         
-        private static UndertaleResourceById<UndertaleString> ParseStringReference(string line, IList<UndertaleString> strg)
+        private static UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> ParseStringReference(string line, IList<UndertaleString> strg)
         {
             string str = line;
             int at = str.LastIndexOf('@');
@@ -272,7 +272,7 @@ namespace UndertaleModLib.Decompiler
                 strobj = strg.MakeString(str);
             if (!id.HasValue)
                 id = (uint)strg.IndexOf(strobj);
-            return new UndertaleResourceById<UndertaleString>("STRG") { Resource = strobj, CachedId = (int)id.Value };
+            return new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>() { Resource = strobj, CachedId = (int)id.Value };
         }
 
         private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance, UndertaleInstruction instr, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null)

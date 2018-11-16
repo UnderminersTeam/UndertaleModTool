@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using UndertaleModLib.Models;
 
 namespace UndertaleModLib
@@ -11,45 +12,50 @@ namespace UndertaleModLib
      * Could probably use some refactoring or a complete rewrite.
      */
 
-    public interface UndertaleResourceRef
+    public interface UndertaleResourceRef : UndertaleObject
     {
-        Type ResourceType { get; }
         object Resource { get; set; }
         void PostUnserialize(UndertaleReader reader);
     }
 
-    public class UndertaleResourceById<T> : UndertaleResourceRef where T : UndertaleResource, new()
+    public class UndertaleResourceById<T, ChunkT> : UndertaleResourceRef where T : UndertaleResource, new() where ChunkT : UndertaleListChunk<T>
     {
-        public string ResourceChunkType { get; }
         public int CachedId { get; set; } = -1;
         public T Resource { get; set; }
 
-        public Type ResourceType => typeof(T);
         object UndertaleResourceRef.Resource { get => Resource; set => Resource = (T)value; }
 
-        public UndertaleResourceById(string type, int id = -1)
+        public UndertaleResourceById()
         {
-            this.ResourceChunkType = type;
+            this.CachedId = -1;
+        }
+
+        public UndertaleResourceById(int id = -1)
+        {
             this.CachedId = id;
         }
 
-        public UndertaleResourceById(string type, T res)
+        public UndertaleResourceById(T res)
         {
-            this.ResourceChunkType = type;
             this.Resource = res;
         }
 
-        public int Serialize(UndertaleWriter writer)
+        private ChunkT FindListChunk(UndertaleData data)
+        {
+            return (ChunkT)data.FORM.Chunks.Where((x) => x.Value is ChunkT).First().Value;
+        }
+
+        public int SerializeById(UndertaleWriter writer)
         {
             if (Resource != null)
             {
-                CachedId = ((UndertaleListChunk<T>)writer.undertaleData.FORM.Chunks[ResourceChunkType]).List.IndexOf(Resource);
+                CachedId = FindListChunk(writer.undertaleData).List.IndexOf(Resource);
                 if (CachedId < 0)
                     throw new IOException("Unregistered object");
             }
             else
             {
-                if (ResourceChunkType == "AGRP")
+                if (typeof(ChunkT) == typeof(UndertaleChunkAGRP))
                     CachedId = 0;
                 else
                     CachedId = -1;
@@ -57,25 +63,25 @@ namespace UndertaleModLib
             return CachedId;
         }
 
-        public void Unserialize(UndertaleReader reader, int id)
+        public void UnserializeById(UndertaleReader reader, int id)
         {
             if (id < 0 && id != -1)
-                throw new IOException("Invalid value for resource ID (" + ResourceChunkType + "): " + id);
+                throw new IOException("Invalid value for resource ID (" + typeof(ChunkT).Name + "): " + id);
             CachedId = id;
             reader.RequestResourceUpdate(this);
         }
 
         public void PostUnserialize(UndertaleReader reader)
         {
-            IList<T> list = ((UndertaleListChunk<T>)reader.undertaleData.FORM.Chunks[ResourceChunkType]).List;
-            if (ResourceChunkType == "AGRP" && CachedId == 0 && list.Count == 0) // I won't even ask why this works like that
+            IList<T> list = FindListChunk(reader.undertaleData).List;
+            if (typeof(ChunkT) == typeof(UndertaleChunkAGRP) && CachedId == 0 && list.Count == 0) // I won't even ask why this works like that
             {
                 Resource = default(T);
                 return;
             }
             if (CachedId >= list.Count)
             {
-                reader.SubmitWarning("Invalid value for resource ID of type " + ResourceChunkType + ": " + CachedId + " (there are only " + list.Count + ")");
+                reader.SubmitWarning("Invalid value for resource ID of type " + typeof(ChunkT).Name + ": " + CachedId + " (there are only " + list.Count + ")");
                 return;
             }
             Resource = CachedId >= 0 ? list[CachedId] : default(T);
@@ -84,6 +90,16 @@ namespace UndertaleModLib
         public override string ToString()
         {
             return String.Format("{0}@{1}", Resource?.ToString() ?? "(null)", CachedId);
+        }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write((int)SerializeById(writer));
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            UnserializeById(reader, reader.ReadInt32());
         }
     }
 

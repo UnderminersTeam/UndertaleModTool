@@ -125,4 +125,9 @@ namespace UndertaleModLib
             }
         }
     }
+
+    public class UndertaleSimpleResourcesList<T, ChunkT> : UndertaleSimpleList<UndertaleResourceById<T, ChunkT>> where T : UndertaleResource, new() where ChunkT : UndertaleListChunk<T>
+    {
+        // TODO: Allow direct access to Resource elements?
+    }
 }

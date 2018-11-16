@@ -471,9 +471,8 @@ namespace UndertaleModLib.Models
                                 writer.WriteUndertaleObject((Reference<UndertaleVariable>)Value);
                                 break;
                             case DataType.String:
-                                Debug.Assert(Value.GetType() == typeof(UndertaleResourceById<UndertaleString>));
-                                UndertaleResourceById<UndertaleString> str = (UndertaleResourceById<UndertaleString>)Value;
-                                writer.Write(str.Serialize(writer));
+                                Debug.Assert(Value.GetType() == typeof(UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>));
+                                writer.WriteUndertaleObject((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value);
                                 break;
                             case DataType.Int16:
                                 break;
@@ -586,9 +585,7 @@ namespace UndertaleModLib.Models
                                 Value = reader.ReadUndertaleObject<Reference<UndertaleVariable>>();
                                 break;
                             case DataType.String:
-                                UndertaleResourceById<UndertaleString> str = new UndertaleResourceById<UndertaleString>("STRG");
-                                str.Unserialize(reader, reader.ReadInt32());
-                                Value = str;
+                                Value = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>>();
                                 break;
                             case DataType.Int16:
                                 Value = val;

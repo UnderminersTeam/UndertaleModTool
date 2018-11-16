@@ -218,7 +218,7 @@
                             <DataGridTemplateColumn Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Room, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertaleModels:UndertaleRoom}" CanRemove="False"/>
+                                        <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Resource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertaleModels:UndertaleRoom}" CanRemove="False"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
