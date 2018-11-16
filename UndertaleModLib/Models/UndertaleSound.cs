@@ -24,8 +24,8 @@ namespace UndertaleModLib.Models
         private uint _Effects = 0;
         private float _Volume = 1;
         private float _Pitch = 0;
-        private UndertaleResourceById<UndertaleAudioGroup> _AudioGroup { get; } = new UndertaleResourceById<UndertaleAudioGroup>("AGRP");
-        private UndertaleResourceById<UndertaleEmbeddedAudio> _AudioFile { get; } = new UndertaleResourceById<UndertaleEmbeddedAudio>("AUDO");
+        private UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP> _AudioGroup = new UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP>();
+        private UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO> _AudioFile = new UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO>();
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public AudioEntryFlags Flags { get => _Flags; set { _Flags = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Flags")); } }
@@ -50,9 +50,9 @@ namespace UndertaleModLib.Models
             writer.Write(Effects);
             writer.Write(Volume);
             writer.Write(Pitch);
-            writer.Write(_AudioGroup.Serialize(writer));
+            writer.WriteUndertaleObject(_AudioGroup);
             if (GroupID == 0)
-                writer.Write(_AudioFile.Serialize(writer));
+                writer.WriteUndertaleObject(_AudioFile);
             else
                 writer.Write(_AudioFile.CachedId);
         }
@@ -66,9 +66,9 @@ namespace UndertaleModLib.Models
             Effects = reader.ReadUInt32();
             Volume = reader.ReadSingle();
             Pitch = reader.ReadSingle();
-            _AudioGroup.Unserialize(reader, reader.ReadInt32());
+            _AudioGroup = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP>>();
             if (GroupID == 0)
-                _AudioFile.Unserialize(reader, reader.ReadInt32());
+                _AudioFile = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO>>();
             else
                 _AudioFile.CachedId = reader.ReadInt32();
         }

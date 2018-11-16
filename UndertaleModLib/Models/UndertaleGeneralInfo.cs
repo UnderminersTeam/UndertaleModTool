@@ -64,30 +64,12 @@ namespace UndertaleModLib.Models
         public uint FunctionClassifications2 { get; set; } = 0;
         public int SteamAppID { get; set; } = 0;
         public uint DebuggerPort { get; set; } = 6502;
-        public UndertaleSimpleList<RoomOrderEntry> RoomOrder { get; private set; } = new UndertaleSimpleList<RoomOrderEntry>();
+        public UndertaleSimpleList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> RoomOrder { get; private set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>>();
 
         public byte[] GMS2RandomUID { get; set; } = new byte[40]; // License data or encrypted something? Has quite high entropy
         public float GMS2FPS { get; set; } = 30.0f;
         public bool GMS2AllowStatistics { get; set; } = true;
         public byte[] GMS2GameGUID { get; set; } = new byte[16]; // more high entropy data
-
-        public class RoomOrderEntry : UndertaleObject, INotifyPropertyChanged
-        {
-            private UndertaleResourceById<UndertaleRoom> _Room = new UndertaleResourceById<UndertaleRoom>("ROOM");
-            public UndertaleRoom Room { get => _Room.Resource; set { _Room.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Room")); } }
-
-            public event PropertyChangedEventHandler PropertyChanged;
-
-            public void Serialize(UndertaleWriter writer)
-            {
-                writer.Write(_Room.Serialize(writer));
-            }
-
-            public void Unserialize(UndertaleReader reader)
-            {
-                _Room.Unserialize(reader, reader.ReadInt32());
-            }
-        }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -169,7 +151,7 @@ namespace UndertaleModLib.Models
             FunctionClassifications2 = reader.ReadUInt32();
             SteamAppID = reader.ReadInt32();
             DebuggerPort = reader.ReadUInt32();
-            RoomOrder = reader.ReadUndertaleObject<UndertaleSimpleList<RoomOrderEntry>>();
+            RoomOrder = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>>>();
             if (Major >= 2)
             {
                 GMS2RandomUID = reader.ReadBytes(40);

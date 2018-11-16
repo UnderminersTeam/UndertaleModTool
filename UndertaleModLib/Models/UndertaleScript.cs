@@ -10,7 +10,7 @@ namespace UndertaleModLib.Models
     public class UndertaleScript : UndertaleNamedResource, INotifyPropertyChanged
     {
         private UndertaleString _Name;
-        private UndertaleResourceById<UndertaleCode> _Code { get; } = new UndertaleResourceById<UndertaleCode>("CODE");
+        private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _Code;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public UndertaleCode Code { get => _Code.Resource; set { _Code.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Code")); } }
@@ -20,13 +20,13 @@ namespace UndertaleModLib.Models
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
-            writer.Write(_Code.Serialize(writer));
+            writer.WriteUndertaleObject(_Code);
         }
 
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
-            _Code.Unserialize(reader, reader.ReadInt32());
+            _Code = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
         }
 
         public override string ToString()

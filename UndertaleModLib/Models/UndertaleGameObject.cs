@@ -19,13 +19,13 @@ namespace UndertaleModLib.Models
     public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChanged
     {
         private UndertaleString _Name;
-        private UndertaleResourceById<UndertaleSprite> _Sprite { get; } = new UndertaleResourceById<UndertaleSprite>("SPRT");
+        private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite;
         private bool _Visible = true;
         private bool _Solid = false;
         private int _Depth = 0;
         private bool _Persistent = false;
-        private UndertaleResourceById<UndertaleGameObject> _ParentId { get; } = new UndertaleResourceById<UndertaleGameObject>("OBJT");
-        private UndertaleResourceById<UndertaleSprite> _TextureMaskId { get; } = new UndertaleResourceById<UndertaleSprite>("SPRT"); // TODO: ?
+        private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ParentId;
+        private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _TextureMaskId; // TODO: ?
         private bool _UsesPhysics = false;
         private bool _IsSensor = false;
         private CollisionShapeFlags _CollisionShape = CollisionShapeFlags.Circle;
@@ -71,7 +71,7 @@ namespace UndertaleModLib.Models
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
-            writer.Write(_Sprite.Serialize(writer));
+            writer.WriteUndertaleObject(_Sprite);
             writer.Write(Visible);
             writer.Write(Solid);
             writer.Write(Depth);
@@ -83,9 +83,9 @@ namespace UndertaleModLib.Models
             }
             else
             {
-                writer.Write(_ParentId.Serialize(writer));
+                writer.WriteUndertaleObject(_ParentId);
             }
-            writer.Write(_TextureMaskId.Serialize(writer));
+            writer.WriteUndertaleObject(_TextureMaskId);
             writer.Write(UsesPhysics);
             writer.Write(IsSensor);
             writer.Write((uint)CollisionShape);
@@ -109,23 +109,24 @@ namespace UndertaleModLib.Models
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
-            _Sprite.Unserialize(reader, reader.ReadInt32());
+            _Sprite = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
             Visible = reader.ReadBoolean();
             Solid = reader.ReadBoolean();
             Depth = reader.ReadInt32();
             Persistent = reader.ReadBoolean();
+            _ParentId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
             int parent = reader.ReadInt32();
             if (parent == -100)
             {
-                _ParentId.Unserialize(reader, -1);
+                _ParentId.UnserializeById(reader, -1);
             }
             else
             {
                 if (parent < 0 && parent != -1) // Technically can be -100 (undefined), -2 (other), or -1 (self). Other makes no sense here though
                     throw new Exception("Invalid value for parent - should be -100 or object id, got " + parent);
-                _ParentId.Unserialize(reader, parent);
+                _ParentId.UnserializeById(reader, parent);
             }
-            _TextureMaskId.Unserialize(reader, reader.ReadInt32());
+            _TextureMaskId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
             UsesPhysics = reader.ReadBoolean();
             IsSensor = reader.ReadBoolean();
             CollisionShape = (CollisionShapeFlags)reader.ReadUInt32();
@@ -272,7 +273,7 @@ namespace UndertaleModLib.Models
             private bool _UseApplyTo;
             private uint _ExeType;
             private UndertaleString _ActionName;
-            private UndertaleResourceById<UndertaleCode> _CodeId { get; } = new UndertaleResourceById<UndertaleCode>("CODE");
+            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CodeId;
             private uint _ArgumentCount;
             private int _Who;
             private bool _Relative;
@@ -306,7 +307,7 @@ namespace UndertaleModLib.Models
                 writer.Write(UseApplyTo);
                 writer.Write(ExeType);
                 writer.WriteUndertaleString(ActionName);
-                writer.Write(_CodeId.Serialize(writer));
+                writer.WriteUndertaleObject(_CodeId);
                 writer.Write(ArgumentCount);
                 writer.Write(Who);
                 writer.Write(Relative);
@@ -324,7 +325,7 @@ namespace UndertaleModLib.Models
                 UseApplyTo = reader.ReadBoolean();
                 ExeType = reader.ReadUInt32();
                 ActionName = reader.ReadUndertaleString();
-                _CodeId.Unserialize(reader, reader.ReadInt32());
+                _CodeId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
                 ArgumentCount = reader.ReadUInt32();
                 Who = reader.ReadInt32();
                 Relative = reader.ReadBoolean();

@@ -28,7 +28,7 @@ namespace UndertaleModLib.Models
         private bool _Persistent = false;
         private uint _BackgroundColor = 0x00000000;
         private bool _DrawBackgroundColor = true;
-        private UndertaleResourceById<UndertaleCode> _CreationCodeId { get; } = new UndertaleResourceById<UndertaleCode>("CODE");
+        private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCodeId;
         private RoomEntryFlags _Flags = RoomEntryFlags.EnableViews;
         private uint _World = 0;
         private uint _Top = 0;
@@ -99,7 +99,7 @@ namespace UndertaleModLib.Models
             writer.Write(Persistent);
             writer.Write(BackgroundColor);
             writer.Write(DrawBackgroundColor);
-            writer.Write(_CreationCodeId.Serialize(writer));
+            writer.WriteUndertaleObject(_CreationCodeId);
             writer.Write((uint)Flags);
             writer.WriteUndertaleObjectPointer(Backgrounds);
             writer.WriteUndertaleObjectPointer(Views);
@@ -133,7 +133,7 @@ namespace UndertaleModLib.Models
             Persistent = reader.ReadBoolean();
             BackgroundColor = reader.ReadUInt32();
             DrawBackgroundColor = reader.ReadBoolean();
-            _CreationCodeId.Unserialize(reader, reader.ReadInt32());
+            _CreationCodeId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
             Flags = (RoomEntryFlags)reader.ReadUInt32();
             Backgrounds = reader.ReadUndertaleObjectPointer<UndertalePointerList<Background>>();
             Views = reader.ReadUndertaleObjectPointer<UndertalePointerList<View>>();
@@ -193,14 +193,14 @@ namespace UndertaleModLib.Models
         {
             private bool _Enabled = false;
             private bool _Foreground = false;
-            private UndertaleResourceById<UndertaleBackground> _BackgroundDefinition { get; } = new UndertaleResourceById<UndertaleBackground>("BGND");
+            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition;
             private uint _X = 0;
             private uint _Y = 0;
             private uint _TileX = 1;
             private uint _TileY = 1;
             private int _SpeedX = 0;
             private int _SpeedY = 0;
-            private UndertaleResourceById<UndertaleGameObject> _ObjectId { get; } = new UndertaleResourceById<UndertaleGameObject>("OBJT");
+            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId;
 
             public bool Enabled { get => _Enabled; set { _Enabled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Enabled")); } }
             public bool Foreground { get => _Foreground; set { _Foreground = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Foreground")); } }
@@ -219,28 +219,28 @@ namespace UndertaleModLib.Models
             {
                 writer.Write(Enabled);
                 writer.Write(Foreground);
-                writer.Write(_BackgroundDefinition.Serialize(writer));
+                writer.WriteUndertaleObject(_BackgroundDefinition);
                 writer.Write(X);
                 writer.Write(Y);
                 writer.Write(TileX);
                 writer.Write(TileY);
                 writer.Write(SpeedX);
                 writer.Write(SpeedY);
-                writer.Write(_ObjectId.Serialize(writer));
+                writer.WriteUndertaleObject(_ObjectId);
             }
 
             public void Unserialize(UndertaleReader reader)
             {
                 Enabled = reader.ReadBoolean();
                 Foreground = reader.ReadBoolean();
-                _BackgroundDefinition.Unserialize(reader, reader.ReadInt32());
+                _BackgroundDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>>();
                 X = reader.ReadUInt32();
                 Y = reader.ReadUInt32();
                 TileX = reader.ReadUInt32();
                 TileY = reader.ReadUInt32();
                 SpeedX = reader.ReadInt32();
                 SpeedY = reader.ReadInt32();
-                _ObjectId.Unserialize(reader, reader.ReadInt32());
+                _ObjectId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
             }
         }
 
@@ -259,7 +259,7 @@ namespace UndertaleModLib.Models
             private uint _BorderY = 32;
             private int _SpeedX = -1;
             private int _SpeedY = -1;
-            private UndertaleResourceById<UndertaleGameObject> _ObjectId { get; } = new UndertaleResourceById<UndertaleGameObject>("OBJT");
+            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId;
 
             public bool Enabled { get => _Enabled; set { _Enabled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Enabled")); } }
             public int ViewX { get => _ViewX; set { _ViewX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ViewX")); } }
@@ -293,7 +293,7 @@ namespace UndertaleModLib.Models
                 writer.Write(BorderY);
                 writer.Write(SpeedX);
                 writer.Write(SpeedY);
-                writer.Write(_ObjectId.Serialize(writer));
+                writer.WriteUndertaleObject(_ObjectId);
             }
 
             public void Unserialize(UndertaleReader reader)
@@ -311,7 +311,7 @@ namespace UndertaleModLib.Models
                 BorderY = reader.ReadUInt32();
                 SpeedX = reader.ReadInt32();
                 SpeedY = reader.ReadInt32();
-                _ObjectId.Unserialize(reader, reader.ReadInt32());
+                _ObjectId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
             }
         }
 
@@ -319,14 +319,14 @@ namespace UndertaleModLib.Models
         {
             private int _X;
             private int _Y;
-            private UndertaleResourceById<UndertaleGameObject> _ObjectDefinition { get; } = new UndertaleResourceById<UndertaleGameObject>("OBJT");
+            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectDefinition;
             private uint _InstanceID;
-            private UndertaleResourceById<UndertaleCode> _CreationCode { get; } = new UndertaleResourceById<UndertaleCode>("CODE");
+            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCode;
             private float _ScaleX = 1;
             private float _ScaleY = 1;
             private uint _Color = 0xFFFFFFFF;
             private float _Rotation = 0;
-            private UndertaleResourceById<UndertaleCode> _PreCreateCode { get; } = new UndertaleResourceById<UndertaleCode>("CODE");
+            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _PreCreateCode;
 
             public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
             public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
@@ -345,30 +345,30 @@ namespace UndertaleModLib.Models
             {
                 writer.Write(X);
                 writer.Write(Y);
-                writer.Write(_ObjectDefinition.Serialize(writer));
+                writer.WriteUndertaleObject(_ObjectDefinition);
                 writer.Write(InstanceID);
-                writer.Write(_CreationCode.Serialize(writer));
+                writer.WriteUndertaleObject(_CreationCode);
                 writer.Write(ScaleX);
                 writer.Write(ScaleY);
                 writer.Write(Color);
                 writer.Write(Rotation);
                 if (writer.undertaleData.GeneralInfo.BytecodeVersion >= 16) // TODO: is that dependent on bytecode or something else?
-                    writer.Write(_PreCreateCode.Serialize(writer));         // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
+                    writer.WriteUndertaleObject(_PreCreateCode);         // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
             }
 
             public void Unserialize(UndertaleReader reader)
             {
                 X = reader.ReadInt32();
                 Y = reader.ReadInt32();
-                _ObjectDefinition.Unserialize(reader, reader.ReadInt32());
+                _ObjectDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
                 InstanceID = reader.ReadUInt32();
-                _CreationCode.Unserialize(reader, reader.ReadInt32());
+                _CreationCode = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
                 ScaleX = reader.ReadSingle();
                 ScaleY = reader.ReadSingle();
                 Color = reader.ReadUInt32();
                 Rotation = reader.ReadSingle();
                 if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 16) // TODO: is that dependent on bytecode or something else?
-                    _PreCreateCode.Unserialize(reader, reader.ReadInt32()); // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
+                    _PreCreateCode = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>(); // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
             }
 
             public override string ToString()
@@ -382,8 +382,8 @@ namespace UndertaleModLib.Models
             private int _X;
             private int _Y;
             public bool _SpriteMode = false;
-            private UndertaleResourceById<UndertaleBackground> _BackgroundDefinition { get; } = new UndertaleResourceById<UndertaleBackground>("BGND");
-            private UndertaleResourceById<UndertaleSprite> _SpriteDefinition { get; } = new UndertaleResourceById<UndertaleSprite>("SPRT");
+            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition;
+            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _SpriteDefinition;
             private uint _SourceX;
             private uint _SourceY;
             private uint _Width;
@@ -418,9 +418,9 @@ namespace UndertaleModLib.Models
                 if (_SpriteMode != (writer.undertaleData.GeneralInfo.Major >= 2))
                     throw new Exception("Unsupported in GMS" + writer.undertaleData.GeneralInfo.Major);
                 if (_SpriteMode)
-                    writer.Write(_SpriteDefinition.Serialize(writer));
+                    writer.WriteUndertaleObject(_SpriteDefinition);
                 else
-                    writer.Write(_BackgroundDefinition.Serialize(writer));
+                    writer.WriteUndertaleObject(_BackgroundDefinition);
                 writer.Write(SourceX);
                 writer.Write(SourceY);
                 writer.Write(Width);
@@ -438,9 +438,9 @@ namespace UndertaleModLib.Models
                 Y = reader.ReadInt32();
                 _SpriteMode = reader.undertaleData.GeneralInfo.Major >= 2;
                 if (_SpriteMode)
-                    _SpriteDefinition.Unserialize(reader, reader.ReadInt32());
+                    _SpriteDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
                 else
-                    _BackgroundDefinition.Unserialize(reader, reader.ReadInt32());
+                    _BackgroundDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>>();
                 SourceX = reader.ReadUInt32();
                 SourceY = reader.ReadUInt32();
                 Width = reader.ReadUInt32();
@@ -592,7 +592,7 @@ namespace UndertaleModLib.Models
 
             public class LayerTilesData : LayerData, INotifyPropertyChanged
             {
-                private UndertaleResourceById<UndertaleBackground> _Background = new UndertaleResourceById<UndertaleBackground>("BGND"); // In GMS2 backgrounds are just tilesets
+                private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _Background; // In GMS2 backgrounds are just tilesets
                 private uint _TilesX;
                 private uint _TilesY;
                 private uint[][] _TileData; // Each is simply an ID from the tileset/background/sprite
@@ -628,7 +628,7 @@ namespace UndertaleModLib.Models
 
                 public void Serialize(UndertaleWriter writer)
                 {
-                    writer.Write(_Background.Serialize(writer));
+                    writer.WriteUndertaleObject(_Background);
                     writer.Write(TilesX);
                     writer.Write(TilesY);
                     if (TileData.Length != TilesY)
@@ -644,7 +644,7 @@ namespace UndertaleModLib.Models
 
                 public void Unserialize(UndertaleReader reader)
                 {
-                    _Background.Unserialize(reader, reader.ReadInt32());
+                    _Background = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>>();
                     _TileData = null; // prevent unnecessary resizes
                     TilesX = reader.ReadUInt32();
                     TilesY = reader.ReadUInt32();
@@ -664,7 +664,7 @@ namespace UndertaleModLib.Models
             {
                 private bool _Visible;
                 private bool _Foreground;
-                private UndertaleResourceById<UndertaleSprite> _Sprite = new UndertaleResourceById<UndertaleSprite>("SPRT"); // Apparently there's a mode where it's a background reference, but probably not necessary
+                private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite; // Apparently there's a mode where it's a background reference, but probably not necessary
                 private bool _TiledHorizontally;
                 private bool _TiledVertically;
                 private bool _Stretch;
@@ -690,7 +690,7 @@ namespace UndertaleModLib.Models
                 {
                     writer.Write(Visible);
                     writer.Write(Foreground);
-                    writer.Write(_Sprite.Serialize(writer));
+                    writer.WriteUndertaleObject(_Sprite);
                     writer.Write(TiledHorizontally);
                     writer.Write(TiledVertically);
                     writer.Write(Stretch);
@@ -704,7 +704,7 @@ namespace UndertaleModLib.Models
                 {
                     Visible = reader.ReadBoolean();
                     Foreground = reader.ReadBoolean();
-                    _Sprite.Unserialize(reader, reader.ReadInt32());
+                    _Sprite = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
                     TiledHorizontally = reader.ReadBoolean();
                     TiledVertically = reader.ReadBoolean();
                     Stretch = reader.ReadBoolean();
@@ -748,7 +748,7 @@ namespace UndertaleModLib.Models
         public class SpriteInstance : UndertaleObject, INotifyPropertyChanged
         {
             private UndertaleString _Name;
-            private UndertaleResourceById<UndertaleSprite> _Sprite = new UndertaleResourceById<UndertaleSprite>("SPRT");
+            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite;
             private int _X;
             private int _Y;
             private float _ScaleX;
@@ -776,7 +776,7 @@ namespace UndertaleModLib.Models
             public void Serialize(UndertaleWriter writer)
             {
                 writer.WriteUndertaleString(Name);
-                writer.Write(_Sprite.Serialize(writer));
+                writer.WriteUndertaleObject(_Sprite);
                 writer.Write(X);
                 writer.Write(Y);
                 writer.Write(ScaleX);
@@ -791,7 +791,7 @@ namespace UndertaleModLib.Models
             public void Unserialize(UndertaleReader reader)
             {
                 Name = reader.ReadUndertaleString();
-                _Sprite.Unserialize(reader, reader.ReadInt32());
+                _Sprite = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
                 X = reader.ReadInt32();
                 Y = reader.ReadInt32();
                 ScaleX = reader.ReadSingle();

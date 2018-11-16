@@ -73,7 +73,7 @@ room_of_determination.Views[0].PortWidth = 640;
 room_of_determination.Views[0].PortHeight = 480;
 room_of_determination.Views[0].ObjectId = obj_mainchara;
 Data.Rooms.Add(room_of_determination);
-Data.GeneralInfo.RoomOrder.Add(new UndertaleGeneralInfo.RoomOrderEntry() { Room = room_of_determination });
+Data.GeneralInfo.RoomOrder.Add(new UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>() { Resource = room_of_determination });
 
 // All game rooms need an overworldcontroller and Frisk... or Chara? :P
 // (by the way, is the name Chara just a shortened version of 'main character'...)
@@ -623,7 +623,7 @@ room_of_determined_dog.Views[0].PortWidth = room_water_dogroom.Views[0].PortWidt
 room_of_determined_dog.Views[0].PortHeight = room_water_dogroom.Views[0].PortHeight;
 room_of_determined_dog.Views[0].ObjectId = room_water_dogroom.Views[0].ObjectId;
 Data.Rooms.Add(room_of_determined_dog);
-Data.GeneralInfo.RoomOrder.Add(new UndertaleGeneralInfo.RoomOrderEntry() { Room = room_of_determined_dog });
+Data.GeneralInfo.RoomOrder.Add(new UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>() { Resource = room_of_determined_dog });
 
 foreach (var other in room_water_dogroom.Tiles)
 {

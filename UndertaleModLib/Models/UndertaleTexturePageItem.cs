@@ -25,7 +25,7 @@ namespace UndertaleModLib.Models
         private ushort _TargetHeight;
         private ushort _BoundingWidth;
         private ushort _BoundingHeight;
-        private UndertaleResourceById<UndertaleEmbeddedTexture> _TexturePage { get; } = new UndertaleResourceById<UndertaleEmbeddedTexture>("TXTR");
+        private UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR> _TexturePage;
 
         public ushort SourceX { get => _SourceX; set { _SourceX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceX")); } }
         public ushort SourceY { get => _SourceY; set { _SourceY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceY")); } }
@@ -53,7 +53,7 @@ namespace UndertaleModLib.Models
             writer.Write(TargetHeight);
             writer.Write(BoundingWidth);
             writer.Write(BoundingHeight);
-            writer.Write((short)_TexturePage.Serialize(writer));
+            writer.Write((short)_TexturePage.SerializeById(writer));
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -68,7 +68,8 @@ namespace UndertaleModLib.Models
             TargetHeight = reader.ReadUInt16();
             BoundingWidth = reader.ReadUInt16();
             BoundingHeight = reader.ReadUInt16();
-            _TexturePage.Unserialize(reader, reader.ReadInt16());
+            _TexturePage = new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();
+            _TexturePage.UnserializeById(reader, reader.ReadInt16()); // This one is special as it uses a short instead of int
         }
 
         public override string ToString()
