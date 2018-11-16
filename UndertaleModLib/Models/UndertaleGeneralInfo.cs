@@ -64,7 +64,7 @@ namespace UndertaleModLib.Models
         public uint FunctionClassifications2 { get; set; } = 0;
         public int SteamAppID { get; set; } = 0;
         public uint DebuggerPort { get; set; } = 6502;
-        public UndertaleSimpleList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> RoomOrder { get; private set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>>();
+        public UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM> RoomOrder { get; private set; } = new UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>();
 
         public byte[] GMS2RandomUID { get; set; } = new byte[40]; // License data or encrypted something? Has quite high entropy
         public float GMS2FPS { get; set; } = 30.0f;
@@ -151,7 +151,7 @@ namespace UndertaleModLib.Models
             FunctionClassifications2 = reader.ReadUInt32();
             SteamAppID = reader.ReadInt32();
             DebuggerPort = reader.ReadUInt32();
-            RoomOrder = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>>>();
+            RoomOrder = reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>>();
             if (Major >= 2)
             {
                 GMS2RandomUID = reader.ReadBytes(40);
