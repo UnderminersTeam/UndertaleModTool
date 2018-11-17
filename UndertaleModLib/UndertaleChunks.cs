@@ -427,7 +427,7 @@ namespace UndertaleModLib
             if (reader.undertaleData.GeneralInfo.Major < 2)
                 throw new InvalidOperationException();
             if (reader.ReadUInt32() != 1)
-                throw new Exception("Should be hardcoded 1");
+                throw new Exception("Expected EMBI version 1");
             base.UnserializeChunk(reader);
         }
     }
@@ -450,7 +450,7 @@ namespace UndertaleModLib
             if (reader.undertaleData.GeneralInfo.Major < 2)
                 throw new InvalidOperationException();
             if (reader.ReadUInt32() != 1)
-                throw new Exception("Should be hardcoded 1");
+                throw new Exception("Expected TGIN version 1");
             base.UnserializeChunk(reader);
         }
     }
