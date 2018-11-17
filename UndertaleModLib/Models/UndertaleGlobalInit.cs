@@ -10,7 +10,7 @@ namespace UndertaleModLib.Models
     // NOTE: Never seen in GMS1.4 so I'm not sure if the structure was the same
     public class UndertaleGlobalInit : UndertaleObject, INotifyPropertyChanged
     {
-        private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _Code;
+        private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _Code = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
         public UndertaleCode Code { get => _Code.Resource; set { _Code.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Code")); } }
 
         public event PropertyChangedEventHandler PropertyChanged;

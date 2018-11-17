@@ -380,6 +380,40 @@ namespace UndertaleModTool
                 }
             }
         }
+
+        private void AddLayer<T>(UndertaleRoom.LayerType type, string name) where T : UndertaleRoom.Layer.LayerData, new()
+        {
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+
+            UndertaleRoom.Layer layer = new UndertaleRoom.Layer();
+            layer.LayerName = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString(name);
+            layer.LayerId = 0; // TODO: find next ID
+            layer.LayerType = type;
+            layer.Data = new T();
+            room.Layers.Add(layer);
+
+            SelectObject(layer);
+        }
+        
+        private void MenuItem_NewLayerInstances_Click(object sender, RoutedEventArgs e)
+        {
+            AddLayer<UndertaleRoom.Layer.LayerInstancesData>(UndertaleRoom.LayerType.Instances, "NewInstancesLayer");
+        }
+
+        private void MenuItem_NewLayerTiles_Click(object sender, RoutedEventArgs e)
+        {
+            AddLayer<UndertaleRoom.Layer.LayerTilesData>(UndertaleRoom.LayerType.Tiles, "NewTilesLayer");
+        }
+
+        private void MenuItem_NewLayerBackground_Click(object sender, RoutedEventArgs e)
+        {
+            AddLayer<UndertaleRoom.Layer.LayerBackgroundData>(UndertaleRoom.LayerType.Background, "NewBackgroundLayer");
+        }
+
+        private void MenuItem_NewLayerAssets_Click(object sender, RoutedEventArgs e)
+        {
+            AddLayer<UndertaleRoom.Layer.LayerAssetsData>(UndertaleRoom.LayerType.Assets, "NewAssetsLayer");
+        }
     }
 
     [ValueConversion(typeof(ObservableCollection<UndertaleRoom.GameObject>), typeof(int))]

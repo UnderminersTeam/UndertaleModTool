@@ -179,6 +179,14 @@
                                 </Style.Triggers>
                             </Style>
                         </TreeViewItem.Style>
+                        <TreeViewItem.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="New Instances layer" Click="MenuItem_NewLayerInstances_Click"/>
+                                <MenuItem Header="New Tiles layer" Click="MenuItem_NewLayerTiles_Click"/>
+                                <MenuItem Header="New Background layer" Click="MenuItem_NewLayerBackground_Click"/>
+                                <MenuItem Header="New Assets layer" Click="MenuItem_NewLayerAssets_Click"/>
+                            </ContextMenu>
+                        </TreeViewItem.ContextMenu>
                         <TreeViewItem.ItemTemplateSelector>
                             <local:LayerDataTemplateSelector>
                                 <local:LayerDataTemplateSelector.InstancesDataTemplate>
