@@ -131,7 +131,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObjectPointer(Texture);
             writer.Write(ScaleX);
             writer.Write(ScaleY);
-            if (writer.undertaleData.GeneralInfo?.Major >= 2 && writer.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
+            if (writer.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
                 writer.Write(AscenderOffset);
             writer.WriteUndertaleObject(Glyphs);
         }
