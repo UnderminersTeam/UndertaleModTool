@@ -82,7 +82,6 @@ namespace UndertaleModLib
             data.FORM.Chunks["DAFL"] = new UndertaleChunkDAFL();
             data.FORM.Chunks["EMBI"] = new UndertaleChunkEMBI();
             data.FORM.Chunks["TPAG"] = new UndertaleChunkTPAG();
-            data.FORM.Chunks["TGIN"] = new UndertaleChunkTGIN(); // Maybe a studio 2 option may come in handy
             data.FORM.Chunks["CODE"] = new UndertaleChunkCODE();
             data.FORM.Chunks["VARI"] = new UndertaleChunkVARI();
             data.FORM.Chunks["FUNC"] = new UndertaleChunkFUNC();
