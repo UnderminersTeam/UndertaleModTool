@@ -28,7 +28,7 @@ namespace UndertaleModLib.Models
         private bool _Persistent = false;
         private uint _BackgroundColor = 0x00000000;
         private bool _DrawBackgroundColor = true;
-        private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCodeId;
+        private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCodeId = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
         private RoomEntryFlags _Flags = RoomEntryFlags.EnableViews;
         private uint _World = 0;
         private uint _Top = 0;
@@ -193,14 +193,14 @@ namespace UndertaleModLib.Models
         {
             private bool _Enabled = false;
             private bool _Foreground = false;
-            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition;
+            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>();
             private uint _X = 0;
             private uint _Y = 0;
             private uint _TileX = 1;
             private uint _TileY = 1;
             private int _SpeedX = 0;
             private int _SpeedY = 0;
-            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId;
+            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
 
             public bool Enabled { get => _Enabled; set { _Enabled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Enabled")); } }
             public bool Foreground { get => _Foreground; set { _Foreground = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Foreground")); } }
@@ -259,7 +259,7 @@ namespace UndertaleModLib.Models
             private uint _BorderY = 32;
             private int _SpeedX = -1;
             private int _SpeedY = -1;
-            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId;
+            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
 
             public bool Enabled { get => _Enabled; set { _Enabled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Enabled")); } }
             public int ViewX { get => _ViewX; set { _ViewX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ViewX")); } }
@@ -319,14 +319,14 @@ namespace UndertaleModLib.Models
         {
             private int _X;
             private int _Y;
-            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectDefinition;
+            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectDefinition = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
             private uint _InstanceID;
-            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCode;
+            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCode = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
             private float _ScaleX = 1;
             private float _ScaleY = 1;
             private uint _Color = 0xFFFFFFFF;
             private float _Rotation = 0;
-            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _PreCreateCode;
+            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _PreCreateCode = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
 
             public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
             public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
@@ -382,8 +382,8 @@ namespace UndertaleModLib.Models
             private int _X;
             private int _Y;
             public bool _SpriteMode = false;
-            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition;
-            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _SpriteDefinition;
+            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>();
+            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _SpriteDefinition = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
             private uint _SourceX;
             private uint _SourceY;
             private uint _Width;
@@ -592,7 +592,7 @@ namespace UndertaleModLib.Models
 
             public class LayerTilesData : LayerData, INotifyPropertyChanged
             {
-                private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _Background; // In GMS2 backgrounds are just tilesets
+                private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _Background = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>(); // In GMS2 backgrounds are just tilesets
                 private uint _TilesX;
                 private uint _TilesY;
                 private uint[][] _TileData; // Each is simply an ID from the tileset/background/sprite
@@ -664,7 +664,7 @@ namespace UndertaleModLib.Models
             {
                 private bool _Visible;
                 private bool _Foreground;
-                private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite; // Apparently there's a mode where it's a background reference, but probably not necessary
+                private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>(); // Apparently there's a mode where it's a background reference, but probably not necessary
                 private bool _TiledHorizontally;
                 private bool _TiledVertically;
                 private bool _Stretch;
@@ -748,7 +748,7 @@ namespace UndertaleModLib.Models
         public class SpriteInstance : UndertaleObject, INotifyPropertyChanged
         {
             private UndertaleString _Name;
-            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite;
+            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
             private int _X;
             private int _Y;
             private float _ScaleX;

@@ -19,13 +19,13 @@ namespace UndertaleModLib.Models
     public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChanged
     {
         private UndertaleString _Name;
-        private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite;
+        private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
         private bool _Visible = true;
         private bool _Solid = false;
         private int _Depth = 0;
         private bool _Persistent = false;
-        private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ParentId;
-        private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _TextureMaskId; // TODO: ?
+        private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ParentId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
+        private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _TextureMaskId = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>(); // TODO: ?
         private bool _UsesPhysics = false;
         private bool _IsSensor = false;
         private CollisionShapeFlags _CollisionShape = CollisionShapeFlags.Circle;
@@ -273,7 +273,7 @@ namespace UndertaleModLib.Models
             private bool _UseApplyTo;
             private uint _ExeType;
             private UndertaleString _ActionName;
-            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CodeId;
+            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CodeId = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
             private uint _ArgumentCount;
             private int _Who;
             private bool _Relative;
