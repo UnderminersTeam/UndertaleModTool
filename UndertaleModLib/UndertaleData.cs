@@ -80,7 +80,6 @@ namespace UndertaleModLib
             data.FORM.Chunks["OBJT"] = new UndertaleChunkOBJT();
             data.FORM.Chunks["ROOM"] = new UndertaleChunkROOM();
             data.FORM.Chunks["DAFL"] = new UndertaleChunkDAFL();
-            data.FORM.Chunks["EMBI"] = new UndertaleChunkEMBI();
             data.FORM.Chunks["TPAG"] = new UndertaleChunkTPAG();
             data.FORM.Chunks["CODE"] = new UndertaleChunkCODE();
             data.FORM.Chunks["VARI"] = new UndertaleChunkVARI();
