@@ -150,7 +150,7 @@ namespace UndertaleModLib.Models
             Texture = reader.ReadUndertaleObjectPointer<UndertaleTexturePageItem>();
             ScaleX = reader.ReadSingle();
             ScaleY = reader.ReadSingle();
-            if (reader.undertaleData.GeneralInfo?.Major >= 2 && reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
+            if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
                 AscenderOffset = reader.ReadInt32();
             Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
         }
