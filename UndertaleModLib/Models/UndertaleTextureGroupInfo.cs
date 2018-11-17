@@ -10,137 +10,58 @@ namespace UndertaleModLib.Models
     public class UndertaleTextureGroupInfo : UndertaleObject
     {
         public UndertaleString GroupName;
-        public List<UndertaleResourceById<UndertaleEmbeddedTexture>> TexturePages;
-        public List<UndertaleResourceById<UndertaleSprite>> Sprites;
-        public List<UndertaleResourceById<UndertaleSprite>> SpineSprites;
-        public List<UndertaleResourceById<UndertaleFont>> Fonts;
-        public List<UndertaleResourceById<UndertaleBackground>> Tilesets;
+        public UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR> TexturePages;
+        public UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT> Sprites;
+        public UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT> SpineSprites;
+        public UndertaleSimpleResourcesList<UndertaleFont, UndertaleChunkFONT> Fonts;
+        public UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND> Tilesets;
 
         public UndertaleTextureGroupInfo()
         {
-            TexturePages = new List<UndertaleResourceById<UndertaleEmbeddedTexture>>();
-            Sprites = new List<UndertaleResourceById<UndertaleSprite>>();
-            SpineSprites = new List<UndertaleResourceById<UndertaleSprite>>();
-            Fonts = new List<UndertaleResourceById<UndertaleFont>>();
-            Tilesets = new List<UndertaleResourceById<UndertaleBackground>>();
+            TexturePages = new UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();
+            Sprites = new UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>();
+            SpineSprites = new UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>();
+            Fonts = new UndertaleSimpleResourcesList<UndertaleFont, UndertaleChunkFONT>();
+            Tilesets = new UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND>();
         }
 
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(GroupName);
-            uint pointer1 = writer.Position; writer.Write(0);
-            uint pointer2 = writer.Position; writer.Write(0);
-            uint pointer3 = writer.Position; writer.Write(0);
-            uint pointer4 = writer.Position; writer.Write(0);
-            uint pointer5 = writer.Position; writer.Write(0);
 
-            SeekWritePointer(writer, pointer1);
-            foreach (UndertaleResourceById<UndertaleEmbeddedTexture> r in TexturePages)
-            {
-                writer.Write(r.Serialize(writer));
-            }
+            writer.WriteUndertaleObjectPointer(TexturePages);
+            writer.WriteUndertaleObjectPointer(Sprites);
+            writer.WriteUndertaleObjectPointer(SpineSprites);
+            writer.WriteUndertaleObjectPointer(Fonts);
+            writer.WriteUndertaleObjectPointer(Tilesets);
 
-            SeekWritePointer(writer, pointer2);
-            foreach (UndertaleResourceById<UndertaleSprite> r in Sprites)
-            {
-                writer.Write(r.Serialize(writer));
-            }
-
-            SeekWritePointer(writer, pointer3);
-            foreach (UndertaleResourceById<UndertaleSprite> r in SpineSprites)
-            {
-                writer.Write(r.Serialize(writer));
-            }
-
-            SeekWritePointer(writer, pointer4);
-            foreach (UndertaleResourceById<UndertaleFont> r in Fonts)
-            {
-                writer.Write(r.Serialize(writer));
-            }
-
-            SeekWritePointer(writer, pointer5);
-            foreach (UndertaleResourceById<UndertaleBackground> r in Tilesets)
-            {
-                writer.Write(r.Serialize(writer));
-            }
-        }
-
-        private void SeekWritePointer(UndertaleWriter writer, uint pointer)
-        {
-            uint returnTo = writer.Position;
-            writer.Position = pointer;
-            writer.Write(returnTo);
-            writer.Position = returnTo;
+            writer.WriteUndertaleObject(TexturePages);
+            writer.WriteUndertaleObject(Sprites);
+            writer.WriteUndertaleObject(SpineSprites);
+            writer.WriteUndertaleObject(Fonts);
+            writer.WriteUndertaleObject(Tilesets);
         }
 
         public void Unserialize(UndertaleReader reader)
         {
             GroupName = reader.ReadUndertaleString();
-            uint pointer1 = reader.ReadUInt32();
-            uint pointer2 = reader.ReadUInt32();
-            uint pointer3 = reader.ReadUInt32();
-            uint pointer4 = reader.ReadUInt32();
-            uint pointer5 = reader.ReadUInt32();
 
-            EnsurePointer(reader, pointer1);
+            // Read the pointers
+            TexturePages = reader.ReadUndertaleObjectPointer<UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR>>();
+            Sprites = reader.ReadUndertaleObjectPointer<UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>>();
+            SpineSprites = reader.ReadUndertaleObjectPointer<UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>>();
+            Fonts = reader.ReadUndertaleObjectPointer<UndertaleSimpleResourcesList<UndertaleFont, UndertaleChunkFONT>>();
+            Tilesets = reader.ReadUndertaleObjectPointer<UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND>>();
+
+            // Read the objects, throwing an error if the pointers are invalid
+            if (reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR>>() != TexturePages ||
+                reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>>() != Sprites ||
+                reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>>() != SpineSprites ||
+                reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleFont, UndertaleChunkFONT>>() != Fonts ||
+                reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND>>() != Tilesets)
             {
-                int count = reader.ReadInt32();
-                for (int i = 0; i < count; i++)
-                {
-                    UndertaleResourceById<UndertaleEmbeddedTexture> r = new UndertaleResourceById<UndertaleEmbeddedTexture>("TXTR");
-                    r.Unserialize(reader, reader.ReadInt32());
-                    TexturePages.Add(r);
-                }
+                throw new UndertaleSerializationException("Invalid pointer to SimpleResourcesList");
             }
-
-            EnsurePointer(reader, pointer2);
-            {
-                int count = reader.ReadInt32();
-                for (int i = 0; i < count; i++)
-                {
-                    UndertaleResourceById<UndertaleSprite> r = new UndertaleResourceById<UndertaleSprite>("SPRT");
-                    r.Unserialize(reader, reader.ReadInt32());
-                    Sprites.Add(r);
-                }
-            }
-
-            EnsurePointer(reader, pointer3);
-            {
-                int count = reader.ReadInt32();
-                for (int i = 0; i < count; i++)
-                {
-                    UndertaleResourceById<UndertaleSprite> r = new UndertaleResourceById<UndertaleSprite>("SPRT");
-                    r.Unserialize(reader, reader.ReadInt32());
-                    SpineSprites.Add(r);
-                }
-            }
-
-            EnsurePointer(reader, pointer4);
-            {
-                int count = reader.ReadInt32();
-                for (int i = 0; i < count; i++)
-                {
-                    UndertaleResourceById<UndertaleFont> r = new UndertaleResourceById<UndertaleFont>("FONT");
-                    r.Unserialize(reader, reader.ReadInt32());
-                    Fonts.Add(r);
-                }
-            }
-
-            EnsurePointer(reader, pointer5);
-            {
-                int count = reader.ReadInt32();
-                for (int i = 0; i < count; i++)
-                {
-                    UndertaleResourceById<UndertaleBackground> r = new UndertaleResourceById<UndertaleBackground>("BGND");
-                    r.Unserialize(reader, reader.ReadInt32());
-                    Tilesets.Add(r);
-                }
-            }
-        }
-
-        private void EnsurePointer(UndertaleReader reader, uint pointer)
-        {
-            Debug.Assert(reader.Position == pointer, "Invalid pointer in TGIN entry");
         }
     }
 }

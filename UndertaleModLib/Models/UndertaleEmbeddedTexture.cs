@@ -10,29 +10,29 @@ namespace UndertaleModLib.Models
 {
     public class UndertaleEmbeddedTexture : UndertaleResource, INotifyPropertyChanged
     {
-        private uint _GMS2Unknown;
-        private uint _UnknownAlwaysZero = 0;
+        private uint _GeneratedMips;
+        private uint _Scaled = 0;
         private TexData _TextureData = new TexData();
 
-        public uint GMS2Unknown { get => _GMS2Unknown; set { _GMS2Unknown = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2Unknown")); } }
-        public uint UnknownAlwaysZero { get => _UnknownAlwaysZero; set { _UnknownAlwaysZero = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UnknownAlwaysZero")); } }
+        public uint Scaled { get => _Scaled; set { _Scaled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Scaled")); } }
+        public uint GeneratedMips { get => _GeneratedMips; set { _GeneratedMips = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GeneratedMips")); } }
         public TexData TextureData { get => _TextureData; set { _TextureData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureData")); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {
+            writer.Write(Scaled);
             if (writer.undertaleData.GeneralInfo.Major >= 2)
-                writer.Write(GMS2Unknown);
-            writer.Write(UnknownAlwaysZero);
+                writer.Write(GeneratedMips);
             writer.WriteUndertaleObjectPointer(TextureData);
         }
 
         public void Unserialize(UndertaleReader reader)
         {
+            Scaled = reader.ReadUInt32();
             if (reader.undertaleData.GeneralInfo.Major >= 2)
-                GMS2Unknown = reader.ReadUInt32();
-            UnknownAlwaysZero = reader.ReadUInt32();
+                GeneratedMips = reader.ReadUInt32();
             TextureData = reader.ReadUndertaleObjectPointer<TexData>();
         }
 

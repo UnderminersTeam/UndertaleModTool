@@ -237,7 +237,7 @@ namespace UndertaleModTool
                     {
                         if (data.UnsupportedBytecodeVersion)
                         {
-                            MessageBox.Show("Only bytecode versions 15 and 16 are supported for now, you are trying to load " + data.GeneralInfo.BytecodeVersion + ". A lot of code is disabled and will likely break something. Saving/exporting is disabled.", "Unsupported bytecode version", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            MessageBox.Show("Only bytecode versions 15, 16, and (partially) 17 are supported for now, you are trying to load " + data.GeneralInfo.BytecodeVersion + ". A lot of code is disabled and will likely break something. Saving/exporting is disabled.", "Unsupported bytecode version", MessageBoxButton.OK, MessageBoxImage.Warning);
                             CanSave = false;
                         }
                         else if (hadWarnings)
@@ -252,6 +252,10 @@ namespace UndertaleModTool
                         if (data.GeneralInfo?.Major >= 2)
                         {
                             MessageBox.Show("Game Maker: Studio 2 game loaded! I just hacked this together quickly for the Nintendo Switch release of Undertale. Most things work, but some editors don't display all the data.", "GMS2 game loaded", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                        if (data.GeneralInfo?.BytecodeVersion == 17)
+                        {
+                            MessageBox.Show("Bytecode version 17 has been loaded. There may be some problems remaining, as thorough research into the changes are yet to be done.", "Bytecode version 17", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
                         if (System.IO.Path.GetDirectoryName(FilePath) != System.IO.Path.GetDirectoryName(filename))
                             CloseChildFiles();

@@ -34,6 +34,7 @@ namespace UndertaleModLib
         public UndertaleChunkOBJT OBJT => Chunks.GetValueOrDefault("OBJT") as UndertaleChunkOBJT;
         public UndertaleChunkROOM ROOM => Chunks.GetValueOrDefault("ROOM") as UndertaleChunkROOM;
         public UndertaleChunkDAFL DAFL => Chunks.GetValueOrDefault("DAFL") as UndertaleChunkDAFL;
+        public UndertaleChunkEMBI EMBI => Chunks.GetValueOrDefault("EMBI") as UndertaleChunkEMBI;
         public UndertaleChunkTPAG TPAG => Chunks.GetValueOrDefault("TPAG") as UndertaleChunkTPAG;
         public UndertaleChunkTGIN TGIN => Chunks.GetValueOrDefault("TGIN") as UndertaleChunkTGIN;
         public UndertaleChunkCODE CODE => Chunks.GetValueOrDefault("CODE") as UndertaleChunkCODE;
@@ -432,7 +433,7 @@ namespace UndertaleModLib
     }
 
     // GMS2.2.1+ only
-    public class UndertaleChunkTGIN : UndertaleSimpleListChunk<UndertaleTextureGroupInfo>
+    public class UndertaleChunkTGIN : UndertaleListChunk<UndertaleTextureGroupInfo>
     {
         public override string Name => "TGIN";
 

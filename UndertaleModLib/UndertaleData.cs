@@ -39,7 +39,9 @@ namespace UndertaleModLib
         public IList<UndertaleCodeLocals> CodeLocals => FORM.FUNC?.CodeLocals;
         public IList<UndertaleString> Strings => FORM.STRG?.List;
         public IList<UndertaleEmbeddedTexture> EmbeddedTextures => FORM.TXTR?.List;
+        public IList<UndertaleEmbeddedImage> EmbeddedImages => FORM.EMBI?.List;
         public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO?.List;
+        public IList<UndertaleTextureGroupInfo> TextureGroupInfo => FORM.TGIN?.List;
 
         public bool UnsupportedBytecodeVersion = false;
 
@@ -78,7 +80,9 @@ namespace UndertaleModLib
             data.FORM.Chunks["OBJT"] = new UndertaleChunkOBJT();
             data.FORM.Chunks["ROOM"] = new UndertaleChunkROOM();
             data.FORM.Chunks["DAFL"] = new UndertaleChunkDAFL();
+            data.FORM.Chunks["EMBI"] = new UndertaleChunkEMBI();
             data.FORM.Chunks["TPAG"] = new UndertaleChunkTPAG();
+            data.FORM.Chunks["TGIN"] = new UndertaleChunkTGIN(); // Maybe a studio 2 option may come in handy
             data.FORM.Chunks["CODE"] = new UndertaleChunkCODE();
             data.FORM.Chunks["VARI"] = new UndertaleChunkVARI();
             data.FORM.Chunks["FUNC"] = new UndertaleChunkFUNC();

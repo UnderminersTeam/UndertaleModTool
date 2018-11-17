@@ -18,11 +18,11 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Unknown (added in GMS2)</TextBlock>
-        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2Unknown}" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Scaled</TextBlock>
+        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Scaled}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Unknown</TextBlock>
-        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding UnknownAlwaysZero}"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Generated mips</TextBlock>
+        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneratedMips}" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
 
         <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="3">
             <Grid.ColumnDefinitions>

@@ -628,7 +628,7 @@ namespace UndertaleModLib.Models
 
                 public void Serialize(UndertaleWriter writer)
                 {
-                    writer.WriteUndertaleObject(_Background);
+                    _Background.Serialize(writer); // see comment below
                     writer.Write(TilesX);
                     writer.Write(TilesY);
                     if (TileData.Length != TilesY)
@@ -644,7 +644,8 @@ namespace UndertaleModLib.Models
 
                 public void Unserialize(UndertaleReader reader)
                 {
-                    _Background = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>>();
+                    _Background = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>(); // see comment in UndertaleGlobalInit.Unserialize
+                    _Background.Unserialize(reader);
                     _TileData = null; // prevent unnecessary resizes
                     TilesX = reader.ReadUInt32();
                     TilesY = reader.ReadUInt32();
