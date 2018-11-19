@@ -32,13 +32,14 @@ using UndertaleModLib;
 using UndertaleModLib.DebugData;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Scripting;
 
 namespace UndertaleModTool
 {
     /// <summary>
     /// Logika interakcji dla klasy MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, INotifyPropertyChanged
+    public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
         public UndertaleData Data { get; set; }
         public string FilePath { get; set; }
@@ -49,7 +50,7 @@ namespace UndertaleModTool
         public object Selected { get { return _Selected; } private set { _Selected = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Selected")); } }
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
 
-        public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
+        private ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
 
         private bool _CanSave = false;
         public bool CanSave { get { return _CanSave; } private set { _CanSave = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CanSave")); } }
@@ -550,9 +551,9 @@ namespace UndertaleModTool
                         loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
 
                         var script = CSharpScript.Create<object>(CommandBox.Text, ScriptOptions.Default
-                            .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "System", "System.IO", "System.Collections.Generic")
+                            .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "System", "System.IO", "System.Collections.Generic")
                             .WithReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly)),
-                            this.GetType(), loader);
+                            typeof(IScriptInterface), loader);
 
                         result = (await script.RunAsync(this)).ReturnValue;
                     }
@@ -653,9 +654,9 @@ namespace UndertaleModTool
                     loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
 
                     var script = CSharpScript.Create<object>(File.ReadAllText(path), ScriptOptions.Default
-                        .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "System", "System.IO", "System.Collections.Generic")
+                        .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "System", "System.IO", "System.Collections.Generic")
                         .WithReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly)),
-                        this.GetType(), loader);
+                        typeof(IScriptInterface), loader);
 
                     object result = (await script.RunAsync(this)).ReturnValue;
                     CommandBox.Text = result != null ? result.ToString() : System.IO.Path.GetFileName(path) + " finished!";
