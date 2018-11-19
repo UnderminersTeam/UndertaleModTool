@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModLib", "UndertaleModLib\UndertaleModLib.csproj", "{4781ADAC-9469-42C4-B357-4A0A157D7FCD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModTests", "UndertaleModTests\UndertaleModTests.csproj", "{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
