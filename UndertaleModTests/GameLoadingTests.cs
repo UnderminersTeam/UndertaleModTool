@@ -10,42 +10,10 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModTests
 {
-    public abstract class GameLoadingTestBase
+    public abstract class GameLoadingTestBase : GameTestBase
     {
-        private readonly string path;
-        private readonly string expectedMD5;
-        private UndertaleData data;
-
-        private static string GenerateMD5(Stream stream)
+        public GameLoadingTestBase(string path, string md5) : base(path, md5)
         {
-            using (var md5 = MD5.Create())
-            {
-                var hash = md5.ComputeHash(stream);
-                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-            }
-        }
-
-        public GameLoadingTestBase(string path, string md5)
-        {
-            this.path = path;
-            this.expectedMD5 = md5;
-        }
-
-        [TestInitialize]
-        public void LoadData()
-        {
-            if (!File.Exists(path))
-                Assert.Inconclusive("Unable to test, file not found: " + path);
-
-            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
-            {
-                string fileMD5 = GenerateMD5(fs);
-                if (fileMD5 != expectedMD5)
-                    Assert.Inconclusive("Unable to test, incorrect file: got " + fileMD5 + " expected " + expectedMD5);
-                fs.Position = 0;
-
-                data = UndertaleIO.Read(fs);
-            }
         }
 
         [TestMethod]
@@ -157,7 +125,7 @@ namespace UndertaleModTests
     [TestClass]
     public class UndertaleLoadingTest : GameLoadingTestBase
     {
-        public UndertaleLoadingTest() : base(@"C:\Program Files (x86)\Steam\steamapps\common\Undertale\data.win", "5903fc5cb042a728d4ad8ee9e949c6eb")
+        public UndertaleLoadingTest() : base(GamePaths.UNDERTALE_PATH, GamePaths.UNDERTALE_MD5)
         {
         }
     }
@@ -165,7 +133,7 @@ namespace UndertaleModTests
     [TestClass]
     public class UndertaleSwitchLoadingTest : GameLoadingTestBase
     {
-        public UndertaleSwitchLoadingTest() : base(@"..\..\..\Test\bin\Debug\switch\game.win", "427520a97db28c87da4220abb3a334c1")
+        public UndertaleSwitchLoadingTest() : base(GamePaths.UNDERTALE_SWITCH_PATH, GamePaths.UNDERTALE_SWITCH_MD5)
         {
         }
     }
@@ -173,7 +141,7 @@ namespace UndertaleModTests
     [TestClass]
     public class DeltaruneLoadingTest : GameLoadingTestBase
     {
-        public DeltaruneLoadingTest() : base(@"C:\Program Files (x86)\SURVEY_PROGRAM\data.win", "a88a2db3a68c714ca2b1ff57ac08a032")
+        public DeltaruneLoadingTest() : base(GamePaths.DELTARUNE_PATH, GamePaths.DELTARUNE_MD5)
         {
         }
     }

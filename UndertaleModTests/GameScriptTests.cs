@@ -1,0 +1,217 @@
+﻿using System;
+using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.CodeAnalysis.Scripting.Hosting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using UndertaleModLib;
+using UndertaleModLib.Scripting;
+
+namespace UndertaleModTests
+{
+    public abstract class GameScriptTestBase : GameTestBase, IScriptInterface
+    {
+        public GameScriptTestBase(string path, string md5) : base(path, md5)
+        {
+        }
+
+        public UndertaleData Data => data;
+        public string FilePath => path;
+        public object Highlighted => throw new NotImplementedException();
+        public object Selected => throw new NotImplementedException();
+        public bool CanSave => throw new NotImplementedException();
+
+        public void ChangeSelection(object newsel)
+        {
+        }
+
+        public void EnsureDataLoaded()
+        {
+        }
+
+        public void ScriptMessage(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+        public bool ScriptQuestion(string message)
+        {
+            Console.WriteLine(message);
+            return true;
+        }
+
+        public void ScriptOpenURL(string url)
+        {
+            Console.WriteLine("Open: " + url);
+        }
+
+        protected async Task<object> RunScript(string path)
+        {
+            string scriptpath = Path.Combine("../../../UndertaleModTool/SampleScripts/", path);
+            using (var loader = new InteractiveAssemblyLoader())
+            {
+                loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
+
+                var script = CSharpScript.Create<object>(File.ReadAllText(scriptpath), ScriptOptions.Default
+                    .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "System", "System.IO", "System.Collections.Generic")
+                    .WithReferences(typeof(UndertaleObject).GetTypeInfo().Assembly),
+                    typeof(IScriptInterface), loader);
+
+                return await script.RunAsync(this);
+            }
+        }
+    }
+
+    [TestClass]
+    public class UndertaleScriptTest : GameScriptTestBase
+    {
+        public UndertaleScriptTest() : base(GamePaths.UNDERTALE_PATH, GamePaths.UNDERTALE_MD5)
+        {
+        }
+
+        [TestMethod]
+        public async Task EnableDebug()
+        {
+            await RunScript("EnableDebug.csx");
+        }
+
+        [TestMethod]
+        public async Task DebugToggler()
+        {
+            await RunScript("DebugToggler.csx");
+        }
+
+        [TestMethod]
+        public async Task GoToRoom()
+        {
+            await RunScript("GoToRoom.csx");
+        }
+
+        [TestMethod]
+        public async Task ShowRoomName()
+        {
+            await RunScript("ShowRoomName.csx");
+        }
+        
+        [TestMethod]
+        [Ignore] // TODO: path problems
+        public async Task BorderEnabler()
+        {
+            await RunScript("BorderEnabler.csx");
+        }
+
+        [TestMethod]
+        public async Task testing()
+        {
+            await RunScript("testing.csx");
+        }
+
+        [TestMethod]
+        public async Task RoomOfDetermination()
+        {
+            await RunScript("RoomOfDetermination.csx");
+        }
+
+        [TestMethod]
+        public async Task TTFFonts()
+        {
+            await RunScript("TTFFonts.csx");
+        }
+
+        [TestMethod]
+        public async Task MixMod()
+        {
+            await RunScript("MixMod.csx");
+        }
+    }
+
+    [TestClass]
+    public class UndertaleSwitchScriptTest : GameScriptTestBase
+    {
+        public UndertaleSwitchScriptTest() : base(GamePaths.UNDERTALE_SWITCH_PATH, GamePaths.UNDERTALE_SWITCH_MD5)
+        {
+        }
+
+        [TestMethod]
+        public async Task EnableDebug()
+        {
+            await RunScript("EnableDebug.csx");
+        }
+
+        [TestMethod]
+        public async Task DebugToggler()
+        {
+            await RunScript("DebugToggler.csx");
+        }
+
+        [TestMethod]
+        public async Task GoToRoom()
+        {
+            await RunScript("GoToRoom.csx");
+        }
+
+        [TestMethod]
+        public async Task ShowRoomName()
+        {
+            await RunScript("ShowRoomName.csx");
+        }
+    }
+
+    [TestClass]
+    public class DeltaruneScriptTest : GameScriptTestBase
+    {
+        public DeltaruneScriptTest() : base(GamePaths.DELTARUNE_PATH, GamePaths.DELTARUNE_MD5)
+        {
+        }
+
+        [TestMethod]
+        public async Task EnableDebug()
+        {
+            await RunScript("EnableDebug.csx");
+        }
+
+        [TestMethod]
+        public async Task DebugToggler()
+        {
+            await RunScript("DebugToggler.csx");
+        }
+
+        [TestMethod]
+        public async Task GoToRoom()
+        {
+            await RunScript("GoToRoom.csx");
+        }
+
+        [TestMethod]
+        public async Task ShowRoomName()
+        {
+            await RunScript("ShowRoomName.csx");
+        }
+
+        [TestMethod]
+        public async Task DeltaHATE()
+        {
+            await RunScript("DeltaHATE.csx");
+        }
+
+        [TestMethod]
+        public async Task DeltaMILK()
+        {
+            await RunScript("DeltaMILK.csx");
+        }
+
+        [TestMethod]
+        public async Task TheWholeWorldRevolving()
+        {
+            await RunScript("TheWholeWorldRevolving.csx");
+        }
+
+        [TestMethod]
+        public async Task DebugMsg()
+        {
+            await RunScript("DebugMsg.csx");
+        }
+    }
+}
