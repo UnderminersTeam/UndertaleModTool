@@ -34,7 +34,9 @@ namespace UndertaleModLib
         public UndertaleChunkOBJT OBJT => Chunks.GetValueOrDefault("OBJT") as UndertaleChunkOBJT;
         public UndertaleChunkROOM ROOM => Chunks.GetValueOrDefault("ROOM") as UndertaleChunkROOM;
         public UndertaleChunkDAFL DAFL => Chunks.GetValueOrDefault("DAFL") as UndertaleChunkDAFL;
+        public UndertaleChunkEMBI EMBI => Chunks.GetValueOrDefault("EMBI") as UndertaleChunkEMBI;
         public UndertaleChunkTPAG TPAG => Chunks.GetValueOrDefault("TPAG") as UndertaleChunkTPAG;
+        public UndertaleChunkTGIN TGIN => Chunks.GetValueOrDefault("TGIN") as UndertaleChunkTGIN;
         public UndertaleChunkCODE CODE => Chunks.GetValueOrDefault("CODE") as UndertaleChunkCODE;
         public UndertaleChunkVARI VARI => Chunks.GetValueOrDefault("VARI") as UndertaleChunkVARI;
         public UndertaleChunkFUNC FUNC => Chunks.GetValueOrDefault("FUNC") as UndertaleChunkFUNC;
@@ -107,9 +109,12 @@ namespace UndertaleModLib
             // Strange data for each extension, some kind of unique identifier based on
             // the product ID for each of them
             productIdData = new List<byte[]>();
-            for (int i = 0; i < List.Count; i++)
+            if (reader.undertaleData.GeneralInfo?.Major >= 2 || (reader.undertaleData.GeneralInfo?.Major == 1 && reader.undertaleData.GeneralInfo?.Build >= 9999))
             {
-                productIdData.Add(reader.ReadBytes(16));
+                for (int i = 0; i < List.Count; i++)
+                {
+                    productIdData.Add(reader.ReadBytes(16));
+                }
             }
         }
 
@@ -403,9 +408,9 @@ namespace UndertaleModLib
     {
         public override string Name => "AUDO";
     }
-    
+
     // GMS2 only
-    public class UndertaleChunkEMBI : UndertaleSimpleListChunk<UndertaleEmbeddedISomething>
+    public class UndertaleChunkEMBI : UndertaleSimpleListChunk<UndertaleEmbeddedImage>
     {
         public override string Name => "EMBI";
 
@@ -422,7 +427,30 @@ namespace UndertaleModLib
             if (reader.undertaleData.GeneralInfo.Major < 2)
                 throw new InvalidOperationException();
             if (reader.ReadUInt32() != 1)
-                throw new Exception("Should be hardcoded 1");
+                throw new Exception("Expected EMBI version 1");
+            base.UnserializeChunk(reader);
+        }
+    }
+
+    // GMS2.2.1+ only
+    public class UndertaleChunkTGIN : UndertaleListChunk<UndertaleTextureGroupInfo>
+    {
+        public override string Name => "TGIN";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            if (writer.undertaleData.GeneralInfo.Major < 2)
+                throw new InvalidOperationException();
+            writer.Write((uint)1); // Hardcoded 1
+            base.SerializeChunk(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            if (reader.undertaleData.GeneralInfo.Major < 2)
+                throw new InvalidOperationException();
+            if (reader.ReadUInt32() != 1)
+                throw new Exception("Expected TGIN version 1");
             base.UnserializeChunk(reader);
         }
     }

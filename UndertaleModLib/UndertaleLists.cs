@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -39,7 +40,54 @@ namespace UndertaleModLib
                 }
                 catch (UndertaleSerializationException e)
                 {
-                    throw new UndertaleSerializationException(e.Message + "\nwhile reading item " + (i+1) + " of " + count + " in a list of " + typeof(T).FullName, e);
+                    throw new UndertaleSerializationException(e.Message + "\nwhile reading item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
+                }
+            }
+        }
+    }
+
+    public class UndertaleSimpleListShort<T> : ObservableCollection<T>, UndertaleObject where T : UndertaleObject, new()
+    {
+        public UndertaleSimpleListShort()
+        {
+            base.CollectionChanged += EnsureShortCount;
+        }
+
+        private void EnsureShortCount(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null && e.NewItems.Count > Int16.MaxValue)
+                throw new InvalidOperationException("Count of short SimpleList exceeds maximum number allowed.");
+        }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write((ushort)Count);
+            for (int i = 0; i < Count; i++)
+            {
+                try
+                {
+                    writer.WriteUndertaleObject<T>(this[i]);
+                }
+                catch (UndertaleSerializationException e)
+                {
+                    throw new UndertaleSerializationException(e.Message + "\nwhile writing item " + (i + 1) + " of " + Count + " in a list of " + typeof(T).FullName, e);
+                }
+            }
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            ushort count = reader.ReadUInt16();
+            Clear();
+            for (ushort i = 0; i < count; i++)
+            {
+                try
+                {
+                    Add(reader.ReadUndertaleObject<T>());
+                }
+                catch (UndertaleSerializationException e)
+                {
+                    throw new UndertaleSerializationException(e.Message + "\nwhile reading item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
                 }
             }
         }
@@ -112,6 +160,7 @@ namespace UndertaleModLib
             {
                 try
                 {
+                    (this[(int)i] as PrePaddedObject)?.UnserializePrePadding(reader);
                     T obj = reader.ReadUndertaleObject<T>();
                     if (!obj.Equals(this[(int)i]))
                         throw new UndertaleSerializationException("Something got misaligned...");

@@ -39,7 +39,9 @@ namespace UndertaleModLib
         public IList<UndertaleCodeLocals> CodeLocals => FORM.FUNC?.CodeLocals;
         public IList<UndertaleString> Strings => FORM.STRG?.List;
         public IList<UndertaleEmbeddedTexture> EmbeddedTextures => FORM.TXTR?.List;
+        public IList<UndertaleEmbeddedImage> EmbeddedImages => FORM.EMBI?.List;
         public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO?.List;
+        public IList<UndertaleTextureGroupInfo> TextureGroupInfo => FORM.TGIN?.List;
 
         public bool UnsupportedBytecodeVersion = false;
 
