@@ -18,7 +18,7 @@ namespace Test
     {
         static void Main(string[] args)
         {
-            UndertaleData data = UndertaleIO.Read(new FileStream(@"deltarune\data.win", FileMode.Open));
+            UndertaleData data = UndertaleIO.Read(new FileStream(@"deltarune\data.win", FileMode.Open, FileAccess.Read));
 
             foreach(var code in data.Code)
             {

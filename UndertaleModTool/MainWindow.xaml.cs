@@ -217,7 +217,7 @@ namespace UndertaleModTool
                 UndertaleData data = null;
                 try
                 {
-                    using (var stream = new FileStream(filename, FileMode.Open))
+                    using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read))
                     {
                         data = UndertaleIO.Read(stream, warning =>
                         {
@@ -298,7 +298,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    using (var stream = new FileStream(filename, FileMode.Create))
+                    using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write))
                     {
                         UndertaleIO.Write(stream, Data);
                     }
@@ -307,7 +307,7 @@ namespace UndertaleModTool
                     {
                         Debug.WriteLine("Generating debugger data...");
                         UndertaleDebugData debugData = DebugDataGenerator.GenerateDebugData(Data, debugMode);
-                        using (FileStream stream = new FileStream(System.IO.Path.ChangeExtension(FilePath, ".yydebug"), FileMode.Create))
+                        using (FileStream stream = new FileStream(System.IO.Path.ChangeExtension(FilePath, ".yydebug"), FileMode.Create, FileAccess.Write))
                         {
                             using (UndertaleWriter writer = new UndertaleWriter(stream))
                             {
@@ -897,7 +897,7 @@ namespace UndertaleModTool
                     {
                         try
                         {
-                            using (var stream = new FileStream(dlg.FileName, FileMode.Open))
+                            using (var stream = new FileStream(dlg.FileName, FileMode.Open, FileAccess.Read))
                             {
                                 var offsets = UndertaleIO.GenerateOffsetMap(stream);
                                 using (var writer = File.CreateText(dlgout.FileName))
