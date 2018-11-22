@@ -34,12 +34,6 @@ namespace UndertaleModTests
         {
             foreach(var code in data.Code)
             {
-                if (code.Name.Content == "gml_Object_obj_vaporized_new_Draw_0")
-                {
-                    Console.WriteLine("SKIPPING " + code.Name.Content + ", known bug"); // see #85
-                    continue;
-                }
-
                 Console.WriteLine(code.Name.Content);
                 try
                 {

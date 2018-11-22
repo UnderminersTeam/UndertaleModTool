@@ -384,8 +384,6 @@ namespace UndertaleModTool
                                         par.Inlines.Add(new Run(token) { Cursor = Cursors.Hand });
                                         par.Inlines.LastInline.MouseDown += (sender, ev) =>
                                         {
-                                            // TODO: Add type resolving to the decompiler so that this is handled mostly automatically
-
                                             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
                                             int id = Int32.Parse(token);
                                             List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
@@ -407,8 +405,6 @@ namespace UndertaleModTool
                                                 possibleObjects.Add(data.Sounds[id]);
                                             if (id < data.Shaders.Count)
                                                 possibleObjects.Add(data.Shaders[id]);
-                                            // if (id < data.Extensions.Count)
-                                            //    possibleObjects.Add(data.Extensions[id]);
                                             if (id < data.Timelines.Count)
                                                 possibleObjects.Add(data.Timelines[id]);
 

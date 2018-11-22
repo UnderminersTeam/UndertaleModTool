@@ -752,10 +752,14 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.Ret:
                     case UndertaleInstruction.Opcode.Exit:
                         ReturnStatement stmt = new ReturnStatement(instr.Kind == UndertaleInstruction.Opcode.Ret ? stack.Pop() : null);
+                        /*
+                        This shouldn't be necessary: all unused things on the stack get converted to tempvars at the end anyway, and this fixes decompilation of repeat()
+                        See #85
+
                         foreach (var expr in stack.Reverse())
                             if (!(expr is ExpressionTempVar))
                                 statements.Add(expr);
-                        stack.Clear();
+                        stack.Clear();*/
                         statements.Add(stmt);
                         end = true;
                         break;
