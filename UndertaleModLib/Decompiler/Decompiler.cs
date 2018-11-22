@@ -814,7 +814,15 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.PopEnv:
-                        statements.Add(new PopEnvStatement());
+                        if (instr.JumpOffsetPopenvExitMagic)
+                        {
+                            // This is just an instruction to make sure the pushenv/popenv stack is cleared on early function return
+                            // Works kinda like 'break', but doesn't have a high-level representation as it's immediately followed by a 'return'
+                        }
+                        else
+                        {
+                            statements.Add(new PopEnvStatement());
+                        }
                         end = true;
                         break;
 
