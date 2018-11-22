@@ -20,5 +20,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
-// TODO: Reenable this once I fix the terrible global variable hacks in the decompiler
-//[assembly: Parallelize(Workers = 4, Scope = Microsoft.VisualStudio.TestTools.UnitTesting.ExecutionScope.ClassLevel)]
+[assembly: Parallelize(Workers = 4, Scope = Microsoft.VisualStudio.TestTools.UnitTesting.ExecutionScope.ClassLevel)]

@@ -1583,21 +1583,25 @@ namespace UndertaleModLib.Decompiler
             return blocks;
         }
 
+        private static readonly object ANOTHER_HACK = new object();
         public static string Decompile(UndertaleCode code, UndertaleData data = null)
         {
-            HUGE_HACK_FIX_THIS_SOON = data;
-            TempVar.i = 0;
-            ExpressionVar.assetTypes.Clear();
-            Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
-            DecompileFromBlock(blocks[0]);
-            FunctionCall.scriptArgs.Clear();
-            // TODO: add self to scriptArgs
-            DoTypePropagation(blocks);
-            List<Statement> stmts = HLDecompile(blocks, blocks[0], blocks[code.Length / 4]);
-            StringBuilder sb = new StringBuilder();
-            foreach (var stmt in stmts)
-                sb.Append(stmt.ToString() + "\n");
-            return sb.ToString();
+            lock(ANOTHER_HACK) // hack together a hack to fix a hack, TODO: remove once I get rid of the globals
+            {
+                HUGE_HACK_FIX_THIS_SOON = data;
+                TempVar.i = 0;
+                ExpressionVar.assetTypes.Clear();
+                Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
+                DecompileFromBlock(blocks[0]);
+                FunctionCall.scriptArgs.Clear();
+                // TODO: add self to scriptArgs
+                DoTypePropagation(blocks);
+                List<Statement> stmts = HLDecompile(blocks, blocks[0], blocks[code.Length / 4]);
+                StringBuilder sb = new StringBuilder();
+                foreach (var stmt in stmts)
+                    sb.Append(stmt.ToString() + "\n");
+                return sb.ToString();
+            }
         }
 
         private static void DoTypePropagation(Dictionary<uint, Block> blocks)
