@@ -63,8 +63,6 @@ namespace UndertaleModTests
                             knownBug = true;
                     }
                 }
-                if (code.Name.Content == "gml_Object_obj_battlebomb_Alarm_3") // The script that contains the one and only popenv with a weirdly encoded offset
-                    knownBug = true;
                 if (knownBug)
                 {
                     Console.WriteLine("SKIPPING " + code.Name.Content + ", known bug");
@@ -93,8 +91,9 @@ namespace UndertaleModTests
                     Assert.AreEqual(code.Instructions[i].TypeInst, reasm[i].TypeInst, errMsg);
                     Assert.AreEqual(code.Instructions[i].DupExtra, reasm[i].DupExtra, errMsg);
                     Assert.AreEqual(code.Instructions[i].ArgumentsCount, reasm[i].ArgumentsCount, errMsg);
-                    Assert.AreEqual(code.Instructions[i].JumpOffset, reasm[i].JumpOffset, errMsg);
-                    Assert.AreEqual(code.Instructions[i].JumpOffsetIsWeird, reasm[i].JumpOffsetIsWeird, errMsg);
+                    Assert.AreEqual(code.Instructions[i].JumpOffsetPopenvExitMagic, reasm[i].JumpOffsetPopenvExitMagic, errMsg);
+                    if (!code.Instructions[i].JumpOffsetPopenvExitMagic)
+                        Assert.AreEqual(code.Instructions[i].JumpOffset, reasm[i].JumpOffset, errMsg);
                     Assert.AreSame(code.Instructions[i].Destination?.Target, reasm[i].Destination?.Target, errMsg);
                     Assert.AreEqual(code.Instructions[i].Destination?.Type, reasm[i].Destination?.Type, errMsg);
                     Assert.AreSame(code.Instructions[i].Function?.Target, reasm[i].Function?.Target, errMsg);

@@ -135,6 +135,8 @@ namespace UndertaleModTool
                             string tgt = (instr.Address + instr.JumpOffset).ToString("D5");
                             if (instr.Address + instr.JumpOffset == code.Length / 4)
                                 tgt = "func_end";
+                            if (instr.JumpOffsetPopenvExitMagic)
+                                tgt = "[drop]";
                             par.Inlines.Add(new Run(tgt) { Foreground = argBrush, ToolTip = "$" + instr.JumpOffset.ToString("+#;-#;0") });
                             break;
 

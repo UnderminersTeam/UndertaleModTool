@@ -73,7 +73,10 @@ namespace UndertaleModLib.Decompiler
                     }
                     else
                     {
-                        label = line;
+                        if (line == "[drop]")
+                            instr.JumpOffsetPopenvExitMagic = true;
+                        else
+                            label = line;
                     }
                     line = "";
                     break;
