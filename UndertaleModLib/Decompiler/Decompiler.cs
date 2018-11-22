@@ -280,7 +280,7 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString()
             {
-                return String.Format("{0}({1} {2})", Type != Argument.Type ? "(" + Type.ToString().ToLower() + ")" : "", OperationToPrintableString(Opcode), Argument.ToString());
+                return String.Format("{0}({1} {2})", false && Type != Argument.Type ? "(" + Type.ToString().ToLower() + ")" : "", OperationToPrintableString(Opcode), Argument.ToString());
             }
 
             internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
