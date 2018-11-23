@@ -71,7 +71,7 @@ pop.v.s self.youtube_last_song
 
 call.i ds_map_create(argc=0)
 pop.v.v self.youtube_cache
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.PostDraw, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
 .localvar 1 w " + var_w + @"
@@ -104,7 +104,7 @@ popz.v
 push.v self.youtube_current_song
 call.i window_set_caption(argc=1)
 popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
 pushi.e 2
@@ -137,7 +137,7 @@ pushglb.v global.window_yofs
 add.v.v
 call.i draw_text(argc=3)
 popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 var MOD_get_mus_query = new UndertaleCode() { Name = Data.Strings.MakeString("gml_Script_MOD_get_mus_query") };
 MOD_get_mus_query.Append(Assembler.Assemble(@"
@@ -1034,7 +1034,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00990: push.s """"
 00992: conv.s.v
 00993: ret.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 Data.Code.Add(MOD_get_mus_query);
 Data.CodeLocals.Add(new UndertaleCodeLocals() { Name = MOD_get_mus_query.Name });
 Data.Scripts.Add(new UndertaleScript() { Name = Data.Strings.MakeString("MOD_get_mus_query"), Code = MOD_get_mus_query });
@@ -1236,7 +1236,7 @@ b func_end
 normal: pushi.e 15
 conv.i.v
 ret.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 Data.Code.Add(MOD_get_mus_count);
 Data.CodeLocals.Add(new UndertaleCodeLocals() { Name = MOD_get_mus_count.Name });
 Data.Scripts.Add(new UndertaleScript() { Name = Data.Strings.MakeString("MOD_get_mus_count"), Code = MOD_get_mus_count });
@@ -1246,7 +1246,7 @@ var youtube_load_song = new UndertaleCode() { Name = Data.Strings.MakeString("gm
 youtube_load_song.Append(Assembler.Assemble(@"
 .localvar 1 items " + var_items + @"
 .localvar 2 item " + var_item + @"
-pushi.e " + Data.GameObjects.IndexOf(Data.GameObjects.ByName("obj_time")) + @"
+pushi.e obj_time
 pushenv func_end
 00000: push.v self.youtube_current_song
 00002: push.v self.youtube_cache
@@ -1293,7 +1293,7 @@ pushenv func_end
 00072: add.v.v
 00073: pop.v.v self.youtube_song_title
 popenv 00000
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 Data.Code.Add(youtube_load_song);
 Data.CodeLocals.Add(new UndertaleCodeLocals() { Name = youtube_load_song.Name });
 Data.Scripts.Add(new UndertaleScript() { Name = Data.Strings.MakeString("youtube_load_song"), Code = youtube_load_song });
@@ -1302,7 +1302,7 @@ Data.Functions.EnsureDefined("youtube_load_song", Data.Strings);
 var youtube_play = new UndertaleCode() { Name = Data.Strings.MakeString("gml_Script_youtube_play") };
 youtube_play.Append(Assembler.Assemble(@"
 .localvar 1 song " + var_song + @"
-pushi.e " + Data.GameObjects.IndexOf(Data.GameObjects.ByName("obj_time")) + @"
+pushi.e obj_time
 pushenv func_end
 00000: pushvar.v self.argument0
 00002: call.i MOD_get_mus_query(argc=1)
@@ -1382,7 +1382,7 @@ pushenv func_end
 00121: push.v self.this_song_i
 00123: ret.v
 popenv 00000
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 Data.Code.Add(youtube_play);
 Data.CodeLocals.Add(new UndertaleCodeLocals() { Name = youtube_play.Name });
 Data.Scripts.Add(new UndertaleScript() { Name = Data.Strings.MakeString("youtube_play"), Code = youtube_play });
@@ -1390,7 +1390,7 @@ Data.Functions.EnsureDefined("youtube_play", Data.Strings);
 
 var youtube_stop = new UndertaleCode() { Name = Data.Strings.MakeString("gml_Script_youtube_stop") };
 youtube_stop.Append(Assembler.Assemble(@"
-pushi.e " + Data.GameObjects.IndexOf(Data.GameObjects.ByName("obj_time")) + @"
+pushi.e obj_time
 pushenv func_end
 00000: push.s ""change_song(null)""
 conv.s.v
@@ -1404,7 +1404,7 @@ popz.v
 pushi.e -4
 pop.v.i self.youtube_request
 popenv 00000
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 Data.Code.Add(youtube_stop);
 Data.CodeLocals.Add(new UndertaleCodeLocals() { Name = youtube_stop.Name });
 Data.Scripts.Add(new UndertaleScript() { Name = Data.Strings.MakeString("youtube_stop"), Code = youtube_stop });
@@ -1412,7 +1412,7 @@ Data.Functions.EnsureDefined("youtube_stop", Data.Strings);
 
 var youtube_is_playing = new UndertaleCode() { Name = Data.Strings.MakeString("gml_Script_youtube_is_playing") };
 youtube_is_playing.Append(Assembler.Assemble(@"
-pushi.e " + Data.GameObjects.IndexOf(Data.GameObjects.ByName("obj_time")) + @"
+pushi.e obj_time
 pushenv func_end
 
 00000: push.v self.youtube_current_song
@@ -1428,7 +1428,7 @@ pushenv func_end
 00014: ret.v
 
 popenv 00000
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 Data.Code.Add(youtube_is_playing);
 Data.CodeLocals.Add(new UndertaleCodeLocals() { Name = youtube_is_playing.Name });
 Data.Scripts.Add(new UndertaleScript() { Name = Data.Strings.MakeString("youtube_is_playing"), Code = youtube_is_playing });
@@ -1468,7 +1468,7 @@ Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Other, (uint)62u, 
 00047: pop.v.i self.youtube_request
 00049: call.i youtube_load_song(argc=0)
 00051: popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Other, (uint)70u, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
 .localvar 1 type " + var_type + @"
@@ -1499,7 +1499,7 @@ Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Other, (uint)70u, 
 00047: push.v self.my_browser
 00049: call.i browser_load_html(argc=2)
 00051: popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, 32, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
 push.v self.youtube_current_song
@@ -1508,7 +1508,7 @@ cmp.s.v NEQ
 bf func_end
 call.i youtube_load_song(argc=0)
 popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 Data.Scripts.ByName("caster_play").Code.Replace(Assembler.Assemble(@"
 00000: pushi.e 0
@@ -1520,7 +1520,7 @@ Data.Scripts.ByName("caster_play").Code.Replace(Assembler.Assemble(@"
 00008: pushvar.v self.argument0
 00010: call.i youtube_play(argc=5)
 00012: ret.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 Data.Scripts.ByName("caster_play_l").Code.Replace(Assembler.Assemble(@"
 00000: pushi.e 0
@@ -1532,7 +1532,7 @@ Data.Scripts.ByName("caster_play_l").Code.Replace(Assembler.Assemble(@"
 00008: pushvar.v self.argument0
 00010: call.i youtube_play(argc=5)
 00012: ret.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 Data.Scripts.ByName("caster_loop").Code.Replace(Assembler.Assemble(@"
 00000: pushi.e 1
@@ -1544,7 +1544,7 @@ Data.Scripts.ByName("caster_loop").Code.Replace(Assembler.Assemble(@"
 00008: pushvar.v self.argument0
 00010: call.i youtube_play(argc=5)
 00012: ret.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 Data.Scripts.ByName("caster_resume").Code.Replace(Assembler.Assemble(@"
 00000: pushvar.v self.argument0
@@ -1567,7 +1567,7 @@ Data.Scripts.ByName("caster_resume").Code.Replace(Assembler.Assemble(@"
 00022: pushvar.v self.argument0
 00024: call.i audio_resume_sound(argc=1)
 00026: popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 Data.Scripts.ByName("caster_pause").Code.Replace(Assembler.Assemble(@"
 00000: pushvar.v self.argument0
@@ -1581,7 +1581,7 @@ Data.Scripts.ByName("caster_pause").Code.Replace(Assembler.Assemble(@"
 00012: pushvar.v self.argument0
 00014: call.i audio_pause_sound(argc=1)
 00016: popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 Data.Scripts.ByName("caster_free").Code.Replace(Assembler.Assemble(@"
 00000: pushvar.v self.argument0
@@ -1604,7 +1604,7 @@ Data.Scripts.ByName("caster_free").Code.Replace(Assembler.Assemble(@"
 00025: popz.v
 00026: call.i youtube_stop(argc=0)
 00028: popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 Data.GameObjects.ByName("obj_titleimage").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
 push.i " + 0x00FFFF.ToString() + @"
@@ -1645,6 +1645,6 @@ pushi.e 240
 conv.i.v
 call.i scr_drawtext_centered_scaled(argc=5)
 popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 ScriptMessage("Finished! Enjoy!");

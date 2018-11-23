@@ -45,7 +45,7 @@ namespace UndertaleModLib
 
         public bool UnsupportedBytecodeVersion = false;
 
-        public object ByName(string name)
+        public UndertaleNamedResource ByName(string name)
         {
             // TODO: Check if those are all possible types
             return Sounds.ByName(name) ??
@@ -56,7 +56,33 @@ namespace UndertaleModLib
                 Fonts.ByName(name) ??
                 GameObjects.ByName(name) ??
                 Rooms.ByName(name) ??
-                (object)null;
+                (UndertaleNamedResource)null;
+        }
+
+        public int IndexOf(UndertaleNamedResource obj)
+        {
+            if (obj is UndertaleSound)
+                return Sounds.IndexOf(obj as UndertaleSound);
+            if (obj is UndertaleSprite)
+                return Sprites.IndexOf(obj as UndertaleSprite);
+            if (obj is UndertaleBackground)
+                return Backgrounds.IndexOf(obj as UndertaleBackground);
+            if (obj is UndertalePath)
+                return Paths.IndexOf(obj as UndertalePath);
+            if (obj is UndertaleScript)
+                return Scripts.IndexOf(obj as UndertaleScript);
+            if (obj is UndertaleFont)
+                return Fonts.IndexOf(obj as UndertaleFont);
+            if (obj is UndertaleGameObject)
+                return GameObjects.IndexOf(obj as UndertaleGameObject);
+            if (obj is UndertaleRoom)
+                return Rooms.IndexOf(obj as UndertaleRoom);
+            throw new InvalidOperationException();
+        }
+
+        internal int IndexOfByName(string line)
+        {
+            throw new NotImplementedException();
         }
 
         public static UndertaleData CreateNew()

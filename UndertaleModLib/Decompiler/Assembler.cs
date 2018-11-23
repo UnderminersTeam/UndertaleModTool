@@ -14,16 +14,21 @@ namespace UndertaleModLib.Decompiler
     {
         // TODO: Improve the error messages
 
-        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars = null)
+        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars = null, UndertaleData data = null)
         {
             string label;
-            UndertaleInstruction instr = AssembleOne(source, funcs, vars, strg, localvars, out label, null);
+            UndertaleInstruction instr = AssembleOne(source, funcs, vars, strg, localvars, out label, data, null);
             if (label != null)
                 throw new Exception("Cannot use labels in this context");
             return instr;
         }
 
-        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars, out string label, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null)
+        public static UndertaleInstruction AssembleOne(string source, UndertaleData data, Dictionary<string, UndertaleVariable> localvars = null)
+        {
+            return AssembleOne(source, data.Functions, data.Variables, data.Strings, localvars, data);
+        }
+
+        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars, out string label, UndertaleData data = null, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null)
         {
             label = null;
             string line = source;
@@ -98,10 +103,18 @@ namespace UndertaleModLib.Decompiler
                             instr.Value = Single.Parse(line, CultureInfo.InvariantCulture);
                             break;
                         case UndertaleInstruction.DataType.Int32:
-                            instr.Value = Int32.Parse(line);
+                            int ival;
+                            if (Int32.TryParse(line, out ival))
+                                instr.Value = ival;
+                            else
+                                instr.Value = (int)ParseResourceName(line, data);
                             break;
                         case UndertaleInstruction.DataType.Int64:
-                            instr.Value = Int64.Parse(line);
+                            long lval;
+                            if (Int64.TryParse(line, out lval))
+                                instr.Value = lval;
+                            else
+                                instr.Value = (long)ParseResourceName(line, data);
                             break;
                         case UndertaleInstruction.DataType.Boolean:
                             instr.Value = Boolean.Parse(line);
@@ -115,7 +128,11 @@ namespace UndertaleModLib.Decompiler
                             instr.Value = ParseStringReference(line, strg);
                             break;
                         case UndertaleInstruction.DataType.Int16:
-                            instr.Value = Int16.Parse(line);
+                            short sval;
+                            if (Int16.TryParse(line, out sval))
+                                instr.Value = sval;
+                            else
+                                instr.Value = (short)ParseResourceName(line, data);
                             break;
                     }
                     line = "";
@@ -144,7 +161,18 @@ namespace UndertaleModLib.Decompiler
             return instr;
         }
 
-        public static List<UndertaleInstruction> Assemble(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg)
+        private static int ParseResourceName(string line, UndertaleData data)
+        {
+            if (data != null)
+            {
+                int id = data.IndexOf(data.ByName(line));
+                if (id >= 0)
+                    return id;
+            }
+            throw new FormatException("Unable to parse " + line + " as number or resource name");
+        }
+
+        public static List<UndertaleInstruction> Assemble(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, UndertaleData data = null)
         {
             var lines = source.Split('\n');
             uint addr = 0;
@@ -227,7 +255,7 @@ namespace UndertaleModLib.Decompiler
                 };
 
                 string labelTgt;
-                UndertaleInstruction instr = AssembleOne(line, funcs, vars, strg, localvars, out labelTgt, lookOnStack);
+                UndertaleInstruction instr = AssembleOne(line, funcs, vars, strg, localvars, out labelTgt, data, lookOnStack);
                 instr.Address = addr;
                 if (labelTgt != null)
                     labelTargets.Add(instr, labelTgt);
@@ -251,7 +279,12 @@ namespace UndertaleModLib.Decompiler
             }
             return instructions;
         }
-        
+
+        public static List<UndertaleInstruction> Assemble(string source, UndertaleData data)
+        {
+            return Assemble(source, data.Functions, data.Variables, data.Strings, data);
+        }
+
         private static UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> ParseStringReference(string line, IList<UndertaleString> strg)
         {
             string str = line;

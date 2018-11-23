@@ -65,6 +65,6 @@ pushi.e 12
 conv.i.v
 call.i __view_set(argc=3)
 popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 ScriptMessage("* The whole world is spinning, spinning\n\nJEVIL HARDMODE CHAOS LOADED\nI CAN DO ANYTHING\nby krzys_h");

@@ -23,8 +23,8 @@ for(int i = 0; i < scr_draw_screen_border.Instructions.Count; i++)
 		scr_draw_screen_border.Instructions[i-2].Kind == UndertaleInstruction.Opcode.PushI   && (short)scr_draw_screen_border.Instructions[i-2].Value == 14 &&
 		scr_draw_screen_border.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushVar && (scr_draw_screen_border.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "os_type")
 	{
-        scr_draw_screen_border.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data.Functions, Data.Variables, Data.Strings);
-        scr_draw_screen_border.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data.Functions, Data.Variables, Data.Strings);
+        scr_draw_screen_border.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data);
+        scr_draw_screen_border.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data);
 	}
 
 // Same for the code that calls it
@@ -35,8 +35,8 @@ for(int i = 0; i < gml_Object_obj_time_Draw_77.Instructions.Count; i++)
 		gml_Object_obj_time_Draw_77.Instructions[i-2].Kind == UndertaleInstruction.Opcode.PushI   && (short)gml_Object_obj_time_Draw_77.Instructions[i-2].Value == 3 &&
 		gml_Object_obj_time_Draw_77.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushGlb && (gml_Object_obj_time_Draw_77.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "osflavor")
     {
-        gml_Object_obj_time_Draw_77.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data.Functions, Data.Variables, Data.Strings);
-        gml_Object_obj_time_Draw_77.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data.Functions, Data.Variables, Data.Strings);
+        gml_Object_obj_time_Draw_77.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data);
+        gml_Object_obj_time_Draw_77.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data);
     }
 
 var gml_Object_obj_time_Create_0 = Data.Code.ByName("gml_Object_obj_time_Create_0");
@@ -46,8 +46,8 @@ for(int i = 0; i < gml_Object_obj_time_Create_0.Instructions.Count; i++)
 		gml_Object_obj_time_Create_0.Instructions[i-2].Kind == UndertaleInstruction.Opcode.PushI   && (short)gml_Object_obj_time_Create_0.Instructions[i-2].Value == 3 &&
 		gml_Object_obj_time_Create_0.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushGlb && (gml_Object_obj_time_Create_0.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "osflavor")
     {
-        gml_Object_obj_time_Create_0.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data.Functions, Data.Variables, Data.Strings);
-        gml_Object_obj_time_Create_0.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data.Functions, Data.Variables, Data.Strings);
+        gml_Object_obj_time_Create_0.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data);
+        gml_Object_obj_time_Create_0.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data);
     }
 
 var gml_Object_obj_time_Draw_76 = Data.Code.ByName("gml_Object_obj_time_Draw_76");
@@ -57,8 +57,8 @@ for(int i = 0; i < gml_Object_obj_time_Draw_76.Instructions.Count; i++)
 		gml_Object_obj_time_Draw_76.Instructions[i-2].Kind == UndertaleInstruction.Opcode.PushI   && (short)gml_Object_obj_time_Draw_76.Instructions[i-2].Value == 4 &&
 		gml_Object_obj_time_Draw_76.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushGlb && (gml_Object_obj_time_Draw_76.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "osflavor")
     {
-        gml_Object_obj_time_Draw_76.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data.Functions, Data.Variables, Data.Strings);
-        gml_Object_obj_time_Draw_76.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data.Functions, Data.Variables, Data.Strings);
+        gml_Object_obj_time_Draw_76.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data);
+        gml_Object_obj_time_Draw_76.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data);
     }
 
 var scr_draw_background_ps4 = Data.Scripts.ByName("scr_draw_background_ps4").Code;
@@ -68,8 +68,8 @@ for(int i = 0; i < scr_draw_background_ps4.Instructions.Count; i++)
 		scr_draw_background_ps4.Instructions[i-2].Kind == UndertaleInstruction.Opcode.PushI   && (short)scr_draw_background_ps4.Instructions[i-2].Value == 14 &&
 		scr_draw_background_ps4.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushVar && (scr_draw_background_ps4.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "os_type")
     {
-        scr_draw_background_ps4.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data.Functions, Data.Variables, Data.Strings);
-        scr_draw_background_ps4.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data.Functions, Data.Variables, Data.Strings);
+        scr_draw_background_ps4.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data);
+        scr_draw_background_ps4.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data);
     }
 
 // Now, patch the settings menu!
@@ -81,8 +81,8 @@ for(int i = 0; i < gml_Object_obj_settingsmenu_Draw_0.Instructions.Count; i++)
 		gml_Object_obj_settingsmenu_Draw_0.Instructions[i-2].Kind == UndertaleInstruction.Opcode.PushI   && (short)gml_Object_obj_settingsmenu_Draw_0.Instructions[i-2].Value == 4 &&
 		gml_Object_obj_settingsmenu_Draw_0.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushGlb && (gml_Object_obj_settingsmenu_Draw_0.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "osflavor")
     {
-        gml_Object_obj_settingsmenu_Draw_0.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data.Functions, Data.Variables, Data.Strings);
-        gml_Object_obj_settingsmenu_Draw_0.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data.Functions, Data.Variables, Data.Strings);
+        gml_Object_obj_settingsmenu_Draw_0.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data);
+        gml_Object_obj_settingsmenu_Draw_0.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data);
     }
 	
 	//00568: pushglb.v osflavor
@@ -111,7 +111,7 @@ for(int i = 0; i < gml_Object_obj_time_Step_1.Instructions.Count; i++)
 		gml_Object_obj_time_Step_1.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushI   && (short)gml_Object_obj_time_Step_1.Instructions[i-3].Value == 4 &&
 		gml_Object_obj_time_Step_1.Instructions[i-4].Kind == UndertaleInstruction.Opcode.PushGlb && (gml_Object_obj_time_Step_1.Instructions[i-4].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "osflavor")
     {
-        gml_Object_obj_time_Step_1.Instructions[i-2] = Assembler.AssembleOne("pushi.e 1", Data.Functions, Data.Variables, Data.Strings);
+        gml_Object_obj_time_Step_1.Instructions[i-2] = Assembler.AssembleOne("pushi.e 1", Data);
 		// TODO: junk on stack again
 	}
 
@@ -124,7 +124,7 @@ pushi.e 960
 conv.i.v
 call.i window_set_size(argc=2)
 popz.i
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 // Load border textures
 Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, UndertaleEmbeddedTexture>();

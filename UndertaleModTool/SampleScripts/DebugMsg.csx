@@ -43,7 +43,7 @@ cmp.i.v LT
 bf exit_loop
 b loop
 
-exit_loop: pushi.e " + Data.GameObjects.IndexOf(Data.GameObjects.ByName("obj_writer")) + @"
+exit_loop: pushi.e obj_writer
 pushenv_start: pushenv func_end
 push.v self.mystring
 pushi.e 30
@@ -53,6 +53,6 @@ conv.i.v
 call.i draw_text(argc=3)
 popz.v
 popenv pushenv_start
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 ChangeSelection(code);

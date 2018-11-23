@@ -101,14 +101,14 @@ room_of_determination.GameObjects.Add(new UndertaleRoom.GameObject()
 // Actually link the door
 obj_door_ruins13.EventHandlerFor(EventType.Alarm, 2, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
 pushvar.v self.room
-pushi.e " + Data.Rooms.IndexOf(room_ruins1) + @"
+pushi.e room_ruins1
 cmp.i.v EQ
 bf func_end
-pushi.e " + Data.Rooms.IndexOf(room_of_determination) + @"
+pushi.e room_of_determination
 conv.i.v
 call.i room_goto(argc=1)
 popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 // A floor would be nice
 for(int x = 0; x <= 940; x += 20)
@@ -212,7 +212,7 @@ pushi.e 30
 pushi.e -1
 pushi.e 0
 pop.v.i [array]alarm
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 obj_something_changed_trigger.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
 pushi.e 5
 pop.v.i global.typer
@@ -224,7 +224,7 @@ pushi.e 0
 pop.v.i global.faceemotion
 
 push.v self.room
-pushi.e " + Data.Rooms.IndexOf(room_of_determination) + @"
+pushi.e room_of_determination
 cmp.i.v NEQ
 bf enter_the_determination
 
@@ -254,7 +254,7 @@ pushi.e -5
 pushi.e 0
 pop.v.v [array]msg
 
-go_display: pushi.e " + Data.GameObjects.IndexOf(obj_dialoguer) + @"
+go_display: pushi.e obj_dialoguer
 conv.i.v
 pushi.e 0
 conv.i.v
@@ -267,7 +267,7 @@ pushi.e 1
 pop.v.i global.interact
 pushi.e 1
 pop.v.i self.con
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 obj_something_changed_trigger.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
 ; Toby, please, why
 ; why can't you just make the obj_dialoguer block movement automatically
@@ -283,7 +283,7 @@ push.v self.con
 pushi.e 1
 cmp.i.v EQ
 bf func_end
-pushi.e " + Data.GameObjects.IndexOf(OBJ_WRITER) + @"
+pushi.e OBJ_WRITER
 conv.i.v
 call.i instance_exists(argc=1)
 pushi.e 0
@@ -294,7 +294,7 @@ pushi.e 0
 pop.v.i global.interact
 pushi.e 0
 pop.v.i self.con
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 Data.GameObjects.Add(obj_something_changed_trigger);
 
 room_ruins1.GameObjects.Add(new UndertaleRoom.GameObject()
@@ -332,7 +332,7 @@ pushi.e 1
 pop.v.i self.image_xscale
 pushi.e 1
 pop.v.i self.image_yscale
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 obj_readable_determination.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
 pushi.e 3
 pop.v.i self.myinteract
@@ -441,7 +441,7 @@ pushi.e -5
 pushi.e 0
 pop.v.v [array]msg
 
-finish: pushi.e " + Data.GameObjects.IndexOf(obj_dialoguer) + @"
+finish: pushi.e obj_dialoguer
 conv.i.v
 pushi.e 0
 conv.i.v
@@ -449,7 +449,7 @@ pushi.e 0
 conv.i.v
 call.i instance_create(argc=3)
 pop.v.v self.mydialoguer
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 Data.GameObjects.Add(obj_readable_determination);
 
 for (int i = 0; i < 6; i++)
@@ -496,7 +496,7 @@ pushi.e 0
 pop.v.i self.image_speed
 pushi.e 0
 pop.v.i self.con
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 obj_determined_rarependant.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
 pushi.e 3
 pop.v.i self.myinteract
@@ -512,7 +512,7 @@ pop.v.i global.faceemotion
 pushi.e 1
 pop.v.i self.con
 
-pushi.e " + Data.GameObjects.IndexOf(obj_dialoguer) + @"
+pushi.e obj_dialoguer
 conv.i.v
 pushi.e 0
 conv.i.v
@@ -520,13 +520,13 @@ pushi.e 0
 conv.i.v
 call.i instance_create(argc=3)
 pop.v.v self.mydialoguer
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 obj_determined_rarependant.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
 push.v self.con
 pushi.e 1
 cmp.i.v EQ
 bf end
-pushi.e " + Data.GameObjects.IndexOf(OBJ_WRITER) + @"
+pushi.e OBJ_WRITER
 conv.i.v
 call.i instance_exists(argc=1)
 pushi.e 0
@@ -548,13 +548,13 @@ pop.v.i self.con
 
 end: call.i event_inherited(argc=0)
 popz.i
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 obj_determined_rarependant.EventHandlerFor(EventType.Alarm, (uint)1, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushi.e " + Data.Rooms.IndexOf(room_of_dog) + @"
+pushi.e room_of_dog
 conv.i.v
 call.i room_goto(argc=1)
 popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 Data.GameObjects.Add(obj_determined_rarependant);
 
 SCR_TEXT.Code.Append(Assembler.Assemble(@"
@@ -607,7 +607,7 @@ conv.s.v
 pushi.e -5
 pushi.e 0
 pop.v.v [array]msg
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 // Okay, now for some copying
 var room_of_determined_dog = new UndertaleRoom()

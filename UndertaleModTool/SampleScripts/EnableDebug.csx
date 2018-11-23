@@ -10,7 +10,7 @@ if (scr_debug != null) // Deltarune
     scr_debug.Replace(Assembler.Assemble(@"
 pushglb.v global.debug
 ret.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 }
 
 bool ok = false;

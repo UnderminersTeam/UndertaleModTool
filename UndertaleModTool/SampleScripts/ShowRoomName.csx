@@ -37,7 +37,7 @@ pushi.e 50
 conv.i.v
 call.i draw_text(argc=3)
 popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 ChangeSelection(code);
 ScriptMessage("Patched!");

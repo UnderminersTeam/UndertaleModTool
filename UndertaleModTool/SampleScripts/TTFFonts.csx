@@ -170,6 +170,6 @@ push.s ""PAPYRUS.TTF""
 conv.s.v
 call.i font_add(argc=6)
 popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 ChangeSelection(obj_time);
