@@ -533,7 +533,7 @@ namespace UndertaleModTool
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
             try
             {
-                var instructions = Assembler.Assemble(DisassemblyEditor.Text, data.Functions, data.Variables, data.Strings);
+                var instructions = Assembler.Assemble(DisassemblyEditor.Text, data);
                 code.Replace(instructions);
             }
             catch(Exception ex)
