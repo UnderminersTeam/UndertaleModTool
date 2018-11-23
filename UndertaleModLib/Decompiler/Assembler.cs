@@ -292,7 +292,8 @@ namespace UndertaleModLib.Decompiler
             uint? id = null;
             if (at >= 0)
             {
-                id = UInt32.Parse(str.Substring(at + 1));
+                if (str.Substring(at + 1) != "-1") // TODO
+                    id = UInt32.Parse(str.Substring(at + 1));
                 str = str.Substring(0, at);
             }
             if (!String.IsNullOrEmpty(str))

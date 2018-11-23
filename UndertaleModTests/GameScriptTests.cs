@@ -213,5 +213,11 @@ namespace UndertaleModTests
         {
             await RunScript("DebugMsg.csx");
         }
+
+        [TestMethod]
+        public async Task HeCanBeEverywhere()
+        {
+            await RunScript("HeCanBeEverywhere.csx");
+        }
     }
 }
