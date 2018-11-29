@@ -872,7 +872,7 @@
                     </Storyboard>
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Background}">
-                        <Rectangle Width="{Binding BackgroundDefinition.Texture.SourceWidth}" Height="{Binding BackgroundDefinition.Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
+                        <Rectangle Width="{Binding BackgroundDefinition.Texture.SourceWidth}" Height="{Binding BackgroundDefinition.Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
                             <Rectangle.RenderTransform>
                                 <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
                             </Rectangle.RenderTransform>
@@ -921,7 +921,7 @@
                         </Rectangle>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Tile}">
-                        <Rectangle Width="{Binding Width}" Height="{Binding Height}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
+                        <Rectangle Width="{Binding Width}" Height="{Binding Height}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
                             <Rectangle.RenderTransform>
                                 <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
                             </Rectangle.RenderTransform>
@@ -972,7 +972,7 @@
                         </Rectangle>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
-                        <Rectangle Width="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth}" Height="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
+                        <Rectangle Width="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth}" Height="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
                             <Rectangle.Style>
                                 <Style TargetType="Rectangle">
                                     <Style.Triggers>
@@ -1030,7 +1030,7 @@
                     </DataTemplate>
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
-                        <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
+                        <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
                             <Rectangle.Fill>
                                 <ImageBrush
                                 ImageSource="{Binding Sprite.Textures[0].Texture.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
