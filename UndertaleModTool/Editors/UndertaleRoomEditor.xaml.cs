@@ -193,7 +193,7 @@ namespace UndertaleModTool
 
                     UndertaleRoom room = this.DataContext as UndertaleRoom;
                     UndertaleRoom.Layer layer = ObjectEditor.Content as UndertaleRoom.Layer;
-                    if (room.Layers != null && layer == null)
+                    if ((Application.Current.MainWindow as MainWindow).IsGMS2 == Visibility.Visible && layer == null)
                     {
                         MessageBox.Show("Must have a layer selected", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
@@ -249,7 +249,7 @@ namespace UndertaleModTool
                 else if (selectedObj is UndertaleRoom.Tile)
                 {
                     UndertaleRoom.Tile tile = selectedObj as UndertaleRoom.Tile;
-                    if (room.Layers != null)
+                    if ((Application.Current.MainWindow as MainWindow).IsGMS2 == Visibility.Visible)
                         foreach (var layer in room.Layers)
                             if (layer.AssetsData != null)
                                 layer.AssetsData.LegacyTiles.Remove(tile);
@@ -259,7 +259,7 @@ namespace UndertaleModTool
                 else if (selectedObj is UndertaleRoom.GameObject)
                 {
                     UndertaleRoom.GameObject gameObj = selectedObj as UndertaleRoom.GameObject;
-                    if (room.Layers != null)
+                    if ((Application.Current.MainWindow as MainWindow).IsGMS2 == Visibility.Visible)
                         foreach (var layer in room.Layers)
                             if (layer.InstancesData != null)
                                 layer.InstancesData.Instances.Remove(gameObj);
@@ -320,7 +320,7 @@ namespace UndertaleModTool
                 UndertaleRoom room = this.DataContext as UndertaleRoom;
 
                 UndertaleRoom.Layer layer = ObjectEditor.Content as UndertaleRoom.Layer;
-                if (room.Layers != null && layer == null)
+                if ((Application.Current.MainWindow as MainWindow).IsGMS2 == Visibility.Visible && layer == null)
                 {
                     MessageBox.Show("Must paste onto a layer", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
