@@ -250,10 +250,6 @@ namespace UndertaleModTool
                         {
                             CanSave = true;
                         }
-                        if (data.GeneralInfo?.Major >= 2)
-                        {
-                            MessageBox.Show("Game Maker: Studio 2 game loaded! I just hacked this together quickly for the Nintendo Switch release of Undertale. Most things work, but some editors don't display all the data.", "GMS2 game loaded", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        }
                         if (data.GeneralInfo?.BytecodeVersion == 17)
                         {
                             MessageBox.Show("Bytecode version 17 has been loaded. There may be some problems remaining, as thorough research into the changes are yet to be done.", "Bytecode version 17", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -278,11 +274,6 @@ namespace UndertaleModTool
         {
             if (Data == null || Data.UnsupportedBytecodeVersion)
                 return;
-
-            if (IsGMS2 == Visibility.Visible)
-            {
-                MessageBox.Show("This is not yet fully stable and may break. You have been warned.", "GMS2 game", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
 
             LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
             dialog.Owner = this;

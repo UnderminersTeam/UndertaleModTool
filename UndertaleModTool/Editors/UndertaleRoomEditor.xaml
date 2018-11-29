@@ -315,7 +315,7 @@
                             <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding MetersPerPixel}"/>
                         </Grid>
                     </DataTemplate>
-                    
+
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Background}">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -441,7 +441,7 @@
                                 <TextBox Grid.Column="0" Margin="3" Text="{Binding SpeedX}" ToolTip="X"/>
                                 <TextBox Grid.Column="1" Margin="3" Text="{Binding SpeedY}" ToolTip="Y"/>
                             </Grid>
-                            
+
                             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Follows object</TextBlock>
                             <local:UndertaleObjectReference Grid.Row="5" Grid.Column="1" Margin="3" ObjectReference="{Binding ObjectId}" ObjectType="{x:Type undertale:UndertaleGameObject}"/>
                         </Grid>
@@ -585,7 +585,7 @@
                             <local:ColorPicker Grid.Row="6" Grid.Column="1" Margin="3" Color="{Binding Color}"/>
                         </Grid>
                     </DataTemplate>
-                    
+
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer}">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -646,7 +646,7 @@
                                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerInstancesData}">
                                         <TextBlock Margin="3" Text="Contains GameObject instances, listed in the tree on the left"/>
                                     </DataTemplate>
-                                    
+
                                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerTilesData}">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -686,7 +686,8 @@
                                                                     </ItemsControl.ItemsPanel>
                                                                     <ItemsControl.ItemTemplate>
                                                                         <DataTemplate>
-                                                                            <TextBox Text="{Binding .}" Width="30" Height="30"/> <!-- TODO: this is crazy slow -->
+                                                                            <TextBox Text="{Binding .}" Width="30" Height="30"/>
+                                                                            <!-- TODO: this is crazy slow -->
                                                                         </DataTemplate>
                                                                     </ItemsControl.ItemTemplate>
                                                                 </ItemsControl>
@@ -763,7 +764,7 @@
                             </ContentControl>
                         </Grid>
                     </DataTemplate>
-                    
+
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+SpriteInstance}">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -810,7 +811,7 @@
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Color</TextBlock>
                             <local:ColorPicker Grid.Row="5" Grid.Column="1" Margin="3" Color="{Binding Color}"/>
-                            
+
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Animation speed</TextBlock>
                             <Grid Grid.Row="6" Grid.Column="1" Margin="3">
                                 <Grid.ColumnDefinitions>
@@ -832,10 +833,6 @@
                 </ContentControl.Resources>
             </ScrollViewer>
         </Grid>
-
-        <Border Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
-            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">IMPORTANT: The GMS2 room editor is experimental. The layers data is not displayed in the preview at the bottom yet.</TextBlock>
-        </Border>
 
         <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
             <ItemsControl Name="RoomGraphics" Background="Black">
