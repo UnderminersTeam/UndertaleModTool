@@ -1,6 +1,6 @@
 ﻿EnsureDataLoaded();
 
-ScriptMessage("HeCanBeEverywhere mod by krzys_h\nVersion 1");
+ScriptMessage("HeCanBeEverywhere mod by krzys_h\nVersion 2");
 
 // spr_joker_main has an offset, so we need to make our own one
 var spr_joker_main = Data.Sprites.ByName("spr_joker_main");
@@ -872,6 +872,36 @@ pushi.e -5
 pushi.e 241
 pop.v.i [array]flag
 ", Data));
+
+Data.GameObjects.ByName("obj_jokerbg_triangle_real").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
+pushvar.v self.room
+pushi.e room_cc_joker
+cmp.i.v EQ
+bf func_end
+
+pushi.e obj_joker
+conv.i.v
+call.i instance_number(argc=1)
+conv.v.i
+dup.i 0
+
+pushi.e 0
+cmp.i.i NEQ
+pop.v.i self.on
+
+dup.i 0
+mul.i.i
+pop.v.i self.rotspeed
+", Data));
+
+var obj_joker_Draw = obj_joker.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals);
+var obj_joker_Draw_code = obj_joker_Draw.Disassemble(Data.Variables, Data.CodeLocals.For(obj_joker_Draw));
+// I'm getting lazy, huh
+obj_joker_Draw_code = obj_joker_Draw_code.Replace("00154: pushi.e 6", "");
+obj_joker_Draw_code = obj_joker_Draw_code.Replace("00155: pushi.e -5", "");
+obj_joker_Draw_code = obj_joker_Draw_code.Replace("00156: pushi.e 241", "");
+obj_joker_Draw_code = obj_joker_Draw_code.Replace("00157: pop.v.i [array]flag", "");
+obj_joker_Draw.Replace(Assembler.Assemble(obj_joker_Draw_code, Data));
 
 ChangeSelection(spr_joker_enemy);
 
