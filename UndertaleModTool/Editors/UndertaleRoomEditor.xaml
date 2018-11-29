@@ -14,7 +14,8 @@
         <local:SimplePointsDisplayConverter x:Key="SimplePointsDisplayConverter"/>
         <local:ObjCenterXConverter x:Key="ObjCenterXConverter" />
         <local:ObjCenterYConverter x:Key="ObjCenterYConverter" />
-        <CompositeCollection x:Key="AllObjects">
+        <local:LayerFlattenerConverter x:Key="LayerFlattenerConverter" />
+        <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.Tiles}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.GameObjects}"/>
@@ -838,11 +839,18 @@
 
         <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
             <ItemsControl Name="RoomGraphics" Background="Black">
-                <ItemsControl.ItemsSource>
-                    <CompositeCollection>
-                        <CollectionContainer Collection="{Binding Source={StaticResource AllObjects}}"/>
-                    </CompositeCollection>
-                </ItemsControl.ItemsSource>
+                <ItemsControl.Style>
+                    <Style TargetType="ItemsControl">
+                        <Setter Property="ItemsSource" Value="{Binding Source={StaticResource AllObjectsGMS1}}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
+                                <DataTrigger.Setters>
+                                    <Setter Property="ItemsSource" Value="{Binding Layers, Converter={StaticResource LayerFlattenerConverter}}"/>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ItemsControl.Style>
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Canvas Width="{Binding Width}" Height="{Binding Height}" IsItemsHost="True" UseLayoutRounding="True" AllowDrop="True" DragOver="Canvas_DragOver" Drop="Canvas_Drop">
@@ -916,7 +924,7 @@
                         </Rectangle>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Tile}">
-                        <Rectangle Width="{Binding Width}" Height="{Binding Height}" Canvas.ZIndex="{Binding TileDepth}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
+                        <Rectangle Width="{Binding Width}" Height="{Binding Height}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
                             <Rectangle.RenderTransform>
                                 <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
                             </Rectangle.RenderTransform>
@@ -945,7 +953,7 @@
                             </Rectangle.Style>
                             <Rectangle.Fill>
                                 <ImageBrush
-                                ImageSource="{Binding BackgroundDefinition.Texture.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
+                                ImageSource="{Binding Tpag.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
                                 ViewboxUnits="Absolute"
                                 TileMode="None"
                                 Stretch="UniformToFill">
@@ -954,9 +962,9 @@
                                             <MultiBinding.Converter>
                                                 <local:SumRectConverter/>
                                             </MultiBinding.Converter>
-                                            <Binding Path="BackgroundDefinition.Texture.SourceX"/>
+                                            <Binding Path="Tpag.SourceX"/>
                                             <Binding Path="SourceX"/>
-                                            <Binding Path="BackgroundDefinition.Texture.SourceY"/>
+                                            <Binding Path="Tpag.SourceY"/>
                                             <Binding Path="SourceY"/>
                                             <Binding Path="Width"/>
                                             <Binding Path="Height"/>
@@ -967,7 +975,7 @@
                         </Rectangle>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
-                        <Rectangle Width="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth}" Height="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight}" Canvas.ZIndex="{Binding ObjectDefinition.Depth}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
+                        <Rectangle Width="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth}" Height="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
                             <Rectangle.Style>
                                 <Style TargetType="Rectangle">
                                     <Style.Triggers>
@@ -1023,6 +1031,31 @@
                             </Rectangle.Fill>
                         </Rectangle>
                     </DataTemplate>
+
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
+                        <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
+                            <Rectangle.Fill>
+                                <ImageBrush
+                                ImageSource="{Binding Sprite.Textures[0].Texture.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
+                                ViewboxUnits="Absolute"
+                                TileMode="None"
+                                Stretch="UniformToFill">
+                                    <ImageBrush.Viewbox>
+                                        <MultiBinding>
+                                            <MultiBinding.Converter>
+                                                <local:RectConverter/>
+                                            </MultiBinding.Converter>
+                                            <Binding Path="Sprite.Textures[0].Texture.SourceX"/>
+                                            <Binding Path="Sprite.Textures[0].Texture.SourceY"/>
+                                            <Binding Path="Sprite.Textures[0].Texture.SourceWidth"/>
+                                            <Binding Path="Sprite.Textures[0].Texture.SourceHeight"/>
+                                        </MultiBinding>
+                                    </ImageBrush.Viewbox>
+                                </ImageBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </DataTemplate>
+
                     <DataTemplate DataType="{x:Type local:UndertalePathEditor+LineData}">
                         <Line X1="{Binding From.X}" Y1="{Binding From.Y}" X2="{Binding To.X}" Y2="{Binding To.Y}" Stroke="Green" StrokeThickness="2"/>
                     </DataTemplate>

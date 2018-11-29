@@ -502,4 +502,38 @@ namespace UndertaleModTool
             throw new NotSupportedException();
         }
     }
+    
+    public class LayerFlattenerConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            CompositeCollection collection = new CompositeCollection();
+            IList<UndertaleRoom.Layer> layers = value as IList<UndertaleRoom.Layer>;
+            foreach (var layer in layers.OrderByDescending((x) => x.LayerDepth))
+            {
+                switch (layer.LayerType)
+                {
+                    case UndertaleRoom.LayerType.Background:
+                        collection.Add(new CollectionContainer() { Collection = new UndertaleRoom.Layer.LayerBackgroundData[] { layer.BackgroundData } });
+                        break;
+                    case UndertaleRoom.LayerType.Instances:
+                        collection.Add(new CollectionContainer() { Collection = layer.InstancesData.Instances });
+                        break;
+                    case UndertaleRoom.LayerType.Assets:
+                        collection.Add(new CollectionContainer() { Collection = layer.AssetsData.LegacyTiles });
+                        collection.Add(new CollectionContainer() { Collection = layer.AssetsData.Sprites }); // TODO: add rendering
+                        break;
+                    case UndertaleRoom.LayerType.Tiles:
+                        // TODO
+                        break;
+                }
+            }
+            return collection;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
 }
