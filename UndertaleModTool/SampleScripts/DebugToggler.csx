@@ -19,7 +19,7 @@ b func_end
 
 go_enable: pushi.e 1
 pop.v.i global.debug
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 var scr_debug = Data.Scripts.ByName("scr_debug")?.Code;
 if (scr_debug != null) // Deltarune
@@ -27,7 +27,7 @@ if (scr_debug != null) // Deltarune
     scr_debug.Replace(Assembler.Assemble(@"
 pushglb.v global.debug
 ret.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 }
 
 ChangeSelection(code);

@@ -116,7 +116,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    using (FileStream stream = new FileStream(dlg.FileName, FileMode.Open))
+                    using (FileStream stream = new FileStream(dlg.FileName, FileMode.Open, FileAccess.Read))
                     {
                         PngBitmapDecoder decoder = new PngBitmapDecoder(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
                         BitmapSource source = decoder.Frames[0];
@@ -154,7 +154,7 @@ namespace UndertaleModTool
                     BitmapSource source = BitmapSource.Create((int)sprite.Width, (int)sprite.Height, 96, 96, PixelFormats.BlackWhite, null, target.Data, (int)((sprite.Width + 7) / 8));
                     PngBitmapEncoder encoder = new PngBitmapEncoder();
                     encoder.Frames.Add(BitmapFrame.Create(source));
-                    using (FileStream stream = new FileStream(dlg.FileName, FileMode.Create))
+                    using (FileStream stream = new FileStream(dlg.FileName, FileMode.Create, FileAccess.Write))
                     {
                         encoder.Save(stream);
                     }

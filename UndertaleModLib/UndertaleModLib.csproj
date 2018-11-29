@@ -67,6 +67,7 @@
     <Compile Include="Models\UndertaleTimeline.cs" />
     <Compile Include="Models\UndertaleUnused.cs" />
     <Compile Include="Models\UndertaleVariable.cs" />
+    <Compile Include="Scripting\IScriptInterface.cs" />
     <Compile Include="UndertaleChunks.cs" />
     <Compile Include="UndertaleChunkTypes.cs" />
     <Compile Include="UndertaleDebugChunks.cs" />

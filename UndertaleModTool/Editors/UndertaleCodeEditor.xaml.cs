@@ -135,6 +135,8 @@ namespace UndertaleModTool
                             string tgt = (instr.Address + instr.JumpOffset).ToString("D5");
                             if (instr.Address + instr.JumpOffset == code.Length / 4)
                                 tgt = "func_end";
+                            if (instr.JumpOffsetPopenvExitMagic)
+                                tgt = "[drop]";
                             par.Inlines.Add(new Run(tgt) { Foreground = argBrush, ToolTip = "$" + instr.JumpOffset.ToString("+#;-#;0") });
                             break;
 
@@ -384,8 +386,6 @@ namespace UndertaleModTool
                                         par.Inlines.Add(new Run(token) { Cursor = Cursors.Hand });
                                         par.Inlines.LastInline.MouseDown += (sender, ev) =>
                                         {
-                                            // TODO: Add type resolving to the decompiler so that this is handled mostly automatically
-
                                             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
                                             int id = Int32.Parse(token);
                                             List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
@@ -407,8 +407,6 @@ namespace UndertaleModTool
                                                 possibleObjects.Add(data.Sounds[id]);
                                             if (id < data.Shaders.Count)
                                                 possibleObjects.Add(data.Shaders[id]);
-                                            // if (id < data.Extensions.Count)
-                                            //    possibleObjects.Add(data.Extensions[id]);
                                             if (id < data.Timelines.Count)
                                                 possibleObjects.Add(data.Timelines[id]);
 
@@ -535,7 +533,7 @@ namespace UndertaleModTool
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
             try
             {
-                var instructions = Assembler.Assemble(DisassemblyEditor.Text, data.Functions, data.Variables, data.Strings);
+                var instructions = Assembler.Assemble(DisassemblyEditor.Text, data);
                 code.Replace(instructions);
             }
             catch(Exception ex)

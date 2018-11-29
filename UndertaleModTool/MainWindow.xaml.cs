@@ -32,16 +32,19 @@ using UndertaleModLib;
 using UndertaleModLib.DebugData;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Scripting;
 
 namespace UndertaleModTool
 {
     /// <summary>
     /// Logika interakcji dla klasy MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, INotifyPropertyChanged
+    public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
         public UndertaleData Data { get; set; }
         public string FilePath { get; set; }
+
+        public string TitleMain { get; set; }
 
         private object _Highlighted;
         public object Highlighted { get { return _Highlighted; } set { _Highlighted = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Highlighted")); } }
@@ -49,7 +52,7 @@ namespace UndertaleModTool
         public object Selected { get { return _Selected; } private set { _Selected = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Selected")); } }
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
 
-        public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
+        private ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
 
         private bool _CanSave = false;
         public bool CanSave { get { return _CanSave; } private set { _CanSave = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CanSave")); } }
@@ -66,7 +69,7 @@ namespace UndertaleModTool
             ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"));
             SelectionHistory.Clear();
 
-            Title = "UndertaleModTool by krzys_h v" + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
+            TitleMain = "UndertaleModTool by krzys_h v" + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
 
             CanSave = false;
         }
@@ -217,7 +220,7 @@ namespace UndertaleModTool
                 UndertaleData data = null;
                 try
                 {
-                    using (var stream = new FileStream(filename, FileMode.Open))
+                    using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read))
                     {
                         data = UndertaleIO.Read(stream, warning =>
                         {
@@ -249,10 +252,6 @@ namespace UndertaleModTool
                         {
                             CanSave = true;
                         }
-                        if (data.GeneralInfo?.Major >= 2)
-                        {
-                            MessageBox.Show("Game Maker: Studio 2 game loaded! I just hacked this together quickly for the Nintendo Switch release of Undertale. Most things work, but some editors don't display all the data.", "GMS2 game loaded", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        }
                         if (data.GeneralInfo?.BytecodeVersion == 17)
                         {
                             MessageBox.Show("Bytecode version 17 has been loaded. There may be some problems remaining, as thorough research into the changes are yet to be done.", "Bytecode version 17", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -262,6 +261,7 @@ namespace UndertaleModTool
                         this.Data = data;
                         this.FilePath = filename;
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FilePath"));
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsGMS2"));
                         ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"));
                         SelectionHistory.Clear();
@@ -278,14 +278,10 @@ namespace UndertaleModTool
             if (Data == null || Data.UnsupportedBytecodeVersion)
                 return;
 
-            if (IsGMS2 == Visibility.Visible)
-            {
-                MessageBox.Show("This is not yet fully stable and may break. You have been warned.", "GMS2 game", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-
             LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
             dialog.Owner = this;
             FilePath = filename;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FilePath"));
             if (System.IO.Path.GetDirectoryName(FilePath) != System.IO.Path.GetDirectoryName(filename))
                 CloseChildFiles();
 
@@ -302,7 +298,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    using (var stream = new FileStream(filename, FileMode.Create))
+                    using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write))
                     {
                         UndertaleIO.Write(stream, Data);
                     }
@@ -311,7 +307,7 @@ namespace UndertaleModTool
                     {
                         Debug.WriteLine("Generating debugger data...");
                         UndertaleDebugData debugData = DebugDataGenerator.GenerateDebugData(Data, debugMode);
-                        using (FileStream stream = new FileStream(System.IO.Path.ChangeExtension(FilePath, ".yydebug"), FileMode.Create))
+                        using (FileStream stream = new FileStream(System.IO.Path.ChangeExtension(FilePath, ".yydebug"), FileMode.Create, FileAccess.Write))
                         {
                             using (UndertaleWriter writer = new UndertaleWriter(stream))
                             {
@@ -550,9 +546,9 @@ namespace UndertaleModTool
                         loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
 
                         var script = CSharpScript.Create<object>(CommandBox.Text, ScriptOptions.Default
-                            .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "System", "System.IO", "System.Collections.Generic")
+                            .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "System", "System.IO", "System.Collections.Generic")
                             .WithReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly)),
-                            this.GetType(), loader);
+                            typeof(IScriptInterface), loader);
 
                         result = (await script.RunAsync(this)).ReturnValue;
                     }
@@ -653,9 +649,9 @@ namespace UndertaleModTool
                     loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
 
                     var script = CSharpScript.Create<object>(File.ReadAllText(path), ScriptOptions.Default
-                        .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "System", "System.IO", "System.Collections.Generic")
+                        .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "System", "System.IO", "System.Collections.Generic")
                         .WithReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly)),
-                        this.GetType(), loader);
+                        typeof(IScriptInterface), loader);
 
                     object result = (await script.RunAsync(this)).ReturnValue;
                     CommandBox.Text = result != null ? result.ToString() : System.IO.Path.GetFileName(path) + " finished!";
@@ -901,7 +897,7 @@ namespace UndertaleModTool
                     {
                         try
                         {
-                            using (var stream = new FileStream(dlg.FileName, FileMode.Open))
+                            using (var stream = new FileStream(dlg.FileName, FileMode.Open, FileAccess.Read))
                             {
                                 var offsets = UndertaleIO.GenerateOffsetMap(stream);
                                 using (var writer = File.CreateText(dlgout.FileName))

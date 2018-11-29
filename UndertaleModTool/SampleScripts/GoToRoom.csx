@@ -23,7 +23,7 @@ conv.s.v
 call.i get_integer(argc=2)
 call.i room_goto(argc=1)
 popz.i
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 ChangeSelection(code);
 ScriptMessage("Patched!");

@@ -280,7 +280,10 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString()
             {
-                return String.Format("{0}({1} {2})", Type != Argument.Type ? "(" + Type.ToString().ToLower() + ")" : "", OperationToPrintableString(Opcode), Argument.ToString());
+                string op = OperationToPrintableString(Opcode);
+                if (Opcode == UndertaleInstruction.Opcode.Not && Type == UndertaleInstruction.DataType.Boolean)
+                    op = "!"; // This is a logical negation instead, see #93
+                return String.Format("{0}({1} {2})", false && Type != Argument.Type ? "(" + Type.ToString().ToLower() + ")" : "", op, Argument.ToString());
             }
 
             internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
@@ -752,10 +755,14 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.Ret:
                     case UndertaleInstruction.Opcode.Exit:
                         ReturnStatement stmt = new ReturnStatement(instr.Kind == UndertaleInstruction.Opcode.Ret ? stack.Pop() : null);
+                        /*
+                        This shouldn't be necessary: all unused things on the stack get converted to tempvars at the end anyway, and this fixes decompilation of repeat()
+                        See #85
+
                         foreach (var expr in stack.Reverse())
                             if (!(expr is ExpressionTempVar))
                                 statements.Add(expr);
-                        stack.Clear();
+                        stack.Clear();*/
                         statements.Add(stmt);
                         end = true;
                         break;
@@ -810,7 +817,15 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.PopEnv:
-                        statements.Add(new PopEnvStatement());
+                        if (instr.JumpOffsetPopenvExitMagic)
+                        {
+                            // This is just an instruction to make sure the pushenv/popenv stack is cleared on early function return
+                            // Works kinda like 'break', but doesn't have a high-level representation as it's immediately followed by a 'return'
+                        }
+                        else
+                        {
+                            statements.Add(new PopEnvStatement());
+                        }
                         end = true;
                         break;
 
@@ -1583,21 +1598,25 @@ namespace UndertaleModLib.Decompiler
             return blocks;
         }
 
+        private static readonly object ANOTHER_HACK = new object();
         public static string Decompile(UndertaleCode code, UndertaleData data = null)
         {
-            HUGE_HACK_FIX_THIS_SOON = data;
-            TempVar.i = 0;
-            ExpressionVar.assetTypes.Clear();
-            Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
-            DecompileFromBlock(blocks[0]);
-            FunctionCall.scriptArgs.Clear();
-            // TODO: add self to scriptArgs
-            DoTypePropagation(blocks);
-            List<Statement> stmts = HLDecompile(blocks, blocks[0], blocks[code.Length / 4]);
-            StringBuilder sb = new StringBuilder();
-            foreach (var stmt in stmts)
-                sb.Append(stmt.ToString() + "\n");
-            return sb.ToString();
+            lock(ANOTHER_HACK) // hack together a hack to fix a hack, TODO: remove once I get rid of the globals
+            {
+                HUGE_HACK_FIX_THIS_SOON = data;
+                TempVar.i = 0;
+                ExpressionVar.assetTypes.Clear();
+                Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
+                DecompileFromBlock(blocks[0]);
+                FunctionCall.scriptArgs.Clear();
+                // TODO: add self to scriptArgs
+                DoTypePropagation(blocks);
+                List<Statement> stmts = HLDecompile(blocks, blocks[0], blocks[code.Length / 4]);
+                StringBuilder sb = new StringBuilder();
+                foreach (var stmt in stmts)
+                    sb.Append(stmt.ToString() + "\n");
+                return sb.ToString();
+            }
         }
 
         private static void DoTypePropagation(Dictionary<uint, Block> blocks)

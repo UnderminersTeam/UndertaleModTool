@@ -119,7 +119,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObjectPointer(Texture);
             writer.Write(ScaleX);
             writer.Write(ScaleY);
-            if (writer.undertaleData.GeneralInfo?.Major >= 2 && writer.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
+            if (writer.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
                 writer.Write(AscenderOffset);
             writer.WriteUndertaleObject(Glyphs);
         }
@@ -138,7 +138,7 @@ namespace UndertaleModLib.Models
             Texture = reader.ReadUndertaleObjectPointer<UndertaleTexturePageItem>();
             ScaleX = reader.ReadSingle();
             ScaleY = reader.ReadSingle();
-            if (reader.undertaleData.GeneralInfo?.Major >= 2 && reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
+            if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
                 AscenderOffset = reader.ReadInt32();
             Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
         }

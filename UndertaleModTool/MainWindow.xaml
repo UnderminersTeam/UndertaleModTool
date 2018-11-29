@@ -9,7 +9,14 @@
         xmlns:scol="clr-namespace:System.Collections;assembly=mscorlib" 
         xmlns:cmod="clr-namespace:System.ComponentModel;assembly=WindowsBase" 
         mc:Ignorable="d"
-        Title="UndertaleModTool" Height="450" Width="800" Loaded="Window_Loaded">
+        Height="450" Width="800" Loaded="Window_Loaded">
+    <Window.Title>
+        <MultiBinding StringFormat="{}{0} - {1} [{2}]">
+            <Binding Path="TitleMain"/>
+            <Binding Path="Data.GeneralInfo" FallbackValue="No game loaded"/>
+            <Binding Path="FilePath"/>
+        </MultiBinding>
+    </Window.Title>
     <Window.Resources>
         <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
         <local:FilteredViewConverter x:Key="FilteredViewConverter" Filter="{Binding Text, Source={x:Reference SearchBox}, UpdateSourceTrigger=PropertyChanged}"/>

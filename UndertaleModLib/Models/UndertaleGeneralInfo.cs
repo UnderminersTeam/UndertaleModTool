@@ -164,7 +164,7 @@ namespace UndertaleModLib.Models
 
         public override string ToString()
         {
-            return "General info for " + DisplayName + " (GMS version " + Major + "." + Minor + "." + Release + "." + Build + ")";
+            return DisplayName + " (GMS version " + Major + "." + Minor + "." + Release + "." + Build + ")";
         }
     }
 

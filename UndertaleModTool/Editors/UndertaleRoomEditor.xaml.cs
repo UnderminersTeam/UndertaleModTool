@@ -193,7 +193,7 @@ namespace UndertaleModTool
 
                     UndertaleRoom room = this.DataContext as UndertaleRoom;
                     UndertaleRoom.Layer layer = ObjectEditor.Content as UndertaleRoom.Layer;
-                    if (room.Layers != null && layer == null)
+                    if ((Application.Current.MainWindow as MainWindow).IsGMS2 == Visibility.Visible && layer == null)
                     {
                         MessageBox.Show("Must have a layer selected", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
@@ -249,7 +249,7 @@ namespace UndertaleModTool
                 else if (selectedObj is UndertaleRoom.Tile)
                 {
                     UndertaleRoom.Tile tile = selectedObj as UndertaleRoom.Tile;
-                    if (room.Layers != null)
+                    if ((Application.Current.MainWindow as MainWindow).IsGMS2 == Visibility.Visible)
                         foreach (var layer in room.Layers)
                             if (layer.AssetsData != null)
                                 layer.AssetsData.LegacyTiles.Remove(tile);
@@ -259,7 +259,7 @@ namespace UndertaleModTool
                 else if (selectedObj is UndertaleRoom.GameObject)
                 {
                     UndertaleRoom.GameObject gameObj = selectedObj as UndertaleRoom.GameObject;
-                    if (room.Layers != null)
+                    if ((Application.Current.MainWindow as MainWindow).IsGMS2 == Visibility.Visible)
                         foreach (var layer in room.Layers)
                             if (layer.InstancesData != null)
                                 layer.InstancesData.Instances.Remove(gameObj);
@@ -320,7 +320,7 @@ namespace UndertaleModTool
                 UndertaleRoom room = this.DataContext as UndertaleRoom;
 
                 UndertaleRoom.Layer layer = ObjectEditor.Content as UndertaleRoom.Layer;
-                if (room.Layers != null && layer == null)
+                if ((Application.Current.MainWindow as MainWindow).IsGMS2 == Visibility.Visible && layer == null)
                 {
                     MessageBox.Show("Must paste onto a layer", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
@@ -498,6 +498,40 @@ namespace UndertaleModTool
         }
 
         public object[] ConvertBack(object value, Type[] targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+    
+    public class LayerFlattenerConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            CompositeCollection collection = new CompositeCollection();
+            IList<UndertaleRoom.Layer> layers = value as IList<UndertaleRoom.Layer>;
+            foreach (var layer in layers.OrderByDescending((x) => x.LayerDepth))
+            {
+                switch (layer.LayerType)
+                {
+                    case UndertaleRoom.LayerType.Background:
+                        collection.Add(new CollectionContainer() { Collection = new UndertaleRoom.Layer.LayerBackgroundData[] { layer.BackgroundData } });
+                        break;
+                    case UndertaleRoom.LayerType.Instances:
+                        collection.Add(new CollectionContainer() { Collection = layer.InstancesData.Instances });
+                        break;
+                    case UndertaleRoom.LayerType.Assets:
+                        collection.Add(new CollectionContainer() { Collection = layer.AssetsData.LegacyTiles });
+                        collection.Add(new CollectionContainer() { Collection = layer.AssetsData.Sprites }); // TODO: add rendering
+                        break;
+                    case UndertaleRoom.LayerType.Tiles:
+                        // TODO
+                        break;
+                }
+            }
+            return collection;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new NotSupportedException();
         }

@@ -12,6 +12,6 @@ pushi.e 200
 conv.i.v
 call.i scr_drawtext_centered(argc=3)
 popz.v
-", Data.Functions, Data.Variables, Data.Strings));
+", Data));
 
 ChangeSelection(code);

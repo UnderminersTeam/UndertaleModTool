@@ -252,7 +252,7 @@ namespace UndertaleModLib.Models
         public Reference<UndertaleVariable> Destination { get; set; }
         public Reference<UndertaleFunction> Function { get; set; }
         public int JumpOffset { get; set; }
-        public bool JumpOffsetIsWeird { get; set; }
+        public bool JumpOffsetPopenvExitMagic { get; set; }
         public ushort ArgumentsCount { get; set; }
         public byte DupExtra { get; set; }
 
@@ -405,13 +405,17 @@ namespace UndertaleModLib.Models
                     
                 case InstructionType.GotoInstruction:
                     {
-                        // TODO: see unserialize
-                        // TODO: why the hell is there exactly ONE number that was NOT encoded in a weird way? If you just rewrite the file with the 'fix' it differs one one byte
-                        uint JumpOffsetFixed = (uint)JumpOffset;
-                        JumpOffsetFixed &= ~0xFF800000;
-                        if (JumpOffsetIsWeird)
-                            JumpOffsetFixed |= 0x00800000;
-                        writer.WriteInt24((int)JumpOffsetFixed);
+                        // See unserialize
+                        if (JumpOffsetPopenvExitMagic)
+                        {
+                            writer.WriteInt24(0xF00000);
+                        }
+                        else
+                        {
+                            uint JumpOffsetFixed = (uint)JumpOffset;
+                            JumpOffsetFixed &= ~0xFF800000;
+                            writer.WriteInt24((int)JumpOffsetFixed);
+                        }
 
                         writer.Write((byte)Kind);
                     }
@@ -534,14 +538,18 @@ namespace UndertaleModLib.Models
                     {
                         uint v = reader.ReadUInt24();
 
-                        // TODO: This is SO WRONG that I don't even believe it. Is that Int24 or Int23?!?!
+                        JumpOffsetPopenvExitMagic = (v & 0x800000) != 0;
+
+                        // The rest is int23 signed value, so make sure
                         uint r = v & 0x003FFFFF;
-
-                        if ((v & 0x00C00000) != 0)
-                            r |= 0xFFC00000;
-
-                        JumpOffset = (int)r;
-                        JumpOffsetIsWeird = (v & 0x00800000) != 0;
+                        if (JumpOffsetPopenvExitMagic && v != 0xF00000)
+                            throw new Exception("Popenv magic doesn't work, call issue #90 again");
+                        else
+                        {
+                            if ((v & 0x00C00000) != 0)
+                                r |= 0xFFC00000;
+                            JumpOffset = (int)r;
+                        }
 
                         if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
                     }
@@ -656,6 +664,8 @@ namespace UndertaleModLib.Models
                     string tgt = (Address + JumpOffset).ToString("D5");
                     if (code != null && Address + JumpOffset == code.Length / 4)
                         tgt = "func_end";
+                    if (JumpOffsetPopenvExitMagic)
+                        tgt = "[drop]";
                     sb.Append(tgt);
                     break;
 
