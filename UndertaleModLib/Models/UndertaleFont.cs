@@ -48,7 +48,7 @@ namespace UndertaleModLib.Models
             private ushort _SourceWidth;
             private ushort _SourceHeight;
             private short _Shift;
-            private int _Offset;
+            private short _Offset;
             private UndertaleSimpleListShort<GlyphKerning> _Kerning;
 
             public ushort Character { get => _Character; set { _Character = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Character")); } }
@@ -57,7 +57,7 @@ namespace UndertaleModLib.Models
             public ushort SourceWidth { get => _SourceWidth; set { _SourceWidth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceWidth")); } }
             public ushort SourceHeight { get => _SourceHeight; set { _SourceHeight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceHeight")); } }
             public short Shift { get => _Shift; set { _Shift = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Shift")); } }
-            public int Offset { get => _Offset; set { _Offset = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Offset")); } }
+            public short Offset { get => _Offset; set { _Offset = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Offset")); } }
             public UndertaleSimpleListShort<GlyphKerning> Kerning { get => _Kerning; set { _Kerning = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Kerning")); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
@@ -70,14 +70,8 @@ namespace UndertaleModLib.Models
                 writer.Write(SourceWidth);
                 writer.Write(SourceHeight);
                 writer.Write(Shift);
-                if (writer.undertaleData.GeneralInfo?.Major >= 2 || (writer.undertaleData.GeneralInfo?.Major == 1 && writer.undertaleData.GeneralInfo?.Build == 9999))
-                {
-                    writer.Write((short)Offset);
-                    writer.WriteUndertaleObject(Kerning);
-                } else
-                {
-                    writer.Write(Offset);
-                }
+                writer.Write(Offset);
+                writer.WriteUndertaleObject(Kerning);
             }
 
             public void Unserialize(UndertaleReader reader)
@@ -88,14 +82,8 @@ namespace UndertaleModLib.Models
                 SourceWidth = reader.ReadUInt16();
                 SourceHeight = reader.ReadUInt16();
                 Shift = reader.ReadInt16();
-                if (reader.undertaleData.GeneralInfo?.Major >= 2 || (reader.undertaleData.GeneralInfo?.Major == 1 && reader.undertaleData.GeneralInfo?.Build == 9999))
-                {
-                    Offset = reader.ReadInt16();
-                    Kerning = reader.ReadUndertaleObject<UndertaleSimpleListShort<GlyphKerning>>();
-                } else
-                {
-                    Offset = reader.ReadInt32(); // Maybe? I don't really know, but this definitely used to work
-                }
+                Offset = reader.ReadInt16(); // potential assumption, see the conversation at https://github.com/krzys-h/UndertaleModTool/issues/40#issuecomment-440208912
+                Kerning = reader.ReadUndertaleObject<UndertaleSimpleListShort<GlyphKerning>>();
             }
 
             public class GlyphKerning : UndertaleObject

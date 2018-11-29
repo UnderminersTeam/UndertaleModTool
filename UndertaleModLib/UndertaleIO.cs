@@ -452,9 +452,15 @@ namespace UndertaleModLib
         {
             Write((byte)val);
             Write((byte)(val >> 8));
+            Write((sbyte)(val >> 16));
+        }
+
+        public void WriteUInt24(uint val)
+        {
+            Write((byte)val);
+            Write((byte)(val >> 8));
             Write((byte)(val >> 16));
         }
-        //TODO: UInt24?
     }
 
     public static class UndertaleIO

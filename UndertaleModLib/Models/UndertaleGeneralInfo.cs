@@ -213,9 +213,9 @@ namespace UndertaleModLib.Models
         public uint Frequency { get; set; } = 0;
         public uint VertexSync { get; set; } = 0;
         public uint Priority { get; set; } = 0;
-        public UndertaleSprite.TextureEntry BackImage { get; set; } = null; // Apparently these exist, but I can't find any examples of it
-        public UndertaleSprite.TextureEntry FrontImage { get; set; } = null;
-        public UndertaleSprite.TextureEntry LoadImage { get; set; } = null;
+        public UndertaleSprite.TextureEntry BackImage { get; set; } = new UndertaleSprite.TextureEntry(); // Apparently these exist, but I can't find any examples of it
+        public UndertaleSprite.TextureEntry FrontImage { get; set; } = new UndertaleSprite.TextureEntry();
+        public UndertaleSprite.TextureEntry LoadImage { get; set; } = new UndertaleSprite.TextureEntry();
         public uint LoadAlpha { get; set; } = 255;
         public UndertaleSimpleList<Constant> Constants { get; private set; } = new UndertaleSimpleList<Constant>();
 

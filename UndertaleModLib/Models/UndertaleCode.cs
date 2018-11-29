@@ -265,7 +265,7 @@ namespace UndertaleModLib.Models
 
         public class Reference<T> : UndertaleObject where T : class, UndertaleObject, ReferencedObject
         {
-            public int NextOccurrenceOffset { get; set; } = 0xdead;
+            public uint NextOccurrenceOffset { get; set; } = 0xdead;
             public VariableType Type { get; set; }
             public T Target { get; set; }
 
@@ -287,13 +287,13 @@ namespace UndertaleModLib.Models
             public void Serialize(UndertaleWriter writer)
             {
                 NextOccurrenceOffset = 0xdead;
-                writer.WriteInt24(NextOccurrenceOffset);
+                writer.WriteUInt24(NextOccurrenceOffset);
                 writer.Write((byte)Type);
             }
 
             public void Unserialize(UndertaleReader reader)
             {
-                NextOccurrenceOffset = reader.ReadInt24();
+                NextOccurrenceOffset = reader.ReadUInt24();
                 Type = (VariableType)reader.ReadByte();
             }
 
@@ -378,7 +378,7 @@ namespace UndertaleModLib.Models
                     reference.Target = obj;
                     addr += (uint)reference.NextOccurrenceOffset;
                 }
-                obj.UnknownChainEndingValue = reference.NextOccurrenceOffset;
+                obj.UnknownChainEndingValue = (int)reference.NextOccurrenceOffset;
             }
         }
 
