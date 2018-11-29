@@ -44,6 +44,8 @@ namespace UndertaleModTool
         public UndertaleData Data { get; set; }
         public string FilePath { get; set; }
 
+        public string TitleMain { get; set; }
+
         private object _Highlighted;
         public object Highlighted { get { return _Highlighted; } set { _Highlighted = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Highlighted")); } }
         private object _Selected;
@@ -67,7 +69,7 @@ namespace UndertaleModTool
             ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"));
             SelectionHistory.Clear();
 
-            Title = "UndertaleModTool by krzys_h v" + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
+            TitleMain = "UndertaleModTool by krzys_h v" + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
 
             CanSave = false;
         }
@@ -259,6 +261,7 @@ namespace UndertaleModTool
                         this.Data = data;
                         this.FilePath = filename;
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FilePath"));
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsGMS2"));
                         ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"));
                         SelectionHistory.Clear();
@@ -278,6 +281,7 @@ namespace UndertaleModTool
             LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
             dialog.Owner = this;
             FilePath = filename;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FilePath"));
             if (System.IO.Path.GetDirectoryName(FilePath) != System.IO.Path.GetDirectoryName(filename))
                 CloseChildFiles();
 
