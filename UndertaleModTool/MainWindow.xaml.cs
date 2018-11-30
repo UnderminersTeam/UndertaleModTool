@@ -52,7 +52,7 @@ namespace UndertaleModTool
         public object Selected { get { return _Selected; } private set { _Selected = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Selected")); } }
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
 
-        private ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
+        public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
 
         private bool _CanSave = false;
         public bool CanSave { get { return _CanSave; } private set { _CanSave = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CanSave")); } }
