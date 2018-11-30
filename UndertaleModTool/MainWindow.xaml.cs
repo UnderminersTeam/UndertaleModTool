@@ -252,6 +252,10 @@ namespace UndertaleModTool
                         {
                             CanSave = true;
                         }
+                        if (data.Code == null)
+                        {
+                            MessageBox.Show("This game uses YYC (YoYo Compiler), which means the code is embedded into the game .exe. This configuration is currently not fully supported, continue at your own risk", "YYC", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
                         if (data.GeneralInfo?.BytecodeVersion == 17)
                         {
                             MessageBox.Show("Bytecode version 17 has been loaded. There may be some problems remaining, as thorough research into the changes are yet to be done.", "Bytecode version 17", MessageBoxButton.OK, MessageBoxImage.Warning);

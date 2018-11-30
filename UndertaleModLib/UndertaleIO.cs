@@ -42,23 +42,31 @@ namespace UndertaleModLib
 
         private ChunkT FindListChunk(UndertaleData data)
         {
-            return (ChunkT)data.FORM.Chunks.Where((x) => x.Value is ChunkT).First().Value;
+            var chunk = data.FORM.Chunks.Where((x) => x.Value is ChunkT);
+            if (chunk.Any())
+                return (ChunkT)chunk.FirstOrDefault().Value;
+            else
+                return null;
         }
 
         public int SerializeById(UndertaleWriter writer)
         {
-            if (Resource != null)
+            var chunk = FindListChunk(writer.undertaleData);
+            if (chunk != null)
             {
-                CachedId = FindListChunk(writer.undertaleData).List.IndexOf(Resource);
-                if (CachedId < 0)
-                    throw new IOException("Unregistered object");
-            }
-            else
-            {
-                if (typeof(ChunkT) == typeof(UndertaleChunkAGRP))
-                    CachedId = 0;
+                if (Resource != null)
+                {
+                    CachedId = chunk.List.IndexOf(Resource);
+                    if (CachedId < 0)
+                        throw new IOException("Unregistered object");
+                }
                 else
-                    CachedId = -1;
+                {
+                    if (typeof(ChunkT) == typeof(UndertaleChunkAGRP))
+                        CachedId = 0;
+                    else
+                        CachedId = -1;
+                }
             }
             return CachedId;
         }
@@ -73,18 +81,21 @@ namespace UndertaleModLib
 
         public void PostUnserialize(UndertaleReader reader)
         {
-            IList<T> list = FindListChunk(reader.undertaleData).List;
-            if (typeof(ChunkT) == typeof(UndertaleChunkAGRP) && CachedId == 0 && list.Count == 0) // I won't even ask why this works like that
+            IList<T> list = FindListChunk(reader.undertaleData)?.List;
+            if (list != null)
             {
-                Resource = default(T);
-                return;
+                if (typeof(ChunkT) == typeof(UndertaleChunkAGRP) && CachedId == 0 && list.Count == 0) // I won't even ask why this works like that
+                {
+                    Resource = default(T);
+                    return;
+                }
+                if (CachedId >= list.Count)
+                {
+                    reader.SubmitWarning("Invalid value for resource ID of type " + typeof(ChunkT).Name + ": " + CachedId + " (there are only " + list.Count + ")");
+                    return;
+                }
+                Resource = CachedId >= 0 ? list[CachedId] : default(T);
             }
-            if (CachedId >= list.Count)
-            {
-                reader.SubmitWarning("Invalid value for resource ID of type " + typeof(ChunkT).Name + ": " + CachedId + " (there are only " + list.Count + ")");
-                return;
-            }
-            Resource = CachedId >= 0 ? list[CachedId] : default(T);
         }
 
         public override string ToString()
@@ -157,6 +168,7 @@ namespace UndertaleModLib
             data.FORM.UnserializeChunk(this);
             lenReader.ToHere();
 
+            Debug.WriteLine("Resolving resource IDs...");
             foreach (UndertaleResourceRef res in resUpdate)
                 res.PostUnserialize(this);
             resUpdate.Clear();

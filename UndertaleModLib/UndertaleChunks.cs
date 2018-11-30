@@ -273,13 +273,18 @@ namespace UndertaleModLib
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
+            if (List == null)
+                return;
             base.SerializeChunk(writer);
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
-            if (Length == 0)
-                throw new Exception("This game uses YYC (YoYo Compiler). This is currently not supported.");
+            if (Length == 0) // YYC, bytecode <= 16, chunk is empty but exists
+            {
+                List = null;
+                return;
+            }
             base.UnserializeChunk(reader);
         }
     }
@@ -296,6 +301,9 @@ namespace UndertaleModLib
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
+            if (List == null)
+                return;
+
             UndertaleInstruction.Reference<UndertaleVariable>.SerializeReferenceChain(writer, writer.undertaleData.Code, List);
 
             writer.Write(InstanceVarCount);
@@ -307,8 +315,12 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
-            if (Length == 0)
-                throw new Exception("This game uses YYC (YoYo Compiler). This is currently not supported.");
+            if (Length == 0) // YYC, bytecode <= 16, chunk is empty but exists
+            {
+                List = null;
+                return;
+            }
+
             if (reader.undertaleData.UnsupportedBytecodeVersion)
                 return;
             uint startPosition = reader.Position;
@@ -330,6 +342,9 @@ namespace UndertaleModLib
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
+            if (Functions == null && CodeLocals == null)
+                return;
+
             UndertaleInstruction.Reference<UndertaleFunction>.SerializeReferenceChain(writer, writer.undertaleData.Code, Functions);
 
             writer.WriteUndertaleObject(Functions);
@@ -338,8 +353,13 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
-            if (Length == 0)
-                throw new Exception("This game uses YYC (YoYo Compiler). This is currently not supported.");
+            if (Length == 0) // YYC, bytecode <= 16, chunk is empty but exists
+            {
+                Functions = null;
+                CodeLocals = null;
+                return;
+            }
+
             if (reader.undertaleData.UnsupportedBytecodeVersion)
                 return;
             Functions = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleFunction>>();
