@@ -8,9 +8,9 @@ namespace UndertaleModLib.Models
 {
     // Not to be confused with the other "embedded" resources, this is a bit separate.
     // GMS2 only, see https://github.com/krzys-h/UndertaleModTool/issues/4#issuecomment-421844420 for rough structure, but doesn't appear commonly used
-    public class UndertaleEmbeddedImage : UndertaleObject
+    public class UndertaleEmbeddedImage : UndertaleNamedResource
     {
-        public UndertaleString Name;
+        public UndertaleString Name { get; set; }
         public UndertaleTexturePageItem TextureEntry;
 
         public UndertaleEmbeddedImage()
@@ -27,6 +27,11 @@ namespace UndertaleModLib.Models
         {
             Name = reader.ReadUndertaleString();
             TextureEntry = reader.ReadUndertaleObjectPointer<UndertaleTexturePageItem>();
+        }
+
+        public override string ToString()
+        {
+            return Name.Content + " (" + GetType().Name + ")";
         }
     }
 }

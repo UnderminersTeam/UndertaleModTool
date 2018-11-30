@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleTextureGroupInfo : UndertaleObject
+    public class UndertaleTextureGroupInfo : UndertaleNamedResource
     {
-        public UndertaleString GroupName;
+        public UndertaleString Name { get; set; }
         public UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR> TexturePages;
         public UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT> Sprites;
         public UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT> SpineSprites;
@@ -27,7 +27,7 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
-            writer.WriteUndertaleString(GroupName);
+            writer.WriteUndertaleString(Name);
 
             writer.WriteUndertaleObjectPointer(TexturePages);
             writer.WriteUndertaleObjectPointer(Sprites);
@@ -44,7 +44,7 @@ namespace UndertaleModLib.Models
 
         public void Unserialize(UndertaleReader reader)
         {
-            GroupName = reader.ReadUndertaleString();
+            Name = reader.ReadUndertaleString();
 
             // Read the pointers
             TexturePages = reader.ReadUndertaleObjectPointer<UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR>>();
@@ -62,6 +62,11 @@ namespace UndertaleModLib.Models
             {
                 throw new UndertaleSerializationException("Invalid pointer to SimpleResourcesList");
             }
+        }
+
+        public override string ToString()
+        {
+            return Name.Content + " (" + GetType().Name + ")";
         }
     }
 }
