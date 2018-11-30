@@ -100,7 +100,7 @@ namespace UndertaleModLib
     public class UndertaleChunkEXTN : UndertaleListChunk<UndertaleExtension>
     {
         public override string Name => "EXTN";
-        public List<byte[]> productIdData;
+        public List<byte[]> productIdData = new List<byte[]>();
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
