@@ -830,6 +830,8 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.Pop:
+                        if (instr.Destination == null)
+                            throw new Exception("Unsupported pop.e.v, this is a bug seemingly with incrementing/decrementing in expressions");
                         ExpressionVar target = new ExpressionVar(instr.Destination.Target, new ExpressionConstant(UndertaleInstruction.DataType.Int16, instr.TypeInst), instr.Destination.Type);
                         Expression val = null;
                         if (instr.Type1 != UndertaleInstruction.DataType.Int32 && instr.Type1 != UndertaleInstruction.DataType.Variable)

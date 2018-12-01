@@ -427,7 +427,8 @@ namespace UndertaleModLib.Models
                         byte TypePair = (byte)((byte)Type2 << 4 | (byte)Type1);
                         writer.Write(TypePair);
                         writer.Write((byte)Kind);
-                        writer.WriteUndertaleObject(Destination);
+                        if (Destination != null)
+                            writer.WriteUndertaleObject(Destination);
                     }
                     break;
 
@@ -562,7 +563,11 @@ namespace UndertaleModLib.Models
                         Type1 = (DataType)(TypePair & 0xf);
                         Type2 = (DataType)(TypePair >> 4);
                         if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
-                        Destination = reader.ReadUndertaleObject<Reference<UndertaleVariable>>();
+                        if (Type1 == DataType.Int16 && Type2 == DataType.Variable)
+                        {
+                            // Special scenario?
+                        } else
+                            Destination = reader.ReadUndertaleObject<Reference<UndertaleVariable>>();
                     }
                     break;
 
@@ -678,7 +683,10 @@ namespace UndertaleModLib.Models
                         sb.Append(TypeInst.ToString().ToLower());
                         sb.Append(".");
                     }
-                    sb.Append(Destination.ToString());
+                    if (Destination != null)
+                        sb.Append(Destination.ToString());
+                    else
+                        sb.Append(TypeInst.ToString());
                     break;
 
                 case InstructionType.PushInstruction:

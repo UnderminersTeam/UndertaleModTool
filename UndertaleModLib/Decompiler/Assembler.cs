@@ -88,7 +88,12 @@ namespace UndertaleModLib.Decompiler
 
                 case UndertaleInstruction.InstructionType.PopInstruction:
                     UndertaleInstruction.InstanceType inst = instr.TypeInst;
-                    instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, instr, lookOnStack);
+                    if (instr.Type1 == UndertaleInstruction.DataType.Int16 && instr.Type2 == UndertaleInstruction.DataType.Variable)
+                    {
+                        // Special scenario?
+                        inst = (UndertaleInstruction.InstanceType)Int32.Parse(line);
+                    } else
+                        instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, instr, lookOnStack);
                     instr.TypeInst = inst;
                     line = "";
                     break;
