@@ -50,7 +50,6 @@ namespace UndertaleModLib.Models
             private short _Shift;
             private short _Offset;
             private UndertaleSimpleListShort<GlyphKerning> _Kerning = new UndertaleSimpleListShort<GlyphKerning>();
-
             public ushort Character { get => _Character; set { _Character = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Character")); } }
             public ushort SourceX { get => _SourceX; set { _SourceX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceX")); } }
             public ushort SourceY { get => _SourceY; set { _SourceY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceY")); } }

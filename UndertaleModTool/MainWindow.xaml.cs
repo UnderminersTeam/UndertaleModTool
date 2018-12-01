@@ -52,7 +52,7 @@ namespace UndertaleModTool
         public object Selected { get { return _Selected; } private set { _Selected = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Selected")); } }
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
 
-        private ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
+        public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
 
         private bool _CanSave = false;
         public bool CanSave { get { return _CanSave; } private set { _CanSave = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CanSave")); } }
@@ -251,6 +251,10 @@ namespace UndertaleModTool
                         else
                         {
                             CanSave = true;
+                        }
+                        if (data.Code == null)
+                        {
+                            MessageBox.Show("This game uses YYC (YoYo Compiler), which means the code is embedded into the game .exe. This configuration is currently not fully supported, continue at your own risk", "YYC", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
                         if (data.GeneralInfo?.BytecodeVersion == 17)
                         {

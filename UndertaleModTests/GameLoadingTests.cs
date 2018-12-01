@@ -138,4 +138,21 @@ namespace UndertaleModTests
         {
         }
     }
+
+
+
+    [TestClass]
+    public class EmptyGameTest
+    {
+        [TestMethod]
+        public void CreateAndSaveEmptyGame()
+        {
+            UndertaleData data = UndertaleData.CreateNew();
+            using (MemoryStream ms = new MemoryStream())
+            {
+                UndertaleIO.Write(ms, data);
+            }
+        }
+    }
+
 }
