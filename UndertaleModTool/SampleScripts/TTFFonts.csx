@@ -21,7 +21,7 @@ obj_time.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLoc
 ;font_add('comic.ttf', 10, true, false, 32, 127);
 ;font_add('PAPYRUS.TTF', 8, true, false, 32, 127);
 
-pushi.e 127
+pushi.e 255
 conv.i.v
 pushi.e 32
 conv.i.v
@@ -36,22 +36,7 @@ conv.s.v
 call.i font_add(argc=6)
 popz.v
 
-pushi.e 127
-conv.i.v
-pushi.e 32
-conv.i.v
-pushi.e 0
-conv.i.v
-pushi.e 0
-conv.i.v
-pushi.e 24
-conv.i.v
-push.s ""8bitoperator_jve.ttf""
-conv.s.v
-call.i font_add(argc=6)
-popz.v
-
-pushi.e 127
+pushi.e 255
 conv.i.v
 pushi.e 32
 conv.i.v
@@ -60,6 +45,21 @@ conv.i.v
 pushi.e 0
 conv.i.v
 pushi.e 12
+conv.i.v
+push.s ""8bitoperator_jve.ttf""
+conv.s.v
+call.i font_add(argc=6)
+popz.v
+
+pushi.e 255
+conv.i.v
+pushi.e 32
+conv.i.v
+pushi.e 0
+conv.i.v
+pushi.e 0
+conv.i.v
+pushi.e 6
 conv.i.v
 push.s ""8bitoperator_jve.ttf""
 conv.s.v
@@ -81,7 +81,7 @@ conv.s.v
 call.i font_add(argc=6)
 popz.v
 
-pushi.e 127
+pushi.e 255
 conv.i.v
 pushi.e 32
 conv.i.v
@@ -96,7 +96,7 @@ conv.s.v
 call.i font_add(argc=6)
 popz.v
 
-pushi.e 127
+pushi.e 255
 conv.i.v
 pushi.e 32
 conv.i.v
@@ -141,7 +141,7 @@ conv.s.v
 call.i font_add(argc=6)
 popz.v
 
-pushi.e 127
+pushi.e 255
 conv.i.v
 pushi.e 32
 conv.i.v
@@ -156,7 +156,7 @@ conv.s.v
 call.i font_add(argc=6)
 popz.v
 
-pushi.e 127
+pushi.e 255
 conv.i.v
 pushi.e 32
 conv.i.v
