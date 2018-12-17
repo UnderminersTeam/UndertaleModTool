@@ -149,12 +149,19 @@ namespace UndertaleModTool
                                 par.Inlines.Add(new Run(instr.TypeInst.ToString().ToLower()) { Foreground = typeBrush });
                                 par.Inlines.Add(new Run("."));
                             }
-                            Run runDest = new Run(instr.Destination.ToString()) { Foreground = argBrush, Cursor = Cursors.Hand };
-                            runDest.MouseDown += (sender, e) =>
+                            if (instr.Destination != null)
                             {
-                                (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Destination);
-                            };
-                            par.Inlines.Add(runDest);
+                                Run runDest = new Run(instr.Destination.ToString()) { Foreground = argBrush, Cursor = Cursors.Hand };
+                                runDest.MouseDown += (sender, e) =>
+                                {
+                                    (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Destination);
+                                };
+                                par.Inlines.Add(runDest);
+                            } else
+                            {
+                                Run runType = new Run(instr.TypeInst.ToString().ToLower()) { Foreground = argBrush, Cursor = Cursors.Arrow };
+                                par.Inlines.Add(runType);
+                            }
                             break;
 
                         case UndertaleInstruction.InstructionType.PushInstruction:
