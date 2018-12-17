@@ -18,6 +18,7 @@ namespace UndertaleModLib.Decompiler
          * Howdy! Yeah, I don't know how any of this works anymore either, so... have fun
          */
 
+        [ThreadStatic]
         internal static UndertaleData HUGE_HACK_FIX_THIS_SOON;
 
         public class Block
@@ -384,7 +385,8 @@ namespace UndertaleModLib.Decompiler
             public string Name;
             public UndertaleInstruction.DataType Type;
 
-            public static int i = 0;
+            [ThreadStatic]
+            public static int i;
             internal AssetIDType AssetType;
 
             public TempVar()
@@ -539,7 +541,8 @@ namespace UndertaleModLib.Decompiler
                 return String.Format("{0}({1})", Function.Name.Content, String.Join(", ", Arguments));
             }
 
-            public static Dictionary<string, AssetIDType[]> scriptArgs = new Dictionary<string, AssetIDType[]>(); // TODO: damnit stop using globals you stupid... this needs a big refactor anyway
+            [ThreadStatic]
+            public static Dictionary<string, AssetIDType[]> scriptArgs; // TODO: damnit stop using globals you stupid... this needs a big refactor anyway
 
             internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
             {
@@ -627,7 +630,8 @@ namespace UndertaleModLib.Decompiler
                 return name;
             }
 
-            public static Dictionary<UndertaleVariable, AssetIDType> assetTypes = new Dictionary<UndertaleVariable, AssetIDType>(); // TODO: huge and ugly memory leak that I may fix one day... nah don't count on it
+            [ThreadStatic]
+            public static Dictionary<UndertaleVariable, AssetIDType> assetTypes; // TODO: huge and ugly memory leak that I may fix one day... nah don't count on it
             internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
             {
                 InstType?.DoTypePropagation(AssetIDType.GameObject);
@@ -1599,26 +1603,22 @@ namespace UndertaleModLib.Decompiler
 
             return blocks;
         }
-
-        private static readonly object ANOTHER_HACK = new object();
+        
         public static string Decompile(UndertaleCode code, UndertaleData data = null)
         {
-            lock(ANOTHER_HACK) // hack together a hack to fix a hack, TODO: remove once I get rid of the globals
-            {
-                HUGE_HACK_FIX_THIS_SOON = data;
-                TempVar.i = 0;
-                ExpressionVar.assetTypes.Clear();
-                Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
-                DecompileFromBlock(blocks[0]);
-                FunctionCall.scriptArgs.Clear();
-                // TODO: add self to scriptArgs
-                DoTypePropagation(blocks);
-                List<Statement> stmts = HLDecompile(blocks, blocks[0], blocks[code.Length / 4]);
-                StringBuilder sb = new StringBuilder();
-                foreach (var stmt in stmts)
-                    sb.Append(stmt.ToString() + "\n");
-                return sb.ToString();
-            }
+            HUGE_HACK_FIX_THIS_SOON = data;
+            TempVar.i = 0;
+            ExpressionVar.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
+            Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
+            DecompileFromBlock(blocks[0]);
+            FunctionCall.scriptArgs = new Dictionary<string, AssetIDType[]>();
+            // TODO: add self to scriptArgs
+            DoTypePropagation(blocks);
+            List<Statement> stmts = HLDecompile(blocks, blocks[0], blocks[code.Length / 4]);
+            StringBuilder sb = new StringBuilder();
+            foreach (var stmt in stmts)
+                sb.Append(stmt.ToString() + "\n");
+            return sb.ToString();
         }
 
         private static void DoTypePropagation(Dictionary<uint, Block> blocks)
