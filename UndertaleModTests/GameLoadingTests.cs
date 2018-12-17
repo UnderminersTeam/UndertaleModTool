@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
@@ -32,26 +33,26 @@ namespace UndertaleModTests
         [TestMethod]
         public void DecompileAllScripts()
         {
-            foreach(var code in data.Code)
+            Parallel.ForEach(data.Code, (code) =>
             {
-                Console.WriteLine(code.Name.Content);
+                //Console.WriteLine(code.Name.Content);
                 try
                 {
                     Decompiler.Decompile(code, data);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     throw new Exception("Failed to decompile script " + code.Name.Content, e);
                 }
-            }
+            });
         }
 
         [TestMethod]
         public void DisassembleAndReassembleAllScripts()
         {
-            foreach (var code in data.Code)
+            Parallel.ForEach(data.Code, (code) =>
             {
-                Console.WriteLine(code.Name.Content);
+                //Console.WriteLine(code.Name.Content);
 
                 bool knownBug = false;
                 foreach(var instr in code.Instructions)
@@ -66,7 +67,7 @@ namespace UndertaleModTests
                 if (knownBug)
                 {
                     Console.WriteLine("SKIPPING " + code.Name.Content + ", known bug");
-                    continue;
+                    return;
                 }
 
                 string disasm;
@@ -112,7 +113,7 @@ namespace UndertaleModTests
                     else
                         Assert.AreEqual(code.Instructions[i].Value, reasm[i].Value, errMsg);
                 }
-            }
+            });
         }
     }
 

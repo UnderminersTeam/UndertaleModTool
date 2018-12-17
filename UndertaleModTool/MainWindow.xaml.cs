@@ -29,9 +29,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using UndertaleModLib;
-using UndertaleModLib.DebugData;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
 
 namespace UndertaleModTool
@@ -283,20 +283,21 @@ namespace UndertaleModTool
                 return;
 
             LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
+            IProgress<Tuple<int, string>> progress = new Progress<Tuple<int, string>>(i => { dialog.ReportProgress(i.Item2, i.Item1); });
+            IProgress<double?> setMax = new Progress<double?>(i => { dialog.Maximum = i; });
             dialog.Owner = this;
             FilePath = filename;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FilePath"));
             if (System.IO.Path.GetDirectoryName(FilePath) != System.IO.Path.GetDirectoryName(filename))
                 CloseChildFiles();
 
-            DebugDataMode debugMode = DebugDataMode.NoDebug;
+            DebugDataDialog.DebugDataMode debugMode = DebugDataDialog.DebugDataMode.NoDebug;
             if (!Data.GeneralInfo.DisableDebugger) // TODO: I think the game itself can also use the .yydebug file on crash reports
             {
                 DebugDataDialog debugDialog = new DebugDataDialog();
                 debugDialog.Owner = this;
                 debugDialog.ShowDialog();
                 debugMode = debugDialog.Result;
-                // TODO: Add an option to generate debug data for just selected scripts (to make running faster / make the full assembly not take forever to load)
             }
             Task t = Task.Run(() =>
             {
@@ -307,10 +308,70 @@ namespace UndertaleModTool
                         UndertaleIO.Write(stream, Data);
                     }
 
-                    if (debugMode != DebugDataMode.NoDebug)
+                    if (debugMode != DebugDataDialog.DebugDataMode.NoDebug)
                     {
                         Debug.WriteLine("Generating debugger data...");
-                        UndertaleDebugData debugData = DebugDataGenerator.GenerateDebugData(Data, debugMode);
+
+                        UndertaleDebugData debugData = UndertaleDebugData.CreateNew();
+
+                        setMax.Report(Data.Code.Count);
+                        int count = 0;
+                        object countLock = new object();
+                        string[] outputs = new string[Data.Code.Count];
+                        UndertaleDebugInfo[] outputsOffsets = new UndertaleDebugInfo[Data.Code.Count];
+                        Parallel.For(0, Data.Code.Count, (i) =>
+                        {
+                            var code = Data.Code[i];
+
+                            if (debugMode == DebugDataDialog.DebugDataMode.Decompiled)
+                            {
+                                //Debug.WriteLine("Decompiling " + code.Name.Content);
+                                string output;
+                                try
+                                {
+                                    output = Decompiler.Decompile(code, Data);
+                                }
+                                catch (Exception e)
+                                {
+                                    Debug.WriteLine(e.Message);
+                                    output = "/*\nEXCEPTION!\n" + e.ToString() + "\n*/";
+                                }
+                                outputs[i] = output;
+
+                                UndertaleDebugInfo debugInfo = new UndertaleDebugInfo();
+                                debugInfo.Add(new UndertaleDebugInfo.DebugInfoPair() { SourceCodeOffset = 0, BytecodeOffset = 0 }); // TODO: generate this too! :D
+                                outputsOffsets[i] = debugInfo;
+                            }
+                            else
+                            {
+                                StringBuilder sb = new StringBuilder();
+                                UndertaleDebugInfo debugInfo = new UndertaleDebugInfo();
+
+                                foreach (var instr in code.Instructions)
+                                {
+                                    if (debugMode == DebugDataDialog.DebugDataMode.FullAssembler || instr.Kind == UndertaleInstruction.Opcode.Pop || instr.Kind == UndertaleInstruction.Opcode.Popz || instr.Kind == UndertaleInstruction.Opcode.B || instr.Kind == UndertaleInstruction.Opcode.Bt || instr.Kind == UndertaleInstruction.Opcode.Bf || instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit)
+                                        debugInfo.Add(new UndertaleDebugInfo.DebugInfoPair() { SourceCodeOffset = (uint)sb.Length, BytecodeOffset = instr.Address * 4 });
+                                    sb.Append(instr.ToString(code, Data.Variables));
+                                    sb.Append("\n");
+                                }
+                                outputs[i] = sb.ToString();
+                                outputsOffsets[i] = debugInfo;
+                            }
+
+                            lock (countLock)
+                            {
+                                progress.Report(new Tuple<int, string>(++count, code.Name.Content));
+                            }
+                        });
+                        setMax.Report(null);
+
+                        for(int i = 0; i < Data.Code.Count; i++)
+                        {
+                            debugData.SourceCode.Add(new UndertaleScriptSource() { SourceCode = debugData.Strings.MakeString(outputs[i]) });
+                            debugData.DebugInfo.Add(outputsOffsets[i]);
+                            debugData.LocalVars.Add(Data.CodeLocals[i]); // TODO: this may be a bug? the strings are not copied...
+                        }
+
                         using (FileStream stream = new FileStream(System.IO.Path.ChangeExtension(FilePath, ".yydebug"), FileMode.Create, FileAccess.Write))
                         {
                             using (UndertaleWriter writer = new UndertaleWriter(stream))
@@ -852,22 +913,30 @@ namespace UndertaleModTool
         {
             LoaderDialog dialog = new LoaderDialog("Decompiling", "Decompiling, please wait...");
             dialog.Owner = this;
+            dialog.Maximum = Data.Code.Count;
+            IProgress<Tuple<int, string>> progress = new Progress<Tuple<int, string>>(i => { dialog.ReportProgress(i.Item2, i.Item1); });
+            int count = 0;
+            object countLock = new object();
             Task t = Task.Run(() =>
             {
-                foreach(var code in Data.Code)
+                Parallel.ForEach(Data.Code, (code) =>
                 {
-                    Debug.WriteLine(code.Name.Content);
+                    //Debug.WriteLine(code.Name.Content);
                     string path = System.IO.Path.Combine(outdir, code.Name.Content + ".gml");
                     try
                     {
                         string decomp = Decompiler.Decompile(code, Data);
                         File.WriteAllText(path, decomp);
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
                     }
-                }
+                    lock(countLock)
+                    {
+                        progress.Report(new Tuple<int, string>(++count, code.Name.Content));
+                    }
+                });
 
                 Dispatcher.Invoke(() =>
                 {

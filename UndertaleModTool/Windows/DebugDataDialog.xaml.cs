@@ -11,7 +11,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using UndertaleModLib.DebugData;
 
 namespace UndertaleModTool
 {
@@ -20,6 +19,14 @@ namespace UndertaleModTool
     /// </summary>
     public partial class DebugDataDialog : Window
     {
+        public enum DebugDataMode
+        {
+            FullAssembler,
+            PartialAssembler,
+            Decompiled,
+            NoDebug
+        }
+
         public DebugDataMode Result { get; private set; } = DebugDataMode.NoDebug;
 
         public DebugDataDialog()

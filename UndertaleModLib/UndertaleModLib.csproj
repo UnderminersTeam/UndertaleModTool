@@ -37,7 +37,6 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DebugData\DebugDataGenerator.cs" />
     <Compile Include="Decompiler\Assembler.cs" />
     <Compile Include="Decompiler\AssetTypeResolver.cs" />
     <Compile Include="Decompiler\Decompiler.cs" />

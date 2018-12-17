@@ -24,6 +24,20 @@ namespace UndertaleModTool
         public string MessageTitle { get; set; }
         public string Message { get; set; }
         public string StatusText { get; set; } = "Please wait...";
+        public double? Maximum
+        {
+            get
+            {
+                return !ProgressBar.IsIndeterminate ? ProgressBar.Maximum : (double?)null;
+            }
+
+            set
+            {
+                ProgressBar.IsIndeterminate = !value.HasValue;
+                if (value.HasValue)
+                    ProgressBar.Maximum = value.Value;
+            }
+        }
 
         private DebugTraceListener listener;
 
@@ -46,6 +60,18 @@ namespace UndertaleModTool
             Debug.Listeners.Remove(listener);
         }
 
+        public void ReportProgress(string message)
+        {
+            StatusText = message;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("StatusText"));
+        }
+
+        public void ReportProgress(string message, double value)
+        {
+            ReportProgress(value + "/" + Maximum + (!String.IsNullOrEmpty(message) ? ": " + message : ""));
+            ProgressBar.Value = value;
+        }
+
         private class DebugTraceListener : TraceListener
         {
             private LoaderDialog loaderDialog;
@@ -62,8 +88,7 @@ namespace UndertaleModTool
 
             public override void WriteLine(string message)
             {
-                loaderDialog.StatusText = message;
-                loaderDialog.PropertyChanged?.Invoke(loaderDialog, new PropertyChangedEventArgs("StatusText"));
+                loaderDialog.ReportProgress(message);
             }
         }
     }

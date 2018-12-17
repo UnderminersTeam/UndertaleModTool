@@ -149,6 +149,8 @@ namespace UndertaleModLib
 
         public static UndertaleString MakeString(this IList<UndertaleString> list, string content)
         {
+            if (content == null)
+                throw new ArgumentNullException("content");
             // TODO: without reference counting the strings, this may leave unused strings in the array
             foreach (UndertaleString str in list)
             {
