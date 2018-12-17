@@ -87,14 +87,18 @@ namespace UndertaleModLib.Decompiler
                     break;
 
                 case UndertaleInstruction.InstructionType.PopInstruction:
-                    UndertaleInstruction.InstanceType inst = instr.TypeInst;
-                    if (instr.Type1 == UndertaleInstruction.DataType.Int16 && instr.Type2 == UndertaleInstruction.DataType.Variable)
+                    if (instr.Type1 == UndertaleInstruction.DataType.Int16)
                     {
-                        // Special scenario?
-                        inst = (UndertaleInstruction.InstanceType)Int32.Parse(line);
-                    } else
+                        // Special scenario - the swap instruction
+                        // TODO: Figure out the proper syntax, see #129
+                        instr.SwapExtra = Byte.Parse(line);
+                    }
+                    else
+                    {
+                        UndertaleInstruction.InstanceType inst = instr.TypeInst;
                         instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, instr, lookOnStack);
-                    instr.TypeInst = inst;
+                        instr.TypeInst = inst;
+                    }
                     line = "";
                     break;
 

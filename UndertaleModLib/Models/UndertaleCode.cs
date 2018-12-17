@@ -255,6 +255,7 @@ namespace UndertaleModLib.Models
         public bool JumpOffsetPopenvExitMagic { get; set; }
         public ushort ArgumentsCount { get; set; }
         public byte DupExtra { get; set; }
+        public ushort SwapExtra { get; set; }
 
         public interface ReferencedObject
         {
@@ -423,12 +424,23 @@ namespace UndertaleModLib.Models
 
                 case InstructionType.PopInstruction:
                     {
-                        writer.Write((short)TypeInst);
-                        byte TypePair = (byte)((byte)Type2 << 4 | (byte)Type1);
-                        writer.Write(TypePair);
-                        writer.Write((byte)Kind);
-                        if (Destination != null)
+                        if (Type1 == DataType.Int16)
+                        {
+                            // Special scenario - the swap instruction
+                            // TODO: Figure out the proper syntax, see #129
+                            writer.Write(SwapExtra);
+                            byte TypePair = (byte)((byte)Type2 << 4 | (byte)Type1);
+                            writer.Write(TypePair);
+                            writer.Write((byte)Kind);
+                        }
+                        else
+                        {
+                            writer.Write((short)TypeInst);
+                            byte TypePair = (byte)((byte)Type2 << 4 | (byte)Type1);
+                            writer.Write(TypePair);
+                            writer.Write((byte)Kind);
                             writer.WriteUndertaleObject(Destination);
+                        }
                     }
                     break;
 
@@ -563,11 +575,17 @@ namespace UndertaleModLib.Models
                         Type1 = (DataType)(TypePair & 0xf);
                         Type2 = (DataType)(TypePair >> 4);
                         if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
-                        if (Type1 == DataType.Int16 && Type2 == DataType.Variable)
+                        if (Type1 == DataType.Int16)
                         {
-                            // Special scenario?
-                        } else
+                            // Special scenario - the swap instruction
+                            // TODO: Figure out the proper syntax, see #129
+                            SwapExtra = (ushort)TypeInst;
+                            TypeInst = 0;
+                        }
+                        else
+                        {
                             Destination = reader.ReadUndertaleObject<Reference<UndertaleVariable>>();
+                        }
                     }
                     break;
 
@@ -678,15 +696,21 @@ namespace UndertaleModLib.Models
                     sb.Append("." + Type1.ToOpcodeParam());
                     sb.Append("." + Type2.ToOpcodeParam());
                     sb.Append(" ");
-                    if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
+                    if (Type1 == DataType.Int16)
                     {
-                        sb.Append(TypeInst.ToString().ToLower());
-                        sb.Append(".");
+                        // Special scenario - the swap instruction
+                        // TODO: Figure out the proper syntax, see #129
+                        sb.Append(SwapExtra.ToString());
                     }
-                    if (Destination != null)
-                        sb.Append(Destination.ToString());
                     else
-                        sb.Append(TypeInst.ToString());
+                    {
+                        if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
+                        {
+                            sb.Append(TypeInst.ToString().ToLower());
+                            sb.Append(".");
+                        }
+                        sb.Append(Destination.ToString());
+                    }
                     break;
 
                 case InstructionType.PushInstruction:

@@ -144,23 +144,27 @@ namespace UndertaleModTool
                             par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run("." + instr.Type2.ToOpcodeParam()) { Foreground = typeBrush });
                             par.Inlines.Add(new Run(" "));
-                            if (instr.Type1 == UndertaleInstruction.DataType.Variable && instr.TypeInst != UndertaleInstruction.InstanceType.Undefined)
+                            if (instr.Type1 == UndertaleInstruction.DataType.Int16)
                             {
-                                par.Inlines.Add(new Run(instr.TypeInst.ToString().ToLower()) { Foreground = typeBrush });
-                                par.Inlines.Add(new Run("."));
+                                // Special scenario - the swap instruction
+                                // TODO: Figure out the proper syntax, see #129
+                                Run runType = new Run(instr.SwapExtra.ToString().ToLower()) { Foreground = argBrush };
+                                par.Inlines.Add(runType);
                             }
-                            if (instr.Destination != null)
+                            else
                             {
+                                if (instr.Type1 == UndertaleInstruction.DataType.Variable && instr.TypeInst != UndertaleInstruction.InstanceType.Undefined)
+                                {
+                                    par.Inlines.Add(new Run(instr.TypeInst.ToString().ToLower()) { Foreground = typeBrush });
+                                    par.Inlines.Add(new Run("."));
+                                }
+
                                 Run runDest = new Run(instr.Destination.ToString()) { Foreground = argBrush, Cursor = Cursors.Hand };
                                 runDest.MouseDown += (sender, e) =>
                                 {
                                     (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Destination);
                                 };
                                 par.Inlines.Add(runDest);
-                            } else
-                            {
-                                Run runType = new Run(instr.TypeInst.ToString().ToLower()) { Foreground = argBrush, Cursor = Cursors.Arrow };
-                                par.Inlines.Add(runType);
                             }
                             break;
 
