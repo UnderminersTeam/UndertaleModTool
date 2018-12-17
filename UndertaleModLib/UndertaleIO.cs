@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using UndertaleModLib.Models;
 
 namespace UndertaleModLib
@@ -193,6 +194,7 @@ namespace UndertaleModLib
 
         private Dictionary<uint, UndertaleObject> objectPool = new Dictionary<uint, UndertaleObject>();
         private Dictionary<UndertaleObject, uint> objectPoolRev = new Dictionary<UndertaleObject, uint>();
+        private HashSet<uint> unreadObjects = new HashSet<uint>();
 
         public Dictionary<uint, UndertaleObject> GetOffsetMap()
         {
@@ -214,6 +216,7 @@ namespace UndertaleModLib
                 obj = new T();
                 objectPool.Add(address, obj);
                 objectPoolRev.Add(obj, address);
+                unreadObjects.Add(address);
             }
             return (T)obj;
         }
@@ -230,6 +233,7 @@ namespace UndertaleModLib
             try
             {
                 T obj = GetUndertaleObjectAtAddress<T>(Position);
+                unreadObjects.Remove(Position);
                 obj.Unserialize(this);
                 return obj;
             }
@@ -254,6 +258,14 @@ namespace UndertaleModLib
             // Normally, the strings point directly to the string content
             // This may be done that way because it's faster when the game accesses them, but for our purposes it's better to access the whole string resource object
             return GetUndertaleObjectAtAddress<UndertaleString>(addr - 4);
+        }
+
+        public void ThrowIfUnreadObjects()
+        {
+            if (unreadObjects.Count > 0)
+            {
+                throw new IOException("Found pointer targets that were never read:\n" + String.Join("\n", unreadObjects.Take(10).Select((x) => "0x" + x.ToString("X8") + " (" + objectPool[x].GetType().Name + ")")) + (unreadObjects.Count > 10 ? "\n(and more, " + unreadObjects.Count + " total)" : ""));
+            }
         }
 
         public class EnsureLengthOperation
@@ -366,6 +378,7 @@ namespace UndertaleModLib
                         Write(objectAddr);
                     }
                     Position = currentPos;
+                    pendingWrites.Remove(obj);
                 }
                 if (pendingStringWrites.ContainsKey(obj))
                 {
@@ -376,6 +389,7 @@ namespace UndertaleModLib
                         Write(objectAddr + 4);
                     }
                     Position = currentPos;
+                    pendingStringWrites.Remove(obj);
                 }
             }
             catch (Exception e)
@@ -423,6 +437,15 @@ namespace UndertaleModLib
                     pendingStringWrites.Add(obj, new List<uint>());
                 pendingStringWrites[obj].Add(Position);
                 Write(0xDEADC0DEu);
+            }
+        }
+
+        public void ThrowIfUnwrittenObjects()
+        {
+            var unwrittenObjects = pendingWrites.Concat(pendingStringWrites);
+            if (unwrittenObjects.Count() > 0)
+            {
+                throw new IOException("Found pointer targets that were never written:\n" + String.Join("\n", unwrittenObjects.Take(10).Select((x) => x.Key + " at " + String.Join(", ", x.Value.Select((y) => "0x" + y.ToString("X8"))))) + (unwrittenObjects.Count() > 10 ? "\n(and more, " + unwrittenObjects.Count() + " total)" : ""));
             }
         }
 
@@ -480,19 +503,23 @@ namespace UndertaleModLib
         public static UndertaleData Read(Stream stream, UndertaleReader.WarningHandlerDelegate warningHandler = null)
         {
             UndertaleReader reader = new UndertaleReader(stream, warningHandler);
-            return reader.ReadUndertaleData();
+            var data = reader.ReadUndertaleData();
+            reader.ThrowIfUnreadObjects();
+            return data;
         }
 
         public static void Write(Stream stream, UndertaleData data)
         {
             UndertaleWriter writer = new UndertaleWriter(stream);
             writer.WriteUndertaleData(data);
+            writer.ThrowIfUnwrittenObjects();
         }
 
         public static Dictionary<uint, UndertaleObject> GenerateOffsetMap(Stream stream)
         {
             UndertaleReader reader = new UndertaleReader(stream);
             reader.ReadUndertaleData();
+            reader.ThrowIfUnreadObjects();
             return reader.GetOffsetMap();
         }
     }

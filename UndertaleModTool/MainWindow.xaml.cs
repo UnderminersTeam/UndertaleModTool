@@ -365,19 +365,17 @@ namespace UndertaleModTool
                         });
                         setMax.Report(null);
 
-                        for(int i = 0; i < Data.Code.Count; i++)
+                        for (int i = 0; i < Data.Code.Count; i++)
                         {
                             debugData.SourceCode.Add(new UndertaleScriptSource() { SourceCode = debugData.Strings.MakeString(outputs[i]) });
                             debugData.DebugInfo.Add(outputsOffsets[i]);
                             debugData.LocalVars.Add(Data.CodeLocals[i]); // TODO: this may be a bug? the strings are not copied...
                         }
 
-                        using (FileStream stream = new FileStream(System.IO.Path.ChangeExtension(FilePath, ".yydebug"), FileMode.Create, FileAccess.Write))
+                        using (UndertaleWriter writer = new UndertaleWriter(new FileStream(System.IO.Path.ChangeExtension(FilePath, ".yydebug"), FileMode.Create, FileAccess.Write)))
                         {
-                            using (UndertaleWriter writer = new UndertaleWriter(stream))
-                            {
-                                debugData.FORM.Serialize(writer);
-                            }
+                            debugData.FORM.Serialize(writer);
+                            writer.ThrowIfUnwrittenObjects();
                         }
                     }
                 }

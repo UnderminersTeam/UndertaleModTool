@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib;
-using UndertaleModLib.DebugData;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 
