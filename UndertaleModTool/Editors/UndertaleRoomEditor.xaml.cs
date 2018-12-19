@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,6 +46,41 @@ namespace UndertaleModTool
 
             Loaded += UndertaleRoomEditor_Loaded;
             DataContextChanged += UndertaleRoomEditor_DataContextChanged;
+        }
+
+        public void SaveImagePNG(Stream outfile)
+        {
+            var target = new RenderTargetBitmap((int)RoomGraphics.RenderSize.Width, (int)RoomGraphics.RenderSize.Height, 96, 96, PixelFormats.Pbgra32);
+            target.Render(RoomGraphics);
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(target));
+            encoder.Save(outfile);
+        }
+
+        private void ExportAsPNG_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.FileName = room.Name.Content + ".png";
+            dlg.DefaultExt = ".png";
+            dlg.Filter = "PNG files (.png)|*.png|All files|*";
+
+            if (dlg.ShowDialog() == true)
+            {
+                try
+                {
+                    using (var file = File.OpenWrite(dlg.FileName))
+                    {
+                        SaveImagePNG(file);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private void UndertaleRoomEditor_Loaded(object sender, RoutedEventArgs e)

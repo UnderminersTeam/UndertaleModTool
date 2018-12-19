@@ -1059,5 +1059,7 @@
                 </ItemsControl.Resources>
             </ItemsControl>
         </Viewbox>
+
+        <Button Content="Save as PNG" Click="ExportAsPNG_Click"/>
     </StackPanel>
 </UserControl>
