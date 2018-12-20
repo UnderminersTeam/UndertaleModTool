@@ -409,7 +409,7 @@ namespace UndertaleModLib.Models
             public float ScaleY { get => _ScaleY; set { _ScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleY")); } }
             public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
 
-            public UndertaleTexturePageItem Tpag => _SpriteMode ? SpriteDefinition.Textures[0].Texture : BackgroundDefinition.Texture; // TODO: what happens on sprites with multiple textures?
+            public UndertaleTexturePageItem Tpag => _SpriteMode ? SpriteDefinition?.Textures?.FirstOrDefault()?.Texture : BackgroundDefinition?.Texture; // TODO: what happens on sprites with multiple textures?
 
             public event PropertyChangedEventHandler PropertyChanged;
 
