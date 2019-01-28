@@ -54,7 +54,7 @@
             <TextBox Grid.Column="1" Margin="3" Text="{Binding Height}"/>
         </Grid>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Marigin Left/Right/Bottom/Top</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Margin Left/Right/Bottom/Top</TextBlock>
         <Grid Grid.Row="3" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
