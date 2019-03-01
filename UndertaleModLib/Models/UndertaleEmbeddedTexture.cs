@@ -51,8 +51,7 @@ namespace UndertaleModLib.Models
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
-            if (reader.ReadUndertaleObject<TexData>() != TextureData)
-                throw new IOException();
+            reader.ReadUndertaleObject(TextureData);
         }
 
         public class TexData : UndertaleObject, INotifyPropertyChanged

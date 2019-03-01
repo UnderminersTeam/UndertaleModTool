@@ -54,14 +54,11 @@ namespace UndertaleModLib.Models
             Tilesets = reader.ReadUndertaleObjectPointer<UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND>>();
 
             // Read the objects, throwing an error if the pointers are invalid
-            if (reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR>>() != TexturePages ||
-                reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>>() != Sprites ||
-                reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>>() != SpineSprites ||
-                reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleFont, UndertaleChunkFONT>>() != Fonts ||
-                reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND>>() != Tilesets)
-            {
-                throw new UndertaleSerializationException("Invalid pointer to SimpleResourcesList");
-            }
+            reader.ReadUndertaleObject(TexturePages);
+            reader.ReadUndertaleObject(Sprites);
+            reader.ReadUndertaleObject(SpineSprites);
+            reader.ReadUndertaleObject(Fonts);
+            reader.ReadUndertaleObject(Tilesets);
         }
 
         public override string ToString()

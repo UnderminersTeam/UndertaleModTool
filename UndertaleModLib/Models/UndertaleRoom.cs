@@ -149,18 +149,13 @@ namespace UndertaleModLib.Models
             MetersPerPixel = reader.ReadSingle();
             if (reader.undertaleData.GeneralInfo.Major >= 2)
                 Layers = reader.ReadUndertaleObjectPointer<UndertalePointerList<Layer>>();
-            if (reader.ReadUndertaleObject<UndertalePointerList<Background>>() != Backgrounds)
-                throw new IOException();
-            if (reader.ReadUndertaleObject<UndertalePointerList<View>>() != Views)
-                throw new IOException();
-            if (reader.ReadUndertaleObject<UndertalePointerList<GameObject>>() != GameObjects)
-                throw new IOException();
-            if (reader.ReadUndertaleObject<UndertalePointerList<Tile>>() != Tiles)
-                throw new IOException();
+            reader.ReadUndertaleObject(Backgrounds);
+            reader.ReadUndertaleObject(Views);
+            reader.ReadUndertaleObject(GameObjects);
+            reader.ReadUndertaleObject(Tiles);
             if (reader.undertaleData.GeneralInfo.Major >= 2)
             {
-                if (reader.ReadUndertaleObject<UndertalePointerList<Layer>>() != Layers)
-                    throw new IOException();
+                reader.ReadUndertaleObject(Layers);
 
                 // Resolve the object IDs
                 foreach(var layer in Layers)
@@ -740,10 +735,8 @@ namespace UndertaleModLib.Models
                 {
                     LegacyTiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<Tile>>();
                     Sprites = reader.ReadUndertaleObjectPointer<UndertalePointerList<SpriteInstance>>();
-                    if (reader.ReadUndertaleObject<UndertalePointerList<Tile>>() != LegacyTiles)
-                        throw new IOException("LegacyTiles misaligned");
-                    if (reader.ReadUndertaleObject<UndertalePointerList<SpriteInstance>>() != Sprites)
-                        throw new IOException("Sprites misaligned");
+                    reader.ReadUndertaleObject(LegacyTiles);
+                    reader.ReadUndertaleObject(Sprites);
                 }
             }
         }

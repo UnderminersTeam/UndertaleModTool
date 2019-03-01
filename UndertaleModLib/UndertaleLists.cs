@@ -161,11 +161,9 @@ namespace UndertaleModLib
                 try
                 {
                     (this[(int)i] as PrePaddedObject)?.UnserializePrePadding(reader);
-                    T obj = reader.ReadUndertaleObject<T>();
-                    if (!obj.Equals(this[(int)i]))
-                        throw new UndertaleSerializationException("Something got misaligned...");
+                    reader.ReadUndertaleObject(this[(int)i]);
                     if (i != count - 1)
-                        (obj as PaddedObject)?.UnserializePadding(reader);
+                        (this[(int)i] as PaddedObject)?.UnserializePadding(reader);
                 }
                 catch (UndertaleSerializationException e)
                 {

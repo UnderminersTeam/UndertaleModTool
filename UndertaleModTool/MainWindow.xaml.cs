@@ -56,6 +56,7 @@ namespace UndertaleModTool
 
         private bool _CanSave = false;
         public bool CanSave { get { return _CanSave; } private set { _CanSave = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CanSave")); } }
+        public bool CanSafelySave = false;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -72,6 +73,7 @@ namespace UndertaleModTool
             TitleMain = "UndertaleModTool by krzys_h v" + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
 
             CanSave = false;
+            CanSafelySave = false;
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -162,6 +164,7 @@ namespace UndertaleModTool
             SelectionHistory.Clear();
 
             CanSave = true;
+            CanSafelySave = true;
         }
 
         private async Task<bool> DoOpenDialog()
@@ -202,7 +205,12 @@ namespace UndertaleModTool
         private void Command_Save(object sender, ExecutedRoutedEventArgs e)
         {
             if (CanSave)
+            {
+                if (!CanSafelySave)
+                    MessageBox.Show("Errors occurred during loading. High chance of data loss! Proceed at your own risk.", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning);
+
                 DoSaveDialog();
+            }
         }
 
         private void Command_Close(object sender, ExecutedRoutedEventArgs e)
@@ -242,15 +250,18 @@ namespace UndertaleModTool
                         {
                             MessageBox.Show("Only bytecode versions 15, 16, and (partially) 17 are supported for now, you are trying to load " + data.GeneralInfo.BytecodeVersion + ". A lot of code is disabled and will likely break something. Saving/exporting is disabled.", "Unsupported bytecode version", MessageBoxButton.OK, MessageBoxImage.Warning);
                             CanSave = false;
+                            CanSafelySave = false;
                         }
                         else if (hadWarnings)
                         {
-                            MessageBox.Show("Warnings occurred during loading. Saving has been disabled.", "Saving disabled", MessageBoxButton.OK, MessageBoxImage.Warning);
-                            CanSave = false;
+                            MessageBox.Show("Warnings occurred during loading. Data loss will likely occur when trying to save!", "Loading problems", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            CanSave = true;
+                            CanSafelySave = false;
                         }
                         else
                         {
                             CanSave = true;
+                            CanSafelySave = true;
                         }
                         if (data.GeneralInfo != null && data.Code == null)
                         {
