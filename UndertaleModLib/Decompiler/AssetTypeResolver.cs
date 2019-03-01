@@ -66,7 +66,8 @@ namespace UndertaleModLib.Decompiler
         os_win8native = 9,
         os_xbox360 = 17,
         os_xboxone = 15,
-        os_switch = 20,
+        os_switch_beta = 20, // this one was used while switch support was in beta and changed later?
+        os_switch = 21,
     }
 
     public enum e__VW : int
