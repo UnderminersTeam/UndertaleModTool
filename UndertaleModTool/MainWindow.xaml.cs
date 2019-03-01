@@ -91,7 +91,7 @@ namespace UndertaleModTool
                 UndertaleModTool_app.CreateSubKey(@"shell\open\command").SetValue("", "\"" + Assembly.GetExecutingAssembly().Location + "\" \"%1\"", RegistryValueKind.String);
                 UndertaleModTool_app.CreateSubKey(@"shell\launch\command").SetValue("", "\"" + Assembly.GetExecutingAssembly().Location + "\" \"%1\" launch", RegistryValueKind.String);
                 UndertaleModTool_app.CreateSubKey(@"shell\launch").SetValue("", "Run game", RegistryValueKind.String);
-                foreach (var extStr in new String[] { ".win", ".unx", ".ios" })
+                foreach (var extStr in new string[] { ".win", ".unx", ".ios" })
                 {
                     var ext = HKCU_Classes.CreateSubKey(extStr);
                     ext.SetValue("", "UndertaleModTool", RegistryValueKind.String);
@@ -116,15 +116,13 @@ namespace UndertaleModTool
             {
                 if (args[2] == "launch")
                 {
-                    string runnerPath = FindRunner();
-                    if (runnerPath == null)
+                    RuntimePicker picker = new RuntimePicker();
+                    picker.Owner = this;
+                    var runtime = picker.Pick(FilePath, Data);
+                    if (runtime == null)
                         return;
 
-                    if (!Data.GeneralInfo.DisableDebugger)
-                        if (MessageBox.Show("This data file has debugger enabled! Continue?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
-                            return;
-
-                    Process.Start(runnerPath, "-game \"" + FilePath + "\"");
+                    Process.Start(runtime.Path, "-game \"" + FilePath + "\"");
                     Close();
                 }
                 else
@@ -844,52 +842,25 @@ namespace UndertaleModTool
             MessageBox.Show("UndertaleModTool by krzys_h\nVersion " + version, "About", MessageBoxButton.OK);
         }
 
-        private string FindRunner()
-        {
-            string gameRunner = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(FilePath), Data.GeneralInfo.Filename.Content + ".exe");
-            Debug.WriteLine(gameRunner);
-            if (File.Exists(gameRunner))
-                return gameRunner;
-
-            if (Data.GeneralInfo.Major >= 2)
-            {
-                // TODO: Implement this
-                MessageBox.Show("Unable to find game runner at " + gameRunner + ", and running GMS2 runner from Studio directly is not supported.", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return null;
-            }
-
-            string studioRunner = System.IO.Path.Combine(Environment.ExpandEnvironmentVariables(SettingsWindow.GameMakerStudioPath), "Runner.exe");
-            Debug.WriteLine(studioRunner);
-            if (File.Exists(studioRunner))
-                return studioRunner;
-            MessageBox.Show("Unable to find game runner at " + gameRunner + " nor GM:S installation directory. Please check the paths.", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
-            return null;
-        }
-
-        private string FindDebugger()
-        {
-            string studioDebugger = System.IO.Path.Combine(Environment.ExpandEnvironmentVariables(SettingsWindow.GameMakerStudioPath), @"GMDebug\GMDebug.exe");
-            Debug.WriteLine(studioDebugger);
-            if (File.Exists(studioDebugger))
-                return studioDebugger;
-            MessageBox.Show("Unable to find Game Maker: Studio debugger at " + studioDebugger + ". Please install GM:S and check the paths.", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
-            return null;
-        }
-
         private async void Command_Run(object sender, ExecutedRoutedEventArgs e)
         {
             if (Data == null)
                 return;
-
-            string runnerPath = FindRunner();
-            if (runnerPath == null)
+            
+            RuntimePicker picker = new RuntimePicker();
+            picker.Owner = this;
+            var runtime = picker.Pick(FilePath, Data);
+            if (runtime == null)
                 return;
 
             bool origDbg = Data.GeneralInfo.DisableDebugger;
             Data.GeneralInfo.DisableDebugger = true;
-            if (await DoSaveDialog())
+            bool saveOk = true;
+            if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                saveOk = await DoSaveDialog();
+            if (saveOk)
             {
-                Process.Start(runnerPath, "-game \"" + FilePath + "\" -debugoutput \"" + System.IO.Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
+                Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + System.IO.Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
             }
             Data.GeneralInfo.DisableDebugger = origDbg;
         }
@@ -899,10 +870,16 @@ namespace UndertaleModTool
             if (Data == null)
                 return;
             
-            string runnerPath = FindRunner();
-            string debuggerPath = FindDebugger();
-            if (runnerPath == null || debuggerPath == null)
+            RuntimePicker picker = new RuntimePicker();
+            picker.Owner = this;
+            var runtime = picker.Pick(FilePath, Data);
+            if (runtime == null)
                 return;
+            if (runtime.DebuggerPath == null)
+            {
+                MessageBox.Show("The selected runtime does not support debugging.", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
             bool origDbg = Data.GeneralInfo.DisableDebugger;
             Data.GeneralInfo.DisableDebugger = false;
@@ -929,8 +906,8 @@ namespace UndertaleModTool
   </TutorialState>
 </assets>");
 
-                Process.Start(runnerPath, "-game \"" + FilePath + "\" -debugoutput \"" + System.IO.Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
-                Process.Start(debuggerPath, "-d=\"" + System.IO.Path.ChangeExtension(FilePath, ".yydebug") + "\" -t=\"127.0.0.1\" -tp=" + Data.GeneralInfo.DebuggerPort + " -p=\"" + tempProject + "\"");
+                Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + System.IO.Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
+                Process.Start(runtime.DebuggerPath, "-d=\"" + System.IO.Path.ChangeExtension(FilePath, ".yydebug") + "\" -t=\"127.0.0.1\" -tp=" + Data.GeneralInfo.DebuggerPort + " -p=\"" + tempProject + "\"");
             }
             Data.GeneralInfo.DisableDebugger = origDbg;
         }

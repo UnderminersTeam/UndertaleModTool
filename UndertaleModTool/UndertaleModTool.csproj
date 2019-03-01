@@ -292,6 +292,9 @@
     <Compile Include="Windows\DebugDataDialog.xaml.cs">
       <DependentUpon>DebugDataDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\RuntimePicker.xaml.cs">
+      <DependentUpon>RuntimePicker.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -433,6 +436,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Windows\RuntimePicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\SettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -45,6 +45,18 @@ namespace UndertaleModTool
             }
         }
 
+        public static string GameMakerStudio2RuntimesPath
+        {
+            get => ConfigurationManager.AppSettings["GameMakerStudio2RuntimesPath"] as String;
+            set
+            {
+                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                config.AppSettings.Settings["GameMakerStudio2RuntimesPath"].Value = value;
+                config.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+            }
+        }
+
         public SettingsWindow()
         {
             InitializeComponent();
