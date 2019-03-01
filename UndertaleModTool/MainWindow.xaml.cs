@@ -625,8 +625,10 @@ namespace UndertaleModTool
                         loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
 
                         var script = CSharpScript.Create<object>(CommandBox.Text, ScriptOptions.Default
-                            .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "System", "System.IO", "System.Collections.Generic")
-                            .WithReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly)),
+                            .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting")
+                            .AddImports("System", "System.IO", "System.Collections.Generic", "System.Text.RegularExpressions")
+                            .AddReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly))
+                            .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                             typeof(IScriptInterface), loader);
 
                         result = (await script.RunAsync(this)).ReturnValue;
@@ -736,8 +738,10 @@ namespace UndertaleModTool
                     loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
 
                     var script = CSharpScript.Create<object>(File.ReadAllText(path), ScriptOptions.Default
-                        .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "System", "System.IO", "System.Collections.Generic")
-                        .WithReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly)),
+                        .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting")
+                        .AddImports("System", "System.IO", "System.Collections.Generic", "System.Text.RegularExpressions")
+                        .AddReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly))
+                        .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                         typeof(IScriptInterface), loader);
 
                     object result = (await script.RunAsync(this)).ReturnValue;
