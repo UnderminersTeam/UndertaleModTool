@@ -208,6 +208,8 @@ namespace UndertaleModLib.Decompiler
                     return ((VAlign)Convert.ToInt32(Value)).ToString();
                 if (AssetType == AssetIDType.Enum_OSType)
                     return ((OSType)Convert.ToInt32(Value)).ToString();
+                if (AssetType == AssetIDType.Enum_GamepadButton)
+                    return ((GamepadButton)Convert.ToInt32(Value)).ToString();
 
                 if (AssetType == AssetIDType.Color && Value is IFormattable)
                 {

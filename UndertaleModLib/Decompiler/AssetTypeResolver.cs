@@ -14,6 +14,7 @@ namespace UndertaleModLib.Decompiler
         Enum_HAlign,
         Enum_VAlign,
         Enum_OSType,
+        Enum_GamepadButton,
         e__VW, // The constant used in __view_get and __view_set compatibility scripts
         e__BG, // The constant used in __background_get and __background_set compatibility scripts
 
@@ -68,6 +69,30 @@ namespace UndertaleModLib.Decompiler
         os_xboxone = 15,
         os_switch_beta = 20, // this one was used while switch support was in beta and changed later?
         os_switch = 21,
+    }
+
+    public enum GamepadButton : int
+    {
+        gp_face1 = 32769,
+        gp_face2 = 32770,
+        gp_face3 = 32771,
+        gp_face4 = 32772,
+        gp_shoulderl = 32773,
+        gp_shoulderlb = 32775,
+        gp_shoulderr = 32774,
+        gp_shoulderrb = 32776,
+        gp_select = 32777,
+        gp_start = 32778,
+        gp_stickl = 32779,
+        gp_stickr = 32780,
+        gp_padu = 32781,
+        gp_padd = 32782,
+        gp_padl = 32783,
+        gp_padr = 32784,
+        gp_axislh = 32785,
+        gp_axislv = 32786,
+        gp_axisrh = 32787,
+        gp_axisrv = 32788,
     }
 
     public enum e__VW : int
@@ -442,6 +467,11 @@ namespace UndertaleModLib.Decompiler
             { "keyboard_unset_map", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_set_numlock", new AssetIDType[] { AssetIDType.Other } },
             { "keyboard_get_numlock", new AssetIDType[] { } },
+
+            { "gamepad_button_value", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
+            { "gamepad_button_check", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
+            { "gamepad_button_check_pressed", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
+            { "gamepad_button_check_released", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
         };
 
         public static Dictionary<string, AssetIDType> builtin_vars = new Dictionary<string, AssetIDType>()
@@ -517,6 +547,9 @@ namespace UndertaleModLib.Decompiler
             OSType os_type;
             if (Enum.TryParse(const_name, out os_type))
                 return (int)os_type;
+            GamepadButton gm_button;
+            if (Enum.TryParse(const_name, out gm_button))
+                return (int)gm_button;
             HAlign halign;
             if (Enum.TryParse(const_name, out halign))
                 return (int)halign;
