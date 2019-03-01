@@ -153,6 +153,11 @@ namespace UndertaleModLib.Decompiler
                 
                 if (HUGE_HACK_FIX_THIS_SOON != null && AssetType != AssetIDType.Other && AssetType != AssetIDType.Color && AssetType != AssetIDType.KeyboardKey && AssetType != AssetIDType.e__VW && AssetType != AssetIDType.e__BG && AssetType != AssetIDType.Enum_HAlign && AssetType != AssetIDType.Enum_VAlign)
                 {
+                    if (Value.GetType() == typeof(UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>))
+                    {
+                        Debug.WriteLine("wtf"); // scr_84_debug in Deltarune Switch
+                        return ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value).ToString();
+                    }
                     int val;
                     try
                     {
