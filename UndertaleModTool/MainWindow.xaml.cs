@@ -15,6 +15,7 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Media;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,8 +77,32 @@ namespace UndertaleModTool
             CanSafelySave = false;
         }
 
+        [DllImport("shell32.dll")]
+        static extern void SHChangeNotify(long wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
+        const long SHCNE_ASSOCCHANGED = 0x08000000;
+
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                var HKCU_Classes = Registry.CurrentUser.OpenSubKey(@"Software\Classes", true);
+                var UndertaleModTool_app = HKCU_Classes.CreateSubKey(@"UndertaleModTool");
+                UndertaleModTool_app.SetValue("", "UndertaleModTool");
+                UndertaleModTool_app.CreateSubKey(@"shell\open\command").SetValue("", "\"" + Assembly.GetExecutingAssembly().Location + "\" \"%1\"", RegistryValueKind.String);
+                UndertaleModTool_app.CreateSubKey(@"shell\launch\command").SetValue("", "\"" + Assembly.GetExecutingAssembly().Location + "\" \"%1\" launch", RegistryValueKind.String);
+                UndertaleModTool_app.CreateSubKey(@"shell\launch").SetValue("", "Run game", RegistryValueKind.String);
+                foreach (var extStr in new String[] { ".win", ".unx", ".ios" })
+                {
+                    var ext = HKCU_Classes.CreateSubKey(extStr);
+                    ext.SetValue("", "UndertaleModTool", RegistryValueKind.String);
+                }
+                SHChangeNotify(SHCNE_ASSOCCHANGED, 0, IntPtr.Zero, IntPtr.Zero);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+            }
+
             var args = Environment.GetCommandLineArgs();
             if (args.Length > 1)
             {
@@ -89,7 +114,23 @@ namespace UndertaleModTool
             }
             if (args.Length > 2)
             {
-                ListenChildConnection(args[2]);
+                if (args[2] == "launch")
+                {
+                    string runnerPath = FindRunner();
+                    if (runnerPath == null)
+                        return;
+
+                    if (!Data.GeneralInfo.DisableDebugger)
+                        if (MessageBox.Show("This data file has debugger enabled! Continue?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+                            return;
+
+                    Process.Start(runnerPath, "-game \"" + FilePath + "\"");
+                    Close();
+                }
+                else
+                {
+                    ListenChildConnection(args[2]);
+                }
             }
         }
 
@@ -813,6 +854,14 @@ namespace UndertaleModTool
             Debug.WriteLine(gameRunner);
             if (File.Exists(gameRunner))
                 return gameRunner;
+
+            if (Data.GeneralInfo.Major >= 2)
+            {
+                // TODO: Implement this
+                MessageBox.Show("Unable to find game runner at " + gameRunner + ", and running GMS2 runner from Studio directly is not supported.", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return null;
+            }
+
             string studioRunner = System.IO.Path.Combine(Environment.ExpandEnvironmentVariables(SettingsWindow.GameMakerStudioPath), "Runner.exe");
             Debug.WriteLine(studioRunner);
             if (File.Exists(studioRunner))
