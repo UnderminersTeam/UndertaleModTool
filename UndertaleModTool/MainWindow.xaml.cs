@@ -702,18 +702,26 @@ namespace UndertaleModTool
         {
             MenuItem item = sender as MenuItem;
             item.Items.Clear();
-            foreach(var path in Directory.EnumerateFiles("SampleScripts"))
+            try
             {
-                var filename = System.IO.Path.GetFileName(path);
-                if (!filename.EndsWith(".csx"))
-                    continue;
-                MenuItem subitem = new MenuItem() { Header = filename.Replace("_", "__") };
-                subitem.Click += MenuItem_RunBuiltinScript_Item_Click;
-                subitem.CommandParameter = path;
-                item.Items.Add(subitem);
+                var appDir = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                foreach (var path in Directory.EnumerateFiles(System.IO.Path.Combine(appDir, "SampleScripts")))
+                {
+                    var filename = System.IO.Path.GetFileName(path);
+                    if (!filename.EndsWith(".csx"))
+                        continue;
+                    MenuItem subitem = new MenuItem() { Header = filename.Replace("_", "__") };
+                    subitem.Click += MenuItem_RunBuiltinScript_Item_Click;
+                    subitem.CommandParameter = path;
+                    item.Items.Add(subitem);
+                }
+                if (item.Items.Count == 0)
+                    item.Items.Add(new MenuItem() { Header = "(whoops, no scripts found?)", IsEnabled = false });
             }
-            if (item.Items.Count == 0)
-                item.Items.Add(new MenuItem() { Header = "(whoops, no scripts found?)", IsEnabled = false });
+            catch (Exception err)
+            {
+                item.Items.Add(new MenuItem() { Header = err.ToString(), IsEnabled = false });
+            }
         }
 
         private async Task RunScript(string path)
