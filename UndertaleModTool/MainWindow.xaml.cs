@@ -660,8 +660,9 @@ namespace UndertaleModTool
                         loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
 
                         var script = CSharpScript.Create<object>(CommandBox.Text, ScriptOptions.Default
-                            .AddImports("UndertaleModTool", "UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting")
+                            .AddImports("UndertaleModTool", "UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler")
                             .AddImports("System", "System.IO", "System.Collections.Generic", "System.Text.RegularExpressions")
+                            .AddImports("System.Windows", "System.Windows.Application", "System.Windows.Media", "System.Windows.Media.Imaging")
                             .AddReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly))
                             .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                             typeof(IScriptInterface), loader);
@@ -775,6 +776,7 @@ namespace UndertaleModTool
                     var script = CSharpScript.Create<object>(File.ReadAllText(path), ScriptOptions.Default
                         .AddImports("UndertaleModTool", "UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting")
                         .AddImports("System", "System.IO", "System.Collections.Generic", "System.Text.RegularExpressions")
+                        .AddImports("System.Windows", "System.Windows.Application", "System.Windows.Media", "System.Windows.Media.Imaging")
                         .AddReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly))
                         .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                         typeof(IScriptInterface), loader);
