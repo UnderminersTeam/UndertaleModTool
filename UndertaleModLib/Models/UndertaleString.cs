@@ -44,7 +44,7 @@ namespace UndertaleModLib.Models
 
         public override string ToString()
         {
-            return "\"" + Content + "\"";
+            return "\"" + Content.Replace("\"", "\" + chr(ord('\"')) + \"") + "\"";
         }
 
         public bool SearchMatches(string filter)

@@ -219,14 +219,14 @@ namespace UndertaleModLib.Decompiler
                 if (AssetType == AssetIDType.Color && Value is IFormattable)
                 {
                     uint val = Convert.ToUInt32(Value);
-                    return "0x" + ((IFormattable)Value).ToString(val > 0xFFFFFF ? "X8" : "X6", CultureInfo.InvariantCulture);
+                    return "$" + ((IFormattable)Value).ToString(val > 0xFFFFFF ? "X8" : "X6", CultureInfo.InvariantCulture);
                 }
 
                 if (AssetType == AssetIDType.KeyboardKey)
                 {
                     int val = Convert.ToInt32(Value);
                     if (!Char.IsControl((char)val) && !Char.IsLower((char)val)) // The special keys overlay with the uppercase letters (ugh)
-                        return "'" + (char)val + "'";
+                        return (((char)val) == '\'' ? "\"'\"" : "'" + (char)val + "'");
                     if (val > 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
                         return ((EventSubtypeKey)val).ToString();
                 }
@@ -478,7 +478,7 @@ namespace UndertaleModLib.Decompiler
                 if (Value != null)
                     return "return " + Value.ToString();
                 else
-                    return "return";
+                    return "exit";
             }
 
             internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
@@ -628,10 +628,11 @@ namespace UndertaleModLib.Decompiler
                 //Debug.Assert((ArrayIndex != null) == NeedsArrayParameters);
                 //Debug.Assert((InstanceIndex != null) == NeedsInstanceParameters);
                 string name = Var.Name.Content;
-                if (ArrayIndex1 != null)
+                if (ArrayIndex1 != null && ArrayIndex2 != null)
+                    name = name + "[" + ArrayIndex1.ToString() + ", " + ArrayIndex2.ToString() + "]";
+                else if (ArrayIndex1 != null)
                     name = name + "[" + ArrayIndex1.ToString() + "]";
-                if (ArrayIndex2 != null)
-                    name = name + "[" + ArrayIndex2.ToString() + "]";
+
                 name = InstType.ToString() + "." + name;
 
                 return name;
@@ -1410,8 +1411,11 @@ namespace UndertaleModLib.Decompiler
         private static BlockHLStatement HLDecompileBlocks(ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, List<Block> alreadyVisited, Block currentLoop = null, bool decompileTheLoop = false, Block stopAt = null)
         {
             BlockHLStatement output = new BlockHLStatement();
+            bool foundBreak = false;
+
             while(block != stopAt && block != null)
             {
+
                 if (loops.ContainsKey(block) && !decompileTheLoop)
                 {
                     if (block != currentLoop)
@@ -1428,9 +1432,11 @@ namespace UndertaleModLib.Decompiler
                 }
                 else if (currentLoop != null && !loops[currentLoop].Contains(block))
                 {
+                    if (foundBreak)
+                        break;
+
                     // this is a break statement
-                    output.Statements.Add(new BreakHLStatement());
-                    break;
+                    foundBreak = true;
                 }
 
                 //output.Statements.Add(new CommentStatement("At block " + block.Address));
@@ -1555,6 +1561,10 @@ namespace UndertaleModLib.Decompiler
                     block = block.nextBlockTrue;
                 }
             }
+
+            if (foundBreak)
+                output.Statements.Add(new BreakHLStatement());
+
             return output;
         }
 
