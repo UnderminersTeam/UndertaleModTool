@@ -1415,7 +1415,6 @@ namespace UndertaleModLib.Decompiler
 
             while(block != stopAt && block != null)
             {
-
                 if (loops.ContainsKey(block) && !decompileTheLoop)
                 {
                     if (block != currentLoop)
@@ -1430,11 +1429,19 @@ namespace UndertaleModLib.Decompiler
                         break;
                     }
                 }
-                else if (currentLoop != null && !loops[currentLoop].Contains(block))
+                else if (currentLoop != null && !loops[currentLoop].Contains(block)) //TODO:Break. If the code is only used here, you can put it before the break. (If two+ blocks branch to this
                 {
-                    if (foundBreak)
-                        break;
+                    int refCount = 0;
+                    foreach (var testBlock in alreadyVisited)
+                        if (testBlock.nextBlockTrue == block || testBlock.nextBlockFalse == block)
+                            refCount++;
 
+                    if (refCount > 1)
+                        foundBreak = true;
+
+                    if (foundBreak || refCount > 1)
+                        break;
+                    
                     // this is a break statement
                     foundBreak = true;
                 }
