@@ -225,10 +225,19 @@ namespace UndertaleModLib.Decompiler
                 if (AssetType == AssetIDType.KeyboardKey)
                 {
                     int val = Convert.ToInt32(Value);
+                    if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
+                    {
+                        if (val < (int)EventSubtypeKey.Digit0 || val > (int)EventSubtypeKey.Z)
+                        {
+                            return ((EventSubtypeKey)val).ToString();
+                        } else if (!Char.IsControl((char)val) && !Char.IsLower((char)val))
+                        {
+                            return "ord(" + (((char)val) == '\'' ? "\"'\"" : "'" + (char)val + "'") + ")";
+                        }
+                    }
+
                     if (!Char.IsControl((char)val) && !Char.IsLower((char)val)) // The special keys overlay with the uppercase letters (ugh)
                         return (((char)val) == '\'' ? "\"'\"" : "'" + (char)val + "'");
-                    if (val > 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
-                        return ((EventSubtypeKey)val).ToString();
                 }
 
                 return ((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
@@ -788,7 +797,18 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.Conv:
                         /*if (instr.Type1 != stack.Peek().Type)
                             stack.Push(new ExpressionCast(instr.Type1, stack.Pop()));*/
-                        stack.Push(new ExpressionCast(instr.Type2, stack.Pop()));
+
+                        Expression castExpression = stack.Pop();
+
+                        if (castExpression is ExpressionTwo) // Knee's shoddy fix.
+                        {
+                            stack.Push(((ExpressionTwo)castExpression).Argument1);
+                        }
+                        else
+                        {
+                            stack.Push(new ExpressionCast(instr.Type2, castExpression));
+                        }
+                        
                         break;
 
                     case UndertaleInstruction.Opcode.Mul:
@@ -813,7 +833,7 @@ namespace UndertaleModLib.Decompiler
                         stack.Push(new ExpressionCompare(instr.ComparisonKind, aa1, aa2)); // TODO: type
                         break;
 
-                    case UndertaleInstruction.Opcode.B:
+                    case UndertaleInstruction.Opcode.B: 
                         end = true;
                         break;
 
@@ -1429,7 +1449,7 @@ namespace UndertaleModLib.Decompiler
                         break;
                     }
                 }
-                else if (currentLoop != null && !loops[currentLoop].Contains(block)) //TODO:Break. If the code is only used here, you can put it before the break. (If two+ blocks branch to this
+                else if (currentLoop != null && !loops[currentLoop].Contains(block))
                 {
                     int refCount = 0;
                     foreach (var testBlock in alreadyVisited)
