@@ -456,10 +456,13 @@ namespace UndertaleModLib.Decompiler
             // TODO: GMS2 layers
             
             { "io_clear", new AssetIDType[] { } },
+            { "keyboard_multicheck", new AssetIDType[] { AssetIDType.KeyboardKey } },
+            { "keyboard_multicheck_pressed", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_check", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_check_pressed", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_check_released", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_check_direct", new AssetIDType[] { AssetIDType.KeyboardKey } },
+            { "keyboard_clear", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_key_press", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_key_release", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_set_map", new AssetIDType[] { AssetIDType.KeyboardKey, AssetIDType.KeyboardKey } },

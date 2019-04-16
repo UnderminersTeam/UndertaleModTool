@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
+using static UndertaleModLib.Models.UndertaleInstruction;
 
 namespace UndertaleModLib.Decompiler
 {
@@ -27,6 +28,7 @@ namespace UndertaleModLib.Decompiler
             public List<UndertaleInstruction> Instructions = new List<UndertaleInstruction>();
             public List<Statement> Statements = null;
             public Expression ConditionStatement = null;
+            public Opcode opcode;
             public bool conditionalExit;
             public Block nextBlockTrue;
             public Block nextBlockFalse;
@@ -833,13 +835,15 @@ namespace UndertaleModLib.Decompiler
                         stack.Push(new ExpressionCompare(instr.ComparisonKind, aa1, aa2)); // TODO: type
                         break;
 
-                    case UndertaleInstruction.Opcode.B: 
+                    case UndertaleInstruction.Opcode.B:
+                        block.opcode = UndertaleInstruction.Opcode.B;
                         end = true;
                         break;
 
                     case UndertaleInstruction.Opcode.Bt:
                     case UndertaleInstruction.Opcode.Bf:
                         block.ConditionStatement = stack.Pop();
+                        block.opcode = instr.Kind;
                         end = true;
                         break;
 
@@ -1428,7 +1432,7 @@ namespace UndertaleModLib.Decompiler
             }
         }*/
 
-        private static BlockHLStatement HLDecompileBlocks(ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, List<Block> alreadyVisited, Block currentLoop = null, bool decompileTheLoop = false, Block stopAt = null)
+        private static BlockHLStatement HLDecompileBlocks(ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, List<Block> alreadyVisited, Block currentLoop = null, bool decompileTheLoop = false, Block stopAt = null, bool allowBreak = false)
         {
             BlockHLStatement output = new BlockHLStatement();
             bool foundBreak = false;
@@ -1448,22 +1452,15 @@ namespace UndertaleModLib.Decompiler
                         output.Statements.Add(new ContinueHLStatement());
                         break;
                     }
-                }
-                else if (currentLoop != null && !loops[currentLoop].Contains(block))
-                {
-                    int refCount = 0;
-                    foreach (var testBlock in alreadyVisited)
-                        if (testBlock.nextBlockTrue == block || testBlock.nextBlockFalse == block)
-                            refCount++;
+                } else if (currentLoop != null) {
+                    bool contains = loops[currentLoop].Contains(block);
 
-                    if (refCount > 1)
+                    if (!contains)
+                    {
                         foundBreak = true;
-
-                    if (foundBreak || refCount > 1)
-                        break;
-                    
-                    // this is a break statement
-                    foundBreak = true;
+                        if (!allowBreak)
+                            break;
+                    }
                 }
 
                 //output.Statements.Add(new CommentStatement("At block " + block.Address));
@@ -1577,8 +1574,14 @@ namespace UndertaleModLib.Decompiler
                     IfHLStatement cond = new IfHLStatement();
                     cond.condition = block.ConditionStatement;
                     Block blTrue = block.nextBlockTrue, blFalse = block.nextBlockFalse;
-                    cond.trueBlock = HLDecompileBlocks(ref blTrue, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint);
-                    cond.falseBlock = HLDecompileBlocks(ref blFalse, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint);
+                    cond.trueBlock = HLDecompileBlocks(ref blTrue, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint, true);
+                    cond.falseBlock = HLDecompileBlocks(ref blFalse, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint, true);
+                    if (cond.trueBlock.Statements.Count > 0 && cond.falseBlock.Statements.Count > 0 && cond.trueBlock.Statements.Last() is BreakHLStatement && cond.falseBlock.Statements.Last() is BreakHLStatement)
+                    {
+                        cond.trueBlock.Statements.Remove(cond.trueBlock.Statements.Last());
+                        cond.falseBlock.Statements.Remove(cond.falseBlock.Statements.Last());
+                    }
+
                     output.Statements.Add(cond);
 
                     block = meetPoint;
