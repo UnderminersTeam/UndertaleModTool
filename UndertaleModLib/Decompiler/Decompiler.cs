@@ -9,7 +9,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
-using static UndertaleModLib.Models.UndertaleInstruction;
 
 namespace UndertaleModLib.Decompiler
 {
@@ -28,7 +27,6 @@ namespace UndertaleModLib.Decompiler
             public List<UndertaleInstruction> Instructions = new List<UndertaleInstruction>();
             public List<Statement> Statements = null;
             public Expression ConditionStatement = null;
-            public Opcode opcode;
             public bool conditionalExit;
             public Block nextBlockTrue;
             public Block nextBlockFalse;
@@ -802,7 +800,7 @@ namespace UndertaleModLib.Decompiler
 
                         Expression castExpression = stack.Pop();
 
-                        if (castExpression is ExpressionTwo) // Knee's shoddy fix.
+                        if (castExpression is ExpressionTwo && ((ExpressionTwo)castExpression).Argument1 is ExpressionTempVar) // Knee's shoddy fix.
                         {
                             stack.Push(((ExpressionTwo)castExpression).Argument1);
                         }
@@ -836,14 +834,12 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.B:
-                        block.opcode = UndertaleInstruction.Opcode.B;
                         end = true;
                         break;
 
                     case UndertaleInstruction.Opcode.Bt:
                     case UndertaleInstruction.Opcode.Bf:
                         block.ConditionStatement = stack.Pop();
-                        block.opcode = instr.Kind;
                         end = true;
                         break;
 
