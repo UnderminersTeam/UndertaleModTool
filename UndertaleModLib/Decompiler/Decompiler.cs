@@ -804,17 +804,7 @@ namespace UndertaleModLib.Decompiler
                         /*if (instr.Type1 != stack.Peek().Type)
                             stack.Push(new ExpressionCast(instr.Type1, stack.Pop()));*/
 
-                        Expression castExpression = stack.Pop();
-
-                        if (castExpression is ExpressionTwo && ((ExpressionTwo)castExpression).Argument1 is ExpressionTempVar) // Knee's shoddy fix.
-                        {
-                            stack.Push(((ExpressionTwo)castExpression).Argument1);
-                        }
-                        else
-                        {
-                            stack.Push(new ExpressionCast(instr.Type2, castExpression));
-                        }
-                        
+                        stack.Push(new ExpressionCast(instr.Type2, stack.Pop()));
                         break;
 
                     case UndertaleInstruction.Opcode.Mul:
@@ -1574,11 +1564,18 @@ namespace UndertaleModLib.Decompiler
                         throw new Exception("End of if not found");
 
                     IfHLStatement cond = new IfHLStatement();
-                    cond.condition = block.ConditionStatement;
+
+                    if (block.ConditionStatement is ExpressionCast && ((ExpressionCast) block.ConditionStatement).Argument is ExpressionTwo) { // Prevents if (tempvar - 1), when it should be if (tempvar)
+                        ExpressionTwo eTwo = (ExpressionTwo) ((ExpressionCast)block.ConditionStatement).Argument;
+                        cond.condition = (eTwo.Argument1 is ExpressionTempVar && eTwo.Argument2 is ExpressionConstant) ? eTwo.Argument1 : block.ConditionStatement;
+                    } else {
+                        cond.condition = block.ConditionStatement;
+                    }
+
                     Block blTrue = block.nextBlockTrue, blFalse = block.nextBlockFalse;
                     cond.trueBlock = HLDecompileBlocks(ref blTrue, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint, true);
                     cond.falseBlock = HLDecompileBlocks(ref blFalse, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint, true);
-                    if (cond.trueBlock.Statements.Count > 0 && cond.falseBlock.Statements.Count > 0 && cond.trueBlock.Statements.Last() is BreakHLStatement && cond.falseBlock.Statements.Last() is BreakHLStatement)
+                    if (cond.trueBlock.Statements.Count > 0 && cond.falseBlock.Statements.Count > 0 && cond.trueBlock.Statements.Last() is BreakHLStatement && cond.falseBlock.Statements.Last() is BreakHLStatement) // Fixes breaks in both if outcomes.
                     {
                         cond.trueBlock.Statements.Remove(cond.trueBlock.Statements.Last());
                         cond.falseBlock.Statements.Remove(cond.falseBlock.Statements.Last());
@@ -1665,6 +1662,39 @@ namespace UndertaleModLib.Decompiler
             DoTypePropagation(blocks);
             List<Statement> stmts = HLDecompile(blocks, blocks[0], blocks[code.Length / 4]);
             StringBuilder sb = new StringBuilder();
+
+            // Mark local variables as local.
+            bool foundAny = false;
+            StringBuilder tempBuilder = new StringBuilder();
+            UndertaleCodeLocals locals = data != null ? data.CodeLocals.For(code) : null;
+
+            if (locals != null) {
+                foreach (var local in locals.Locals)
+                {
+                    if (local.Name.Content.Equals("arguments"))
+                        continue;
+
+                    if (!foundAny)
+                    {
+                        foundAny = true;
+                    }
+                    else
+                    {
+                        tempBuilder.Append(", ");
+                    }
+
+                    tempBuilder.Append(local.Name.Content);
+                }
+
+                if (foundAny)
+                {
+                    sb.Append("var ");
+                    sb.Append(tempBuilder);
+                    sb.Append(";\n");
+                }
+            }
+
+            // Write code.
             foreach (var stmt in stmts)
                 sb.Append(stmt.ToString() + "\n");
             return sb.ToString();
