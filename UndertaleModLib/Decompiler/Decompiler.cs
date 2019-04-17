@@ -240,6 +240,12 @@ namespace UndertaleModLib.Decompiler
                         return (((char)val) == '\'' ? "\"'\"" : "'" + (char)val + "'");
                 }
 
+                if (Value is float) // Prevents scientific notation by using high bit number.
+                    return ((decimal) ((float) Value)).ToString();
+
+                if (Value is double) // Prevents scientific notation by using high bit number.
+                    return ((decimal) ((double) Value)).ToString();
+
                 return ((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
             }
 
