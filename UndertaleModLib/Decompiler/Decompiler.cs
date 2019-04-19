@@ -132,23 +132,25 @@ namespace UndertaleModLib.Decompiler
                 return true;
             }
 
+            public int GetIntegerValue()
+            {
+                try
+                {
+                    return Convert.ToInt32(Value);
+                }
+                catch (OverflowException)
+                {
+                    return Int32.MaxValue;
+                }
+            }
+
             public override string ToString()
             {
                 if (AssetType == AssetIDType.GameObject)
                 {
-                    int val;
-                    try
-                    {
-                        val = Convert.ToInt32(Value);
-                    }
-                    catch(OverflowException)
-                    {
-                        val = Int32.MaxValue;
-                    }
+                    int val = GetIntegerValue();
                     if (val < 0) 
-                    {
                         return ((UndertaleInstruction.InstanceType)val).ToString().ToLower();
-                    }
                 }
                 
                 if (HUGE_HACK_FIX_THIS_SOON != null && AssetType != AssetIDType.Other && AssetType != AssetIDType.Color && AssetType != AssetIDType.KeyboardKey && AssetType != AssetIDType.e__VW && AssetType != AssetIDType.e__BG && AssetType != AssetIDType.Enum_HAlign && AssetType != AssetIDType.Enum_VAlign)
@@ -158,15 +160,7 @@ namespace UndertaleModLib.Decompiler
                         Debug.WriteLine("wtf"); // scr_84_debug in Deltarune Switch
                         return ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value).ToString();
                     }
-                    int val;
-                    try
-                    {
-                        val = Convert.ToInt32(Value);
-                    }
-                    catch (OverflowException) // Toby what did you do
-                    {
-                        val = Int32.MaxValue;
-                    }
+
                     IList assetList = null;
                     switch(AssetType)
                     {
@@ -198,6 +192,8 @@ namespace UndertaleModLib.Decompiler
                             assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Scripts;
                             break;
                     }
+
+                    int val = GetIntegerValue();
                     if (assetList != null && val >= 0 && val < assetList.Count)
                         return ((UndertaleNamedResource)assetList[val]).Name.Content;
                 }
@@ -648,7 +644,21 @@ namespace UndertaleModLib.Decompiler
                 else if (ArrayIndex1 != null)
                     name = name + "[" + ArrayIndex1.ToString() + "]";
 
-                name = InstType.ToString() + "." + name;
+                Boolean usePrefix = true;
+                if (InstType is ExpressionConstant) // Only use "global." and "other.", not "self." or "local.". GMS doesn't recognize those.
+                {
+                    ExpressionConstant constant = (ExpressionConstant)InstType;
+                    int val = constant.GetIntegerValue();
+                    if (constant.AssetType == AssetIDType.GameObject && val < 0)
+                    {
+                        UndertaleInstruction.InstanceType instanceType = (UndertaleInstruction.InstanceType)val;
+                        usePrefix = (instanceType == UndertaleInstruction.InstanceType.Global) || (instanceType == UndertaleInstruction.InstanceType.Other);
+                    }
+
+                }
+
+                if (usePrefix)
+                    name = InstType.ToString() + "." + name;
 
                 return name;
             }
