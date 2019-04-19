@@ -60,6 +60,12 @@ namespace UndertaleModTool
             Debug.Listeners.Remove(listener);
         }
 
+        public void SetMessage(string message)
+        {
+            Message = message;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Message"));
+        }
+
         public void ReportProgress(string message)
         {
             StatusText = message;
