@@ -500,10 +500,10 @@ namespace UndertaleModLib.Decompiler
 
         public class AssignmentStatement : Statement
         {
-            public Expression Destination;
+            public ExpressionVar Destination;
             public Expression Value;
 
-            public AssignmentStatement(Expression destination, Expression value)
+            public AssignmentStatement(ExpressionVar destination, Expression value)
             {
                 Destination = destination;
                 Value = value;
@@ -516,7 +516,8 @@ namespace UndertaleModLib.Decompiler
 
             internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
             {
-                return Value.DoTypePropagation(Destination.DoTypePropagation(suggestedType));
+                AssetIDType destinationType = Destination.DoTypePropagation(suggestedType);
+                return (AssetTypeResolver.AnnotateTypeForVariable(Destination.Var.Name.Content) != AssetIDType.Other || Value.Type == UndertaleInstruction.DataType.Int16) ? Value.DoTypePropagation(destinationType) : destinationType;
             }
         }
 
@@ -644,7 +645,7 @@ namespace UndertaleModLib.Decompiler
                 else if (ArrayIndex1 != null)
                     name = name + "[" + ArrayIndex1.ToString() + "]";
 
-                Boolean usePrefix = true;
+                string prefix = InstType.ToString() + ".";
                 if (InstType is ExpressionConstant) // Only use "global." and "other.", not "self." or "local.". GMS doesn't recognize those.
                 {
                     ExpressionConstant constant = (ExpressionConstant)InstType;
@@ -652,15 +653,15 @@ namespace UndertaleModLib.Decompiler
                     if (constant.AssetType == AssetIDType.GameObject && val < 0)
                     {
                         UndertaleInstruction.InstanceType instanceType = (UndertaleInstruction.InstanceType)val;
-                        usePrefix = (instanceType == UndertaleInstruction.InstanceType.Global) || (instanceType == UndertaleInstruction.InstanceType.Other);
+                        if (instanceType == UndertaleInstruction.InstanceType.Global || instanceType == UndertaleInstruction.InstanceType.Other) {
+                            prefix = prefix.ToLower();
+                        } else {
+                            prefix = "";
+                        }
                     }
-
                 }
 
-                if (usePrefix)
-                    name = InstType.ToString() + "." + name;
-
-                return name;
+                return prefix + name;
             }
 
             [ThreadStatic]
@@ -671,7 +672,10 @@ namespace UndertaleModLib.Decompiler
                 ArrayIndex1?.DoTypePropagation(AssetIDType.Other);
                 ArrayIndex2?.DoTypePropagation(AssetIDType.Other);
 
-                AssetIDType current = assetTypes.ContainsKey(Var) ? assetTypes[Var] : AssetIDType.Other;
+                // This is bad, but I don't see any better alternative. This is a hacky fix to fix objects like obj_ambientrain to not use global.flags[x] == abc_123_a, but use the proper values instead, while still not breaking names in files like obj_undyne_face.
+                bool useCache = (VarType != UndertaleInstruction.VariableType.Array || (InstType is ExpressionConstant && (((UndertaleInstruction.InstanceType)((ExpressionConstant)InstType).Value) != UndertaleInstruction.InstanceType.Global)));
+                AssetIDType current = (assetTypes.ContainsKey(Var) && useCache) ? assetTypes[Var] : AssetIDType.Other;
+
                 if (current == AssetIDType.Other && suggestedType != AssetIDType.Other)
                     current = assetTypes[Var] = suggestedType;
                 AssetIDType builtinSuggest = AssetTypeResolver.AnnotateTypeForVariable(Var.Name.Content);
