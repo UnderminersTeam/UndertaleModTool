@@ -516,8 +516,7 @@ namespace UndertaleModLib.Decompiler
 
             internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
             {
-                AssetIDType destinationType = Destination.DoTypePropagation(suggestedType);
-                return (AssetTypeResolver.AnnotateTypeForVariable(Destination.Var.Name.Content) != AssetIDType.Other || Value.Type == UndertaleInstruction.DataType.Int16) ? Value.DoTypePropagation(destinationType) : destinationType;
+                return Value.DoTypePropagation(Destination.DoTypePropagation(suggestedType));
             }
         }
 
@@ -672,15 +671,15 @@ namespace UndertaleModLib.Decompiler
                 ArrayIndex1?.DoTypePropagation(AssetIDType.Other);
                 ArrayIndex2?.DoTypePropagation(AssetIDType.Other);
 
-                // This is bad, but I don't see any better alternative. This is a hacky fix to fix objects like obj_ambientrain to not use global.flags[x] == abc_123_a, but use the proper values instead, while still not breaking names in files like obj_undyne_face.
-                bool useCache = (VarType != UndertaleInstruction.VariableType.Array || (InstType is ExpressionConstant && (((UndertaleInstruction.InstanceType)((ExpressionConstant)InstType).Value) != UndertaleInstruction.InstanceType.Global)));
-                AssetIDType current = (assetTypes.ContainsKey(Var) && useCache) ? assetTypes[Var] : AssetIDType.Other;
-
+                AssetIDType current = assetTypes.ContainsKey(Var) ? assetTypes[Var] : AssetIDType.Other;
                 if (current == AssetIDType.Other && suggestedType != AssetIDType.Other)
-                    current = assetTypes[Var] = suggestedType;
+                    current = suggestedType;
                 AssetIDType builtinSuggest = AssetTypeResolver.AnnotateTypeForVariable(Var.Name.Content);
                 if (builtinSuggest != AssetIDType.Other)
-                    current = assetTypes[Var] = builtinSuggest;
+                    current = builtinSuggest;
+
+                if ((VarType != UndertaleInstruction.VariableType.Array || (ArrayIndex1 != null && !(ArrayIndex1 is ExpressionConstant))))
+                    assetTypes[Var] = current; // This is a messy fix to arrays messing up exported variable types.
                 return current;
             }
 
