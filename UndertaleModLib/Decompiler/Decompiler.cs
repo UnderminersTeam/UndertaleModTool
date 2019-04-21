@@ -310,7 +310,42 @@ namespace UndertaleModLib.Decompiler
                 return Argument.DoTypePropagation(suggestedType);
             }
         }
-        
+
+        // This is basically ExpressionTwo, but allows for using symbols like && or || without creating new opcodes.
+        public class ExpressionTwoSymbol : Expression
+        {
+            public string Symbol;
+            public Expression Argument1;
+            public Expression Argument2;
+
+            public ExpressionTwoSymbol(string symbol, UndertaleInstruction.DataType targetType, Expression argument1, Expression argument2)
+            {
+                this.Symbol = symbol;
+                this.Type = targetType;
+                this.Argument1 = argument1;
+                this.Argument2 = argument2;
+            }
+
+            internal override bool IsDuplicationSafe()
+            {
+                return Argument1.IsDuplicationSafe() && Argument2.IsDuplicationSafe();
+            }
+
+            public override string ToString()
+            {
+                // TODO: better condition for casts
+                return String.Format("{0}({1} {2} {3})", false && (Type != Argument1.Type || Type != Argument2.Type || Argument1.Type != Argument2.Type) ? "(" + Type.ToString().ToLower() + ")" : "", Argument1.ToString(), Symbol, Argument2.ToString());
+            }
+
+            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            {
+                // The most likely, but probably rarely happens
+                AssetIDType t = Argument1.DoTypePropagation(suggestedType);
+                Argument2.DoTypePropagation(AssetIDType.Other);
+                return t;
+            }
+        }
+
         public class ExpressionTwo : Expression
         {
             public UndertaleInstruction.Opcode Opcode;
@@ -1578,9 +1613,12 @@ namespace UndertaleModLib.Decompiler
 
                     IfHLStatement cond = new IfHLStatement();
 
-                    if (block.ConditionStatement is ExpressionCast && ((ExpressionCast) block.ConditionStatement).Argument is ExpressionTwo) { // Prevents if (tempvar - 1), when it should be if (tempvar)
+                    // Prevents if (tempvar - 1), when it should be if (tempvar)
+                    bool PreventTempVarMath = false;
+                    if (block.ConditionStatement is ExpressionCast && ((ExpressionCast) block.ConditionStatement).Argument is ExpressionTwo) {
                         ExpressionTwo eTwo = (ExpressionTwo) ((ExpressionCast)block.ConditionStatement).Argument;
                         cond.condition = (eTwo.Argument1 is ExpressionTempVar && eTwo.Argument2 is ExpressionConstant) ? eTwo.Argument1 : block.ConditionStatement;
+                        PreventTempVarMath = true;
                     } else {
                         cond.condition = block.ConditionStatement;
                     }
@@ -1588,13 +1626,78 @@ namespace UndertaleModLib.Decompiler
                     Block blTrue = block.nextBlockTrue, blFalse = block.nextBlockFalse;
                     cond.trueBlock = HLDecompileBlocks(ref blTrue, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint, true);
                     cond.falseBlock = HLDecompileBlocks(ref blFalse, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint, true);
-                    if (cond.trueBlock.Statements.Count > 0 && cond.falseBlock.Statements.Count > 0 && cond.trueBlock.Statements.Last() is BreakHLStatement && cond.falseBlock.Statements.Last() is BreakHLStatement) // Fixes breaks in both if outcomes.
+
+                    bool shouldAdd = true;
+
+                    //  COMBINES CONDITIONS WITH || + &&  //
+                    if (cond.trueBlock.Statements.Count == 1 && cond.falseBlock.Statements.Count == 1 && cond.trueBlock.Statements.Last() is TempVarAssigmentStatement && cond.falseBlock.Statements.Last() is TempVarAssigmentStatement)
+                    {
+                        TempVarAssigmentStatement trueStatement = (TempVarAssigmentStatement) (cond.trueBlock.Statements.Last());
+                        TempVarAssigmentStatement falseStatement = (TempVarAssigmentStatement) (cond.falseBlock.Statements.Last());
+
+                        if (trueStatement.Value is ExpressionConstant && trueStatement.Value.ToString() == "1")
+                        {
+                            shouldAdd = false;
+                            TempVarAssigmentStatement assignment = new TempVarAssigmentStatement(trueStatement.Var, new ExpressionTwoSymbol("||", UndertaleInstruction.DataType.Boolean, cond.condition, falseStatement.Value));
+                            output.Statements.Add(assignment);
+                        } else if (falseStatement.Value is ExpressionConstant && falseStatement.Value.ToString() == "0")
+                        {
+                            shouldAdd = false;
+                            TempVarAssigmentStatement assignment = new TempVarAssigmentStatement(trueStatement.Var, new ExpressionTwoSymbol("&&", UndertaleInstruction.DataType.Boolean, cond.condition, trueStatement.Value));
+                            output.Statements.Add(assignment);
+                        }
+
+                    }
+
+                    // tempVar = stuff; normalVar = tempVar; -> normalVar = stuff;
+                    if (output.Statements.Count > 1 && output.Statements.Last() is AssignmentStatement && output.Statements[output.Statements.Count - 2] is TempVarAssigmentStatement)
+                    {
+                        AssignmentStatement lastAssign = (AssignmentStatement)output.Statements.Last();
+                        TempVarAssigmentStatement tempAssign = (TempVarAssigmentStatement)output.Statements[output.Statements.Count - 2];
+
+                        if (lastAssign.Value is ExpressionTempVar && tempAssign.Var.Var == ((ExpressionTempVar) lastAssign.Value).Var.Var)
+                        {
+                            output.Statements.RemoveAt(output.Statements.Count - 2); // Don't assign further, put in if statement.
+                            lastAssign.Value = tempAssign.Value;
+                            cond.condition = lastAssign.Value;
+                        }
+                    }
+
+                    // Stop using tempvar assignments before if.
+                    if (!PreventTempVarMath && output.Statements.Count > 0 && output.Statements.Last() is TempVarAssigmentStatement && cond.condition is ExpressionTempVar)
+                    {
+                        ExpressionTempVar condition = (ExpressionTempVar)cond.condition;
+                        TempVarAssigmentStatement lastAssign = (TempVarAssigmentStatement)output.Statements.Last();
+                        if (lastAssign.Var == condition.Var)
+                        {
+                            output.Statements.RemoveAt(output.Statements.Count - 1); // Don't assign further, put in if statement.
+                            cond.condition = lastAssign.Value;
+                        }
+                    }
+
+                    // Fixes breaks in both if outcomes.
+                    if (cond.trueBlock.Statements.Count > 0 && cond.falseBlock.Statements.Count > 0 && cond.trueBlock.Statements.Last() is BreakHLStatement && cond.falseBlock.Statements.Last() is BreakHLStatement)
                     {
                         cond.trueBlock.Statements.Remove(cond.trueBlock.Statements.Last());
                         cond.falseBlock.Statements.Remove(cond.falseBlock.Statements.Last());
                     }
 
-                    output.Statements.Add(cond);
+                    // Simplify return logic. if (condition) 1 else 0 -> condition.
+                    if (cond.trueBlock.Statements.Count == 1 && cond.falseBlock.Statements.Count == 1 && cond.trueBlock.Statements.Last() is ReturnStatement && cond.falseBlock.Statements.Last() is ReturnStatement)
+                    {
+                        ReturnStatement trueStatement = (ReturnStatement)(cond.trueBlock.Statements.Last());
+                        ReturnStatement falseStatement = (ReturnStatement)(cond.falseBlock.Statements.Last());
+
+                        if (trueStatement.Value.ToString() == "1" && falseStatement.Value.ToString() == "0")
+                        {
+                            shouldAdd = false;
+                            output.Statements.Add(new ReturnStatement(cond.condition));
+                        }
+                    }
+
+                    // Add the if statement.
+                    if (shouldAdd)
+                        output.Statements.Add(cond);
 
                     block = meetPoint;
                 }
