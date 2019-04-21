@@ -1635,16 +1635,20 @@ namespace UndertaleModLib.Decompiler
                         TempVarAssigmentStatement trueStatement = (TempVarAssigmentStatement) (cond.trueBlock.Statements.Last());
                         TempVarAssigmentStatement falseStatement = (TempVarAssigmentStatement) (cond.falseBlock.Statements.Last());
 
-                        if (trueStatement.Value is ExpressionConstant && trueStatement.Value.ToString() == "1")
+                        if (trueStatement.Var.Var == falseStatement.Var.Var)
                         {
-                            shouldAdd = false;
-                            TempVarAssigmentStatement assignment = new TempVarAssigmentStatement(trueStatement.Var, new ExpressionTwoSymbol("||", UndertaleInstruction.DataType.Boolean, cond.condition, falseStatement.Value));
-                            output.Statements.Add(assignment);
-                        } else if (falseStatement.Value is ExpressionConstant && falseStatement.Value.ToString() == "0")
-                        {
-                            shouldAdd = false;
-                            TempVarAssigmentStatement assignment = new TempVarAssigmentStatement(trueStatement.Var, new ExpressionTwoSymbol("&&", UndertaleInstruction.DataType.Boolean, cond.condition, trueStatement.Value));
-                            output.Statements.Add(assignment);
+                            if (trueStatement.Value is ExpressionConstant && trueStatement.Value.ToString() == "1")
+                            {
+                                shouldAdd = false;
+                                TempVarAssigmentStatement assignment = new TempVarAssigmentStatement(trueStatement.Var, new ExpressionTwoSymbol("||", UndertaleInstruction.DataType.Boolean, cond.condition, falseStatement.Value));
+                                output.Statements.Add(assignment);
+                            }
+                            else if (falseStatement.Value is ExpressionConstant && falseStatement.Value.ToString() == "0")
+                            {
+                                shouldAdd = false;
+                                TempVarAssigmentStatement assignment = new TempVarAssigmentStatement(trueStatement.Var, new ExpressionTwoSymbol("&&", UndertaleInstruction.DataType.Boolean, cond.condition, trueStatement.Value));
+                                output.Statements.Add(assignment);
+                            }
                         }
 
                     }
