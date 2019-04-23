@@ -826,7 +826,7 @@ namespace UndertaleModTool
             {
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
-                MessageBox.Show(exc.Message, "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+                ScriptMessage("Script Error: " + exc.Message + "\n" + exc.ToString());
             }
         }
 

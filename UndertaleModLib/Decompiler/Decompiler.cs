@@ -1609,15 +1609,20 @@ namespace UndertaleModLib.Decompiler
                         throw new Exception("End of if not found");
 
                     IfHLStatement cond = new IfHLStatement();
+                    cond.condition = block.ConditionStatement;
 
                     // Prevents if (tempvar - 1), when it should be if (tempvar)
                     bool PreventTempVarMath = false;
-                    if (block.ConditionStatement is ExpressionCast && ((ExpressionCast) block.ConditionStatement).Argument is ExpressionTwo) {
-                        ExpressionTwo eTwo = (ExpressionTwo) ((ExpressionCast)block.ConditionStatement).Argument;
-                        cond.condition = (eTwo.Argument1 is ExpressionTempVar && eTwo.Argument2 is ExpressionConstant) ? eTwo.Argument1 : block.ConditionStatement;
-                        PreventTempVarMath = true;
-                    } else {
-                        cond.condition = block.ConditionStatement;
+                    if (output.Statements.Count > 0 && block.ConditionStatement is ExpressionCast && ((ExpressionCast) block.ConditionStatement).Argument is ExpressionTwo) {
+                        ExpressionTwo conditionExpression = (ExpressionTwo) ((ExpressionCast)block.ConditionStatement).Argument;
+                        Statement lastStatement = output.Statements.Last();
+
+                        if (conditionExpression.Argument1 is ExpressionTempVar && lastStatement is TempVarAssigmentStatement && conditionExpression.Argument2 is ExpressionConstant
+                            && ((ExpressionTempVar)conditionExpression.Argument1).Var.Var == ((TempVarAssigmentStatement)lastStatement).Var.Var)
+                        {
+                            cond.condition = conditionExpression.Argument1;
+                            PreventTempVarMath = true;
+                        }
                     }
 
                     Block blTrue = block.nextBlockTrue, blFalse = block.nextBlockFalse;
