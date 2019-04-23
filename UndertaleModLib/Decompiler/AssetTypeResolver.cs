@@ -497,7 +497,8 @@ namespace UndertaleModLib.Decompiler
             
             // These ones are ordinary variables with specific meaning within Undertale/Deltarune.
             // It would probably be better to only use these if UT/DR are being loaded.
-            { "dsprite", AssetIDType.Sprite },
+            // DISABLED DUE TO BUGS
+            /*{ "dsprite", AssetIDType.Sprite },
             { "usprite", AssetIDType.Sprite },
             { "lsprite", AssetIDType.Sprite },
             { "rsprite", AssetIDType.Sprite },
@@ -507,7 +508,7 @@ namespace UndertaleModLib.Decompiler
             { "rtsprite", AssetIDType.Sprite },
             { "normalsprite", AssetIDType.Sprite },
             { "hurtsprite", AssetIDType.Sprite },
-            { "hurtsound", AssetIDType.Sound },
+            { "hurtsound", AssetIDType.Sound },*/
         };
 
         internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, Dictionary<string, AssetIDType[]> scriptArgs)
