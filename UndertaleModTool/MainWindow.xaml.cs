@@ -772,11 +772,11 @@ namespace UndertaleModTool
 
         public void HideProgressBar()
         {
-            Dispatcher.Invoke(() =>
+            Task.Run(async () => Dispatcher.Invoke(() =>
             {
                 if (scriptDialog.IsVisible)
                     scriptDialog.Hide();
-            });
+            }));
         }
 
         public async Task RunScript(string path) {
