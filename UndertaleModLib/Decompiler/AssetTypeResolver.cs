@@ -494,6 +494,20 @@ namespace UndertaleModLib.Decompiler
             { "keyboard_key", AssetIDType.KeyboardKey },
             { "keyboard_lastkey", AssetIDType.KeyboardKey },
             { "os_type", AssetIDType.Enum_OSType },
+            
+            // These ones are ordinary variables with specific meaning within Undertale/Deltarune.
+            // It would probably be better to only use these if UT/DR are being loaded.
+            { "dsprite", AssetIDType.Sprite },
+            { "usprite", AssetIDType.Sprite },
+            { "lsprite", AssetIDType.Sprite },
+            { "rsprite", AssetIDType.Sprite },
+            { "dtsprite", AssetIDType.Sprite },
+            { "utsprite", AssetIDType.Sprite },
+            { "ltsprite", AssetIDType.Sprite },
+            { "rtsprite", AssetIDType.Sprite },
+            { "normalsprite", AssetIDType.Sprite },
+            { "hurtsprite", AssetIDType.Sprite },
+            { "hurtsound", AssetIDType.Sound },
         };
 
         internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, Dictionary<string, AssetIDType[]> scriptArgs)

@@ -1786,7 +1786,6 @@ namespace UndertaleModLib.Decompiler
             StringBuilder sb = new StringBuilder();
 
             // Mark local variables as local.
-            bool foundAny = false;
             StringBuilder tempBuilder = new StringBuilder();
             UndertaleCodeLocals locals = data != null ? data.CodeLocals.For(code) : null;
 
@@ -1796,19 +1795,13 @@ namespace UndertaleModLib.Decompiler
                     if (local.Name.Content == "arguments")
                         continue;
 
-                    if (foundAny)
-                    {
+                    if (tempBuilder.Length > 0)
                         tempBuilder.Append(", ");
-                    }
-                    else
-                    {
-                        foundAny = true;
-                    }
 
                     tempBuilder.Append(local.Name.Content);
                 }
 
-                if (foundAny)
+                if (tempBuilder.Length > 0)
                 {
                     sb.Append("var ");
                     sb.Append(tempBuilder);
