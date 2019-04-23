@@ -146,6 +146,8 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString()
             {
+                bool isGMS2 = HUGE_HACK_FIX_THIS_SOON != null && HUGE_HACK_FIX_THIS_SOON.IsGameMaker2();
+
                 if (AssetType == AssetIDType.GameObject)
                 {
                     int val = GetIntegerValue();
@@ -215,7 +217,7 @@ namespace UndertaleModLib.Decompiler
                 if (AssetType == AssetIDType.Color && Value is IFormattable)
                 {
                     uint val = Convert.ToUInt32(Value);
-                    return "$" + ((IFormattable)Value).ToString(val > 0xFFFFFF ? "X8" : "X6", CultureInfo.InvariantCulture);
+                    return (isGMS2 ? "0x" : "$") + ((IFormattable)Value).ToString(val > 0xFFFFFF ? "X8" : "X6", CultureInfo.InvariantCulture);
                 }
 
                 if (AssetType == AssetIDType.KeyboardKey)
@@ -223,13 +225,8 @@ namespace UndertaleModLib.Decompiler
                     int val = Convert.ToInt32(Value);
                     if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
                     {
-                        if (val < (int)EventSubtypeKey.Digit0 || val > (int)EventSubtypeKey.Z)
-                        {
-                            return ((EventSubtypeKey)val).ToString();
-                        } else if (!Char.IsControl((char)val) && !Char.IsLower((char)val))
-                        {
-                            return "ord(" + (((char)val) == '\'' ? "\"'\"" : "'" + (char)val + "'") + ")";
-                        }
+                        bool isAlphaNumeric = val >= (int)EventSubtypeKey.Digit0 && val <= (int)EventSubtypeKey.Z;
+                        return isAlphaNumeric ? "ord('" + (char)val + "')" : ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
                     }
 
                     if (!Char.IsControl((char)val) && !Char.IsLower((char)val)) // The special keys overlay with the uppercase letters (ugh)
@@ -524,7 +521,7 @@ namespace UndertaleModLib.Decompiler
                 if (Value != null)
                     return "return " + Value.ToString();
                 else
-                    return "exit";
+                    return "exit"; //TODO: Maybe GMS1 only? This might be bad in GMS2.
             }
 
             internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
@@ -1791,16 +1788,16 @@ namespace UndertaleModLib.Decompiler
             if (locals != null) {
                 foreach (var local in locals.Locals)
                 {
-                    if (local.Name.Content.Equals("arguments"))
+                    if (local.Name.Content == "arguments")
                         continue;
 
-                    if (!foundAny)
+                    if (foundAny)
                     {
-                        foundAny = true;
+                        tempBuilder.Append(", ");
                     }
                     else
                     {
-                        tempBuilder.Append(", ");
+                        foundAny = true;
                     }
 
                     tempBuilder.Append(local.Name.Content);

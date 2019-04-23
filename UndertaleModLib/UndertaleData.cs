@@ -85,6 +85,12 @@ namespace UndertaleModLib
             throw new NotImplementedException();
         }
 
+        // Test if this data.win was built by GameMaker Studio 2.
+        public bool IsGameMaker2()
+        {
+            return GeneralInfo.Major >= 2;
+        }
+
         public static UndertaleData CreateNew()
         {
             UndertaleData data = new UndertaleData();

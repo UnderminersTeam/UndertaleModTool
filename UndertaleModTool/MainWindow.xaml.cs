@@ -659,10 +659,13 @@ namespace UndertaleModTool
                     using (var loader = new InteractiveAssemblyLoader())
                     {
                         loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
+                        loader.RegisterDependency(GetType().GetTypeInfo().Assembly);
 
                         var script = CSharpScript.Create<object>(CommandBox.Text, ScriptOptions.Default
                             .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting")
                             .AddImports("UndertaleModTool", "System", "System.IO", "System.Collections.Generic", "System.Text.RegularExpressions")
+                            .AddReferences(Program.GetAssemblyMetadata(Assembly.GetExecutingAssembly()))
+                            .AddReferences(GetType().GetTypeInfo().Assembly)
                             .AddReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly))
                             .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                             typeof(IScriptInterface), loader);
@@ -764,50 +767,33 @@ namespace UndertaleModTool
 
         public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
         {
-            Console.WriteLine("UpdateProgressBar!");
+            Task.Run(async () => Dispatcher.Invoke(() => scriptDialog.Update(message, status, progressValue, maxValue)));
+        }
 
-            if (!scriptDialog.IsVisible)
-                Task.Run(() => {
-                    Console.WriteLine("Opening dialog.");
-                    scriptDialog.ShowDialog();
-                    });
-
-            if (message != null)
-                Dispatcher.Invoke(() => {
-                    Console.WriteLine("Updating Message.");
-                    scriptDialog.SetMessage(message);
-                    });
-
-            if (maxValue != 0)
+        public void HideProgressBar()
+        {
+            Dispatcher.Invoke(() =>
             {
-                Console.WriteLine("Updating Max Value.");
-                scriptDialog.Maximum = maxValue;
-            }
-
-            Console.WriteLine("Updating Progress.");
-            scriptDialog.ReportProgress(status, progressValue);
+                if (scriptDialog.IsVisible)
+                    scriptDialog.Hide();
+            });
         }
 
         public async Task RunScript(string path) {
-            scriptDialog = new LoaderDialog("Saving", "Saving, please wait...");
+            scriptDialog = new LoaderDialog("Script in progress...", "Please wait...");
             scriptDialog.Owner = this;
-            Console.WriteLine("Running script.");
 
             Task t = Task.Run(async () =>
             {
-                Console.WriteLine("await RunScriptNow(path);");
                 await RunScriptNow(path); // Runs the script now.
-                Console.WriteLine("Hide!");
-                Dispatcher.Invoke(() => scriptDialog.Hide()); // Hides the script, 
+                HideProgressBar(); // Hide the progress bar.
             });
-            Console.WriteLine("Awaiting script.");
 
             await t;
         }
 
         private async Task RunScriptNow(string path)
         {
-            Console.WriteLine("Running script now!");
             Debug.WriteLine(path);
 
             Dispatcher.Invoke(() => CommandBox.Text = "Running " + System.IO.Path.GetFileName(path) + " ...");
@@ -815,34 +801,30 @@ namespace UndertaleModTool
             {
                 using (var loader = new InteractiveAssemblyLoader())
                 {
-                    Console.WriteLine("Run Step 1.");
                     loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
-
-                    Console.WriteLine("Run Step 2.");
-
+                    loader.RegisterDependency(GetType().GetTypeInfo().Assembly);
 
                     var script = CSharpScript.Create<object>(File.ReadAllText(path), ScriptOptions.Default
-                        /*.AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting")
+                        .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting")
                         .AddImports("UndertaleModTool", "System", "System.IO", "System.Collections.Generic", "System.Text.RegularExpressions")
                         .AddReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly))
-                        .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly)*/,
+                        .AddReferences(GetType().GetTypeInfo().Assembly)
+                        .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                         typeof(IScriptInterface), loader);
 
-                    Console.WriteLine("Executing Script.");
                     object result = (await script.RunAsync(this)).ReturnValue;
-                    Console.WriteLine("Execution Complete");
                     Dispatcher.Invoke(() => CommandBox.Text = result != null ? result.ToString() : System.IO.Path.GetFileName(path) + " finished!");
                 }
             }
             catch (CompilationErrorException exc)
             {
-                Debug.WriteLine(exc.ToString());
+                Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
                 MessageBox.Show(exc.Message, "Script compile error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception exc)
             {
-                Debug.WriteLine(exc.ToString());
+                Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
                 MessageBox.Show(exc.Message, "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
             }

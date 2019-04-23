@@ -50,6 +50,10 @@ namespace UndertaleModTests
         {
             Console.WriteLine("Update Progress: " + progressValue + " / " + maxValue + ", Message: " + message + ", Status: " + status);
         }
+        public void HideProgressBar()
+        {
+            Console.WriteLine("Hiding Progress Bar.");
+        }
 
         protected async Task<object> RunScript(string path)
         {

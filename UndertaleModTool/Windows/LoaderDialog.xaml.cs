@@ -60,12 +60,6 @@ namespace UndertaleModTool
             Debug.Listeners.Remove(listener);
         }
 
-        public void SetMessage(string message)
-        {
-            Message = message;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Message"));
-        }
-
         public void ReportProgress(string message)
         {
             StatusText = message;
@@ -76,6 +70,22 @@ namespace UndertaleModTool
         {
             ReportProgress(value + "/" + Maximum + (!String.IsNullOrEmpty(message) ? ": " + message : ""));
             ProgressBar.Value = value;
+        }
+
+        public void Update(string message, string status, double progressValue, double maxValue) {
+            if (!IsVisible)
+                ShowDialog();
+
+            if (message != null)
+            {
+                Message = message;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Message"));
+            }
+
+            if (maxValue != 0)
+                Maximum = maxValue;
+
+            ReportProgress(status, progressValue);
         }
 
         private class DebugTraceListener : TraceListener
