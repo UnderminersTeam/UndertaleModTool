@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -660,6 +661,7 @@ namespace UndertaleModTool
                     {
                         loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
                         loader.RegisterDependency(GetType().GetTypeInfo().Assembly);
+                        loader.RegisterDependency(typeof(JsonConvert).GetTypeInfo().Assembly);
 
                         var script = CSharpScript.Create<object>(CommandBox.Text, ScriptOptions.Default
                             .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting")
@@ -667,6 +669,7 @@ namespace UndertaleModTool
                             .AddReferences(Program.GetAssemblyMetadata(Assembly.GetExecutingAssembly()))
                             .AddReferences(GetType().GetTypeInfo().Assembly)
                             .AddReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly))
+                            .AddReferences(Program.GetAssemblyMetadata(typeof(JsonConvert).GetTypeInfo().Assembly))
                             .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                             typeof(IScriptInterface), loader);
 
@@ -803,12 +806,14 @@ namespace UndertaleModTool
                 {
                     loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
                     loader.RegisterDependency(GetType().GetTypeInfo().Assembly);
+                    loader.RegisterDependency(typeof(JsonConvert).GetTypeInfo().Assembly);
 
                     var script = CSharpScript.Create<object>(File.ReadAllText(path), ScriptOptions.Default
                         .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting")
                         .AddImports("UndertaleModTool", "System", "System.IO", "System.Collections.Generic", "System.Text.RegularExpressions")
                         .AddReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly))
                         .AddReferences(GetType().GetTypeInfo().Assembly)
+                        .AddReferences(Program.GetAssemblyMetadata(typeof(JsonConvert).GetTypeInfo().Assembly))
                         .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                         typeof(IScriptInterface), loader);
 
