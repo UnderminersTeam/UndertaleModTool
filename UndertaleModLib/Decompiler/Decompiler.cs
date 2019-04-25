@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
 
@@ -236,11 +237,13 @@ namespace UndertaleModLib.Decompiler
                         return (((char)val) == '\'' ? "\"'\"" : "'" + (char)val + "'");
                 }
 
+                char languageDecimal = Convert.ToChar(Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+
                 if (Value is float) // Prevents scientific notation by using high bit number.
-                    return ((decimal) ((float) Value)).ToString();
+                    return ((decimal) ((float) Value)).ToString().Replace(languageDecimal, '.');
 
                 if (Value is double) // Prevents scientific notation by using high bit number.
-                    return ((decimal) ((double) Value)).ToString();
+                    return ((decimal) ((double) Value)).ToString().Replace(languageDecimal, '.');
 
                 return ((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
             }
