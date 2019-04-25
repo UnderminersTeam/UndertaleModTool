@@ -27,6 +27,7 @@ namespace UndertaleModLib.Decompiler
         Room,
         GameObject, // or GameObjectInstance or InstanceType, these are all interchangable
         Script,
+        Shader,
 
         Layer // GMS2
     };
@@ -450,7 +451,9 @@ namespace UndertaleModLib.Decompiler
 
             // TODO: surface drawing
 
-            // TODO: shaders
+            { "shader_is_compiled", new AssetIDType[] { AssetIDType.Shader } },
+            { "shader_set", new AssetIDType[] { AssetIDType.Shader } },
+            // { "shader_current", new AssetIDType[] { } }, returns shader.
 
             // TODO: GMS2 tilemaps
             // TODO: GMS2 layers

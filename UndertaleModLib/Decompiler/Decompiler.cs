@@ -190,6 +190,9 @@ namespace UndertaleModLib.Decompiler
                         case AssetIDType.GameObject:
                             assetList = (IList)HUGE_HACK_FIX_THIS_SOON.GameObjects;
                             break;
+                        case AssetIDType.Shader:
+                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Shaders;
+                            break;
                         case AssetIDType.Script:
                             assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Scripts;
                             break;
