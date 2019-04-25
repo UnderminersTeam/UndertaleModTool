@@ -840,9 +840,15 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.Popz:
-                        Expression popped = stack.Pop();
-                        if (!(popped is ExpressionTempVar))
-                            statements.Add(popped);
+                        if (stack.Count > 0)
+                        {
+                            Expression popped = stack.Pop();
+                            if (!(popped is ExpressionTempVar))
+                                statements.Add(popped);
+                        } else
+                        {
+                            statements.Add(new CommentStatement("WARNING: Popz'd an empty stack."));
+                        }
                         break;
 
                     case UndertaleInstruction.Opcode.Conv:
