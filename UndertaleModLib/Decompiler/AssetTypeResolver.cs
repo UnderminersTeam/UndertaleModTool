@@ -564,24 +564,19 @@ namespace UndertaleModLib.Decompiler
             if (const_name.Length >= 1 && const_name[0] == '-')
                 return null; // that is not a constant either
 
-            OSType os_type;
-            if (Enum.TryParse(const_name, out os_type))
-                return (int)os_type;
-            GamepadButton gm_button;
-            if (Enum.TryParse(const_name, out gm_button))
-                return (int)gm_button;
-            HAlign halign;
-            if (Enum.TryParse(const_name, out halign))
-                return (int)halign;
-            VAlign valign;
-            if (Enum.TryParse(const_name, out valign))
-                return (int)valign;
-            e__VW vw;
-            if (Enum.TryParse(const_name, out vw))
-                return (int)vw;
-            e__BG bg;
-            if (Enum.TryParse(const_name, out bg))
-                return (int)bg;
+            // By avoiding Enum.TryParse, we avoid exception spam in the console, and there isn't any speed loss.
+            if (Enum.IsDefined(typeof(OSType), const_name))
+                return (int)Enum.Parse(typeof(OSType), const_name);
+            if (Enum.IsDefined(typeof(GamepadButton), const_name))
+                return (int)Enum.Parse(typeof(GamepadButton), const_name);
+            if (Enum.IsDefined(typeof(HAlign), const_name))
+                return (int)Enum.Parse(typeof(HAlign), const_name);
+            if (Enum.IsDefined(typeof(VAlign), const_name))
+                return (int)Enum.Parse(typeof(VAlign), const_name);
+            if (Enum.IsDefined(typeof(e__VW), const_name))
+                return (int)Enum.Parse(typeof(e__VW), const_name);
+            if (Enum.IsDefined(typeof(e__BG), const_name))
+                return (int)Enum.Parse(typeof(e__BG), const_name);
 
             return null;
         }
