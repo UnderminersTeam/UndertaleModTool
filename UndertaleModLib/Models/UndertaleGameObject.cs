@@ -373,6 +373,7 @@ namespace UndertaleModLib.Models
         KeyRelease = 10, // subtype is key ID, see EventSubtypeKey
         Gesture = 11, // TODO: mapping is a guess // TODO: subtypes
         Asynchronous = 12, // TODO: mapping is a guess // TODO: subtypes
+        PreCreate = 14
     }
 
     public enum EventSubtypeStep : uint
