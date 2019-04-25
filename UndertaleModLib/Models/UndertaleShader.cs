@@ -315,8 +315,8 @@ namespace UndertaleModLib.Models
         {
             GLSL_ES = 1,
             GLSL = 2,
-            Unknown1 = 3,
-            HLSL = 4,
+            HLSL9 = 3,
+            HLSL11 = 4,
             Unknown2 = 5,
             Unknown3 = 6,
             Unknown4 = 7
