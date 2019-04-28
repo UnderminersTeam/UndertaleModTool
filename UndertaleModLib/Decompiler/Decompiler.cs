@@ -245,6 +245,9 @@ namespace UndertaleModLib.Decompiler
                 if (Value is double) // Prevents scientific notation by using high bit number.
                     return ((decimal) ((double) Value)).ToString().Replace(languageDecimal, '.');
 
+                if (Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>) // Don't add @ to strings.
+                    return ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value).Resource.ToString();
+
                 return ((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
             }
 
