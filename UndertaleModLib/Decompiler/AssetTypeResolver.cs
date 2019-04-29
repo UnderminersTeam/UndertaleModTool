@@ -490,6 +490,7 @@ namespace UndertaleModLib.Decompiler
             { "room_first", AssetIDType.Room },
             { "room_last", AssetIDType.Room },
             { "room", AssetIDType.Room },
+            { "currentroom", AssetIDType.Room },
             { "object_index", AssetIDType.GameObject },
             { "sprite_index", AssetIDType.Sprite },
             { "image_blend", AssetIDType.Color },
