@@ -161,7 +161,7 @@ namespace UndertaleModLib.Decompiler
                     if (Value.GetType() == typeof(UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>))
                     {
                         Debug.WriteLine("wtf"); // scr_84_debug in Deltarune Switch
-                        return ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value).ToString();
+                        return ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value).Resource.ToCodeString(isGMS2);
                     }
 
                     IList assetList = null;
@@ -230,11 +230,13 @@ namespace UndertaleModLib.Decompiler
                     if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
                     {
                         bool isAlphaNumeric = val >= (int)EventSubtypeKey.Digit0 && val <= (int)EventSubtypeKey.Z;
-                        return isAlphaNumeric ? "ord('" + (char)val + "')" : ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
+                        return isAlphaNumeric ? "ord(\"" + (char)val + "\")" : ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
                     }
 
                     if (!Char.IsControl((char)val) && !Char.IsLower((char)val)) // The special keys overlay with the uppercase letters (ugh)
-                        return (((char)val) == '\'' ? "\"'\"" : "'" + (char)val + "'");
+                        return ((char)val) == '\'' ? (isGMS2 ? "\"\\\"\"" : "'\"'")
+                            : (((char) val) == '\\' ? (isGMS2 ? "\"\\\\\"" : "\"\\\"")
+                            : "\"" + (char)val + "\"");
                 }
 
                 if (Value is float) // Prevents scientific notation by using high bit number.
@@ -244,7 +246,7 @@ namespace UndertaleModLib.Decompiler
                     return ((decimal) ((double) Value)).ToString(CultureInfo.InvariantCulture);
 
                 if (Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>) // Don't add @ to strings.
-                    return ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value).Resource.ToString();
+                    return ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value).Resource.ToCodeString(isGMS2);
 
                 return ((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
             }
@@ -594,6 +596,9 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString()
             {
+                if (Function.Name.Content == "@@NewGMLArray@@") // Special-case.
+                    return "[" + String.Join(", ", Arguments) + "]";
+
                 //return String.Format("({0}){1}({2})", ReturnType.ToString().ToLower(), Function.Name.Content, String.Join(", ", Arguments));
                 return String.Format("{0}({1})", Function.Name.Content, String.Join(", ", Arguments));
             }
@@ -1771,10 +1776,13 @@ namespace UndertaleModLib.Decompiler
 
             // TODO: This doesn't propagate to tempvars in broken switch statements but that will be cleaned up at some point
             AssetIDType propType = AssetIDType.Other;
-            if (code.Name.Content == "gml_Script___view_set_internal" || code.Name.Content == "gml_Script___view_get")
-                propType = AssetIDType.e__VW;
-            if (code.Name.Content == "gml_Script___background_set_internal" || code.Name.Content == "gml_Script___background_get_internal")
-                propType = AssetIDType.e__BG;
+            // NOTE: This was disabled because it wasn't valid.
+            // 1. The type only applied to the first case statement.
+            // 2. Even if each case statement had the proper type, it still gives an error when compiling.
+            //if (code.Name.Content == "gml_Script___view_set_internal" || code.Name.Content == "gml_Script___view_get")
+            //    propType = AssetIDType.e__VW;
+            //if (code.Name.Content == "gml_Script___background_set_internal" || code.Name.Content == "gml_Script___background_get_internal")
+            //    propType = AssetIDType.e__BG;
             if (propType != AssetIDType.Other)
             {
                 var v = code.FindReferencedVars().Where((x) => x.Name.Content == "__prop").FirstOrDefault();
