@@ -688,6 +688,8 @@ namespace UndertaleModLib.Decompiler
                 else if (ArrayIndex1 != null)
                     name = name + "[" + ArrayIndex1.ToString() + "]";
 
+                //NOTE: The "var" prefix is handled in Decompiler.Decompile. 
+
                 string prefix = InstType.ToString() + ".";
                 if (InstType is ExpressionConstant) // Only use "global." and "other.", not "self." or "local.". GMS doesn't recognize those.
                 {
