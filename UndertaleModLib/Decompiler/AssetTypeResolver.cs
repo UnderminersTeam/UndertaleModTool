@@ -490,7 +490,6 @@ namespace UndertaleModLib.Decompiler
             { "room_first", AssetIDType.Room },
             { "room_last", AssetIDType.Room },
             { "room", AssetIDType.Room },
-            { "currentroom", AssetIDType.Room },
             { "object_index", AssetIDType.GameObject },
             { "sprite_index", AssetIDType.Sprite },
             { "image_blend", AssetIDType.Color },
@@ -501,6 +500,7 @@ namespace UndertaleModLib.Decompiler
             
             // These ones are ordinary variables with specific meaning within Undertale/Deltarune.
             // It would probably be better to only use these if UT/DR are being loaded.
+            { "currentroom", AssetIDType.Room },
             { "dsprite", AssetIDType.Sprite },
             { "usprite", AssetIDType.Sprite },
             { "lsprite", AssetIDType.Sprite },
