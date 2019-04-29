@@ -237,13 +237,11 @@ namespace UndertaleModLib.Decompiler
                         return (((char)val) == '\'' ? "\"'\"" : "'" + (char)val + "'");
                 }
 
-                char languageDecimal = Convert.ToChar(Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator);
-
                 if (Value is float) // Prevents scientific notation by using high bit number.
-                    return ((decimal) ((float) Value)).ToString().Replace(languageDecimal, '.');
+                    return ((decimal) ((float) Value)).ToString(CultureInfo.InvariantCulture);
 
                 if (Value is double) // Prevents scientific notation by using high bit number.
-                    return ((decimal) ((double) Value)).ToString().Replace(languageDecimal, '.');
+                    return ((decimal) ((double) Value)).ToString(CultureInfo.InvariantCulture);
 
                 if (Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>) // Don't add @ to strings.
                     return ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value).Resource.ToString();
