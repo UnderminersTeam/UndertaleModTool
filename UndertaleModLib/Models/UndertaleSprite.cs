@@ -23,7 +23,7 @@ namespace UndertaleModLib.Models
         private bool _Smooth;
         private bool _Preload;
         private uint _BBoxMode;
-        private uint _SepMasks;
+        private bool _SepMasks; // Whether or not multiple collision masks will be used.
         private uint _OriginX;
         private uint _OriginY;
         private uint _GMS2UnknownAlways1 = 1;
@@ -43,7 +43,7 @@ namespace UndertaleModLib.Models
         public bool Smooth { get => _Smooth; set { _Smooth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Smooth")); } }
         public bool Preload { get => _Preload; set { _Preload = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Preload")); } }
         public uint BBoxMode { get => _BBoxMode; set { _BBoxMode = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BBoxMode")); } }
-        public uint SepMasks { get => _SepMasks; set { _SepMasks = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SepMasks")); } }
+        public bool SepMasks { get => _SepMasks; set { _SepMasks = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SepMasks")); } }
         public uint OriginX { get => _OriginX; set { _OriginX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OriginX")); } }
         public uint OriginY { get => _OriginY; set { _OriginY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OriginY")); } }
         public UndertaleSimpleList<TextureEntry> Textures { get; private set; } = new UndertaleSimpleList<TextureEntry>();
@@ -206,7 +206,7 @@ namespace UndertaleModLib.Models
             Smooth = reader.ReadBoolean();
             Preload = reader.ReadBoolean();
             BBoxMode = reader.ReadUInt32();
-            SepMasks = reader.ReadUInt32();
+            SepMasks = reader.ReadBoolean();
             OriginX = reader.ReadUInt32();
             OriginY = reader.ReadUInt32();
             if (reader.ReadInt32() == -1) // technically this seems to be able to occur on older versions, for special sprite types
