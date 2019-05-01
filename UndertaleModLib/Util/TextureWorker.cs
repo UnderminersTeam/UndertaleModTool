@@ -85,7 +85,13 @@ namespace UndertaleModLib.Util
             if ((texPageItem.SourceWidth != texPageItem.TargetWidth) || (texPageItem.SourceHeight != texPageItem.TargetHeight))
                 resultImage = ResizeImage(resultImage, texPageItem.SourceWidth, texPageItem.SourceHeight);
 
-            return resultImage;
+            // Put it in the final, holder image.
+            Bitmap finalImage = new Bitmap(exportWidth, exportHeight);
+            Graphics g = Graphics.FromImage(finalImage);
+            g.DrawImageUnscaled(resultImage, new Point(texPageItem.TargetX, texPageItem.TargetY));
+            g.Dispose();
+
+            return finalImage;
         }
 
         // Grabbed from https://stackoverflow.com/questions/3801275/how-to-convert-image-to-byte-array/16576471#16576471
