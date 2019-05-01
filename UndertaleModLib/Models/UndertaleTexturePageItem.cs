@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
+﻿using System.ComponentModel;
 
 namespace UndertaleModLib.Models
 {
@@ -29,13 +21,6 @@ namespace UndertaleModLib.Models
         private ushort _BoundingWidth;
         private ushort _BoundingHeight;
         private UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR> _TexturePage = new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();
-
-        private static int maxSpriteWidth = 0;
-        private static int maxSpriteHeight = 0;
-        private static UInt32[] pixelBuffer = null; // a memory buffer for the largest possible sprite.
-        private static UndertaleEmbeddedTexture embedded = null;
-        private static PngBitmapDecoder decoder = null;
-        private static WriteableBitmap renderTarget = null;
 
         public ushort SourceX { get => _SourceX; set { _SourceX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceX")); } }
         public ushort SourceY { get => _SourceY; set { _SourceY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceY")); } }
@@ -85,100 +70,6 @@ namespace UndertaleModLib.Models
         public override string ToString()
         {
             return "(" + GetType().Name + ")";
-        }
-
-        public void ExportAsPNG(UndertaleData data, string FullPath, string imageName, bool newTarget)
-        {
-            int exportWidth = BoundingWidth; // sprite.Width
-            int exportHeight = BoundingHeight; // sprite.Height
-            if (newTarget)
-                renderTarget = new WriteableBitmap(exportWidth, exportHeight, 96, 96, PixelFormats.Pbgra32, null);
-
-            // Clear the render target.
-            if (pixelBuffer == null)
-            {
-                foreach (var texPageItem in data.TexturePageItems)
-                {
-                    if ((int)texPageItem.BoundingWidth > maxSpriteWidth)
-                        maxSpriteWidth = texPageItem.BoundingWidth;
-                    if ((int)texPageItem.BoundingHeight > maxSpriteHeight)
-                        maxSpriteHeight = texPageItem.BoundingHeight;
-                }
-                pixelBuffer = new UInt32[maxSpriteWidth * maxSpriteHeight]; // Allocate the memory buffer.
-            }
-
-            for (int x = 0; x < pixelBuffer.Length; x++)
-                pixelBuffer[x] = (UInt32)0U;
-
-            System.Windows.Int32Rect rect = default;
-            rect.X = 0;
-            rect.Y = 0;
-            rect.Width = exportWidth;
-            rect.Height = exportHeight;
-            renderTarget.WritePixels(rect, pixelBuffer, maxSpriteWidth * 4, 0, 0);
-
-            // Create a Windows bitmap object for the backing texture.
-            if (embedded != TexturePage)
-            {
-                embedded = TexturePage;
-                decoder = new PngBitmapDecoder(new MemoryStream(embedded.TextureData.TextureBlob), BitmapCreateOptions.None, BitmapCacheOption.Default);
-            }
-
-            // Sanity checks.
-            if ((TargetWidth > exportWidth) || (TargetHeight > exportHeight))
-                throw new InvalidDataException(imageName + " has too large a texture");
-
-            // Create a bitmap representing that part of the texture page.
-            rect.X = SourceX;
-            rect.Y = SourceY;
-            rect.Width = SourceWidth;
-            rect.Height = SourceHeight;
-            CroppedBitmap cropped = new CroppedBitmap(decoder.Frames[0], rect);
-
-            // Do we need to scale?
-            if ((SourceWidth != TargetWidth) || (SourceHeight != TargetHeight))
-            {
-                // Yes.
-                double scaleX = (double)TargetWidth / SourceWidth;
-                double scaleY = (double)TargetHeight / SourceHeight;
-                ScaleTransform scale = new ScaleTransform(scaleX, scaleY);
-                TransformedBitmap transformed = new TransformedBitmap(cropped, scale);
-
-                // Sanity check, since we're using floating point.
-                if ((transformed.PixelWidth != TargetWidth) || (transformed.PixelHeight != TargetHeight))
-                {
-                    throw new InvalidDataException($"{imageName} has mismatched scaling size: " +
-                        $"{SourceWidth} {TargetWidth} {SourceHeight} {TargetHeight} " +
-                        $"{exportWidth} {exportHeight} {transformed.PixelWidth} {transformed.PixelHeight} {scaleX} {scaleY}");
-                }
-
-                // Copy the transformed pixels.
-                rect.X = 0;
-                rect.Y = 0;
-                rect.Width = TargetWidth;
-                rect.Height = TargetHeight;
-                transformed.CopyPixels(pixelBuffer, TargetWidth * 4, 0);
-            }
-            else
-            {
-                // Copy the cropped bitmap to the buffer.
-                cropped.CopyPixels(pixelBuffer, TargetWidth * 4, 0);
-            }
-
-            // Overwrite the render target with this.
-            rect.X = 0;
-            rect.Y = 0;
-            rect.Width = TargetWidth;
-            rect.Height = TargetHeight;
-            renderTarget.WritePixels(rect, pixelBuffer, TargetWidth * 4, TargetX, TargetY);
-
-            // Output the image data.
-            PngBitmapEncoder encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(renderTarget));
-
-            var stream = new FileStream(FullPath, FileMode.Create);
-            encoder.Save(stream);
-            stream.Close();
         }
     }
 }

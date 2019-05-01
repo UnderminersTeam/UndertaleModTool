@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModTool
 {
@@ -39,6 +40,8 @@ namespace UndertaleModTool
             dlg.DefaultExt = ".png";
             dlg.Filter = "PNG files (.png)|*.png|All files|*";
 
+            TextureWorker worker = new TextureWorker();
+
             if (dlg.ShowDialog() == true)
             {
                 try
@@ -55,11 +58,7 @@ namespace UndertaleModTool
                         {
                             try
                             {
-                                TextureList.SelectedItem = tex.tex;
-                                using (var file = File.OpenWrite(System.IO.Path.Combine(path, tex.id + ext)))
-                                {
-                                    TextureDisplay.SaveImagePNG(file);
-                                }
+                                worker.ExportAsPNG(tex.tex.Texture, System.IO.Path.Combine(path, tex.id + ext));
                             }
                             catch (Exception ex)
                             {
@@ -71,10 +70,7 @@ namespace UndertaleModTool
                     {
                         try
                         {
-                            using (var file = File.OpenWrite(dlg.FileName))
-                            {
-                                TextureDisplay.SaveImagePNG(file);
-                            }
+                            worker.ExportAsPNG(sprite.Textures[0].Texture, dlg.FileName);
                         }
                         catch (Exception ex)
                         {
@@ -151,13 +147,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    BitmapSource source = BitmapSource.Create((int)sprite.Width, (int)sprite.Height, 96, 96, PixelFormats.BlackWhite, null, target.Data, (int)((sprite.Width + 7) / 8));
-                    PngBitmapEncoder encoder = new PngBitmapEncoder();
-                    encoder.Frames.Add(BitmapFrame.Create(source));
-                    using (FileStream stream = new FileStream(dlg.FileName, FileMode.Create, FileAccess.Write))
-                    {
-                        encoder.Save(stream);
-                    }
+                    new TextureWorker().ExportCollisionMaskPNG(sprite, target, dlg.FileName);
                 }
                 catch (Exception ex)
                 {

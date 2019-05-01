@@ -14,6 +14,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModTool
 {
@@ -38,10 +40,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    using (var file = File.OpenWrite(dlg.FileName))
-                    {
-                        ItemDisplay.SaveImagePNG(file);
-                    }
+                    new TextureWorker().ExportAsPNG((UndertaleTexturePageItem)this.DataContext, dlg.FileName);
                 }
                 catch (Exception ex)
                 {
