@@ -769,29 +769,25 @@ namespace UndertaleModTool
 
         public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
         {
-            Task.Run(async () => Dispatcher.Invoke(() => scriptDialog.Update(message, status, progressValue, maxValue)));
+            scriptDialog.Update(message, status, progressValue, maxValue);
+            scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
         }
 
         public void HideProgressBar()
         {
-            Task.Run(async () => Dispatcher.Invoke(() =>
-            {
-                if (scriptDialog.IsVisible)
-                    scriptDialog.Hide();
-            }));
+            scriptDialog.TryHide();
         }
 
         public async Task RunScript(string path) {
             scriptDialog = new LoaderDialog("Script in progress...", "Please wait...");
             scriptDialog.Owner = this;
+            scriptDialog.PreventClose = true;
+            this.IsEnabled = false; // Prevent interaction while the script is running.
 
-            Task t = Task.Run(async () =>
-            {
-                await RunScriptNow(path); // Runs the script now.
-                HideProgressBar(); // Hide the progress bar.
-            });
-
-            await t;
+            await RunScriptNow(path); // Runs the script now.
+            HideProgressBar(); // Hide the progress bar.
+            scriptDialog = null;
+            this.IsEnabled = true; // Allow interaction again.
         }
 
         private async Task RunScriptNow(string path)
