@@ -133,37 +133,21 @@ namespace UndertaleModLib.Decompiler
                 return true;
             }
 
-            public int GetIntegerValue()
-            {
-                try
-                {
-                    return Convert.ToInt32(Value);
-                }
-                catch (OverflowException)
-                {
-                    return Int32.MaxValue;
-                }
-            }
-
             public override string ToString()
             {
                 bool isGMS2 = HUGE_HACK_FIX_THIS_SOON != null && HUGE_HACK_FIX_THIS_SOON.IsGameMaker2();
 
-                if (AssetType == AssetIDType.GameObject)
+                if (Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>) // Don't add @ to strings.
+                    return ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value).Resource.ToCodeString(isGMS2);
+
+                if (AssetType == AssetIDType.GameObject && !(Value is Int64)) // When the value is Int64, an example value is 343434343434. It is unknown what it represents, but it's not an InstanceType.
                 {
-                    int val = GetIntegerValue();
-                    if (val < 0) 
-                        return ((UndertaleInstruction.InstanceType)val).ToString().ToLower();
+                    if (Convert.ToInt32(Value) < 0) 
+                        return ((UndertaleInstruction.InstanceType)Value).ToString().ToLower();
                 }
                 
                 if (HUGE_HACK_FIX_THIS_SOON != null && AssetType != AssetIDType.Other && AssetType != AssetIDType.Color && AssetType != AssetIDType.KeyboardKey && AssetType != AssetIDType.e__VW && AssetType != AssetIDType.e__BG && AssetType != AssetIDType.Enum_HAlign && AssetType != AssetIDType.Enum_VAlign)
                 {
-                    if (Value.GetType() == typeof(UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>))
-                    {
-                        Debug.WriteLine("wtf"); // scr_84_debug in Deltarune Switch
-                        return ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value).Resource.ToCodeString(isGMS2);
-                    }
-
                     IList assetList = null;
                     switch(AssetType)
                     {
@@ -199,9 +183,12 @@ namespace UndertaleModLib.Decompiler
                             break;
                     }
 
-                    int val = GetIntegerValue();
-                    if (assetList != null && val >= 0 && val < assetList.Count)
-                        return ((UndertaleNamedResource)assetList[val]).Name.Content;
+                    if (!(Value is Int64)) // It is unknown what Int64 data represents, but it's not this.
+                    {
+                        int val = Convert.ToInt32(Value);
+                        if (assetList != null && val >= 0 && val < assetList.Count)
+                            return ((UndertaleNamedResource)assetList[val]).Name.Content;
+                    }
                 }
 
                 if (AssetType == AssetIDType.e__VW)
@@ -244,9 +231,6 @@ namespace UndertaleModLib.Decompiler
 
                 if (Value is double) // Prevents scientific notation by using high bit number.
                     return ((decimal) ((double) Value)).ToString(CultureInfo.InvariantCulture);
-
-                if (Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>) // Don't add @ to strings.
-                    return ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value).Resource.ToCodeString(isGMS2);
 
                 return ((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
             }
@@ -694,14 +678,20 @@ namespace UndertaleModLib.Decompiler
                 if (InstType is ExpressionConstant) // Only use "global." and "other.", not "self." or "local.". GMS doesn't recognize those.
                 {
                     ExpressionConstant constant = (ExpressionConstant)InstType;
-                    int val = constant.GetIntegerValue();
-                    if (constant.AssetType == AssetIDType.GameObject && val < 0)
+                    if (!(constant.Value is Int64))
                     {
-                        UndertaleInstruction.InstanceType instanceType = (UndertaleInstruction.InstanceType)val;
-                        if (instanceType == UndertaleInstruction.InstanceType.Global || instanceType == UndertaleInstruction.InstanceType.Other) {
-                            prefix = prefix.ToLower();
-                        } else {
-                            prefix = "";
+                        int val = Convert.ToInt32(constant.Value);
+                        if (constant.AssetType == AssetIDType.GameObject && val < 0)
+                        {
+                            UndertaleInstruction.InstanceType instanceType = (UndertaleInstruction.InstanceType)val;
+                            if (instanceType == UndertaleInstruction.InstanceType.Global || instanceType == UndertaleInstruction.InstanceType.Other)
+                            {
+                                prefix = prefix.ToLower();
+                            }
+                            else
+                            {
+                                prefix = "";
+                            }
                         }
                     }
                 }
