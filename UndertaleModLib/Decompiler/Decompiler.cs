@@ -429,12 +429,17 @@ namespace UndertaleModLib.Decompiler
             public UndertaleInstruction.DataType Type;
 
             [ThreadStatic]
-            public static int i;
+            public static int TempVarId;
             internal AssetIDType AssetType;
 
             public TempVar()
             {
-                Name = "_temp_local_var_" + (++i);
+                Name = MakeTemporaryVarName(++TempVarId);  ;
+            }
+
+            public static string MakeTemporaryVarName(int id)
+            {
+                return "_temp_local_var_" + id;
             }
         }
 
@@ -1840,7 +1845,7 @@ namespace UndertaleModLib.Decompiler
         public static string Decompile(UndertaleCode code, UndertaleData data = null)
         {
             HUGE_HACK_FIX_THIS_SOON = data;
-            TempVar.i = 0;
+            TempVar.TempVarId = 0;
             ExpressionVar.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
             DecompileFromBlock(blocks[0]);
@@ -1854,6 +1859,11 @@ namespace UndertaleModLib.Decompiler
             StringBuilder tempBuilder = new StringBuilder();
             UndertaleCodeLocals locals = data != null ? data.CodeLocals.For(code) : null;
 
+            // Write code.
+            foreach (var stmt in stmts)
+                sb.Append(stmt.ToString() + "\n");
+            string decompiledCode = sb.ToString();
+
             if (locals != null) {
                 foreach (var local in locals.Locals)
                 {
@@ -1866,18 +1876,22 @@ namespace UndertaleModLib.Decompiler
                     tempBuilder.Append(local.Name.Content);
                 }
 
-                if (tempBuilder.Length > 0)
-                {
-                    sb.Append("var ");
-                    sb.Append(tempBuilder);
-                    sb.Append(";\n");
+                for (int i = 0; i < TempVar.TempVarId; i++) {
+                    string tempVarName = TempVar.MakeTemporaryVarName(i + 1);
+                    if (decompiledCode.Contains(tempVarName))
+                    {
+                        if (tempBuilder.Length > 0)
+                            tempBuilder.Append(", ");
+                        tempBuilder.Append(tempVarName);
+                    }
                 }
+
+                if (tempBuilder.Length > 0)
+                    decompiledCode = "var " + tempBuilder.ToString() + ";\n" + decompiledCode;
             }
 
-            // Write code.
-            foreach (var stmt in stmts)
-                sb.Append(stmt.ToString() + "\n");
-            return sb.ToString();
+            
+            return decompiledCode;
         }
 
         private static void DoTypePropagation(Dictionary<uint, Block> blocks)
