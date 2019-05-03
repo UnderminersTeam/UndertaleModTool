@@ -11,48 +11,7 @@ namespace UndertaleModLib.Util
     public class TextureWorker
     {
         private Dictionary<UndertaleEmbeddedTexture, Bitmap> embeddedDictionary = new Dictionary<UndertaleEmbeddedTexture, Bitmap>();
-
         private static readonly ImageConverter _imageConverter = new ImageConverter();
-
-        public void SaveEmptyPNG(string FullPath, int width, int height)
-        {
-            var b = new Bitmap(1, 1);
-            b.SetPixel(0, 0, Color.Black);
-            var result = new Bitmap(b, width, height);
-            var stream = new FileStream(FullPath, FileMode.Create);
-            result.Save(stream, ImageFormat.Png);
-            stream.Close();
-        }
-
-        public Bitmap GetCollisionMaskImage(UndertaleSprite sprite, UndertaleSprite.MaskEntry mask)
-        {
-            byte[] maskData = mask.Data;
-            Bitmap bitmap = new Bitmap((int)sprite.Width, (int)sprite.Height, PixelFormat.Format32bppArgb); // Ugh. I want to use 1bpp, but for some BS reason C# doesn't allow SetPixel in that mode.
-
-            for (int y = 0; y < sprite.Height; y++)
-            {
-                int rowStart = y * (int) ((sprite.Width + 7) / 8);
-                for (int x = 0; x < sprite.Width; x++)
-                {
-                    byte temp = maskData[rowStart + (x / 8)];
-                    bool pixelBit = (temp & (0b1 << (7 - (x % 8)))) != 0b0;
-                    bitmap.SetPixel(x, y, pixelBit ? Color.White : Color.Black);
-                }
-            }
-
-            return bitmap;
-        }
-
-        public void ExportCollisionMaskPNG(UndertaleSprite sprite, UndertaleSprite.MaskEntry mask, string fullPath)
-        {
-            Bitmap bitmap = GetCollisionMaskImage(sprite, mask);
-
-            // Export the image data.
-            var stream = new FileStream(fullPath, FileMode.Create);
-            bitmap.Save(stream, ImageFormat.Png);
-            stream.Close();
-            bitmap.Dispose();
-        }
 
         public void ExportAsPNG(UndertaleTexturePageItem texPageItem, string FullPath, string imageName = null)
         {
@@ -121,6 +80,77 @@ namespace UndertaleModLib.Util
             g.DrawImage(image, 0, 0, newWidth, newHeight);
             g.Dispose();
             return newImage;
+        }
+
+        public static byte[] ReadMaskData(string filePath)
+        {
+            Bitmap image = GetImageFromByteArray(File.ReadAllBytes(filePath));
+            List<byte> bytes = new List<byte>();
+
+            int enableColor = Color.White.ToArgb();
+            for (int y = 0; y < image.Height; y++)
+            {
+                for (int xByte = 0; xByte < (image.Width + 7) / 8; xByte++)
+                {
+                    byte fullByte = 0x00;
+                    int pxStart = (xByte * 8);
+                    int pxEnd = Math.Min(pxStart + 8, (int) image.Width);
+
+                    for (int x = pxStart; x < pxEnd; x++)
+                        if (image.GetPixel(x, y).ToArgb() == enableColor) // Don't use Color == OtherColor, it doesn't seem to give us the type of equals comparison we want here.
+                            fullByte |= (byte)(0b1 << (7 - (x - pxStart)));
+
+                    bytes.Add(fullByte);
+                }
+            }
+
+            return bytes.ToArray();
+        }
+
+        public static byte[] ReadTextureBlob(string filePath)
+        {
+            Image.FromFile(filePath); // Make sure the file is valid PNG
+            return File.ReadAllBytes(filePath);
+        }
+
+        public static void SaveEmptyPNG(string FullPath, int width, int height)
+        {
+            var b = new Bitmap(1, 1);
+            b.SetPixel(0, 0, Color.Black);
+            var result = new Bitmap(b, width, height);
+            var stream = new FileStream(FullPath, FileMode.Create);
+            result.Save(stream, ImageFormat.Png);
+            stream.Close();
+        }
+
+        public static Bitmap GetCollisionMaskImage(UndertaleSprite sprite, UndertaleSprite.MaskEntry mask)
+        {
+            byte[] maskData = mask.Data;
+            Bitmap bitmap = new Bitmap((int)sprite.Width, (int)sprite.Height, PixelFormat.Format32bppArgb); // Ugh. I want to use 1bpp, but for some BS reason C# doesn't allow SetPixel in that mode.
+
+            for (int y = 0; y < sprite.Height; y++)
+            {
+                int rowStart = y * (int)((sprite.Width + 7) / 8);
+                for (int x = 0; x < sprite.Width; x++)
+                {
+                    byte temp = maskData[rowStart + (x / 8)];
+                    bool pixelBit = (temp & (0b1 << (7 - (x % 8)))) != 0b0;
+                    bitmap.SetPixel(x, y, pixelBit ? Color.White : Color.Black);
+                }
+            }
+
+            return bitmap;
+        }
+
+        public static void ExportCollisionMaskPNG(UndertaleSprite sprite, UndertaleSprite.MaskEntry mask, string fullPath)
+        {
+            Bitmap bitmap = GetCollisionMaskImage(sprite, mask);
+
+            // Export the image data.
+            var stream = new FileStream(fullPath, FileMode.Create);
+            bitmap.Save(stream, ImageFormat.Png);
+            stream.Close();
+            bitmap.Dispose();
         }
     }
 }

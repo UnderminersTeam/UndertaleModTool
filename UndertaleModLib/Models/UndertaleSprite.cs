@@ -66,6 +66,14 @@ namespace UndertaleModLib.Models
             return Name.Content + " (" + GetType().Name + ")";
         }
 
+        public MaskEntry NewMaskEntry()
+        {
+            MaskEntry newEntry = new MaskEntry();
+            uint len = (Width + 7) / 8 * Height;
+            newEntry.Data = new byte[len];
+            return newEntry;
+        }
+
         public enum SpriteType : uint
         {
             Normal = 0,

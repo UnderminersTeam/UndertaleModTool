@@ -91,20 +91,14 @@ namespace UndertaleModTool
 
         private void MaskList_AddingNewItem(object sender, AddingNewItemEventArgs e)
         {
-            UndertaleSprite.MaskEntry obj = new UndertaleSprite.MaskEntry();
-            UndertaleSprite sprite = this.DataContext as UndertaleSprite;
-            uint len = (sprite.Width + 7) / 8 * sprite.Height;
-            obj.Data = new byte[len];
-            e.NewItem = obj;
+            e.NewItem = (this.DataContext as UndertaleSprite).NewMaskEntry();
         }
 
         private void MaskImport_Click(object sender, RoutedEventArgs e)
         {
-            UndertaleSprite sprite = this.DataContext as UndertaleSprite;
             UndertaleSprite.MaskEntry target = (sender as Button).DataContext as UndertaleSprite.MaskEntry;
 
             OpenFileDialog dlg = new OpenFileDialog();
-
             dlg.DefaultExt = ".png";
             dlg.Filter = "PNG files (.png)|*.png|All files|*";
 
@@ -112,19 +106,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    using (FileStream stream = new FileStream(dlg.FileName, FileMode.Open, FileAccess.Read))
-                    {
-                        PngBitmapDecoder decoder = new PngBitmapDecoder(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
-                        BitmapSource source = decoder.Frames[0];
-                        if (source.Format.BitsPerPixel != 1)
-                            throw new Exception("Must be a 1 bit-per-pixel image");
-                        if (source.PixelWidth != sprite.Width || source.PixelHeight != sprite.Height)
-                            throw new Exception("Mask size doesn't match sprite size");
-                        int stride = (int)((sprite.Width + 7) / 8);
-                        byte[] data = new byte[source.PixelHeight * stride];
-                        source.CopyPixels(data, stride, 0);
-                        target.Data = data;
-                    }
+                    target.Data = TextureWorker.ReadMaskData(dlg.FileName);
                 }
                 catch (Exception ex)
                 {
@@ -147,7 +129,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    new TextureWorker().ExportCollisionMaskPNG(sprite, target, dlg.FileName);
+                    TextureWorker.ExportCollisionMaskPNG(sprite, target, dlg.FileName);
                 }
                 catch (Exception ex)
                 {
