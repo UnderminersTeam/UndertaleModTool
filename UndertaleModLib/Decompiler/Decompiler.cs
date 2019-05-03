@@ -1210,10 +1210,16 @@ namespace UndertaleModLib.Decompiler
         public class LoopHLStatement : HLStatement
         {
             public BlockHLStatement Block;
+            public Statement Condition;
+            public AssignmentStatement InitialzeStatement;
+            public AssignmentStatement StepStatement;
 
             public override string ToString()
             {
-                return "while(true)\n" + Block.ToString();
+                if (InitialzeStatement != null && StepStatement != null && Condition != null)
+                    return "for (" + InitialzeStatement.ToString() + "; " + Condition.ToString() + "; " + StepStatement.ToString() + ")\n" + Block.ToString();
+
+                return "while " + (Condition != null ? Condition.ToString() : "(true)") + "\n" + Block.ToString();
             }
         };
 
@@ -1490,7 +1496,53 @@ namespace UndertaleModLib.Decompiler
                 {
                     if (block != currentLoop)
                     {
-                        output.Statements.Add(new LoopHLStatement() { Block = HLDecompileBlocks(ref block, blocks, loops, reverseDominators, alreadyVisited, block, true, null) });
+                        LoopHLStatement newLoop = new LoopHLStatement() { Block = HLDecompileBlocks(ref block, blocks, loops, reverseDominators, alreadyVisited, block, true, null) };
+
+                        // While loops have conditions.
+                        if (newLoop.Block.Statements.Count == 2)
+                        {
+                            Statement firstStatement = newLoop.Block.Statements[0];
+                            Statement secondStatement = newLoop.Block.Statements[1];
+
+                            if (firstStatement is IfHLStatement && secondStatement is BreakHLStatement)
+                            {
+                                IfHLStatement ifStatement = (IfHLStatement)firstStatement;
+                                if (ifStatement.falseBlock is BlockHLStatement && ((BlockHLStatement) ifStatement.falseBlock).Statements.Count == 0)
+                                {
+                                    newLoop.Condition = ifStatement.condition;
+                                    newLoop.Block.Statements.Remove(firstStatement); // Remove if statement.
+                                    newLoop.Block.Statements.Remove(secondStatement); // Remove break.
+                                    newLoop.Block.Statements.InsertRange(0, ifStatement.trueBlock.Statements); // Add if contents.
+                                }
+                            }
+                        }
+
+                        // [Late] Remove redundant continues at the end of the loop.
+                        if (newLoop.Block.Statements.Count > 0)
+                        {
+                            Statement lastStatement = newLoop.Block.Statements.Last();
+                            if (lastStatement is ContinueHLStatement)
+                                newLoop.Block.Statements.RemoveAt(newLoop.Block.Statements.Count - 1);
+                        }
+
+                        // [Late] Convert into a for loop.
+                        if (output.Statements.Count > 0 && output.Statements.Last() is AssignmentStatement && newLoop.Block.Statements.Count > 0 && newLoop.Block.Statements.Last() is AssignmentStatement && newLoop.Condition is ExpressionCompare)
+                        {
+                            ExpressionCompare compare = (ExpressionCompare)newLoop.Condition;
+                            AssignmentStatement assignment = (AssignmentStatement)output.Statements.Last();
+                            AssignmentStatement increment = (AssignmentStatement)newLoop.Block.Statements.Last();
+                            UndertaleVariable variable = assignment.Destination.Var;
+
+                            if (((compare.Argument1 is ExpressionVar && (((ExpressionVar)compare.Argument1).Var == variable)) || (compare.Argument2 is ExpressionVar && (((ExpressionVar)compare.Argument2).Var == variable))) && increment.Destination.Var == variable)
+                            {
+                                output.Statements.Remove(assignment);
+                                newLoop.InitialzeStatement = assignment;
+                                newLoop.Block.Statements.Remove(increment);
+                                newLoop.StepStatement = increment;
+                            }
+                        }
+
+                        output.Statements.Add(newLoop);
                         continue;
                     }
                     else

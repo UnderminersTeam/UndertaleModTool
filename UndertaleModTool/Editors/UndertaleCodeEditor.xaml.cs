@@ -345,7 +345,7 @@ namespace UndertaleModTool
                                 {
                                     int? val = null;
                                     string token = split[i];
-                                    if (token == "if" || token == "else" || token == "return" || token == "break" || token == "continue" || token == "while" || token == "with" || token == "switch" || token == "case" || token == "default")
+                                    if (token == "if" || token == "else" || token == "return" || token == "break" || token == "continue" || token == "while" || token == "for" || token == "repeat" || token == "with" || token == "switch" || token == "case" || token == "default")
                                         par.Inlines.Add(new Run(token) { Foreground = keywordBrush, FontWeight = FontWeights.Bold });
                                     else if (token == "self" || token == "global" || token == "local" || token == "other" || token == "noone" || token == "true" || token == "false")
                                         par.Inlines.Add(new Run(token) { Foreground = keywordBrush });
