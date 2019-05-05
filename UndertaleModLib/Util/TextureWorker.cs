@@ -15,13 +15,7 @@ namespace UndertaleModLib.Util
 
         public void ExportAsPNG(UndertaleTexturePageItem texPageItem, string FullPath, string imageName = null)
         {
-            Bitmap result = GetTextureFor(texPageItem, imageName != null ? imageName : Path.GetFileNameWithoutExtension(FullPath));
-
-            // Export the image data.
-            var stream = new FileStream(FullPath, FileMode.Create);
-            result.Save(stream, ImageFormat.Png);
-            stream.Close();
-            result.Dispose();
+            SaveImageToFile(FullPath, GetTextureFor(texPageItem, imageName != null ? imageName : Path.GetFileNameWithoutExtension(FullPath)));
         }
 
         public Bitmap GetTextureFor(UndertaleTexturePageItem texPageItem, string imageName)
@@ -35,19 +29,19 @@ namespace UndertaleModLib.Util
 
             // Sanity checks.
             if ((texPageItem.TargetWidth > exportWidth) || (texPageItem.TargetHeight > exportHeight))
-                throw new InvalidDataException(imageName + " has too large a texture");
+                throw new InvalidDataException(imageName + "'s texture is larger than its bounding box!");
 
             // Create a bitmap representing that part of the texture page.
-            Bitmap resultImage = embeddedImage.Clone(new Rectangle(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight), System.Drawing.Imaging.PixelFormat.DontCare);
-            
-            // Do we need to scale?
-            if ((texPageItem.SourceWidth != texPageItem.TargetWidth) || (texPageItem.SourceHeight != texPageItem.TargetHeight))
-                resultImage = ResizeImage(resultImage, texPageItem.SourceWidth, texPageItem.SourceHeight);
+            Bitmap resultImage = embeddedImage.Clone(new Rectangle(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight), PixelFormat.DontCare);
 
-            // Put it in the final, holder image.
+            // Resize the image, if necessary.
+            if ((texPageItem.SourceWidth != texPageItem.TargetWidth) || (texPageItem.SourceHeight != texPageItem.TargetHeight))
+                resultImage = ResizeImage(resultImage, texPageItem.TargetWidth, texPageItem.TargetHeight);
+
+            // Put it in the final holder image.
             Bitmap finalImage = new Bitmap(exportWidth, exportHeight);
             Graphics g = Graphics.FromImage(finalImage);
-            g.DrawImageUnscaled(resultImage, new Point(texPageItem.TargetX, texPageItem.TargetY));
+            g.DrawImage(resultImage, new Rectangle(texPageItem.TargetX, texPageItem.TargetY, resultImage.Width, resultImage.Height), new Rectangle(0, 0, resultImage.Width, resultImage.Height), GraphicsUnit.Pixel);
             g.Dispose();
 
             return finalImage;
@@ -71,15 +65,31 @@ namespace UndertaleModLib.Util
             return bm;
         }
 
+        // This should perform a high quality resize.
         // Grabbed from https://stackoverflow.com/questions/1922040/how-to-resize-an-image-c-sharp
-        public static Bitmap ResizeImage(Image image, int newWidth, int newHeight)
+        public static Bitmap ResizeImage(Image image, int width, int height)
         {
-            Bitmap newImage = new Bitmap(newWidth, newHeight);
-            Graphics g = Graphics.FromImage((Image) newImage);
-            g.InterpolationMode = InterpolationMode.High;
-            g.DrawImage(image, 0, 0, newWidth, newHeight);
-            g.Dispose();
-            return newImage;
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+
+            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            return destImage;
         }
 
         public static byte[] ReadMaskData(string filePath)
@@ -104,23 +114,23 @@ namespace UndertaleModLib.Util
                 }
             }
 
+            image.Dispose();
             return bytes.ToArray();
         }
 
         public static byte[] ReadTextureBlob(string filePath)
         {
-            Image.FromFile(filePath); // Make sure the file is valid PNG
+            Image.FromFile(filePath).Dispose(); // Make sure the file is valid image.
             return File.ReadAllBytes(filePath);
         }
 
         public static void SaveEmptyPNG(string FullPath, int width, int height)
         {
-            var b = new Bitmap(1, 1);
-            b.SetPixel(0, 0, Color.Black);
-            var result = new Bitmap(b, width, height);
-            var stream = new FileStream(FullPath, FileMode.Create);
-            result.Save(stream, ImageFormat.Png);
-            stream.Close();
+            var blackImage = new Bitmap(width, height);
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                    blackImage.SetPixel(x, y, Color.Black);
+            SaveImageToFile(FullPath, blackImage);
         }
 
         public static Bitmap GetCollisionMaskImage(UndertaleSprite sprite, UndertaleSprite.MaskEntry mask)
@@ -144,13 +154,16 @@ namespace UndertaleModLib.Util
 
         public static void ExportCollisionMaskPNG(UndertaleSprite sprite, UndertaleSprite.MaskEntry mask, string fullPath)
         {
-            Bitmap bitmap = GetCollisionMaskImage(sprite, mask);
+            SaveImageToFile(fullPath, GetCollisionMaskImage(sprite, mask));
+        }
 
-            // Export the image data.
-            var stream = new FileStream(fullPath, FileMode.Create);
-            bitmap.Save(stream, ImageFormat.Png);
+        public static void SaveImageToFile(string FullPath, Image image, Boolean disposeImage = true)
+        {
+            var stream = new FileStream(FullPath, FileMode.Create);
+            image.Save(stream, ImageFormat.Png);
             stream.Close();
-            bitmap.Dispose();
+            if (disposeImage)
+                image.Dispose();
         }
     }
 }
