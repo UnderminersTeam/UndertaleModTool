@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UndertaleModLib.Decompiler;
 
 namespace UndertaleModLib.Models
 {
@@ -47,9 +48,9 @@ namespace UndertaleModLib.Models
             return "\"" + Content + "\"";
         }
 
-        public string ToCodeString(bool isGameMaker2)
+        public string ToString(DecompileContext context)
         {
-            if (isGameMaker2)
+            if (context.isGameMaker2)
                 return "\"" + Content.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"") + "\"";
 
             return "\"" + Content.Replace("\"", "\" + chr(ord('\"')) + \"") + "\"";

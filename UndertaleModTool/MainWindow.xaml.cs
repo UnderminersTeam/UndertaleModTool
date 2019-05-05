@@ -367,6 +367,7 @@ namespace UndertaleModTool
                         object countLock = new object();
                         string[] outputs = new string[Data.Code.Count];
                         UndertaleDebugInfo[] outputsOffsets = new UndertaleDebugInfo[Data.Code.Count];
+                        DecompileContext context = new DecompileContext(Data, false);
                         Parallel.For(0, Data.Code.Count, (i) =>
                         {
                             var code = Data.Code[i];
@@ -377,7 +378,7 @@ namespace UndertaleModTool
                                 string output;
                                 try
                                 {
-                                    output = Decompiler.Decompile(code, Data);
+                                    output = Decompiler.Decompile(code, context);
                                 }
                                 catch (Exception e)
                                 {
@@ -1000,13 +1001,14 @@ namespace UndertaleModTool
             object countLock = new object();
             Task t = Task.Run(() =>
             {
+                DecompileContext context = new DecompileContext(Data, false);
                 Parallel.ForEach(Data.Code, (code) =>
                 {
                     //Debug.WriteLine(code.Name.Content);
                     string path = System.IO.Path.Combine(outdir, code.Name.Content + ".gml");
                     try
                     {
-                        string decomp = Decompiler.Decompile(code, Data);
+                        string decomp = Decompiler.Decompile(code, context);
                         File.WriteAllText(path, decomp);
                     }
                     catch (Exception e)

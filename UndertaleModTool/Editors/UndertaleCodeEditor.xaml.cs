@@ -224,7 +224,7 @@ namespace UndertaleModTool
         private void UpdateGettext(UndertaleCode gettextCode)
         {
             gettext = new Dictionary<string, int>();
-            foreach(var line in Decompiler.Decompile(gettextCode).Replace("\r\n", "\n").Split('\n'))
+            foreach (var line in Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n'))
             {
                 Match m = Regex.Match(line, "^ds_map_add\\(global.text_data_en, \"(.*)\"@([0-9]+), \"(.*)\"@([0-9]+)\\)");
                 if (m.Success)
@@ -261,7 +261,7 @@ namespace UndertaleModTool
                 Exception e = null;
                 try
                 {
-                    decompiled = Decompiler.Decompile(code, dataa).Replace("\r\n", "\n");
+                    decompiled = Decompiler.Decompile(code, new DecompileContext(dataa, true)).Replace("\r\n", "\n");
                 }
                 catch (Exception ex)
                 {

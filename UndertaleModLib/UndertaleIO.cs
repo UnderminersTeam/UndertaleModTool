@@ -101,7 +101,12 @@ namespace UndertaleModLib
 
         public override string ToString()
         {
-            return String.Format("{0}@{1}", Resource?.ToString() ?? "(null)", CachedId);
+            return (Resource?.ToString() ?? "(null)") + GetMarkerSuffix();
+        }
+
+        public string GetMarkerSuffix()
+        {
+            return "@" + CachedId;
         }
 
         public void Serialize(UndertaleWriter writer)

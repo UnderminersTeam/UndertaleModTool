@@ -13,14 +13,26 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Decompiler
 {
-    public static class Decompiler
+    public class DecompileContext
     {
+        public UndertaleData Data;
+        public bool EnableStringLabels;
+
+        public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
+
+        public DecompileContext(UndertaleData data, bool enableStringLabels)
+        {
+            this.Data = data;
+            this.EnableStringLabels = enableStringLabels;
+        }
+    }
+
+    public static class Decompiler
+    {    
+
         /**
          * Howdy! Yeah, I don't know how any of this works anymore either, so... have fun
          */
-
-        [ThreadStatic]
-        internal static UndertaleData HUGE_HACK_FIX_THIS_SOON;
 
         public class Block
         {
@@ -47,8 +59,8 @@ namespace UndertaleModLib.Decompiler
 
         public abstract class Statement
         {
-            public abstract override string ToString();
-            internal abstract AssetIDType DoTypePropagation(AssetIDType suggestedType);
+            public abstract string ToString(DecompileContext context);
+            internal abstract AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType);
         }
 
         public abstract class Expression : Statement
@@ -138,12 +150,18 @@ namespace UndertaleModLib.Decompiler
                 return (Value is Int16 || Value is Int32) && Convert.ToInt32(TestNumber) == TestNumber;
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
-                bool isGMS2 = HUGE_HACK_FIX_THIS_SOON != null && HUGE_HACK_FIX_THIS_SOON.IsGameMaker2();
 
-                if (Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>) // Don't add @ to strings.
-                    return ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value).Resource.ToCodeString(isGMS2);
+                if (Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>) // Export string.
+                {
+                    UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> resource = (UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value;
+
+                    string resultStr = resource.Resource.ToString(context);
+                    if (context.EnableStringLabels)
+                        resultStr += resource.GetMarkerSuffix();
+                    return resultStr;
+                }
 
                 if (AssetType == AssetIDType.GameObject && !(Value is Int64)) // When the value is Int64, an example value is 343434343434. It is unknown what it represents, but it's not an InstanceType.
                 {
@@ -151,40 +169,40 @@ namespace UndertaleModLib.Decompiler
                         return ((UndertaleInstruction.InstanceType)Value).ToString().ToLower();
                 }
                 
-                if (HUGE_HACK_FIX_THIS_SOON != null && AssetType != AssetIDType.Other && AssetType != AssetIDType.Color && AssetType != AssetIDType.KeyboardKey && AssetType != AssetIDType.e__VW && AssetType != AssetIDType.e__BG && AssetType != AssetIDType.Enum_HAlign && AssetType != AssetIDType.Enum_VAlign)
+                if (context.Data != null && AssetType != AssetIDType.Other && AssetType != AssetIDType.Color && AssetType != AssetIDType.KeyboardKey && AssetType != AssetIDType.e__VW && AssetType != AssetIDType.e__BG && AssetType != AssetIDType.Enum_HAlign && AssetType != AssetIDType.Enum_VAlign)
                 {
                     IList assetList = null;
                     switch(AssetType)
                     {
                         case AssetIDType.Sprite:
-                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Sprites;
+                            assetList = (IList)context.Data.Sprites;
                             break;
                         case AssetIDType.Background:
-                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Backgrounds;
+                            assetList = (IList)context.Data.Backgrounds;
                             break;
                         case AssetIDType.Sound:
-                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Sounds;
+                            assetList = (IList)context.Data.Sounds;
                             break;
                         case AssetIDType.Font:
-                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Fonts;
+                            assetList = (IList)context.Data.Fonts;
                             break;
                         case AssetIDType.Path:
-                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Paths;
+                            assetList = (IList)context.Data.Paths;
                             break;
                         case AssetIDType.Timeline:
-                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Timelines;
+                            assetList = (IList)context.Data.Timelines;
                             break;
                         case AssetIDType.Room:
-                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Rooms;
+                            assetList = (IList)context.Data.Rooms;
                             break;
                         case AssetIDType.GameObject:
-                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.GameObjects;
+                            assetList = (IList)context.Data.GameObjects;
                             break;
                         case AssetIDType.Shader:
-                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Shaders;
+                            assetList = (IList)context.Data.Shaders;
                             break;
                         case AssetIDType.Script:
-                            assetList = (IList)HUGE_HACK_FIX_THIS_SOON.Scripts;
+                            assetList = (IList)context.Data.Scripts;
                             break;
                     }
 
@@ -213,7 +231,7 @@ namespace UndertaleModLib.Decompiler
                 if (AssetType == AssetIDType.Color && Value is IFormattable)
                 {
                     uint val = Convert.ToUInt32(Value);
-                    return (isGMS2 ? "0x" : "$") + ((IFormattable)Value).ToString(val > 0xFFFFFF ? "X8" : "X6", CultureInfo.InvariantCulture);
+                    return (context.isGameMaker2 ? "0x" : "$") + ((IFormattable)Value).ToString(val > 0xFFFFFF ? "X8" : "X6", CultureInfo.InvariantCulture);
                 }
 
                 if (AssetType == AssetIDType.KeyboardKey)
@@ -226,8 +244,8 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     if (!Char.IsControl((char)val) && !Char.IsLower((char)val)) // The special keys overlay with the uppercase letters (ugh)
-                        return ((char)val) == '\'' ? (isGMS2 ? "\"\\\"\"" : "'\"'")
-                            : (((char) val) == '\\' ? (isGMS2 ? "\"\\\\\"" : "\"\\\"")
+                        return ((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
+                            : (((char) val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
                             : "\"" + (char)val + "\"");
                 }
 
@@ -237,10 +255,13 @@ namespace UndertaleModLib.Decompiler
                 if (Value is double) // Prevents scientific notation by using high bit number.
                     return ((decimal) ((double) Value)).ToString(CultureInfo.InvariantCulture);
 
+                if (Value is Statement)
+                    return ((Statement)Value).ToString(context);
+
                 return ((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
             }
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 if (AssetType == AssetIDType.Other)
                     AssetType = suggestedType;
@@ -263,15 +284,15 @@ namespace UndertaleModLib.Decompiler
                 return Argument.IsDuplicationSafe();
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 //return String.Format("{0}({1})", Type != Argument.Type ? "(" + Type.ToString().ToLower() + ")" : "", Argument.ToString());
-                return Argument.ToString();
+                return Argument.ToString(context);
             }
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
-                return Argument.DoTypePropagation(suggestedType);
+                return Argument.DoTypePropagation(context, suggestedType);
             }
         }
 
@@ -292,17 +313,17 @@ namespace UndertaleModLib.Decompiler
                 return Argument.IsDuplicationSafe();
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 string op = OperationToPrintableString(Opcode);
                 if (Opcode == UndertaleInstruction.Opcode.Not && Type == UndertaleInstruction.DataType.Boolean)
                     op = "!"; // This is a logical negation instead, see #93
-                return String.Format("{0}({1} {2})", false && Type != Argument.Type ? "(" + Type.ToString().ToLower() + ")" : "", op, Argument.ToString());
+                return String.Format("{0}({1} {2})", false && Type != Argument.Type ? "(" + Type.ToString().ToLower() + ")" : "", op, Argument.ToString(context));
             }
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
-                return Argument.DoTypePropagation(suggestedType);
+                return Argument.DoTypePropagation(context, suggestedType);
             }
         }
 
@@ -326,17 +347,17 @@ namespace UndertaleModLib.Decompiler
                 return Argument1.IsDuplicationSafe() && Argument2.IsDuplicationSafe();
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 // TODO: better condition for casts
-                return String.Format("{0}({1} {2} {3})", false && (Type != Argument1.Type || Type != Argument2.Type || Argument1.Type != Argument2.Type) ? "(" + Type.ToString().ToLower() + ")" : "", Argument1.ToString(), Symbol, Argument2.ToString());
+                return String.Format("{0}({1} {2} {3})", false && (Type != Argument1.Type || Type != Argument2.Type || Argument1.Type != Argument2.Type) ? "(" + Type.ToString().ToLower() + ")" : "", Argument1.ToString(context), Symbol, Argument2.ToString(context));
             }
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 // The most likely, but probably rarely happens
-                AssetIDType t = Argument1.DoTypePropagation(suggestedType);
-                Argument2.DoTypePropagation(AssetIDType.Other);
+                AssetIDType t = Argument1.DoTypePropagation(context, suggestedType);
+                Argument2.DoTypePropagation(context, AssetIDType.Other);
                 return t;
             }
         }
@@ -360,17 +381,17 @@ namespace UndertaleModLib.Decompiler
                 return Argument1.IsDuplicationSafe() && Argument2.IsDuplicationSafe();
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 // TODO: better condition for casts
-                return String.Format("{0}({1} {2} {3})", false && (Type != Argument1.Type || Type != Argument2.Type || Argument1.Type != Argument2.Type) ? "(" + Type.ToString().ToLower() + ")" : "", Argument1.ToString(), OperationToPrintableString(Opcode), Argument2.ToString());
+                return String.Format("{0}({1} {2} {3})", false && (Type != Argument1.Type || Type != Argument2.Type || Argument1.Type != Argument2.Type) ? "(" + Type.ToString().ToLower() + ")" : "", Argument1.ToString(context), OperationToPrintableString(Opcode), Argument2.ToString(context));
             }
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 // The most likely, but probably rarely happens
-                AssetIDType t = Argument1.DoTypePropagation(suggestedType);
-                Argument2.DoTypePropagation(AssetIDType.Other);
+                AssetIDType t = Argument1.DoTypePropagation(context, suggestedType);
+                Argument2.DoTypePropagation(context, AssetIDType.Other);
                 return t;
             }
         }
@@ -394,15 +415,15 @@ namespace UndertaleModLib.Decompiler
                 return Argument1.IsDuplicationSafe() && Argument2.IsDuplicationSafe();
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
-                return String.Format("({0} {1} {2})", Argument1.ToString(), OperationToPrintableString(Opcode), Argument2.ToString());
+                return String.Format("({0} {1} {2})", Argument1.ToString(context), OperationToPrintableString(Opcode), Argument2.ToString(context));
             }
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 // TODO: This should be probably able to go both ways...
-                Argument2.DoTypePropagation(Argument1.DoTypePropagation(suggestedType));
+                Argument2.DoTypePropagation(context, Argument1.DoTypePropagation(context, suggestedType));
                 return AssetIDType.Other;
             }
         }
@@ -416,12 +437,12 @@ namespace UndertaleModLib.Decompiler
                 this.Opcode = opcode;
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 return Opcode.ToString().ToUpper();
             }
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 return suggestedType;
             }
@@ -469,16 +490,16 @@ namespace UndertaleModLib.Decompiler
                 Value = value;
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 return String.Format("{0} = {1}", Var.Var.Name, Value);
             }
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 if (Var.Var.AssetType == AssetIDType.Other)
                     Var.Var.AssetType = suggestedType;
-                return Value.DoTypePropagation(Var.Var.AssetType);
+                return Value.DoTypePropagation(context, Var.Var.AssetType);
             }
         }
 
@@ -497,12 +518,12 @@ namespace UndertaleModLib.Decompiler
                 return true;
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 return String.Format("{0}{1}", /*Type != Var.Var.Type ? "(" + Type.ToString().ToLower() + ")" : ""*/ "", Var.Var.Name);
             }
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 if (Var.Var.AssetType == AssetIDType.Other)
                     Var.Var.AssetType = suggestedType;
@@ -519,17 +540,17 @@ namespace UndertaleModLib.Decompiler
                 Value = value;
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 if (Value != null)
-                    return "return " + Value.ToString();
+                    return "return " + Value.ToString(context);
                 else
-                    return "exit"; //TODO: Maybe GMS1 only? This might be bad in GMS2.
+                    return "exit";
             }
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
-                return Value?.DoTypePropagation(suggestedType) ?? suggestedType;
+                return Value?.DoTypePropagation(context, suggestedType) ?? suggestedType;
             }
         }
 
@@ -544,7 +565,7 @@ namespace UndertaleModLib.Decompiler
                 Value = value;
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 if (Value is ExpressionTwo)
                 {
@@ -556,20 +577,19 @@ namespace UndertaleModLib.Decompiler
 
                     if (isValid && (isAdd || isSub || (eTwo.Opcode == UndertaleInstruction.Opcode.Mul) || (eTwo.Opcode == UndertaleInstruction.Opcode.Div)))
                     {
-                        bool isGMS2 = HUGE_HACK_FIX_THIS_SOON != null && HUGE_HACK_FIX_THIS_SOON.IsGameMaker2();
-                        if (isGMS2 && (isAdd || isSub) && eTwo.Argument2 is ExpressionConstant && ((ExpressionConstant)eTwo.Argument2).EqualsNumber(1))
-                            return Expression.OperationToPrintableString(eTwo.Opcode) + Expression.OperationToPrintableString(eTwo.Opcode) + eTwo.Argument1.ToString();
+                        if (context.isGameMaker2 && (isAdd || isSub) && eTwo.Argument2 is ExpressionConstant && ((ExpressionConstant)eTwo.Argument2).EqualsNumber(1))
+                            return Expression.OperationToPrintableString(eTwo.Opcode) + Expression.OperationToPrintableString(eTwo.Opcode) + eTwo.Argument1.ToString(context);
 
-                        return Destination.ToString() + " " + Expression.OperationToPrintableString(eTwo.Opcode) + "= " + eTwo.Argument2;
+                        return Destination.ToString(context) + " " + Expression.OperationToPrintableString(eTwo.Opcode) + "= " + eTwo.Argument2;
                     }
                 }
 
-                return String.Format("{0} = {1}", Destination.ToString(), Value.ToString());
+                return String.Format("{0} = {1}", Destination.ToString(context), Value.ToString(context));
             }
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
-                return Value.DoTypePropagation(Destination.DoTypePropagation(suggestedType));
+                return Value.DoTypePropagation(context, Destination.DoTypePropagation(context, suggestedType));
             }
         }
 
@@ -582,12 +602,12 @@ namespace UndertaleModLib.Decompiler
                 Message = message;
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 return "// " + Message;
             }
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 return suggestedType;
             }
@@ -606,21 +626,28 @@ namespace UndertaleModLib.Decompiler
                 this.Arguments = args;
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
-                if (Function.Name.Content == "@@NewGMLArray@@") // Special-case.
-                    return "[" + String.Join(", ", Arguments) + "]";
+                StringBuilder argumentString = new StringBuilder();
+                foreach (Expression exp in Arguments)
+                {
+                    if (argumentString.Length > 0)
+                        argumentString.Append(", ");
+                    argumentString.Append(exp.ToString(context));
+                }
 
-                //return String.Format("({0}){1}({2})", ReturnType.ToString().ToLower(), Function.Name.Content, String.Join(", ", Arguments));
-                return String.Format("{0}({1})", Function.Name.Content, String.Join(", ", Arguments));
+                if (Function.Name.Content == "@@NewGMLArray@@") // Special-case.
+                    return "[" + argumentString.ToString() + "]";
+
+                return String.Format("{0}({1})", Function.Name.Content, argumentString.ToString());
             }
 
             [ThreadStatic]
             public static Dictionary<string, AssetIDType[]> scriptArgs; // TODO: damnit stop using globals you stupid... this needs a big refactor anyway
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
-                var script_code = HUGE_HACK_FIX_THIS_SOON?.Scripts.ByName(Function.Name.Content)?.Code;
+                var script_code = context.Data?.Scripts.ByName(Function.Name.Content)?.Code;
                 if (script_code != null && !scriptArgs.ContainsKey(Function.Name.Content))
                 {
                     scriptArgs.Add(Function.Name.Content, null); // stop the recursion from looping
@@ -628,7 +655,7 @@ namespace UndertaleModLib.Decompiler
                     ExpressionVar.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>(); // TODO: don't look at this
                     Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code);
                     Decompiler.DecompileFromBlock(blocks[0]);
-                    Decompiler.DoTypePropagation(blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
+                    Decompiler.DoTypePropagation(context, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
                     scriptArgs[Function.Name.Content] = new AssetIDType[15];
                     for(int i = 0; i < 15; i++)
                     {
@@ -642,7 +669,7 @@ namespace UndertaleModLib.Decompiler
                 AssetTypeResolver.AnnotateTypesForFunctionCall(Function.Name.Content, args, scriptArgs);
                 for (var i = 0; i < Arguments.Count; i++)
                 {
-                    Arguments[i].DoTypePropagation(args[i]);
+                    Arguments[i].DoTypePropagation(context, args[i]);
                 }
                 return suggestedType; // TODO: maybe we should handle returned values too?
             }
@@ -690,19 +717,19 @@ namespace UndertaleModLib.Decompiler
                 return new Tuple<Expression, Expression>(ind1, ind2);
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 //Debug.Assert((ArrayIndex != null) == NeedsArrayParameters);
                 //Debug.Assert((InstanceIndex != null) == NeedsInstanceParameters);
                 string name = Var.Name.Content;
                 if (ArrayIndex1 != null && ArrayIndex2 != null)
-                    name = name + "[" + ArrayIndex1.ToString() + ", " + ArrayIndex2.ToString() + "]";
+                    name = name + "[" + ArrayIndex1.ToString(context) + ", " + ArrayIndex2.ToString(context) + "]";
                 else if (ArrayIndex1 != null)
-                    name = name + "[" + ArrayIndex1.ToString() + "]";
+                    name = name + "[" + ArrayIndex1.ToString(context) + "]";
 
                 //NOTE: The "var" prefix is handled in Decompiler.Decompile. 
 
-                string prefix = InstType.ToString() + ".";
+                string prefix = InstType.ToString(context) + ".";
                 if (InstType is ExpressionConstant) // Only use "global." and "other.", not "self." or "local.". GMS doesn't recognize those.
                 {
                     ExpressionConstant constant = (ExpressionConstant)InstType;
@@ -729,11 +756,11 @@ namespace UndertaleModLib.Decompiler
 
             [ThreadStatic]
             public static Dictionary<UndertaleVariable, AssetIDType> assetTypes; // TODO: huge and ugly memory leak that I may fix one day... nah don't count on it
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
-                InstType?.DoTypePropagation(AssetIDType.GameObject);
-                ArrayIndex1?.DoTypePropagation(AssetIDType.Other);
-                ArrayIndex2?.DoTypePropagation(AssetIDType.Other);
+                InstType?.DoTypePropagation(context, AssetIDType.GameObject);
+                ArrayIndex1?.DoTypePropagation(context, AssetIDType.Other);
+                ArrayIndex2?.DoTypePropagation(context, AssetIDType.Other);
 
                 AssetIDType current = assetTypes.ContainsKey(Var) ? assetTypes[Var] : AssetIDType.Other;
                 if (current == AssetIDType.Other && suggestedType != AssetIDType.Other)
@@ -760,26 +787,26 @@ namespace UndertaleModLib.Decompiler
                 this.NewEnv = newEnv;
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 return "pushenv " + NewEnv;
             }
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
-                NewEnv.DoTypePropagation(AssetIDType.GameObject);
+                NewEnv.DoTypePropagation(context, AssetIDType.GameObject);
                 return suggestedType;
             }
         }
 
         public class PopEnvStatement : Statement
         {
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 return "popenv";
             }
 
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 return suggestedType;
             }
@@ -1180,7 +1207,7 @@ namespace UndertaleModLib.Decompiler
 
         public abstract class HLStatement : Statement
         {
-            internal override AssetIDType DoTypePropagation(AssetIDType suggestedType)
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 throw new NotImplementedException();
             }
@@ -1190,10 +1217,10 @@ namespace UndertaleModLib.Decompiler
         {
             public List<Statement> Statements = new List<Statement>();
 
-            public string ToString(bool canSkipBrackets = true)
+            public string ToString(DecompileContext context, bool canSkipBrackets = true)
             {
                 if (Statements.Count == 1 && !(Statements[0] is IfHLStatement) && !(Statements[0] is LoopHLStatement) && !(Statements[0] is WithHLStatement) && canSkipBrackets)
-                    return "    " + Statements[0].ToString().Replace("\n", "\n    ");
+                    return "    " + Statements[0].ToString(context).Replace("\n", "\n    ");
                 else
                 {
                     StringBuilder sb = new StringBuilder();
@@ -1201,7 +1228,7 @@ namespace UndertaleModLib.Decompiler
                     foreach(var stmt in Statements)
                     {
                         sb.Append("    ");
-                        sb.Append(stmt.ToString().Replace("\n", "\n    "));
+                        sb.Append(stmt.ToString(context).Replace("\n", "\n    "));
                         sb.Append("\n");
                     }
                     sb.Append("}");
@@ -1209,9 +1236,9 @@ namespace UndertaleModLib.Decompiler
                 }
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
-                return ToString(true);
+                return ToString(context, true);
             }
         };
 
@@ -1222,22 +1249,22 @@ namespace UndertaleModLib.Decompiler
             public List<Tuple<Expression, BlockHLStatement>> elseConditions = new List<Tuple<Expression, BlockHLStatement>>();
             public BlockHLStatement falseBlock;
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.Append("if " + condition.ToString() + "\n");
-                sb.Append(trueBlock.ToString());
+                sb.Append("if " + condition.ToString(context) + "\n");
+                sb.Append(trueBlock.ToString(context));
 
                 foreach (Tuple<Expression, BlockHLStatement> tuple in elseConditions)
                 {
-                    sb.Append("\nelse if " + tuple.Item1.ToString() + "\n");
-                    sb.Append(tuple.Item2.ToString());
+                    sb.Append("\nelse if " + tuple.Item1.ToString(context) + "\n");
+                    sb.Append(tuple.Item2.ToString(context));
                 }
 
                 if (falseBlock != null && falseBlock.Statements.Count > 0)
                 {
                     sb.Append("\nelse\n");
-                    sb.Append(falseBlock.ToString());
+                    sb.Append(falseBlock.ToString(context));
                 }
                 return sb.ToString();
             }
@@ -1263,29 +1290,29 @@ namespace UndertaleModLib.Decompiler
             public bool isRepeatLoop { get => RepeatStartValue != null; }
             public Statement RepeatStartValue;
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 if (isRepeatLoop) {
                     bool isConstant = RepeatStartValue is ExpressionConstant;
-                    return "repeat " + (isConstant ? "(" : "") + RepeatStartValue.ToString() + (isConstant  ? ")" : "") + "\n" + Block.ToString();
+                    return "repeat " + (isConstant ? "(" : "") + RepeatStartValue.ToString(context) + (isConstant  ? ")" : "") + "\n" + Block.ToString(context);
                 }
 
                 if (IsForLoop)
                 {
-                    string conditionStr = Condition.ToString(); // Cut off parenthesis for the condition.
+                    string conditionStr = Condition.ToString(context); // Cut off parenthesis for the condition.
                     if (conditionStr.StartsWith("(") && conditionStr.EndsWith(")"))
                         conditionStr = conditionStr.Substring(1, conditionStr.Length - 2);
 
-                    return "for (" + InitializeStatement.ToString() + "; " + conditionStr + "; " + StepStatement.ToString() + ")\n" + Block.ToString();
+                    return "for (" + InitializeStatement.ToString(context) + "; " + conditionStr + "; " + StepStatement.ToString(context) + ")\n" + Block.ToString(context);
                 }
 
-                return "while " + (Condition != null ? Condition.ToString() : "(true)") + "\n" + Block.ToString();
+                return "while " + (Condition != null ? Condition.ToString(context) : "(true)") + "\n" + Block.ToString(context);
             }
         };
 
         public class ContinueHLStatement : HLStatement
         {
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 return "continue";
             }
@@ -1293,7 +1320,7 @@ namespace UndertaleModLib.Decompiler
 
         public class BreakHLStatement : HLStatement
         {
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 return "break";
             }
@@ -1304,9 +1331,9 @@ namespace UndertaleModLib.Decompiler
             public Expression NewEnv;
             public BlockHLStatement Block;
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
-                return "with(" + NewEnv.ToString() + ")\n" + Block.ToString(false);
+                return "with(" + NewEnv.ToString(context) + ")\n" + Block.ToString(context, false);
             }
         }
 
@@ -1321,15 +1348,15 @@ namespace UndertaleModLib.Decompiler
                 this.Cases = cases;
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.Append("switch " + SwitchExpression.ToString() + "\n");
+                sb.Append("switch " + SwitchExpression.ToString(context) + "\n");
                 sb.Append("{\n");
                 foreach(var casee in Cases)
                 {
                     sb.Append("    ");
-                    sb.Append(casee.ToString().Replace("\n", "\n    "));
+                    sb.Append(casee.ToString(context).Replace("\n", "\n    "));
                     sb.Append("\n");
                 }
                 sb.Append("}\n");
@@ -1349,20 +1376,20 @@ namespace UndertaleModLib.Decompiler
                 this.Block = block;
             }
 
-            public override string ToString()
+            public override string ToString(DecompileContext context)
             {
                 StringBuilder sb = new StringBuilder();
                 foreach(Expression caseExpr in CaseExpressions)
                 {
                     if (caseExpr != null)
-                        sb.Append("case " + caseExpr.ToString() + ":\n");
+                        sb.Append("case " + caseExpr.ToString(context) + ":\n");
                     else
                         sb.Append("default:\n");
                 }
                 if (Block.Statements.Count > 0)
                 {
                     sb.Append("    ");
-                    sb.Append(Block.ToString(false).Replace("\n", "\n    ") + "\n");
+                    sb.Append(Block.ToString(context, false).Replace("\n", "\n    ") + "\n");
                 }
                 sb.Append("    break\n");
                 return sb.ToString();
@@ -1545,7 +1572,7 @@ namespace UndertaleModLib.Decompiler
             }
         }*/
 
-        private static BlockHLStatement HLDecompileBlocks(ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, List<Block> alreadyVisited, Block currentLoop = null, bool decompileTheLoop = false, Block stopAt = null, bool allowBreak = false)
+        private static BlockHLStatement HLDecompileBlocks(DecompileContext context, ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, List<Block> alreadyVisited, Block currentLoop = null, bool decompileTheLoop = false, Block stopAt = null, bool allowBreak = false)
         {
             BlockHLStatement output = new BlockHLStatement();
             bool foundBreak = false;
@@ -1556,7 +1583,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     if (block != currentLoop)
                     {
-                        LoopHLStatement newLoop = new LoopHLStatement() { Block = HLDecompileBlocks(ref block, blocks, loops, reverseDominators, alreadyVisited, block, true, null) };
+                        LoopHLStatement newLoop = new LoopHLStatement() { Block = HLDecompileBlocks(context, ref block, blocks, loops, reverseDominators, alreadyVisited, block, true, null) };
 
                         // While loops have conditions.
                         if (newLoop.Block.Statements.Count == 2)
@@ -1664,7 +1691,7 @@ namespace UndertaleModLib.Decompiler
                             if (cmp.Argument1 != switchExpression &&
                                 (!(cmp.Argument1 is ExpressionTempVar) || !(switchExpression is ExpressionTempVar) || (cmp.Argument1 as ExpressionTempVar).Var.Var != (switchExpression as ExpressionTempVar).Var.Var) &&
                                 (!(cmp.Argument1 is ExpressionTempVar) || (cmp.Argument1 as ExpressionTempVar).Var.Var != switchTempVar))
-                                throw new Exception("Malformed switch statement: bad condition var (" + cmp.Argument1.ToString() + ")");
+                                throw new Exception("Malformed switch statement: bad condition var (" + cmp.Argument1.ToString(context) + ")");
                             if (cmp.Opcode != UndertaleInstruction.ComparisonType.EQ)
                                 throw new Exception("Malformed switch statement: bad contition type (" + cmp.Opcode.ToString().ToUpper() + ")");
                             caseExpr = cmp.Argument2;
@@ -1696,7 +1723,7 @@ namespace UndertaleModLib.Decompiler
                     foreach(var x in caseEntries)
                     {
                         Block temp = x.Key;
-                        cases.Add(new HLSwitchCaseStatement(x.Value, HLDecompileBlocks(ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint)));
+                        cases.Add(new HLSwitchCaseStatement(x.Value, HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint)));
                         Debug.Assert(temp == meetPoint);
                     }
 
@@ -1714,7 +1741,7 @@ namespace UndertaleModLib.Decompiler
                     output.Statements.Add(new WithHLStatement()
                     {
                         NewEnv = stmt.NewEnv,
-                        Block = HLDecompileBlocks(ref block, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, stopAt)
+                        Block = HLDecompileBlocks(context, ref block, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, stopAt)
                     });
                     if (block == null)
                         break;
@@ -1748,8 +1775,8 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     Block blTrue = block.nextBlockTrue, blFalse = block.nextBlockFalse;
-                    cond.trueBlock = HLDecompileBlocks(ref blTrue, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint, true);
-                    cond.falseBlock = HLDecompileBlocks(ref blFalse, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint, true);
+                    cond.trueBlock = HLDecompileBlocks(context, ref blTrue, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint, true);
+                    cond.falseBlock = HLDecompileBlocks(context, ref blFalse, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint, true);
 
                     bool shouldAdd = true;
 
@@ -1814,7 +1841,7 @@ namespace UndertaleModLib.Decompiler
                         ReturnStatement trueStatement = (ReturnStatement)(cond.trueBlock.Statements.Last());
                         ReturnStatement falseStatement = (ReturnStatement)(cond.falseBlock.Statements.Last());
 
-                        if (trueStatement.Value.ToString() == "1" && falseStatement.Value.ToString() == "0")
+                        if (trueStatement.Value.ToString(context) == "1" && falseStatement.Value.ToString(context) == "0")
                         {
                             shouldAdd = false;
                             output.Statements.Add(new ReturnStatement(cond.condition));
@@ -1845,7 +1872,7 @@ namespace UndertaleModLib.Decompiler
                         TempVar loopVar = priorAssignment.Var.Var;
 
                         List<Statement> loopCode = loop.Block.Statements;
-                        if (loop.IsWhileLoop && loop.Condition == null && loopCode.Count > 2 && condition.Opcode == UndertaleInstruction.ComparisonType.LTE && condition.Argument2 is ExpressionConstant && ((ExpressionConstant)condition.Argument2).EqualsNumber(0) && condition.Argument1.ToString() == startValue.ToString())
+                        if (loop.IsWhileLoop && loop.Condition == null && loopCode.Count > 2 && condition.Opcode == UndertaleInstruction.ComparisonType.LTE && condition.Argument2 is ExpressionConstant && ((ExpressionConstant)condition.Argument2).EqualsNumber(0) && condition.Argument1.ToString(context) == startValue.ToString(context))
                         {
                             Statement testDecrementStatement = loopCode[loopCode.Count - 3];
                             Statement testLoopCheckStatement = loopCode[loopCode.Count - 2];
@@ -1911,7 +1938,7 @@ namespace UndertaleModLib.Decompiler
             return output;
         }
 
-        private static List<Statement> HLDecompile(Dictionary<uint, Block> blocks, Block entryPoint, Block rootExitPoint)
+        private static List<Statement> HLDecompile(DecompileContext context, Dictionary<uint, Block> blocks, Block entryPoint, Block rootExitPoint)
         {
             Dictionary<Block, List<Block>> loops = ComputeNaturalLoops(blocks, entryPoint);
             /*foreach(var a in loops)
@@ -1922,7 +1949,7 @@ namespace UndertaleModLib.Decompiler
             }*/
             var reverseDominators = ComputeDominators(blocks, rootExitPoint, true);
             Block bl = entryPoint;
-            return HLDecompileBlocks(ref bl, blocks, loops, reverseDominators, new List<Block>()).Statements;
+            return HLDecompileBlocks(context, ref bl, blocks, loops, reverseDominators, new List<Block>()).Statements;
         }
 
         private static Dictionary<uint, Block> PrepareDecompileFlow(UndertaleCode code)
@@ -1967,26 +1994,25 @@ namespace UndertaleModLib.Decompiler
             return blocks;
         }
         
-        public static string Decompile(UndertaleCode code, UndertaleData data = null)
+        public static string Decompile(UndertaleCode code, DecompileContext context)
         {
-            HUGE_HACK_FIX_THIS_SOON = data;
             TempVar.TempVarId = 0;
             ExpressionVar.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
             DecompileFromBlock(blocks[0]);
             FunctionCall.scriptArgs = new Dictionary<string, AssetIDType[]>();
             // TODO: add self to scriptArgs
-            DoTypePropagation(blocks);
-            List<Statement> stmts = HLDecompile(blocks, blocks[0], blocks[code.Length / 4]);
+            DoTypePropagation(context, blocks);
+            List<Statement> stmts = HLDecompile(context, blocks, blocks[0], blocks[code.Length / 4]);
             StringBuilder sb = new StringBuilder();
 
             // Mark local variables as local.
             StringBuilder tempBuilder = new StringBuilder();
-            UndertaleCodeLocals locals = data != null ? data.CodeLocals.For(code) : null;
+            UndertaleCodeLocals locals = context.Data != null ? context.Data.CodeLocals.For(code) : null;
 
             // Write code.
             foreach (var stmt in stmts)
-                sb.Append(stmt.ToString() + "\n");
+                sb.Append(stmt.ToString(context) + "\n");
             string decompiledCode = sb.ToString();
 
             if (locals != null) {
@@ -2019,15 +2045,15 @@ namespace UndertaleModLib.Decompiler
             return decompiledCode;
         }
 
-        private static void DoTypePropagation(Dictionary<uint, Block> blocks)
+        private static void DoTypePropagation(DecompileContext context, Dictionary<uint, Block> blocks)
         {
             foreach(var b in blocks.Values.Cast<Block>().Reverse())
             {
                 foreach(var s in b.Statements.Cast<Statement>().Reverse())
                 {
-                    s.DoTypePropagation(AssetIDType.Other);
+                    s.DoTypePropagation(context, AssetIDType.Other);
                 }
-                b.ConditionStatement?.DoTypePropagation(AssetIDType.Other);
+                b.ConditionStatement?.DoTypePropagation(context, AssetIDType.Other);
             }
         }
 
