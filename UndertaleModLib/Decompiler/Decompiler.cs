@@ -1201,6 +1201,7 @@ namespace UndertaleModLib.Decompiler
         {
             public Expression condition;
             public BlockHLStatement trueBlock;
+            public List<Tuple<Expression, BlockHLStatement>> elseConditions = new List<Tuple<Expression, BlockHLStatement>>();
             public BlockHLStatement falseBlock;
 
             public override string ToString()
@@ -1208,6 +1209,13 @@ namespace UndertaleModLib.Decompiler
                 StringBuilder sb = new StringBuilder();
                 sb.Append("if " + condition.ToString() + "\n");
                 sb.Append(trueBlock.ToString());
+
+                foreach (Tuple<Expression, BlockHLStatement> tuple in elseConditions)
+                {
+                    sb.Append("\nelse if " + tuple.Item1.ToString() + "\n");
+                    sb.Append(tuple.Item2.ToString());
+                }
+
                 if (falseBlock != null && falseBlock.Statements.Count > 0)
                 {
                     sb.Append("\nelse\n");
@@ -1243,7 +1251,13 @@ namespace UndertaleModLib.Decompiler
                     return "repeat (" + RepeatStartValue.ToString() + ")\n" + Block.ToString();
 
                 if (IsForLoop)
-                    return "for (" + InitializeStatement.ToString() + "; " + Condition.ToString() + "; " + StepStatement.ToString() + ")\n" + Block.ToString();
+                {
+                    string conditionStr = Condition.ToString(); // Cut off parenthesis for the condition.
+                    if (conditionStr.StartsWith("(") && conditionStr.EndsWith(")"))
+                        conditionStr = conditionStr.Substring(1, conditionStr.Length - 2);
+
+                    return "for (" + InitializeStatement.ToString() + "; " + conditionStr + "; " + StepStatement.ToString() + ")\n" + Block.ToString();
+                }
 
                 return "while " + (Condition != null ? Condition.ToString() : "(true)") + "\n" + Block.ToString();
             }
@@ -1786,6 +1800,19 @@ namespace UndertaleModLib.Decompiler
                         {
                             shouldAdd = false;
                             output.Statements.Add(new ReturnStatement(cond.condition));
+                        }
+                    }
+
+                    // Use if -> else if, instead of nesting ifs.
+                    if (shouldAdd)
+                    {
+                        IfHLStatement parentIf = cond;
+                        while (parentIf.falseBlock.Statements.Count == 1 && parentIf.falseBlock.Statements[0] is IfHLStatement) // The condition of one if statement.
+                        {
+                            IfHLStatement nestedIf = (IfHLStatement)parentIf.falseBlock.Statements[0];
+                            parentIf.elseConditions.Add(Tuple.Create(nestedIf.condition, nestedIf.trueBlock));
+                            parentIf.elseConditions.AddRange(nestedIf.elseConditions);
+                            parentIf.falseBlock = nestedIf.falseBlock;
                         }
                     }
 
