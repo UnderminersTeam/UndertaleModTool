@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Decompiler
 {
@@ -578,6 +579,8 @@ namespace UndertaleModLib.Decompiler
                 return (int)Enum.Parse(typeof(e__VW), const_name);
             if (Enum.IsDefined(typeof(e__BG), const_name))
                 return (int)Enum.Parse(typeof(e__BG), const_name);
+            if (Enum.IsDefined(typeof(EventSubtypeKey), const_name))
+                return Convert.ToInt32((uint)Enum.Parse(typeof(EventSubtypeKey), const_name));
 
             return null;
         }
