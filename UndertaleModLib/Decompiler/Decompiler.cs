@@ -552,7 +552,9 @@ namespace UndertaleModLib.Decompiler
 
                     bool isAdd = (eTwo.Opcode == UndertaleInstruction.Opcode.Add);
                     bool isSub = (eTwo.Opcode == UndertaleInstruction.Opcode.Sub);
-                    if (isAdd || isSub || (eTwo.Opcode == UndertaleInstruction.Opcode.Mul) || (eTwo.Opcode == UndertaleInstruction.Opcode.Div))
+                    bool isValid = (eTwo.Argument1 is ExpressionVar && Destination.Var == ((ExpressionVar)eTwo.Argument1).Var);
+
+                    if (isValid && (isAdd || isSub || (eTwo.Opcode == UndertaleInstruction.Opcode.Mul) || (eTwo.Opcode == UndertaleInstruction.Opcode.Div)))
                     {
                         bool isGMS2 = HUGE_HACK_FIX_THIS_SOON != null && HUGE_HACK_FIX_THIS_SOON.IsGameMaker2();
                         if (isGMS2 && (isAdd || isSub) && eTwo.Argument2 is ExpressionConstant && ((ExpressionConstant)eTwo.Argument2).EqualsNumber(1))
