@@ -32,7 +32,9 @@ namespace UndertaleModLib.Util
                 throw new InvalidDataException(imageName + "'s texture is larger than its bounding box!");
 
             // Create a bitmap representing that part of the texture page.
-            Bitmap resultImage = embeddedImage.Clone(new Rectangle(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight), PixelFormat.DontCare);
+            Bitmap resultImage = null;
+            lock (embeddedImage)
+                resultImage = embeddedImage.Clone(new Rectangle(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight), PixelFormat.DontCare);
 
             // Resize the image, if necessary.
             if ((texPageItem.SourceWidth != texPageItem.TargetWidth) || (texPageItem.SourceHeight != texPageItem.TargetHeight))

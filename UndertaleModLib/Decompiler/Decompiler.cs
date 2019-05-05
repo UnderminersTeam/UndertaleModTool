@@ -531,7 +531,7 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                return String.Format("{0} = {1}", Var.Var.Name, Value);
+                return String.Format("{0} = {1}", Var.Var.Name, Value.ToString(context));
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -1901,7 +1901,7 @@ namespace UndertaleModLib.Decompiler
                         AssignmentStatement trueAssign = (AssignmentStatement)cond.trueBlock.Statements[0];
                         AssignmentStatement falseAssign = (AssignmentStatement)cond.falseBlock.Statements[0];
 
-                        if (trueAssign.Destination.Var == falseAssign.Destination.Var)
+                        if (!(trueAssign.Value is ExpressionTernary) && !(falseAssign.Value is ExpressionTernary) && trueAssign.Destination.Var == falseAssign.Destination.Var)
                         {
                             shouldAdd = false;
                             output.Statements.Add(new AssignmentStatement(trueAssign.Destination, new ExpressionTernary(trueAssign.Value.Type, cond.condition, trueAssign.Value, falseAssign.Value)));
