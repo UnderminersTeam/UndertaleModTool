@@ -546,6 +546,22 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString()
             {
+                if (Value is ExpressionTwo)
+                {
+                    ExpressionTwo eTwo = (ExpressionTwo)Value;
+
+                    bool isAdd = (eTwo.Opcode == UndertaleInstruction.Opcode.Add);
+                    bool isSub = (eTwo.Opcode == UndertaleInstruction.Opcode.Sub);
+                    if (isAdd || isSub || (eTwo.Opcode == UndertaleInstruction.Opcode.Mul) || (eTwo.Opcode == UndertaleInstruction.Opcode.Div))
+                    {
+                        bool isGMS2 = HUGE_HACK_FIX_THIS_SOON != null && HUGE_HACK_FIX_THIS_SOON.IsGameMaker2();
+                        if (isGMS2 && (isAdd || isSub) && eTwo.Argument2 is ExpressionConstant && ((ExpressionConstant)eTwo.Argument2).EqualsNumber(1))
+                            return Expression.OperationToPrintableString(eTwo.Opcode) + Expression.OperationToPrintableString(eTwo.Opcode) + eTwo.Argument1.ToString();
+
+                        return Destination.ToString() + " " + Expression.OperationToPrintableString(eTwo.Opcode) + "= " + eTwo.Argument2;
+                    }
+                }
+
                 return String.Format("{0} = {1}", Destination.ToString(), Value.ToString());
             }
 
@@ -1247,8 +1263,10 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString()
             {
-                if (isRepeatLoop)
-                    return "repeat (" + RepeatStartValue.ToString() + ")\n" + Block.ToString();
+                if (isRepeatLoop) {
+                    bool isConstant = RepeatStartValue is ExpressionConstant;
+                    return "repeat " + (isConstant ? "(" : "") + RepeatStartValue.ToString() + (isConstant  ? ")" : "") + "\n" + Block.ToString();
+                }
 
                 if (IsForLoop)
                 {
@@ -1745,20 +1763,19 @@ namespace UndertaleModLib.Decompiler
                     {
                         TempVarAssigmentStatement trueStatement = (TempVarAssigmentStatement) (cond.trueBlock.Statements.Last());
                         TempVarAssigmentStatement falseStatement = (TempVarAssigmentStatement) (cond.falseBlock.Statements.Last());
+                        TempVarReference tempVar = trueStatement.Var;
 
                         if (trueStatement.Var.Var == falseStatement.Var.Var)
                         {
                             if (trueStatement.Value is ExpressionConstant && ((ExpressionConstant)trueStatement.Value).EqualsNumber(1))
                             {
                                 shouldAdd = false;
-                                TempVarAssigmentStatement assignment = new TempVarAssigmentStatement(trueStatement.Var, new ExpressionTwoSymbol("||", UndertaleInstruction.DataType.Boolean, cond.condition, falseStatement.Value));
-                                output.Statements.Add(assignment);
+                                output.Statements.Add(new TempVarAssigmentStatement(tempVar, new ExpressionTwoSymbol("||", UndertaleInstruction.DataType.Boolean, cond.condition, falseStatement.Value)));
                             }
                             else if (falseStatement.Value is ExpressionConstant && ((ExpressionConstant)falseStatement.Value).EqualsNumber(0))
                             {
                                 shouldAdd = false;
-                                TempVarAssigmentStatement assignment = new TempVarAssigmentStatement(trueStatement.Var, new ExpressionTwoSymbol("&&", UndertaleInstruction.DataType.Boolean, cond.condition, trueStatement.Value));
-                                output.Statements.Add(assignment);
+                                output.Statements.Add(new TempVarAssigmentStatement(tempVar, new ExpressionTwoSymbol("&&", UndertaleInstruction.DataType.Boolean, cond.condition, trueStatement.Value)));
                             }
                         }
                     }
@@ -1857,9 +1874,17 @@ namespace UndertaleModLib.Decompiler
                                     loopCode.Remove(testDecrementStatement);
                                     loopCode.Remove(testLoopCheckStatement);
                                     loopCode.Remove(testBreakStatement);
-                                    loop.RepeatStartValue = startValue;
-
                                     output.Statements.Remove(priorAssignment);
+                                    
+                                    // Avoid tempvars.
+                                    if (startValue is ExpressionTempVar && output.Statements.Count > 0 && output.Statements.Last() is TempVarAssigmentStatement)
+                                    {
+                                        TempVarAssigmentStatement nextTempVar = (TempVarAssigmentStatement)output.Statements.Last();
+                                        output.Statements.Remove(nextTempVar);
+                                        startValue = nextTempVar.Value;
+                                    }
+                                    
+                                    loop.RepeatStartValue = startValue;
                                     output.Statements.Add(loop);
                                 }
                             }
