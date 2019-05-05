@@ -1733,6 +1733,13 @@ namespace UndertaleModLib.Decompiler
 
                     bool shouldAdd = true;
 
+                    // Fixes breaks in both if outcomes. [Should go first, before other statements that use trueBlock and falseBlock]
+                    if (cond.trueBlock.Statements.Count > 0 && cond.falseBlock.Statements.Count > 0 && cond.trueBlock.Statements.Last() is BreakHLStatement && cond.falseBlock.Statements.Last() is BreakHLStatement)
+                    {
+                        cond.trueBlock.Statements.Remove(cond.trueBlock.Statements.Last());
+                        cond.falseBlock.Statements.Remove(cond.falseBlock.Statements.Last());
+                    }
+
                     //  COMBINES CONDITIONS WITH || + &&  //
                     if (cond.trueBlock.Statements.Count == 1 && cond.falseBlock.Statements.Count == 1 && cond.trueBlock.Statements.Last() is TempVarAssigmentStatement && cond.falseBlock.Statements.Last() is TempVarAssigmentStatement)
                     {
@@ -1741,20 +1748,19 @@ namespace UndertaleModLib.Decompiler
 
                         if (trueStatement.Var.Var == falseStatement.Var.Var)
                         {
-                            if (trueStatement.Value is ExpressionConstant && trueStatement.Value.ToString() == "1")
+                            if (trueStatement.Value is ExpressionConstant && ((ExpressionConstant)trueStatement.Value).EqualsNumber(1))
                             {
                                 shouldAdd = false;
                                 TempVarAssigmentStatement assignment = new TempVarAssigmentStatement(trueStatement.Var, new ExpressionTwoSymbol("||", UndertaleInstruction.DataType.Boolean, cond.condition, falseStatement.Value));
                                 output.Statements.Add(assignment);
                             }
-                            else if (falseStatement.Value is ExpressionConstant && falseStatement.Value.ToString() == "0")
+                            else if (falseStatement.Value is ExpressionConstant && ((ExpressionConstant)falseStatement.Value).EqualsNumber(0))
                             {
                                 shouldAdd = false;
                                 TempVarAssigmentStatement assignment = new TempVarAssigmentStatement(trueStatement.Var, new ExpressionTwoSymbol("&&", UndertaleInstruction.DataType.Boolean, cond.condition, trueStatement.Value));
                                 output.Statements.Add(assignment);
                             }
                         }
-
                     }
 
                     // tempVar = stuff; normalVar = tempVar; -> normalVar = stuff;
@@ -1781,13 +1787,6 @@ namespace UndertaleModLib.Decompiler
                             output.Statements.RemoveAt(output.Statements.Count - 1); // Don't assign further, put in if statement.
                             cond.condition = lastAssign.Value;
                         }
-                    }
-
-                    // Fixes breaks in both if outcomes.
-                    if (cond.trueBlock.Statements.Count > 0 && cond.falseBlock.Statements.Count > 0 && cond.trueBlock.Statements.Last() is BreakHLStatement && cond.falseBlock.Statements.Last() is BreakHLStatement)
-                    {
-                        cond.trueBlock.Statements.Remove(cond.trueBlock.Statements.Last());
-                        cond.falseBlock.Statements.Remove(cond.falseBlock.Statements.Last());
                     }
 
                     // Simplify return logic. if (condition) 1 else 0 -> condition.
