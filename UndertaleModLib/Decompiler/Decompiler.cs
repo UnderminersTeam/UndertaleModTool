@@ -576,7 +576,7 @@ namespace UndertaleModLib.Decompiler
                     bool isValid = (eTwo.Argument1 is ExpressionVar && Destination.Var == ((ExpressionVar)eTwo.Argument1).Var);
 
                     if (isValid && (isAdd || isSub || (eTwo.Opcode == UndertaleInstruction.Opcode.Mul) || (eTwo.Opcode == UndertaleInstruction.Opcode.Div)))
-                        return Destination.ToString(context) + " " + Expression.OperationToPrintableString(eTwo.Opcode) + "= " + eTwo.Argument2;
+                        return Destination.ToString(context) + " " + Expression.OperationToPrintableString(eTwo.Opcode) + "= " + eTwo.Argument2.ToString(context);
                 }
 
                 return String.Format("{0} = {1}", Destination.ToString(context), Value.ToString(context));
