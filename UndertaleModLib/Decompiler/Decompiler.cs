@@ -606,18 +606,6 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                if (Value is ExpressionTwo)
-                {
-                    ExpressionTwo eTwo = (ExpressionTwo)Value;
-
-                    bool isAdd = (eTwo.Opcode == UndertaleInstruction.Opcode.Add);
-                    bool isSub = (eTwo.Opcode == UndertaleInstruction.Opcode.Sub);
-                    bool isValid = (eTwo.Argument1 is ExpressionVar && Destination.Var == ((ExpressionVar)eTwo.Argument1).Var);
-
-                    if (isValid && (isAdd || isSub || (eTwo.Opcode == UndertaleInstruction.Opcode.Mul) || (eTwo.Opcode == UndertaleInstruction.Opcode.Div)))
-                        return Destination.ToString(context) + " " + Expression.OperationToPrintableString(eTwo.Opcode) + "= " + eTwo.Argument2.ToString(context);
-                }
-
                 return String.Format("{0} = {1}", Destination.ToString(context), Value.ToString(context));
             }
 
