@@ -328,6 +328,45 @@ namespace UndertaleModLib.Decompiler
         }
 
         // This is basically ExpressionTwo, but allows for using symbols like && or || without creating new opcodes.
+        public class ExpressionTernary : Expression
+        {
+            public Expression Condition;
+            public Expression TrueExpression;
+            public Expression FalseExpression;
+
+            public ExpressionTernary(UndertaleInstruction.DataType targetType, Expression Condition, Expression argument1, Expression argument2)
+            {
+                this.Type = targetType;
+                this.Condition = Condition;
+                this.TrueExpression = argument1;
+                this.FalseExpression = argument2;
+            }
+
+            internal override bool IsDuplicationSafe()
+            {
+                return Condition.IsDuplicationSafe() && TrueExpression.IsDuplicationSafe() && FalseExpression.IsDuplicationSafe();
+            }
+
+            public override string ToString(DecompileContext context)
+            {
+                string condStr = Condition.ToString(context);
+                if (!condStr.StartsWith("(") || !condStr.EndsWith(")"))
+                    condStr = "(" + condStr + ")";
+
+                return condStr + " ? " + TrueExpression.ToString(context) + " : " + FalseExpression.ToString(context);
+
+            }
+
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
+            {
+                // The most likely, but probably rarely happens
+                AssetIDType t = TrueExpression.DoTypePropagation(context, suggestedType);
+                FalseExpression.DoTypePropagation(context, AssetIDType.Other);
+                return t;
+            }
+        }
+
+        // This is basically ExpressionTwo, but allows for using symbols like && or || without creating new opcodes.
         public class ExpressionTwoSymbol : Expression
         {
             public string Symbol;
@@ -1853,6 +1892,19 @@ namespace UndertaleModLib.Decompiler
                             parentIf.elseConditions.Add(Tuple.Create(nestedIf.condition, nestedIf.trueBlock));
                             parentIf.elseConditions.AddRange(nestedIf.elseConditions);
                             parentIf.falseBlock = nestedIf.falseBlock;
+                        }
+                    }
+
+                    // Use ternary when possible.
+                    if (context.isGameMaker2 && cond.trueBlock.Statements.Count == 1 && cond.falseBlock.Statements.Count == 1 && cond.trueBlock.Statements[0] is AssignmentStatement && cond.falseBlock.Statements[0] is AssignmentStatement)
+                    {
+                        AssignmentStatement trueAssign = (AssignmentStatement)cond.trueBlock.Statements[0];
+                        AssignmentStatement falseAssign = (AssignmentStatement)cond.falseBlock.Statements[0];
+
+                        if (trueAssign.Destination.Var == falseAssign.Destination.Var)
+                        {
+                            shouldAdd = false;
+                            output.Statements.Add(new AssignmentStatement(trueAssign.Destination, new ExpressionTernary(trueAssign.Value.Type, cond.condition, trueAssign.Value, falseAssign.Value)));
                         }
                     }
 
