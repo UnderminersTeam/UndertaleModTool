@@ -133,6 +133,11 @@ namespace UndertaleModLib.Decompiler
                 return true;
             }
 
+            public Boolean EqualsNumber(int TestNumber)
+            {
+                return (Value is Int16 || Value is Int32) && Convert.ToInt32(TestNumber) == TestNumber;
+            }
+
             public override string ToString()
             {
                 bool isGMS2 = HUGE_HACK_FIX_THIS_SOON != null && HUGE_HACK_FIX_THIS_SOON.IsGameMaker2();
@@ -1214,15 +1219,31 @@ namespace UndertaleModLib.Decompiler
 
         public class LoopHLStatement : HLStatement
         {
+            // Loop Block.
             public BlockHLStatement Block;
+
+            // While / For Condition.
             public Statement Condition;
-            public AssignmentStatement InitialzeStatement;
+
+            // While Loop.
+            public bool IsWhileLoop { get => !IsForLoop && !isRepeatLoop; }
+
+            // For Loop.
+            public bool IsForLoop { get => InitializeStatement != null && StepStatement != null && Condition != null; }
+            public AssignmentStatement InitializeStatement;
             public AssignmentStatement StepStatement;
+
+            // Repeat Loop.
+            public bool isRepeatLoop { get => RepeatStartValue != null; }
+            public Statement RepeatStartValue;
 
             public override string ToString()
             {
-                if (InitialzeStatement != null && StepStatement != null && Condition != null)
-                    return "for (" + InitialzeStatement.ToString() + "; " + Condition.ToString() + "; " + StepStatement.ToString() + ")\n" + Block.ToString();
+                if (isRepeatLoop)
+                    return "repeat (" + RepeatStartValue.ToString() + ")\n" + Block.ToString();
+
+                if (IsForLoop)
+                    return "for (" + InitializeStatement.ToString() + "; " + Condition.ToString() + "; " + StepStatement.ToString() + ")\n" + Block.ToString();
 
                 return "while " + (Condition != null ? Condition.ToString() : "(true)") + "\n" + Block.ToString();
             }
@@ -1541,7 +1562,7 @@ namespace UndertaleModLib.Decompiler
                             if (((compare.Argument1 is ExpressionVar && (((ExpressionVar)compare.Argument1).Var == variable)) || (compare.Argument2 is ExpressionVar && (((ExpressionVar)compare.Argument2).Var == variable))) && increment.Destination.Var == variable)
                             {
                                 output.Statements.Remove(assignment);
-                                newLoop.InitialzeStatement = assignment;
+                                newLoop.InitializeStatement = assignment;
                                 newLoop.Block.Statements.Remove(increment);
                                 newLoop.StepStatement = increment;
                             }
@@ -1765,6 +1786,57 @@ namespace UndertaleModLib.Decompiler
                         {
                             shouldAdd = false;
                             output.Statements.Add(new ReturnStatement(cond.condition));
+                        }
+                    }
+
+                    // Condense into repeat statement. [Should go after all if handlers]
+                    if (shouldAdd && cond.trueBlock.Statements.Count == 0 && cond.falseBlock.Statements.Count == 1 && cond.falseBlock.Statements[0] is LoopHLStatement
+                        && cond.condition is ExpressionCompare && output.Statements.Count > 0 && output.Statements.Last() is TempVarAssigmentStatement)
+                    {
+                        ExpressionCompare condition = (ExpressionCompare)cond.condition;
+                        LoopHLStatement loop = (LoopHLStatement)cond.falseBlock.Statements[0];
+                        TempVarAssigmentStatement priorAssignment = (TempVarAssigmentStatement)output.Statements.Last();
+                        Expression startValue = priorAssignment.Value;
+                        TempVar loopVar = priorAssignment.Var.Var;
+
+                        List<Statement> loopCode = loop.Block.Statements;
+                        if (loop.IsWhileLoop && loop.Condition == null && loopCode.Count > 2 && condition.Opcode == UndertaleInstruction.ComparisonType.LTE && condition.Argument2 is ExpressionConstant && ((ExpressionConstant)condition.Argument2).EqualsNumber(0) && condition.Argument1.ToString() == startValue.ToString())
+                        {
+                            Statement testDecrementStatement = loopCode[loopCode.Count - 3];
+                            Statement testLoopCheckStatement = loopCode[loopCode.Count - 2];
+                            Statement testBreakStatement = loopCode[loopCode.Count - 1];
+
+                            if (testDecrementStatement is TempVarAssigmentStatement && testLoopCheckStatement is IfHLStatement && testBreakStatement is BreakHLStatement)
+                            { // tempVar = (tempVar -1); -> if (tempVar) continue -> break
+                                TempVarAssigmentStatement decrementStatement = (TempVarAssigmentStatement)testDecrementStatement;
+                                IfHLStatement loopCheckStatement = (IfHLStatement)testLoopCheckStatement;
+
+                                bool decrementPass = false;
+                                if (decrementStatement.Var.Var == loopVar && decrementStatement.Value is ExpressionTwo)
+                                { // tempVar = (tempVar - 1);
+                                    ExpressionTwo setValue = (ExpressionTwo) decrementStatement.Value;
+                                    decrementPass = (setValue.Opcode == UndertaleInstruction.Opcode.Sub) // -
+                                        && (setValue.Argument1 is ExpressionTempVar && ((ExpressionTempVar) setValue.Argument1).Var.Var == loopVar) // tempVar
+                                        && (setValue.Argument2 is ExpressionConstant && ((ExpressionConstant) setValue.Argument2).EqualsNumber(1)); // 1
+                                }
+
+                                // if (tempVar) {continue} else {empty}
+                                bool ifPass = loopCheckStatement.trueBlock.Statements.Count == 1 && loopCheckStatement.falseBlock.Statements.Count == 0
+                                    && loopCheckStatement.trueBlock.Statements[0] is ContinueHLStatement
+                                    && loopCheckStatement.condition is ExpressionTempVar && ((ExpressionTempVar) loopCheckStatement.condition).Var.Var == loopVar;
+
+                                if (decrementPass && decrementPass)
+                                {
+                                    shouldAdd = false;
+                                    loopCode.Remove(testDecrementStatement);
+                                    loopCode.Remove(testLoopCheckStatement);
+                                    loopCode.Remove(testBreakStatement);
+                                    loop.RepeatStartValue = startValue;
+
+                                    output.Statements.Remove(priorAssignment);
+                                    output.Statements.Add(loop);
+                                }
+                            }
                         }
                     }
 
