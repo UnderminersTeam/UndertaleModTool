@@ -14,6 +14,11 @@
                 <x:Type TypeName="undertale:UndertaleSprite+SpriteType" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="SepMaskType">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="undertale:UndertaleSprite+SepMaskType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </UserControl.Resources>
     <Grid>
@@ -80,8 +85,9 @@
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Bounding box mode</TextBlock>
         <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding BBoxMode}"/>
 
-        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Separate Collision Masks</TextBlock>
-        <CheckBox Grid.Row="8" Grid.Column="1" Margin="3" IsChecked="{Binding SepMasks}"/>
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">SepMasks</TextBlock>
+        <ComboBox ItemsSource="{Binding Source={StaticResource SepMaskType}}" SelectedItem="{Binding Path=SepMasks}"
+                  Grid.Row="8" Grid.Column="1" Margin="3"/>
 
         <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Origin</TextBlock>
         <Grid Grid.Row="9" Grid.Column="1">
