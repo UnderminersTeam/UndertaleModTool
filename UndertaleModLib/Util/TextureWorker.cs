@@ -23,9 +23,14 @@ namespace UndertaleModLib.Util
             int exportWidth = texPageItem.BoundingWidth; // sprite.Width
             int exportHeight = texPageItem.BoundingHeight; // sprite.Height
 
-            if (!embeddedDictionary.ContainsKey(texPageItem.TexturePage))
-                embeddedDictionary[texPageItem.TexturePage] = GetImageFromByteArray(texPageItem.TexturePage.TextureData.TextureBlob);
-            Bitmap embeddedImage = embeddedDictionary[texPageItem.TexturePage];
+            Bitmap embeddedImage = null;
+
+            lock (embeddedDictionary)
+            {
+                if (!embeddedDictionary.ContainsKey(texPageItem.TexturePage))
+                    embeddedDictionary[texPageItem.TexturePage] = GetImageFromByteArray(texPageItem.TexturePage.TextureData.TextureBlob);
+                embeddedImage = embeddedDictionary[texPageItem.TexturePage];
+            }
 
             // Sanity checks.
             if ((texPageItem.TargetWidth > exportWidth) || (texPageItem.TargetHeight > exportHeight))

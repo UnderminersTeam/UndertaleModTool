@@ -173,6 +173,57 @@ namespace UndertaleModLib
         }
     }
 
+    public class UndertalePointerListLenCheck<T> : UndertalePointerList<T>, UndertaleObjectEndPos where T : UndertaleObjectLenCheck, new()
+    {
+        public void Unserialize(UndertaleReader reader, uint endPosition)
+        {
+            uint count = reader.ReadUInt32();
+            Clear();
+            List<uint> pointers = new List<uint>();
+            for (uint i = 0; i < count; i++)
+            {
+                try
+                {
+                    uint ptr = reader.ReadUInt32();
+                    pointers.Add(ptr);
+                    Add(reader.GetUndertaleObjectAtAddress<T>(ptr));
+                }
+                catch (UndertaleSerializationException e)
+                {
+                    throw new UndertaleSerializationException(e.Message + "\nwhile reading pointer to item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
+                }
+            }
+            if (Count > 0 && reader.Position != reader.GetAddressForUndertaleObject(this[0]))
+            {
+                int skip = (int)reader.GetAddressForUndertaleObject(this[0]) - (int)reader.Position;
+                if (skip > 0)
+                {
+                    //Console.WriteLine("Skip " + skip + " bytes of blobs");
+                    reader.Position = reader.Position + (uint)skip;
+                }
+                else
+                    throw new IOException("First list item starts inside the pointer list?!?!");
+            }
+            for (uint i = 0; i < count; i++)
+            {
+                try
+                {
+                    (this[(int)i] as PrePaddedObject)?.UnserializePrePadding(reader);
+                    if ((i + 1) < count)
+                        reader.ReadUndertaleObject(this[(int)i], (int)(pointers[(int)i + 1] - reader.Position));
+                    else
+                        reader.ReadUndertaleObject(this[(int)i], (int)(endPosition - reader.Position));
+                    if (i != count - 1)
+                        (this[(int)i] as PaddedObject)?.UnserializePadding(reader);
+                }
+                catch (UndertaleSerializationException e)
+                {
+                    throw new UndertaleSerializationException(e.Message + "\nwhile reading item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
+                }
+            }
+        }
+    }
+
     public class UndertaleSimpleResourcesList<T, ChunkT> : UndertaleSimpleList<UndertaleResourceById<T, ChunkT>> where T : UndertaleResource, new() where ChunkT : UndertaleListChunk<T>
     {
         // TODO: Allow direct access to Resource elements?

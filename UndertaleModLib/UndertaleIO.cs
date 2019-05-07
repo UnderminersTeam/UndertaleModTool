@@ -246,7 +246,45 @@ namespace UndertaleModLib
                 unreadObjects.Remove(Position);
                 obj.Unserialize(this);
             }
-            catch(Exception e)
+            catch (Exception e)
+            {
+                throw new UndertaleSerializationException(e.Message + "\nat " + Position.ToString("X8") + " while reading object " + typeof(T).FullName, e);
+            }
+        }
+
+        public void ReadUndertaleObject<T>(T obj, uint endPosition) where T : UndertaleObjectEndPos, new()
+        {
+            try
+            {
+                var expectedAddress = GetAddressForUndertaleObject(obj);
+                if (expectedAddress != Position)
+                {
+                    SubmitWarning("Reading misaligned at " + Position.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
+                    Position = expectedAddress;
+                }
+                unreadObjects.Remove(Position);
+                obj.Unserialize(this, endPosition);
+            }
+            catch (Exception e)
+            {
+                throw new UndertaleSerializationException(e.Message + "\nat " + Position.ToString("X8") + " while reading object " + typeof(T).FullName, e);
+            }
+        }
+
+        public void ReadUndertaleObject<T>(T obj, int length) where T : UndertaleObjectLenCheck, new()
+        {
+            try
+            {
+                var expectedAddress = GetAddressForUndertaleObject(obj);
+                if (expectedAddress != Position)
+                {
+                    SubmitWarning("Reading misaligned at " + Position.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
+                    Position = expectedAddress;
+                }
+                unreadObjects.Remove(Position);
+                obj.Unserialize(this, length);
+            }
+            catch (Exception e)
             {
                 throw new UndertaleSerializationException(e.Message + "\nat " + Position.ToString("X8") + " while reading object " + typeof(T).FullName, e);
             }
@@ -379,7 +417,8 @@ namespace UndertaleModLib
 
         public void WriteUndertaleObject<T>(T obj) where T : UndertaleObject, new()
         {
-            try {
+            try
+            {
                 if (objectPool.ContainsKey(obj))
                     throw new IOException("Writing object twice");
                 uint objectAddr = Position;

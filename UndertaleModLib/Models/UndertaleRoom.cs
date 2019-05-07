@@ -59,7 +59,7 @@ namespace UndertaleModLib.Models
         public float MetersPerPixel { get => _MetersPerPixel; set { _MetersPerPixel = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MetersPerPixel")); } }
         public UndertalePointerList<Background> Backgrounds { get; private set; } = new UndertalePointerList<Background>();
         public UndertalePointerList<View> Views { get; private set; } = new UndertalePointerList<View>();
-        public UndertalePointerList<GameObject> GameObjects { get; private set; } = new UndertalePointerList<GameObject>();
+        public UndertalePointerListLenCheck<GameObject> GameObjects { get; private set; } = new UndertalePointerListLenCheck<GameObject>();
         public UndertalePointerList<Tile> Tiles { get; private set; } = new UndertalePointerList<Tile>();
         public UndertalePointerList<Layer> Layers { get; private set; } = new UndertalePointerList<Layer>();
 
@@ -137,8 +137,9 @@ namespace UndertaleModLib.Models
             Flags = (RoomEntryFlags)reader.ReadUInt32();
             Backgrounds = reader.ReadUndertaleObjectPointer<UndertalePointerList<Background>>();
             Views = reader.ReadUndertaleObjectPointer<UndertalePointerList<View>>();
-            GameObjects = reader.ReadUndertaleObjectPointer<UndertalePointerList<GameObject>>();
-            Tiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<Tile>>();
+            GameObjects = reader.ReadUndertaleObjectPointer<UndertalePointerListLenCheck<GameObject>>();
+            uint tilePtr = reader.ReadUInt32();
+            Tiles = reader.GetUndertaleObjectAtAddress<UndertalePointerList<Tile>>(tilePtr);
             World = reader.ReadUInt32();
             Top = reader.ReadUInt32();
             Left = reader.ReadUInt32();
@@ -151,19 +152,19 @@ namespace UndertaleModLib.Models
                 Layers = reader.ReadUndertaleObjectPointer<UndertalePointerList<Layer>>();
             reader.ReadUndertaleObject(Backgrounds);
             reader.ReadUndertaleObject(Views);
-            reader.ReadUndertaleObject(GameObjects);
+            reader.ReadUndertaleObject(GameObjects, tilePtr);
             reader.ReadUndertaleObject(Tiles);
             if (reader.undertaleData.GeneralInfo.Major >= 2)
             {
                 reader.ReadUndertaleObject(Layers);
 
                 // Resolve the object IDs
-                foreach(var layer in Layers)
+                foreach (var layer in Layers)
                 {
                     if (layer.InstancesData != null)
                     {
                         layer.InstancesData.Instances.Clear();
-                        foreach(var id in layer.InstancesData._InstanceIds)
+                        foreach (var id in layer.InstancesData._InstanceIds)
                         {
                             layer.InstancesData.Instances.Add(GameObjects.ByInstanceID(id));
                         }
@@ -310,7 +311,7 @@ namespace UndertaleModLib.Models
             }
         }
 
-        public class GameObject : UndertaleObject, RoomObject, INotifyPropertyChanged
+        public class GameObject : UndertaleObjectLenCheck, RoomObject, INotifyPropertyChanged
         {
             private int _X;
             private int _Y;
@@ -322,6 +323,9 @@ namespace UndertaleModLib.Models
             private uint _Color = 0xFFFFFFFF;
             private float _Rotation = 0;
             private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _PreCreateCode = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
+            private bool _GMS2_2_2 = false;
+            private float _ImageSpeed = 0;
+            private int _ImageIndex = 0;
 
             public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
             public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
@@ -333,6 +337,9 @@ namespace UndertaleModLib.Models
             public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
             public float Rotation { get => _Rotation; set { _Rotation = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Rotation")); } }
             public UndertaleCode PreCreateCode { get => _PreCreateCode.Resource; set { _PreCreateCode.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PreCreateCode")); } }
+            public bool GMS2_2_2 { get => _GMS2_2_2; set { _GMS2_2_2 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2_2_2")); } }
+            public float ImageSpeed { get => _ImageSpeed; set { _ImageSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ImageSpeed")); } }
+            public int ImageIndex { get => _ImageIndex; set { _ImageIndex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ImageIndex")); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -345,6 +352,11 @@ namespace UndertaleModLib.Models
                 writer.WriteUndertaleObject(_CreationCode);
                 writer.Write(ScaleX);
                 writer.Write(ScaleY);
+                if (GMS2_2_2)
+                {
+                    writer.Write(ImageSpeed);
+                    writer.Write(ImageIndex);
+                }
                 writer.Write(Color);
                 writer.Write(Rotation);
                 if (writer.undertaleData.GeneralInfo.BytecodeVersion >= 16) // TODO: is that dependent on bytecode or something else?
@@ -353,6 +365,11 @@ namespace UndertaleModLib.Models
 
             public void Unserialize(UndertaleReader reader)
             {
+                Unserialize(reader, -1);
+            }
+
+            public void Unserialize(UndertaleReader reader, int length)
+            {
                 X = reader.ReadInt32();
                 Y = reader.ReadInt32();
                 _ObjectDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
@@ -360,6 +377,12 @@ namespace UndertaleModLib.Models
                 _CreationCode = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
                 ScaleX = reader.ReadSingle();
                 ScaleY = reader.ReadSingle();
+                if (length == 48)
+                {
+                    GMS2_2_2 = true;
+                    ImageSpeed = reader.ReadSingle();
+                    ImageIndex = reader.ReadInt32();
+                }
                 Color = reader.ReadUInt32();
                 Rotation = reader.ReadSingle();
                 if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 16) // TODO: is that dependent on bytecode or something else?
@@ -595,18 +618,25 @@ namespace UndertaleModLib.Models
                 private uint[][] _TileData; // Each is simply an ID from the tileset/background/sprite
 
                 public UndertaleBackground Background { get => _Background.Resource; set { _Background.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Background")); } }
-                public uint TilesX { get => _TilesX; set {
+                public uint TilesX
+                {
+                    get => _TilesX; set
+                    {
                         _TilesX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TilesX"));
                         if (_TileData != null)
                         {
-                            for(var y = 0; y < _TileData.Length; y++)
+                            for (var y = 0; y < _TileData.Length; y++)
                             {
                                 Array.Resize(ref _TileData[y], (int)value);
                             }
                             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileData"));
                         }
-                    } }
-                public uint TilesY { get => _TilesY; set {
+                    }
+                }
+                public uint TilesY
+                {
+                    get => _TilesY; set
+                    {
                         _TilesY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TilesY"));
                         if (_TileData != null)
                         {
@@ -618,7 +648,8 @@ namespace UndertaleModLib.Models
                             }
                             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileData"));
                         }
-                    } }
+                    }
+                }
                 public uint[][] TileData { get => _TileData; set { _TileData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileData")); } }
 
                 public event PropertyChangedEventHandler PropertyChanged;

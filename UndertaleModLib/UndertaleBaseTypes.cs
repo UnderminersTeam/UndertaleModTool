@@ -13,6 +13,16 @@ namespace UndertaleModLib
         void Unserialize(UndertaleReader reader);
     }
 
+    public interface UndertaleObjectLenCheck : UndertaleObject
+    {
+        void Unserialize(UndertaleReader reader, int length);
+    }
+
+    public interface UndertaleObjectEndPos : UndertaleObject
+    {
+        void Unserialize(UndertaleReader reader, uint endPosition);
+    }
+
     public interface UndertaleObjectWithBlobs
     {
         void SerializeBlobBefore(UndertaleWriter writer);
