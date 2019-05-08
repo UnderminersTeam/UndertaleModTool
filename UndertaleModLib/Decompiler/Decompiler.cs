@@ -28,7 +28,7 @@ namespace UndertaleModLib.Decompiler
     }
 
     public static class Decompiler
-    {    
+    {
 
         /**
          * Howdy! Yeah, I don't know how any of this works anymore either, so... have fun
@@ -69,7 +69,7 @@ namespace UndertaleModLib.Decompiler
 
             public static string OperationToPrintableString(UndertaleInstruction.Opcode op)
             {
-                switch(op)
+                switch (op)
                 {
                     case UndertaleInstruction.Opcode.Mul:
                         return "*";
@@ -139,7 +139,7 @@ namespace UndertaleModLib.Decompiler
                 Type = type;
                 Value = value;
             }
-            
+
             internal override bool IsDuplicationSafe()
             {
                 return true;
@@ -165,14 +165,14 @@ namespace UndertaleModLib.Decompiler
 
                 if (AssetType == AssetIDType.GameObject && !(Value is Int64)) // When the value is Int64, an example value is 343434343434. It is unknown what it represents, but it's not an InstanceType.
                 {
-                    if (Convert.ToInt32(Value) < 0) 
+                    if (Convert.ToInt32(Value) < 0)
                         return ((UndertaleInstruction.InstanceType)Value).ToString().ToLower();
                 }
-                
+
                 if (context.Data != null && AssetType != AssetIDType.Other && AssetType != AssetIDType.Color && AssetType != AssetIDType.KeyboardKey && AssetType != AssetIDType.e__VW && AssetType != AssetIDType.e__BG && AssetType != AssetIDType.Enum_HAlign && AssetType != AssetIDType.Enum_VAlign)
                 {
                     IList assetList = null;
-                    switch(AssetType)
+                    switch (AssetType)
                     {
                         case AssetIDType.Sprite:
                             assetList = (IList)context.Data.Sprites;
@@ -245,15 +245,15 @@ namespace UndertaleModLib.Decompiler
 
                     if (!Char.IsControl((char)val) && !Char.IsLower((char)val)) // The special keys overlay with the uppercase letters (ugh)
                         return ((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
-                            : (((char) val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
+                            : (((char)val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
                             : "\"" + (char)val + "\"");
                 }
 
                 if (Value is float) // Prevents scientific notation by using high bit number.
-                    return ((decimal) ((float) Value)).ToString(CultureInfo.InvariantCulture);
+                    return ((decimal)((float)Value)).ToString(CultureInfo.InvariantCulture);
 
                 if (Value is double) // Prevents scientific notation by using high bit number.
-                    return ((decimal) ((double) Value)).ToString(CultureInfo.InvariantCulture);
+                    return ((decimal)((double)Value)).ToString(CultureInfo.InvariantCulture);
 
                 if (Value is Statement)
                     return ((Statement)Value).ToString(context);
@@ -499,7 +499,7 @@ namespace UndertaleModLib.Decompiler
 
             public TempVar()
             {
-                Name = MakeTemporaryVarName(++TempVarId);  ;
+                Name = MakeTemporaryVarName(++TempVarId); ;
             }
 
             public static string MakeTemporaryVarName(int id)
@@ -679,7 +679,7 @@ namespace UndertaleModLib.Decompiler
                     Decompiler.DecompileFromBlock(blocks[0]);
                     Decompiler.DoTypePropagation(context, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
                     scriptArgs[Function.Name.Content] = new AssetIDType[15];
-                    for(int i = 0; i < 15; i++)
+                    for (int i = 0; i < 15; i++)
                     {
                         var v = ExpressionVar.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
                         scriptArgs[Function.Name.Content][i] = v.Count() > 0 ? v.First().Value : AssetIDType.Other;
@@ -836,7 +836,7 @@ namespace UndertaleModLib.Decompiler
 
         internal static void DecompileFromBlock(Block block, List<TempVarReference> tempvars, Stack<Tuple<Block, List<TempVarReference>>> workQueue)
         {
-            if (block.TempVarsOnEntry != null && (block.nextBlockTrue != null || block.nextBlockFalse != null)) // TODO: RET breaks it?
+            if (block.TempVarsOnEntry != null && (block.nextBlockTrue != null || block.nextBlockFalse != null))
             {
                 // Reroute tempvars to alias them to our ones
                 if (block.TempVarsOnEntry.Count != tempvars.Count)
@@ -864,11 +864,12 @@ namespace UndertaleModLib.Decompiler
 
             List<Statement> statements = new List<Statement>();
             bool end = false;
-            foreach(var instr in block.Instructions)
+            bool returned = false;
+            foreach (var instr in block.Instructions)
             {
                 if (end)
                     throw new Exception("Excepted end of block, but still has instructions");
-                switch(instr.Kind)
+                switch (instr.Kind)
                 {
                     case UndertaleInstruction.Opcode.Neg:
                     case UndertaleInstruction.Opcode.Not:
@@ -878,7 +879,8 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.Dup:
                         List<Expression> topExpressions1 = new List<Expression>();
                         List<Expression> topExpressions2 = new List<Expression>();
-                        for (int i = 0; i < instr.DupExtra + 1; i++)
+                        int count = ((instr.DupExtra + 1) * (instr.Type1 == UndertaleInstruction.DataType.Int64 ? 2 : 1));
+                        for (int i = 0; i < count; i++)
                         {
                             var item = stack.Pop();
                             if (item.IsDuplicationSafe())
@@ -918,6 +920,7 @@ namespace UndertaleModLib.Decompiler
                         stack.Clear();*/
                         statements.Add(stmt);
                         end = true;
+                        returned = true;
                         break;
 
                     case UndertaleInstruction.Opcode.Popz:
@@ -926,7 +929,8 @@ namespace UndertaleModLib.Decompiler
                             Expression popped = stack.Pop();
                             if (!(popped is ExpressionTempVar))
                                 statements.Add(popped);
-                        } else
+                        }
+                        else
                         {
                             statements.Add(new CommentStatement("WARNING: Popz'd an empty stack."));
                         }
@@ -1057,12 +1061,12 @@ namespace UndertaleModLib.Decompiler
 
             // Convert everything that remains on the stack to a temp var
             List<TempVarReference> leftovers = new List<TempVarReference>();
-            for(int i = stack.Count-1; i >= 0; i--)
+            for (int i = stack.Count - 1; i >= 0; i--)
             {
                 if (i < tempvars.Count)
                 {
                     Expression val = stack.Pop();
-                    if (!(val is ExpressionTempVar) || (val as ExpressionTempVar).Var != tempvars[i] )
+                    if (!(val is ExpressionTempVar) || (val as ExpressionTempVar).Var != tempvars[i])
                         statements.Add(new TempVarAssigmentStatement(tempvars[i], val));
                     leftovers.Add(tempvars[i]);
                 }
@@ -1079,17 +1083,26 @@ namespace UndertaleModLib.Decompiler
             leftovers.Reverse();
 
             block.Statements = statements;
-            if (block.nextBlockFalse != null)
+            // If we returned from this block, don't go to the "next" block, because that's totally wrong.
+            if (!returned)
+            {
+                if (block.nextBlockFalse != null)
+                    workQueue.Push(new Tuple<Block, List<TempVarReference>>(block.nextBlockFalse, leftovers));
+                if (block.nextBlockTrue != null)
+                    workQueue.Push(new Tuple<Block, List<TempVarReference>>(block.nextBlockTrue, leftovers));
+            }
+            else if (block.nextBlockFalse != null && block.nextBlockFalse.nextBlockFalse == null)
+            {
+                // Last block- make an exception for this one.
                 workQueue.Push(new Tuple<Block, List<TempVarReference>>(block.nextBlockFalse, leftovers));
-            if (block.nextBlockTrue != null)
-                workQueue.Push(new Tuple<Block, List<TempVarReference>>(block.nextBlockTrue, leftovers));
+            }
         }
 
         public static void DecompileFromBlock(Block block)
         {
             Stack<Tuple<Block, List<TempVarReference>>> workQueue = new Stack<Tuple<Block, List<TempVarReference>>>();
             workQueue.Push(new Tuple<Block, List<TempVarReference>>(block, new List<TempVarReference>()));
-            while(workQueue.Count > 0)
+            while (workQueue.Count > 0)
             {
                 var item = workQueue.Pop();
                 DecompileFromBlock(item.Item1, item.Item2, workQueue);
@@ -1105,7 +1118,7 @@ namespace UndertaleModLib.Decompiler
             blockByAddress[code.Length / 4] = finalBlock;
             Block currentBlock = entryBlock;
 
-            foreach(var instr in code.Instructions)
+            foreach (var instr in code.Instructions)
             {
                 if (blockByAddress.ContainsKey(instr.Address))
                 {
@@ -1125,7 +1138,7 @@ namespace UndertaleModLib.Decompiler
                 }
 
                 currentBlock.Instructions.Add(instr);
-                
+
                 Func<uint, Block> GetBlock = (uint addr) =>
                 {
                     Block nextBlock;
@@ -1139,7 +1152,7 @@ namespace UndertaleModLib.Decompiler
 
                             // First, find the block we have to split
                             Block blockToSplit = null;
-                            foreach(var block in blockByAddress)
+                            foreach (var block in blockByAddress)
                             {
                                 if (block.Key < addr && (blockToSplit == null || block.Key > blockToSplit.Address))
                                     blockToSplit = block.Value;
@@ -1148,7 +1161,7 @@ namespace UndertaleModLib.Decompiler
                             // Now, split the list of instructions into two
                             List<UndertaleInstruction> instrBefore = new List<UndertaleInstruction>();
                             List<UndertaleInstruction> instrAfter = new List<UndertaleInstruction>();
-                            foreach(UndertaleInstruction inst in blockToSplit.Instructions)
+                            foreach (UndertaleInstruction inst in blockToSplit.Instructions)
                             {
                                 if (inst.Address < addr)
                                     instrBefore.Add(inst);
@@ -1217,7 +1230,7 @@ namespace UndertaleModLib.Decompiler
                 currentBlock.nextBlockTrue = finalBlock;
                 currentBlock.nextBlockFalse = finalBlock;
             }
-            foreach(var block in blockByAddress.Values)
+            foreach (var block in blockByAddress.Values)
             {
                 if (block.nextBlockTrue != null && !block.nextBlockTrue.entryPoints.Contains(block))
                     block.nextBlockTrue.entryPoints.Add(block);
@@ -1247,7 +1260,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     StringBuilder sb = new StringBuilder();
                     sb.Append("{\n");
-                    foreach(var stmt in Statements)
+                    foreach (var stmt in Statements)
                     {
                         sb.Append("    ");
                         sb.Append(stmt.ToString(context).Replace("\n", "\n    "));
@@ -1314,9 +1327,10 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                if (isRepeatLoop) {
+                if (isRepeatLoop)
+                {
                     bool isConstant = RepeatStartValue is ExpressionConstant;
-                    return "repeat " + (isConstant ? "(" : "") + RepeatStartValue.ToString(context) + (isConstant  ? ")" : "") + "\n" + Block.ToString(context);
+                    return "repeat " + (isConstant ? "(" : "") + RepeatStartValue.ToString(context) + (isConstant ? ")" : "") + "\n" + Block.ToString(context);
                 }
 
                 if (IsForLoop)
@@ -1375,7 +1389,7 @@ namespace UndertaleModLib.Decompiler
                 StringBuilder sb = new StringBuilder();
                 sb.Append("switch " + SwitchExpression.ToString(context) + "\n");
                 sb.Append("{\n");
-                foreach(var casee in Cases)
+                foreach (var casee in Cases)
                 {
                     sb.Append("    ");
                     sb.Append(casee.ToString(context).Replace("\n", "\n    "));
@@ -1401,7 +1415,7 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 StringBuilder sb = new StringBuilder();
-                foreach(Expression caseExpr in CaseExpressions)
+                foreach (Expression caseExpr in CaseExpressions)
                 {
                     if (caseExpr != null)
                         sb.Append("case " + caseExpr.ToString(context) + ":\n");
@@ -1424,7 +1438,8 @@ namespace UndertaleModLib.Decompiler
             List<Block> blockList = blocks.Values.ToList();
             List<BitArray> dominators = new List<BitArray>();
 
-            for (int i = 0; i < blockList.Count; i++) {
+            for (int i = 0; i < blockList.Count; i++)
+            {
                 dominators.Add(new BitArray(blockList.Count));
                 dominators[i].SetAll(true);
             }
@@ -1459,7 +1474,7 @@ namespace UndertaleModLib.Decompiler
                         dominators[i].Set(i, true);
                         /*if (!dominators[i].SequenceEquals(temp))
                             changed = true;*/
-                        for(var j = 0; j < blockList.Count; j++)
+                        for (var j = 0; j < blockList.Count; j++)
                             if (dominators[i][j] != temp[j])
                             {
                                 changed = true;
@@ -1470,10 +1485,10 @@ namespace UndertaleModLib.Decompiler
             } while (changed);
 
             Dictionary<Block, List<Block>> result = new Dictionary<Block, List<Block>>();
-            for(var i = 0; i < blockList.Count; i++)
+            for (var i = 0; i < blockList.Count; i++)
             {
                 result[blockList[i]] = new List<Block>();
-                for(var j = 0; j < blockList.Count; j++)
+                for (var j = 0; j < blockList.Count; j++)
                 {
                     if (dominators[i].Get(j))
                         result[blockList[i]].Add(blockList[j]);
@@ -1494,12 +1509,12 @@ namespace UndertaleModLib.Decompiler
                 workList.Push(tail);
             }
 
-            while(workList.Count > 0)
+            while (workList.Count > 0)
             {
                 Block block = workList.Pop();
-                foreach(Block pred in block.entryPoints)
+                foreach (Block pred in block.entryPoints)
                 {
-                    if(!loopBlocks.Contains(pred))
+                    if (!loopBlocks.Contains(pred))
                     {
                         loopBlocks.Add(pred);
                         workList.Push(pred);
@@ -1515,7 +1530,7 @@ namespace UndertaleModLib.Decompiler
             var dominators = ComputeDominators(blocks, entryBlock, false);
             Dictionary<Block, List<Block>> loopSet = new Dictionary<Block, List<Block>>();
 
-            foreach(var block in blocks.Values)
+            foreach (var block in blocks.Values)
             {
                 // Every successor that dominates its predecessor
                 // must be the header of a loop.
@@ -1599,7 +1614,7 @@ namespace UndertaleModLib.Decompiler
             BlockHLStatement output = new BlockHLStatement();
             bool foundBreak = false;
 
-            while(block != stopAt && block != null)
+            while (block != stopAt && block != null)
             {
                 if (loops.ContainsKey(block) && !decompileTheLoop)
                 {
@@ -1616,7 +1631,7 @@ namespace UndertaleModLib.Decompiler
                             if (firstStatement is IfHLStatement && secondStatement is BreakHLStatement)
                             {
                                 IfHLStatement ifStatement = (IfHLStatement)firstStatement;
-                                if (ifStatement.falseBlock is BlockHLStatement && ((BlockHLStatement) ifStatement.falseBlock).Statements.Count == 0)
+                                if (ifStatement.falseBlock is BlockHLStatement && ((BlockHLStatement)ifStatement.falseBlock).Statements.Count == 0)
                                 {
                                     newLoop.Condition = ifStatement.condition;
                                     newLoop.Block.Statements.Remove(firstStatement); // Remove if statement.
@@ -1660,7 +1675,9 @@ namespace UndertaleModLib.Decompiler
                         output.Statements.Add(new ContinueHLStatement());
                         break;
                     }
-                } else if (currentLoop != null) {
+                }
+                else if (currentLoop != null)
+                {
                     bool contains = loops[currentLoop].Contains(block);
 
                     if (!contains)
@@ -1671,7 +1688,6 @@ namespace UndertaleModLib.Decompiler
                     }
                 }
 
-                //output.Statements.Add(new CommentStatement("At block " + block.Address));
                 if (alreadyVisited.Contains(block))
                 {
                     if (block.Statements.Count == 1 && block.Statements[0] is TempVarAssigmentStatement)
@@ -1688,9 +1704,42 @@ namespace UndertaleModLib.Decompiler
                 {
                     alreadyVisited.Add(block);
                 }
-                foreach (var stmt in block.Statements)
+                if (block.Statements == null)
+                {
+                    // This is possible with unused blocks (due to return)
+                    block = stopAt;
+                    continue;
+                }
+                for (int i = 0; i < block.Statements.Count; i++)
+                {
+                    Statement stmt = block.Statements[i];
                     if (!(stmt is PushEnvStatement) && !(stmt is PopEnvStatement))
+                    {
+                        bool handled = false;
+                        // Check for $$$$temp$$$$ return, remove if possible
+                        // Kind of ugly but performant?
                         output.Statements.Add(stmt);
+                        if (stmt is AssignmentStatement && (stmt as AssignmentStatement).Destination.Var?.Name.Content == "$$$$temp$$$$" &&
+                           (i + 1) < block.Statements.Count)
+                        {
+                            Statement next = block.Statements[i + 1];
+                            if (next is ReturnStatement)
+                            {
+                                Expression expr = (next as ReturnStatement).Value;
+                                if (expr is ExpressionVar)
+                                {
+                                    if ((expr as ExpressionVar).Var?.Name.Content == "$$$$temp$$$$")
+                                    {
+                                        // Let's do it!
+                                        output.Statements.Remove(stmt);
+                                        output.Statements.Add(new ReturnStatement((stmt as AssignmentStatement).Value));
+                                        i++;
+                                    }
+                                }
+                            }
+                        }    
+                    }
+                }
 
                 if (output.Statements.Count >= 1 && output.Statements[output.Statements.Count - 1] is TempVarAssigmentStatement && block.Instructions[block.Instructions.Count - 1].Kind == UndertaleInstruction.Opcode.Bt && block.conditionalExit && block.ConditionStatement is ExpressionCompare && (block.ConditionStatement as ExpressionCompare).Opcode == UndertaleInstruction.ComparisonType.EQ)
                 {
@@ -1742,7 +1791,7 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     List<HLSwitchCaseStatement> cases = new List<HLSwitchCaseStatement>();
-                    foreach(var x in caseEntries)
+                    foreach (var x in caseEntries)
                     {
                         Block temp = x.Key;
                         cases.Add(new HLSwitchCaseStatement(x.Value, HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint)));
@@ -1784,8 +1833,9 @@ namespace UndertaleModLib.Decompiler
 
                     // Prevents if (tempvar - 1), when it should be if (tempvar)
                     bool PreventTempVarMath = false;
-                    if (output.Statements.Count > 0 && block.ConditionStatement is ExpressionCast && ((ExpressionCast) block.ConditionStatement).Argument is ExpressionTwo) {
-                        ExpressionTwo conditionExpression = (ExpressionTwo) ((ExpressionCast)block.ConditionStatement).Argument;
+                    if (output.Statements.Count > 0 && block.ConditionStatement is ExpressionCast && ((ExpressionCast)block.ConditionStatement).Argument is ExpressionTwo)
+                    {
+                        ExpressionTwo conditionExpression = (ExpressionTwo)((ExpressionCast)block.ConditionStatement).Argument;
                         Statement lastStatement = output.Statements.Last();
 
                         if (conditionExpression.Argument1 is ExpressionTempVar && lastStatement is TempVarAssigmentStatement && conditionExpression.Argument2 is ExpressionConstant
@@ -1805,15 +1855,25 @@ namespace UndertaleModLib.Decompiler
                     // Fixes breaks in both if outcomes. [Should go first, before other statements that use trueBlock and falseBlock]
                     if (cond.trueBlock.Statements.Count > 0 && cond.falseBlock.Statements.Count > 0 && cond.trueBlock.Statements.Last() is BreakHLStatement && cond.falseBlock.Statements.Last() is BreakHLStatement)
                     {
-                        cond.trueBlock.Statements.Remove(cond.trueBlock.Statements.Last());
-                        cond.falseBlock.Statements.Remove(cond.falseBlock.Statements.Last());
+                        Boolean valid = true;
+                        foreach (Tuple<Expression, BlockHLStatement> tuple in cond.elseConditions)
+                            if (tuple.Item2.Statements.Count == 0 || !(tuple.Item2.Statements.Last() is BreakHLStatement))
+                                valid = false;
+
+                        if (valid)
+                        {
+                            cond.trueBlock.Statements.Remove(cond.trueBlock.Statements.Last());
+                            cond.falseBlock.Statements.Remove(cond.falseBlock.Statements.Last());
+                            foreach (Tuple<Expression, BlockHLStatement> tuple in cond.elseConditions)
+                                tuple.Item2.Statements.Remove(tuple.Item2.Statements.Last());
+                        }
                     }
 
                     //  COMBINES CONDITIONS WITH || + &&  //
                     if (cond.trueBlock.Statements.Count == 1 && cond.falseBlock.Statements.Count == 1 && cond.trueBlock.Statements.Last() is TempVarAssigmentStatement && cond.falseBlock.Statements.Last() is TempVarAssigmentStatement)
                     {
-                        TempVarAssigmentStatement trueStatement = (TempVarAssigmentStatement) (cond.trueBlock.Statements.Last());
-                        TempVarAssigmentStatement falseStatement = (TempVarAssigmentStatement) (cond.falseBlock.Statements.Last());
+                        TempVarAssigmentStatement trueStatement = (TempVarAssigmentStatement)(cond.trueBlock.Statements.Last());
+                        TempVarAssigmentStatement falseStatement = (TempVarAssigmentStatement)(cond.falseBlock.Statements.Last());
                         TempVarReference tempVar = trueStatement.Var;
 
                         if (trueStatement.Var.Var == falseStatement.Var.Var)
@@ -1837,7 +1897,7 @@ namespace UndertaleModLib.Decompiler
                         AssignmentStatement lastAssign = (AssignmentStatement)output.Statements.Last();
                         TempVarAssigmentStatement tempAssign = (TempVarAssigmentStatement)output.Statements[output.Statements.Count - 2];
 
-                        if (lastAssign.Value is ExpressionTempVar && tempAssign.Var.Var == ((ExpressionTempVar) lastAssign.Value).Var.Var)
+                        if (lastAssign.Value is ExpressionTempVar && tempAssign.Var.Var == ((ExpressionTempVar)lastAssign.Value).Var.Var)
                         {
                             output.Statements.RemoveAt(output.Statements.Count - 2); // Don't assign further, put in if statement.
                             lastAssign.Value = tempAssign.Value;
@@ -1858,7 +1918,8 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     // Simplify return logic. if (condition) 1 else 0 -> condition.
-                    if (cond.trueBlock.Statements.Count == 1 && cond.falseBlock.Statements.Count == 1 && cond.trueBlock.Statements.Last() is ReturnStatement && cond.falseBlock.Statements.Last() is ReturnStatement)
+                    bool noElse = (cond.elseConditions == null || cond.elseConditions.Count == 0);
+                    if (noElse && cond.trueBlock.Statements.Count == 1 && cond.falseBlock.Statements.Count == 1 && cond.trueBlock.Statements.Last() is ReturnStatement && cond.falseBlock.Statements.Last() is ReturnStatement)
                     {
                         ReturnStatement trueStatement = (ReturnStatement)(cond.trueBlock.Statements.Last());
                         ReturnStatement falseStatement = (ReturnStatement)(cond.falseBlock.Statements.Last());
@@ -1880,11 +1941,12 @@ namespace UndertaleModLib.Decompiler
                             parentIf.elseConditions.Add(Tuple.Create(nestedIf.condition, nestedIf.trueBlock));
                             parentIf.elseConditions.AddRange(nestedIf.elseConditions);
                             parentIf.falseBlock = nestedIf.falseBlock;
+                            noElse = false;
                         }
                     }
 
                     // Use ternary when possible.
-                    if (context.isGameMaker2 && cond.trueBlock.Statements.Count == 1 && cond.falseBlock.Statements.Count == 1 && cond.trueBlock.Statements[0] is AssignmentStatement && cond.falseBlock.Statements[0] is AssignmentStatement)
+                    if (noElse && context.isGameMaker2 && cond.trueBlock.Statements.Count == 1 && cond.falseBlock.Statements.Count == 1 && cond.trueBlock.Statements[0] is AssignmentStatement && cond.falseBlock.Statements[0] is AssignmentStatement)
                     {
                         AssignmentStatement trueAssign = (AssignmentStatement)cond.trueBlock.Statements[0];
                         AssignmentStatement falseAssign = (AssignmentStatement)cond.falseBlock.Statements[0];
@@ -1897,7 +1959,7 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     // Condense into repeat statement. [Should go after all if handlers]
-                    if (shouldAdd && cond.trueBlock.Statements.Count == 0 && cond.falseBlock.Statements.Count == 1 && cond.falseBlock.Statements[0] is LoopHLStatement
+                    if (noElse && shouldAdd && cond.trueBlock.Statements.Count == 0 && cond.falseBlock.Statements.Count == 1 && cond.falseBlock.Statements[0] is LoopHLStatement
                         && cond.condition is ExpressionCompare && output.Statements.Count > 0 && output.Statements.Last() is TempVarAssigmentStatement)
                     {
                         ExpressionCompare condition = (ExpressionCompare)cond.condition;
@@ -1921,16 +1983,16 @@ namespace UndertaleModLib.Decompiler
                                 bool decrementPass = false;
                                 if (decrementStatement.Var.Var == loopVar && decrementStatement.Value is ExpressionTwo)
                                 { // tempVar = (tempVar - 1);
-                                    ExpressionTwo setValue = (ExpressionTwo) decrementStatement.Value;
+                                    ExpressionTwo setValue = (ExpressionTwo)decrementStatement.Value;
                                     decrementPass = (setValue.Opcode == UndertaleInstruction.Opcode.Sub) // -
-                                        && (setValue.Argument1 is ExpressionTempVar && ((ExpressionTempVar) setValue.Argument1).Var.Var == loopVar) // tempVar
-                                        && (setValue.Argument2 is ExpressionConstant && ((ExpressionConstant) setValue.Argument2).EqualsNumber(1)); // 1
+                                        && (setValue.Argument1 is ExpressionTempVar && ((ExpressionTempVar)setValue.Argument1).Var.Var == loopVar) // tempVar
+                                        && (setValue.Argument2 is ExpressionConstant && ((ExpressionConstant)setValue.Argument2).EqualsNumber(1)); // 1
                                 }
 
                                 // if (tempVar) {continue} else {empty}
                                 bool ifPass = loopCheckStatement.trueBlock.Statements.Count == 1 && loopCheckStatement.falseBlock.Statements.Count == 0
                                     && loopCheckStatement.trueBlock.Statements[0] is ContinueHLStatement
-                                    && loopCheckStatement.condition is ExpressionTempVar && ((ExpressionTempVar) loopCheckStatement.condition).Var.Var == loopVar;
+                                    && loopCheckStatement.condition is ExpressionTempVar && ((ExpressionTempVar)loopCheckStatement.condition).Var.Var == loopVar;
 
                                 if (decrementPass && decrementPass)
                                 {
@@ -1939,7 +2001,7 @@ namespace UndertaleModLib.Decompiler
                                     loopCode.Remove(testLoopCheckStatement);
                                     loopCode.Remove(testBreakStatement);
                                     output.Statements.Remove(priorAssignment);
-                                    
+
                                     // Avoid tempvars.
                                     if (startValue is ExpressionTempVar && output.Statements.Count > 0 && output.Statements.Last() is TempVarAssigmentStatement)
                                     {
@@ -1947,7 +2009,7 @@ namespace UndertaleModLib.Decompiler
                                         output.Statements.Remove(nextTempVar);
                                         startValue = nextTempVar.Value;
                                     }
-                                    
+
                                     loop.RepeatStartValue = startValue;
                                     output.Statements.Add(loop);
                                 }
@@ -1963,7 +2025,20 @@ namespace UndertaleModLib.Decompiler
                 }
                 else
                 {
-                    block = block.nextBlockTrue;
+                    // Don't continue if there's a return/exit, except for last block
+                    if (block.Instructions.Count == 0)
+                        block = block.nextBlockTrue;
+                    else
+                    {
+                        var lastKind = block.Instructions.Last().Kind;
+                        if ((lastKind != UndertaleInstruction.Opcode.Ret && lastKind != UndertaleInstruction.Opcode.Exit) ||
+                          (block.nextBlockTrue != null && block.nextBlockTrue.nextBlockFalse == null))
+                            block = block.nextBlockTrue; // last block
+                        else
+                        {
+                            block = stopAt;
+                        }
+                    }
                 }
             }
 
@@ -2028,7 +2103,7 @@ namespace UndertaleModLib.Decompiler
 
             return blocks;
         }
-        
+
         public static string Decompile(UndertaleCode code, DecompileContext context)
         {
             TempVar.TempVarId = 0;
@@ -2050,10 +2125,11 @@ namespace UndertaleModLib.Decompiler
                 sb.Append(stmt.ToString(context) + "\n");
             string decompiledCode = sb.ToString();
 
-            if (locals != null) {
+            if (locals != null)
+            {
                 foreach (var local in locals.Locals)
                 {
-                    if (local.Name.Content == "arguments")
+                    if (local.Name.Content == "arguments" || local.Name.Content == "$$$$temp$$$$")
                         continue;
 
                     if (tempBuilder.Length > 0)
@@ -2062,7 +2138,8 @@ namespace UndertaleModLib.Decompiler
                     tempBuilder.Append(local.Name.Content);
                 }
 
-                for (int i = 0; i < TempVar.TempVarId; i++) {
+                for (int i = 0; i < TempVar.TempVarId; i++)
+                {
                     string tempVarName = TempVar.MakeTemporaryVarName(i + 1);
                     if (decompiledCode.Contains(tempVarName))
                     {
@@ -2076,18 +2153,18 @@ namespace UndertaleModLib.Decompiler
                     decompiledCode = "var " + tempBuilder.ToString() + ";\n" + decompiledCode;
             }
 
-            
+
             return decompiledCode;
         }
 
         private static void DoTypePropagation(DecompileContext context, Dictionary<uint, Block> blocks)
         {
-            foreach(var b in blocks.Values.Cast<Block>().Reverse())
+            foreach (var b in blocks.Values.Cast<Block>().Reverse())
             {
-                foreach(var s in b.Statements.Cast<Statement>().Reverse())
-                {
-                    s.DoTypePropagation(context, AssetIDType.Other);
-                }
+                if (b.Statements != null) // With returns not allowing all blocks coverage, make sure it's even been processed
+                    foreach (var s in b.Statements.Cast<Statement>().Reverse())
+                        s.DoTypePropagation(context, AssetIDType.Other);
+
                 b.ConditionStatement?.DoTypePropagation(context, AssetIDType.Other);
             }
         }
