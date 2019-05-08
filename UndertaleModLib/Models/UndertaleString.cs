@@ -45,15 +45,20 @@ namespace UndertaleModLib.Models
 
         public override string ToString()
         {
-            return "\"" + Content + "\"";
+            return ToString(true);
         }
 
         public string ToString(DecompileContext context)
         {
-            if (context.isGameMaker2)
+            return ToString(context.isGameMaker2);
+        }
+
+        public string ToString(bool isGMS2)
+        {
+            if (isGMS2)
                 return "\"" + Content.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"") + "\"";
 
-            return "\"" + Content.Replace("\"", "\" + chr(ord('\"')) + \"") + "\"";
+            return "\"" + Content.Replace("\r\n", "\n").Replace("\n", "#").Replace("\"", "\" + chr(34) + \"") + "\""; // Do chr(34) instead of chr(ord('"')), because single-quoted strings aren't supported by the syntax highlighter currently.
         }
 
         public bool SearchMatches(string filter)

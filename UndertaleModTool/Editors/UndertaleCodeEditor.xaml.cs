@@ -257,11 +257,12 @@ namespace UndertaleModTool
             var dataa = (Application.Current.MainWindow as MainWindow).Data;
             Task t = Task.Run(() =>
             {
+                DecompileContext context = new DecompileContext(dataa, true);
                 string decompiled = null;
                 Exception e = null;
                 try
                 {
-                    decompiled = Decompiler.Decompile(code, new DecompileContext(dataa, true)).Replace("\r\n", "\n");
+                    decompiled = Decompiler.Decompile(code, context).Replace("\r\n", "\n");
                 }
                 catch (Exception ex)
                 {
@@ -309,6 +310,7 @@ namespace UndertaleModTool
                                 List<string> split = new List<string>();
                                 string tok = "";
                                 bool readingString = false;
+                                bool escaped = false;
                                 for (int i = 0; i < line.Length; i++)
                                 {
                                     if (tok == "//")
@@ -326,6 +328,24 @@ namespace UndertaleModTool
                                         split.Add(tok);
                                         tok = "";
                                     }
+
+                                    if (readingString && context.isGameMaker2)
+                                    {
+                                        if (escaped)
+                                        {
+                                            escaped = false;
+                                            if (line[i] == '"')
+                                            {
+                                                tok += line[i];
+                                                continue;
+                                            }
+                                        }
+                                        else if (line[i] == '\\')
+                                        {
+                                            escaped = true;
+                                        }
+                                    }
+
                                     tok += line[i];
                                     if (line[i] == '"')
                                     {
