@@ -147,7 +147,7 @@ namespace UndertaleModLib.Decompiler
 
             public Boolean EqualsNumber(int TestNumber)
             {
-                return (Value is Int16 || Value is Int32) && Convert.ToInt32(TestNumber) == TestNumber;
+                return (Value is Int16 || Value is Int32) && Convert.ToInt32(Value) == TestNumber;
             }
 
             public override string ToString(DecompileContext context)
@@ -350,10 +350,10 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 string condStr = Condition.ToString(context);
-                if (!condStr.StartsWith("(") || !condStr.EndsWith(")"))
-                    condStr = "(" + condStr + ")";
+                if (TestNumber(TrueExpression, 1) && TestNumber(FalseExpression, 0))
+                    return condStr; // Default values, yes = true, no = false.
 
-                return condStr + " ? " + TrueExpression.ToString(context) + " : " + FalseExpression.ToString(context);
+                return "(" + condStr + " ? " + TrueExpression.ToString(context) + " : " + FalseExpression.ToString(context) + ")";
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -1895,12 +1895,12 @@ namespace UndertaleModLib.Decompiler
                                 }
                             }
 
-                            if (trueStatement.Value is ExpressionConstant && ((ExpressionConstant)trueStatement.Value).EqualsNumber(1))
+                            if (TestNumber(trueStatement.Value, 1))
                             {
                                 shouldAdd = false;
                                 output.Statements.Add(new TempVarAssigmentStatement(tempVar, new ExpressionTwoSymbol("||", UndertaleInstruction.DataType.Boolean, cond.condition, falseStatement.Value)));
                             }
-                            else if (falseStatement.Value is ExpressionConstant && ((ExpressionConstant)falseStatement.Value).EqualsNumber(0))
+                            else if (TestNumber(falseStatement.Value, 0))
                             {
                                 shouldAdd = false;
                                 output.Statements.Add(new TempVarAssigmentStatement(tempVar, new ExpressionTwoSymbol("&&", UndertaleInstruction.DataType.Boolean, cond.condition, trueStatement.Value)));
@@ -1920,21 +1920,8 @@ namespace UndertaleModLib.Decompiler
                         }
                     }
 
-                    // Simplify return logic. if (condition) 1 else 0 -> condition.
-                    bool noElse = (cond.elseConditions == null || cond.elseConditions.Count == 0);
-                    if (noElse && cond.trueBlock.Statements.Count == 1 && cond.falseBlock.Statements.Count == 1 && cond.trueBlock.Statements.Last() is ReturnStatement && cond.falseBlock.Statements.Last() is ReturnStatement)
-                    {
-                        ReturnStatement trueStatement = (ReturnStatement)(cond.trueBlock.Statements.Last());
-                        ReturnStatement falseStatement = (ReturnStatement)(cond.falseBlock.Statements.Last());
-
-                        if (trueStatement.Value.ToString(context) == "1" && falseStatement.Value.ToString(context) == "0")
-                        {
-                            shouldAdd = false;
-                            output.Statements.Add(new ReturnStatement(cond.condition));
-                        }
-                    }
-
                     // Use if -> else if, instead of nesting ifs.
+                    bool noElse = (cond.elseConditions == null || cond.elseConditions.Count == 0);
                     if (shouldAdd)
                     {
                         IfHLStatement parentIf = cond;
@@ -1945,19 +1932,6 @@ namespace UndertaleModLib.Decompiler
                             parentIf.elseConditions.AddRange(nestedIf.elseConditions);
                             parentIf.falseBlock = nestedIf.falseBlock;
                             noElse = false;
-                        }
-                    }
-
-                    // Use ternary when possible.
-                    if (noElse && context.isGameMaker2 && cond.trueBlock.Statements.Count == 1 && cond.falseBlock.Statements.Count == 1 && cond.trueBlock.Statements[0] is AssignmentStatement && cond.falseBlock.Statements[0] is AssignmentStatement)
-                    {
-                        AssignmentStatement trueAssign = (AssignmentStatement)cond.trueBlock.Statements[0];
-                        AssignmentStatement falseAssign = (AssignmentStatement)cond.falseBlock.Statements[0];
-
-                        if (!(trueAssign.Value is ExpressionTernary) && !(falseAssign.Value is ExpressionTernary) && trueAssign.Destination.Var == falseAssign.Destination.Var)
-                        {
-                            shouldAdd = false;
-                            output.Statements.Add(new AssignmentStatement(trueAssign.Destination, new ExpressionTernary(trueAssign.Value.Type, cond.condition, trueAssign.Value, falseAssign.Value)));
                         }
                     }
 
@@ -1972,7 +1946,7 @@ namespace UndertaleModLib.Decompiler
                         TempVar loopVar = priorAssignment.Var.Var;
 
                         List<Statement> loopCode = loop.Block.Statements;
-                        if (loop.IsWhileLoop && loop.Condition == null && loopCode.Count > 2 && condition.Opcode == UndertaleInstruction.ComparisonType.LTE && condition.Argument2 is ExpressionConstant && ((ExpressionConstant)condition.Argument2).EqualsNumber(0) && condition.Argument1.ToString(context) == startValue.ToString(context))
+                        if (loop.IsWhileLoop && loop.Condition == null && loopCode.Count > 2 && condition.Opcode == UndertaleInstruction.ComparisonType.LTE && TestNumber(condition.Argument2, 0) && condition.Argument1.ToString(context) == startValue.ToString(context))
                         {
                             Statement testDecrementStatement = loopCode[loopCode.Count - 3];
                             Statement testLoopCheckStatement = loopCode[loopCode.Count - 2];
@@ -1989,7 +1963,7 @@ namespace UndertaleModLib.Decompiler
                                     ExpressionTwo setValue = (ExpressionTwo)decrementStatement.Value;
                                     decrementPass = (setValue.Opcode == UndertaleInstruction.Opcode.Sub) // -
                                         && (setValue.Argument1 is ExpressionTempVar && ((ExpressionTempVar)setValue.Argument1).Var.Var == loopVar) // tempVar
-                                        && (setValue.Argument2 is ExpressionConstant && ((ExpressionConstant)setValue.Argument2).EqualsNumber(1)); // 1
+                                        && TestNumber(setValue.Argument2, 1); // 1
                                 }
 
                                 // if (tempVar) {continue} else {empty}
@@ -2054,7 +2028,45 @@ namespace UndertaleModLib.Decompiler
                 Statement currentStatement = output.Statements[i];
                 Statement nextStatement = (output.Statements.Count > i + 1 ? output.Statements[i + 1] : null);
 
-                // tempVar = stuff; normalVar = tempVar; -> normalVar = stuff;
+                // Use ternary when possible.
+                if (currentStatement is IfHLStatement)
+                {
+                    IfHLStatement ifStatement = (IfHLStatement)currentStatement;
+                    bool noElse = (ifStatement.elseConditions == null || ifStatement.elseConditions.Count == 0);
+
+                    if (noElse && ifStatement.trueBlock.Statements.Count == 1 && ifStatement.falseBlock.Statements.Count == 1)
+                    {
+                        Statement trueStatement = ifStatement.trueBlock.Statements[0];
+                        Statement falseStatement = ifStatement.falseBlock.Statements[0];
+
+                        if (trueStatement is AssignmentStatement && falseStatement is AssignmentStatement)
+                        {
+                            AssignmentStatement trueAssign = (AssignmentStatement)trueStatement;
+                            AssignmentStatement falseAssign = (AssignmentStatement)falseStatement;
+                            if (trueAssign.Destination.Var == falseAssign.Destination.Var && TestTernaryPass(trueAssign.Value, falseAssign.Value, context.isGameMaker2))
+                                output.Statements[i] = new AssignmentStatement(trueAssign.Destination, new ExpressionTernary(trueAssign.Value.Type, ifStatement.condition, trueAssign.Value, falseAssign.Value));
+
+                        }
+                        else if (trueStatement is TempVarAssigmentStatement && falseStatement is TempVarAssigmentStatement)
+                        {
+                            TempVarAssigmentStatement trueAssign = (TempVarAssigmentStatement)trueStatement;
+                            TempVarAssigmentStatement falseAssign = (TempVarAssigmentStatement)falseStatement;
+                            if (trueAssign.Var.Var == falseAssign.Var.Var && TestTernaryPass(trueAssign.Value, falseAssign.Value, context.isGameMaker2))
+                                output.Statements[i] = new TempVarAssigmentStatement(trueAssign.Var, new ExpressionTernary(trueAssign.Value.Type, ifStatement.condition, trueAssign.Value, falseAssign.Value));
+                        }
+                        else if (trueStatement is ReturnStatement && falseStatement is ReturnStatement)
+                        {
+                            ReturnStatement trueReturn = (ReturnStatement)trueStatement;
+                            ReturnStatement falseReturn = (ReturnStatement)falseStatement;
+                            if (trueReturn.Value != null && falseReturn.Value != null && TestTernaryPass(trueReturn.Value, falseReturn.Value, context.isGameMaker2))
+                                output.Statements[i] = new ReturnStatement(new ExpressionTernary(trueReturn.Value.Type, ifStatement.condition, trueReturn.Value, falseReturn.Value));
+                        }
+
+                        currentStatement = output.Statements[i];
+                    }
+                }
+
+                // tempVar = <>; normalVar = tempVar; ---> normalVar = <>; [Goes after ternary updates]
                 if (currentStatement is TempVarAssigmentStatement && nextStatement is AssignmentStatement)
                 {
                     TempVarAssigmentStatement tempAssign = (TempVarAssigmentStatement)currentStatement;
@@ -2062,13 +2074,50 @@ namespace UndertaleModLib.Decompiler
 
                     if (lastAssign.Value is ExpressionTempVar && tempAssign.Var.Var == ((ExpressionTempVar)lastAssign.Value).Var.Var)
                     {
-                        output.Statements.RemoveAt(i); // Remove tempVar assignment.
+                        output.Statements.RemoveAt(i--); // Remove tempVar assignment.
                         lastAssign.Value = tempAssign.Value;
+                        continue;
+                    }
+                }
+
+                // tempVar = <>; return tempVar; ---> return <>; [Goes after ternary and if cleaning.
+                if (currentStatement is TempVarAssigmentStatement && nextStatement is ReturnStatement)
+                {
+                    TempVarAssigmentStatement assignment = (TempVarAssigmentStatement)currentStatement;
+                    ReturnStatement returnStatement = (ReturnStatement)nextStatement;
+                    Statement returnValue = UnCast(returnStatement.Value);
+
+                    if (returnValue is ExpressionTempVar && returnValue != null && ((ExpressionTempVar)returnValue).Var.Var == assignment.Var.Var)
+                    {
+                        output.Statements.RemoveAt(i--);
+                        returnStatement.Value = assignment.Value;
+                        continue;
                     }
                 }
             }
 
             return output;
+        }
+
+        private static bool TestTernaryPass(Expression s1, Expression s2, bool allowValues)
+        {
+            return s1.Type == s2.Type
+                && !(s1 is ExpressionTernary) && !(s2 is ExpressionTernary)
+                && (allowValues || (TestNumber(s1, 1) && TestNumber(s2, 0)));
+        }
+
+        private static Statement UnCast(Statement statement)
+        {
+            if (statement is ExpressionCast)
+                return UnCast(((ExpressionCast)statement).Argument);
+
+            return statement;
+        }
+
+        private static bool TestNumber(Statement statement, int number, DecompileContext context = null)
+        {
+            statement = UnCast(statement);
+            return (statement is ExpressionConstant) && ((ExpressionConstant)statement).EqualsNumber(number);
         }
 
         private static List<Statement> HLDecompile(DecompileContext context, Dictionary<uint, Block> blocks, Block entryPoint, Block rootExitPoint)
