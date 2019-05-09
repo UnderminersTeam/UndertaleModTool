@@ -675,7 +675,7 @@ namespace UndertaleModLib.Decompiler
                     var xxx = ExpressionVar.assetTypes; // TODO: this is going bad
                     ExpressionVar.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>(); // TODO: don't look at this
                     Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code);
-                    Decompiler.DecompileFromBlock(blocks[0]);
+                    Decompiler.DecompileFromBlock(context, blocks[0]);
                     Decompiler.DoTypePropagation(context, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
                     scriptArgs[Function.Name.Content] = new AssetIDType[15];
                     for (int i = 0; i < 15; i++)
@@ -833,7 +833,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
-        internal static void DecompileFromBlock(Block block, List<TempVarReference> tempvars, Stack<Tuple<Block, List<TempVarReference>>> workQueue)
+        internal static void DecompileFromBlock(DecompileContext context, Block block, List<TempVarReference> tempvars, Stack<Tuple<Block, List<TempVarReference>>> workQueue)
         {
             if (block.TempVarsOnEntry != null && (block.nextBlockTrue != null || block.nextBlockFalse != null))
             {
@@ -1097,14 +1097,14 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
-        public static void DecompileFromBlock(Block block)
+        public static void DecompileFromBlock(DecompileContext context, Block block)
         {
             Stack<Tuple<Block, List<TempVarReference>>> workQueue = new Stack<Tuple<Block, List<TempVarReference>>>();
             workQueue.Push(new Tuple<Block, List<TempVarReference>>(block, new List<TempVarReference>()));
             while (workQueue.Count > 0)
             {
                 var item = workQueue.Pop();
-                DecompileFromBlock(item.Item1, item.Item2, workQueue);
+                DecompileFromBlock(context, item.Item1, item.Item2, workQueue);
             }
         }
 
@@ -1880,13 +1880,13 @@ namespace UndertaleModLib.Decompiler
                             // Handle multiple tempvars working forming a single condition.
                             if (cond.condition is ExpressionTempVar && output.Statements.Last() is TempVarAssigmentStatement)
                             {
-                                ExpressionTempVar conditionVar = ((ExpressionTempVar) cond.condition);
+                                ExpressionTempVar conditionVar = ((ExpressionTempVar)cond.condition);
 
                                 int i = output.Statements.Count;
                                 TempVarAssigmentStatement foundAssign = null;
                                 while (--i >= 0 && output.Statements[i] is TempVarAssigmentStatement)
-                                    if (((TempVarAssigmentStatement) output.Statements[i]).Var.Var == conditionVar.Var.Var)
-                                        foundAssign = (TempVarAssigmentStatement) output.Statements[i];
+                                    if (((TempVarAssigmentStatement)output.Statements[i]).Var.Var == conditionVar.Var.Var)
+                                        foundAssign = (TempVarAssigmentStatement)output.Statements[i];
 
                                 if (foundAssign != null)
                                 {
@@ -1905,20 +1905,6 @@ namespace UndertaleModLib.Decompiler
                                 shouldAdd = false;
                                 output.Statements.Add(new TempVarAssigmentStatement(tempVar, new ExpressionTwoSymbol("&&", UndertaleInstruction.DataType.Boolean, cond.condition, trueStatement.Value)));
                             }
-                        }
-                    }
-
-                    // tempVar = stuff; normalVar = tempVar; -> normalVar = stuff;
-                    if (output.Statements.Count > 1 && output.Statements.Last() is AssignmentStatement && output.Statements[output.Statements.Count - 2] is TempVarAssigmentStatement)
-                    {
-                        AssignmentStatement lastAssign = (AssignmentStatement)output.Statements.Last();
-                        TempVarAssigmentStatement tempAssign = (TempVarAssigmentStatement)output.Statements[output.Statements.Count - 2];
-
-                        if (lastAssign.Value is ExpressionTempVar && tempAssign.Var.Var == ((ExpressionTempVar)lastAssign.Value).Var.Var)
-                        {
-                            output.Statements.RemoveAt(output.Statements.Count - 2); // Don't assign further, put in if statement.
-                            lastAssign.Value = tempAssign.Value;
-                            cond.condition = lastAssign.Value;
                         }
                     }
 
@@ -2062,6 +2048,26 @@ namespace UndertaleModLib.Decompiler
             if (foundBreak)
                 output.Statements.Add(new BreakHLStatement());
 
+            // Cleanup.
+            for (int i = 0; i < output.Statements.Count; i++)
+            {
+                Statement currentStatement = output.Statements[i];
+                Statement nextStatement = (output.Statements.Count > i + 1 ? output.Statements[i + 1] : null);
+
+                // tempVar = stuff; normalVar = tempVar; -> normalVar = stuff;
+                if (currentStatement is TempVarAssigmentStatement && nextStatement is AssignmentStatement)
+                {
+                    TempVarAssigmentStatement tempAssign = (TempVarAssigmentStatement)currentStatement;
+                    AssignmentStatement lastAssign = (AssignmentStatement)nextStatement;
+
+                    if (lastAssign.Value is ExpressionTempVar && tempAssign.Var.Var == ((ExpressionTempVar)lastAssign.Value).Var.Var)
+                    {
+                        output.Statements.RemoveAt(i); // Remove tempVar assignment.
+                        lastAssign.Value = tempAssign.Value;
+                    }
+                }
+            }
+
             return output;
         }
 
@@ -2126,7 +2132,7 @@ namespace UndertaleModLib.Decompiler
             TempVar.TempVarId = 0;
             ExpressionVar.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
-            DecompileFromBlock(blocks[0]);
+            DecompileFromBlock(context, blocks[0]);
             FunctionCall.scriptArgs = new Dictionary<string, AssetIDType[]>();
             // TODO: add self to scriptArgs
             DoTypePropagation(context, blocks);
