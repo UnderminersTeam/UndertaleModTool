@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UndertaleModLib.Decompiler;
 
@@ -64,6 +65,17 @@ namespace UndertaleModLib.Models
         public bool SearchMatches(string filter)
         {
             return Content?.ToLower().Contains(filter.ToLower()) ?? false;
+        }
+
+        public static string UnescapeText(string text, bool isGMS2 = true)
+        {
+            if (isGMS2)
+                return text.Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\"", "\"").Replace("\\\\", "\\");
+            else {
+                text = text.Replace("\" + chr(34) + \"", "\"");
+                text = Regex.Replace(text, "([^\\\\])#", "$1\r\n");
+                return text;
+            }
         }
     }
 }
