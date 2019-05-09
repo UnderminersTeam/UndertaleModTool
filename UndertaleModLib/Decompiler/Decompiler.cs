@@ -1313,7 +1313,8 @@ namespace UndertaleModLib.Decompiler
             public Statement Condition;
 
             // While Loop.
-            public bool IsWhileLoop { get => !IsForLoop && !isRepeatLoop; }
+            public bool IsWhileLoop { get => !IsForLoop && !IsRepeatLoop && !IsDoUntilLoop; }
+            public bool IsDoUntilLoop;
 
             // For Loop.
             public bool IsForLoop { get => InitializeStatement != null && StepStatement != null && Condition != null; }
@@ -1321,12 +1322,12 @@ namespace UndertaleModLib.Decompiler
             public AssignmentStatement StepStatement;
 
             // Repeat Loop.
-            public bool isRepeatLoop { get => RepeatStartValue != null; }
+            public bool IsRepeatLoop { get => RepeatStartValue != null; }
             public Statement RepeatStartValue;
 
             public override string ToString(DecompileContext context)
             {
-                if (isRepeatLoop)
+                if (IsRepeatLoop)
                 {
                     bool isConstant = RepeatStartValue is ExpressionConstant;
                     return "repeat " + (isConstant ? "(" : "") + RepeatStartValue.ToString(context) + (isConstant ? ")" : "") + "\n" + Block.ToString(context);
@@ -1340,6 +1341,9 @@ namespace UndertaleModLib.Decompiler
 
                     return "for (" + InitializeStatement.ToString(context) + "; " + conditionStr + "; " + StepStatement.ToString(context) + ")\n" + Block.ToString(context);
                 }
+
+                if (IsDoUntilLoop)
+                    return "do " + Block.ToString(context, false) + " until " + Condition.ToString(context) + ";\n";
 
                 return "while " + (Condition != null ? Condition.ToString(context) : "(true)") + "\n" + Block.ToString(context);
             }
@@ -1465,6 +1469,9 @@ namespace UndertaleModLib.Decompiler
                             e = new Block[] { blockList[i].nextBlockTrue };
                     foreach (Block pred in e)
                     {
+                        if (pred == null)
+                            continue; // Happens in do-until loops. No other known situations.
+
                         var predId = blockList.IndexOf(pred);
                         Debug.Assert(predId >= 0);
                         temp.SetAll(false);
@@ -1823,7 +1830,17 @@ namespace UndertaleModLib.Decompiler
                     Debug.Assert(!block.conditionalExit);
                     break;
                 }
-                if (block.conditionalExit)
+
+                if (block.conditionalExit && block.ConditionStatement == null && block.nextBlockTrue != null && block.nextBlockFalse != null && block.nextBlockFalse.ConditionStatement != null) // DO UNTIL STATEMENT!
+                {
+                    LoopHLStatement doUntilLoop = new LoopHLStatement();
+                    doUntilLoop.Condition = block.nextBlockFalse.ConditionStatement;
+                    doUntilLoop.Block = HLDecompileBlocks(context, ref block.nextBlockFalse, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, block.nextBlockTrue, true);
+                    doUntilLoop.IsDoUntilLoop = true;
+                    output.Statements.Add(doUntilLoop);
+                }
+
+                if (block.conditionalExit && block.ConditionStatement != null) // IF STATEMENT!
                 {
                     Block meetPoint = FindFirstMeetPoint(block, reverseDominators);
                     if (meetPoint == null)
