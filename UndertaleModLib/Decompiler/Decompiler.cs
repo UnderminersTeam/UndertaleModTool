@@ -1687,6 +1687,13 @@ namespace UndertaleModLib.Decompiler
                     }
                 }
 
+                if (block.Statements == null)
+                {
+                    // This is possible with unused blocks (due to return)
+                    block = stopAt;
+                    continue;
+                }
+
                 if (alreadyVisited.Contains(block))
                 {
                     if (block.Statements.Count == 1 && block.Statements[0] is TempVarAssigmentStatement)
@@ -1703,12 +1710,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     alreadyVisited.Add(block);
                 }
-                if (block.Statements == null)
-                {
-                    // This is possible with unused blocks (due to return)
-                    block = stopAt;
-                    continue;
-                }
+                
                 for (int i = 0; i < block.Statements.Count; i++)
                 {
                     Statement stmt = block.Statements[i];
