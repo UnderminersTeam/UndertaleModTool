@@ -354,7 +354,6 @@ namespace UndertaleModLib.Decompiler
                     condStr = "(" + condStr + ")";
 
                 return condStr + " ? " + TrueExpression.ToString(context) + " : " + FalseExpression.ToString(context);
-
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -1878,6 +1877,24 @@ namespace UndertaleModLib.Decompiler
 
                         if (trueStatement.Var.Var == falseStatement.Var.Var)
                         {
+                            // Handle multiple tempvars working forming a single condition.
+                            if (cond.condition is ExpressionTempVar && output.Statements.Last() is TempVarAssigmentStatement)
+                            {
+                                ExpressionTempVar conditionVar = ((ExpressionTempVar) cond.condition);
+
+                                int i = output.Statements.Count;
+                                TempVarAssigmentStatement foundAssign = null;
+                                while (--i >= 0 && output.Statements[i] is TempVarAssigmentStatement)
+                                    if (((TempVarAssigmentStatement) output.Statements[i]).Var.Var == conditionVar.Var.Var)
+                                        foundAssign = (TempVarAssigmentStatement) output.Statements[i];
+
+                                if (foundAssign != null)
+                                {
+                                    cond.condition = foundAssign.Value;
+                                    output.Statements.Remove(foundAssign);
+                                }
+                            }
+
                             if (trueStatement.Value is ExpressionConstant && ((ExpressionConstant)trueStatement.Value).EqualsNumber(1))
                             {
                                 shouldAdd = false;
