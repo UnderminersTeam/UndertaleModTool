@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModTool
 {
@@ -41,16 +42,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    byte[] data = File.ReadAllBytes(dlg.FileName);
-
-                    // Make sure the file is valid PNG
-                    // TODO: does that work?
-                    using (var stream = new MemoryStream(data))
-                    {
-                        PngBitmapDecoder decoder = new PngBitmapDecoder(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
-                    }
-
-                    target.TextureData.TextureBlob = data;
+                    target.TextureData.TextureBlob = TextureWorker.ReadTextureBlob(dlg.FileName);
                 }
                 catch (Exception ex)
                 {

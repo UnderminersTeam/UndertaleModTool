@@ -19,6 +19,8 @@ namespace UndertaleModLib.Scripting
         void ScriptMessage(string message);
         bool ScriptQuestion(string message);
         void ScriptOpenURL(string url);
+        void UpdateProgressBar(string message, string status, double progressValue, double maxValue);
+        void HideProgressBar();
 
         void ChangeSelection(object newsel);
     }

@@ -33,12 +33,13 @@ namespace UndertaleModTests
         [TestMethod]
         public void DecompileAllScripts()
         {
+            DecompileContext context = new DecompileContext(data, true);
             Parallel.ForEach(data.Code, (code) =>
             {
                 //Console.WriteLine(code.Name.Content);
                 try
                 {
-                    Decompiler.Decompile(code, data);
+                    Decompiler.Decompile(code, context);
                 }
                 catch (Exception e)
                 {

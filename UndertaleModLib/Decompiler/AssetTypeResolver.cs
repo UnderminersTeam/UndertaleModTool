@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Decompiler
 {
@@ -27,6 +28,7 @@ namespace UndertaleModLib.Decompiler
         Room,
         GameObject, // or GameObjectInstance or InstanceType, these are all interchangable
         Script,
+        Shader,
 
         Layer // GMS2
     };
@@ -450,16 +452,21 @@ namespace UndertaleModLib.Decompiler
 
             // TODO: surface drawing
 
-            // TODO: shaders
+            { "shader_is_compiled", new AssetIDType[] { AssetIDType.Shader } },
+            { "shader_set", new AssetIDType[] { AssetIDType.Shader } },
+            // { "shader_current", new AssetIDType[] { } }, returns shader.
 
             // TODO: GMS2 tilemaps
             // TODO: GMS2 layers
             
             { "io_clear", new AssetIDType[] { } },
+            { "keyboard_multicheck", new AssetIDType[] { AssetIDType.KeyboardKey } },
+            { "keyboard_multicheck_pressed", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_check", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_check_pressed", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_check_released", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_check_direct", new AssetIDType[] { AssetIDType.KeyboardKey } },
+            { "keyboard_clear", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_key_press", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_key_release", new AssetIDType[] { AssetIDType.KeyboardKey } },
             { "keyboard_set_map", new AssetIDType[] { AssetIDType.KeyboardKey, AssetIDType.KeyboardKey } },
@@ -491,6 +498,21 @@ namespace UndertaleModLib.Decompiler
             { "keyboard_key", AssetIDType.KeyboardKey },
             { "keyboard_lastkey", AssetIDType.KeyboardKey },
             { "os_type", AssetIDType.Enum_OSType },
+            
+            // These ones are ordinary variables with specific meaning within Undertale/Deltarune.
+            // It would probably be better to only use these if UT/DR are being loaded.
+            { "currentroom", AssetIDType.Room },
+            { "dsprite", AssetIDType.Sprite },
+            { "usprite", AssetIDType.Sprite },
+            { "lsprite", AssetIDType.Sprite },
+            { "rsprite", AssetIDType.Sprite },
+            { "dtsprite", AssetIDType.Sprite },
+            { "utsprite", AssetIDType.Sprite },
+            { "ltsprite", AssetIDType.Sprite },
+            { "rtsprite", AssetIDType.Sprite },
+            { "normalsprite", AssetIDType.Sprite },
+            { "hurtsprite", AssetIDType.Sprite },
+            { "hurtsound", AssetIDType.Sound },
         };
 
         internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, Dictionary<string, AssetIDType[]> scriptArgs)
@@ -544,24 +566,21 @@ namespace UndertaleModLib.Decompiler
             if (const_name.Length >= 1 && const_name[0] == '-')
                 return null; // that is not a constant either
 
-            OSType os_type;
-            if (Enum.TryParse(const_name, out os_type))
-                return (int)os_type;
-            GamepadButton gm_button;
-            if (Enum.TryParse(const_name, out gm_button))
-                return (int)gm_button;
-            HAlign halign;
-            if (Enum.TryParse(const_name, out halign))
-                return (int)halign;
-            VAlign valign;
-            if (Enum.TryParse(const_name, out valign))
-                return (int)valign;
-            e__VW vw;
-            if (Enum.TryParse(const_name, out vw))
-                return (int)vw;
-            e__BG bg;
-            if (Enum.TryParse(const_name, out bg))
-                return (int)bg;
+            // By avoiding Enum.TryParse, we avoid exception spam in the console, and there isn't any speed loss.
+            if (Enum.IsDefined(typeof(OSType), const_name))
+                return (int)Enum.Parse(typeof(OSType), const_name);
+            if (Enum.IsDefined(typeof(GamepadButton), const_name))
+                return (int)Enum.Parse(typeof(GamepadButton), const_name);
+            if (Enum.IsDefined(typeof(HAlign), const_name))
+                return (int)Enum.Parse(typeof(HAlign), const_name);
+            if (Enum.IsDefined(typeof(VAlign), const_name))
+                return (int)Enum.Parse(typeof(VAlign), const_name);
+            if (Enum.IsDefined(typeof(e__VW), const_name))
+                return (int)Enum.Parse(typeof(e__VW), const_name);
+            if (Enum.IsDefined(typeof(e__BG), const_name))
+                return (int)Enum.Parse(typeof(e__BG), const_name);
+            if (Enum.IsDefined(typeof(EventSubtypeKey), const_name))
+                return Convert.ToInt32((uint)Enum.Parse(typeof(EventSubtypeKey), const_name));
 
             return null;
         }

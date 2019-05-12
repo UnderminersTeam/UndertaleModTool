@@ -224,7 +224,7 @@ namespace UndertaleModTool
         private void UpdateGettext(UndertaleCode gettextCode)
         {
             gettext = new Dictionary<string, int>();
-            foreach(var line in Decompiler.Decompile(gettextCode).Replace("\r\n", "\n").Split('\n'))
+            foreach (var line in Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n'))
             {
                 Match m = Regex.Match(line, "^ds_map_add\\(global.text_data_en, \"(.*)\"@([0-9]+), \"(.*)\"@([0-9]+)\\)");
                 if (m.Success)
@@ -257,11 +257,12 @@ namespace UndertaleModTool
             var dataa = (Application.Current.MainWindow as MainWindow).Data;
             Task t = Task.Run(() =>
             {
+                DecompileContext context = new DecompileContext(dataa, true);
                 string decompiled = null;
                 Exception e = null;
                 try
                 {
-                    decompiled = Decompiler.Decompile(code, dataa).Replace("\r\n", "\n");
+                    decompiled = Decompiler.Decompile(code, context).Replace("\r\n", "\n");
                 }
                 catch (Exception ex)
                 {
@@ -309,6 +310,7 @@ namespace UndertaleModTool
                                 List<string> split = new List<string>();
                                 string tok = "";
                                 bool readingString = false;
+                                bool escaped = false;
                                 for (int i = 0; i < line.Length; i++)
                                 {
                                     if (tok == "//")
@@ -326,6 +328,24 @@ namespace UndertaleModTool
                                         split.Add(tok);
                                         tok = "";
                                     }
+
+                                    if (readingString && context.isGameMaker2)
+                                    {
+                                        if (escaped)
+                                        {
+                                            escaped = false;
+                                            if (line[i] == '"')
+                                            {
+                                                tok += line[i];
+                                                continue;
+                                            }
+                                        }
+                                        else if (line[i] == '\\')
+                                        {
+                                            escaped = true;
+                                        }
+                                    }
+
                                     tok += line[i];
                                     if (line[i] == '"')
                                     {
@@ -345,7 +365,7 @@ namespace UndertaleModTool
                                 {
                                     int? val = null;
                                     string token = split[i];
-                                    if (token == "if" || token == "else" || token == "return" || token == "break" || token == "continue" || token == "while" || token == "with" || token == "switch" || token == "case" || token == "default")
+                                    if (token == "if" || token == "else" || token == "return" || token == "break" || token == "continue" || token == "while" || token == "for" || token == "repeat" || token == "with" || token == "switch" || token == "case" || token == "default" || token == "exit" || token == "var" || token == "do" || token == "until")
                                         par.Inlines.Add(new Run(token) { Foreground = keywordBrush, FontWeight = FontWeights.Bold });
                                     else if (token == "self" || token == "global" || token == "local" || token == "other" || token == "noone" || token == "true" || token == "false")
                                         par.Inlines.Add(new Run(token) { Foreground = keywordBrush });

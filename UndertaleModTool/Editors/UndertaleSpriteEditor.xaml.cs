@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModTool
 {
@@ -39,6 +40,8 @@ namespace UndertaleModTool
             dlg.DefaultExt = ".png";
             dlg.Filter = "PNG files (.png)|*.png|All files|*";
 
+            TextureWorker worker = new TextureWorker();
+
             if (dlg.ShowDialog() == true)
             {
                 try
@@ -55,11 +58,7 @@ namespace UndertaleModTool
                         {
                             try
                             {
-                                TextureList.SelectedItem = tex.tex;
-                                using (var file = File.OpenWrite(System.IO.Path.Combine(path, tex.id + ext)))
-                                {
-                                    TextureDisplay.SaveImagePNG(file);
-                                }
+                                worker.ExportAsPNG(tex.tex.Texture, System.IO.Path.Combine(path, tex.id + ext));
                             }
                             catch (Exception ex)
                             {
@@ -71,10 +70,7 @@ namespace UndertaleModTool
                     {
                         try
                         {
-                            using (var file = File.OpenWrite(dlg.FileName))
-                            {
-                                TextureDisplay.SaveImagePNG(file);
-                            }
+                            worker.ExportAsPNG(sprite.Textures[0].Texture, dlg.FileName);
                         }
                         catch (Exception ex)
                         {
@@ -95,20 +91,14 @@ namespace UndertaleModTool
 
         private void MaskList_AddingNewItem(object sender, AddingNewItemEventArgs e)
         {
-            UndertaleSprite.MaskEntry obj = new UndertaleSprite.MaskEntry();
-            UndertaleSprite sprite = this.DataContext as UndertaleSprite;
-            uint len = (sprite.Width + 7) / 8 * sprite.Height;
-            obj.Data = new byte[len];
-            e.NewItem = obj;
+            e.NewItem = (this.DataContext as UndertaleSprite).NewMaskEntry();
         }
 
         private void MaskImport_Click(object sender, RoutedEventArgs e)
         {
-            UndertaleSprite sprite = this.DataContext as UndertaleSprite;
             UndertaleSprite.MaskEntry target = (sender as Button).DataContext as UndertaleSprite.MaskEntry;
 
             OpenFileDialog dlg = new OpenFileDialog();
-
             dlg.DefaultExt = ".png";
             dlg.Filter = "PNG files (.png)|*.png|All files|*";
 
@@ -116,19 +106,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    using (FileStream stream = new FileStream(dlg.FileName, FileMode.Open, FileAccess.Read))
-                    {
-                        PngBitmapDecoder decoder = new PngBitmapDecoder(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
-                        BitmapSource source = decoder.Frames[0];
-                        if (source.Format.BitsPerPixel != 1)
-                            throw new Exception("Must be a 1 bit-per-pixel image");
-                        if (source.PixelWidth != sprite.Width || source.PixelHeight != sprite.Height)
-                            throw new Exception("Mask size doesn't match sprite size");
-                        int stride = (int)((sprite.Width + 7) / 8);
-                        byte[] data = new byte[source.PixelHeight * stride];
-                        source.CopyPixels(data, stride, 0);
-                        target.Data = data;
-                    }
+                    target.Data = TextureWorker.ReadMaskData(dlg.FileName);
                 }
                 catch (Exception ex)
                 {
@@ -151,13 +129,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    BitmapSource source = BitmapSource.Create((int)sprite.Width, (int)sprite.Height, 96, 96, PixelFormats.BlackWhite, null, target.Data, (int)((sprite.Width + 7) / 8));
-                    PngBitmapEncoder encoder = new PngBitmapEncoder();
-                    encoder.Frames.Add(BitmapFrame.Create(source));
-                    using (FileStream stream = new FileStream(dlg.FileName, FileMode.Create, FileAccess.Write))
-                    {
-                        encoder.Save(stream);
-                    }
+                    TextureWorker.ExportCollisionMaskPNG(sprite, target, dlg.FileName);
                 }
                 catch (Exception ex)
                 {
