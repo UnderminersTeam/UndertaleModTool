@@ -1723,7 +1723,6 @@ namespace UndertaleModLib.Decompiler
                     Statement stmt = block.Statements[i];
                     if (!(stmt is PushEnvStatement) && !(stmt is PopEnvStatement))
                     {
-                        bool handled = false;
                         // Check for $$$$temp$$$$ return, remove if possible
                         // Kind of ugly but performant?
                         output.Statements.Add(stmt);
