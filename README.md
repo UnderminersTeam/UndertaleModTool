@@ -6,10 +6,12 @@
 
 heya. I heard you like digging deep into Undertale data so I made a tool just for you! **Downloads** are **HERE**: :point_right::point_right::point_right: https://github.com/krzys-h/UndertaleModTool/releases :point_left::point_left::point_left:
 
+**Have questions? Want to talk?** Join us on Discord! https://discord.gg/hqpQvUX
+
 ![flowey](flowey.png)
 
 ### Main features
-* Can read every single byte from the data file for lastest version of Undertale, and probably other GameMaker: Studio games (GM:S 1.4 bytecode version 15 or 16 only, version 14 may be supported at some point but not yet, partial GM:S2 support is done) for every platform and then recreate a byte-for-byte exact copy from the decoded data.
+* Can read every single byte from the data file for lastest version of Undertale, Deltarune, and probably other GameMaker: Studio games (GM:S 1.4 and GM:S 2 bytecode versions 15, 16 and 17 are currently supported, version 14 support may be added at some point) for every platform and then recreate a byte-for-byte exact copy from the decoded data.
 * Properly handles all of the pointers in the file so that if you add/remove stuff, make things longer/shorter, move them around etc. the file format won't break.
 * An editor which lets you change (almost) every single value, including unknown ones. A lot better than a hex editor, huh?
 * Includes a (very) simple level editor
@@ -17,9 +19,7 @@ heya. I heard you like digging deep into Undertale data so I made a tool just fo
 * Experimental high-level decompiler. The output is accurate and I've not seen it totally break in a long time, but it could use some more cleaning up of the high-level structures.
 * Support for running scripts that automatically modify your data file - this is the way to distribute mods, but creating them is manual job for now. It also serves as a replacement for sharing hex editor offsets - if you make it into a file-format-aware script instead, there is much smaller change of it breaking after an update.
 * All core IO functionality extracted into a library for use in external tools
-* Can generate an .yydebug file for the GM:S debugger so that you can edit variables live [EXPERIMENTAL]
-* Partial GM:S 2 support. Loading and saving should work fine, although not all editors are updated yet. Should work with the latest Nintendo Switch release of Undertale.
-* Supports [DELTARUNE](https://www.deltarune.com/) too!
+* Can generate an .yydebug file for the GM:S debugger so that you can edit variables live (see [here](https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-Game-Maker:-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions#yydebug-file-format))
 
 ### Included scripts
 I also included some of my test scripts. They are:
@@ -40,16 +40,11 @@ I also included some of my test scripts. They are:
 
 ### Bug reports, contributing
 All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is my current list of stuff that needs to be worked on:
-* Finish updating the room editor for GMS2 (it's almost done!)
 * Add missing chunk editors for Timelines and Extensions
-* Finish writing the decompiler:
-  * decompile other loop types than just while(true)
-  * decompile compound if expressions (things like `a || b` are decomposed into multiple ifs internally because GML has short-circuit evaluation)
-  * make sure the output syntax is fully GML-compatible
-* Write a matching GML compiler, so that edits of high-level code are possible
+* Write a matching GML compiler, so that edits of high-level code are possible (@colinator27 is already working on it)
 * Add support for other bytecode versions, at least for bytecode 14 so that Undertale 1.00 can be opened as well
 * Add support for YYC games - you won't be able to edit code, but everything else should technically work
-* Maybe try to write a GameMaker Project output module, should be technically possible after decompiler is done but I'm not sure I really want to do that for legal reasons...
+* Maybe try to write a GameMaker Project output module, should be technically possible after decompiler is done but I'm not sure I really want to do that for legal reasons... (@Kneesnap has it almost working)
 
 ### data.win file format
 Interested in the file and instruction format research I've done while working on this? Check out these:
@@ -69,6 +64,7 @@ Special thanks to everybody who did previous research on unpacking and decompili
 * https://github.com/WarlockD/GMdsam
 * [@NarryG](https://github.com/NarryG) for [helping me figure out](https://github.com/krzys-h/UndertaleModTool/issues/3) the missing stuff for GMS2 and Nintendo Switch release
 * [@colinator27](https://github.com/colinator27) for [figuring out Extensions](https://github.com/krzys-h/UndertaleModTool/issues/4), [Sha](https://github.com/krzys-h/UndertaleModTool/issues/13)[ders](https://github.com/krzys-h/UndertaleModTool/pull/25) and [a bunch of other stuff](https://github.com/krzys-h/UndertaleModTool/pull/30)
+* [@Kneesnap](https://github.com/Kneesnap) for [improving the decompiler a bunch](https://github.com/krzys-h/UndertaleModTool/pull/162)
 
 And of course, special thanks to Toby Fox and the whole Undertale team for making the game ;)
 

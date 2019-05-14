@@ -35,7 +35,7 @@ namespace UndertaleModTool
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.DefaultExt = ".wav";
-            dlg.Filter = "WAV files (.wav)|*.png|All files|*";
+            dlg.Filter = "WAV files (.wav)|*.wav|All files|*";
 
             if (dlg.ShowDialog() == true)
             {
