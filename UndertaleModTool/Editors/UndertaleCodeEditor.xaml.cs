@@ -563,18 +563,26 @@ namespace UndertaleModTool
             Debug.Assert(code != null);
 
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
+
+            string assembledString = Compiler.CompileGMLText(DecompiledEditor.Text, data);
+            if (!Compiler.SuccessfulCompile) // There were errors.
+            {
+                MessageBox.Show(assembledString, "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             try
             {
-                var assembledString = Compiler.CompileGMLText(DecompiledEditor.Text, data);
                 var instructions = Assembler.Assemble(assembledString, data);
                 code.Replace(instructions);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
+            // Show new code, decompiled.
             CurrentDisassembled = null;
             CurrentDecompiled = null;
             CurrentGraphed = null;
