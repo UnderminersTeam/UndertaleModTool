@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
+using static UndertaleModLib.Compiler.Compiler.Lexer.Token;
 
 namespace UndertaleModLib.Compiler
 {
@@ -303,12 +304,21 @@ namespace UndertaleModLib.Compiler
 
             private static void ReportCodeError(string msg, Lexer.Token context, bool synchronize)
             {
-                if (context != null && context.Location != null)
+                if (context != null)
                 {
-                    ErrorMessages.Add(msg + string.Format(" Around line {0}, column {1}.", context.Location.Line, context.Location.Column));
-                    hasError = true;
-                    if (synchronize)
-                        Synchronize();
+                    if (msg.EndsWith("."))
+                        msg = msg.Remove(msg.Length - 1);
+
+                    if (context.Location != null)
+                    {
+                        msg += string.Format(" around line {0}, column {1}", context.Location.Line, context.Location.Column);
+                    } else if (context.Kind == TokenKind.EOF)
+                    {
+                        msg += " around EOF (end of file)";
+                    }
+                    if (context.Content != null && context.Content.Length > 0)
+                        msg += " (" + context.Content + ")";
+                    ReportCodeError(msg + ".", synchronize);
                 }
                 else
                 {
