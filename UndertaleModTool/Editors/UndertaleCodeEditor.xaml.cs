@@ -21,6 +21,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib;
+using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 
@@ -543,6 +544,44 @@ namespace UndertaleModTool
             });
             dialog.ShowDialog();
             await t;
+        }
+
+        private void DecompiledView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            DecompiledView.Visibility = Visibility.Collapsed;
+            DecompiledEditor.Visibility = Visibility.Visible;
+            DecompiledEditor.Text = new TextRange(DecompiledView.Document.ContentStart, DecompiledView.Document.ContentEnd).Text;
+            int index = DisassemblyEditor.GetCharacterIndexFromPoint(Mouse.GetPosition(DecompiledView), true);
+            if (index >= 0)
+                DecompiledEditor.CaretIndex = index;
+            DecompiledEditor.Focus();
+        }
+
+        private void DecompiledEditor_LostFocus(object sender, RoutedEventArgs e)
+        {
+            UndertaleCode code = this.DataContext as UndertaleCode;
+            Debug.Assert(code != null);
+
+            UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
+            try
+            {
+                var assembledString = Compiler.CompileGMLText(DecompiledEditor.Text, data);
+                var instructions = Assembler.Assemble(assembledString, data);
+                code.Replace(instructions);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            CurrentDisassembled = null;
+            CurrentDecompiled = null;
+            CurrentGraphed = null;
+            DecompileCode(code);
+
+            DecompiledView.Visibility = Visibility.Visible;
+            DecompiledEditor.Visibility = Visibility.Collapsed;
         }
 
         private void DisassemblyView_MouseDoubleClick(object sender, MouseButtonEventArgs e)

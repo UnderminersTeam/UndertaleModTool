@@ -41,7 +41,10 @@
                 </Viewbox>
             </TabItem>
             <TabItem Header="Decompiled" Name="DecompiledTab">
-                <RichTextBox IsReadOnly="True" IsDocumentEnabled="True" Name="DecompiledView" Padding="-5,0,-5,0"/>
+              <Grid>
+                <RichTextBox IsReadOnly="True" IsDocumentEnabled="True" Name="DecompiledView" Padding="-5,0,-5,0" MouseDoubleClick="DecompiledView_MouseDoubleClick"/>
+                <TextBox Name="DecompiledEditor" LostFocus="DecompiledEditor_LostFocus" Visibility="Collapsed" FontFamily="Lucida Console" Padding="-2,0,-2,0" AcceptsReturn="True"/>
+              </Grid>
             </TabItem>
         </TabControl>
     </Grid>

@@ -37,6 +37,11 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compiler\AssemblyWriter.cs" />
+    <Compile Include="Compiler\BuiltinList.cs" />
+    <Compile Include="Compiler\Compiler.cs" />
+    <Compile Include="Compiler\Lexer.cs" />
+    <Compile Include="Compiler\Parser.cs" />
     <Compile Include="Decompiler\Assembler.cs" />
     <Compile Include="Decompiler\AssetTypeResolver.cs" />
     <Compile Include="Decompiler\Decompiler.cs" />

@@ -190,16 +190,29 @@ namespace UndertaleModLib
             UndertaleVariable vari = list.Where((x) => x.Name.Content == name && x.InstanceType == inst).FirstOrDefault();
             if (vari == null)
             {
-                if (data.InstanceVarCount != data.InstanceVarCountAgain)
-                    throw new Exception("Integrity error - instance var count broken");
+                var oldId = data.InstanceVarCount;
+                if (data.InstanceVarCount == data.InstanceVarCountAgain)
+                { // Example games that use this mode: Undertale v1.08, Undertale v1.11.
+                    data.InstanceVarCount++;
+                    data.InstanceVarCountAgain++;
+                } else
+                { // Example Games which use this mode: Undertale v1.001.
+                    if (inst == UndertaleInstruction.InstanceType.Self)
+                    {
+                    data.InstanceVarCountAgain++;
+                    } else if (inst == UndertaleInstruction.InstanceType.Global)
+                    {
+                        data.InstanceVarCount++;
+                    }
+                }
+
                 vari = new UndertaleVariable()
                 {
                     Name = strg.MakeString(name),
                     InstanceType = inst,
-                    VarID = isBuiltin ? (int)UndertaleInstruction.InstanceType.Builtin : (int)data.InstanceVarCount++,
+                    VarID = isBuiltin ? (int)UndertaleInstruction.InstanceType.Builtin : (int)oldId,
                     UnknownChainEndingValue = 0 // TODO: seems to work...
                 };
-                data.InstanceVarCountAgain = data.InstanceVarCount;
                 list.Add(vari);
             }
             return vari;
