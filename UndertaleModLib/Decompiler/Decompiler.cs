@@ -1251,22 +1251,28 @@ namespace UndertaleModLib.Decompiler
         {
             public List<Statement> Statements = new List<Statement>();
 
-            public string ToString(DecompileContext context, bool canSkipBrackets = true)
+            public string ToString(DecompileContext context, bool canSkipBrackets = true, bool forceSkipBrackets = false)
             {
                 if (Statements.Count == 1 && !(Statements[0] is IfHLStatement) && !(Statements[0] is LoopHLStatement) && !(Statements[0] is WithHLStatement) && canSkipBrackets)
                     return "    " + Statements[0].ToString(context).Replace("\n", "\n    ");
                 else
                 {
                     StringBuilder sb = new StringBuilder();
-                    sb.Append("{\n");
+                    if (!forceSkipBrackets)
+                        sb.Append("{\n");
                     foreach (var stmt in Statements)
                     {
-                        sb.Append("    ");
-                        sb.Append(stmt.ToString(context).Replace("\n", "\n    "));
-                        sb.Append("\n");
+                        string resultStr = stmt.ToString(context);
+                        if (!forceSkipBrackets)
+                        {
+                            sb.Append("    ");
+                            resultStr = resultStr.Replace("\n", "\n    ");
+                        }
+                        sb.Append(resultStr).Append("\n");
                     }
-                    sb.Append("}");
-                    return sb.ToString();
+                    if (!forceSkipBrackets)
+                        sb.Append("}");
+                    return sb.ToString().Trim('\n');
                 }
             }
 
@@ -1428,9 +1434,10 @@ namespace UndertaleModLib.Decompiler
                 if (Block.Statements.Count > 0)
                 {
                     sb.Append("    ");
-                    sb.Append(Block.ToString(context, false).Replace("\n", "\n    ") + "\n");
+                    sb.Append(Block.ToString(context, false, true).Replace("\n", "\n    "));
                 }
-                sb.Append("    break\n");
+                if (Block.Statements.Count == 0 || !(Block.Statements.Last() is ReturnStatement))
+                    sb.Append((Block.Statements.Count > 0 ? "\n" : "") + "    break");
                 return sb.ToString();
             }
         }
@@ -1760,7 +1767,7 @@ namespace UndertaleModLib.Decompiler
                         throw new Exception("End of switch not found");
 
                     Dictionary<Block, List<Expression>> caseEntries = new Dictionary<Block, List<Expression>>();
-                    while (block.nextBlockTrue != meetPoint)
+                    while (block != meetPoint)
                     {
                         Expression caseExpr = null;
                         if (block.ConditionStatement != null)
@@ -1777,8 +1784,10 @@ namespace UndertaleModLib.Decompiler
                         if (!caseEntries.ContainsKey(block.nextBlockTrue))
                             caseEntries.Add(block.nextBlockTrue, new List<Expression>());
                         caseEntries[block.nextBlockTrue].Add(caseExpr);
+
                         if (!block.conditionalExit)
                         {
+
                             // Seems to be "default", and we simply want to go to the exit now.
                             // This is a little hack, but it should fully work. The compiler always
                             // emits "default" at the end it looks like. Also this navigates down the
@@ -2268,6 +2277,7 @@ namespace UndertaleModLib.Decompiler
             foreach (var block in blocks)
             {
                 sb.Append("    block_" + block.Key + " [label=\"");
+                sb.Append(block.ToString() + "\n");
                 foreach (var instr in block.Value.Instructions)
                     sb.Append(instr.ToString().Replace("\"", "\\\"") + "\\n");
                 sb.Append("\"");
