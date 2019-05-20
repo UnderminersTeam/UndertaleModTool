@@ -198,10 +198,18 @@ namespace UndertaleModLib.Decompiler
                 int labelEnd = line.IndexOf(':');
                 if (labelEnd >= 0)
                 {
-                    label = line.Substring(0, labelEnd).Trim();
-                    line = line.Substring(labelEnd + 1);
-                    if (String.IsNullOrEmpty(label))
-                        throw new Exception("Empty label");
+                    bool isLabel = true;
+                    for (var i = 0; i < labelEnd - 1; i++)
+                        if (!Char.IsDigit(line[i]))
+                            isLabel = false;
+
+                    if (isLabel)
+                    {
+                        label = line.Substring(0, labelEnd).Trim();
+                        line = line.Substring(labelEnd + 1);
+                        if (String.IsNullOrEmpty(label))
+                            throw new Exception("Empty label");
+                    }
                 }
                 line = line.Trim();
                 if (String.IsNullOrEmpty(line))
