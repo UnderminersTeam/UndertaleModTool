@@ -92,7 +92,7 @@ namespace UndertaleModTool
             {
                 // Disable syntax highlighting. Loading it can take a few MINUTES on large scripts.
                 var data = (Application.Current.MainWindow as MainWindow).Data;
-                par.Inlines.Add(new Run(code.Disassemble(data.Variables, data.CodeLocals.For(code))));
+                par.Inlines.Add(code.Disassemble(data.Variables, data.CodeLocals.For(code)));
             }
             else
             {
@@ -289,7 +289,17 @@ namespace UndertaleModTool
                         string[] lines = decompiled.Split('\n');
                         if (lines.Length > 5000)
                         {
-                            par.Inlines.Add(new Run(decompiled));
+                            for (var i = 0; i < lines.Length; i++)
+                            {
+
+                                if (i > 0 && i % 100 == 0)
+                                { // Splitting into different paragraphs significantly increases selection performance.
+                                    document.Blocks.Add(par);
+                                    par = new Paragraph();
+                                }
+
+                                par.Inlines.Add(lines[i] + "\n");
+                            }
                         }
                         else
                         {
@@ -361,9 +371,17 @@ namespace UndertaleModTool
                                 if (tok != "")
                                     split.Add(tok);
 
+                                var lastParagraph = 0;
                                 Dictionary<string, object> usedObjects = new Dictionary<string, object>();
                                 for (int i = 0; i < split.Count; i++)
                                 {
+                                    if (i - lastParagraph >= 500)
+                                    { // Splitting into different paragraphs significantly increases selection performance.
+                                        document.Blocks.Add(par);
+                                        par = new Paragraph();
+                                        lastParagraph = i;
+                                    }
+
                                     int? val = null;
                                     string token = split[i];
                                     if (token == "if" || token == "else" || token == "return" || token == "break" || token == "continue" || token == "while" || token == "for" || token == "repeat" || token == "with" || token == "switch" || token == "case" || token == "default" || token == "exit" || token == "var" || token == "do" || token == "until")
@@ -461,7 +479,7 @@ namespace UndertaleModTool
                                         };
                                     }
                                     else
-                                        par.Inlines.Add(new Run(token));
+                                        par.Inlines.Add(token);
 
                                     if (token == "." && (Char.IsLetter(split[i + 1][0]) || split[i + 1][0] == '_'))
                                     {
@@ -476,9 +494,7 @@ namespace UndertaleModTool
                                 }
                                 foreach (var gt in usedObjects)
                                 {
-                                    par.Inlines.Add(new Run(" // ") { Foreground = commentBrush });
-                                    par.Inlines.Add(new Run(gt.Key) { Foreground = commentBrush });
-                                    par.Inlines.Add(new Run(" = ") { Foreground = commentBrush });
+                                    par.Inlines.Add(new Run(" // " + gt.Key + " = ") { Foreground = commentBrush });
                                     par.Inlines.Add(new Run(gt.Value is string ? "\"" + (string)gt.Value + "\"" : gt.Value.ToString()) { Foreground = commentBrush, Cursor = Cursors.Hand });
                                     if (gt.Value is UndertaleObject)
                                         par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(gt.Value);
