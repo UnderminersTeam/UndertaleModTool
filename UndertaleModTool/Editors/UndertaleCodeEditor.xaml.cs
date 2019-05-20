@@ -298,7 +298,7 @@ namespace UndertaleModTool
                                     par = new Paragraph();
                                 }
 
-                                par.Inlines.Add(lines[i] + "\n");
+                                par.Inlines.Add(Regex.Replace(lines[i], @"\""([^\""]*)\""\@(\d+)", "\"$1\"") + "\n"); // Remove @number on the end, it causes issues when recompiling.
                             }
                         }
                         else
