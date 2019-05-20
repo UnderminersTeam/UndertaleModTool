@@ -1411,8 +1411,9 @@ namespace UndertaleModLib.Decompiler
 
         public class HLSwitchCaseStatement : HLStatement
         {
-            private List<Expression> CaseExpressions;
-            private BlockHLStatement Block;
+            public List<Expression> CaseExpressions;
+            public BlockHLStatement Block;
+            public bool ShowBreak = true;
 
             public HLSwitchCaseStatement(List<Expression> caseExpressions, BlockHLStatement block)
             {
@@ -1436,7 +1437,7 @@ namespace UndertaleModLib.Decompiler
                     sb.Append("    ");
                     sb.Append(Block.ToString(context, false, true).Replace("\n", "\n    "));
                 }
-                if (Block.Statements.Count == 0 || !(Block.Statements.Last() is ReturnStatement))
+                if (ShowBreak && (Block.Statements.Count == 0 || !(Block.Statements.Last() is ReturnStatement)))
                     sb.Append((Block.Statements.Count > 0 ? "\n" : "") + "    break");
                 return sb.ToString();
             }
@@ -1812,6 +1813,34 @@ namespace UndertaleModLib.Decompiler
                         Block temp = x.Key;
                         cases.Add(new HLSwitchCaseStatement(x.Value, HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint)));
                         Debug.Assert(temp == meetPoint);
+                    }
+
+                    // Cleanup switch statements that just duplicate the code from another.
+                    for (int i = 0; i < cases.Count - 1; i++)
+                    {
+                        var now = cases[i];
+                        var next = cases[i + 1];
+
+                        bool testPass = true;
+                        var startIndex = (now.Block.Statements.Count - next.Block.Statements.Count);
+                        if (startIndex < 0)
+                            continue;
+
+                        for (var j = 0; j < next.Block.Statements.Count; j++)
+                        {
+                            if (next.Block.Statements[j] != now.Block.Statements[j + startIndex])
+                            {
+                                testPass = false;
+                                break;
+                            }
+                        }
+
+                        if (testPass)
+                        {
+                            while (now.Block.Statements.Count > startIndex)
+                                now.Block.Statements.RemoveAt(startIndex);
+                            now.ShowBreak = false;
+                        }
                     }
 
                     output.Statements.Add(new HLSwitchStatement(switchExpression, cases));
