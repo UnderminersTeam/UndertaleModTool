@@ -92,7 +92,19 @@ namespace UndertaleModTool
             {
                 // Disable syntax highlighting. Loading it can take a few MINUTES on large scripts.
                 var data = (Application.Current.MainWindow as MainWindow).Data;
-                par.Inlines.Add(code.Disassemble(data.Variables, data.CodeLocals.For(code)));
+                string[] split = code.Disassemble(data.Variables, data.CodeLocals.For(code)).Split('\n');
+
+                for (var i = 0; i < split.Length; i++)
+                { // Makes it possible to select text.
+                    if (i > 0 && (i % 100) == 0)
+                    {
+                        document.Blocks.Add(par);
+                        par = new Paragraph();
+                    }
+
+                    par.Inlines.Add((i > 0 ? "\n" : "") + split[i]);
+                }
+
             }
             else
             {
@@ -104,6 +116,12 @@ namespace UndertaleModTool
                 par.Inlines.Add(new Run(code.GenerateLocalVarDefinitions(data.Variables, data.CodeLocals.For(code))) { Foreground = addressBrush });
                 foreach (var instr in code.Instructions)
                 {
+                    if (par.Inlines.Count > 250)
+                    { // Makes selecting text possible.
+                        document.Blocks.Add(par);
+                        par = new Paragraph();
+                    }
+
                     par.Inlines.Add(new Run(instr.Address.ToString("D5") + ": ") { Foreground = addressBrush });
                     par.Inlines.Add(new Run(instr.Kind.ToString().ToLower()) { Foreground = opcodeBrush, FontWeight = FontWeights.Bold });
 
@@ -298,7 +316,7 @@ namespace UndertaleModTool
                                     par = new Paragraph();
                                 }
 
-                                par.Inlines.Add(Regex.Replace(lines[i], @"\""([^\""]*)\""\@(\d+)", "\"$1\"") + "\n"); // Remove @number on the end, it causes issues when recompiling.
+                                par.Inlines.Add((i > 0 ? "\n" : "") + Regex.Replace(lines[i], @"\""([^\""]*)\""\@(\d+)", "\"$1\"")); // Remove @number on the end, it causes issues when recompiling.
                             }
                         }
                         else
