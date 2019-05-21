@@ -530,9 +530,34 @@ namespace UndertaleModLib.Compiler
                         }
                         break;
                     case Parser.Statement.StatementKind.DoUntilLoop:
-                        // todo
-                        // implement with contexts
-                        throw new NotImplementedException();
+                        {
+                            if (s.Children.Count != 2)
+                            {
+                                AssemblyWriterError(cw, "Malformed do..until loop.", s.Token);
+                                break;
+                            }
+
+                            int startLabel = GetNextLabelID();
+                            int endLabel = GetNextLabelID();
+                            int repeatLabel = GetNextLabelID();
+
+                            loopContexts.Push(new LoopContext(endLabel, repeatLabel));
+
+                            cw.Write(startLabel);
+                            AssembleStatement(cw, s.Children[0]); // body
+                            
+                            cw.Write(repeatLabel);
+                            AssembleExpression(cw, s.Children[1]); // condition
+                            UndertaleInstruction.DataType type = typeStack.Pop();
+                            if (type != UndertaleInstruction.DataType.Boolean)
+                            {
+                                cw.Write("conv." + type.ToOpcodeParam() + ".b");
+                            }
+                            cw.Write("bf", startLabel);
+
+                            cw.Write(endLabel);
+                            loopContexts.Pop();
+                        }
                         break;
                     case Parser.Statement.StatementKind.Switch:
                         {
