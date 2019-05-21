@@ -1253,7 +1253,7 @@ namespace UndertaleModLib.Decompiler
 
             public string ToString(DecompileContext context, bool canSkipBrackets = true, bool forceSkipBrackets = false)
             {
-                if (Statements.Count == 1 && !(Statements[0] is IfHLStatement) && !(Statements[0] is LoopHLStatement) && !(Statements[0] is WithHLStatement) && canSkipBrackets)
+                if (canSkipBrackets && CanSkipBrackets(this))
                     return "    " + Statements[0].ToString(context).Replace("\n", "\n    ");
                 else
                 {
@@ -1280,6 +1280,34 @@ namespace UndertaleModLib.Decompiler
             {
                 return ToString(context, true);
             }
+
+            private static bool CanSkipBrackets(BlockHLStatement blockStatement)
+            {
+                if (blockStatement == null || blockStatement.Statements.Count != 1)
+                    return false; // Nope! Need brackets!
+
+                Statement statement = blockStatement.Statements[0];
+
+                if (statement is IfHLStatement)
+                {
+                    IfHLStatement ifStatement = (IfHLStatement)statement;
+                    return !ifStatement.HasElse && !ifStatement.HasElseIf && CanSkipBrackets(ifStatement.trueBlock);
+                }
+
+                if (statement is LoopHLStatement)
+                {
+                    LoopHLStatement loop = (LoopHLStatement)statement;
+                    return !loop.IsDoUntilLoop && CanSkipBrackets(loop.Block);
+                }
+
+                if (statement is WithHLStatement)
+                    return CanSkipBrackets(((WithHLStatement) statement).Block);
+
+                if (statement is HLSwitchStatement)
+                    return false; // These will always require a block. Basically any place that uses ToString with canSkipBrackets set to false.
+
+                return true;
+            }
         };
 
         public class IfHLStatement : HLStatement
@@ -1288,6 +1316,9 @@ namespace UndertaleModLib.Decompiler
             public BlockHLStatement trueBlock;
             public List<Tuple<Expression, BlockHLStatement>> elseConditions = new List<Tuple<Expression, BlockHLStatement>>();
             public BlockHLStatement falseBlock;
+
+            public bool HasElseIf { get => elseConditions != null && elseConditions.Count > 0; }
+            public bool HasElse { get => falseBlock != null && falseBlock.Statements.Count > 0; }
 
             public override string ToString(DecompileContext context)
             {
@@ -1301,7 +1332,7 @@ namespace UndertaleModLib.Decompiler
                     sb.Append(tuple.Item2.ToString(context));
                 }
 
-                if (falseBlock != null && falseBlock.Statements.Count > 0)
+                if (HasElse)
                 {
                     sb.Append("\nelse\n");
                     sb.Append(falseBlock.ToString(context));
@@ -1378,7 +1409,7 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                return "with(" + NewEnv.ToString(context) + ")\n" + Block.ToString(context, false);
+                return "with (" + NewEnv.ToString(context) + ")\n" + Block.ToString(context);
             }
         }
 
