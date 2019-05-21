@@ -198,12 +198,7 @@ namespace UndertaleModLib.Decompiler
                 int labelEnd = line.IndexOf(':');
                 if (labelEnd >= 0)
                 {
-                    bool isLabel = true;
-                    for (var i = 0; i < labelEnd - 1; i++)
-                        if (!Char.IsDigit(line[i]))
-                            isLabel = false;
-
-                    if (isLabel)
+                    if (line.Take(labelEnd).All(c => Char.IsLetterOrDigit(c) || c.Equals('_')))
                     {
                         label = line.Substring(0, labelEnd).Trim();
                         line = line.Substring(labelEnd + 1);

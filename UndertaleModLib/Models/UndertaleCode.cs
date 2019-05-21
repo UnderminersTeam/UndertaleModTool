@@ -902,9 +902,8 @@ namespace UndertaleModLib.Models
 
         public string GenerateLocalVarDefinitions(IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
         {
-            // Detection for if the code is not disassembled
             if (locals == null)
-                return "Code failed to disassemble- likely due to unsupported bytecode version.";
+                return "Missing code locals- possibly due to unsupported bytecode version or brand new code entry.";
 
             StringBuilder sb = new StringBuilder();
 
@@ -928,7 +927,10 @@ namespace UndertaleModLib.Models
         public string Disassemble(IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(GenerateLocalVarDefinitions(vars, locals));
+            if (locals == null)
+                sb.Append("; WARNING: Missing code locals, possibly due to unsupported bytecode version or a brand new code entry.\n");
+            else
+                sb.Append(GenerateLocalVarDefinitions(vars, locals));
             foreach (var inst in Instructions)
             {
                 sb.Append(inst.ToString(this, vars));
