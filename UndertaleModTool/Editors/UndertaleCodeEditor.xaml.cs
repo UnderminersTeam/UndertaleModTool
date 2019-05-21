@@ -87,6 +87,7 @@ namespace UndertaleModTool
             document.PagePadding = new Thickness(0);
             document.FontFamily = new FontFamily("Lucida Console");
             Paragraph par = new Paragraph();
+            par.Margin = new Thickness(0);
 
             if (code.Instructions.Count > 5000)
             {
@@ -100,9 +101,10 @@ namespace UndertaleModTool
                     {
                         document.Blocks.Add(par);
                         par = new Paragraph();
+                        par.Margin = new Thickness(0);
                     }
 
-                    par.Inlines.Add((i > 0 ? "\n" : "") + split[i]);
+                    par.Inlines.Add(split[i] + (split.Length > i + 1 && ((i + 1) % 100) != 0 ? "\n" : ""));
                 }
 
             }
@@ -116,12 +118,6 @@ namespace UndertaleModTool
                 par.Inlines.Add(new Run(code.GenerateLocalVarDefinitions(data.Variables, data.CodeLocals.For(code))) { Foreground = addressBrush });
                 foreach (var instr in code.Instructions)
                 {
-                    if (par.Inlines.Count > 250)
-                    { // Makes selecting text possible.
-                        document.Blocks.Add(par);
-                        par = new Paragraph();
-                    }
-
                     par.Inlines.Add(new Run(instr.Address.ToString("D5") + ": ") { Foreground = addressBrush });
                     par.Inlines.Add(new Run(instr.Kind.ToString().ToLower()) { Foreground = opcodeBrush, FontWeight = FontWeights.Bold });
 
@@ -229,7 +225,16 @@ namespace UndertaleModTool
                             break;
                     }
 
-                    par.Inlines.Add(new Run("\n"));
+                    if (par.Inlines.Count >= 250)
+                    { // Makes selecting text possible.
+                        document.Blocks.Add(par);
+                        par = new Paragraph();
+                        par.Margin = new Thickness(0);
+                    }
+                    else
+                    {
+                        par.Inlines.Add(new Run("\n"));
+                    }
                 }
             }
             document.Blocks.Add(par);
@@ -266,6 +271,7 @@ namespace UndertaleModTool
             document.PagePadding = new Thickness(0);
             document.FontFamily = new FontFamily("Lucida Console");
             Paragraph par = new Paragraph();
+            par.Margin = new Thickness(0);
 
             UndertaleCode gettextCode = null;
             if (gettext == null)
@@ -309,14 +315,18 @@ namespace UndertaleModTool
                         {
                             for (var i = 0; i < lines.Length; i++)
                             {
+                                string toWrite = Regex.Replace(lines[i], @"\""([^\""]*)\""\@(\d+)", "\"$1\""); // Remove @number on the end, it causes issues when recompiling. TODO: Maybe just decompile without @s.
+                                if (((i + 1) % 100) != 0 && lines.Length > i + 1)
+                                    toWrite += "\n"; // Write a new-line if we're not making a new paragraph.
 
                                 if (i > 0 && i % 100 == 0)
                                 { // Splitting into different paragraphs significantly increases selection performance.
                                     document.Blocks.Add(par);
                                     par = new Paragraph();
+                                    par.Margin = new Thickness(0);
                                 }
 
-                                par.Inlines.Add((i > 0 ? "\n" : "") + Regex.Replace(lines[i], @"\""([^\""]*)\""\@(\d+)", "\"$1\"")); // Remove @number on the end, it causes issues when recompiling.
+                                par.Inlines.Add(toWrite); 
                             }
                         }
                         else
@@ -389,17 +399,9 @@ namespace UndertaleModTool
                                 if (tok != "")
                                     split.Add(tok);
 
-                                var lastParagraph = 0;
                                 Dictionary<string, object> usedObjects = new Dictionary<string, object>();
                                 for (int i = 0; i < split.Count; i++)
                                 {
-                                    if (i - lastParagraph >= 500)
-                                    { // Splitting into different paragraphs significantly increases selection performance.
-                                        document.Blocks.Add(par);
-                                        par = new Paragraph();
-                                        lastParagraph = i;
-                                    }
-
                                     int? val = null;
                                     string token = split[i];
                                     if (token == "if" || token == "else" || token == "return" || token == "break" || token == "continue" || token == "while" || token == "for" || token == "repeat" || token == "with" || token == "switch" || token == "case" || token == "default" || token == "exit" || token == "var" || token == "do" || token == "until")
@@ -510,6 +512,8 @@ namespace UndertaleModTool
                                         }
                                     }
                                 }
+
+                                // Add used object comments.
                                 foreach (var gt in usedObjects)
                                 {
                                     par.Inlines.Add(new Run(" // " + gt.Key + " = ") { Foreground = commentBrush });
@@ -517,7 +521,16 @@ namespace UndertaleModTool
                                     if (gt.Value is UndertaleObject)
                                         par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(gt.Value);
                                 }
-                                par.Inlines.Add(new Run("\n"));
+
+                                if (par.Inlines.Count >= 250)
+                                { // Splitting into different paragraphs significantly increases selection performance.
+                                    document.Blocks.Add(par);
+                                    par = new Paragraph();
+                                    par.Margin = new Thickness(0);
+                                } else
+                                {
+                                    par.Inlines.Add(new Run("\n"));
+                                }
                             }
                         }
                     }
