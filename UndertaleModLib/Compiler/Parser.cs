@@ -1468,7 +1468,7 @@ namespace UndertaleModLib.Compiler
                             if (result.Children.Count == 3 && result.Children[1].Token?.Kind == Lexer.Token.TokenKind.Assign &&
                               result.Children[0].Children.Count == 0 && result.Children[0].Kind == Statement.StatementKind.ExprSingleVariable &&
                               result.Children[2].Children.Count == 0 && result.Children[2].Kind == Statement.StatementKind.ExprSingleVariable &&
-                              result.Children[0].ID == result.Children[2].ID)
+                              result.Children[0].Text == result.Children[2].Text && result.Children[0].ID == result.Children[2].ID)
                             {
                                 // Remove redundant assignments, like "a = a"
                                 result = new Statement(Statement.StatementKind.Discard);
