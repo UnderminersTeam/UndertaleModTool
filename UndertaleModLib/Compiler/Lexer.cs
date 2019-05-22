@@ -427,7 +427,8 @@ namespace UndertaleModLib.Compiler
                             cr.AdvancePosition();
                             return new Token(Token.TokenKind.Conditional, cr.GetPositionInfo(cr.Position - 1));
                         default:
-                            throw new Exception("Invalid token: '" + c + "'");
+                            cr.AdvancePosition();
+                            return new Token(Token.TokenKind.Error, c.ToString(), cr.GetPositionInfo(cr.Position - 1));
                     }
                 }
                 else

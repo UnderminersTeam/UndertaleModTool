@@ -137,7 +137,7 @@ namespace UndertaleModLib.Compiler
                 }
 
                 // Copy with new token kind
-                public Statement(Lexer.Token.TokenKind newType, Statement s)
+                public Statement(TokenKind newType, Statement s)
                 {
                     Token = s.Token;
                     Token.Kind = newType;
@@ -183,7 +183,7 @@ namespace UndertaleModLib.Compiler
                         Constant = new ExpressionConstant(constant);
                 }
 
-                public Statement(Lexer.Token.TokenKind newKind, Lexer.Token copyFrom)
+                public Statement(TokenKind newKind, Lexer.Token copyFrom)
                 {
                     Kind = StatementKind.Token;
                     Token = new Lexer.Token(newKind);
@@ -194,7 +194,7 @@ namespace UndertaleModLib.Compiler
                     Children = new List<Statement>();
                 }
 
-                public Statement(Lexer.Token.TokenKind newKind, Lexer.Token copyFrom, int id)
+                public Statement(TokenKind newKind, Lexer.Token copyFrom, int id)
                 {
                     Kind = StatementKind.Token;
                     Token = new Lexer.Token(newKind);
@@ -206,7 +206,7 @@ namespace UndertaleModLib.Compiler
                     Children = new List<Statement>();
                 }
 
-                public Statement(Lexer.Token.TokenKind newKind, Lexer.Token copyFrom, ExpressionConstant constant)
+                public Statement(TokenKind newKind, Lexer.Token copyFrom, ExpressionConstant constant)
                 {
                     Kind = StatementKind.Token;
                     Token = new Lexer.Token(newKind);
@@ -238,7 +238,7 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            public static Statement EnsureTokenKind(Lexer.Token.TokenKind kind)
+            public static Statement EnsureTokenKind(TokenKind kind)
             {
                 if (remainingStageOne.Count == 0)
                 {
@@ -267,7 +267,7 @@ namespace UndertaleModLib.Compiler
                 return remainingStageOne.Peek().Kind.In(kinds);
             }
 
-            public static bool IsNextToken(params Lexer.Token.TokenKind[] kinds)
+            public static bool IsNextToken(params TokenKind[] kinds)
             {
                 if (remainingStageOne.Count == 0)
                 {
@@ -280,7 +280,7 @@ namespace UndertaleModLib.Compiler
             }
 
             // Discards token if the next token kind is of <kinds>
-            public static bool IsNextTokenDiscard(params Lexer.Token.TokenKind[] kinds)
+            public static bool IsNextTokenDiscard(params TokenKind[] kinds)
             {
                 if (remainingStageOne.Count == 0)
                 {
@@ -300,15 +300,15 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            public static Lexer.Token.TokenKind GetNextTokenKind()
+            public static TokenKind GetNextTokenKind()
             {
                 if (remainingStageOne.Count == 0)
                 {
                     ReportCodeError("Unexpected end of code.", false);
-                    return Lexer.Token.TokenKind.Error;
+                    return TokenKind.Error;
                 }
                 if (remainingStageOne.Peek().Token == null)
-                    return Lexer.Token.TokenKind.Error;
+                    return TokenKind.Error;
                 return remainingStageOne.Peek().Token.Kind;
             }
 
@@ -350,7 +350,7 @@ namespace UndertaleModLib.Compiler
             {
                 while (remainingStageOne.Count > 0)
                 {
-                    if (IsNextToken(Lexer.Token.TokenKind.EndStatement) || IsKeyword(GetNextTokenKind()))
+                    if (IsNextToken(TokenKind.EndStatement) || IsKeyword(GetNextTokenKind()))
                         break;
                     remainingStageOne.Dequeue();
                 }
@@ -369,8 +369,8 @@ namespace UndertaleModLib.Compiler
                 hasError = false;
 
                 // Ensuring an EOF exists
-                if (tokens.Count == 0 || tokens[tokens.Count - 1].Kind != Lexer.Token.TokenKind.EOF)
-                    tokens.Add(new Lexer.Token(Lexer.Token.TokenKind.EOF));
+                if (tokens.Count == 0 || tokens[tokens.Count - 1].Kind != TokenKind.EOF)
+                    tokens.Add(new Lexer.Token(TokenKind.EOF));
 
                 // Run first parse stage- basic abstraction into functions and constants
                 List<Statement> firstPass = new List<Statement>();
@@ -378,13 +378,13 @@ namespace UndertaleModLib.Compiler
                 bool chainedVariableReference = false;
                 for (int i = 0; i < tokens.Count; i++)
                 {
-                    if (tokens[i].Kind == Lexer.Token.TokenKind.Identifier &&
-                        tokens[i + 1].Kind == Lexer.Token.TokenKind.OpenParen)
+                    if (tokens[i].Kind == TokenKind.Identifier &&
+                        tokens[i + 1].Kind == TokenKind.OpenParen)
                     {
                         // Differentiate between variable reference identifiers and functions
-                        firstPass.Add(new Statement(Lexer.Token.TokenKind.ProcFunction, tokens[i]));
+                        firstPass.Add(new Statement(TokenKind.ProcFunction, tokens[i]));
                     }
-                    else if (tokens[i].Kind == Lexer.Token.TokenKind.Identifier)
+                    else if (tokens[i].Kind == TokenKind.Identifier)
                     {
                         // Convert identifiers into their proper references, at least sort of.
                         ExpressionConstant constant;
@@ -393,16 +393,16 @@ namespace UndertaleModLib.Compiler
                             bool isGlobalBuiltin;
                             int ID = GetVariableID(tokens[i].Content, out isGlobalBuiltin);
                             if (ID >= 0 && ID < 100000)
-                                firstPass.Add(new Statement(Lexer.Token.TokenKind.ProcVariable, tokens[i], -1)); // becomes self anyway?
+                                firstPass.Add(new Statement(TokenKind.ProcVariable, tokens[i], -1)); // becomes self anyway?
                             else
-                                firstPass.Add(new Statement(Lexer.Token.TokenKind.ProcVariable, tokens[i], ID));
+                                firstPass.Add(new Statement(TokenKind.ProcVariable, tokens[i], ID));
                         }
                         else
                         {
-                            firstPass.Add(new Statement(Lexer.Token.TokenKind.ProcConstant, tokens[i], constant));
+                            firstPass.Add(new Statement(TokenKind.ProcConstant, tokens[i], constant));
                         }
                     }
-                    else if (tokens[i].Kind == Lexer.Token.TokenKind.Number)
+                    else if (tokens[i].Kind == TokenKind.Number)
                     {
                         // Convert number literals to their raw numerical value
                         Lexer.Token t = tokens[i];
@@ -430,12 +430,12 @@ namespace UndertaleModLib.Compiler
                             }
                             constant = new ExpressionConstant(val);
                         }
-                        firstPass.Add(new Statement(Lexer.Token.TokenKind.ProcConstant, t, constant));
+                        firstPass.Add(new Statement(TokenKind.ProcConstant, t, constant));
                     }
-                    else if (tokens[i].Kind == Lexer.Token.TokenKind.String)
+                    else if (tokens[i].Kind == TokenKind.String)
                     {
                         // Convert strings to their proper constant form
-                        firstPass.Add(new Statement(Lexer.Token.TokenKind.ProcConstant, tokens[i],
+                        firstPass.Add(new Statement(TokenKind.ProcConstant, tokens[i],
                                                     new ExpressionConstant(tokens[i].Content)));
                     }
                     else
@@ -443,7 +443,7 @@ namespace UndertaleModLib.Compiler
                         // Everything else that doesn't need to be pre-processed
                         firstPass.Add(new Statement(Statement.StatementKind.Token, tokens[i]));
                     }
-                    chainedVariableReference = (tokens[tokens.Count - 1].Kind == Lexer.Token.TokenKind.Dot);
+                    chainedVariableReference = (tokens[tokens.Count - 1].Kind == TokenKind.Dot);
                 }
 
                 // Run the main parse stage- full abstraction, so that it's ready to be compiled
@@ -462,9 +462,9 @@ namespace UndertaleModLib.Compiler
                 Statement s = new Statement(Statement.StatementKind.Block);
 
                 if (!isRoot)
-                    EnsureTokenKind(Lexer.Token.TokenKind.OpenBlock);
+                    EnsureTokenKind(TokenKind.OpenBlock);
 
-                while (remainingStageOne.Count > 0 && !IsNextToken(Lexer.Token.TokenKind.CloseBlock, Lexer.Token.TokenKind.EOF))
+                while (remainingStageOne.Count > 0 && !IsNextToken(TokenKind.CloseBlock, TokenKind.EOF))
                 {
                     Statement parsed = ParseStatement();
                     if (parsed != null) // Sometimes it can be null, for instance if there's a bunch of semicolons, or an error
@@ -472,7 +472,7 @@ namespace UndertaleModLib.Compiler
                 }
 
                 if (!isRoot)
-                    EnsureTokenKind(Lexer.Token.TokenKind.CloseBlock);
+                    EnsureTokenKind(TokenKind.CloseBlock);
 
                 return s;
             }
@@ -483,69 +483,75 @@ namespace UndertaleModLib.Compiler
                 Statement s = null;
                 switch (GetNextTokenKind())
                 {
-                    case Lexer.Token.TokenKind.OpenBlock:
+                    case TokenKind.OpenBlock:
                         s = ParseBlock();
                         break;
-                    case Lexer.Token.TokenKind.ProcFunction:
+                    case TokenKind.ProcFunction:
                         s = ParseFunctionCall();
                         break;
-                    case Lexer.Token.TokenKind.KeywordVar:
+                    case TokenKind.KeywordVar:
                         s = ParseLocalVarDeclare(); // can be multiple
                         break;
-                    case Lexer.Token.TokenKind.KeywordGlobalVar:
+                    case TokenKind.KeywordGlobalVar:
                         s = ParseGlobalVarDeclare(); // can be multiple
                         break;
-                    case Lexer.Token.TokenKind.KeywordBreak:
+                    case TokenKind.KeywordBreak:
                         s = new Statement(Statement.StatementKind.Break, remainingStageOne.Dequeue().Token);
                         break;
-                    case Lexer.Token.TokenKind.KeywordContinue:
+                    case TokenKind.KeywordContinue:
                         s = new Statement(Statement.StatementKind.Continue, remainingStageOne.Dequeue().Token);
                         break;
-                    case Lexer.Token.TokenKind.KeywordExit:
+                    case TokenKind.KeywordExit:
                         s = new Statement(Statement.StatementKind.Exit, remainingStageOne.Dequeue().Token);
                         break;
-                    case Lexer.Token.TokenKind.KeywordReturn:
+                    case TokenKind.KeywordReturn:
                         s = ParseReturn();
                         break;
-                    case Lexer.Token.TokenKind.KeywordWith:
+                    case TokenKind.KeywordWith:
                         s = ParseWith();
                         break;
-                    case Lexer.Token.TokenKind.KeywordWhile:
+                    case TokenKind.KeywordWhile:
                         s = ParseWhile();
                         break;
-                    case Lexer.Token.TokenKind.KeywordRepeat:
+                    case TokenKind.KeywordRepeat:
                         s = ParseRepeat();
                         break;
-                    case Lexer.Token.TokenKind.KeywordFor:
+                    case TokenKind.KeywordFor:
                         s = ParseFor();
                         break;
-                    case Lexer.Token.TokenKind.KeywordSwitch:
+                    case TokenKind.KeywordSwitch:
                         s = ParseSwitch();
                         break;
-                    case Lexer.Token.TokenKind.KeywordCase:
+                    case TokenKind.KeywordCase:
                         s = ParseSwitchCase();
                         break;
-                    case Lexer.Token.TokenKind.KeywordDefault:
+                    case TokenKind.KeywordDefault:
                         s = ParseSwitchDefault();
                         break;
-                    case Lexer.Token.TokenKind.KeywordIf:
+                    case TokenKind.KeywordIf:
                         s = ParseIf();
                         break;
-                    case Lexer.Token.TokenKind.KeywordDo:
+                    case TokenKind.KeywordDo:
                         s = ParseDoUntil();
                         break;
-                    case Lexer.Token.TokenKind.EOF:
+                    case TokenKind.EOF:
                         ReportCodeError("Unexpected end of code.", false);
                         break;
-                    case Lexer.Token.TokenKind.Enum:
+                    case TokenKind.Enum:
                         s = ParseEnum();
                         break;
-                    case Lexer.Token.TokenKind.EndStatement:
+                    case TokenKind.EndStatement:
                         break;
-                    case Lexer.Token.TokenKind.Increment:
-                    case Lexer.Token.TokenKind.Decrement:
+                    case TokenKind.Increment:
+                    case TokenKind.Decrement:
                         s = new Statement(Statement.StatementKind.Pre, remainingStageOne.Dequeue().Token);
                         s.Children.Add(ParsePostAndRef());
+                        break;
+                    case TokenKind.Error:
+                        if (remainingStageOne.Count > 0)
+                        {
+                            ReportCodeError("Unexpected error token (invalid code).", remainingStageOne.Peek().Token, true);
+                        }
                         break;
                     default:
                         // Assumes it's a variable assignment
@@ -553,14 +559,14 @@ namespace UndertaleModLib.Compiler
                         break;
                 }
                 // Ignore any semicolons
-                while (remainingStageOne.Count > 0 && remainingStageOne.Peek().Token?.Kind == Lexer.Token.TokenKind.EndStatement)
+                while (remainingStageOne.Count > 0 && remainingStageOne.Peek().Token?.Kind == TokenKind.EndStatement)
                     remainingStageOne.Dequeue();
                 return s;
             }
 
             private static Statement ParseRepeat()
             {
-                Statement result = new Statement(Statement.StatementKind.RepeatLoop, EnsureTokenKind(Lexer.Token.TokenKind.KeywordRepeat).Token);
+                Statement result = new Statement(Statement.StatementKind.RepeatLoop, EnsureTokenKind(TokenKind.KeywordRepeat).Token);
                 result.Children.Add(ParseExpression());
                 result.Children.Add(ParseStatement());
                 return result;
@@ -568,11 +574,11 @@ namespace UndertaleModLib.Compiler
 
             private static Statement ParseFor()
             {
-                Statement result = new Statement(Statement.StatementKind.ForLoop, EnsureTokenKind(Lexer.Token.TokenKind.KeywordFor).Token);
-                EnsureTokenKind(Lexer.Token.TokenKind.OpenParen);
+                Statement result = new Statement(Statement.StatementKind.ForLoop, EnsureTokenKind(TokenKind.KeywordFor).Token);
+                EnsureTokenKind(TokenKind.OpenParen);
 
                 // Parse initialization statement
-                if (IsNextToken(Lexer.Token.TokenKind.EndStatement))
+                if (IsNextToken(TokenKind.EndStatement))
                 {
                     // Nonexistent
                     result.Children.Add(new Statement(Statement.StatementKind.Block, remainingStageOne.Dequeue().Token));
@@ -583,20 +589,20 @@ namespace UndertaleModLib.Compiler
                 }
 
                 // Parse expression/condition
-                if (IsNextToken(Lexer.Token.TokenKind.EndStatement))
+                if (IsNextToken(TokenKind.EndStatement))
                 {
                     // Nonexistent: always true
                     remainingStageOne.Dequeue();
-                    result.Children.Add(new Statement(Statement.StatementKind.ExprConstant, new Lexer.Token(Lexer.Token.TokenKind.ProcConstant, "1"), new ExpressionConstant(1L)));
+                    result.Children.Add(new Statement(Statement.StatementKind.ExprConstant, new Lexer.Token(TokenKind.ProcConstant, "1"), new ExpressionConstant(1L)));
                 }
                 else
                 {
                     result.Children.Add(ParseExpression());
-                    IsNextTokenDiscard(Lexer.Token.TokenKind.EndStatement);
+                    IsNextTokenDiscard(TokenKind.EndStatement);
                 }
 
                 // Parse statement that calls each iteration
-                if (IsNextToken(Lexer.Token.TokenKind.CloseParen))
+                if (IsNextToken(TokenKind.CloseParen))
                 {
                     // Nonexistent
                     result.Children.Add(new Statement(Statement.StatementKind.Block, remainingStageOne.Dequeue().Token));
@@ -604,7 +610,7 @@ namespace UndertaleModLib.Compiler
                 else
                 {
                     result.Children.Add(ParseStatement());
-                    EnsureTokenKind(Lexer.Token.TokenKind.CloseParen);
+                    EnsureTokenKind(TokenKind.CloseParen);
                 }
 
                 // Parse the body
@@ -641,15 +647,15 @@ namespace UndertaleModLib.Compiler
                         assign.Children.Add(left);
 
                         if (assign.Token.Kind.In(
-                            Lexer.Token.TokenKind.Assign,
-                            Lexer.Token.TokenKind.AssignAnd,
-                            Lexer.Token.TokenKind.AssignDivide,
-                            Lexer.Token.TokenKind.AssignMinus,
-                            Lexer.Token.TokenKind.AssignMod,
-                            Lexer.Token.TokenKind.AssignOr,
-                            Lexer.Token.TokenKind.AssignPlus,
-                            Lexer.Token.TokenKind.AssignTimes,
-                            Lexer.Token.TokenKind.AssignXor
+                            TokenKind.Assign,
+                            TokenKind.AssignAnd,
+                            TokenKind.AssignDivide,
+                            TokenKind.AssignMinus,
+                            TokenKind.AssignMod,
+                            TokenKind.AssignOr,
+                            TokenKind.AssignPlus,
+                            TokenKind.AssignTimes,
+                            TokenKind.AssignXor
                             ))
                         {
                             assign.Children.Add(new Statement(Statement.StatementKind.Token, assign.Token));
@@ -679,10 +685,10 @@ namespace UndertaleModLib.Compiler
                 ReportCodeError("Enums not currently supported.", true);
                 return null;
                 /*
-                Statement result = new Statement(Statement.StatementKind.Enum, EnsureTokenKind(Lexer.Token.TokenKind.Enum).Token);
+                Statement result = new Statement(Statement.StatementKind.Enum, EnsureTokenKind(TokenKind.Enum).Token);
                 Dictionary<string, int> values = new Dictionary<string, int>();
 
-                Statement name = EnsureTokenKind(Lexer.Token.TokenKind.ProcVariable);
+                Statement name = EnsureTokenKind(TokenKind.ProcVariable);
                 if (name == null)
                     return null;
                 if (name.ID < 100000)
@@ -690,7 +696,7 @@ namespace UndertaleModLib.Compiler
                 result.Text = name.Text;
                 result.ID = name.ID;
 
-                if (EnsureTokenKind(Lexer.Token.TokenKind.OpenBlock) == null) return null;
+                if (EnsureTokenKind(TokenKind.OpenBlock) == null) return null;
 
                 if (Enums.ContainsKey(name.Text))
                 {
@@ -701,17 +707,17 @@ namespace UndertaleModLib.Compiler
                 }
 
                 int incrementingValue = 0;
-                while (!hasError && !IsNextToken(Lexer.Token.TokenKind.CloseBlock))
+                while (!hasError && !IsNextToken(TokenKind.CloseBlock))
                 {
                     Statement val = new Statement(Statement.StatementKind.VariableName, remainingStageOne.Dequeue().Token);
                     result.Children.Add(val);
                     
-                    if (IsNextTokenDiscard(Lexer.Token.TokenKind.Assign))
+                    if (IsNextTokenDiscard(TokenKind.Assign))
                     {
                         Statement expr = ParseExpression();
                         val.Children.Add(expr);
                         Statement optimized = Optimize(expr);
-                        if (expr.Token.Kind == Lexer.Token.TokenKind.Constant && (expr.Kind != Statement.StatementKind.ExprConstant ||
+                        if (expr.Token.Kind == TokenKind.Constant && (expr.Kind != Statement.StatementKind.ExprConstant ||
                              expr.Constant.kind == ExpressionConstant.Kind.Constant || expr.Constant.kind == ExpressionConstant.Kind.Number))
                         {
                             incrementingValue = (int)optimized.Constant.valueNumber;
@@ -728,9 +734,9 @@ namespace UndertaleModLib.Compiler
 
                     values[val.Text] = incrementingValue++;
 
-                    if (!IsNextTokenDiscard(Lexer.Token.TokenKind.Comma))
+                    if (!IsNextTokenDiscard(TokenKind.Comma))
                     {
-                        EnsureTokenKind(Lexer.Token.TokenKind.CloseBlock);
+                        EnsureTokenKind(TokenKind.CloseBlock);
                         break;
                     }
                 }
@@ -740,46 +746,46 @@ namespace UndertaleModLib.Compiler
 
             private static Statement ParseDoUntil()
             {
-                Statement result = new Statement(Statement.StatementKind.DoUntilLoop, EnsureTokenKind(Lexer.Token.TokenKind.KeywordDo).Token);
+                Statement result = new Statement(Statement.StatementKind.DoUntilLoop, EnsureTokenKind(TokenKind.KeywordDo).Token);
                 result.Children.Add(ParseStatement());
-                EnsureTokenKind(Lexer.Token.TokenKind.KeywordUntil);
+                EnsureTokenKind(TokenKind.KeywordUntil);
                 result.Children.Add(ParseExpression());
                 return result;
             }
 
             private static Statement ParseIf()
             {
-                Statement result = new Statement(Statement.StatementKind.If, EnsureTokenKind(Lexer.Token.TokenKind.KeywordIf).Token);
+                Statement result = new Statement(Statement.StatementKind.If, EnsureTokenKind(TokenKind.KeywordIf).Token);
                 result.Children.Add(ParseExpression());
-                IsNextTokenDiscard(Lexer.Token.TokenKind.KeywordThen);
+                IsNextTokenDiscard(TokenKind.KeywordThen);
                 result.Children.Add(ParseStatement());
-                if (IsNextTokenDiscard(Lexer.Token.TokenKind.KeywordElse))
+                if (IsNextTokenDiscard(TokenKind.KeywordElse))
                     result.Children.Add(ParseStatement());
                 return result;
             }
 
             private static Statement ParseSwitchDefault()
             {
-                Statement result = new Statement(Statement.StatementKind.SwitchDefault, EnsureTokenKind(Lexer.Token.TokenKind.KeywordDefault).Token);
-                EnsureTokenKind(Lexer.Token.TokenKind.Colon);
+                Statement result = new Statement(Statement.StatementKind.SwitchDefault, EnsureTokenKind(TokenKind.KeywordDefault).Token);
+                EnsureTokenKind(TokenKind.Colon);
                 return result;
             }
 
             private static Statement ParseSwitchCase()
             {
-                Statement result = new Statement(Statement.StatementKind.SwitchCase, EnsureTokenKind(Lexer.Token.TokenKind.KeywordCase).Token);
+                Statement result = new Statement(Statement.StatementKind.SwitchCase, EnsureTokenKind(TokenKind.KeywordCase).Token);
                 result.Children.Add(ParseExpression());
-                EnsureTokenKind(Lexer.Token.TokenKind.Colon);
+                EnsureTokenKind(TokenKind.Colon);
                 return result;
             }
 
             private static Statement ParseSwitch()
             {
-                Statement result = new Statement(Statement.StatementKind.Switch, EnsureTokenKind(Lexer.Token.TokenKind.KeywordSwitch).Token);
+                Statement result = new Statement(Statement.StatementKind.Switch, EnsureTokenKind(TokenKind.KeywordSwitch).Token);
                 result.Children.Add(ParseExpression());
-                EnsureTokenKind(Lexer.Token.TokenKind.OpenBlock);
+                EnsureTokenKind(TokenKind.OpenBlock);
 
-                while (!hasError && remainingStageOne.Count > 0 && !IsNextToken(Lexer.Token.TokenKind.CloseBlock, Lexer.Token.TokenKind.EOF))
+                while (!hasError && remainingStageOne.Count > 0 && !IsNextToken(TokenKind.CloseBlock, TokenKind.EOF))
                 {
                     // Apparently the compiler allows any statement here, no validation until later
                     Statement c = ParseStatement();
@@ -787,33 +793,33 @@ namespace UndertaleModLib.Compiler
                         result.Children.Add(c);
                 }
 
-                EnsureTokenKind(Lexer.Token.TokenKind.CloseBlock);
+                EnsureTokenKind(TokenKind.CloseBlock);
 
                 return result;
             }
 
             private static Statement ParseWhile()
             {
-                Statement result = new Statement(Statement.StatementKind.WhileLoop, EnsureTokenKind(Lexer.Token.TokenKind.KeywordWhile).Token);
+                Statement result = new Statement(Statement.StatementKind.WhileLoop, EnsureTokenKind(TokenKind.KeywordWhile).Token);
                 result.Children.Add(ParseExpression());
-                IsNextTokenDiscard(Lexer.Token.TokenKind.KeywordDo);
+                IsNextTokenDiscard(TokenKind.KeywordDo);
                 result.Children.Add(ParseStatement());
                 return result;
             }
 
             private static Statement ParseWith()
             {
-                Statement result = new Statement(Statement.StatementKind.With, EnsureTokenKind(Lexer.Token.TokenKind.KeywordWith).Token);
+                Statement result = new Statement(Statement.StatementKind.With, EnsureTokenKind(TokenKind.KeywordWith).Token);
                 result.Children.Add(ParseExpression());
-                IsNextTokenDiscard(Lexer.Token.TokenKind.KeywordDo);
+                IsNextTokenDiscard(TokenKind.KeywordDo);
                 result.Children.Add(ParseStatement());
                 return result;
             }
 
             private static Statement ParseReturn()
             {
-                Statement result = new Statement(Statement.StatementKind.Return, EnsureTokenKind(Lexer.Token.TokenKind.KeywordReturn).Token);
-                if (remainingStageOne.Count > 0 && !IsKeyword(GetNextTokenKind()) && !IsNextToken(Lexer.Token.TokenKind.EndStatement, Lexer.Token.TokenKind.EOF))
+                Statement result = new Statement(Statement.StatementKind.Return, EnsureTokenKind(TokenKind.KeywordReturn).Token);
+                if (remainingStageOne.Count > 0 && !IsKeyword(GetNextTokenKind()) && !IsNextToken(TokenKind.EndStatement, TokenKind.EOF))
                 {
                     result.Children.Add(ParseExpression());
                 }
@@ -822,8 +828,8 @@ namespace UndertaleModLib.Compiler
 
             private static Statement ParseLocalVarDeclare()
             {
-                Statement result = new Statement(Statement.StatementKind.TempVarDeclare, EnsureTokenKind(Lexer.Token.TokenKind.KeywordVar).Token);
-                while (remainingStageOne.Count > 0 && IsNextToken(Lexer.Token.TokenKind.ProcVariable))
+                Statement result = new Statement(Statement.StatementKind.TempVarDeclare, EnsureTokenKind(TokenKind.KeywordVar).Token);
+                while (remainingStageOne.Count > 0 && IsNextToken(TokenKind.ProcVariable))
                 {
                     Statement var = remainingStageOne.Dequeue();
 
@@ -840,7 +846,7 @@ namespace UndertaleModLib.Compiler
                     LocalVars[var.Text] = var.Text;
 
                     // Read assignments if necessary
-                    if (remainingStageOne.Count > 0 && IsNextToken(Lexer.Token.TokenKind.Assign))
+                    if (remainingStageOne.Count > 0 && IsNextToken(TokenKind.Assign))
                     {
                         Statement a = new Statement(Statement.StatementKind.Assign, remainingStageOne.Dequeue().Token);
                         variable.Children.Add(a);
@@ -849,11 +855,11 @@ namespace UndertaleModLib.Compiler
                         left.ID = var.ID;
 
                         a.Children.Add(left);
-                        a.Children.Add(new Statement(Lexer.Token.TokenKind.Assign, a.Token));
+                        a.Children.Add(new Statement(TokenKind.Assign, a.Token));
                         a.Children.Add(ParseExpression());
                     }
 
-                    if (!IsNextTokenDiscard(Lexer.Token.TokenKind.Comma))
+                    if (!IsNextTokenDiscard(TokenKind.Comma))
                         break;
                 }
 
@@ -862,8 +868,8 @@ namespace UndertaleModLib.Compiler
 
             private static Statement ParseGlobalVarDeclare()
             {
-                Statement result = new Statement(Statement.StatementKind.GlobalVarDeclare, EnsureTokenKind(Lexer.Token.TokenKind.KeywordGlobalVar).Token);
-                while (remainingStageOne.Count > 0 && IsNextToken(Lexer.Token.TokenKind.ProcVariable))
+                Statement result = new Statement(Statement.StatementKind.GlobalVarDeclare, EnsureTokenKind(TokenKind.KeywordGlobalVar).Token);
+                while (remainingStageOne.Count > 0 && IsNextToken(TokenKind.ProcVariable))
                 {
                     Statement var = remainingStageOne.Dequeue();
 
@@ -879,7 +885,7 @@ namespace UndertaleModLib.Compiler
                     result.Children.Add(variable);
                     GlobalVars[var.Text] = var.Text;
 
-                    if (!IsNextTokenDiscard(Lexer.Token.TokenKind.Comma))
+                    if (!IsNextTokenDiscard(TokenKind.Comma))
                         break;
                 }
 
@@ -888,24 +894,24 @@ namespace UndertaleModLib.Compiler
 
             private static Statement ParseFunctionCall(bool expression = false)
             {
-                Statement s = EnsureTokenKind(Lexer.Token.TokenKind.ProcFunction);
+                Statement s = EnsureTokenKind(TokenKind.ProcFunction);
 
                 // gml_pragma processing can be done here, however we don't need to do that yet really
 
-                EnsureTokenKind(Lexer.Token.TokenKind.OpenParen); // this should be guaranteed
+                EnsureTokenKind(TokenKind.OpenParen); // this should be guaranteed
 
                 Statement result = new Statement(expression ? Statement.StatementKind.ExprFunctionCall :
                                                  Statement.StatementKind.FunctionCall, s.Token);
 
                 // Parse the parameters/arguments
-                while (remainingStageOne.Count > 0 && !hasError && !IsNextToken(Lexer.Token.TokenKind.EOF) && !IsNextToken(Lexer.Token.TokenKind.CloseParen))
+                while (remainingStageOne.Count > 0 && !hasError && !IsNextToken(TokenKind.EOF) && !IsNextToken(TokenKind.CloseParen))
                 {
                     Statement expr = ParseExpression();
                     if (expr != null)
                         result.Children.Add(expr);
-                    if (!IsNextTokenDiscard(Lexer.Token.TokenKind.Comma))
+                    if (!IsNextTokenDiscard(TokenKind.Comma))
                     {
-                        if (!IsNextToken(Lexer.Token.TokenKind.CloseParen))
+                        if (!IsNextToken(TokenKind.CloseParen))
                         {
                             ReportCodeError("Expected ',' or ')' after argument in function call.", s.Token, true);
                             break;
@@ -913,7 +919,7 @@ namespace UndertaleModLib.Compiler
                     }
                 }
 
-                if (EnsureTokenKind(Lexer.Token.TokenKind.CloseParen) == null) return null;
+                if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
                 // Check for proper argument count, at least for builtins
                 FunctionInfo fi;
@@ -933,7 +939,7 @@ namespace UndertaleModLib.Compiler
             private static Statement ParseConditionalOp()
             {
                 Statement left = ParseOrOp();
-                if (!hasError && IsNextToken(Lexer.Token.TokenKind.Conditional))
+                if (!hasError && IsNextToken(TokenKind.Conditional))
                 {
                     if (data?.GeneralInfo.Major < 2)
                     {
@@ -942,11 +948,11 @@ namespace UndertaleModLib.Compiler
                     }
 
                     Statement result = new Statement(Statement.StatementKind.ExprConditional,
-                                                    EnsureTokenKind(Lexer.Token.TokenKind.Conditional).Token);
+                                                    EnsureTokenKind(TokenKind.Conditional).Token);
 
                     Statement expr1 = ParseOrOp();
 
-                    if (EnsureTokenKind(Lexer.Token.TokenKind.Colon) != null)
+                    if (EnsureTokenKind(TokenKind.Colon) != null)
                     {
                         Statement expr2 = ParseExpression();
 
@@ -969,13 +975,13 @@ namespace UndertaleModLib.Compiler
             private static Statement ParseOrOp()
             {
                 Statement left = ParseAndOp();
-                if (!hasError && IsNextToken(Lexer.Token.TokenKind.LogicalOr))
+                if (!hasError && IsNextToken(TokenKind.LogicalOr))
                 {
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp,
-                                                     EnsureTokenKind(Lexer.Token.TokenKind.LogicalOr).Token);
+                                                     EnsureTokenKind(TokenKind.LogicalOr).Token);
                     result.Children.Add(left);
                     result.Children.Add(ParseExpression());
-                    while (remainingStageOne.Count > 0 && IsNextTokenDiscard(Lexer.Token.TokenKind.LogicalOr))
+                    while (remainingStageOne.Count > 0 && IsNextTokenDiscard(TokenKind.LogicalOr))
                     {
                         result.Children.Add(ParseExpression());
                     }
@@ -991,13 +997,13 @@ namespace UndertaleModLib.Compiler
             private static Statement ParseAndOp()
             {
                 Statement left = ParseXorOp();
-                if (!hasError && IsNextToken(Lexer.Token.TokenKind.LogicalAnd))
+                if (!hasError && IsNextToken(TokenKind.LogicalAnd))
                 {
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp,
-                                                     EnsureTokenKind(Lexer.Token.TokenKind.LogicalAnd).Token);
+                                                     EnsureTokenKind(TokenKind.LogicalAnd).Token);
                     result.Children.Add(left);
                     result.Children.Add(ParseExpression());
-                    while (remainingStageOne.Count > 0 && IsNextTokenDiscard(Lexer.Token.TokenKind.LogicalAnd))
+                    while (remainingStageOne.Count > 0 && IsNextTokenDiscard(TokenKind.LogicalAnd))
                     {
                         result.Children.Add(ParseExpression());
                     }
@@ -1013,10 +1019,10 @@ namespace UndertaleModLib.Compiler
             private static Statement ParseXorOp()
             {
                 Statement left = ParseCompare();
-                if (!hasError && IsNextToken(Lexer.Token.TokenKind.LogicalXor))
+                if (!hasError && IsNextToken(TokenKind.LogicalXor))
                 {
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp,
-                                                     EnsureTokenKind(Lexer.Token.TokenKind.LogicalXor).Token);
+                                                     EnsureTokenKind(TokenKind.LogicalXor).Token);
                     Statement right = ParseCompare();
 
                     result.Children.Add(left);
@@ -1033,19 +1039,19 @@ namespace UndertaleModLib.Compiler
             {
                 Statement left = ParseBitwise();
                 if (!hasError && IsNextToken(
-                    Lexer.Token.TokenKind.CompareEqual,
-                    Lexer.Token.TokenKind.Assign, // Legacy
-                    Lexer.Token.TokenKind.CompareGreater,
-                    Lexer.Token.TokenKind.CompareGreaterEqual,
-                    Lexer.Token.TokenKind.CompareLess,
-                    Lexer.Token.TokenKind.CompareLessEqual,
-                    Lexer.Token.TokenKind.CompareNotEqual
+                    TokenKind.CompareEqual,
+                    TokenKind.Assign, // Legacy
+                    TokenKind.CompareGreater,
+                    TokenKind.CompareGreaterEqual,
+                    TokenKind.CompareLess,
+                    TokenKind.CompareLessEqual,
+                    TokenKind.CompareNotEqual
                     ))
                 {
                     Lexer.Token t = remainingStageOne.Dequeue().Token;
                     // Repair legacy comparison
-                    if (t.Kind == Lexer.Token.TokenKind.Assign)
-                        t.Kind = Lexer.Token.TokenKind.CompareEqual;
+                    if (t.Kind == TokenKind.Assign)
+                        t.Kind = TokenKind.CompareEqual;
 
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp, t);
 
@@ -1065,9 +1071,9 @@ namespace UndertaleModLib.Compiler
             {
                 Statement left = ParseBitShift();
                 if (!hasError && IsNextToken(
-                    Lexer.Token.TokenKind.BitwiseOr,
-                    Lexer.Token.TokenKind.BitwiseAnd,
-                    Lexer.Token.TokenKind.BitwiseXor
+                    TokenKind.BitwiseOr,
+                    TokenKind.BitwiseAnd,
+                    TokenKind.BitwiseXor
                     ))
                 {
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp, remainingStageOne.Dequeue().Token);
@@ -1078,9 +1084,9 @@ namespace UndertaleModLib.Compiler
                     result.Children.Add(right);
 
                     while (IsNextToken(
-                            Lexer.Token.TokenKind.BitwiseOr,
-                            Lexer.Token.TokenKind.BitwiseAnd,
-                            Lexer.Token.TokenKind.BitwiseXor
+                            TokenKind.BitwiseOr,
+                            TokenKind.BitwiseAnd,
+                            TokenKind.BitwiseXor
                     ))
                     {
                         result.Children.Add(ParseBitShift());
@@ -1098,8 +1104,8 @@ namespace UndertaleModLib.Compiler
             {
                 Statement left = ParseAddSub();
                 if (!hasError && IsNextToken(
-                    Lexer.Token.TokenKind.BitwiseShiftLeft,
-                    Lexer.Token.TokenKind.BitwiseShiftRight
+                    TokenKind.BitwiseShiftLeft,
+                    TokenKind.BitwiseShiftRight
                     ))
                 {
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp, remainingStageOne.Dequeue().Token);
@@ -1110,8 +1116,8 @@ namespace UndertaleModLib.Compiler
                     result.Children.Add(right);
 
                     while (IsNextTokenDiscard(
-                            Lexer.Token.TokenKind.BitwiseShiftLeft,
-                            Lexer.Token.TokenKind.BitwiseShiftRight
+                            TokenKind.BitwiseShiftLeft,
+                            TokenKind.BitwiseShiftRight
                             ))
                     {
                         result.Children.Add(ParseAddSub());
@@ -1128,8 +1134,8 @@ namespace UndertaleModLib.Compiler
             {
                 Statement left = ParseMulDiv();
                 if (!hasError && IsNextToken(
-                    Lexer.Token.TokenKind.Plus,
-                    Lexer.Token.TokenKind.Minus
+                    TokenKind.Plus,
+                    TokenKind.Minus
                     ))
                 {
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp, remainingStageOne.Dequeue().Token);
@@ -1140,8 +1146,8 @@ namespace UndertaleModLib.Compiler
                     result.Children.Add(right);
 
                     while (IsNextTokenDiscard(
-                            Lexer.Token.TokenKind.Plus,
-                            Lexer.Token.TokenKind.Minus
+                            TokenKind.Plus,
+                            TokenKind.Minus
                             ))
                     {
                         result.Children.Add(ParseMulDiv());
@@ -1159,10 +1165,10 @@ namespace UndertaleModLib.Compiler
             {
                 Statement left = ParsePostAndRef();
                 if (!hasError && IsNextToken(
-                    Lexer.Token.TokenKind.Times,
-                    Lexer.Token.TokenKind.Divide,
-                    Lexer.Token.TokenKind.Div,
-                    Lexer.Token.TokenKind.Mod
+                    TokenKind.Times,
+                    TokenKind.Divide,
+                    TokenKind.Div,
+                    TokenKind.Mod
                     ))
                 {
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp, remainingStageOne.Dequeue().Token);
@@ -1173,10 +1179,10 @@ namespace UndertaleModLib.Compiler
                     result.Children.Add(right);
 
                     while (IsNextTokenDiscard(
-                        Lexer.Token.TokenKind.Times,
-                        Lexer.Token.TokenKind.Divide,
-                        Lexer.Token.TokenKind.Div,
-                        Lexer.Token.TokenKind.Mod
+                        TokenKind.Times,
+                        TokenKind.Divide,
+                        TokenKind.Div,
+                        TokenKind.Mod
                             ))
                     {
                         result.Children.Add(ParsePostAndRef());
@@ -1193,7 +1199,7 @@ namespace UndertaleModLib.Compiler
             private static Statement ParsePostAndRef()
             {
                 Statement left = ParseLowLevel();
-                if (!hasError && IsNextToken(Lexer.Token.TokenKind.Dot))
+                if (!hasError && IsNextToken(TokenKind.Dot))
                 {
                     // Parse chain variable reference
                     Statement result = new Statement(Statement.StatementKind.ExprVariableRef, remainingStageOne.Peek().Token);
@@ -1202,7 +1208,7 @@ namespace UndertaleModLib.Compiler
                         result.Children.Add(left);
                     else
                         combine = true;
-                    while (remainingStageOne.Count > 0 && IsNextTokenDiscard(Lexer.Token.TokenKind.Dot))
+                    while (remainingStageOne.Count > 0 && IsNextTokenDiscard(TokenKind.Dot))
                     {
                         Statement next = ParseSingleVar();
                         if (combine)
@@ -1216,8 +1222,8 @@ namespace UndertaleModLib.Compiler
                     }
 
                     // Post increment/decrement check
-                    if (remainingStageOne.Count > 0 && GetNextTokenKind().In(Lexer.Token.TokenKind.Increment,
-                                                                             Lexer.Token.TokenKind.Decrement))
+                    if (remainingStageOne.Count > 0 && GetNextTokenKind().In(TokenKind.Increment,
+                                                                             TokenKind.Decrement))
                     {
                         Statement newResult = new Statement(Statement.StatementKind.Post, remainingStageOne.Dequeue().Token);
                         newResult.Children.Add(result);
@@ -1236,7 +1242,7 @@ namespace UndertaleModLib.Compiler
 
             private static Statement ParseSingleVar()
             {
-                Statement s = EnsureTokenKind(Lexer.Token.TokenKind.ProcVariable);
+                Statement s = EnsureTokenKind(TokenKind.ProcVariable);
 
                 // Check to make sure we aren't overriding a script/function name
                 if (BuiltinList.Functions.ContainsKey(s.Text) || scripts.Contains(s.Text))
@@ -1250,34 +1256,34 @@ namespace UndertaleModLib.Compiler
                 result.ID = s.ID;
                 // Check for array
                 if (remainingStageOne.Count > 0 && IsNextToken(
-                    Lexer.Token.TokenKind.OpenArray,
-                    Lexer.Token.TokenKind.OpenArrayBaseArray,
-                    Lexer.Token.TokenKind.OpenArrayGrid,
-                    Lexer.Token.TokenKind.OpenArrayList,
-                    Lexer.Token.TokenKind.OpenArrayMap))
+                    TokenKind.OpenArray,
+                    TokenKind.OpenArrayBaseArray,
+                    TokenKind.OpenArrayGrid,
+                    TokenKind.OpenArrayList,
+                    TokenKind.OpenArrayMap))
                 {
                     Lexer.Token tok = remainingStageOne.Dequeue().Token;
-                    Lexer.Token.TokenKind t = tok.Kind;
+                    TokenKind t = tok.Kind;
 
                     // Add accessor info
-                    if (t != Lexer.Token.TokenKind.OpenArray)
+                    if (t != TokenKind.OpenArray)
                         result.Children.Add(new Statement(t, tok));
 
                     // Index
                     Statement index = ParseExpression();
                     result.Children.Add(index);
-                    if (!hasError && t != Lexer.Token.TokenKind.OpenArrayMap)
+                    if (!hasError && t != TokenKind.OpenArrayMap)
                     {
                         // Make sure the map accessor is the only one that uses strings
                         CheckNormalArrayIndex(index);
                     }
 
                     // Second index (2D array)
-                    if (IsNextTokenDiscard(Lexer.Token.TokenKind.Comma))
+                    if (IsNextTokenDiscard(TokenKind.Comma))
                     {
                         Statement index2d = ParseExpression();
                         result.Children.Add(index2d);
-                        if (!hasError && t != Lexer.Token.TokenKind.OpenArrayMap)
+                        if (!hasError && t != TokenKind.OpenArrayMap)
                         {
                             // Make sure the map accessor is the only one that uses strings
                             CheckNormalArrayIndex(index2d);
@@ -1285,10 +1291,10 @@ namespace UndertaleModLib.Compiler
                     }
 
                     // TODO: Remove this once support is added
-                    //if (t != Lexer.Token.TokenKind.OpenArray)
+                    //if (t != TokenKind.OpenArray)
                     //    ReportCodeError("Accessors are currently unsupported in this compiler- use the DS functions themselves instead (internally they're the same).", false);
 
-                    if (EnsureTokenKind(Lexer.Token.TokenKind.CloseArray) == null) return null;
+                    if (EnsureTokenKind(TokenKind.CloseArray) == null) return null;
                 }
                 else if (BuiltinList.GlobalArray.TryGetValue(result.Text, out vi) || BuiltinList.InstanceLimitedEvent.TryGetValue(result.Text, out vi))
                 {
@@ -1314,26 +1320,26 @@ namespace UndertaleModLib.Compiler
             {
                 switch (GetNextTokenKind())
                 {
-                    case Lexer.Token.TokenKind.OpenArray:
+                    case TokenKind.OpenArray:
                         return ParseArrayLiteral();
-                    case Lexer.Token.TokenKind.OpenParen:
+                    case TokenKind.OpenParen:
                         {
                             remainingStageOne.Dequeue();
                             Statement expr = ParseExpression();
-                            EnsureTokenKind(Lexer.Token.TokenKind.CloseParen);
+                            EnsureTokenKind(TokenKind.CloseParen);
                             return expr;
                         }
-                    case Lexer.Token.TokenKind.ProcConstant:
+                    case TokenKind.ProcConstant:
                         {
                             Statement next = remainingStageOne.Dequeue();
                             return new Statement(Statement.StatementKind.ExprConstant, next.Token, next.Constant);
                         }
-                    case Lexer.Token.TokenKind.ProcFunction:
+                    case TokenKind.ProcFunction:
                         return ParseFunctionCall(true);
-                    case Lexer.Token.TokenKind.ProcVariable:
+                    case TokenKind.ProcVariable:
                         {
                             Statement variableRef = ParseSingleVar();
-                            if (!IsNextToken(Lexer.Token.TokenKind.Increment, Lexer.Token.TokenKind.Decrement))
+                            if (!IsNextToken(TokenKind.Increment, TokenKind.Decrement))
                             {
                                 return variableRef;
                             }
@@ -1344,21 +1350,21 @@ namespace UndertaleModLib.Compiler
                                 return final;
                             }
                         }
-                    case Lexer.Token.TokenKind.OpenBlock:
+                    case TokenKind.OpenBlock:
                         // todo? maybe?
                         ReportCodeError("Unsupported syntax.", remainingStageOne.Dequeue().Token, true);
                         break;
-                    case Lexer.Token.TokenKind.Increment:
-                    case Lexer.Token.TokenKind.Decrement:
+                    case TokenKind.Increment:
+                    case TokenKind.Decrement:
                         {
                             Statement post = new Statement(Statement.StatementKind.Pre, remainingStageOne.Dequeue().Token);
                             post.Children.Add(ParsePostAndRef());
                             return post;
                         }
-                    case Lexer.Token.TokenKind.Not:
-                    case Lexer.Token.TokenKind.Plus:
-                    case Lexer.Token.TokenKind.Minus:
-                    case Lexer.Token.TokenKind.BitwiseNegate:
+                    case TokenKind.Not:
+                    case TokenKind.Plus:
+                    case TokenKind.Minus:
+                    case TokenKind.BitwiseNegate:
                         {
                             Statement unary = new Statement(Statement.StatementKind.ExprUnary, remainingStageOne.Dequeue().Token);
                             unary.Children.Add(ParsePostAndRef());
@@ -1373,17 +1379,17 @@ namespace UndertaleModLib.Compiler
             private static Statement ParseArrayLiteral()
             {
                 Statement result = new Statement(Statement.StatementKind.ExprFunctionCall,
-                                                EnsureTokenKind(Lexer.Token.TokenKind.OpenArray)?.Token);
+                                                EnsureTokenKind(TokenKind.OpenArray)?.Token);
 
                 // It literally converts into a function call
                 result.Text = "@@NewGMLArray@@";
 
-                while (!hasError && remainingStageOne.Count > 0 && !IsNextToken(Lexer.Token.TokenKind.CloseArray, Lexer.Token.TokenKind.EOF))
+                while (!hasError && remainingStageOne.Count > 0 && !IsNextToken(TokenKind.CloseArray, TokenKind.EOF))
                 {
                     result.Children.Add(ParseExpression());
-                    if (!IsNextTokenDiscard(Lexer.Token.TokenKind.Comma))
+                    if (!IsNextTokenDiscard(TokenKind.Comma))
                     {
-                        if (!IsNextToken(Lexer.Token.TokenKind.CloseArray))
+                        if (!IsNextToken(TokenKind.CloseArray))
                         {
                             ReportCodeError("Expected ',' or ']' after value in inline array.", remainingStageOne.Peek().Token, true);
                             break;
@@ -1391,7 +1397,7 @@ namespace UndertaleModLib.Compiler
                     }
                 }
 
-                if (EnsureTokenKind(Lexer.Token.TokenKind.CloseArray) == null) return null;
+                if (EnsureTokenKind(TokenKind.CloseArray) == null) return null;
 
                 return result;
             }
@@ -1483,7 +1489,7 @@ namespace UndertaleModLib.Compiler
                             }
 
                             // (Don't use "left" here because it's not optimized)
-                            if (result.Children.Count == 3 && result.Children[1].Token?.Kind == Lexer.Token.TokenKind.Assign &&
+                            if (result.Children.Count == 3 && result.Children[1].Token?.Kind == TokenKind.Assign &&
                               result.Children[0].Children.Count == 0 && result.Children[0].Kind == Statement.StatementKind.ExprSingleVariable &&
                               result.Children[2].Children.Count == 0 && result.Children[2].Kind == Statement.StatementKind.ExprSingleVariable &&
                               result.Children[0].Text == result.Children[2].Text && result.Children[0].ID == result.Children[2].ID)
@@ -1638,7 +1644,7 @@ namespace UndertaleModLib.Compiler
                             ExpressionConstant val = result.Children[0].Constant;
                             switch (result.Token.Kind)
                             {
-                                case Lexer.Token.TokenKind.Not:
+                                case TokenKind.Not:
                                     switch (val.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
@@ -1652,7 +1658,7 @@ namespace UndertaleModLib.Compiler
                                             break;
                                     }
                                     break;
-                                case Lexer.Token.TokenKind.BitwiseNegate:
+                                case TokenKind.BitwiseNegate:
                                     switch (val.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
@@ -1666,7 +1672,7 @@ namespace UndertaleModLib.Compiler
                                             break;
                                     }
                                     break;
-                                case Lexer.Token.TokenKind.Minus:
+                                case TokenKind.Minus:
                                     switch (val.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
@@ -1758,7 +1764,7 @@ namespace UndertaleModLib.Compiler
             private static AccessorInfo GetAccessorInfoFromStatement(Statement s)
             {
                 AccessorInfo ai = null;
-                Lexer.Token.TokenKind kind = s.Children[0].Token.Kind;
+                TokenKind kind = s.Children[0].Token.Kind;
                 if (s.Children.Count == 2)
                 {
                     if (BuiltinList.Accessors1D.ContainsKey(kind))
@@ -1788,7 +1794,7 @@ namespace UndertaleModLib.Compiler
                     switch (s.Token.Kind)
                     {
                         // AND
-                        case Lexer.Token.TokenKind.LogicalAnd:
+                        case TokenKind.LogicalAnd:
                             switch (left.kind)
                             {
                                 case ExpressionConstant.Kind.Number:
@@ -1825,7 +1831,7 @@ namespace UndertaleModLib.Compiler
                             }
                             break;
                         // OR
-                        case Lexer.Token.TokenKind.LogicalOr:
+                        case TokenKind.LogicalOr:
                             switch (left.kind)
                             {
                                 case ExpressionConstant.Kind.Number:
@@ -1862,7 +1868,7 @@ namespace UndertaleModLib.Compiler
                             }
                             break;
                         // PLUS
-                        case Lexer.Token.TokenKind.Plus:
+                        case TokenKind.Plus:
                             switch (left.kind)
                             {
                                 case ExpressionConstant.Kind.Number:
@@ -1907,7 +1913,7 @@ namespace UndertaleModLib.Compiler
                             }
                             break;
                         // MINUS
-                        case Lexer.Token.TokenKind.Minus:
+                        case TokenKind.Minus:
                             switch (left.kind)
                             {
                                 case ExpressionConstant.Kind.Number:
@@ -1944,7 +1950,7 @@ namespace UndertaleModLib.Compiler
                             }
                             break;
                         // TIMES
-                        case Lexer.Token.TokenKind.Times:
+                        case TokenKind.Times:
                             switch (left.kind)
                             {
                                 case ExpressionConstant.Kind.Number:
@@ -1988,7 +1994,7 @@ namespace UndertaleModLib.Compiler
                             }
                             break;
                         // DIVIDE
-                        case Lexer.Token.TokenKind.Divide:
+                        case TokenKind.Divide:
                             switch (left.kind)
                             {
                                 case ExpressionConstant.Kind.Number:
@@ -2046,7 +2052,7 @@ namespace UndertaleModLib.Compiler
                             }
                             break;
                         // DIV
-                        case Lexer.Token.TokenKind.Div:
+                        case TokenKind.Div:
                             switch (left.kind)
                             {
                                 case ExpressionConstant.Kind.Number:
@@ -2107,7 +2113,7 @@ namespace UndertaleModLib.Compiler
                             }
                             break;
                         // MOD
-                        case Lexer.Token.TokenKind.Mod:
+                        case TokenKind.Mod:
                             switch (left.kind)
                             {
                                 case ExpressionConstant.Kind.Number:
@@ -2168,7 +2174,7 @@ namespace UndertaleModLib.Compiler
                             }
                             break;
                         // XOR
-                        case Lexer.Token.TokenKind.LogicalXor:
+                        case TokenKind.LogicalXor:
                             switch (left.kind)
                             {
                                 case ExpressionConstant.Kind.Number:
@@ -2205,7 +2211,7 @@ namespace UndertaleModLib.Compiler
                             }
                             break;
                         // BITWISE OR
-                        case Lexer.Token.TokenKind.BitwiseOr:
+                        case TokenKind.BitwiseOr:
                             switch (left.kind)
                             {
                                 case ExpressionConstant.Kind.Number:
@@ -2242,7 +2248,7 @@ namespace UndertaleModLib.Compiler
                             }
                             break;
                         // BITWISE AND
-                        case Lexer.Token.TokenKind.BitwiseAnd:
+                        case TokenKind.BitwiseAnd:
                             switch (left.kind)
                             {
                                 case ExpressionConstant.Kind.Number:
@@ -2279,7 +2285,7 @@ namespace UndertaleModLib.Compiler
                             }
                             break;
                         // BITWISE XOR
-                        case Lexer.Token.TokenKind.BitwiseXor:
+                        case TokenKind.BitwiseXor:
                             switch (left.kind)
                             {
                                 case ExpressionConstant.Kind.Number:
@@ -2316,7 +2322,7 @@ namespace UndertaleModLib.Compiler
                             }
                             break;
                         // BITWISE SHIFT LEFT
-                        case Lexer.Token.TokenKind.BitwiseShiftLeft:
+                        case TokenKind.BitwiseShiftLeft:
                             switch (left.kind)
                             {
                                 case ExpressionConstant.Kind.Number:
@@ -2353,7 +2359,7 @@ namespace UndertaleModLib.Compiler
                             }
                             break;
                         // BITWISE SHIFT RIGHT
-                        case Lexer.Token.TokenKind.BitwiseShiftRight:
+                        case TokenKind.BitwiseShiftRight:
                             switch (left.kind)
                             {
                                 case ExpressionConstant.Kind.Number:
@@ -2390,12 +2396,12 @@ namespace UndertaleModLib.Compiler
                             }
                             break;
                         // COMPARISONS
-                        case Lexer.Token.TokenKind.CompareEqual:
-                        case Lexer.Token.TokenKind.CompareGreater:
-                        case Lexer.Token.TokenKind.CompareGreaterEqual:
-                        case Lexer.Token.TokenKind.CompareLess:
-                        case Lexer.Token.TokenKind.CompareLessEqual:
-                        case Lexer.Token.TokenKind.CompareNotEqual:
+                        case TokenKind.CompareEqual:
+                        case TokenKind.CompareGreater:
+                        case TokenKind.CompareGreaterEqual:
+                        case TokenKind.CompareLess:
+                        case TokenKind.CompareLessEqual:
+                        case TokenKind.CompareNotEqual:
                             // First, calculate "difference" number
                             double differenceValue = 0;
                             switch (left.kind)
@@ -2449,22 +2455,22 @@ namespace UndertaleModLib.Compiler
 
                                 switch (s.Token.Kind)
                                 {
-                                    case Lexer.Token.TokenKind.CompareEqual:
+                                    case TokenKind.CompareEqual:
                                         newConstant.Constant.valueNumber = (differenceValue == 0) ? 1 : 0;
                                         break;
-                                    case Lexer.Token.TokenKind.CompareNotEqual:
+                                    case TokenKind.CompareNotEqual:
                                         newConstant.Constant.valueNumber = (differenceValue != 0) ? 1 : 0;
                                         break;
-                                    case Lexer.Token.TokenKind.CompareLess:
+                                    case TokenKind.CompareLess:
                                         newConstant.Constant.valueNumber = (differenceValue < 0) ? 1 : 0;
                                         break;
-                                    case Lexer.Token.TokenKind.CompareLessEqual:
+                                    case TokenKind.CompareLessEqual:
                                         newConstant.Constant.valueNumber = (differenceValue <= 0) ? 1 : 0;
                                         break;
-                                    case Lexer.Token.TokenKind.CompareGreater:
+                                    case TokenKind.CompareGreater:
                                         newConstant.Constant.valueNumber = (differenceValue > 0) ? 1 : 0;
                                         break;
-                                    case Lexer.Token.TokenKind.CompareGreaterEqual:
+                                    case TokenKind.CompareGreaterEqual:
                                         newConstant.Constant.valueNumber = (differenceValue >= 0) ? 1 : 0;
                                         break;
                                 }
@@ -2491,28 +2497,28 @@ namespace UndertaleModLib.Compiler
                 return IsKeyword(t.Kind);
             }
 
-            private static bool IsKeyword(Lexer.Token.TokenKind t)
+            private static bool IsKeyword(TokenKind t)
             {
                 return t.In(
-                    Lexer.Token.TokenKind.KeywordBreak,
-                    Lexer.Token.TokenKind.KeywordCase,
-                    Lexer.Token.TokenKind.KeywordContinue,
-                    Lexer.Token.TokenKind.KeywordDefault,
-                    Lexer.Token.TokenKind.KeywordDo,
-                    Lexer.Token.TokenKind.KeywordElse,
-                    Lexer.Token.TokenKind.KeywordExit,
-                    Lexer.Token.TokenKind.KeywordFor,
-                    Lexer.Token.TokenKind.KeywordGlobalVar,
-                    Lexer.Token.TokenKind.KeywordIf,
-                    Lexer.Token.TokenKind.KeywordRepeat,
-                    Lexer.Token.TokenKind.KeywordReturn,
-                    Lexer.Token.TokenKind.KeywordStruct,
-                    Lexer.Token.TokenKind.KeywordSwitch,
-                    Lexer.Token.TokenKind.KeywordThen,
-                    Lexer.Token.TokenKind.KeywordUntil,
-                    Lexer.Token.TokenKind.KeywordVar,
-                    Lexer.Token.TokenKind.KeywordWhile,
-                    Lexer.Token.TokenKind.KeywordWith);
+                    TokenKind.KeywordBreak,
+                    TokenKind.KeywordCase,
+                    TokenKind.KeywordContinue,
+                    TokenKind.KeywordDefault,
+                    TokenKind.KeywordDo,
+                    TokenKind.KeywordElse,
+                    TokenKind.KeywordExit,
+                    TokenKind.KeywordFor,
+                    TokenKind.KeywordGlobalVar,
+                    TokenKind.KeywordIf,
+                    TokenKind.KeywordRepeat,
+                    TokenKind.KeywordReturn,
+                    TokenKind.KeywordStruct,
+                    TokenKind.KeywordSwitch,
+                    TokenKind.KeywordThen,
+                    TokenKind.KeywordUntil,
+                    TokenKind.KeywordVar,
+                    TokenKind.KeywordWhile,
+                    TokenKind.KeywordWith);
             }
 
             private static bool ResolveIdentifier(string identifier, out ExpressionConstant constant)
