@@ -282,7 +282,10 @@ namespace UndertaleModTool
             var dataa = (Application.Current.MainWindow as MainWindow).Data;
             Task t = Task.Run(() =>
             {
-                DecompileContext context = new DecompileContext(dataa, true);
+                int estimatedLineCount = (int)Math.Round(code.Length * .056D);
+                bool skipFormatting = (estimatedLineCount > 5000);
+
+                DecompileContext context = new DecompileContext(dataa, !skipFormatting);
                 string decompiled = null;
                 Exception e = null;
                 try
@@ -311,11 +314,11 @@ namespace UndertaleModTool
                     else if (decompiled != null)
                     {
                         string[] lines = decompiled.Split('\n');
-                        if (lines.Length > 5000)
+                        if (skipFormatting)
                         {
                             for (var i = 0; i < lines.Length; i++)
                             {
-                                string toWrite = Regex.Replace(lines[i], @"\""([^\""]*)\""\@(\d+)", "\"$1\""); // Remove @number on the end, it causes issues when recompiling. TODO: Maybe just decompile without @s.
+                                string toWrite = lines[i];
                                 if (((i + 1) % 100) != 0 && lines.Length > i + 1)
                                     toWrite += "\n"; // Write a new-line if we're not making a new paragraph.
 
