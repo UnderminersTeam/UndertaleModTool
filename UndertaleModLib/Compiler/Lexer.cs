@@ -527,6 +527,7 @@ namespace UndertaleModLib.Compiler
                 StringBuilder sb = new StringBuilder();
 
                 int index = cr.Position;
+                char type = cr.PeekChar();
 
                 cr.AdvancePosition();
 
@@ -632,9 +633,9 @@ namespace UndertaleModLib.Compiler
                             c = cr.PeekChar();
                             c2 = cr.PeekCharAhead();
                             continue;
-                        case '"':
-                            break;
                         default:
+                            if (c == type)
+                                break;
                             sb.Append(c);
                             cr.AdvancePosition();
                             c = cr.PeekChar();

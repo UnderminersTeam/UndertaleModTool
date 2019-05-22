@@ -555,7 +555,8 @@ namespace UndertaleModLib.Compiler
                         break;
                     default:
                         // Assumes it's a variable assignment
-                        s = ParseAssign();
+                        if (remainingStageOne.Count > 0)
+                            s = ParseAssign();
                         break;
                 }
                 // Ignore any semicolons
@@ -1321,7 +1322,10 @@ namespace UndertaleModLib.Compiler
                 switch (GetNextTokenKind())
                 {
                     case TokenKind.OpenArray:
-                        return ParseArrayLiteral();
+                        if (data?.GeneralInfo?.Major >= 2)
+                            return ParseArrayLiteral();
+                        ReportCodeError("Cannot use array literal prior to GMS2 version.", remainingStageOne.Dequeue().Token, true);
+                        return null;
                     case TokenKind.OpenParen:
                         {
                             remainingStageOne.Dequeue();
