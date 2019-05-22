@@ -610,7 +610,8 @@ namespace UndertaleModTool
         private void DecompiledEditor_LostFocus(object sender, RoutedEventArgs e)
         {
             UndertaleCode code = this.DataContext as UndertaleCode;
-            Debug.Assert(code != null);
+            if (code == null)
+                return; // Probably loaded another data.win or something.
 
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
 
@@ -656,7 +657,8 @@ namespace UndertaleModTool
         private void DisassemblyEditor_LostFocus(object sender, RoutedEventArgs e)
         {
             UndertaleCode code = this.DataContext as UndertaleCode;
-            Debug.Assert(code != null);
+            if (code == null)
+                return; // Probably loaded another data.win or something.
 
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
             try
