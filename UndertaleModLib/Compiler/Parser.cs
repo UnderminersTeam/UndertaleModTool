@@ -629,7 +629,7 @@ namespace UndertaleModLib.Compiler
                     {
                         // hack because I don't know what I'm doing
                         string name;
-                        if (left.Children.Count == 0 || left.Children[0].Text == null)
+                        if (left.Children.Count == 0 || left.Kind == Statement.StatementKind.ExprSingleVariable)
                             name = left.Text;
                         else
                             name = left.Children[0].Text;
@@ -1424,7 +1424,7 @@ namespace UndertaleModLib.Compiler
                     case Statement.StatementKind.Assign:
                         Statement left = result.Children[0];
                         bool isVarRef = (left.Kind == Statement.StatementKind.ExprVariableRef);
-                        if (isVarRef || (left.Kind == Statement.StatementKind.ExprSingleVariable && left.Children.Count >= 2))
+                        if (isVarRef || (left.Kind == Statement.StatementKind.ExprSingleVariable && left.Children.Count >= 2 && left.Children[0].Kind == Statement.StatementKind.Token))
                         {
                             if (!isVarRef)
                             {
