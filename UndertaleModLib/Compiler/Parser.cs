@@ -222,7 +222,10 @@ namespace UndertaleModLib.Compiler
             public static Statement EnsureStatementKind(Statement.StatementKind kind)
             {
                 if (remainingStageOne.Count == 0)
+                {
                     ReportCodeError("Unexpected end of code.", false);
+                    return null;
+                }
                 if (remainingStageOne.Peek().Kind == kind)
                 {
                     return remainingStageOne.Dequeue();
@@ -238,7 +241,10 @@ namespace UndertaleModLib.Compiler
             public static Statement EnsureTokenKind(Lexer.Token.TokenKind kind)
             {
                 if (remainingStageOne.Count == 0)
+                {
                     ReportCodeError("Unexpected end of code.", false);
+                    return null;
+                }
                 if (remainingStageOne.Peek()?.Token?.Kind == kind)
                 {
                     return remainingStageOne.Dequeue();
@@ -254,14 +260,20 @@ namespace UndertaleModLib.Compiler
             public static bool IsNextStatement(params Statement.StatementKind[] kinds)
             {
                 if (remainingStageOne.Count == 0)
+                {
                     ReportCodeError("Unexpected end of code.", false);
+                    return false;
+                }
                 return remainingStageOne.Peek().Kind.In(kinds);
             }
 
             public static bool IsNextToken(params Lexer.Token.TokenKind[] kinds)
             {
                 if (remainingStageOne.Count == 0)
+                {
                     ReportCodeError("Unexpected end of code.", false);
+                    return false;
+                }
                 if (remainingStageOne.Peek().Token == null)
                     return false;
                 return remainingStageOne.Peek().Token.Kind.In(kinds);
@@ -271,7 +283,10 @@ namespace UndertaleModLib.Compiler
             public static bool IsNextTokenDiscard(params Lexer.Token.TokenKind[] kinds)
             {
                 if (remainingStageOne.Count == 0)
+                {
                     ReportCodeError("Unexpected end of code.", false);
+                    return false;
+                }
                 if (remainingStageOne.Peek().Token == null)
                     return false;
                 if (remainingStageOne.Peek().Token.Kind.In(kinds))
@@ -288,7 +303,10 @@ namespace UndertaleModLib.Compiler
             public static Lexer.Token.TokenKind GetNextTokenKind()
             {
                 if (remainingStageOne.Count == 0)
+                {
                     ReportCodeError("Unexpected end of code.", false);
+                    return Lexer.Token.TokenKind.Error;
+                }
                 if (remainingStageOne.Peek().Token == null)
                     return Lexer.Token.TokenKind.Error;
                 return remainingStageOne.Peek().Token.Kind;
@@ -795,7 +813,7 @@ namespace UndertaleModLib.Compiler
             private static Statement ParseReturn()
             {
                 Statement result = new Statement(Statement.StatementKind.Return, EnsureTokenKind(Lexer.Token.TokenKind.KeywordReturn).Token);
-                while (remainingStageOne.Count > 0 && !IsKeyword(GetNextTokenKind()) && !IsNextToken(Lexer.Token.TokenKind.EndStatement))
+                if (remainingStageOne.Count > 0 && !IsKeyword(GetNextTokenKind()) && !IsNextToken(Lexer.Token.TokenKind.EndStatement, Lexer.Token.TokenKind.EOF))
                 {
                     result.Children.Add(ParseExpression());
                 }
@@ -1360,7 +1378,7 @@ namespace UndertaleModLib.Compiler
                 // It literally converts into a function call
                 result.Text = "@@NewGMLArray@@";
 
-                while (!hasError && remainingStageOne.Count > 0 && !IsNextToken(Lexer.Token.TokenKind.CloseArray))
+                while (!hasError && remainingStageOne.Count > 0 && !IsNextToken(Lexer.Token.TokenKind.CloseArray, Lexer.Token.TokenKind.EOF))
                 {
                     result.Children.Add(ParseExpression());
                     if (!IsNextTokenDiscard(Lexer.Token.TokenKind.Comma))
