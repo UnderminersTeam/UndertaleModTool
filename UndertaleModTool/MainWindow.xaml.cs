@@ -83,6 +83,12 @@ namespace UndertaleModTool
         static extern void SHChangeNotify(long wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
         const long SHCNE_ASSOCCHANGED = 0x08000000;
 
+        private void UpdateTree()
+        {
+            foreach (var child in (MainTree.Items[0] as TreeViewItem).Items)
+                ((child as TreeViewItem).ItemsSource as ICollectionView)?.Refresh();
+        }
+
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             try
@@ -633,6 +639,7 @@ namespace UndertaleModTool
                     ChangeSelection(null);
                 if (Highlighted == obj)
                     Highlighted = null;
+                UpdateTree();
             }
         }
 
@@ -739,6 +746,7 @@ namespace UndertaleModTool
             }
             list.Add(obj);
             // TODO: change highlighted too
+            UpdateTree();
             ChangeSelection(obj);
         }
 
@@ -955,10 +963,7 @@ namespace UndertaleModTool
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            foreach (var child in (MainTree.Items[0] as TreeViewItem).Items)
-            {
-                ((child as TreeViewItem).ItemsSource as ICollectionView)?.Refresh();
-            }
+            UpdateTree();
         }
 
         public void ChangeSelection(object newsel)

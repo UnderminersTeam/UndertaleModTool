@@ -52,7 +52,7 @@ namespace UndertaleModLib.Models
 
         public override string ToString()
         {
-            return Name.Content;
+            return Name != null && Name.Content != null ? Name.Content : "<NULL_VAR_NAME>";
         }
 
         public bool SearchMatches(string filter)
