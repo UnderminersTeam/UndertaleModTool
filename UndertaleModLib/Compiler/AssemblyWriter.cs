@@ -1413,7 +1413,6 @@ namespace UndertaleModLib.Compiler
                         if (typeStack.Peek() != UndertaleInstruction.DataType.Int32) // apparently it converts to ints
                         {
                             cw.Write("conv." + typeStack.Pop().ToOpcodeParam() + ".i");
-                            typeStack.Push(UndertaleInstruction.DataType.Int32);
                         }
 
                         int next = 1;
@@ -1428,7 +1427,6 @@ namespace UndertaleModLib.Compiler
                             if (next + 1 < e.Children.Count)
                             {
                                 cw.Write("conv." + typeStack.Pop().ToOpcodeParam() + ".i");
-                                typeStack.Push(UndertaleInstruction.DataType.Int32);
                             }
                             next++;
                         }
@@ -1597,7 +1595,6 @@ namespace UndertaleModLib.Compiler
                                 typeStack.Push(UndertaleInstruction.DataType.Variable);
                                 cw.Write("push.v [stacktop]" + s.Children[next].Text);
                                 cw.Write("conv." + typeStack.Pop().ToOpcodeParam() + ".i");
-                                typeStack.Push(UndertaleInstruction.DataType.Int32);
                             } else
                             {
                                 cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [stacktop]" + s.Children[next].Text);
