@@ -1485,6 +1485,11 @@ namespace UndertaleModLib.Compiler
                             }
 
                             result.Children[0] = left;
+
+                            for (int i = 0; i < result.Children.Count; i++)
+                            {
+                                result.Children[i] = Optimize(result.Children[i]);
+                            }
                         } else
                         {
                             for (int i = 0; i < result.Children.Count; i++)
