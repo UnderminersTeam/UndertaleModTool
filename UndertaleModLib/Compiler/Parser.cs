@@ -1361,9 +1361,11 @@ namespace UndertaleModLib.Compiler
                     case TokenKind.Increment:
                     case TokenKind.Decrement:
                         {
-                            Statement post = new Statement(Statement.StatementKind.Pre, remainingStageOne.Dequeue().Token);
-                            post.Children.Add(ParsePostAndRef());
-                            return post;
+                            Statement pre = new Statement(Statement.StatementKind.Pre, remainingStageOne.Dequeue().Token);
+                            pre.Children.Add(ParsePostAndRef());
+                            if (pre.Children[0].Kind == Statement.StatementKind.Post)
+                                ReportCodeError("Unexpected pre/post combination.", pre.Token, true);
+                            return pre;
                         }
                     case TokenKind.Not:
                     case TokenKind.Plus:
