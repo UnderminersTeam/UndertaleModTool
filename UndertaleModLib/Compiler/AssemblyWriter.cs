@@ -1419,6 +1419,10 @@ namespace UndertaleModLib.Compiler
                         int next = 1;
                         while (next < e.Children.Count)
                         {
+                            if (ensureVariablesDefined)
+                            {
+                                data?.Variables?.EnsureDefined(e.Children[next].Text, UndertaleInstruction.InstanceType.Self, BuiltinList.GlobalArray.ContainsKey(e.Children[next].Text) || BuiltinList.GlobalNotArray.ContainsKey(e.Children[next].Text), data.Strings, data);
+                            }
                             if (e.Children[next].Children.Count != 0)
                             {
                                 AssembleArrayPush(cw, e.Children[next]);
@@ -1444,10 +1448,6 @@ namespace UndertaleModLib.Compiler
                                     cw.Write("dup.i 0");
                                 }
                                 cw.Write("push.v [stacktop]" + e.Children[next].Text);
-                                if (ensureVariablesDefined)
-                                {
-                                    data?.Variables?.EnsureDefined(e.Children[next].Text, UndertaleInstruction.InstanceType.Self, BuiltinList.GlobalArray.ContainsKey(e.Children[next].Text) || BuiltinList.GlobalNotArray.ContainsKey(e.Children[next].Text), data.Strings, data);
-                                }
                                 typeStack.Push(UndertaleInstruction.DataType.Variable);
                                 if (next + 1 < e.Children.Count)
                                 {
@@ -1600,30 +1600,41 @@ namespace UndertaleModLib.Compiler
                             popLocation = "i";
                             next = s.Children.Count - 1;
                         }
-                        while (next < s.Children.Count && s.Children[next].Children.Count == 0)
+                        while (next < s.Children.Count)
                         {
-                            if (next + 1 < s.Children.Count)
-                            {
-                                typeStack.Push(UndertaleInstruction.DataType.Variable);
-                                cw.Write("push.v [stacktop]" + s.Children[next].Text);
-                                cw.Write("conv." + typeStack.Pop().ToOpcodeParam() + ".i");
-                            } else
-                            {
-                                cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [stacktop]" + s.Children[next].Text);
-                            }
-                            next++;
-                        }
-
-                        // Deal with arrays
-                        if (next < s.Children.Count && s.Children[next].Children.Count != 0)
-                        {
-                            if (!skip) // don't push the index again
-                                AssembleArrayPush(cw, s.Children[next]);
-                            if (ensureVariablesDefined && s.Children[next].ID == -1)
+                            if (ensureVariablesDefined)
                             {
                                 data?.Variables?.EnsureDefined(s.Children[next].Text, UndertaleInstruction.InstanceType.Self, BuiltinList.GlobalArray.ContainsKey(s.Children[next].Text) || BuiltinList.GlobalNotArray.ContainsKey(s.Children[next].Text), data.Strings, data);
                             }
-                            cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [array]" + s.Children[next].Text);
+                            if (s.Children[next].Children.Count != 0)
+                            {
+                                if (!skip) // don't push the index again
+                                    AssembleArrayPush(cw, s.Children[next]);
+                                if (next + 1 < s.Children.Count)
+                                {
+                                    cw.Write("push.v [array]" + s.Children[next].Text);
+                                    typeStack.Push(UndertaleInstruction.DataType.Variable);
+                                    cw.Write("conv." + typeStack.Pop().ToOpcodeParam() + ".i");
+                                }
+                                else
+                                {
+                                    cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [array]" + s.Children[next].Text);
+                                }
+                            }
+                            else
+                            {
+                                if (next + 1 < s.Children.Count)
+                                {
+                                    cw.Write("push.v [stacktop]" + s.Children[next].Text);
+                                    typeStack.Push(UndertaleInstruction.DataType.Variable);
+                                    cw.Write("conv." + typeStack.Pop().ToOpcodeParam() + ".i");
+                                }
+                                else
+                                {
+                                    cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [stacktop]" + s.Children[next].Text);
+                                }
+                            }
+                            next++;
                         }
                         if (!skip)
                             typeStack.Pop();
