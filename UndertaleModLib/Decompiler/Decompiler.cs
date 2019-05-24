@@ -132,12 +132,14 @@ namespace UndertaleModLib.Decompiler
         public class ExpressionConstant : Expression
         {
             public object Value;
+            public bool IsPushE;
             internal AssetIDType AssetType = AssetIDType.Other;
 
-            public ExpressionConstant(UndertaleInstruction.DataType type, object value)
+            public ExpressionConstant(UndertaleInstruction.DataType type, object value, bool isPushE = false)
             {
                 Type = type;
                 Value = value;
+                IsPushE = isPushE;
             }
 
             internal override bool IsDuplicationSafe()
@@ -362,6 +364,60 @@ namespace UndertaleModLib.Decompiler
                 AssetIDType t = TrueExpression.DoTypePropagation(context, suggestedType);
                 FalseExpression.DoTypePropagation(context, AssetIDType.Other);
                 return t;
+            }
+        }
+
+        public class ExpressionPost : Expression
+        {
+            public UndertaleInstruction.Opcode Opcode;
+            public Expression Variable;
+
+            public ExpressionPost(UndertaleInstruction.Opcode opcode, Expression variable)
+            {
+                Opcode = opcode;
+                Variable = variable;
+            }
+
+            internal override bool IsDuplicationSafe()
+            {
+                return Variable.IsDuplicationSafe();
+            }
+
+            public override string ToString(DecompileContext context)
+            {
+                return Variable.ToString(context) + (Opcode == UndertaleInstruction.Opcode.Add ? "++" : "--");
+            }
+
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
+            {
+                return Variable.DoTypePropagation(context, suggestedType);
+            }
+        }
+
+        public class ExpressionPre : Expression
+        {
+            public UndertaleInstruction.Opcode Opcode;
+            public Expression Variable;
+
+            public ExpressionPre(UndertaleInstruction.Opcode opcode, Expression variable)
+            {
+                Opcode = opcode;
+                Variable = variable;
+            }
+
+            internal override bool IsDuplicationSafe()
+            {
+                return Variable.IsDuplicationSafe();
+            }
+
+            public override string ToString(DecompileContext context)
+            {
+                return (Opcode == UndertaleInstruction.Opcode.Add ? "++" : "--") + Variable.ToString(context);
+            }
+
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
+            {
+                return Variable.DoTypePropagation(context, suggestedType);
             }
         }
 
@@ -605,7 +661,13 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                return String.Format("{0} = {1}", Destination.ToString(context), Value.ToString(context));
+                if (Value is ExpressionTwo && ((Value as ExpressionTwo).Argument1 is ExpressionVar) && ((Value as ExpressionTwo).Argument1 as ExpressionVar).Var == Destination.Var 
+                    && ((Value as ExpressionTwo).Argument2 is ExpressionConstant) && ((Value as ExpressionTwo).Argument2 as ExpressionConstant).IsPushE
+                    && Convert.ToInt32(((Value as ExpressionTwo).Argument2 as ExpressionConstant).Value) == 1)
+                {
+                    return String.Format("{0}" + (((Value as ExpressionTwo).Opcode == UndertaleInstruction.Opcode.Add) ? "++" : "--"), Destination.ToString(context));
+                } else
+                    return String.Format("{0} = {1}", Destination.ToString(context), Value.ToString(context));
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -864,10 +926,11 @@ namespace UndertaleModLib.Decompiler
             List<Statement> statements = new List<Statement>();
             bool end = false;
             bool returned = false;
-            foreach (var instr in block.Instructions)
+            for (int i = 0; i < block.Instructions.Count; i++)
             {
                 if (end)
                     throw new Exception("Excepted end of block, but still has instructions");
+                var instr = block.Instructions[i];
                 switch (instr.Kind)
                 {
                     case UndertaleInstruction.Opcode.Neg:
@@ -879,7 +942,7 @@ namespace UndertaleModLib.Decompiler
                         List<Expression> topExpressions1 = new List<Expression>();
                         List<Expression> topExpressions2 = new List<Expression>();
                         int count = ((instr.DupExtra + 1) * (instr.Type1 == UndertaleInstruction.DataType.Int64 ? 2 : 1));
-                        for (int i = 0; i < count; i++)
+                        for (int j = 0; j < count; j++)
                         {
                             var item = stack.Pop();
                             if (item.IsDuplicationSafe())
@@ -900,10 +963,10 @@ namespace UndertaleModLib.Decompiler
                         }
                         topExpressions1.Reverse();
                         topExpressions2.Reverse();
-                        for (int i = 0; i < topExpressions1.Count; i++)
-                            stack.Push(topExpressions1[i]);
-                        for (int i = 0; i < topExpressions2.Count; i++)
-                            stack.Push(topExpressions2[i]);
+                        for (int j = 0; j < topExpressions1.Count; j++)
+                            stack.Push(topExpressions1[j]);
+                        for (int j = 0; j < topExpressions2.Count; j++)
+                            stack.Push(topExpressions2[j]);
                         break;
 
                     case UndertaleInstruction.Opcode.Ret:
@@ -994,7 +1057,16 @@ namespace UndertaleModLib.Decompiler
 
                     case UndertaleInstruction.Opcode.Pop:
                         if (instr.Destination == null)
-                            throw new Exception("Unsupported pop.e.v, this is a bug seemingly with incrementing/decrementing in expressions");
+                        {
+                            // pop.e.v 5/6
+                            Expression e1 = stack.Pop();
+                            Expression e2 = stack.Pop();
+                            for (int j = 0; j < instr.SwapExtra - 4; j++)
+                                stack.Pop();
+                            stack.Push(e2);
+                            stack.Push(e1);
+                            break;
+                        }
                         ExpressionVar target = new ExpressionVar(instr.Destination.Target, new ExpressionConstant(UndertaleInstruction.DataType.Int16, instr.TypeInst), instr.Destination.Type);
                         Expression val = null;
                         if (instr.Type1 != UndertaleInstruction.DataType.Int32 && instr.Type1 != UndertaleInstruction.DataType.Variable)
@@ -1037,14 +1109,57 @@ namespace UndertaleModLib.Decompiler
                         }
                         else
                         {
-                            Expression pushTarget = new ExpressionConstant(instr.Type1, instr.Value);
-                            stack.Push(pushTarget);
+                            bool isPushE = (instr.Kind == UndertaleInstruction.Opcode.Push && instr.Type1 == UndertaleInstruction.DataType.Int16);
+                            Expression pushTarget = new ExpressionConstant(instr.Type1, instr.Value, isPushE);
+                            if (isPushE && pushTarget.Type == UndertaleInstruction.DataType.Int16 && Convert.ToInt32((pushTarget as ExpressionConstant).Value) == 1)
+                            {
+                                // Check for expression ++ or --
+                                if (((i >= 1 && block.Instructions[i - 1].Kind == UndertaleInstruction.Opcode.Dup && block.Instructions[i - 1].Type1 == UndertaleInstruction.DataType.Variable) ||
+                                     (i >= 2 && block.Instructions[i - 2].Kind == UndertaleInstruction.Opcode.Dup && block.Instructions[i - 2].Type1 == UndertaleInstruction.DataType.Variable &&
+                                      block.Instructions[i - 1].Kind == UndertaleInstruction.Opcode.Pop && block.Instructions[i - 1].Type1 == UndertaleInstruction.DataType.Int16 && block.Instructions[i - 1].Type2 == UndertaleInstruction.DataType.Variable)) &&
+                                    (i + 1 < block.Instructions.Count && (block.Instructions[i + 1].Kind == UndertaleInstruction.Opcode.Add || block.Instructions[i + 1].Kind == UndertaleInstruction.Opcode.Sub)))
+                                {
+                                    // We've detected a post increment/decrement (i.e., x = y++)
+                                    // Remove duplicate from stack
+                                    stack.Pop();
+
+                                    // Do the magic
+                                    stack.Push(new ExpressionPost(block.Instructions[i + 1].Kind, stack.Pop()));
+
+                                    while (i < block.Instructions.Count && (block.Instructions[i].Kind != UndertaleInstruction.Opcode.Pop || (block.Instructions[i].Type1 == UndertaleInstruction.DataType.Int16 && block.Instructions[i].Type2 == UndertaleInstruction.DataType.Variable)))
+                                        i++;
+                                } else if (i + 2 < block.Instructions.Count && (block.Instructions[i + 1].Kind == UndertaleInstruction.Opcode.Add || block.Instructions[i + 1].Kind == UndertaleInstruction.Opcode.Sub) &&
+                                          block.Instructions[i + 2].Kind == UndertaleInstruction.Opcode.Dup && block.Instructions[i + 2].Type1 == UndertaleInstruction.DataType.Variable)
+                                {
+                                    // We've detected a pre increment/decrement (i.e., x = ++y)
+                                    // Do the magic
+                                    stack.Push(new ExpressionPre(block.Instructions[i + 1].Kind, stack.Pop()));
+
+                                    while (i < block.Instructions.Count && block.Instructions[i].Kind != UndertaleInstruction.Opcode.Pop)
+                                        i++;
+                                    var _inst = block.Instructions[i];
+                                    if (_inst.Type1 == UndertaleInstruction.DataType.Int16 && _inst.Type2 == UndertaleInstruction.DataType.Variable)
+                                    {
+                                        Expression e = stack.Pop();
+                                        stack.Pop();
+                                        stack.Push(e);
+                                        i++;
+                                    }
+                                }
+                                else
+                                {
+                                    stack.Push(pushTarget);
+                                }
+                            } else
+                            {
+                                stack.Push(pushTarget);
+                            }
                         }
                         break;
 
                     case UndertaleInstruction.Opcode.Call:
                         List<Expression> args = new List<Expression>();
-                        for (int i = 0; i < instr.ArgumentsCount; i++)
+                        for (int j = 0; j < instr.ArgumentsCount; j++)
                             args.Add(stack.Pop());
                         stack.Push(new FunctionCall(instr.Function.Target, instr.Type1, args));
                         break;
@@ -1787,7 +1902,7 @@ namespace UndertaleModLib.Decompiler
                     }
                 }
 
-                if (output.Statements.Count >= 1 && output.Statements[output.Statements.Count - 1] is TempVarAssigmentStatement && block.Instructions[block.Instructions.Count - 1].Kind == UndertaleInstruction.Opcode.Bt && block.conditionalExit && block.ConditionStatement is ExpressionCompare && (block.ConditionStatement as ExpressionCompare).Opcode == UndertaleInstruction.ComparisonType.EQ)
+                if (output.Statements.Count >= 1 && output.Statements[output.Statements.Count - 1] is TempVarAssigmentStatement && block.Instructions.Count >= 1 && block.Instructions[block.Instructions.Count - 1].Kind == UndertaleInstruction.Opcode.Bt && block.conditionalExit && block.ConditionStatement is ExpressionCompare && (block.ConditionStatement as ExpressionCompare).Opcode == UndertaleInstruction.ComparisonType.EQ)
                 {
                     // This is a switch statement!
                     Expression switchExpression = (output.Statements[output.Statements.Count - 1] as TempVarAssigmentStatement).Value;
@@ -2126,27 +2241,14 @@ namespace UndertaleModLib.Decompiler
                         Statement trueStatement = ifStatement.trueBlock.Statements[0];
                         Statement falseStatement = ifStatement.falseBlock.Statements[0];
 
-                        if (trueStatement is AssignmentStatement && falseStatement is AssignmentStatement)
-                        {
-                            AssignmentStatement trueAssign = (AssignmentStatement)trueStatement;
-                            AssignmentStatement falseAssign = (AssignmentStatement)falseStatement;
-                            if (trueAssign.Destination.Var == falseAssign.Destination.Var && TestTernaryPass(trueAssign.Value, falseAssign.Value, context.isGameMaker2))
-                                output.Statements[i] = new AssignmentStatement(trueAssign.Destination, new ExpressionTernary(trueAssign.Value.Type, ifStatement.condition, trueAssign.Value, falseAssign.Value));
-
-                        }
-                        else if (trueStatement is TempVarAssigmentStatement && falseStatement is TempVarAssigmentStatement)
+                        // Only tempvars will technically be ternary, others will be expanded- causes
+                        // compiler inconsistencies we really don't need.
+                        if (trueStatement is TempVarAssigmentStatement && falseStatement is TempVarAssigmentStatement)
                         {
                             TempVarAssigmentStatement trueAssign = (TempVarAssigmentStatement)trueStatement;
                             TempVarAssigmentStatement falseAssign = (TempVarAssigmentStatement)falseStatement;
                             if (trueAssign.Var.Var == falseAssign.Var.Var && TestTernaryPass(trueAssign.Value, falseAssign.Value, context.isGameMaker2))
                                 output.Statements[i] = new TempVarAssigmentStatement(trueAssign.Var, new ExpressionTernary(trueAssign.Value.Type, ifStatement.condition, trueAssign.Value, falseAssign.Value));
-                        }
-                        else if (trueStatement is ReturnStatement && falseStatement is ReturnStatement)
-                        {
-                            ReturnStatement trueReturn = (ReturnStatement)trueStatement;
-                            ReturnStatement falseReturn = (ReturnStatement)falseStatement;
-                            if (trueReturn.Value != null && falseReturn.Value != null && TestTernaryPass(trueReturn.Value, falseReturn.Value, context.isGameMaker2))
-                                output.Statements[i] = new ReturnStatement(new ExpressionTernary(trueReturn.Value.Type, ifStatement.condition, trueReturn.Value, falseReturn.Value));
                         }
 
                         currentStatement = output.Statements[i];

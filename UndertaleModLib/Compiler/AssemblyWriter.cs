@@ -1406,6 +1406,7 @@ namespace UndertaleModLib.Compiler
                                 cw.Write("push.v " + GetIDPrefix(id) + name);
                                 break;
                         }
+                        typeStack.Push(UndertaleInstruction.DataType.Variable);
                     }
                     else
                     {
@@ -1416,35 +1417,46 @@ namespace UndertaleModLib.Compiler
                         }
 
                         int next = 1;
-                        while (next < e.Children.Count && e.Children[next].Children.Count == 0)
+                        while (next < e.Children.Count)
                         {
-                            if (duplicate && next + 1 >= e.Children.Count)
+                            if (e.Children[next].Children.Count != 0)
                             {
-                                cw.Write("dup.i 0");
+                                AssembleArrayPush(cw, e.Children[next]);
+                                bool notLast = (next + 1 < e.Children.Count);
+                                if (!notLast && duplicate) // ha ha, double negatives
+                                {
+                                    cw.Write(useLongDupForArray ? "dup.l 0" : "dup.i 1");
+                                }
+                                cw.Write("push.v [array]" + e.Children[next].Text);
+                                typeStack.Push(UndertaleInstruction.DataType.Variable);
+                                if (notLast)
+                                {
+                                    cw.Write("conv." + typeStack.Pop().ToOpcodeParam() + ".i");
+                                }
+                                else
+                                    isArray = true;
+                                next++;
                             }
-                            cw.Write("push.v [stacktop]" + e.Children[next].Text);
-                            typeStack.Push(UndertaleInstruction.DataType.Variable);
-                            if (next + 1 < e.Children.Count)
+                            else
                             {
-                                cw.Write("conv." + typeStack.Pop().ToOpcodeParam() + ".i");
+                                if (duplicate && next + 1 >= e.Children.Count)
+                                {
+                                    cw.Write("dup.i 0");
+                                }
+                                cw.Write("push.v [stacktop]" + e.Children[next].Text);
+                                if (ensureVariablesDefined)
+                                {
+                                    data?.Variables?.EnsureDefined(e.Children[next].Text, UndertaleInstruction.InstanceType.Self, BuiltinList.GlobalArray.ContainsKey(e.Children[next].Text) || BuiltinList.GlobalNotArray.ContainsKey(e.Children[next].Text), data.Strings, data);
+                                }
+                                typeStack.Push(UndertaleInstruction.DataType.Variable);
+                                if (next + 1 < e.Children.Count)
+                                {
+                                    cw.Write("conv." + typeStack.Pop().ToOpcodeParam() + ".i");
+                                }
+                                next++;
                             }
-                            next++;
                         }
-
-                        // Deal with arrays
-                        if (next < e.Children.Count && e.Children[next].Children.Count != 0)
-                        {
-                            AssembleArrayPush(cw, e.Children[next]);
-                            if (duplicate)
-                            {
-                                cw.Write(useLongDupForArray ? "dup.l 0" : "dup.i 1");
-                            }
-                            cw.Write("push.v [array]" + e.Children[next].Text);
-                            isArray = true;
-                        }
-                        typeStack.Pop();
                     }
-                    typeStack.Push(UndertaleInstruction.DataType.Variable);
                 } else if (e.Kind == Parser.Statement.StatementKind.ExprSingleVariable)
                 {
                     // Assume local or self if necessary. Global doesn't apply here

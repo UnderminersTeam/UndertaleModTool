@@ -164,6 +164,8 @@ namespace UndertaleModLib.Models
                     return 0;
 
                 case Opcode.Pop:
+                    if (instr.Destination == null)
+                        return instr.SwapExtra - 6;
                     if (instr.Destination.Type == VariableType.StackTop)
                         return -1 - 1;
                     if (instr.Destination.Type == VariableType.Array)
@@ -873,7 +875,7 @@ namespace UndertaleModLib.Models
         public void UpdateAddresses()
         {
             uint addr = 0;
-            foreach(UndertaleInstruction instr in Instructions)
+            foreach (UndertaleInstruction instr in Instructions)
             {
                 instr.Address = addr;
                 addr += instr.CalculateInstructionSize();

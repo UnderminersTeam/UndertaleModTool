@@ -622,6 +622,26 @@ namespace UndertaleModTool
                 return;
             }
 
+            UndertaleCodeLocals locals = data.CodeLocals.For(code);
+            bool hasLocal(string name)
+            {
+                foreach (var l in locals.Locals)
+                {
+                    if (name == l.Name.Content)
+                        return true;
+                }
+                return false;
+            }
+            foreach (var l in Compiler.LocalVars)
+            {
+                string name = l.Key;
+                if (!hasLocal(name))
+                {
+                    locals.Locals.Add(new UndertaleCodeLocals.LocalVar() { Index = (uint)locals.Locals.Count, Name = data.Strings.MakeString(name) });
+                    code.LocalsCount++;
+                }
+            }
+
             try
             {
                 var instructions = Assembler.Assemble(assembledString, data);
