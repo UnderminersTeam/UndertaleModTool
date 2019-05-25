@@ -196,7 +196,7 @@ namespace UndertaleModLib.Models
             private uint _TileY = 1;
             private int _SpeedX = 0;
             private int _SpeedY = 0;
-            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
+            private bool _Stretch = false;
 
             public bool Enabled { get => _Enabled; set { _Enabled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Enabled")); } }
             public bool Foreground { get => _Foreground; set { _Foreground = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Foreground")); } }
@@ -207,7 +207,7 @@ namespace UndertaleModLib.Models
             public uint TileY { get => _TileY; set { _TileY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileY")); } }
             public int SpeedX { get => _SpeedX; set { _SpeedX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpeedX")); } }
             public int SpeedY { get => _SpeedY; set { _SpeedY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpeedY")); } }
-            public UndertaleGameObject ObjectId { get => _ObjectId.Resource; set { _ObjectId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ObjectId")); } }
+            public bool Stretch { get => _Stretch; set { _Stretch = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Stretch")); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -222,7 +222,7 @@ namespace UndertaleModLib.Models
                 writer.Write(TileY);
                 writer.Write(SpeedX);
                 writer.Write(SpeedY);
-                writer.WriteUndertaleObject(_ObjectId);
+                writer.Write(Stretch);
             }
 
             public void Unserialize(UndertaleReader reader)
@@ -236,7 +236,7 @@ namespace UndertaleModLib.Models
                 TileY = reader.ReadUInt32();
                 SpeedX = reader.ReadInt32();
                 SpeedY = reader.ReadInt32();
-                _ObjectId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
+                Stretch = reader.ReadBoolean();
             }
         }
 

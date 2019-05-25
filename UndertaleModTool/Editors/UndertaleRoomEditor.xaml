@@ -371,8 +371,8 @@
                                 <TextBox Grid.Column="1" Margin="3" Text="{Binding SpeedY}" ToolTip="Y"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Object id</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="6" Grid.Column="1" Margin="3" ObjectReference="{Binding ObjectId}" ObjectType="{x:Type undertale:UndertaleGameObject}"/>
+                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Stretch</TextBlock>
+                            <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Stretch}"/>
                         </Grid>
                     </DataTemplate>
 
