@@ -1402,26 +1402,7 @@ namespace UndertaleModLib.Decompiler
                     return false; // Nope! Need brackets!
 
                 Statement statement = blockStatement.Statements[0];
-
-                if (statement is IfHLStatement)
-                {
-                    IfHLStatement ifStatement = (IfHLStatement)statement;
-                    return !ifStatement.HasElse && !ifStatement.HasElseIf && CanSkipBrackets(ifStatement.trueBlock);
-                }
-
-                if (statement is LoopHLStatement)
-                {
-                    LoopHLStatement loop = (LoopHLStatement)statement;
-                    return !loop.IsDoUntilLoop && CanSkipBrackets(loop.Block);
-                }
-
-                if (statement is WithHLStatement)
-                    return CanSkipBrackets(((WithHLStatement) statement).Block);
-
-                if (statement is HLSwitchStatement)
-                    return false; // These will always require a block. Basically any place that uses ToString with canSkipBrackets set to false.
-
-                return true;
+                return !(statement is IfHLStatement || statement is LoopHLStatement || statement is HLSwitchStatement || statement is WithHLStatement); // Nesting these can cause issues.
             }
         };
 
