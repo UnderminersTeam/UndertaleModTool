@@ -639,7 +639,7 @@ namespace UndertaleModLib.Decompiler
                 if (Value != null)
                     return "return " + Value.ToString(context);
                 else
-                    return "exit";
+                    return (context.isGameMaker2 ? "return" : "exit");
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
