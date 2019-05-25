@@ -2003,7 +2003,7 @@ namespace UndertaleModLib.Decompiler
                     output.Statements.Add(new WithHLStatement()
                     {
                         NewEnv = stmt.NewEnv,
-                        Block = HLDecompileBlocks(context, ref block, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, stopAt)
+                        Block = HLDecompileBlocks(context, ref block, blocks, loops, reverseDominators, alreadyVisited, null, false, stopAt)
                     });
                     if (block == null)
                         break;
