@@ -66,6 +66,7 @@ namespace UndertaleModLib.Decompiler
         public abstract class Expression : Statement
         {
             public UndertaleInstruction.DataType Type;
+            public bool WasDuplicated = false;
 
             public static string OperationToPrintableString(UndertaleInstruction.Opcode op)
             {
@@ -661,13 +662,38 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                if (Value is ExpressionTwo && ((Value as ExpressionTwo).Argument1 is ExpressionVar) && ((Value as ExpressionTwo).Argument1 as ExpressionVar).Var == Destination.Var 
+                if (Value is ExpressionTwo && ((Value as ExpressionTwo).Argument1 is ExpressionVar) && ((Value as ExpressionTwo).Argument1 as ExpressionVar).Var == Destination.Var
                     && ((Value as ExpressionTwo).Argument2 is ExpressionConstant) && ((Value as ExpressionTwo).Argument2 as ExpressionConstant).IsPushE
                     && Convert.ToInt32(((Value as ExpressionTwo).Argument2 as ExpressionConstant).Value) == 1)
                 {
                     return String.Format("{0}" + (((Value as ExpressionTwo).Opcode == UndertaleInstruction.Opcode.Add) ? "++" : "--"), Destination.ToString(context));
-                } else
+                }
+                else
                     return String.Format("{0} = {1}", Destination.ToString(context), Value.ToString(context));
+            }
+
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
+            {
+                return Value.DoTypePropagation(context, Destination.DoTypePropagation(context, suggestedType));
+            }
+        }
+
+        public class AssignmentEqualsStatement : Statement
+        {
+            public ExpressionVar Destination;
+            public UndertaleInstruction.Opcode Operation;
+            public Expression Value;
+
+            public AssignmentEqualsStatement(ExpressionVar destination, UndertaleInstruction.Opcode operation, Expression value)
+            {
+                Destination = destination;
+                Operation = operation;
+                Value = value;
+            }
+
+            public override string ToString(DecompileContext context)
+            {
+                return String.Format("{0} {1}= {2}", Destination.ToString(context), Expression.OperationToPrintableString(Operation), Value.ToString(context));
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -947,6 +973,7 @@ namespace UndertaleModLib.Decompiler
                             var item = stack.Pop();
                             if (item.IsDuplicationSafe())
                             {
+                                item.WasDuplicated = true;
                                 topExpressions1.Add(item);
                                 topExpressions2.Add(item);
                             }
@@ -957,8 +984,8 @@ namespace UndertaleModLib.Decompiler
                                 TempVarReference varref = new TempVarReference(var);
                                 statements.Add(new TempVarAssigmentStatement(varref, item));
 
-                                topExpressions1.Add(new ExpressionTempVar(varref, varref.Var.Type));
-                                topExpressions2.Add(new ExpressionTempVar(varref, instr.Type1));
+                                topExpressions1.Add(new ExpressionTempVar(varref, varref.Var.Type) { WasDuplicated = true } );
+                                topExpressions2.Add(new ExpressionTempVar(varref, instr.Type1) { WasDuplicated = true } );
                             }
                         }
                         topExpressions1.Reverse();
@@ -1085,6 +1112,28 @@ namespace UndertaleModLib.Decompiler
                         if (instr.Type1 == UndertaleInstruction.DataType.Variable)
                             val = stack.Pop();
                         Debug.Assert(val != null);
+                        if (val != null)
+                        {
+                            if ((target.NeedsInstanceParameters || target.NeedsArrayParameters) && target.InstType.WasDuplicated)
+                            {
+                                // Should be safe to assume that this is a +=, -=, etc.
+                                if (val is ExpressionTwo)
+                                {
+                                    var two = (val as ExpressionTwo);
+                                    var arg = two.Argument1;
+                                    if (arg is ExpressionVar)
+                                    {
+                                        var v = arg as ExpressionVar;
+                                        if (v.Var == target.Var && v.InstType == target.InstType &&
+                                            v.ArrayIndex1 == target.ArrayIndex1 && v.ArrayIndex2 == target.ArrayIndex2) // even if null
+                                        {
+                                            statements.Add(new AssignmentEqualsStatement(target, two.Opcode, two.Argument2));
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         statements.Add(new AssignmentStatement(target, val));
                         break;
 
