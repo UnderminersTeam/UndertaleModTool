@@ -2379,22 +2379,52 @@ namespace UndertaleModLib.Decompiler
 
                     tempBuilder.Append(local.Name.Content);
                 }
-
-                for (int i = 0; i < TempVar.TempVarId; i++)
+            }
+            else
+            {
+                // Time to search through this thing manually.
+                List<string> localSearch = new List<string>();
+                for (int i = 0; i < code.Instructions.Count; i++)
                 {
-                    string tempVarName = TempVar.MakeTemporaryVarName(i + 1);
-                    if (decompiledCode.Contains(tempVarName))
+                    var inst = code.Instructions[i];
+                    if (inst.Kind == UndertaleInstruction.Opcode.PushLoc)
                     {
-                        if (tempBuilder.Length > 0)
-                            tempBuilder.Append(", ");
-                        tempBuilder.Append(tempVarName);
+                        string name = (inst.Value as UndertaleInstruction.Reference<UndertaleVariable>)?.Target?.Name?.Content;
+                        if (name != null && !localSearch.Contains(name))
+                            localSearch.Add(name);
+                    }
+                    else if (inst.Kind == UndertaleInstruction.Opcode.Pop && inst.TypeInst == UndertaleInstruction.InstanceType.Local)
+                    {
+                        string name = inst.Destination.Target?.Name?.Content;
+                        if (name != null && !localSearch.Contains(name))
+                            localSearch.Add(name);
                     }
                 }
+                foreach (string local in localSearch)
+                {
+                    if (local == "arguments" || local == "$$$$temp$$$$")
+                        continue;
 
-                if (tempBuilder.Length > 0)
-                    decompiledCode = "var " + tempBuilder.ToString() + ";\n" + decompiledCode;
+                    if (tempBuilder.Length > 0)
+                        tempBuilder.Append(", ");
+
+                    tempBuilder.Append(local);
+                }
             }
 
+            for (int i = 0; i < TempVar.TempVarId; i++)
+            {
+                string tempVarName = TempVar.MakeTemporaryVarName(i + 1);
+                if (decompiledCode.Contains(tempVarName))
+                {
+                    if (tempBuilder.Length > 0)
+                        tempBuilder.Append(", ");
+                    tempBuilder.Append(tempVarName);
+                }
+            }
+
+            if (tempBuilder.Length > 0)
+                decompiledCode = "var " + tempBuilder.ToString() + ";\n" + decompiledCode;
 
             return decompiledCode;
         }

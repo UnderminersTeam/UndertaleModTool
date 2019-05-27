@@ -62,7 +62,7 @@ namespace UndertaleModLib.Models
 
         public static InstructionType GetInstructionType(Opcode op)
         {
-            switch(op)
+            switch (op)
             {
                 case Opcode.Neg:
                 case Opcode.Not:
@@ -88,7 +88,7 @@ namespace UndertaleModLib.Models
 
                 case Opcode.Cmp:
                     return InstructionType.ComparisonInstruction;
-                    
+
                 case Opcode.B:
                 case Opcode.Bt:
                 case Opcode.Bf:
@@ -311,9 +311,9 @@ namespace UndertaleModLib.Models
             public static Dictionary<T, List<UndertaleInstruction>> CollectReferences(IList<UndertaleCode> codes)
             {
                 Dictionary<T, List<UndertaleInstruction>> list = new Dictionary<T, List<UndertaleInstruction>>();
-                foreach(UndertaleCode code in codes)
+                foreach (UndertaleCode code in codes)
                 {
-                    foreach(UndertaleInstruction instr in code.Instructions)
+                    foreach (UndertaleInstruction instr in code.Instructions)
                     {
                         T obj = instr.GetReference<T>()?.Target;
                         if (obj != null)
@@ -398,18 +398,88 @@ namespace UndertaleModLib.Models
                 case InstructionType.DoubleTypeInstruction:
                 case InstructionType.ComparisonInstruction:
                     {
+                        bool bytecode14 = (writer.undertaleData.GeneralInfo?.BytecodeVersion <= 14);
                         writer.Write(DupExtra);
-                        writer.Write((byte)ComparisonKind);
+                        if (bytecode14 && Kind == Opcode.Cmp)
+                            writer.Write((byte)0);
+                        else
+                            writer.Write((byte)ComparisonKind);
                         byte TypePair = (byte)((byte)Type2 << 4 | (byte)Type1);
                         writer.Write(TypePair);
-                        writer.Write((byte)Kind);
+
+                        if (writer.undertaleData.GeneralInfo?.BytecodeVersion <= 14)
+                        {
+                            byte k;
+                            switch (Kind)
+                            {
+                                case Opcode.Conv:
+                                    k = 0x03;
+                                    break;
+                                case Opcode.Mul:
+                                    k = 0x04;
+                                    break;
+                                case Opcode.Div:
+                                    k = 0x05;
+                                    break;
+                                case Opcode.Rem:
+                                    k = 0x06;
+                                    break;
+                                case Opcode.Mod:
+                                    k = 0x07;
+                                    break;
+                                case Opcode.Add:
+                                    k = 0x08;
+                                    break;
+                                case Opcode.Sub:
+                                    k = 0x09;
+                                    break;
+                                case Opcode.And:
+                                    k = 0x0A;
+                                    break;
+                                case Opcode.Or:
+                                    k = 0x0B;
+                                    break;
+                                case Opcode.Xor:
+                                    k = 0x0C;
+                                    break;
+                                case Opcode.Neg:
+                                    k = 0x0D;
+                                    break;
+                                case Opcode.Not:
+                                    k = 0x0E;
+                                    break;
+                                case Opcode.Dup:
+                                    k = 0x82;
+                                    break;
+                                case Opcode.Cmp:
+                                    k = (byte)(ComparisonKind + 0x10);
+                                    break;
+                                case Opcode.Ret:
+                                    k = 0x9D;
+                                    break;
+                                case Opcode.Exit:
+                                    k = 0x9E;
+                                    break;
+                                case Opcode.Popz:
+                                    k = 0x9F;
+                                    break;
+                                default:
+                                    k = (byte)Kind;
+                                    break;
+                            }
+                            writer.Write(k);
+                        }
+                        else
+                            writer.Write((byte)Kind);
                     }
                     break;
-                    
+
                 case InstructionType.GotoInstruction:
                     {
                         // See unserialize
-                        if (JumpOffsetPopenvExitMagic)
+                        if (writer.undertaleData.GeneralInfo?.BytecodeVersion <= 14)
+                            writer.WriteInt24(JumpOffset);
+                        else if (JumpOffsetPopenvExitMagic)
                         {
                             writer.WriteInt24(0xF00000);
                         }
@@ -420,7 +490,23 @@ namespace UndertaleModLib.Models
                             writer.WriteInt24((int)JumpOffsetFixed);
                         }
 
-                        writer.Write((byte)Kind);
+                        if (writer.undertaleData.GeneralInfo?.BytecodeVersion <= 14)
+                        {
+                            if (Kind == Opcode.B)
+                                writer.Write((byte)0xB7);
+                            else if (Kind == Opcode.Bt)
+                                writer.Write((byte)0xB8);
+                            else if (Kind == Opcode.Bf)
+                                writer.Write((byte)0xB9);
+                            else if (Kind == Opcode.PushEnv)
+                                writer.Write((byte)0xBB);
+                            else if (Kind == Opcode.PopEnv)
+                                writer.Write((byte)0xBC);
+                            else
+                                writer.Write((byte)Kind);
+                        }
+                        else
+                            writer.Write((byte)Kind);
                     }
                     break;
 
@@ -433,14 +519,20 @@ namespace UndertaleModLib.Models
                             writer.Write(SwapExtra);
                             byte TypePair = (byte)((byte)Type2 << 4 | (byte)Type1);
                             writer.Write(TypePair);
-                            writer.Write((byte)Kind);
+                            if (writer.undertaleData.GeneralInfo?.BytecodeVersion <= 14 && Kind == Opcode.Pop)
+                                writer.Write((byte)0x41);
+                            else
+                                writer.Write((byte)Kind);
                         }
                         else
                         {
                             writer.Write((short)TypeInst);
                             byte TypePair = (byte)((byte)Type2 << 4 | (byte)Type1);
                             writer.Write(TypePair);
-                            writer.Write((byte)Kind);
+                            if (writer.undertaleData.GeneralInfo?.BytecodeVersion <= 14 && Kind == Opcode.Pop)
+                                writer.Write((byte)0x41);
+                            else
+                                writer.Write((byte)Kind);
                             writer.WriteUndertaleObject(Destination);
                         }
                     }
@@ -462,7 +554,10 @@ namespace UndertaleModLib.Models
                             writer.Write((short)0);
                         }
                         writer.Write((byte)Type1);
-                        writer.Write((byte)Kind);
+                        if (writer.undertaleData.GeneralInfo?.BytecodeVersion <= 14)
+                            writer.Write((byte)0xC0);
+                        else
+                            writer.Write((byte)Kind);
                         switch (Type1)
                         {
                             case DataType.Double:
@@ -503,7 +598,10 @@ namespace UndertaleModLib.Models
                     {
                         writer.Write(ArgumentsCount);
                         writer.Write((byte)Type1);
-                        writer.Write((byte)Kind);
+                        if (writer.undertaleData.GeneralInfo?.BytecodeVersion <= 14 && Kind == Opcode.Call)
+                            writer.Write((byte)0xDA);
+                        else
+                            writer.Write((byte)Kind);
                         writer.WriteUndertaleObject(Function);
                     }
                     break;
@@ -526,7 +624,93 @@ namespace UndertaleModLib.Models
         {
             uint instructionStartAddress = reader.Position;
             reader.ReadByte(); reader.ReadByte(); reader.ReadByte(); // skip for now, we'll read them later
-            Kind = (Opcode)reader.ReadByte();
+            byte kind = reader.ReadByte();
+            bool bytecode14 = (reader.undertaleData.GeneralInfo?.BytecodeVersion <= 14);
+            if (bytecode14)
+            {
+                // Convert opcode to our enum
+                switch (kind)
+                {
+                    case 0x03:
+                        kind = 0x07;
+                        break;
+                    case 0x04:
+                        kind = 0x08;
+                        break;
+                    case 0x05:
+                        kind = 0x09;
+                        break;
+                    case 0x06:
+                        kind = 0x0A;
+                        break;
+                    case 0x07:
+                        kind = 0x0B;
+                        break;
+                    case 0x08:
+                        kind = 0x0C;
+                        break;
+                    case 0x09:
+                        kind = 0x0D;
+                        break;
+                    case 0x0A:
+                        kind = 0x0E;
+                        break;
+                    case 0x0B:
+                        kind = 0x0F;
+                        break;
+                    case 0x0C:
+                        kind = 0x10;
+                        break;
+                    case 0x0D:
+                        kind = 0x11;
+                        break;
+                    case 0x0E:
+                        kind = 0x12;
+                        break;
+                    case 0x11:
+                    case 0x12:
+                    case 0x13:
+                    case 0x14:
+                    //  case 0x15:
+                    case 0x16:
+                        kind = 0x15;
+                        break;
+                    case 0xDA:
+                        kind = 0xD9;
+                        break;
+                    case 0x41:
+                        kind = 0x45;
+                        break;
+                    case 0x82:
+                        kind = 0x86;
+                        break;
+                    case 0xB7:
+                        kind = 0xB6;
+                        break;
+                    case 0xB8:
+                        kind = 0xB7;
+                        break;
+                    case 0xB9:
+                        kind = 0xB8;
+                        break;
+                    case 0x9D:
+                        kind = 0x9C;
+                        break;
+                    case 0x9E:
+                        kind = 0x9D;
+                        break;
+                    case 0x9F:
+                        kind = 0x9E;
+                        break;
+                    case 0xBB:
+                        kind = 0xBA;
+                        break;
+                    case 0xBC:
+                        kind = 0xBB;
+                        break;
+                }
+            }
+            Kind = (Opcode)kind;
             reader.Position = instructionStartAddress;
             switch (GetInstructionType(Kind))
             {
@@ -538,26 +722,39 @@ namespace UndertaleModLib.Models
                         if (DupExtra != 0 && Kind != Opcode.Dup)
                             throw new IOException("Invalid padding in " + Kind.ToString().ToUpper());
                         ComparisonKind = (ComparisonType)reader.ReadByte();
-                        if ((Kind == Opcode.Cmp) != ((byte)ComparisonKind != 0))
+                        if (!bytecode14 && (Kind == Opcode.Cmp) != ((byte)ComparisonKind != 0))
                             throw new IOException("Got unexpected comparison type in " + Kind.ToString().ToUpper() + " (should be only in CMP)");
                         byte TypePair = reader.ReadByte();
                         Type1 = (DataType)(TypePair & 0xf);
                         Type2 = (DataType)(TypePair >> 4);
                         if (GetInstructionType(Kind) == InstructionType.SingleTypeInstruction && Type2 != (byte)0)
                             throw new IOException("Second type should be 0 in " + Kind.ToString().ToUpper());
-                        if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                        //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                        if (bytecode14 && Kind == Opcode.Cmp)
+                            ComparisonKind = (ComparisonType)(reader.ReadByte() - 0x10);
+                        else
+                            reader.ReadByte();
                     }
                     break;
 
                 case InstructionType.GotoInstruction:
                     {
+                        if (bytecode14)
+                        {
+                            JumpOffset = reader.ReadInt24();
+                            if (JumpOffset == -1048576) // magic? encoded in little endian as 00 00 F0, which is like below
+                                JumpOffsetPopenvExitMagic = true;
+                            reader.ReadByte();
+                            break;
+                        }
+
                         uint v = reader.ReadUInt24();
 
                         JumpOffsetPopenvExitMagic = (v & 0x800000) != 0;
 
                         // The rest is int23 signed value, so make sure
                         uint r = v & 0x003FFFFF;
-                        if (JumpOffsetPopenvExitMagic && v != 0xF00000)
+                        if (JumpOffsetPopenvExitMagic && !bytecode14 && v != 0xF00000)
                             throw new Exception("Popenv magic doesn't work, call issue #90 again");
                         else
                         {
@@ -566,7 +763,8 @@ namespace UndertaleModLib.Models
                             JumpOffset = (int)r;
                         }
 
-                        if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                        //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                        reader.ReadByte();
                     }
                     break;
 
@@ -576,7 +774,8 @@ namespace UndertaleModLib.Models
                         byte TypePair = reader.ReadByte();
                         Type1 = (DataType)(TypePair & 0xf);
                         Type2 = (DataType)(TypePair >> 4);
-                        if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                        //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                        reader.ReadByte();
                         if (Type1 == DataType.Int16)
                         {
                             // Special scenario - the swap instruction
@@ -595,7 +794,30 @@ namespace UndertaleModLib.Models
                     {
                         short val = reader.ReadInt16();
                         Type1 = (DataType)reader.ReadByte();
-                        if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                        if (bytecode14)
+                        {
+                            if (Type1 == DataType.Variable)
+                            {
+                                switch (val)
+                                {
+                                    case -5:
+                                        Kind = Opcode.PushGlb;
+                                        break;
+                                    case -6: // builtin
+                                        Kind = Opcode.PushVar;
+                                        break;
+                                    case -7:
+                                        Kind = Opcode.PushLoc;
+                                        break;
+                                }
+                            }
+                            else if (Type1 == DataType.Int16)
+                            {
+                                Kind = Opcode.PushI;
+                            }
+                        }
+                        //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                        reader.ReadByte();
                         switch (Type1)
                         {
                             case DataType.Double:
@@ -631,7 +853,8 @@ namespace UndertaleModLib.Models
                     {
                         ArgumentsCount = reader.ReadUInt16();
                         Type1 = (DataType)reader.ReadByte();
-                        if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                        //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                        reader.ReadByte();
                         Function = reader.ReadUndertaleObject<Reference<UndertaleFunction>>();
                     }
                     break;
@@ -640,7 +863,7 @@ namespace UndertaleModLib.Models
                     {
                         Value = reader.ReadInt16();
                         Type1 = (DataType)reader.ReadByte();
-                        if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                        if (reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
                     }
                     break;
 
@@ -761,7 +984,7 @@ namespace UndertaleModLib.Models
     {
         public static string ToOpcodeParam(this UndertaleInstruction.DataType type)
         {
-            switch(type)
+            switch (type)
             {
                 case UndertaleInstruction.DataType.Double:
                     return "d";
@@ -817,17 +1040,22 @@ namespace UndertaleModLib.Models
         private uint _LocalsCount = 0; // Seems related do UndertaleCodeLocals, TODO: does it also seem unused?
         internal uint _BytecodeAbsoluteAddress;
         private uint _UnknownProbablyZero = 0;
+        private byte[] _UnsupportedBuffer;
+        private bool _NoLocals = false;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public uint Length { get => _Length; internal set { _Length = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Length")); } }
         public uint LocalsCount { get => _LocalsCount; set { _LocalsCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LocalsCount")); } }
         public uint UnknownProbablyZero { get => _UnknownProbablyZero; set { _UnknownProbablyZero = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UnknownProbablyZero")); } }
         public List<UndertaleInstruction> Instructions { get; } = new List<UndertaleInstruction>();
+        public bool NoLocals { get => _NoLocals; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void SerializeBlobBefore(UndertaleWriter writer)
         {
+            if (writer.undertaleData.UnsupportedBytecodeVersion || writer.undertaleData.GeneralInfo.BytecodeVersion <= 14)
+                return;
             _BytecodeAbsoluteAddress = writer.Position;
             uint start = writer.Position;
             foreach (UndertaleInstruction instr in Instructions)
@@ -838,21 +1066,58 @@ namespace UndertaleModLib.Models
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
-            writer.Write(Length);
-            writer.Write(LocalsCount);
-            int BytecodeRelativeAddress = (int)_BytecodeAbsoluteAddress - (int)writer.Position;
-            writer.Write(BytecodeRelativeAddress);
-            writer.Write(UnknownProbablyZero);
+            if (writer.undertaleData.UnsupportedBytecodeVersion)
+            {
+                Length = (uint)_UnsupportedBuffer.Length;
+                writer.Write(Length);
+                writer.Write(_UnsupportedBuffer);
+            }
+            else if (writer.undertaleData.GeneralInfo.BytecodeVersion <= 14)
+            {
+                uint patch = writer.Position;
+                writer.Write(0xDEADC0DE);
+                uint start = writer.Position;
+                foreach (UndertaleInstruction instr in Instructions)
+                    writer.WriteUndertaleObject(instr);
+                Length = writer.Position - start;
+                uint jumpBack = writer.Position;
+                writer.Position = patch;
+                writer.Write(Length);
+                writer.Position = jumpBack;
+            }
+            else
+            {
+                writer.Write(Length);
+                writer.Write(LocalsCount);
+                int BytecodeRelativeAddress = (int)_BytecodeAbsoluteAddress - (int)writer.Position;
+                writer.Write(BytecodeRelativeAddress);
+                writer.Write(UnknownProbablyZero);
+            }
         }
 
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
             Length = reader.ReadUInt32();
-            if (reader.undertaleData.UnsupportedBytecodeVersion && reader.undertaleData.GeneralInfo.BytecodeVersion < 15)
+            if (reader.undertaleData.UnsupportedBytecodeVersion)
             {
-                reader.ReadBytes((int)Length);
-            } else
+                _UnsupportedBuffer = reader.ReadBytes((int)Length);
+            }
+            else if (reader.undertaleData.GeneralInfo.BytecodeVersion <= 14)
+            {
+                Instructions.Clear();
+                uint here = reader.Position;
+                uint stop = here + Length;
+                while (reader.Position < stop)
+                {
+                    uint a = (reader.Position - here) / 4;
+                    UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
+                    instr.Address = a;
+                    Instructions.Add(instr);
+                }
+                _NoLocals = true;
+            }
+            else
             {
                 LocalsCount = reader.ReadUInt32();
                 int BytecodeRelativeAddress = reader.ReadInt32();
@@ -904,8 +1169,10 @@ namespace UndertaleModLib.Models
 
         public string GenerateLocalVarDefinitions(IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
         {
+            if (NoLocals)
+                return "";
             if (locals == null)
-                return "Missing code locals- possibly due to unsupported bytecode version or brand new code entry.";
+                return "Missing code locals- possibly due to unsupported bytecode version or brand new code entry.\n";
 
             StringBuilder sb = new StringBuilder();
 
@@ -929,7 +1196,7 @@ namespace UndertaleModLib.Models
         public string Disassemble(IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
         {
             StringBuilder sb = new StringBuilder();
-            if (locals == null)
+            if (locals == null && !NoLocals)
                 sb.Append("; WARNING: Missing code locals, possibly due to unsupported bytecode version or a brand new code entry.\n");
             else
                 sb.Append(GenerateLocalVarDefinitions(vars, locals));
@@ -940,7 +1207,7 @@ namespace UndertaleModLib.Models
             }
             return sb.ToString();
         }
-        
+
         public void Append(IList<UndertaleInstruction> instructions)
         {
             Instructions.AddRange(instructions);

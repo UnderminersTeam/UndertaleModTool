@@ -79,7 +79,11 @@ namespace UndertaleModLib.Decompiler
                     else
                     {
                         if (line == "[drop]")
+                        {
                             instr.JumpOffsetPopenvExitMagic = true;
+                            if (data?.GeneralInfo?.BytecodeVersion <= 14)
+                                instr.JumpOffset = -1048576; // I really don't know at this point. Magic for little endian 00 00 F0
+                        }
                         else
                             label = line;
                     }
@@ -249,6 +253,8 @@ namespace UndertaleModLib.Decompiler
                         {
                             if (i.Kind == UndertaleInstruction.Opcode.Push)
                                 return UndertaleInstruction.InstanceType.Self; // This is probably an instance variable then (e.g. pushi.e 1337; push.v self.someinstance; conv.v.i; pushi.e 0; pop.v.v [array]alarm)
+                            else if (i.Kind == UndertaleInstruction.Opcode.PushLoc)
+                                return UndertaleInstruction.InstanceType.Local;
                         }
                         //int old = stackCounter;
                         stackCounter -= UndertaleInstruction.CalculateStackDiff(i);
@@ -285,7 +291,7 @@ namespace UndertaleModLib.Decompiler
             if (labels.ContainsKey("func_end"))
                 throw new Exception("func_end is a reserved label name");
             labels.Add("func_end", addr);
-            foreach(var pair in labelTargets)
+            foreach (var pair in labelTargets)
             {
                 pair.Key.JumpOffset = (int)labels[pair.Value] - (int)pair.Key.Address;
             }
