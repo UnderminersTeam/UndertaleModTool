@@ -754,7 +754,7 @@ namespace UndertaleModLib.Models
 
                         // The rest is int23 signed value, so make sure
                         uint r = v & 0x003FFFFF;
-                        if (JumpOffsetPopenvExitMagic && !bytecode14 && v != 0xF00000)
+                        if (JumpOffsetPopenvExitMagic && v != 0xF00000)
                             throw new Exception("Popenv magic doesn't work, call issue #90 again");
                         else
                         {
