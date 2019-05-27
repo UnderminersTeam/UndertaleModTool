@@ -182,9 +182,9 @@ namespace UndertaleModLib.Compiler
                     int localId = 1;
                     foreach (KeyValuePair<string, string> v in LocalVars)
                     {
-                        uint id = (uint)data.Variables.Count;
+                        uint id = (uint)(data?.Variables?.Count ?? 0);
                         if (ensureVariablesDefined)
-                            data.Variables.DefineLocal(id, v.Key, data.Strings, data);
+                            data?.Variables?.DefineLocal(id, v.Key, data.Strings, data);
                         sb.AppendLine(".localvar " + localId++.ToString() + " " + v.Key + " " + id.ToString());
                     }
 
