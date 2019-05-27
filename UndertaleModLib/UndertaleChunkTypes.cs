@@ -38,7 +38,9 @@ namespace UndertaleModLib
                     // TODO: what about the debug data??
                     if (generalInfo != null && (generalInfo.Major >= 2 || (generalInfo.Major == 1 && generalInfo.Build >= 9999)))
                     {
-                        while (writer.Position % 16 != 0)
+                        int e = writer.undertaleData.PaddingAlignException;
+                        uint pad = (e == -1 ? 16 : (uint)e);
+                        while (writer.Position % pad != 0)
                         {
                             writer.Write((byte)0);
                         }
@@ -91,10 +93,19 @@ namespace UndertaleModLib
                     // (but the padding is included with length of previous chunk)
                     if (generalInfo.Major >= 2 || (generalInfo.Major == 1 && generalInfo.Build >= 9999))
                     {
-                        while (reader.Position % 16 != 0)
+                        int e = reader.undertaleData.PaddingAlignException;
+                        uint pad = (e == -1 ? 16 : (uint)e);
+                        while (reader.Position % pad != 0)
                         {
                             if (reader.ReadByte() != 0)
-                                throw new Exception("Chunk padding error");
+                            {
+                                reader.Position -= 1;
+                                if (reader.Position % 4 == 0)
+                                    reader.undertaleData.PaddingAlignException = 4;
+                                else
+                                    reader.undertaleData.PaddingAlignException = 1;
+                                break;
+                            }
                         }
                     }
                 }
