@@ -1397,12 +1397,20 @@ namespace UndertaleModLib.Compiler
                                 }
                                 break;
                             case -5:
+                                if (ensureVariablesDefined)
+                                {
+                                    data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Global, false, data.Strings, data);
+                                }
                                 cw.Write("pushglb.v global." + name);
                                 break;
                             case -7:
                                 cw.Write("pushloc.v local." + name);
                                 break;
                             default:
+                                if (ensureVariablesDefined)
+                                {
+                                    data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Self, BuiltinList.GlobalArray.ContainsKey(name) || BuiltinList.GlobalNotArray.ContainsKey(name), data.Strings, data);
+                                }
                                 cw.Write("push.v " + GetIDPrefix(id) + name);
                                 break;
                         }

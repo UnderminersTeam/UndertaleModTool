@@ -100,7 +100,7 @@ namespace UndertaleModLib.Decompiler
                     else
                     {
                         UndertaleInstruction.InstanceType inst = instr.TypeInst;
-                        instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, instr, lookOnStack);
+                        instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, instr, lookOnStack, data);
                         instr.TypeInst = inst;
                     }
                     line = "";
@@ -134,7 +134,7 @@ namespace UndertaleModLib.Decompiler
                             break;
                         case UndertaleInstruction.DataType.Variable:
                             UndertaleInstruction.InstanceType inst2 = instr.TypeInst;
-                            instr.Value = ParseVariableReference(line, vars, localvars, ref inst2, instr, lookOnStack);
+                            instr.Value = ParseVariableReference(line, vars, localvars, ref inst2, instr, lookOnStack, data);
                             instr.TypeInst = inst2;
                             break;
                         case UndertaleInstruction.DataType.String:
@@ -330,7 +330,7 @@ namespace UndertaleModLib.Decompiler
             return new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>() { Resource = strobj, CachedId = (int)id.Value };
         }
 
-        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance, UndertaleInstruction instr, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null)
+        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance, UndertaleInstruction instr, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null, UndertaleData data = null)
         {
             string str = line;
             string inst = null;
@@ -382,9 +382,11 @@ namespace UndertaleModLib.Decompiler
             }
             if (realinstance >= 0)
                 realinstance = UndertaleInstruction.InstanceType.Self;
-            if (realinstance == UndertaleInstruction.InstanceType.Other)
+            else if (realinstance == UndertaleInstruction.InstanceType.Other)
                 realinstance = UndertaleInstruction.InstanceType.Self;
 
+            if (data?.GeneralInfo?.BytecodeVersion <= 14)
+                realinstance = UndertaleInstruction.InstanceType.Undefined;
 
             UndertaleVariable varobj;
             if (realinstance == UndertaleInstruction.InstanceType.Local)

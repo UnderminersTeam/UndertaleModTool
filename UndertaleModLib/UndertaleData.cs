@@ -187,22 +187,30 @@ namespace UndertaleModLib
         {
             if (inst == UndertaleInstruction.InstanceType.Local)
                 throw new InvalidOperationException("Use DefineLocal instead");
-            UndertaleVariable vari = list.Where((x) => x.Name.Content == name && x.InstanceType == inst).FirstOrDefault();
+            bool bytecode14 = (data?.GeneralInfo?.BytecodeVersion <= 14);
+            if (bytecode14)
+                inst = UndertaleInstruction.InstanceType.Undefined;
+            UndertaleVariable vari = list.Where((x) => x.Name.Content == name && x.InstanceType == inst).FirstOrDefault();   
             if (vari == null)
             {
                 var oldId = data.InstanceVarCount;
-                if (data.InstanceVarCount == data.InstanceVarCountAgain)
-                { // Example games that use this mode: Undertale v1.08, Undertale v1.11.
-                    data.InstanceVarCount++;
-                    data.InstanceVarCountAgain++;
-                } else
-                { // Example Games which use this mode: Undertale v1.001.
-                    if (inst == UndertaleInstruction.InstanceType.Self)
-                    {
-                    data.InstanceVarCountAgain++;
-                    } else if (inst == UndertaleInstruction.InstanceType.Global)
-                    {
+                if (!bytecode14)
+                {
+                    if (data.InstanceVarCount == data.InstanceVarCountAgain)
+                    { // Example games that use this mode: Undertale v1.08, Undertale v1.11.
                         data.InstanceVarCount++;
+                        data.InstanceVarCountAgain++;
+                    }
+                    else
+                    { // Example Games which use this mode: Undertale v1.001.
+                        if (inst == UndertaleInstruction.InstanceType.Self)
+                        {
+                            data.InstanceVarCountAgain++;
+                        }
+                        else if (inst == UndertaleInstruction.InstanceType.Global)
+                        {
+                            data.InstanceVarCount++;
+                        }
                     }
                 }
 
@@ -210,7 +218,7 @@ namespace UndertaleModLib
                 {
                     Name = strg.MakeString(name),
                     InstanceType = inst,
-                    VarID = isBuiltin ? (int)UndertaleInstruction.InstanceType.Builtin : (int)oldId,
+                    VarID = bytecode14 ? 0 : (isBuiltin ? (int)UndertaleInstruction.InstanceType.Builtin : (int)oldId),
                     UnknownChainEndingValue = 0 // TODO: seems to work...
                 };
                 list.Add(vari);
@@ -220,14 +228,21 @@ namespace UndertaleModLib
 
         public static UndertaleVariable DefineLocal(this IList<UndertaleVariable> list, uint idx, string name, IList<UndertaleString> strg, UndertaleData data)
         {
+            bool bytecode14 = (data?.GeneralInfo?.BytecodeVersion <= 14);
+            if (bytecode14)
+            {
+                UndertaleVariable search = list.Where((x) => x.Name.Content == name).FirstOrDefault();
+                if (search != null)
+                    return search;
+            }
             UndertaleVariable vari = new UndertaleVariable()
             {
                 Name = strg.MakeString(name),
-                InstanceType = UndertaleInstruction.InstanceType.Local,
-                VarID = (int)idx,
+                InstanceType = bytecode14 ? UndertaleInstruction.InstanceType.Undefined : UndertaleInstruction.InstanceType.Local,
+                VarID = bytecode14 ? 0 : (int)idx,
                 UnknownChainEndingValue = 0 // TODO: seems to work...
             };
-            if (idx >= data.MaxLocalVarCount)
+            if (!bytecode14 && idx >= data.MaxLocalVarCount)
                 data.MaxLocalVarCount = idx + 1;
             list.Add(vari);
             return vari;
