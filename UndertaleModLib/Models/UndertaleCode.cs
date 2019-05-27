@@ -448,6 +448,12 @@ namespace UndertaleModLib.Models
                                 case Opcode.Not:
                                     k = 0x0E;
                                     break;
+                                case Opcode.Shl:
+                                    k = 0x0F;
+                                    break;
+                                case Opcode.Shr:
+                                    k = 0x10;
+                                    break;
                                 case Opcode.Dup:
                                     k = 0x82;
                                     break;
@@ -666,6 +672,12 @@ namespace UndertaleModLib.Models
                         break;
                     case 0x0E:
                         kind = 0x12;
+                        break;
+                    case 0x0F:
+                        kind = 0x13;
+                        break;
+                    case 0x10:
+                        kind = 0x14;
                         break;
                     case 0x11:
                     case 0x12:
