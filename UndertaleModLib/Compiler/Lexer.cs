@@ -540,6 +540,14 @@ namespace UndertaleModLib.Compiler
                     {
                         // Escape character
                         case '\\':
+                            if (data?.IsGameMaker2() == false)
+                            {
+                                sb.Append(c);
+                                cr.AdvancePosition();
+                                c = cr.PeekChar();
+                                c2 = cr.PeekCharAhead();
+                                continue;
+                            }
                             cr.AdvancePosition();
                             c = cr.PeekChar();
                             c2 = cr.PeekCharAhead();
