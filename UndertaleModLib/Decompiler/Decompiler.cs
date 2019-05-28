@@ -2496,14 +2496,15 @@ namespace UndertaleModLib.Decompiler
             sb.AppendLine("digraph G {");
             //sb.AppendLine("    graph [splines=polyline];");
             //sb.AppendLine("");
-            foreach (var block in blocks)
+            foreach (var pair in blocks)
             {
-                sb.Append("    block_" + block.Key + " [label=\"");
-                sb.Append(block.ToString() + "\n");
-                foreach (var instr in block.Value.Instructions)
+                var block = pair.Value;
+                sb.Append("    block_" + pair.Key + " [label=\"");
+                sb.Append("[" + block.ToString() + ", Exit: " + block.conditionalExit + (block.nextBlockTrue != null ? ", T: " + block.nextBlockTrue.Address : "") + (block.nextBlockFalse != null ? ", F: " + block.nextBlockFalse.Address : "") + "]\n");
+                foreach (var instr in block.Instructions)
                     sb.Append(instr.ToString().Replace("\"", "\\\"") + "\\n");
                 sb.Append("\"");
-                sb.Append(block.Key == 0 ? ", color=\"blue\"" : "");
+                sb.Append(pair.Key == 0 ? ", color=\"blue\"" : "");
                 sb.AppendLine(", shape=\"box\"];");
             }
             sb.AppendLine("");

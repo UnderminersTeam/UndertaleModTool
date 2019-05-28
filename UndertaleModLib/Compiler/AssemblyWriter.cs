@@ -184,7 +184,7 @@ namespace UndertaleModLib.Compiler
                     {
                         uint id = (uint)(data?.Variables?.Count ?? 0);
                         if (ensureVariablesDefined)
-                            data?.Variables?.DefineLocal(id, v.Key, data.Strings, data);
+                            data?.Variables?.DefineLocal(localId, v.Key, data.Strings, data);
                         sb.AppendLine(".localvar " + localId++.ToString() + " " + v.Key + " " + id.ToString());
                     }
 

@@ -191,7 +191,7 @@ namespace UndertaleModLib
             bool bytecode14 = (data?.GeneralInfo?.BytecodeVersion <= 14);
             if (bytecode14)
                 inst = UndertaleInstruction.InstanceType.Undefined;
-            UndertaleVariable vari = list.Where((x) => x.Name.Content == name && x.InstanceType == inst).FirstOrDefault();   
+            UndertaleVariable vari = list.Where((x) => x.Name.Content == name && x.InstanceType == inst).FirstOrDefault();
             if (vari == null)
             {
                 var oldId = data.InstanceVarCount;
@@ -227,7 +227,7 @@ namespace UndertaleModLib
             return vari;
         }
 
-        public static UndertaleVariable DefineLocal(this IList<UndertaleVariable> list, uint idx, string name, IList<UndertaleString> strg, UndertaleData data)
+        public static UndertaleVariable DefineLocal(this IList<UndertaleVariable> list, int localId, string name, IList<UndertaleString> strg, UndertaleData data)
         {
             bool bytecode14 = (data?.GeneralInfo?.BytecodeVersion <= 14);
             if (bytecode14)
@@ -236,15 +236,16 @@ namespace UndertaleModLib
                 if (search != null)
                     return search;
             }
+
             UndertaleVariable vari = new UndertaleVariable()
             {
                 Name = strg.MakeString(name),
                 InstanceType = bytecode14 ? UndertaleInstruction.InstanceType.Undefined : UndertaleInstruction.InstanceType.Local,
-                VarID = bytecode14 ? 0 : (int)idx,
+                VarID = bytecode14 ? 0 : localId,
                 UnknownChainEndingValue = 0 // TODO: seems to work...
             };
-            if (!bytecode14 && idx >= data.MaxLocalVarCount)
-                data.MaxLocalVarCount = idx + 1;
+            if (!bytecode14 && list?.Count >= data.MaxLocalVarCount)
+                data.MaxLocalVarCount = (uint) list?.Count + 1;
             list.Add(vari);
             return vari;
         }
