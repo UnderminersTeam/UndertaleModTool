@@ -20,6 +20,7 @@ namespace UndertaleModLib.Compiler
         public static Dictionary<string, string> LocalVars = new Dictionary<string, string>();
         public static Dictionary<string, string> GlobalVars = new Dictionary<string, string>();
         public static Dictionary<string, Dictionary<string, int>> Enums = new Dictionary<string, Dictionary<string, int>>();
+        public static UndertaleCode OriginalCode;
 
         private static void AddAssetsFromList<T>(IList<T> list) where T : UndertaleNamedResource
         {
@@ -102,11 +103,12 @@ namespace UndertaleModLib.Compiler
             ensureVariablesDefined = val;
         }
 
-        public static string CompileGMLText(string input, UndertaleData data = null)
+        public static string CompileGMLText(string input, UndertaleData data = null, UndertaleCode oldCode = null)
         {
             // Set up
             if (data != null)
                 SetUndertaleData(data);
+            Compiler.OriginalCode = oldCode;
             LastCompiledArgumentCount = 0;
             userDefinedVariables.Clear();
 

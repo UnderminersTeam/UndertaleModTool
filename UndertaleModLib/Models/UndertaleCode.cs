@@ -1166,9 +1166,7 @@ namespace UndertaleModLib.Models
             foreach (UndertaleInstruction instr in Instructions)
             {
                 var v = instr.GetReference<UndertaleVariable>()?.Target;
-                if (v == null)
-                    continue;
-                if (!vars.Contains(v))
+                if (v != null && !vars.Contains(v))
                     vars.Add(v);
             }
             return vars;

@@ -179,13 +179,28 @@ namespace UndertaleModLib.Compiler
 
                     // First, code locals
                     sb.AppendLine(".localvar 0 arguments");
+
+                    if (Compiler.OriginalCode != null) {
+                        UndertaleCodeLocals locals = Compiler.data.CodeLocals.For(Compiler.OriginalCode);
+                        for (var i = 1; i < locals.Locals.Count; i++) {
+                            string localName = locals.Locals[i].Name.Content;
+                            locals.Locals[i].Index = (uint) i;
+                            if (!LocalVars.ContainsKey(localName))
+                            {
+                                LocalVars.Remove(localName);
+                                locals.Locals.RemoveAt(i--);
+                            }
+                        }
+                    }
+
                     int localId = 1;
                     foreach (KeyValuePair<string, string> v in LocalVars)
                     {
-                        uint id = (uint)(data?.Variables?.Count ?? 0);
+                        int id = (data?.Variables?.Count ?? 0);
                         if (ensureVariablesDefined)
-                            data?.Variables?.DefineLocal(localId, v.Key, data.Strings, data);
-                        sb.AppendLine(".localvar " + localId++.ToString() + " " + v.Key + " " + id.ToString());
+                            id = (data?.Variables?.IndexOf(data?.Variables?.DefineLocal(Compiler.OriginalCode, localId, v.Key, data.Strings, data)) ?? 0);
+                        if (id >= 0)
+                            sb.AppendLine(".localvar " + localId++.ToString() + " " + v.Key + " " + id.ToString());
                     }
 
                     // Now, write all of the instructions!

@@ -615,7 +615,7 @@ namespace UndertaleModTool
 
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
 
-            string assembledString = Compiler.CompileGMLText(DecompiledEditor.Text, data);
+            string assembledString = Compiler.CompileGMLText(DecompiledEditor.Text, data, code);
             if (!Compiler.SuccessfulCompile) // There were errors.
             {
                 MessageBox.Show(assembledString, "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
