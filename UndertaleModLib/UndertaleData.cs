@@ -240,7 +240,6 @@ namespace UndertaleModLib
             // Use existing registered variables.
             if (originalCode != null)
             {
-                UndertaleCodeLocals codeLocals = data.CodeLocals.For(originalCode);
                 var referenced = originalCode.FindReferencedLocalVars();
                 var refvar = referenced.Where((x) => x.Name.Content == name && x.VarID == localId).FirstOrDefault();
                 if (refvar != null)

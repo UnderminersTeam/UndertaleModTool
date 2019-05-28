@@ -180,15 +180,20 @@ namespace UndertaleModLib.Compiler
                     // First, code locals
                     sb.AppendLine(".localvar 0 arguments");
 
-                    if (Compiler.OriginalCode != null) {
+                    if (Compiler.OriginalCode != null)
+                    {
                         UndertaleCodeLocals locals = Compiler.data.CodeLocals.For(Compiler.OriginalCode);
-                        for (var i = 1; i < locals.Locals.Count; i++) {
-                            string localName = locals.Locals[i].Name.Content;
-                            locals.Locals[i].Index = (uint) i;
-                            if (!LocalVars.ContainsKey(localName))
+                        if (locals != null)
+                        {
+                            for (var i = 1; i < locals.Locals.Count; i++)
                             {
-                                LocalVars.Remove(localName);
-                                locals.Locals.RemoveAt(i--);
+                                string localName = locals.Locals[i].Name.Content;
+                                locals.Locals[i].Index = (uint)i;
+                                if (!LocalVars.ContainsKey(localName))
+                                {
+                                    LocalVars.Remove(localName);
+                                    locals.Locals.RemoveAt(i--);
+                                }
                             }
                         }
                     }
