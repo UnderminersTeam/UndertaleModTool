@@ -638,9 +638,9 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 if (Value != null)
-                    return "return " + Value.ToString(context);
+                    return "return " + Value.ToString(context) + ";";
                 else
-                    return (context.isGameMaker2 ? "return" : "exit");
+                    return (context.isGameMaker2 ? "return;" : "exit");
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
