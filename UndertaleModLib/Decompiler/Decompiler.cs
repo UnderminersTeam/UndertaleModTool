@@ -2004,7 +2004,7 @@ namespace UndertaleModLib.Decompiler
 
                         for (var j = 0; j < next.Block.Statements.Count; j++)
                         {
-                            if (next.Block.Statements[j] != now.Block.Statements[j + startIndex])
+                            if (next.Block.Statements[j].ToString(context) != now.Block.Statements[j + startIndex].ToString(context))
                             {
                                 testPass = false;
                                 break;
