@@ -2461,10 +2461,11 @@ namespace UndertaleModLib.Decompiler
                 }
             }
 
+            string oldStr = tempBuilder.ToString();
             for (int i = 0; i < TempVar.TempVarId; i++)
             {
                 string tempVarName = TempVar.MakeTemporaryVarName(i + 1);
-                if (decompiledCode.Contains(tempVarName))
+                if (decompiledCode.Contains(tempVarName) && !oldStr.Contains(tempVarName))
                 {
                     if (tempBuilder.Length > 0)
                         tempBuilder.Append(", ");
