@@ -70,13 +70,15 @@ namespace UndertaleModTool
             InitializeComponent();
             this.DataContext = this;
 
-            ChangeSelection(Highlighted = new DescriptionView("Welcome to GMX Decomp.", "Open data.win file to get started, then double click on the items on the left to view them"));
+            ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"));
             SelectionHistory.Clear();
 
-            TitleMain = "GMX Decomp";
+            TitleMain = "UndertaleModTool by krzys_h v" + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
 
             CanSave = false;
             CanSafelySave = false;
+
+            ChangeTheme(Properties.Settings.Default.dark);
         }
 
         [DllImport("shell32.dll")]
@@ -86,9 +88,7 @@ namespace UndertaleModTool
         private void UpdateTree()
         {
             foreach (var child in (MainTree.Items[0] as TreeViewItem).Items)
-            {
                 ((child as TreeViewItem).ItemsSource as ICollectionView)?.Refresh();
-            }
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -96,15 +96,15 @@ namespace UndertaleModTool
             try
             {
                 var HKCU_Classes = Registry.CurrentUser.OpenSubKey(@"Software\Classes", true);
-                var UndertaleModTool_app = HKCU_Classes.CreateSubKey(@"GMX Decomp");
-                UndertaleModTool_app.SetValue("", "GMX Decomp");
+                var UndertaleModTool_app = HKCU_Classes.CreateSubKey(@"UndertaleModTool");
+                UndertaleModTool_app.SetValue("", "UndertaleModTool");
                 UndertaleModTool_app.CreateSubKey(@"shell\open\command").SetValue("", "\"" + Assembly.GetExecutingAssembly().Location + "\" \"%1\"", RegistryValueKind.String);
                 UndertaleModTool_app.CreateSubKey(@"shell\launch\command").SetValue("", "\"" + Assembly.GetExecutingAssembly().Location + "\" \"%1\" launch", RegistryValueKind.String);
                 UndertaleModTool_app.CreateSubKey(@"shell\launch").SetValue("", "Run game", RegistryValueKind.String);
                 foreach (var extStr in new string[] { ".win", ".unx", ".ios" })
                 {
                     var ext = HKCU_Classes.CreateSubKey(extStr);
-                    ext.SetValue("", "GMX Decomp", RegistryValueKind.String);
+                    ext.SetValue("", "UndertaleModTool", RegistryValueKind.String);
                 }
                 SHChangeNotify(SHCNE_ASSOCCHANGED, 0, IntPtr.Zero, IntPtr.Zero);
             }
@@ -209,7 +209,7 @@ namespace UndertaleModTool
             CloseChildFiles();
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsGMS2"));
-            ChangeSelection(Highlighted = new DescriptionView("Welcome to GMX Decomp", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P"));
+            ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P"));
             SelectionHistory.Clear();
 
             CanSave = true;
@@ -323,7 +323,7 @@ namespace UndertaleModTool
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FilePath"));
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsGMS2"));
-                        ChangeSelection(Highlighted = new DescriptionView("Welcome to GMX Decomp", "Double click on the items on the left to view them!"));
+                        ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"));
                         SelectionHistory.Clear();
                     }
                     dialog.Hide();
@@ -1088,6 +1088,56 @@ namespace UndertaleModTool
             }
         }
 
+        public void ChangeTheme(bool dark)
+        {
+            ///
+            /// Dark theme, created by Kade (KadePcGames)
+            ///
+
+            switch (dark)
+            {
+                case true:
+                    Properties.Settings.Default.dark = true;
+                    Properties.Settings.Default.Save();
+                    GridSpillterTreeMain.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
+                    Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
+                    Foreground = Brushes.White;
+                    MainTree.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FFDADADA"));
+                    MainTree.Foreground = Brushes.White;
+                    MainTree.BorderBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FFDADADA"));
+                    SearchBox.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
+                    SearchBox.BorderBrush = Brushes.White;
+                    SearchBox.Foreground = Brushes.White;
+                    TopMenu.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
+                    TopMenu.Foreground = Brushes.White;
+                    CommandBox.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
+                    CommandBox.Foreground = Brushes.White;
+                    // Loop thru all the options cuz im lazy as fuck lmao
+                    foreach (MenuItem item in TopMenu.Items)
+                    {
+                        foreach (MenuItem item2 in item.Items)
+                        {
+                            item2.BorderBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
+                            item2.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
+                        }
+                    }
+                    break;
+                case false:
+                    if (Properties.Settings.Default.dark)
+                    {
+                        MessageBoxResult res = MessageBox.Show("What your doing needs a restart of the tool!\nWould you like to restart?", "Undertale Mod Tool", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                        if (res == MessageBoxResult.Yes)
+                        {
+                            Properties.Settings.Default.dark = false;
+                            Properties.Settings.Default.Save();
+                            Process.Start(Application.ResourceAssembly.Location);
+                            Close();
+                        }
+                    }
+                    break;
+            }
+        }
+
         private bool scr_dogcheck()
         {
             if (Environment.UserName != "The one and only annoying dog!")
@@ -1113,6 +1163,21 @@ namespace UndertaleModTool
                 return;
 
             // TODO: Don't ever implement this
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        {
+            ChangeTheme(false);
+        }
+
+        private void MenuItem_Click_2(object sender, RoutedEventArgs e)
+        {
+            ChangeTheme(true);
         }
     }
 
