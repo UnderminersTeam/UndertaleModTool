@@ -36,9 +36,43 @@ namespace UndertaleModTool
         public UndertaleCode CurrentDecompiled = null;
         public UndertaleCode CurrentGraphed = null;
 
+        // Added the ability to change the different colors! (To fit better with the dark theme)
+
+        private Brush addressBrush = new SolidColorBrush(Color.FromRgb(50, 50, 50));
+        private Brush opcodeBrush = new SolidColorBrush(Color.FromRgb(0, 100, 0));
+        private Brush argBrush = new SolidColorBrush(Color.FromRgb(0, 0, 150));
+        private Brush typeBrush = new SolidColorBrush(Color.FromRgb(0, 0, 50));
+        private Brush keywordBrush = new SolidColorBrush(Color.FromRgb(0, 0, 150));
+        private Brush constBrush = new SolidColorBrush(Color.FromRgb(0, 100, 150));
+        private Brush stringBrush = new SolidColorBrush(Color.FromRgb(0, 0, 200));
+        private Brush commentBrush = new SolidColorBrush(Color.FromRgb(0, 150, 0));
+        private Brush funcBrush = new SolidColorBrush(Color.FromRgb(100, 100, 0));
+        private Brush assetBrush = new SolidColorBrush(Color.FromRgb(0, 150, 100));
+
         public UndertaleCodeEditor()
         {
             InitializeComponent();
+            // CODE DARK THEME???!?!?!??!
+            if (Properties.Settings.Default.dark)
+            {
+                DisassemblyView.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
+                DisassemblyView.Foreground = Brushes.White;
+                DisassemblyView.BorderBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
+                DecompiledView.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
+                DecompiledView.BorderBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
+                DecompiledView.Foreground = Brushes.White;
+                addressBrush = new SolidColorBrush(Color.FromRgb(43, 145, 175));
+                opcodeBrush = new SolidColorBrush(Color.FromRgb(43, 145, 175));
+                argBrush = new SolidColorBrush(Color.FromRgb(214, 157, 133));
+                typeBrush = new SolidColorBrush(Color.FromRgb(195, 214, 141));
+                keywordBrush = new SolidColorBrush(Color.FromRgb(111, 194, 122));
+                constBrush = new SolidColorBrush(Color.FromRgb(50, 171, 173));
+                stringBrush = new SolidColorBrush(Color.FromRgb(214, 157, 133));
+                commentBrush = new SolidColorBrush(Color.FromRgb(69, 165, 65));
+                funcBrush = new SolidColorBrush(Color.FromRgb(50, 171, 173));
+                assetBrush = new SolidColorBrush(Color.FromRgb(220, 220, 170));
+
+            }
         }
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -110,10 +144,6 @@ namespace UndertaleModTool
             }
             else
             {
-                Brush addressBrush = new SolidColorBrush(Color.FromRgb(50, 50, 50));
-                Brush opcodeBrush = new SolidColorBrush(Color.FromRgb(0, 100, 0));
-                Brush argBrush = new SolidColorBrush(Color.FromRgb(0, 0, 150));
-                Brush typeBrush = new SolidColorBrush(Color.FromRgb(0, 0, 50));
                 var data = (Application.Current.MainWindow as MainWindow).Data;
                 par.Inlines.Add(new Run(code.GenerateLocalVarDefinitions(data.Variables, data.CodeLocals.For(code))) { Foreground = addressBrush });
                 foreach (var instr in code.Instructions)
@@ -334,12 +364,7 @@ namespace UndertaleModTool
                         }
                         else
                         {
-                            Brush keywordBrush = new SolidColorBrush(Color.FromRgb(0, 0, 150));
-                            Brush constBrush = new SolidColorBrush(Color.FromRgb(0, 100, 150));
-                            Brush stringBrush = new SolidColorBrush(Color.FromRgb(0, 0, 200));
-                            Brush commentBrush = new SolidColorBrush(Color.FromRgb(0, 150, 0));
-                            Brush funcBrush = new SolidColorBrush(Color.FromRgb(100, 100, 0));
-                            Brush assetBrush = new SolidColorBrush(Color.FromRgb(0, 150, 100));
+                    
 
                             Dictionary<string, UndertaleFunction> funcs = new Dictionary<string, UndertaleFunction>();
                             foreach (var x in (Application.Current.MainWindow as MainWindow).Data.Functions)
