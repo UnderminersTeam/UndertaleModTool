@@ -1914,6 +1914,10 @@ namespace UndertaleModLib.Decompiler
                            (i + 1) < block.Statements.Count)
                         {
                             Statement next = block.Statements[i + 1];
+                            if (next is PopEnvStatement && (i + 2) < block.Statements.Count)
+                            {
+                                next = block.Statements[i + 2];
+                            }
                             if (next is ReturnStatement)
                             {
                                 Expression expr = (next as ReturnStatement).Value;
