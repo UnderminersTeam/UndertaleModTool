@@ -58,6 +58,7 @@ namespace UndertaleModTool
                 DisassemblyView.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
                 DisassemblyView.Foreground = Brushes.White;
                 DisassemblyView.BorderBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
+                DisassemblyView.BorderBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
                 DecompiledView.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
                 DecompiledView.BorderBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF1F1E1E"));
                 DecompiledView.Foreground = Brushes.White;
