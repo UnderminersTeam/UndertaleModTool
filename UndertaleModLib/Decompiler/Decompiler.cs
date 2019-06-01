@@ -1799,7 +1799,7 @@ namespace UndertaleModLib.Decompiler
             }
         }*/
 
-        private static BlockHLStatement HLDecompileBlocks(DecompileContext context, ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, List<Block> alreadyVisited, Block currentLoop = null, bool decompileTheLoop = false, Block stopAt = null, bool allowBreak = false)
+        private static BlockHLStatement HLDecompileBlocks(DecompileContext context, ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, List<Block> alreadyVisited, Block currentLoop = null, bool decompileTheLoop = false, Block stopAt = null, bool allowBreak = false, Statement tempPop = null)
         {
             BlockHLStatement output = new BlockHLStatement();
             bool foundBreak = false;
@@ -1910,29 +1910,47 @@ namespace UndertaleModLib.Decompiler
                         // Check for $$$$temp$$$$ return, remove if possible
                         // Kind of ugly but performant?
                         output.Statements.Add(stmt);
-                        if (stmt is AssignmentStatement && (stmt as AssignmentStatement).Destination.Var?.Name.Content == "$$$$temp$$$$" &&
-                           (i + 1) < block.Statements.Count)
+                        bool poppedTemp = (tempPop != null);
+                        if ((stmt is AssignmentStatement && (stmt as AssignmentStatement).Destination.Var?.Name.Content == "$$$$temp$$$$") || poppedTemp)
                         {
-                            Statement next = block.Statements[i + 1];
-                            if (next is PopEnvStatement && (i + 2) < block.Statements.Count)
+                            if ((i + 1) < block.Statements.Count || poppedTemp)
                             {
-                                next = block.Statements[i + 2];
-                            }
-                            if (next is ReturnStatement)
-                            {
-                                Expression expr = (next as ReturnStatement).Value;
-                                if (expr is ExpressionVar)
+                                Statement next;
+                                if (poppedTemp)
                                 {
-                                    if ((expr as ExpressionVar).Var?.Name.Content == "$$$$temp$$$$")
+                                    next = block.Statements[i];
+                                }
+                                else
+                                    next = block.Statements[i + 1];
+                                if (next is ReturnStatement)
+                                {
+                                    Expression expr = (next as ReturnStatement).Value;
+                                    if (expr is ExpressionVar)
                                     {
-                                        // Let's do it!
-                                        output.Statements.Remove(stmt);
-                                        output.Statements.Add(new ReturnStatement((stmt as AssignmentStatement).Value));
-                                        i++;
+                                        if ((expr as ExpressionVar).Var?.Name.Content == "$$$$temp$$$$")
+                                        {
+                                            // Let's do it!
+                                            if (poppedTemp)
+                                            {
+                                                output.Statements.Remove(stmt);
+                                                stmt = tempPop;
+                                            }
+                                            output.Statements.Remove(stmt);
+                                            output.Statements.Add(new ReturnStatement((stmt as AssignmentStatement).Value));
+                                            i++;
+                                        }
                                     }
                                 }
+                                if (poppedTemp)
+                                    tempPop = null;
+                            } else
+                            {
+                                tempPop = stmt;
                             }
-                        }    
+                        } else
+                        {
+                            tempPop = null;
+                        }
                     }
                 }
 
@@ -2037,7 +2055,7 @@ namespace UndertaleModLib.Decompiler
                     output.Statements.Add(new WithHLStatement()
                     {
                         NewEnv = stmt.NewEnv,
-                        Block = HLDecompileBlocks(context, ref block, blocks, loops, reverseDominators, alreadyVisited, null, false, stopAt)
+                        Block = HLDecompileBlocks(context, ref block, blocks, loops, reverseDominators, alreadyVisited, null, false, stopAt, false, tempPop)
                     });
                     if (block == null)
                         break;
