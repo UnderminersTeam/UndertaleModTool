@@ -409,7 +409,17 @@ namespace UndertaleModLib.Compiler
                         ExpressionConstant constant = null;
                         if (t.Content[0] == '$' || t.Content.StartsWith("0x"))
                         {
-                            long val = Convert.ToInt64(t.Content.Substring(t.Content[0] == '$' ? 1 : 2), 16);
+                            long val;
+                            try
+                            {
+                                val = Convert.ToInt64(t.Content.Substring(t.Content[0] == '$' ? 1 : 2), 16);
+                            } catch (Exception)
+                            {
+                                ReportCodeError("Invalid hex literal.", t, false);
+                                constant = new ExpressionConstant(0);
+                                firstPass.Add(new Statement(TokenKind.ProcConstant, t, constant));
+                                continue;
+                            }
                             if (val > Int32.MaxValue || val < Int32.MinValue)
                             {
                                 constant = new ExpressionConstant(val);
