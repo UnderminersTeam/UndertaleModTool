@@ -229,7 +229,7 @@ namespace UndertaleModLib.Decompiler
                         if (aaa.Length >= 4)
                         {
                             var varii = vars[Int32.Parse(aaa[3])];
-                            if (varii.InstanceType != UndertaleInstruction.InstanceType.Local)
+                            if (data?.GeneralInfo?.BytecodeVersion >= 15 && varii.InstanceType != UndertaleInstruction.InstanceType.Local)
                                 throw new Exception("Not a local var");
                             if (varii.Name.Content != aaa[2])
                                 throw new Exception("Name mismatch");
