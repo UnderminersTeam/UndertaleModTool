@@ -231,10 +231,11 @@ namespace UndertaleModLib.Decompiler
                 if (AssetType == AssetIDType.Enum_GamepadButton)
                     return ((GamepadButton)Convert.ToInt32(Value)).ToString();
 
-                if (AssetType == AssetIDType.Color && Value is IFormattable)
+                if (AssetType == AssetIDType.Color && Value is IFormattable && !(Value is float) && !(Value is double) && !(Value is decimal))
                 {
+                    Console.WriteLine("Type: " + Value.GetType());
                     uint val = Convert.ToUInt32(Value);
-                    return (context.isGameMaker2 ? "0x" : "$") + ((IFormattable)Value).ToString(val > 0xFFFFFF ? "X8" : "X6", CultureInfo.InvariantCulture);
+                    return (context.isGameMaker2 ? "0x" : "$") + ((IFormattable)Value).ToString("X8", CultureInfo.InvariantCulture);
                 }
 
                 if (AssetType == AssetIDType.KeyboardKey)
