@@ -10,11 +10,11 @@ namespace UndertaleModLib.Models
     public class UndertaleTextureGroupInfo : UndertaleNamedResource
     {
         public UndertaleString Name { get; set; }
-        public UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR> TexturePages;
-        public UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT> Sprites;
-        public UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT> SpineSprites;
-        public UndertaleSimpleResourcesList<UndertaleFont, UndertaleChunkFONT> Fonts;
-        public UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND> Tilesets;
+        public UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR> TexturePages { get; set; }
+        public UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT> Sprites { get; set; }
+        public UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT> SpineSprites { get; set; }
+        public UndertaleSimpleResourcesList<UndertaleFont, UndertaleChunkFONT> Fonts { get; set; }
+        public UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND> Tilesets { get; set; }
 
         public UndertaleTextureGroupInfo()
         {
