@@ -453,6 +453,98 @@ namespace UndertaleModTool
         }
     }
 
+    [ValueConversion(typeof(UndertaleRoom.Background), typeof(int))]
+    public class BackgroundScaleXConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            UndertaleRoomEditor roomEditor = parameter as UndertaleRoomEditor;
+            Debug.Assert(roomEditor != null);
+            UndertaleRoom room = roomEditor.DataContext as UndertaleRoom;
+
+            // GMS2 backgrounds.
+            if (value is UndertaleRoom.Layer.LayerBackgroundData)
+            {
+                UndertaleRoom.Layer.LayerBackgroundData layerBackground = value as UndertaleRoom.Layer.LayerBackgroundData;
+                return layerBackground.Stretch ? (room.Width / layerBackground.Sprite.Width) : 1;
+            }
+
+            // GMS1 backgrounds.
+            UndertaleRoom.Background background = value as UndertaleRoom.Background;
+            if (background == null || !background.Stretch || background.BackgroundDefinition == null)
+                return 1;
+
+            //TODO: Object rotation.
+            //TODO: Update stretch on checkbox.
+            //TODO: Tile mode? Update tile on checkbox. TiledHorizontally, TiledVertically
+
+            return ((room.Width - background.X) / background.BackgroundDefinition.Texture.SourceWidth);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    [ValueConversion(typeof(UndertaleRoom.Background), typeof(int))]
+    public class BackgroundScaleYConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            UndertaleRoomEditor roomEditor = parameter as UndertaleRoomEditor;
+            Debug.Assert(roomEditor != null);
+            UndertaleRoom room = roomEditor.DataContext as UndertaleRoom;
+
+            // GMS2 backgrounds.
+            if (value is UndertaleRoom.Layer.LayerBackgroundData)
+            {
+                UndertaleRoom.Layer.LayerBackgroundData layerBackground = value as UndertaleRoom.Layer.LayerBackgroundData;
+                return layerBackground.Stretch ? (room.Height / layerBackground.Sprite.Height) : 1;
+            }
+
+            // GMS1 backgrounds.
+            UndertaleRoom.Background background = value as UndertaleRoom.Background;
+            if (background == null || !background.Stretch || background.BackgroundDefinition == null)
+                return 1;
+
+            return ((room.Height - background.Y) / background.BackgroundDefinition.Texture.SourceHeight);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    [ValueConversion(typeof(UndertaleRoom.Background), typeof(int))]
+    public class BackgroundCenterXConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return (value as UndertaleRoom.Background)?.X ?? 0;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    [ValueConversion(typeof(UndertaleRoom.Background), typeof(int))]
+    public class BackgroundCenterYConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return (value as UndertaleRoom.Background)?.Y ?? 0;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     [ValueConversion(typeof(ObservableCollection<UndertaleRoom.GameObject>), typeof(int))]
     public class ObjCenterXConverter : IValueConverter
     {
