@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
+using static UndertaleModLib.Decompiler.Decompiler;
 
 namespace UndertaleModLib.Decompiler
 {
@@ -17,6 +19,7 @@ namespace UndertaleModLib.Decompiler
     {
         public UndertaleData Data;
         public bool EnableStringLabels;
+        public Dictionary<string, TempVarAssigmentStatement> TempVarMap = new Dictionary<string, TempVarAssigmentStatement>();
 
         public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
 
@@ -61,6 +64,8 @@ namespace UndertaleModLib.Decompiler
         {
             public abstract string ToString(DecompileContext context);
             internal abstract AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType);
+
+            public abstract Statement CleanStatement(DecompileContext context, BlockHLStatement block);
         }
 
         public abstract class Expression : Statement
@@ -128,6 +133,11 @@ namespace UndertaleModLib.Decompiler
             {
                 return false;
             }
+
+            public Expression CleanExpression(DecompileContext context, BlockHLStatement block)
+            {
+                return CleanStatement(context, block) as Expression;
+            }
         }
 
         public class ExpressionConstant : Expression
@@ -146,6 +156,12 @@ namespace UndertaleModLib.Decompiler
             internal override bool IsDuplicationSafe()
             {
                 return true;
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                Value = (Value as Statement)?.CleanStatement(context, block) ?? Value;
+                return this;
             }
 
             public Boolean EqualsNumber(int TestNumber)
@@ -284,6 +300,12 @@ namespace UndertaleModLib.Decompiler
                 return Argument.IsDuplicationSafe();
             }
 
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                Argument = Argument?.CleanExpression(context, block);
+                return this;
+            }
+
             public override string ToString(DecompileContext context)
             {
                 //return String.Format("{0}({1})", Type != Argument.Type ? "(" + Type.ToString().ToLower() + ")" : "", Argument.ToString());
@@ -311,6 +333,12 @@ namespace UndertaleModLib.Decompiler
             internal override bool IsDuplicationSafe()
             {
                 return Argument.IsDuplicationSafe();
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                Argument = Argument?.CleanExpression(context, block);
+                return this;
             }
 
             public override string ToString(DecompileContext context)
@@ -347,6 +375,14 @@ namespace UndertaleModLib.Decompiler
                 return Condition.IsDuplicationSafe() && TrueExpression.IsDuplicationSafe() && FalseExpression.IsDuplicationSafe();
             }
 
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                Condition = Condition?.CleanExpression(context, block);
+                TrueExpression = TrueExpression?.CleanExpression(context, block);
+                FalseExpression = FalseExpression?.CleanExpression(context, block);
+                return this;
+            }
+
             public override string ToString(DecompileContext context)
             {
                 string condStr = Condition.ToString(context);
@@ -381,6 +417,12 @@ namespace UndertaleModLib.Decompiler
                 return Variable.IsDuplicationSafe();
             }
 
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                Variable = Variable?.CleanStatement(context, block) as Expression;
+                return this;
+            }
+
             public override string ToString(DecompileContext context)
             {
                 return Variable.ToString(context) + (Opcode == UndertaleInstruction.Opcode.Add ? "++" : "--");
@@ -406,6 +448,12 @@ namespace UndertaleModLib.Decompiler
             internal override bool IsDuplicationSafe()
             {
                 return Variable.IsDuplicationSafe();
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                Variable = Variable?.CleanExpression(context, block);
+                return this;
             }
 
             public override string ToString(DecompileContext context)
@@ -437,6 +485,13 @@ namespace UndertaleModLib.Decompiler
             internal override bool IsDuplicationSafe()
             {
                 return Argument1.IsDuplicationSafe() && Argument2.IsDuplicationSafe();
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                Argument1 = Argument1?.CleanExpression(context, block);
+                Argument2 = Argument2?.CleanExpression(context, block);
+                return this;
             }
 
             public override string ToString(DecompileContext context)
@@ -471,6 +526,13 @@ namespace UndertaleModLib.Decompiler
             internal override bool IsDuplicationSafe()
             {
                 return Argument1.IsDuplicationSafe() && Argument2.IsDuplicationSafe();
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                Argument1 = Argument1?.CleanExpression(context, block);
+                Argument2 = Argument2?.CleanExpression(context, block);
+                return this;
             }
 
             public override string ToString(DecompileContext context)
@@ -512,6 +574,13 @@ namespace UndertaleModLib.Decompiler
                 return String.Format("({0} {1} {2})", Argument1.ToString(context), OperationToPrintableString(Opcode), Argument2.ToString(context));
             }
 
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                Argument1 = Argument1?.CleanExpression(context, block);
+                Argument2 = Argument2?.CleanExpression(context, block);
+                return this;
+            }
+
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 // TODO: This should be probably able to go both ways...
@@ -532,6 +601,11 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 return Opcode.ToString().ToUpper();
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                return this;
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -587,6 +661,13 @@ namespace UndertaleModLib.Decompiler
                 return String.Format("{0} = {1}", Var.Var.Name, Value.ToString(context));
             }
 
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                if (Var != null && Var.Var != null && Var.Var.Name != null)
+                    context.TempVarMap[Var.Var.Name] = this;
+                return this;
+            }
+
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 if (Var.Var.AssetType == AssetIDType.Other)
@@ -615,6 +696,18 @@ namespace UndertaleModLib.Decompiler
                 return String.Format("{0}{1}", /*Type != Var.Var.Type ? "(" + Type.ToString().ToLower() + ")" : ""*/ "", Var.Var.Name);
             }
 
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                TempVarAssigmentStatement tempVarStatement = context.TempVarMap[Var.Var.Name];
+                if (tempVarStatement != null)
+                {
+                    block.Statements.Remove(tempVarStatement); //TODO: Issue, what happens if a tempvar is set in a block?
+                    return tempVarStatement.Value.CleanStatement(context, block);
+                }
+
+                return this;
+            }
+
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 if (Var.Var.AssetType == AssetIDType.Other)
@@ -638,6 +731,12 @@ namespace UndertaleModLib.Decompiler
                     return "return " + Value.ToString(context) + ";";
                 else
                     return (context.isGameMaker2 ? "return;" : "exit");
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                Value = Value?.CleanExpression(context, block);
+                return this;
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -669,6 +768,12 @@ namespace UndertaleModLib.Decompiler
                     return String.Format("{0} = {1}", Destination.ToString(context), Value.ToString(context));
             }
 
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                Value = Value.CleanExpression(context, block);
+                return this;
+            }
+
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 return Value.DoTypePropagation(context, Destination.DoTypePropagation(context, suggestedType));
@@ -693,6 +798,12 @@ namespace UndertaleModLib.Decompiler
                 return String.Format("{0} {1}= {2}", Destination.ToString(context), Expression.OperationToPrintableString(Operation), Value.ToString(context));
             }
 
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                Value = Value?.CleanExpression(context, block);
+                return this;
+            }
+
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 return Value.DoTypePropagation(context, Destination.DoTypePropagation(context, suggestedType));
@@ -711,6 +822,11 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 return "// " + Message;
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                return this;
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -746,6 +862,13 @@ namespace UndertaleModLib.Decompiler
                     return "[" + argumentString.ToString() + "]";
 
                 return String.Format("{0}({1})", Function.Name.Content, argumentString.ToString());
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                for (var i = 0; i < Arguments.Count; i++)
+                    Arguments[i] = Arguments[i]?.CleanExpression(context, block);
+                return this;
             }
 
             [ThreadStatic]
@@ -799,6 +922,14 @@ namespace UndertaleModLib.Decompiler
             internal override bool IsDuplicationSafe()
             {
                 return (InstType?.IsDuplicationSafe() ?? true) && (ArrayIndex1?.IsDuplicationSafe() ?? true) && (ArrayIndex2?.IsDuplicationSafe() ?? true);
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                InstType = InstType?.CleanExpression(context, block);
+                ArrayIndex1 = ArrayIndex1?.CleanExpression(context, block);
+                ArrayIndex2 = ArrayIndex2?.CleanExpression(context, block);
+                return this;
             }
 
             public static Tuple<Expression, Expression> Decompile2DArrayIndex(Expression index)
@@ -898,6 +1029,12 @@ namespace UndertaleModLib.Decompiler
                 return "pushenv " + NewEnv;
             }
 
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                NewEnv = NewEnv?.CleanExpression(context, block);
+                return this;
+            }
+
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 NewEnv.DoTypePropagation(context, AssetIDType.GameObject);
@@ -910,6 +1047,11 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 return "popenv";
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                return this;
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -1437,6 +1579,22 @@ namespace UndertaleModLib.Decompiler
                 }
             }
 
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                for (var i = 0; i < Statements.Count; i++)
+                {
+                    var count = Statements.Count;
+
+                    var Result = Statements[i]?.CleanStatement(context, this);
+                    i -= (count - Statements.Count); // If removed.
+                    if (count != Statements.Count)
+                        Console.WriteLine("i -= " + (count - Statements.Count));
+
+                    Statements[i] = Result;
+                }
+                return this;
+            }
+
             public override string ToString(DecompileContext context)
             {
                 return ToString(context, true);
@@ -1456,11 +1614,26 @@ namespace UndertaleModLib.Decompiler
         {
             public Expression condition;
             public BlockHLStatement trueBlock;
-            public List<Tuple<Expression, BlockHLStatement>> elseConditions = new List<Tuple<Expression, BlockHLStatement>>();
+            public List<Pair<Expression, BlockHLStatement>> elseConditions = new List<Pair<Expression, BlockHLStatement>>();
             public BlockHLStatement falseBlock;
 
             public bool HasElseIf { get => elseConditions != null && elseConditions.Count > 0; }
             public bool HasElse { get => falseBlock != null && falseBlock.Statements.Count > 0; }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                condition = condition?.CleanExpression(context, block);
+                trueBlock = trueBlock?.CleanStatement(context, block) as BlockHLStatement;
+                falseBlock = falseBlock?.CleanStatement(context, block) as BlockHLStatement;
+                foreach (Pair<Expression, BlockHLStatement> pair in elseConditions)
+                {
+                    pair.Item1 = pair.Item1?.CleanExpression(context, block);
+                    pair.Item2 = pair.Item2?.CleanStatement(context, block) as BlockHLStatement;
+                }
+
+
+                return this;
+            }
 
             public override string ToString(DecompileContext context)
             {
@@ -1468,7 +1641,7 @@ namespace UndertaleModLib.Decompiler
                 sb.Append("if " + condition.ToString(context) + "\n");
                 sb.Append(trueBlock.ToString(context));
 
-                foreach (Tuple<Expression, BlockHLStatement> tuple in elseConditions)
+                foreach (Pair<Expression, BlockHLStatement> tuple in elseConditions)
                 {
                     sb.Append("\nelse if " + tuple.Item1.ToString(context) + "\n");
                     sb.Append(tuple.Item2.ToString(context));
@@ -1504,6 +1677,17 @@ namespace UndertaleModLib.Decompiler
             public bool IsRepeatLoop { get => RepeatStartValue != null; }
             public Statement RepeatStartValue;
 
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                Block = Block?.CleanStatement(context, block) as BlockHLStatement;
+                Condition = Condition?.CleanStatement(context, block);
+                InitializeStatement = InitializeStatement?.CleanStatement(context, block) as AssignmentStatement;
+                StepStatement = StepStatement?.CleanStatement(context, block) as AssignmentStatement;
+                RepeatStartValue = RepeatStartValue?.CleanStatement(context, block);
+
+                return this;
+            }
+
             public override string ToString(DecompileContext context)
             {
                 if (IsRepeatLoop)
@@ -1534,6 +1718,11 @@ namespace UndertaleModLib.Decompiler
             {
                 return "continue";
             }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                return this;
+            }
         }
 
         public class BreakHLStatement : HLStatement
@@ -1541,6 +1730,11 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 return "break";
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                return this;
             }
         }
 
@@ -1553,6 +1747,13 @@ namespace UndertaleModLib.Decompiler
             {
                 return "with (" + NewEnv.ToString(context) + ")\n" + Block.ToString(context);
             }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                NewEnv = NewEnv?.CleanExpression(context, block);
+                Block = Block?.CleanStatement(context, block) as BlockHLStatement;
+                return this;
+            }
         }
 
         public class HLSwitchStatement : HLStatement
@@ -1564,6 +1765,15 @@ namespace UndertaleModLib.Decompiler
             {
                 this.SwitchExpression = switchExpression;
                 this.Cases = cases;
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                SwitchExpression = SwitchExpression?.CleanExpression(context, block);
+                for (var i = 0; i < Cases.Count; i++)
+                    Cases[i] = Cases[i]?.CleanStatement(context, block) as HLSwitchCaseStatement;
+
+                return this;
             }
 
             public override string ToString(DecompileContext context)
@@ -1593,6 +1803,14 @@ namespace UndertaleModLib.Decompiler
                 Debug.Assert(caseExpressions.Count > 0);
                 this.CaseExpressions = caseExpressions;
                 this.Block = block;
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                for (var i = 0; i < CaseExpressions.Count; i++)
+                    CaseExpressions[i] = CaseExpressions[i]?.CleanExpression(context, block);
+                Block = Block?.CleanStatement(context, block) as BlockHLStatement;
+                return this;
             }
 
             public override string ToString(DecompileContext context)
@@ -2106,7 +2324,7 @@ namespace UndertaleModLib.Decompiler
                     if (cond.trueBlock.Statements.Count > 0 && cond.falseBlock.Statements.Count > 0 && cond.trueBlock.Statements.Last() is BreakHLStatement && cond.falseBlock.Statements.Last() is BreakHLStatement)
                     {
                         Boolean valid = true;
-                        foreach (Tuple<Expression, BlockHLStatement> tuple in cond.elseConditions)
+                        foreach (Pair<Expression, BlockHLStatement> tuple in cond.elseConditions)
                             if (tuple.Item2.Statements.Count == 0 || !(tuple.Item2.Statements.Last() is BreakHLStatement))
                                 valid = false;
 
@@ -2114,7 +2332,7 @@ namespace UndertaleModLib.Decompiler
                         {
                             cond.trueBlock.Statements.Remove(cond.trueBlock.Statements.Last());
                             cond.falseBlock.Statements.Remove(cond.falseBlock.Statements.Last());
-                            foreach (Tuple<Expression, BlockHLStatement> tuple in cond.elseConditions)
+                            foreach (Pair<Expression, BlockHLStatement> tuple in cond.elseConditions)
                                 tuple.Item2.Statements.Remove(tuple.Item2.Statements.Last());
                         }
                     }
@@ -2179,7 +2397,7 @@ namespace UndertaleModLib.Decompiler
                         while (parentIf.falseBlock.Statements.Count == 1 && parentIf.falseBlock.Statements[0] is IfHLStatement) // The condition of one if statement.
                         {
                             IfHLStatement nestedIf = (IfHLStatement)parentIf.falseBlock.Statements[0];
-                            parentIf.elseConditions.Add(Tuple.Create(nestedIf.condition, nestedIf.trueBlock));
+                            parentIf.elseConditions.Add(new Pair<Expression, BlockHLStatement>(nestedIf.condition, nestedIf.trueBlock));
                             parentIf.elseConditions.AddRange(nestedIf.elseConditions);
                             parentIf.falseBlock = nestedIf.falseBlock;
                             noElse = false;
@@ -2334,7 +2552,7 @@ namespace UndertaleModLib.Decompiler
                 }
             }
 
-            return output;
+            return output.CleanStatement(context, output) as BlockHLStatement;
         }
 
         private static bool TestTernaryPass(Expression s1, Expression s2, bool allowValues)
