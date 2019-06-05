@@ -20,6 +20,7 @@ namespace UndertaleModLib.Decompiler
         public UndertaleData Data;
         public bool EnableStringLabels;
         public Dictionary<string, TempVarAssigmentStatement> TempVarMap = new Dictionary<string, TempVarAssigmentStatement>();
+        public TempVarAssigmentStatement LastTempVar;
 
         public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
 
@@ -674,6 +675,7 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     context.TempVarMap[Var.Var.Name] = this;
+                    context.LastTempVar = this;
                 }
                 return this;
             }
@@ -1632,6 +1634,33 @@ namespace UndertaleModLib.Decompiler
                 trueBlock = trueBlock?.CleanStatement(context, block) as BlockHLStatement;
                 falseBlock = falseBlock?.CleanStatement(context, block) as BlockHLStatement;
 
+                // Fixes breaks in both if outcomes. [Should go first, before other statements that use trueBlock and falseBlock]
+                if (trueBlock.Statements.Count > 0 && falseBlock.Statements.Count > 0 && trueBlock.Statements.Last() is BreakHLStatement && falseBlock.Statements.Last() is BreakHLStatement)
+                {
+                    Boolean valid = true;
+                    foreach (Pair<Expression, BlockHLStatement> tuple in elseConditions)
+                        if (tuple.Item2.Statements.Count == 0 || !(tuple.Item2.Statements.Last() is BreakHLStatement))
+                            valid = false;
+
+                    if (valid)
+                    {
+                        trueBlock.Statements.Remove(trueBlock.Statements.Last());
+                        falseBlock.Statements.Remove(falseBlock.Statements.Last());
+                        foreach (Pair<Expression, BlockHLStatement> tuple in elseConditions)
+                            tuple.Item2.Statements.Remove(tuple.Item2.Statements.Last());
+                    }
+                }
+
+                // Use if -> else if, instead of nesting ifs.
+                while (falseBlock.Statements.Count == 1 && falseBlock.Statements[0] is IfHLStatement) // The condition of one if statement.
+                {
+                    IfHLStatement nestedIf = (IfHLStatement)falseBlock.Statements[0];
+                    elseConditions.Add(new Pair<Expression, BlockHLStatement>(nestedIf.condition, nestedIf.trueBlock));
+                    elseConditions.AddRange(nestedIf.elseConditions);
+                    falseBlock = nestedIf.falseBlock;
+                }
+
+                // Collapse conditions into && + || + ternary.
                 if (HasElse && !HasElseIf && trueBlock.Statements.Count == 1 && falseBlock.Statements.Count == 1)
                 {
                     TempVarAssigmentStatement trueAssign = trueBlock.Statements[0] as TempVarAssigmentStatement;
@@ -1648,7 +1677,44 @@ namespace UndertaleModLib.Decompiler
                             newAssign = new TempVarAssigmentStatement(trueAssign.Var, new ExpressionTernary(trueAssign.Value.Type, condition, trueAssign.Value, falseAssign.Value));
 
                         context.TempVarMap[newAssign.Var.Var.Name] = newAssign;
+                        context.LastTempVar = newAssign;
                         return newAssign;
+                    }
+                }
+
+                // Create repeat loops.
+                if (!HasElseIf && trueBlock.Statements.Count == 0 && falseBlock.Statements.Count == 1 && falseBlock.Statements[0] is LoopHLStatement
+                        && condition is ExpressionCompare && block.Statements.Count > 0 && context.LastTempVar is TempVarAssigmentStatement)
+                {
+                    ExpressionCompare compareCondition = condition as ExpressionCompare;
+                    LoopHLStatement loop = falseBlock.Statements[0] as LoopHLStatement;
+                    TempVarAssigmentStatement priorAssignment = block.Statements[block.Statements.IndexOf(this) - 1] as TempVarAssigmentStatement;
+                    Expression startValue = priorAssignment.Value;
+
+                    List<Statement> loopCode = loop.Block.Statements;
+                    if (priorAssignment != null && loop.IsWhileLoop && loop.Condition == null && loopCode.Count > 2 && compareCondition.Opcode == UndertaleInstruction.ComparisonType.LTE && TestNumber(compareCondition.Argument2, 0) && compareCondition.Argument1.ToString(context) == startValue.ToString(context))
+                    {
+                        IfHLStatement loopCheckStatement = loopCode[loopCode.Count - 2] as IfHLStatement;
+                        Statement testBreakStatement = loopCode[loopCode.Count - 1];
+
+                        if (loopCheckStatement != null && testBreakStatement is BreakHLStatement)
+                        { // tempVar = (tempVar -1); -> if (tempVar) continue -> break
+
+                            // if (tempVar) {continue} else {empty}
+                            bool ifPass = loopCheckStatement.trueBlock.Statements.Count == 1 && !loopCheckStatement.HasElse && !loopCheckStatement.HasElseIf
+                                && loopCheckStatement.trueBlock.Statements[0] is ContinueHLStatement
+                                && loopCheckStatement.condition is ExpressionTwo && loopCheckStatement.condition.ToString(context) == ("(" + startValue.ToString(context) + " - 1)");
+
+                            if (ifPass)
+                            {
+                                loopCode.Remove(loopCheckStatement);
+                                loopCode.Remove(testBreakStatement);
+                                block.Statements.Remove(priorAssignment);
+
+                                loop.RepeatStartValue = startValue;
+                                return loop;
+                            }
+                        }
                     }
                 }
 
@@ -2344,104 +2410,7 @@ namespace UndertaleModLib.Decompiler
                     Block blTrue = block.nextBlockTrue, blFalse = block.nextBlockFalse;
                     cond.trueBlock = HLDecompileBlocks(context, ref blTrue, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint, true);
                     cond.falseBlock = HLDecompileBlocks(context, ref blFalse, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint, true);
-
-                    bool shouldAdd = true;
-
-                    // Fixes breaks in both if outcomes. [Should go first, before other statements that use trueBlock and falseBlock]
-                    if (cond.trueBlock.Statements.Count > 0 && cond.falseBlock.Statements.Count > 0 && cond.trueBlock.Statements.Last() is BreakHLStatement && cond.falseBlock.Statements.Last() is BreakHLStatement)
-                    {
-                        Boolean valid = true;
-                        foreach (Pair<Expression, BlockHLStatement> tuple in cond.elseConditions)
-                            if (tuple.Item2.Statements.Count == 0 || !(tuple.Item2.Statements.Last() is BreakHLStatement))
-                                valid = false;
-
-                        if (valid)
-                        {
-                            cond.trueBlock.Statements.Remove(cond.trueBlock.Statements.Last());
-                            cond.falseBlock.Statements.Remove(cond.falseBlock.Statements.Last());
-                            foreach (Pair<Expression, BlockHLStatement> tuple in cond.elseConditions)
-                                tuple.Item2.Statements.Remove(tuple.Item2.Statements.Last());
-                        }
-                    }
-
-                    // Use if -> else if, instead of nesting ifs.
-                    bool noElse = (cond.elseConditions == null || cond.elseConditions.Count == 0);
-                    if (shouldAdd)
-                    {
-                        IfHLStatement parentIf = cond;
-                        while (parentIf.falseBlock.Statements.Count == 1 && parentIf.falseBlock.Statements[0] is IfHLStatement) // The condition of one if statement.
-                        {
-                            IfHLStatement nestedIf = (IfHLStatement)parentIf.falseBlock.Statements[0];
-                            parentIf.elseConditions.Add(new Pair<Expression, BlockHLStatement>(nestedIf.condition, nestedIf.trueBlock));
-                            parentIf.elseConditions.AddRange(nestedIf.elseConditions);
-                            parentIf.falseBlock = nestedIf.falseBlock;
-                            noElse = false;
-                        }
-                    }
-
-                    // Condense into repeat statement. [Should go after all if handlers]
-                    if (noElse && shouldAdd && cond.trueBlock.Statements.Count == 0 && cond.falseBlock.Statements.Count == 1 && cond.falseBlock.Statements[0] is LoopHLStatement
-                        && cond.condition is ExpressionCompare && output.Statements.Count > 0 && output.Statements.Last() is TempVarAssigmentStatement)
-                    {
-                        ExpressionCompare condition = (ExpressionCompare)cond.condition;
-                        LoopHLStatement loop = (LoopHLStatement)cond.falseBlock.Statements[0];
-                        TempVarAssigmentStatement priorAssignment = (TempVarAssigmentStatement)output.Statements.Last();
-                        Expression startValue = priorAssignment.Value;
-                        TempVar loopVar = priorAssignment.Var.Var;
-
-                        List<Statement> loopCode = loop.Block.Statements;
-                        if (loop.IsWhileLoop && loop.Condition == null && loopCode.Count > 2 && condition.Opcode == UndertaleInstruction.ComparisonType.LTE && TestNumber(condition.Argument2, 0) && condition.Argument1.ToString(context) == startValue.ToString(context))
-                        {
-                            Statement testDecrementStatement = loopCode[loopCode.Count - 3];
-                            Statement testLoopCheckStatement = loopCode[loopCode.Count - 2];
-                            Statement testBreakStatement = loopCode[loopCode.Count - 1];
-
-                            if (testDecrementStatement is TempVarAssigmentStatement && testLoopCheckStatement is IfHLStatement && testBreakStatement is BreakHLStatement)
-                            { // tempVar = (tempVar -1); -> if (tempVar) continue -> break
-                                TempVarAssigmentStatement decrementStatement = (TempVarAssigmentStatement)testDecrementStatement;
-                                IfHLStatement loopCheckStatement = (IfHLStatement)testLoopCheckStatement;
-
-                                bool decrementPass = false;
-                                if (decrementStatement.Var.Var == loopVar && decrementStatement.Value is ExpressionTwo)
-                                { // tempVar = (tempVar - 1);
-                                    ExpressionTwo setValue = (ExpressionTwo)decrementStatement.Value;
-                                    decrementPass = (setValue.Opcode == UndertaleInstruction.Opcode.Sub) // -
-                                        && (setValue.Argument1 is ExpressionTempVar && ((ExpressionTempVar)setValue.Argument1).Var.Var == loopVar) // tempVar
-                                        && TestNumber(setValue.Argument2, 1); // 1
-                                }
-
-                                // if (tempVar) {continue} else {empty}
-                                bool ifPass = loopCheckStatement.trueBlock.Statements.Count == 1 && loopCheckStatement.falseBlock.Statements.Count == 0
-                                    && loopCheckStatement.trueBlock.Statements[0] is ContinueHLStatement
-                                    && loopCheckStatement.condition is ExpressionTempVar && ((ExpressionTempVar)loopCheckStatement.condition).Var.Var == loopVar;
-
-                                if (decrementPass && decrementPass)
-                                {
-                                    shouldAdd = false;
-                                    loopCode.Remove(testDecrementStatement);
-                                    loopCode.Remove(testLoopCheckStatement);
-                                    loopCode.Remove(testBreakStatement);
-                                    output.Statements.Remove(priorAssignment);
-
-                                    // Avoid tempvars.
-                                    if (startValue is ExpressionTempVar && output.Statements.Count > 0 && output.Statements.Last() is TempVarAssigmentStatement)
-                                    {
-                                        TempVarAssigmentStatement nextTempVar = (TempVarAssigmentStatement)output.Statements.Last();
-                                        output.Statements.Remove(nextTempVar);
-                                        startValue = nextTempVar.Value;
-                                    }
-
-                                    loop.RepeatStartValue = startValue;
-                                    output.Statements.Add(loop);
-                                }
-                            }
-                        }
-                    }
-
-                    // Add the if statement.
-                    if (shouldAdd)
-                        output.Statements.Add(cond);
-
+                    output.Statements.Add(cond); // Add the if statement.
                     block = meetPoint;
                 }
                 else
@@ -2466,14 +2435,7 @@ namespace UndertaleModLib.Decompiler
             if (foundBreak)
                 output.Statements.Add(new BreakHLStatement());
 
-            return output.CleanStatement(context, output) as BlockHLStatement;
-        }
-
-        private static bool TestTernaryPass(Expression s1, Expression s2, bool allowValues)
-        {
-            return s1.Type == s2.Type
-                && !(s1 is ExpressionTernary) && !(s2 is ExpressionTernary)
-                && (allowValues || (TestNumber(s1, 1) && TestNumber(s2, 0)));
+            return output;
         }
 
         private static Statement UnCast(Statement statement)

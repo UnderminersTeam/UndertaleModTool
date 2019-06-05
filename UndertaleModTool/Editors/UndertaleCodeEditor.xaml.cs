@@ -85,6 +85,7 @@ namespace UndertaleModTool
 
             FlowDocument document = new FlowDocument();
             document.PagePadding = new Thickness(0);
+            document.PageWidth = 2048; // Speed-up.
             document.FontFamily = new FontFamily("Lucida Console");
             Paragraph par = new Paragraph();
             par.Margin = new Thickness(0);
@@ -269,6 +270,7 @@ namespace UndertaleModTool
 
             FlowDocument document = new FlowDocument();
             document.PagePadding = new Thickness(0);
+            document.PageWidth = 2048; // Speed-up.
             document.FontFamily = new FontFamily("Lucida Console");
             Paragraph par = new Paragraph();
             par.Margin = new Thickness(0);
