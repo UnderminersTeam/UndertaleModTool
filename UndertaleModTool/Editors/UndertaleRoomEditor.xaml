@@ -14,11 +14,7 @@
         <local:SimplePointsDisplayConverter x:Key="SimplePointsDisplayConverter"/>
         <local:ObjCenterXConverter x:Key="ObjCenterXConverter" />
         <local:ObjCenterYConverter x:Key="ObjCenterYConverter" />
-        <local:BackgroundCenterXConverter x:Key="BackgroundCenterXConverter" />
-        <local:BackgroundCenterYConverter x:Key="BackgroundCenterYConverter" />
         <local:LayerFlattenerConverter x:Key="LayerFlattenerConverter" />
-        <local:BackgroundScaleXConverter x:Key="BackgroundScaleXConverter" />
-        <local:BackgroundScaleYConverter x:Key="BackgroundScaleYConverter" />
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Tiles}"/>
@@ -880,7 +876,7 @@
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
                                   <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
-                                  <ScaleTransform ScaleX="{Binding Converter={StaticResource BackgroundScaleXConverter}, ConverterParameter={x:Reference RoomEditor}}" ScaleY="{Binding Converter={StaticResource BackgroundScaleYConverter}, ConverterParameter={x:Reference RoomEditor}}"  CenterX="{Binding Converter={StaticResource BackgroundCenterXConverter}}" CenterY="{Binding Converter={StaticResource BackgroundCenterYConverter}}"/>
+                                  <ScaleTransform ScaleX="{Binding CalcScaleX}" ScaleY="{Binding CalcScaleY}"  CenterX="{Binding X}" CenterY="{Binding Y}"/>
                                 </TransformGroup>
                             </Rectangle.RenderTransform>
                             <Rectangle.Style>
@@ -1038,15 +1034,17 @@
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
                         <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                          
                           <Rectangle.RenderTransform>
-                              <ScaleTransform ScaleX="{Binding Converter={StaticResource BackgroundScaleXConverter}, ConverterParameter={x:Reference RoomEditor}}" ScaleY="{Binding Converter={StaticResource BackgroundScaleYConverter}, ConverterParameter={x:Reference RoomEditor}}"  CenterX="0" CenterY="0"/>
+                            <ScaleTransform ScaleX="{Binding CalcScaleX}" ScaleY="{Binding CalcScaleY}" CenterX="0" CenterY="0"/>
                           </Rectangle.RenderTransform>
-                            <Rectangle.Fill>
-                                <ImageBrush
+                          
+                          <Rectangle.Fill>
+                              <ImageBrush
                                 ImageSource="{Binding Sprite.Textures[0].Texture.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
                                 ViewboxUnits="Absolute"
                                 TileMode="None"
-                                Stretch="UniformToFill">
+                                Stretch="Fill">
                                     <ImageBrush.Viewbox>
                                         <MultiBinding>
                                             <MultiBinding.Converter>
@@ -1058,8 +1056,8 @@
                                             <Binding Path="Sprite.Textures[0].Texture.SourceHeight"/>
                                         </MultiBinding>
                                     </ImageBrush.Viewbox>
-                                </ImageBrush>
-                            </Rectangle.Fill>
+                              </ImageBrush>
+                          </Rectangle.Fill>
                         </Rectangle>
                     </DataTemplate>
 

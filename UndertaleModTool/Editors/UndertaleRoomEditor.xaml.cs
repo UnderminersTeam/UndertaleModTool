@@ -86,11 +86,13 @@ namespace UndertaleModTool
         private void UndertaleRoomEditor_Loaded(object sender, RoutedEventArgs e)
         {
             RoomRootItem.IsSelected = true;
+            (this.DataContext as UndertaleRoom)?.SetupRoom();
         }
 
         private void UndertaleRoomEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             RoomRootItem.IsSelected = true;
+            (this.DataContext as UndertaleRoom)?.SetupRoom();
         }
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -110,7 +112,7 @@ namespace UndertaleModTool
 
         private UndertaleObject movingObj;
         private double hotpointX, hotpointY;
-        
+
         private void Rectangle_MouseDown(object sender, MouseButtonEventArgs e)
         {
             UndertaleObject clickedObj = (sender as Rectangle).DataContext as UndertaleObject;
@@ -261,6 +263,8 @@ namespace UndertaleModTool
                 }
             }
             e.Handled = true;
+
+            (this.DataContext as UndertaleRoom)?.SetupRoom();
         }
 
         private void RoomObjectsTree_KeyDown(object sender, KeyEventArgs e)
@@ -416,6 +420,8 @@ namespace UndertaleModTool
                     SelectObject(obj);
                 }
             }
+
+            (this.DataContext as UndertaleRoom)?.SetupRoom();
         }
 
         private void AddLayer<T>(UndertaleRoom.LayerType type, string name) where T : UndertaleRoom.Layer.LayerData, new()
@@ -430,6 +436,7 @@ namespace UndertaleModTool
             room.Layers.Add(layer);
 
             SelectObject(layer);
+            (this.DataContext as UndertaleRoom)?.SetupRoom();
         }
         
         private void MenuItem_NewLayerInstances_Click(object sender, RoutedEventArgs e)
@@ -450,98 +457,6 @@ namespace UndertaleModTool
         private void MenuItem_NewLayerAssets_Click(object sender, RoutedEventArgs e)
         {
             AddLayer<UndertaleRoom.Layer.LayerAssetsData>(UndertaleRoom.LayerType.Assets, "NewAssetsLayer");
-        }
-    }
-
-    [ValueConversion(typeof(UndertaleRoom.Background), typeof(int))]
-    public class BackgroundScaleXConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            UndertaleRoomEditor roomEditor = parameter as UndertaleRoomEditor;
-            Debug.Assert(roomEditor != null);
-            UndertaleRoom room = roomEditor.DataContext as UndertaleRoom;
-
-            // GMS2 backgrounds.
-            if (value is UndertaleRoom.Layer.LayerBackgroundData)
-            {
-                UndertaleRoom.Layer.LayerBackgroundData layerBackground = value as UndertaleRoom.Layer.LayerBackgroundData;
-                return layerBackground.Stretch ? (room.Width / layerBackground.Sprite.Width) : 1;
-            }
-
-            // GMS1 backgrounds.
-            UndertaleRoom.Background background = value as UndertaleRoom.Background;
-            if (background == null || !background.Stretch || background.BackgroundDefinition == null)
-                return 1;
-
-            //TODO: Object rotation.
-            //TODO: Update stretch on checkbox.
-            //TODO: Tile mode? Update tile on checkbox. TiledHorizontally, TiledVertically
-
-            return ((room.Width - background.X) / background.BackgroundDefinition.Texture.SourceWidth);
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    [ValueConversion(typeof(UndertaleRoom.Background), typeof(int))]
-    public class BackgroundScaleYConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            UndertaleRoomEditor roomEditor = parameter as UndertaleRoomEditor;
-            Debug.Assert(roomEditor != null);
-            UndertaleRoom room = roomEditor.DataContext as UndertaleRoom;
-
-            // GMS2 backgrounds.
-            if (value is UndertaleRoom.Layer.LayerBackgroundData)
-            {
-                UndertaleRoom.Layer.LayerBackgroundData layerBackground = value as UndertaleRoom.Layer.LayerBackgroundData;
-                return layerBackground.Stretch ? (room.Height / layerBackground.Sprite.Height) : 1;
-            }
-
-            // GMS1 backgrounds.
-            UndertaleRoom.Background background = value as UndertaleRoom.Background;
-            if (background == null || !background.Stretch || background.BackgroundDefinition == null)
-                return 1;
-
-            return ((room.Height - background.Y) / background.BackgroundDefinition.Texture.SourceHeight);
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    [ValueConversion(typeof(UndertaleRoom.Background), typeof(int))]
-    public class BackgroundCenterXConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return (value as UndertaleRoom.Background)?.X ?? 0;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    [ValueConversion(typeof(UndertaleRoom.Background), typeof(int))]
-    public class BackgroundCenterYConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return (value as UndertaleRoom.Background)?.Y ?? 0;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 
