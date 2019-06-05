@@ -1006,6 +1006,7 @@
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
                                     <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
+                                    <RotateTransform CenterX="{Binding Converter={StaticResource ObjCenterXConverter}}" CenterY="{Binding Converter={StaticResource ObjCenterYConverter}}" Angle="{Binding OppositeRotation}"/>
                                     <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}" CenterX="{Binding Converter={StaticResource ObjCenterXConverter}}" CenterY="{Binding Converter={StaticResource ObjCenterYConverter}}"/>
                                 </TransformGroup>
                                 <!-- TODO: X + TargetX? -->

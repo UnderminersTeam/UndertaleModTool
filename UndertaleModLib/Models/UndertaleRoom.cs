@@ -368,13 +368,14 @@ namespace UndertaleModLib.Models
             public float ScaleX { get => _ScaleX; set { _ScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleX")); } }
             public float ScaleY { get => _ScaleY; set { _ScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleY")); } }
             public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
-            public float Rotation { get => _Rotation; set { _Rotation = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Rotation")); } }
+            public float Rotation { get => _Rotation; set { _Rotation = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Rotation")); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OppositeRotation")); } }
             public UndertaleCode PreCreateCode { get => _PreCreateCode.Resource; set { _PreCreateCode.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PreCreateCode")); } }
             public bool GMS2_2_2 { get => _GMS2_2_2; set { _GMS2_2_2 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2_2_2")); } }
             public float ImageSpeed { get => _ImageSpeed; set { _ImageSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ImageSpeed")); } }
             public int ImageIndex { get => _ImageIndex; set { _ImageIndex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ImageIndex")); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
+            public float OppositeRotation { get => 360F - Rotation; }
 
             public void Serialize(UndertaleWriter writer)
             {
