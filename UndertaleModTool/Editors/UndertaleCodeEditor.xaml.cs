@@ -340,6 +340,7 @@ namespace UndertaleModTool
                             Brush commentBrush = new SolidColorBrush(Color.FromRgb(0, 150, 0));
                             Brush funcBrush = new SolidColorBrush(Color.FromRgb(100, 100, 0));
                             Brush assetBrush = new SolidColorBrush(Color.FromRgb(0, 150, 100));
+                            Brush argumentBrush = new SolidColorBrush(Color.FromRgb(80, 131, 80));
 
                             Dictionary<string, UndertaleFunction> funcs = new Dictionary<string, UndertaleFunction>();
                             foreach (var x in (Application.Current.MainWindow as MainWindow).Data.Functions)
@@ -409,8 +410,10 @@ namespace UndertaleModTool
                                     string token = split[i];
                                     if (token == "if" || token == "else" || token == "return" || token == "break" || token == "continue" || token == "while" || token == "for" || token == "repeat" || token == "with" || token == "switch" || token == "case" || token == "default" || token == "exit" || token == "var" || token == "do" || token == "until")
                                         par.Inlines.Add(new Run(token) { Foreground = keywordBrush, FontWeight = FontWeights.Bold });
-                                    else if (token == "self" || token == "global" || token == "local" || token == "other" || token == "noone" || token == "true" || token == "false")
+                                    else if (token == "self" || token == "global" || token == "local" || token == "other" || token == "noone" || token == "true" || token == "false" || token == "undefined" || token == "all")
                                         par.Inlines.Add(new Run(token) { Foreground = keywordBrush });
+                                    else if (token.StartsWith("argument"))
+                                        par.Inlines.Add(new Run(token) { Foreground = argumentBrush });
                                     else if ((val = AssetTypeResolver.FindConstValue(token)) != null)
                                         par.Inlines.Add(new Run(token) { Foreground = constBrush, FontStyle = FontStyles.Italic, ToolTip = val.ToString() });
                                     else if (token.StartsWith("\""))
@@ -484,7 +487,7 @@ namespace UndertaleModTool
                                                 possibleObjects.Add(data.Timelines[id]);
 
                                             ContextMenu contextMenu = new ContextMenu();
-                                            foreach(UndertaleObject obj in possibleObjects)
+                                            foreach (UndertaleObject obj in possibleObjects)
                                             {
                                                 MenuItem item = new MenuItem();
                                                 item.Header = obj.ToString().Replace("_", "__");
