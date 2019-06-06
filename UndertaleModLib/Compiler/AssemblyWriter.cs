@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -971,7 +972,7 @@ namespace UndertaleModLib.Compiler
                                     else
                                     {
                                         // It's a double
-                                        cw.Write("push.d " + value.valueNumber.ToString());
+                                        cw.Write("push.d " + value.valueNumber.ToString(CultureInfo.InvariantCulture));
                                         typeStack.Push(UndertaleInstruction.DataType.Double);
                                     }
                                     break;
