@@ -1272,15 +1272,20 @@ namespace UndertaleModLib.Decompiler
                                 if (val is ExpressionTwo)
                                 {
                                     var two = (val as ExpressionTwo);
-                                    var arg = two.Argument1;
-                                    if (arg is ExpressionVar)
+                                    if (two.Opcode != UndertaleInstruction.Opcode.Rem && // Not possible in GML, but possible in bytecode. Don't deal with these,
+                                        two.Opcode != UndertaleInstruction.Opcode.Shl && // frankly we don't care enough.
+                                        two.Opcode != UndertaleInstruction.Opcode.Shr)
                                     {
-                                        var v = arg as ExpressionVar;
-                                        if (v.Var == target.Var && v.InstType == target.InstType &&
-                                            v.ArrayIndex1 == target.ArrayIndex1 && v.ArrayIndex2 == target.ArrayIndex2) // even if null
+                                        var arg = two.Argument1;
+                                        if (arg is ExpressionVar)
                                         {
-                                            statements.Add(new AssignmentEqualsStatement(target, two.Opcode, two.Argument2));
-                                            break;
+                                            var v = arg as ExpressionVar;
+                                            if (v.Var == target.Var && v.InstType == target.InstType &&
+                                                v.ArrayIndex1 == target.ArrayIndex1 && v.ArrayIndex2 == target.ArrayIndex2) // even if null
+                                            {
+                                                statements.Add(new AssignmentEqualsStatement(target, two.Opcode, two.Argument2));
+                                                break;
+                                            }
                                         }
                                     }
                                 }
