@@ -2361,7 +2361,7 @@ namespace UndertaleModLib.Decompiler
                         var now = cases[i];
                         var next = cases[i + 1];
 
-                        bool testPass = true;
+                        bool testPass = now.ShowBreak == next.ShowBreak;
                         var startIndex = (now.Block.Statements.Count - next.Block.Statements.Count);
                         if (startIndex < 0)
                             continue;
@@ -2384,7 +2384,6 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     output.Statements.Add(new HLSwitchStatement(switchExpression, cases));
-                    Debug.Assert(!block.conditionalExit);
                     block = block.nextBlockTrue;
                     continue;
                 }
