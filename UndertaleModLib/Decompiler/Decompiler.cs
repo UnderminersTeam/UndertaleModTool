@@ -166,10 +166,41 @@ namespace UndertaleModLib.Decompiler
                 return this;
             }
 
-            public Boolean EqualsNumber(int TestNumber)
+            public bool EqualsNumber(int TestNumber)
             {
                 return (Value is Int16 || Value is Int32) && Convert.ToInt32(Value) == TestNumber;
             }
+
+            private static int? ConvertToInt(object val)
+            {
+                 if (val is int || val is short || val is ushort || val is UndertaleInstruction.InstanceType)
+                 {
+                     return Convert.ToInt32(val);
+                 }
+                 else if (val is double)
+                 {
+                     var v = Convert.ToDouble(val);
+                     int res = (int)v;
+                     if (v == res)
+                         return res;
+                 }
+                 else if (val is float)
+                 {
+                     var v = Convert.ToSingle(val);
+                     int res = (int)v;
+                     if (v == res)
+                         return res;
+                 }
+                 return null;
+             }
+
+             private static string ConvertToEnumStr<T>(object val)
+             {
+                 int? intVal = ConvertToInt(val);
+                 if (intVal == null)
+                     return val.ToString();
+                 return ((T)(object) intVal).ToString();
+             }
 
             public override string ToString(DecompileContext context)
             {
@@ -229,42 +260,55 @@ namespace UndertaleModLib.Decompiler
 
                     if (!(Value is Int64)) // It is unknown what Int64 data represents, but it's not this.
                     {
-                        int val = Convert.ToInt32(Value);
-                        if (assetList != null && val >= 0 && val < assetList.Count)
-                            return ((UndertaleNamedResource)assetList[val]).Name.Content;
+                         int? tryVal = ConvertToInt(Value);
+                         int val;
+                         if (tryVal != null)
+                         {
+                             val = tryVal ?? -1;
+                             if (assetList != null && val >= 0 && val < assetList.Count)
+                                 return ((UndertaleNamedResource)assetList[val]).Name.Content;
+                         }
                     }
                 }
 
                 if (AssetType == AssetIDType.e__VW)
-                    return "e__VW." + ((e__VW)Convert.ToInt32(Value)).ToString();
+                    return "e__VW." + ConvertToEnumStr<e__VW>(Value);
                 if (AssetType == AssetIDType.e__BG)
-                    return "e__BG." + ((e__BG)Convert.ToInt32(Value)).ToString();
+                    return "e__BG." + ConvertToEnumStr<e__BG>(Value);
 
                 if (AssetType == AssetIDType.Enum_HAlign)
-                    return ((HAlign)Convert.ToInt32(Value)).ToString();
+                    return ConvertToEnumStr<HAlign>(Value);
                 if (AssetType == AssetIDType.Enum_VAlign)
-                    return ((VAlign)Convert.ToInt32(Value)).ToString();
+                    return ConvertToEnumStr<VAlign>(Value);
                 if (AssetType == AssetIDType.Enum_OSType)
-                    return ((OSType)Convert.ToInt32(Value)).ToString();
+                    return ConvertToEnumStr<OSType>(Value);
                 if (AssetType == AssetIDType.Enum_GamepadButton)
-                    return ((GamepadButton)Convert.ToInt32(Value)).ToString();
+                    return ConvertToEnumStr<GamepadButton>(Value);
+                if (AssetType == AssetIDType.Enum_PathEndAction)
+                    return ConvertToEnumStr<PathEndAction>(Value);
+                if (AssetType == AssetIDType.Boolean)
+                    return ConvertToEnumStr<Boolean>(Value);
 
                 if (AssetType == AssetIDType.Color && Value is IFormattable && !(Value is float) && !(Value is double) && !(Value is decimal))
                     return (context.isGameMaker2 ? "0x" : "$") + ((IFormattable)Value).ToString("X8", CultureInfo.InvariantCulture);
 
                 if (AssetType == AssetIDType.KeyboardKey)
                 {
-                    int val = Convert.ToInt32(Value);
-                    if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
+                    int? tryVal = ConvertToInt(Value);
+                    if (tryVal != null)
                     {
-                        bool isAlphaNumeric = val >= (int)EventSubtypeKey.Digit0 && val <= (int)EventSubtypeKey.Z;
-                        return isAlphaNumeric ? "ord(\"" + (char)val + "\")" : ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
-                    }
+                        int val = tryVal ?? -1;
+                        if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
+                        {
+                            bool isAlphaNumeric = val >= (int)EventSubtypeKey.Digit0 && val <= (int)EventSubtypeKey.Z;
+                            return isAlphaNumeric ? "ord(\"" + (char)val + "\")" : ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
+                        }
 
-                    if (!Char.IsControl((char)val) && !Char.IsLower((char)val)) // The special keys overlay with the uppercase letters (ugh)
-                        return ((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
-                            : (((char)val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
-                            : "\"" + (char)val + "\"");
+                        if (!Char.IsControl((char)val) && !Char.IsLower((char)val)) // The special keys overlay with the uppercase letters (ugh)
+                            return ((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
+                                : (((char)val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
+                                : "\"" + (char)val + "\"");
+                    }
                 }
 
                 if (Value is float) // Prevents scientific notation by using high bit number.
@@ -1643,7 +1687,7 @@ namespace UndertaleModLib.Decompiler
                 // Fixes breaks in both if outcomes. [Should go first, before other statements that use trueBlock and falseBlock]
                 if (trueBlock.Statements.Count > 0 && falseBlock.Statements.Count > 0 && trueBlock.Statements.Last() is BreakHLStatement && falseBlock.Statements.Last() is BreakHLStatement)
                 {
-                    Boolean valid = true;
+                    bool valid = true;
                     foreach (Pair<Expression, BlockHLStatement> tuple in elseConditions)
                         if (tuple.Item2.Statements.Count == 0 || !(tuple.Item2.Statements.Last() is BreakHLStatement))
                             valid = false;
