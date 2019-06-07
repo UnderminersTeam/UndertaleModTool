@@ -130,7 +130,7 @@ namespace UndertaleModLib.Decompiler
                                 instr.Value = (long)ParseResourceName(line, data);
                             break;
                         case UndertaleInstruction.DataType.Boolean:
-                            instr.Value = Boolean.Parse(line);
+                            instr.Value = bool.Parse(line);
                             break;
                         case UndertaleInstruction.DataType.Variable:
                             UndertaleInstruction.InstanceType inst2 = instr.TypeInst;

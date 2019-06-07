@@ -179,6 +179,8 @@ namespace UndertaleModLib
                 res.PostUnserialize(this);
             resUpdate.Clear();
 
+            Decompiler.AssetTypeResolver.InitializeTypes(data);
+
             return data;
         }
 
