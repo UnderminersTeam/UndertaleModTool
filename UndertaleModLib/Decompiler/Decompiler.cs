@@ -21,6 +21,7 @@ namespace UndertaleModLib.Decompiler
         public bool EnableStringLabels;
         public Dictionary<string, TempVarAssigmentStatement> TempVarMap = new Dictionary<string, TempVarAssigmentStatement>();
         public TempVarAssigmentStatement LastTempVar;
+        public UndertaleCode TargetCode;
 
         public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
 
@@ -2274,6 +2275,7 @@ namespace UndertaleModLib.Decompiler
                         throw new Exception("End of switch not found");
 
                     Dictionary<Block, List<Expression>> caseEntries = new Dictionary<Block, List<Expression>>();
+                    bool defaultEscape = false;
                     while (block != meetPoint)
                     {
                         Expression caseExpr = null;
@@ -2308,17 +2310,44 @@ namespace UndertaleModLib.Decompiler
                                 else
                                     block = block.nextBlockTrue;
                             }
+                            defaultEscape = true;
                             break;
                         }
                         block = block.nextBlockFalse;
                     }
 
                     List<HLSwitchCaseStatement> cases = new List<HLSwitchCaseStatement>();
+                    HLSwitchCaseStatement defaultCase = null;
                     foreach (var x in caseEntries)
                     {
                         Block temp = x.Key;
-                        cases.Add(new HLSwitchCaseStatement(x.Value, HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint)));
+                        BlockHLStatement result = HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint);
+                        cases.Add(new HLSwitchCaseStatement(x.Value, result));
+                        if (x.Value.Contains(null))
+                            defaultCase = cases.Last();
+
                         Debug.Assert(temp == meetPoint);
+                    }
+
+                    if (defaultEscape && defaultCase != null && defaultCase.Block.Statements.Count == 0)
+                    { // Handles default case.
+                        UndertaleInstruction breakInstruction = context.TargetCode.GetInstructionFromAddress((uint) block.Address + 1);
+
+                        if (breakInstruction.Kind == UndertaleInstruction.Opcode.B) // This is the default-case meet-point if it's b.
+                        {
+                            uint instructionId = ((uint)block.Address + 1 + (uint)breakInstruction.JumpOffset);
+                            if (!blocks.ContainsKey(instructionId))
+                                Console.WriteLine("Error: Bad Target [" + block.Address + ", " + breakInstruction.JumpOffset + "]: " + breakInstruction.ToString());
+                            Block switchEnd = blocks[instructionId];
+
+                            Block temp = block;
+                            defaultCase.Block = HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, switchEnd);
+                            block = switchEnd;
+                        } else // If there is no default-case, remove the default break, since that creates different bytecode.
+                        {
+                            defaultCase.CaseExpressions.Clear();
+                            defaultCase.ShowBreak = false;
+                        }
                     }
 
                     // Cleanup switch statements that just duplicate the code from another.
@@ -2510,6 +2539,8 @@ namespace UndertaleModLib.Decompiler
 
         public static string Decompile(UndertaleCode code, DecompileContext context)
         {
+            context.TargetCode = code;
+
             TempVar.TempVarId = 0;
             ExpressionVar.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);

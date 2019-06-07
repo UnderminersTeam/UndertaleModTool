@@ -1160,6 +1160,15 @@ namespace UndertaleModLib.Models
             Length = addr * 4;
         }
 
+        public UndertaleInstruction GetInstructionFromAddress(uint address)
+        {
+            UpdateAddresses();
+            foreach (UndertaleInstruction instr in Instructions)
+                if (instr.Address == address)
+                    return instr;
+            return null;
+        }
+
         public IList<UndertaleVariable> FindReferencedVars()
         {
             List<UndertaleVariable> vars = new List<UndertaleVariable>();
