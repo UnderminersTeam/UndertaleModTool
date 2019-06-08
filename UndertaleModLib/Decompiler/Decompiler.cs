@@ -2001,9 +2001,6 @@ namespace UndertaleModLib.Decompiler
                 sb.Append("{\n");
                 foreach (var casee in Cases)
                 {
-                    if (casee.Block.Statements.Count == 0 && casee.CaseExpressions.Count == 0 && !casee.ShowBreak)
-                        continue; // Don't bother adding disabled statements.
-
                     sb.Append("    ");
                     sb.Append(casee.ToString(context).Replace("\n", "\n    "));
                     sb.Append("\n");
@@ -2280,7 +2277,6 @@ namespace UndertaleModLib.Decompiler
                         output.Statements.Add(stmt);
                 }
 
-                //TODO: Maybe this belongs in a place where it's working with bytecode, not statements.
                 if (output.Statements.Count >= 1 && output.Statements[output.Statements.Count - 1] is TempVarAssigmentStatement && block.Instructions.Count >= 1 && block.Instructions[block.Instructions.Count - 1].Kind == UndertaleInstruction.Opcode.Bt && block.conditionalExit && block.ConditionStatement is ExpressionCompare && (block.ConditionStatement as ExpressionCompare).Opcode == UndertaleInstruction.ComparisonType.EQ)
                 {
                     // This is a switch statement!
