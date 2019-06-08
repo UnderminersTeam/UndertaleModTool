@@ -1136,8 +1136,7 @@ namespace UndertaleModLib.Decompiler
                 // Reroute tempvars to alias them to our ones
                 if (block.TempVarsOnEntry.Count != tempvars.Count)
                 {
-                    //throw new Exception("Reentered block with different amount of vars on stack");
-                    block.Statements.Add(new CommentStatement("Something was wrong with the stack, reentered the block with " + tempvars.Count + " variables instead of " + block.TempVarsOnEntry.Count + ", ignoring"));
+                    throw new Exception("Reentered block with different amount of vars on stack");
                 }
                 else
                 {
