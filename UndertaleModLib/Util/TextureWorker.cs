@@ -13,6 +13,16 @@ namespace UndertaleModLib.Util
         private Dictionary<UndertaleEmbeddedTexture, Bitmap> embeddedDictionary = new Dictionary<UndertaleEmbeddedTexture, Bitmap>();
         private static readonly ImageConverter _imageConverter = new ImageConverter();
 
+        public Bitmap GetEmbeddedTexture(UndertaleEmbeddedTexture embeddedTexture)
+        {
+            lock (embeddedDictionary)
+            {
+                if (!embeddedDictionary.ContainsKey(embeddedTexture))
+                    embeddedDictionary[embeddedTexture] = GetImageFromByteArray(embeddedTexture.TextureData.TextureBlob);
+                return embeddedDictionary[embeddedTexture];
+            }
+        }
+
         public void ExportAsPNG(UndertaleTexturePageItem texPageItem, string FullPath, string imageName = null)
         {
             SaveImageToFile(FullPath, GetTextureFor(texPageItem, imageName != null ? imageName : Path.GetFileNameWithoutExtension(FullPath)));
@@ -22,15 +32,7 @@ namespace UndertaleModLib.Util
         {
             int exportWidth = texPageItem.BoundingWidth; // sprite.Width
             int exportHeight = texPageItem.BoundingHeight; // sprite.Height
-
-            Bitmap embeddedImage = null;
-
-            lock (embeddedDictionary)
-            {
-                if (!embeddedDictionary.ContainsKey(texPageItem.TexturePage))
-                    embeddedDictionary[texPageItem.TexturePage] = GetImageFromByteArray(texPageItem.TexturePage.TextureData.TextureBlob);
-                embeddedImage = embeddedDictionary[texPageItem.TexturePage];
-            }
+            Bitmap embeddedImage = GetEmbeddedTexture(texPageItem.TexturePage);
 
             // Sanity checks.
             if ((texPageItem.TargetWidth > exportWidth) || (texPageItem.TargetHeight > exportHeight))
