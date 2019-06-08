@@ -18,12 +18,23 @@ namespace UndertaleModLib.Decompiler
     public class DecompileContext
     {
         public UndertaleData Data;
-        public bool EnableStringLabels;
-        public Dictionary<string, TempVarAssigmentStatement> TempVarMap = new Dictionary<string, TempVarAssigmentStatement>();
-        public TempVarAssigmentStatement LastTempVar;
         public UndertaleCode TargetCode;
 
+        // Settings.
+        public bool EnableStringLabels;
+
+        // Decompilation Instance Data.
+        public Dictionary<string, TempVarAssigmentStatement> TempVarMap = new Dictionary<string, TempVarAssigmentStatement>();
+        public TempVarAssigmentStatement LastTempVar;
+
         public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
+
+        public void Setup(UndertaleCode code)
+        {
+            TargetCode = code;
+            TempVarMap.Clear();
+            LastTempVar = null;
+        }
 
         public DecompileContext(UndertaleData data, bool enableStringLabels)
         {
@@ -1646,11 +1657,16 @@ namespace UndertaleModLib.Decompiler
                 for (var i = 0; i < Statements.Count; i++)
                 {
                     var count = Statements.Count;
-                    var Result = Statements[i]?.CleanStatement(context, this);
+                    var Result = Statements[i]?.CleanStatement(context, this); //Yes, this uses "this" and not "block".
                     i -= (count - Statements.Count); // If removed.
                     Statements[i] = Result;
                 }
                 return this;
+            }
+
+            public BlockHLStatement CleanBlockStatement(DecompileContext context)
+            {
+                return CleanStatement(context, null) as BlockHLStatement;
             }
 
             public override string ToString(DecompileContext context)
@@ -1681,8 +1697,8 @@ namespace UndertaleModLib.Decompiler
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
             {
                 condition = condition?.CleanExpression(context, block);
-                trueBlock = trueBlock?.CleanStatement(context, block) as BlockHLStatement;
-                falseBlock = falseBlock?.CleanStatement(context, block) as BlockHLStatement;
+                trueBlock = trueBlock?.CleanBlockStatement(context);
+                falseBlock = falseBlock?.CleanBlockStatement(context);
 
                 // Fixes breaks in both if outcomes. [Should go first, before other statements that use trueBlock and falseBlock]
                 if (trueBlock.Statements.Count > 0 && falseBlock.Statements.Count > 0 && trueBlock.Statements.Last() is BreakHLStatement && falseBlock.Statements.Last() is BreakHLStatement)
@@ -1771,7 +1787,7 @@ namespace UndertaleModLib.Decompiler
                 foreach (Pair<Expression, BlockHLStatement> pair in elseConditions)
                 {
                     pair.Item1 = pair.Item1?.CleanExpression(context, block);
-                    pair.Item2 = pair.Item2?.CleanStatement(context, block) as BlockHLStatement;
+                    pair.Item2 = pair.Item2?.CleanBlockStatement(context);
                 }
 
 
@@ -1822,7 +1838,7 @@ namespace UndertaleModLib.Decompiler
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
             {
-                Block = Block?.CleanStatement(context, block) as BlockHLStatement;
+                Block = Block?.CleanBlockStatement(context);
                 Condition = Condition?.CleanStatement(context, block);
                 InitializeStatement = InitializeStatement?.CleanStatement(context, block) as AssignmentStatement;
                 StepStatement = StepStatement?.CleanStatement(context, block) as AssignmentStatement;
@@ -1894,7 +1910,7 @@ namespace UndertaleModLib.Decompiler
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
             {
                 NewEnv = NewEnv?.CleanExpression(context, block);
-                Block = Block?.CleanStatement(context, block) as BlockHLStatement;
+                Block = Block?.CleanBlockStatement(context);
                 return this;
             }
         }
@@ -1926,6 +1942,9 @@ namespace UndertaleModLib.Decompiler
                 sb.Append("{\n");
                 foreach (var casee in Cases)
                 {
+                    if (casee.Block.Statements.Count == 0 && casee.CaseExpressions.Count == 0 && !casee.ShowBreak)
+                        continue; // Don't bother adding disabled statements.
+
                     sb.Append("    ");
                     sb.Append(casee.ToString(context).Replace("\n", "\n    "));
                     sb.Append("\n");
@@ -1952,7 +1971,7 @@ namespace UndertaleModLib.Decompiler
             {
                 for (var i = 0; i < CaseExpressions.Count; i++)
                     CaseExpressions[i] = CaseExpressions[i]?.CleanExpression(context, block);
-                Block = Block?.CleanStatement(context, block) as BlockHLStatement;
+                Block = Block?.CleanBlockStatement(context);
                 return this;
             }
 
@@ -2312,6 +2331,7 @@ namespace UndertaleModLib.Decompiler
                     }
                 }
 
+                //TODO: Maybe this belongs in a place where it's working with bytecode, not statements.
                 if (output.Statements.Count >= 1 && output.Statements[output.Statements.Count - 1] is TempVarAssigmentStatement && block.Instructions.Count >= 1 && block.Instructions[block.Instructions.Count - 1].Kind == UndertaleInstruction.Opcode.Bt && block.conditionalExit && block.ConditionStatement is ExpressionCompare && (block.ConditionStatement as ExpressionCompare).Opcode == UndertaleInstruction.ComparisonType.EQ)
                 {
                     // This is a switch statement!
@@ -2324,7 +2344,6 @@ namespace UndertaleModLib.Decompiler
                         throw new Exception("End of switch not found");
 
                     Dictionary<Block, List<Expression>> caseEntries = new Dictionary<Block, List<Expression>>();
-                    bool defaultEscape = false;
                     while (block != meetPoint)
                     {
                         Expression caseExpr = null;
@@ -2359,7 +2378,6 @@ namespace UndertaleModLib.Decompiler
                                 else
                                     block = block.nextBlockTrue;
                             }
-                            defaultEscape = true;
                             break;
                         }
                         block = block.nextBlockFalse;
@@ -2367,20 +2385,27 @@ namespace UndertaleModLib.Decompiler
 
                     List<HLSwitchCaseStatement> cases = new List<HLSwitchCaseStatement>();
                     HLSwitchCaseStatement defaultCase = null;
-                    foreach (var x in caseEntries)
-                    {
-                        Block temp = x.Key;
-                        BlockHLStatement result = HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, meetPoint);
-                        cases.Add(new HLSwitchCaseStatement(x.Value, result));
-                        if (x.Value.Contains(null))
-                            defaultCase = cases.Last();
 
-                        Debug.Assert(temp == meetPoint);
+                    for (var i = 0; i < caseEntries.Count; i++)
+                    {
+                        var x = caseEntries.ElementAt(i);
+                        Block temp = x.Key;
+
+                        Block switchEnd = DetermineSwitchEnd(temp, caseEntries.Count > (i + 1) ? caseEntries.ElementAt(i + 1).Key : null, meetPoint);
+
+                        HLSwitchCaseStatement result = new HLSwitchCaseStatement(x.Value, HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, switchEnd));
+                        result.ShowBreak = (switchEnd == meetPoint);
+                        cases.Add(result);
+                        if (result.CaseExpressions.Contains(null))
+                            defaultCase = result;
+
+                        Debug.Assert(temp == switchEnd);
                     }
 
-                    if (defaultEscape && defaultCase != null && defaultCase.Block.Statements.Count == 0)
+
+                    if (defaultCase != null && defaultCase.Block.Statements.Count == 0)
                     { // Handles default case.
-                        UndertaleInstruction breakInstruction = context.TargetCode.GetInstructionFromAddress((uint) block.Address + 1);
+                        UndertaleInstruction breakInstruction = context.TargetCode.GetInstructionFromAddress((uint)block.Address + 1);
 
                         if (breakInstruction.Kind == UndertaleInstruction.Opcode.B) // This is the default-case meet-point if it's b.
                         {
@@ -2392,38 +2417,10 @@ namespace UndertaleModLib.Decompiler
                             Block temp = block;
                             defaultCase.Block = HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, switchEnd);
                             block = switchEnd;
-                        } else // If there is no default-case, remove the default break, since that creates different bytecode.
-                        {
-                            defaultCase.CaseExpressions.Clear();
-                            defaultCase.ShowBreak = false;
                         }
-                    }
-
-                    // Cleanup switch statements that just duplicate the code from another.
-                    for (int i = 0; i < cases.Count - 1; i++)
-                    {
-                        var now = cases[i];
-                        var next = cases[i + 1];
-
-                        bool testPass = now.ShowBreak == next.ShowBreak;
-                        var startIndex = (now.Block.Statements.Count - next.Block.Statements.Count);
-                        if (startIndex < 0)
-                            continue;
-
-                        for (var j = 0; j < next.Block.Statements.Count; j++)
+                        else // If there is no default-case, remove the default break, since that creates different bytecode.
                         {
-                            if (next.Block.Statements[j].ToString(context) != now.Block.Statements[j + startIndex].ToString(context))
-                            {
-                                testPass = false;
-                                break;
-                            }
-                        }
-
-                        if (testPass)
-                        {
-                            while (now.Block.Statements.Count > startIndex)
-                                now.Block.Statements.RemoveAt(startIndex);
-                            now.ShowBreak = false;
+                            cases.Remove(defaultCase);
                         }
                     }
 
@@ -2540,7 +2537,7 @@ namespace UndertaleModLib.Decompiler
             }*/
             var reverseDominators = ComputeDominators(blocks, rootExitPoint, true);
             Block bl = entryPoint;
-            return (HLDecompileBlocks(context, ref bl, blocks, loops, reverseDominators, new List<Block>()).CleanStatement(context, null) as BlockHLStatement).Statements;
+            return (HLDecompileBlocks(context, ref bl, blocks, loops, reverseDominators, new List<Block>()).CleanBlockStatement(context)).Statements;
         }
 
         private static Dictionary<uint, Block> PrepareDecompileFlow(UndertaleCode code)
@@ -2587,9 +2584,9 @@ namespace UndertaleModLib.Decompiler
 
         public static string Decompile(UndertaleCode code, DecompileContext context)
         {
-            context.TargetCode = code;
+            context.Setup(code);
 
-            TempVar.TempVarId = 0;
+            TempVar.TempVarId = 0; //TODO: This should be context-specific.
             ExpressionVar.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
             DecompileFromBlock(context, blocks[0]);
@@ -2681,6 +2678,32 @@ namespace UndertaleModLib.Decompiler
 
                 b.ConditionStatement?.DoTypePropagation(context, AssetIDType.Other);
             }
+        }
+
+        private static Block DetermineSwitchEnd(Block start, Block end, Block meetPoint)
+        {
+            if (end == null)
+                return meetPoint;
+
+            Queue<Block> blocks = new Queue<Block>();
+
+            blocks.Enqueue(start);
+            while (blocks.Count > 0)
+            {
+                Block test = blocks.Dequeue();
+
+                if (test == end)
+                    return end;
+                if (test == meetPoint)
+                    return meetPoint;
+
+                blocks.Enqueue(test.nextBlockTrue);
+                if (test.nextBlockTrue != test.nextBlockFalse)
+                    blocks.Enqueue(test.nextBlockFalse);
+
+            }
+
+            return meetPoint;
         }
 
         public static string ExportFlowGraph(Dictionary<uint, Block> blocks)
