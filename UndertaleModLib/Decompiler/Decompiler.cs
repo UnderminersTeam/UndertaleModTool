@@ -297,6 +297,12 @@ namespace UndertaleModLib.Decompiler
                     return ConvertToEnumStr<GamepadButton>(Value);
                 if (AssetType == AssetIDType.Enum_PathEndAction)
                     return ConvertToEnumStr<PathEndAction>(Value);
+                if (AssetType == AssetIDType.Enum_BufferKind)
+                    return ConvertToEnumStr<BufferKind>(Value);
+                if (AssetType == AssetIDType.Enum_BufferType)
+                    return ConvertToEnumStr<BufferType>(Value);
+                if (AssetType == AssetIDType.Enum_BufferSeek)
+                    return ConvertToEnumStr<BufferSeek>(Value);
                 if (AssetType == AssetIDType.Boolean)
                     return ConvertToEnumStr<Boolean>(Value);
 

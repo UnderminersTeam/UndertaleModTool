@@ -17,6 +17,9 @@ namespace UndertaleModLib.Decompiler
         Enum_OSType,
         Enum_GamepadButton,
         Enum_PathEndAction,
+        Enum_BufferKind,
+        Enum_BufferType,
+        Enum_BufferSeek,
         e__VW, // The constant used in __view_get and __view_set compatibility scripts
         e__BG, // The constant used in __background_get and __background_set compatibility scripts
         Boolean,
@@ -105,6 +108,40 @@ namespace UndertaleModLib.Decompiler
         path_action_restart = 1,
         path_action_continue = 2,
         path_action_reverse = 3
+    }
+
+    public enum BufferKind : int
+    {
+        buffer_fixed = 0,
+        buffer_grow = 1,
+        buffer_wrap = 2,
+        buffer_fast = 3,
+        buffer_vbuffer = 4,
+        buffer_network = 5
+    }
+
+    public enum BufferType : int
+    {
+        buffer_u8 = 1,
+        buffer_s8 = 2,
+        buffer_u16 = 3,
+        buffer_s16 = 4,
+        buffer_u32 = 5,
+        buffer_s32 = 6,
+        buffer_f16 = 7,
+        buffer_f32 = 8,
+        buffer_f64 = 9,
+        buffer_bool = 10,
+        buffer_string = 11,
+        buffer_u64 = 12,
+        buffer_text = 13
+    }
+
+    public enum BufferSeek : int
+    {
+        buffer_seek_start = 0,
+        buffer_seek_relative = 1,
+        buffer_seek_end = 2
     }
 
     public enum e__VW : int
@@ -581,6 +618,17 @@ namespace UndertaleModLib.Decompiler
                 { "gamepad_button_check", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
                 { "gamepad_button_check_pressed", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
                 { "gamepad_button_check_released", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
+
+                { "buffer_create", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferKind, AssetIDType.Other } },
+                { "buffer_create_from_vertex_buffer", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferKind, AssetIDType.Other } },
+                { "buffer_create_from_vertex_buffer_ext", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferKind, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "buffer_read", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferType } },
+                { "buffer_write", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferType, AssetIDType.Other } },
+                { "buffer_peek", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Enum_BufferType } },
+                { "buffer_poke", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Enum_BufferType, AssetIDType.Other } },
+                { "buffer_fill", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Enum_BufferType, AssetIDType.Other, AssetIDType.Other } },
+                { "buffer_sizeof", new AssetIDType[] { AssetIDType.Enum_BufferType } },
+                { "buffer_seek", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferSeek, AssetIDType.Other } },
 
                 // Also big TODO: Implement Boolean type for all these functions
             };
