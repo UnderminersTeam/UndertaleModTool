@@ -2288,6 +2288,8 @@ namespace UndertaleModLib.Decompiler
                     if (meetPoint == null)
                         throw new Exception("End of switch not found");
 
+                    bool lastHasBreak = false;
+                    bool defaultHasBreak = false;
                     Dictionary<Block, List<Expression>> caseEntries = new Dictionary<Block, List<Expression>>();
                     while (block != meetPoint)
                     {
@@ -2303,13 +2305,13 @@ namespace UndertaleModLib.Decompiler
                                 throw new Exception("Malformed switch statement: bad contition type (" + cmp.Opcode.ToString().ToUpper() + ")");
                             caseExpr = cmp.Argument2;
                         }
+
                         if (!caseEntries.ContainsKey(block.nextBlockTrue))
                             caseEntries.Add(block.nextBlockTrue, new List<Expression>());
                         caseEntries[block.nextBlockTrue].Add(caseExpr);
 
                         if (!block.conditionalExit)
                         {
-
                             // Seems to be "default", and we simply want to go to the exit now.
                             // This is a little hack, but it should fully work. The compiler always
                             // emits "default" at the end it looks like. Also this navigates down the
@@ -2323,8 +2325,12 @@ namespace UndertaleModLib.Decompiler
                                 else
                                     block = block.nextBlockTrue;
                             }
+
+                            defaultHasBreak = (block.Instructions.Last()?.Kind == UndertaleInstruction.Opcode.B && block.nextBlockTrue == meetPoint && !block.conditionalExit);
                             break;
-                        }
+                        } else if (!block.nextBlockFalse.conditionalExit)
+                            lastHasBreak = (block.nextBlockTrue.Instructions.Last()?.Kind == UndertaleInstruction.Opcode.B && block.nextBlockTrue.nextBlockTrue == meetPoint && !block.nextBlockTrue.conditionalExit);
+
                         block = block.nextBlockFalse;
                     }
 
@@ -2339,7 +2345,7 @@ namespace UndertaleModLib.Decompiler
                         Block switchEnd = DetermineSwitchEnd(temp, caseEntries.Count > (i + 1) ? caseEntries.ElementAt(i + 1).Key : null, meetPoint);
 
                         HLSwitchCaseStatement result = new HLSwitchCaseStatement(x.Value, HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, switchEnd));
-                        result.ShowBreak = (switchEnd == meetPoint);
+                        result.ShowBreak = (switchEnd == meetPoint) && (caseEntries.Count != (i + 2) || lastHasBreak);
                         cases.Add(result);
                         if (result.CaseExpressions.Contains(null))
                             defaultCase = result;
@@ -2348,24 +2354,28 @@ namespace UndertaleModLib.Decompiler
                     }
 
 
-                    if (defaultCase != null && defaultCase.Block.Statements.Count == 0)
+                    if (defaultCase != null)
                     { // Handles default case.
-                        UndertaleInstruction breakInstruction = context.TargetCode.GetInstructionFromAddress((uint)block.Address + 1);
 
-                        if (breakInstruction.Kind == UndertaleInstruction.Opcode.B) // This is the default-case meet-point if it's b.
-                        {
-                            uint instructionId = ((uint)block.Address + 1 + (uint)breakInstruction.JumpOffset);
-                            if (!blocks.ContainsKey(instructionId))
-                                Console.WriteLine("Error: Bad Target [" + block.Address + ", " + breakInstruction.JumpOffset + "]: " + breakInstruction.ToString());
-                            Block switchEnd = blocks[instructionId];
+                        defaultCase.ShowBreak = defaultHasBreak;
+                        if (defaultCase.Block.Statements.Count == 0) {
+                            UndertaleInstruction breakInstruction = context.TargetCode.GetInstructionFromAddress((uint)block.Address + 1);
 
-                            Block temp = block;
-                            defaultCase.Block = HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, switchEnd);
-                            block = switchEnd;
-                        }
-                        else // If there is no default-case, remove the default break, since that creates different bytecode.
-                        {
-                            cases.Remove(defaultCase);
+                            if (breakInstruction.Kind == UndertaleInstruction.Opcode.B) // This is the default-case meet-point if it's b.
+                            {
+                                uint instructionId = ((uint)block.Address + 1 + (uint)breakInstruction.JumpOffset);
+                                if (!blocks.ContainsKey(instructionId))
+                                    Console.WriteLine("Error: Bad Target [" + block.Address + ", " + breakInstruction.JumpOffset + "]: " + breakInstruction.ToString());
+                                Block switchEnd = blocks[instructionId];
+
+                                Block temp = block;
+                                defaultCase.Block = HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, switchEnd);
+                                block = switchEnd;
+                            }
+                            else // If there is no default-case, remove the default break, since that creates different bytecode.
+                            {
+                                cases.Remove(defaultCase);
+                            }
                         }
                     }
 
