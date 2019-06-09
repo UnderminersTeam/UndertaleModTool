@@ -972,7 +972,7 @@ namespace UndertaleModLib.Compiler
                                     else
                                     {
                                         // It's a double
-                                        cw.Write("push.d " + value.valueNumber.ToString("0.0", CultureInfo.GetCultureInfo("en-US")));
+                                        cw.Write("push.d " + value.valueNumber.ToString(CultureInfo.InvariantCulture));
                                         typeStack.Push(UndertaleInstruction.DataType.Double);
                                     }
                                     break;
