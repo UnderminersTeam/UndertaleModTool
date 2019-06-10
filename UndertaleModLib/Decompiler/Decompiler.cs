@@ -1858,48 +1858,51 @@ namespace UndertaleModLib.Decompiler
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
             {
-                // While loops have conditions.
-                if (Block.Statements.Count == 2)
+                if (IsWhileLoop)
                 {
-                    Statement firstStatement = Block.Statements[0];
-                    Statement secondStatement = Block.Statements[1];
-
-                    if (firstStatement is IfHLStatement && secondStatement is BreakHLStatement)
+                    // While loops have conditions.
+                    if (Block.Statements.Count == 2)
                     {
-                        IfHLStatement ifStatement = (IfHLStatement)firstStatement;
-                        if (ifStatement.falseBlock is BlockHLStatement && ((BlockHLStatement)ifStatement.falseBlock).Statements.Count == 0)
+                        Statement firstStatement = Block.Statements[0];
+                        Statement secondStatement = Block.Statements[1];
+
+                        if (firstStatement is IfHLStatement && secondStatement is BreakHLStatement)
                         {
-                            Condition = ifStatement.condition;
-                            Block.Statements.Remove(firstStatement); // Remove if statement.
-                            Block.Statements.Remove(secondStatement); // Remove break.
-                            Block.Statements.InsertRange(0, ifStatement.trueBlock.Statements); // Add if contents.
+                            IfHLStatement ifStatement = (IfHLStatement)firstStatement;
+                            if (ifStatement.falseBlock is BlockHLStatement && ((BlockHLStatement)ifStatement.falseBlock).Statements.Count == 0)
+                            {
+                                Condition = ifStatement.condition;
+                                Block.Statements.Remove(firstStatement); // Remove if statement.
+                                Block.Statements.Remove(secondStatement); // Remove break.
+                                Block.Statements.InsertRange(0, ifStatement.trueBlock.Statements); // Add if contents.
+                            }
                         }
                     }
-                }
 
-                // Remove redundant continues at the end of the loop.
-                if (Block.Statements.Count > 0)
-                {
-                    Statement lastStatement = Block.Statements.Last();
-                    if (lastStatement is ContinueHLStatement)
-                        Block.Statements.Remove(lastStatement);
-                }
-
-                // Convert into a for loop.
-                int myIndex = block.Statements.IndexOf(this);
-                if (myIndex > 0 && block.Statements[myIndex - 1] is AssignmentStatement && Block.Statements.Count > 0 && Block.Statements.Last() is AssignmentStatement && Condition is ExpressionCompare)
-                {
-                    ExpressionCompare compare = (ExpressionCompare)Condition;
-                    AssignmentStatement assignment = (AssignmentStatement)block.Statements[myIndex - 1];
-                    AssignmentStatement increment = (AssignmentStatement)Block.Statements.Last();
-                    UndertaleVariable variable = assignment.Destination.Var;
-
-                    if (((compare.Argument1 is ExpressionVar && (((ExpressionVar)compare.Argument1).Var == variable)) || (compare.Argument2 is ExpressionVar && (((ExpressionVar)compare.Argument2).Var == variable))) && increment.Destination.Var == variable)
+                    // Remove redundant continues at the end of the loop.
+                    if (Block.Statements.Count > 0)
                     {
-                        block.Statements.Remove(assignment);
-                        InitializeStatement = assignment;
-                        Block.Statements.Remove(increment);
-                        StepStatement = increment;
+                        Statement lastStatement = Block.Statements.Last();
+                        if (lastStatement is ContinueHLStatement)
+                            Block.Statements.Remove(lastStatement);
+                    }
+
+                    // Convert into a for loop.
+                    int myIndex = block.Statements.IndexOf(this);
+                    if (myIndex > 0 && block.Statements[myIndex - 1] is AssignmentStatement && Block.Statements.Count > 0 && Block.Statements.Last() is AssignmentStatement && Condition is ExpressionCompare)
+                    {
+                        ExpressionCompare compare = (ExpressionCompare)Condition;
+                        AssignmentStatement assignment = (AssignmentStatement)block.Statements[myIndex - 1];
+                        AssignmentStatement increment = (AssignmentStatement)Block.Statements.Last();
+                        UndertaleVariable variable = assignment.Destination.Var;
+
+                        if (((compare.Argument1 is ExpressionVar && (((ExpressionVar)compare.Argument1).Var == variable)) || (compare.Argument2 is ExpressionVar && (((ExpressionVar)compare.Argument2).Var == variable))) && increment.Destination.Var == variable)
+                        {
+                            block.Statements.Remove(assignment);
+                            InitializeStatement = assignment;
+                            Block.Statements.Remove(increment);
+                            StepStatement = increment;
+                        }
                     }
                 }
 
@@ -2409,7 +2412,7 @@ namespace UndertaleModLib.Decompiler
                     break;
                 }
 
-                if (block.conditionalExit && block.ConditionStatement == null && block.nextBlockTrue != null && block.nextBlockFalse != null && block.nextBlockFalse.ConditionStatement != null) // DO UNTIL STATEMENT!
+                if (block.conditionalExit && block.ConditionStatement == null && block.nextBlockFalse != null && block.nextBlockFalse.ConditionStatement != null) // DO UNTIL STATEMENT!
                 {
                     LoopHLStatement doUntilLoop = new LoopHLStatement();
                     doUntilLoop.Condition = block.nextBlockFalse.ConditionStatement;
