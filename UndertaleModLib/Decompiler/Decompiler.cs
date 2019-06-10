@@ -20,10 +20,10 @@ namespace UndertaleModLib.Decompiler
         public UndertaleData Data;
         public UndertaleCode TargetCode;
 
-        // Settings.
+        // Settings
         public bool EnableStringLabels;
 
-        // Decompilation Instance Data.
+        // Decompilation instance data
         public Dictionary<string, TempVarAssigmentStatement> TempVarMap = new Dictionary<string, TempVarAssigmentStatement>();
         public AssignmentStatement CompilerTempVar;
 
@@ -45,11 +45,7 @@ namespace UndertaleModLib.Decompiler
 
     public static class Decompiler
     {
-
-        /**
-         * Howdy! Yeah, I don't know how any of this works anymore either, so... have fun
-         */
-
+        // Represents a block node of instructions from GML bytecode (for control flow).
         public class Block
         {
             public uint? Address;
@@ -73,6 +69,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents all kinds of high-level decompilation results, to be stringified at the end.
         public abstract class Statement
         {
             public abstract string ToString(DecompileContext context);
@@ -81,11 +78,13 @@ namespace UndertaleModLib.Decompiler
             public abstract Statement CleanStatement(DecompileContext context, BlockHLStatement block);
         }
 
+        // Represents all expressions.
         public abstract class Expression : Statement
         {
             public UndertaleInstruction.DataType Type;
             public bool WasDuplicated = false;
 
+            // Helper function to convert opcode operations to "printable" strings.
             public static string OperationToPrintableString(UndertaleInstruction.Opcode op)
             {
                 switch (op)
@@ -121,6 +120,7 @@ namespace UndertaleModLib.Decompiler
                 }
             }
 
+            // Helper function to convert opcode comparisons to "printable" strings.
             public static string OperationToPrintableString(UndertaleInstruction.ComparisonType op)
             {
                 switch (op)
@@ -153,6 +153,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents a base constant expression, such as a number (no operations).
         public class ExpressionConstant : Expression
         {
             public object Value;
@@ -182,6 +183,7 @@ namespace UndertaleModLib.Decompiler
                 return (Value is Int16 || Value is Int32) && Convert.ToInt32(Value) == TestNumber;
             }
 
+            // Helper function to carefully check if an object is in fact an integer, for asset types.
             private static int? ConvertToInt(object val)
             {
                  if (val is int || val is short || val is ushort || val is UndertaleInstruction.InstanceType)
@@ -205,6 +207,7 @@ namespace UndertaleModLib.Decompiler
                  return null;
              }
 
+             // Helper function, using the one above, to convert an object into its respective asset type enum, if possible.
              private static string ConvertToEnumStr<T>(object val)
              {
                  int? intVal = ConvertToInt(val);
@@ -215,7 +218,6 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-
                 if (Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>) // Export string.
                 {
                     UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> resource = (UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value;
@@ -348,6 +350,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents an expression converted to one of another data type - makes no difference on high-level code.
         public class ExpressionCast : Expression
         {
             public Expression Argument;
@@ -371,7 +374,6 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                //return String.Format("{0}({1})", Type != Argument.Type ? "(" + Type.ToString().ToLower() + ")" : "", Argument.ToString());
                 return Argument.ToString(context);
             }
 
@@ -381,6 +383,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents a unary expression.
         public class ExpressionOne : Expression
         {
             public UndertaleInstruction.Opcode Opcode;
@@ -409,7 +412,7 @@ namespace UndertaleModLib.Decompiler
                 string op = OperationToPrintableString(Opcode);
                 if (Opcode == UndertaleInstruction.Opcode.Not && Type == UndertaleInstruction.DataType.Boolean)
                     op = "!"; // This is a logical negation instead, see #93
-                return String.Format("{0}({1} {2})", false && Type != Argument.Type ? "(" + Type.ToString().ToLower() + ")" : "", op, Argument.ToString(context));
+                return String.Format("({0}{1})", op, Argument.ToString(context));
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -464,6 +467,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents post increments and decrements, such as a++ and a--.
         public class ExpressionPost : Expression
         {
             public UndertaleInstruction.Opcode Opcode;
@@ -497,6 +501,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents pre increments and decrements, such as ++a and --a.
         public class ExpressionPre : Expression
         {
             public UndertaleInstruction.Opcode Opcode;
@@ -559,8 +564,7 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                // TODO: better condition for casts
-                return String.Format("{0}({1} {2} {3})", false && (Type != Argument1.Type || Type != Argument2.Type || Argument1.Type != Argument2.Type) ? "(" + Type.ToString().ToLower() + ")" : "", Argument1.ToString(context), Symbol, Argument2.ToString(context));
+                return String.Format("({0} {1} {2})", Argument1.ToString(context), Symbol, Argument2.ToString(context));
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -572,6 +576,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents a binary expression.
         public class ExpressionTwo : Expression
         {
             public UndertaleInstruction.Opcode Opcode;
@@ -600,8 +605,7 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                // TODO: better condition for casts
-                return String.Format("{0}({1} {2} {3})", false && (Type != Argument1.Type || Type != Argument2.Type || Argument1.Type != Argument2.Type) ? "(" + Type.ToString().ToLower() + ")" : "", Argument1.ToString(context), OperationToPrintableString(Opcode), Argument2.ToString(context));
+                return String.Format("({0} {1} {2})", Argument1.ToString(context), OperationToPrintableString(Opcode), Argument2.ToString(context));
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -613,6 +617,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents a binary comparison expression.
         public class ExpressionCompare : Expression
         {
             public UndertaleInstruction.ComparisonType Opcode;
@@ -652,32 +657,8 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
-        public class OperationStatement : Statement
-        {
-            public UndertaleInstruction.Opcode Opcode;
-
-            public OperationStatement(UndertaleInstruction.Opcode opcode)
-            {
-                this.Opcode = opcode;
-            }
-
-            public override string ToString(DecompileContext context)
-            {
-                return Opcode.ToString().ToUpper();
-            }
-
-            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
-            {
-                return this;
-            }
-
-            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
-            {
-                return suggestedType;
-            }
-        }
-
-
+        // Represents an unnamed value that gets passed around the stack.
+        // Theoretically, these should be cleaned up and removed by the end of decompilation.
         public class TempVar
         {
             public string Name;
@@ -698,6 +679,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // A reference class for tempvars.
         public class TempVarReference
         {
             public TempVar Var;
@@ -708,6 +690,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Assignement statement for tempvars.
         public class TempVarAssigmentStatement : Statement
         {
             public TempVarReference Var;
@@ -749,6 +732,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents a tempvar inside of an expression.
         public class ExpressionTempVar : Expression
         {
             public TempVarReference Var;
@@ -766,7 +750,7 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                return String.Format("{0}{1}", /*Type != Var.Var.Type ? "(" + Type.ToString().ToLower() + ")" : ""*/ "", Var.Var.Name);
+                return Var.Var.Name;
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
@@ -789,6 +773,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents a high-level return statement, or an exit in Studio version < 2 if there is no value.
         public class ReturnStatement : Statement
         {
             public Expression Value;
@@ -818,6 +803,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents a high-level assignment statement.
         public class AssignmentStatement : Statement
         {
             public ExpressionVar Destination;
@@ -856,6 +842,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents a high-level assignment-equals statement, such as a += 1.
         public class AssignmentEqualsStatement : Statement
         {
             public ExpressionVar Destination;
@@ -886,6 +873,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents a code comment, for debugging use (or minor error reporting).
         public class CommentStatement : Statement
         {
             public string Message;
@@ -911,6 +899,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents a high-level function or script call.
         public class FunctionCall : Expression
         {
             private UndertaleFunction Function;
@@ -934,7 +923,7 @@ namespace UndertaleModLib.Decompiler
                     argumentString.Append(exp.ToString(context));
                 }
 
-                if (Function.Name.Content == "@@NewGMLArray@@") // Special-case.
+                if (Function.Name.Content == "@@NewGMLArray@@") // Special case in GMS2.
                     return "[" + argumentString.ToString() + "]";
 
                 return String.Format("{0}({1})", Function.Name.Content, argumentString.ToString());
@@ -980,6 +969,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents a variable in an expression, of any type.
         public class ExpressionVar : Expression
         {
             public UndertaleVariable Var;
@@ -1018,7 +1008,7 @@ namespace UndertaleModLib.Decompiler
             {
                 Expression ind1 = index;
                 Expression ind2 = null;
-                if (ind1 is ExpressionTwo && (ind1 as ExpressionTwo).Opcode == UndertaleInstruction.Opcode.Add) // Decompile 2D array access
+                if (ind1 is ExpressionTwo && (ind1 as ExpressionTwo).Opcode == UndertaleInstruction.Opcode.Add)
                 {
                     var arg1 = (ind1 as ExpressionTwo).Argument1;
                     var arg2 = (ind1 as ExpressionTwo).Argument2;
@@ -1038,15 +1028,13 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                //Debug.Assert((ArrayIndex != null) == NeedsArrayParameters);
-                //Debug.Assert((InstanceIndex != null) == NeedsInstanceParameters);
                 string name = Var.Name.Content;
                 if (ArrayIndex1 != null && ArrayIndex2 != null)
                     name = name + "[" + ArrayIndex1.ToString(context) + ", " + ArrayIndex2.ToString(context) + "]";
                 else if (ArrayIndex1 != null)
                     name = name + "[" + ArrayIndex1.ToString(context) + "]";
 
-                //NOTE: The "var" prefix is handled in Decompiler.Decompile. 
+                // NOTE: The "var" prefix is handled in Decompiler.Decompile. 
 
                 string prefix = InstType.ToString(context) + ".";
                 if (InstType is ExpressionConstant) // Only use "global." and "other.", not "self." or "local.". GMS doesn't recognize those.
@@ -1087,9 +1075,11 @@ namespace UndertaleModLib.Decompiler
             }
 
             public bool NeedsArrayParameters => VarType == UndertaleInstruction.VariableType.Array;
-            public bool NeedsInstanceParameters => /*InstType == UndertaleInstruction.InstanceType.StackTopOrGlobal &&*/ VarType == UndertaleInstruction.VariableType.StackTop;
+            public bool NeedsInstanceParameters => VarType == UndertaleInstruction.VariableType.StackTop;
         }
 
+        // Represents a with statement beginning (pushing to the env stack).
+        // This is not seen in high-level output.
         public class PushEnvStatement : Statement
         {
             public Expression NewEnv;
@@ -1117,6 +1107,8 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents a with statement ending (popping from or clearing the env stack).
+        // This is not seen in high-level output.
         public class PopEnvStatement : Statement
         {
             public override string ToString(DecompileContext context)
@@ -1135,6 +1127,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // The core function to decompile a specific block.
         internal static void DecompileFromBlock(DecompileContext context, Block block, List<TempVarReference> tempvars, Stack<Tuple<Block, List<TempVarReference>>> workQueue)
         {
             if (block.TempVarsOnEntry != null && (block.nextBlockTrue != null || block.nextBlockFalse != null))
@@ -1153,22 +1146,25 @@ namespace UndertaleModLib.Decompiler
                 }
             }
 
+            // Don't decompile more than once
             if (block.Statements != null)
-                return; // don't decompile again :P
+                return;
 
+            // Recover stack tempvars which may be needed
             block.TempVarsOnEntry = tempvars;
-
             Stack<Expression> stack = new Stack<Expression>();
             foreach (TempVarReference var in tempvars)
                 stack.Push(new ExpressionTempVar(var, var.Var.Type));
 
+            // Iterate through all of the sta
             List<Statement> statements = new List<Statement>();
             bool end = false;
             bool returned = false;
             for (int i = 0; i < block.Instructions.Count; i++)
             {
                 if (end)
-                    throw new Exception("Excepted end of block, but still has instructions");
+                    throw new Exception("Expected end of block, but still has instructions");
+
                 var instr = block.Instructions[i];
                 switch (instr.Kind)
                 {
@@ -1180,6 +1176,8 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.Dup:
                         List<Expression> topExpressions1 = new List<Expression>();
                         List<Expression> topExpressions2 = new List<Expression>();
+                        // This "count" is necessary because sometimes dup.i 1 is replaced with dup.l 0...
+                        // Seemingly have equivalent behavior, so treat it that way.
                         int count = ((instr.DupExtra + 1) * (instr.Type1 == UndertaleInstruction.DataType.Int64 ? 2 : 1));
                         for (int j = 0; j < count; j++)
                         {
@@ -1213,13 +1211,14 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.Exit:
                         ReturnStatement stmt = new ReturnStatement(instr.Kind == UndertaleInstruction.Opcode.Ret ? stack.Pop() : null);
                         /*
-                        This shouldn't be necessary: all unused things on the stack get converted to tempvars at the end anyway, and this fixes decompilation of repeat()
-                        See #85
+                            This shouldn't be necessary: all unused things on the stack get converted to tempvars at the end anyway, and this fixes decompilation of repeat()
+                            See #85
 
-                        foreach (var expr in stack.Reverse())
-                            if (!(expr is ExpressionTempVar))
-                                statements.Add(expr);
-                        stack.Clear();*/
+                            foreach (var expr in stack.Reverse())
+                                if (!(expr is ExpressionTempVar))
+                                    statements.Add(expr);
+                            stack.Clear();
+                        */
                         statements.Add(stmt);
                         end = true;
                         returned = true;
@@ -1239,9 +1238,6 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.Conv:
-                        /*if (instr.Type1 != stack.Peek().Type)
-                            stack.Push(new ExpressionCast(instr.Type1, stack.Pop()));*/
-
                         stack.Push(new ExpressionCast(instr.Type2, stack.Pop()));
                         break;
 
@@ -1258,13 +1254,13 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.Shr:
                         Expression a2 = stack.Pop();
                         Expression a1 = stack.Pop();
-                        stack.Push(new ExpressionTwo(instr.Kind, instr.Type1, a1, a2)); // TODO: type
+                        stack.Push(new ExpressionTwo(instr.Kind, instr.Type1, a1, a2));
                         break;
 
                     case UndertaleInstruction.Opcode.Cmp:
                         Expression aa2 = stack.Pop();
                         Expression aa1 = stack.Pop();
-                        stack.Push(new ExpressionCompare(instr.ComparisonKind, aa1, aa2)); // TODO: type
+                        stack.Push(new ExpressionCompare(instr.ComparisonKind, aa1, aa2));
                         break;
 
                     case UndertaleInstruction.Opcode.B:
@@ -1283,22 +1279,18 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.PopEnv:
-                        if (instr.JumpOffsetPopenvExitMagic)
-                        {
-                            // This is just an instruction to make sure the pushenv/popenv stack is cleared on early function return
-                            // Works kinda like 'break', but doesn't have a high-level representation as it's immediately followed by a 'return'
-                        }
-                        else
-                        {
+                        if (!instr.JumpOffsetPopenvExitMagic)
                             statements.Add(new PopEnvStatement());
-                        }
+                        // For JumpOffsetPopenvExitMagic:
+                        //  This is just an instruction to make sure the pushenv/popenv stack is cleared on early function return
+                        //  Works kinda like 'break', but doesn't have a high-level representation as it's immediately followed by a 'return'
                         end = true;
                         break;
 
                     case UndertaleInstruction.Opcode.Pop:
                         if (instr.Destination == null)
                         {
-                            // pop.e.v 5/6
+                            // pop.e.v 5/6, strange magic stack operation
                             Expression e1 = stack.Pop();
                             Expression e2 = stack.Pop();
                             for (int j = 0; j < instr.SwapExtra - 4; j++)
@@ -1310,7 +1302,7 @@ namespace UndertaleModLib.Decompiler
                         ExpressionVar target = new ExpressionVar(instr.Destination.Target, new ExpressionConstant(UndertaleInstruction.DataType.Int16, instr.TypeInst), instr.Destination.Type);
                         Expression val = null;
                         if (instr.Type1 != UndertaleInstruction.DataType.Int32 && instr.Type1 != UndertaleInstruction.DataType.Variable)
-                            throw new Exception("Oh no, what do I do with this POP? OH NOOOOOOOoooooooooo");
+                            throw new Exception("Unrecognized pop instruction, doesn't conform to pop.i.X, pop.v.X, or pop.e.v");
                         if (instr.Type1 == UndertaleInstruction.DataType.Int32)
                             val = stack.Pop();
                         if (target.NeedsInstanceParameters)
@@ -1324,7 +1316,6 @@ namespace UndertaleModLib.Decompiler
                         }
                         if (instr.Type1 == UndertaleInstruction.DataType.Variable)
                             val = stack.Pop();
-                        Debug.Assert(val != null);
                         if (val != null)
                         {
                             if ((target.NeedsInstanceParameters || target.NeedsArrayParameters) && target.InstType.WasDuplicated)
@@ -1352,6 +1343,8 @@ namespace UndertaleModLib.Decompiler
                                 }
                             }
                         }
+                        else
+                            Debug.Fail("Pop value is null.");
                         statements.Add(new AssignmentStatement(target, val));
                         break;
 
@@ -1432,7 +1425,6 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.Break:
-                        //statements.Add(new CommentStatement("// TODO: BREAK " + (short)instr.Value));
                         // This is used for checking bounds in 2D arrays
                         // I'm not sure of the specifics but I guess it causes a debug breakpoint if the top of the stack is >= 32000
                         // anyway, that's not important when decompiling to high-level code so just ignore it
@@ -1663,7 +1655,7 @@ namespace UndertaleModLib.Decompiler
                 for (var i = 0; i < Statements.Count; i++)
                 {
                     var count = Statements.Count;
-                    var Result = Statements[i]?.CleanStatement(context, this); //Yes, this uses "this" and not "block".
+                    var Result = Statements[i]?.CleanStatement(context, this); // Yes, this uses "this" and not "block".
                     i -= (count - Statements.Count); // If removed.
                     Statements[i] = Result;
                 }
@@ -1837,22 +1829,22 @@ namespace UndertaleModLib.Decompiler
 
         public class LoopHLStatement : HLStatement
         {
-            // Loop Block.
+            // Loop block
             public BlockHLStatement Block;
 
-            // While / For Condition.
+            // While / for condition
             public Statement Condition;
 
-            // While Loop.
+            // While loop
             public bool IsWhileLoop { get => !IsForLoop && !IsRepeatLoop && !IsDoUntilLoop; }
             public bool IsDoUntilLoop;
 
-            // For Loop.
+            // For loop
             public bool IsForLoop { get => InitializeStatement != null && StepStatement != null && Condition != null; }
             public AssignmentStatement InitializeStatement;
             public AssignmentStatement StepStatement;
 
-            // Repeat Loop.
+            // Repeat loop
             public bool IsRepeatLoop { get => RepeatStartValue != null; }
             public Statement RepeatStartValue;
 
@@ -2027,7 +2019,7 @@ namespace UndertaleModLib.Decompiler
 
             public HLSwitchCaseStatement(List<Expression> caseExpressions, BlockHLStatement block)
             {
-                Debug.Assert(caseExpressions.Count > 0);
+                Debug.Assert(caseExpressions.Count > 0, "Switch statement lacks any cases.");
                 this.CaseExpressions = caseExpressions;
                 this.Block = block;
             }
@@ -2099,19 +2091,19 @@ namespace UndertaleModLib.Decompiler
                             continue; // Happens in do-until loops. No other known situations.
 
                         var predId = blockList.IndexOf(pred);
-                        Debug.Assert(predId >= 0);
+                        Debug.Assert(predId >= 0, "predId < 0");
                         temp.SetAll(false);
                         temp.Or(dominators[i]);
                         dominators[i].And(dominators[predId]);
                         dominators[i].Set(i, true);
-                        /*if (!dominators[i].SequenceEquals(temp))
-                            changed = true;*/
                         for (var j = 0; j < blockList.Count; j++)
+                        {
                             if (dominators[i][j] != temp[j])
                             {
                                 changed = true;
                                 break;
                             }
+                        }
                     }
                 }
             } while (changed);
@@ -2185,10 +2177,10 @@ namespace UndertaleModLib.Decompiler
 
         public static Block FindFirstMeetPoint(Block ifStart, Dictionary<Block, List<Block>> reverseDominators)
         {
-            Debug.Assert(ifStart.conditionalExit);
+            Debug.Assert(ifStart.conditionalExit, "If start does not have a conditional exit");
             var commonDominators = reverseDominators[ifStart.nextBlockTrue].Intersect(reverseDominators[ifStart.nextBlockFalse]);
 
-            // find the closest one of them
+            // Find the closest one of them
             List<Block> visited = new List<Block>();
             visited.Add(ifStart);
             Queue<Block> q = new Queue<Block>();
@@ -2208,39 +2200,7 @@ namespace UndertaleModLib.Decompiler
             return null;
         }
 
-        /*public class ExpressionCollapsedCondition : Expression
-        {
-            public Expression left;
-            public string op;
-            public Expression right;
-
-            public ExpressionCollapsedCondition(Expression left, string op, Expression right)
-            {
-                this.left = left;
-                this.op = op;
-                this.right = right;
-            }
-
-            public override string ToString()
-            {
-                return "(" + left.ToString() + " " + op + right.ToString() + ")";
-            }
-        }
-
-        private static Block HLCollapseMultiIf(Block entryBlock, Expression expr)
-        {
-            bool? ifTrueThen = null;
-            bool? ifFalseThen = null;
-            if (!entryBlock.nextBlockTrue.conditionalExit && entryBlock.nextBlockTrue.Statements.Count == 1)
-            {
-                ifTrueThen = ((short)((entryBlock.nextBlockTrue.Statements[0] as TempVarAssigmentStatement)?.Value as ExpressionConstant).Value) != 0;
-            }
-            if (!entryBlock.nextBlockFalse.conditionalExit && entryBlock.nextBlockFalse.Statements.Count == 1)
-            {
-                ifFalseThen = ((short)((entryBlock.nextBlockFalse.Statements[0] as TempVarAssigmentStatement)?.Value as ExpressionConstant).Value) != 0;
-            }
-        }*/
-
+        // Process the base decompilation: clean up, make it readable, identify structures
         private static BlockHLStatement HLDecompileBlocks(DecompileContext context, ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, List<Block> alreadyVisited, Block currentLoop = null, bool decompileTheLoop = false, Block stopAt = null, bool allowBreak = false)
         {
             BlockHLStatement output = new BlockHLStatement();
@@ -2257,7 +2217,7 @@ namespace UndertaleModLib.Decompiler
                     }
                     else
                     {
-                        // this is a continue statement
+                        // This is a continue statement
                         output.Statements.Add(new ContinueHLStatement());
                         break;
                     }
@@ -2288,7 +2248,7 @@ namespace UndertaleModLib.Decompiler
 
                 if (output.Statements.Count >= 1 && output.Statements[output.Statements.Count - 1] is TempVarAssigmentStatement && block.Instructions.Count >= 1 && block.Instructions[block.Instructions.Count - 1].Kind == UndertaleInstruction.Opcode.Bt && block.conditionalExit && block.ConditionStatement is ExpressionCompare && (block.ConditionStatement as ExpressionCompare).Opcode == UndertaleInstruction.ComparisonType.EQ)
                 {
-                    // This is a switch statement!
+                    // Switch statement
                     Expression switchExpression = (output.Statements[output.Statements.Count - 1] as TempVarAssigmentStatement).Value;
                     TempVar switchTempVar = (output.Statements[output.Statements.Count - 1] as TempVarAssigmentStatement).Var.Var;
                     output.Statements.RemoveAt(output.Statements.Count - 1);
@@ -2359,30 +2319,32 @@ namespace UndertaleModLib.Decompiler
                         if (result.CaseExpressions.Contains(null))
                             defaultCase = result;
 
-                        Debug.Assert(temp == switchEnd);
+                        Debug.Assert(temp == switchEnd, "temp != switchEnd");
                     }
 
 
                     if (defaultCase != null)
-                    { // Handles default case.
-
+                    { 
+                        // Handles default case.
                         defaultCase.ShowBreak = defaultHasBreak;
                         if (defaultCase.Block.Statements.Count == 0) {
                             UndertaleInstruction breakInstruction = context.TargetCode.GetInstructionFromAddress((uint)block.Address + 1);
 
-                            if (breakInstruction.Kind == UndertaleInstruction.Opcode.B) // This is the default-case meet-point if it's b.
+                            if (breakInstruction.Kind == UndertaleInstruction.Opcode.B)
                             {
+                                // This is the default-case meet-point if it is b.
                                 uint instructionId = ((uint)block.Address + 1 + (uint)breakInstruction.JumpOffset);
                                 if (!blocks.ContainsKey(instructionId))
-                                    Console.WriteLine("Error: Bad Target [" + block.Address + ", " + breakInstruction.JumpOffset + "]: " + breakInstruction.ToString());
+                                    Debug.Fail("Switch statement default: Bad target [" + block.Address + ", " + breakInstruction.JumpOffset + "]: " + breakInstruction.ToString());
                                 Block switchEnd = blocks[instructionId];
 
                                 Block temp = block;
                                 defaultCase.Block = HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, false, switchEnd);
                                 block = switchEnd;
                             }
-                            else // If there is no default-case, remove the default break, since that creates different bytecode.
+                            else
                             {
+                                // If there is no default-case, remove the default break, since that creates different bytecode.
                                 cases.Remove(defaultCase);
                             }
                         }
@@ -2395,7 +2357,7 @@ namespace UndertaleModLib.Decompiler
 
                 if (block.Statements.Count > 0 && block.Statements.Last() is PushEnvStatement)
                 {
-                    Debug.Assert(!block.conditionalExit);
+                    Debug.Assert(!block.conditionalExit, "Block ending with pushenv does not have a conditional exit");
                     PushEnvStatement stmt = (block.Statements.Last() as PushEnvStatement);
                     block = block.nextBlockTrue;
                     output.Statements.Add(new WithHLStatement()
@@ -2408,11 +2370,11 @@ namespace UndertaleModLib.Decompiler
                 }
                 else if (block.Statements.Count > 0 && block.Statements.Last() is PopEnvStatement)
                 {
-                    Debug.Assert(!block.conditionalExit);
+                    Debug.Assert(!block.conditionalExit, "Block ending in popenv does not have a conditional exit");
                     break;
                 }
 
-                if (block.conditionalExit && block.ConditionStatement == null && block.nextBlockFalse != null && block.nextBlockFalse.ConditionStatement != null) // DO UNTIL STATEMENT!
+                if (block.conditionalExit && block.ConditionStatement == null && block.nextBlockFalse != null && block.nextBlockFalse.ConditionStatement != null) // Do...until statement
                 {
                     LoopHLStatement doUntilLoop = new LoopHLStatement();
                     doUntilLoop.Condition = block.nextBlockFalse.ConditionStatement;
@@ -2421,7 +2383,7 @@ namespace UndertaleModLib.Decompiler
                     output.Statements.Add(doUntilLoop);
                 }
 
-                if (block.conditionalExit && block.ConditionStatement != null) // IF STATEMENT!
+                if (block.conditionalExit && block.ConditionStatement != null) // If statement
                 {
                     Block meetPoint = FindFirstMeetPoint(block, reverseDominators);
                     if (meetPoint == null)
@@ -2473,12 +2435,6 @@ namespace UndertaleModLib.Decompiler
         private static List<Statement> HLDecompile(DecompileContext context, Dictionary<uint, Block> blocks, Block entryPoint, Block rootExitPoint)
         {
             Dictionary<Block, List<Block>> loops = ComputeNaturalLoops(blocks, entryPoint);
-            /*foreach(var a in loops)
-            {
-                Debug.WriteLine("LOOP at " + a.Key.Address + " contains blocks: ");
-                foreach (var b in a.Value)
-                    Debug.WriteLine("* " + b.Address);
-            }*/
             var reverseDominators = ComputeDominators(blocks, rootExitPoint, true);
             Block bl = entryPoint;
             return (HLDecompileBlocks(context, ref bl, blocks, loops, reverseDominators, new List<Block>()).CleanBlockStatement(context)).Statements;
@@ -2490,7 +2446,7 @@ namespace UndertaleModLib.Decompiler
             Dictionary<uint, Block> blocks = DecompileFlowGraph(code);
 
             // Throw away unreachable blocks
-            // I guess this is a bug in GM:S compiler, it still generates a path to end of script after exit/return
+            // I guess this is a quirk in the compiler, it still generates a path to end of script after exit/return
             // and it's throwing off the loop detector for some reason
             bool changed;
             do
@@ -2498,7 +2454,6 @@ namespace UndertaleModLib.Decompiler
                 changed = false;
                 foreach (var k in blocks.Where(pair => pair.Key != 0 && pair.Value.entryPoints.Count == 0).Select(pair => pair.Key).ToList())
                 {
-                    //Debug.WriteLine("Throwing away " + k);
                     foreach (var other in blocks.Values)
                         if (other.entryPoints.Contains(blocks[k]))
                             other.entryPoints.Remove(blocks[k]);
@@ -2530,7 +2485,7 @@ namespace UndertaleModLib.Decompiler
         {
             context.Setup(code);
 
-            TempVar.TempVarId = 0; //TODO: This should be context-specific.
+            TempVar.TempVarId = 0; // TODO: This should be context-specific.
             ExpressionVar.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
             DecompileFromBlock(context, blocks[0]);
@@ -2549,6 +2504,7 @@ namespace UndertaleModLib.Decompiler
                 sb.Append(stmt.ToString(context) + "\n");
             string decompiledCode = sb.ToString();
 
+            // Build a list of code locals
             if (locals != null)
             {
                 foreach (var local in locals.Locals)
@@ -2594,6 +2550,7 @@ namespace UndertaleModLib.Decompiler
                 }
             }
 
+            // Add tempvars to locals
             string oldStr = tempBuilder.ToString();
             for (int i = 0; i < TempVar.TempVarId; i++)
             {
@@ -2606,6 +2563,7 @@ namespace UndertaleModLib.Decompiler
                 }
             }
 
+            // Add the locals to the top of the code
             if (tempBuilder.Length > 0)
                 decompiledCode = "var " + tempBuilder.ToString() + ";\n" + decompiledCode;
 
@@ -2654,8 +2612,6 @@ namespace UndertaleModLib.Decompiler
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("digraph G {");
-            //sb.AppendLine("    graph [splines=polyline];");
-            //sb.AppendLine("");
             foreach (var pair in blocks)
             {
                 var block = pair.Value;
@@ -2673,21 +2629,15 @@ namespace UndertaleModLib.Decompiler
                 if (block.Value.conditionalExit)
                 {
                     if (block.Value.nextBlockTrue != null)
-                        sb.AppendLine("    block_" + block.Key + " -> block_" + block.Value.nextBlockTrue.Address + " [color=\"green\"];"); //, headport=n, tailport=s
+                        sb.AppendLine("    block_" + block.Key + " -> block_" + block.Value.nextBlockTrue.Address + " [color=\"green\"];");
                     if (block.Value.nextBlockFalse != null)
-                        sb.AppendLine("    block_" + block.Key + " -> block_" + block.Value.nextBlockFalse.Address + " [color=\"red\"];"); // , headport=n, tailport=s
+                        sb.AppendLine("    block_" + block.Key + " -> block_" + block.Value.nextBlockFalse.Address + " [color=\"red\"];");
                 }
                 else
                 {
                     if (block.Value.nextBlockTrue != null)
-                        sb.AppendLine("    block_" + block.Key + " -> block_" + block.Value.nextBlockTrue.Address + ";"); //  [headport=n, tailport=s]
+                        sb.AppendLine("    block_" + block.Key + " -> block_" + block.Value.nextBlockTrue.Address + ";");
                 }
-                /*foreach(var rev in block.Value.entryPoints)
-                {
-                    if (!rev.Address.HasValue)
-                        continue;
-                    sb.AppendLine("    block_" + block.Key + " -> block_" + rev.Address + " [color=\"gray\", weight=0]");
-                }*/
             }
             sb.AppendLine("}");
             return sb.ToString();
