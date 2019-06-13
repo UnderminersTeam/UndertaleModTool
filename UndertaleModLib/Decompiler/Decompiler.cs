@@ -26,20 +26,29 @@ namespace UndertaleModLib.Decompiler
         // Decompilation instance data
         public Dictionary<string, TempVarAssigmentStatement> TempVarMap = new Dictionary<string, TempVarAssigmentStatement>();
         public AssignmentStatement CompilerTempVar;
+        public Dictionary<UndertaleVariable, AssetIDType> assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
+        public int TempVarId;
 
         public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
-
-        public void Setup(UndertaleCode code)
-        {
-            TargetCode = code;
-            TempVarMap.Clear();
-            CompilerTempVar = null;
-        }
 
         public DecompileContext(UndertaleData data, bool enableStringLabels)
         {
             this.Data = data;
             this.EnableStringLabels = enableStringLabels;
+        }
+
+        public void Setup(UndertaleCode code)
+        {
+            TempVarId = 0;
+            TargetCode = code;
+            TempVarMap.Clear();
+            CompilerTempVar = null;
+            assetTypes.Clear();
+        }
+
+        public TempVar NewTempVar()
+        {
+            return new TempVar(++TempVarId);
         }
     }
 
@@ -663,14 +672,11 @@ namespace UndertaleModLib.Decompiler
         {
             public string Name;
             public UndertaleInstruction.DataType Type;
-
-            [ThreadStatic]
-            public static int TempVarId;
             internal AssetIDType AssetType;
 
-            public TempVar()
+            public TempVar(int id)
             {
-                Name = MakeTemporaryVarName(++TempVarId); ;
+                Name = MakeTemporaryVarName(id); ;
             }
 
             public static string MakeTemporaryVarName(int id)
@@ -945,18 +951,18 @@ namespace UndertaleModLib.Decompiler
                 if (script_code != null && !scriptArgs.ContainsKey(Function.Name.Content))
                 {
                     scriptArgs.Add(Function.Name.Content, null); // stop the recursion from looping
-                    var xxx = ExpressionVar.assetTypes; // TODO: this is going bad
-                    ExpressionVar.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>(); // TODO: don't look at this
+                    var xxx = context.assetTypes;
+                    context.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>(); // Apply a temporary dictionary which types will be applied to.
                     Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code);
                     Decompiler.DecompileFromBlock(context, blocks[0]);
                     Decompiler.DoTypePropagation(context, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
                     scriptArgs[Function.Name.Content] = new AssetIDType[15];
                     for (int i = 0; i < 15; i++)
                     {
-                        var v = ExpressionVar.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
+                        var v = context.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
                         scriptArgs[Function.Name.Content][i] = v.Count() > 0 ? v.First().Value : AssetIDType.Other;
                     }
-                    ExpressionVar.assetTypes = xxx; // restore
+                    context.assetTypes = xxx; // restore original / proper map.
                 }
 
                 AssetIDType[] args = new AssetIDType[Arguments.Count];
@@ -1054,15 +1060,13 @@ namespace UndertaleModLib.Decompiler
                 return prefix + name;
             }
 
-            [ThreadStatic]
-            public static Dictionary<UndertaleVariable, AssetIDType> assetTypes; // TODO: huge and ugly memory leak that I may fix one day... nah don't count on it
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 InstType?.DoTypePropagation(context, AssetIDType.GameObject);
                 ArrayIndex1?.DoTypePropagation(context, AssetIDType.Other);
                 ArrayIndex2?.DoTypePropagation(context, AssetIDType.Other);
 
-                AssetIDType current = assetTypes.ContainsKey(Var) ? assetTypes[Var] : AssetIDType.Other;
+                AssetIDType current = context.assetTypes.ContainsKey(Var) ? context.assetTypes[Var] : AssetIDType.Other;
                 if (current == AssetIDType.Other && suggestedType != AssetIDType.Other)
                     current = suggestedType;
                 AssetIDType builtinSuggest = AssetTypeResolver.AnnotateTypeForVariable(Var.Name.Content);
@@ -1070,7 +1074,7 @@ namespace UndertaleModLib.Decompiler
                     current = builtinSuggest;
 
                 if ((VarType != UndertaleInstruction.VariableType.Array || (ArrayIndex1 != null && !(ArrayIndex1 is ExpressionConstant))))
-                    assetTypes[Var] = current; // This is a messy fix to arrays messing up exported variable types.
+                    context.assetTypes[Var] = current; // This is a messy fix to arrays messing up exported variable types.
                 return current;
             }
 
@@ -1190,7 +1194,7 @@ namespace UndertaleModLib.Decompiler
                             }
                             else
                             {
-                                TempVar var = new TempVar();
+                                TempVar var = context.NewTempVar();
                                 var.Type = item.Type;
                                 TempVarReference varref = new TempVarReference(var);
                                 statements.Add(new TempVarAssigmentStatement(varref, item));
@@ -1446,7 +1450,7 @@ namespace UndertaleModLib.Decompiler
                 else
                 {
                     Expression val = stack.Pop();
-                    TempVar var = new TempVar();
+                    TempVar var = context.NewTempVar();
                     var.Type = val.Type;
                     TempVarReference varref = new TempVarReference(var);
                     statements.Add(new TempVarAssigmentStatement(varref, val));
@@ -2462,22 +2466,6 @@ namespace UndertaleModLib.Decompiler
                 }
             } while (changed);
 
-            // TODO: This doesn't propagate to tempvars in broken switch statements but that will be cleaned up at some point
-            AssetIDType propType = AssetIDType.Other;
-            // NOTE: This was disabled because it wasn't valid.
-            // 1. The type only applied to the first case statement.
-            // 2. Even if each case statement had the proper type, it still gives an error when compiling.
-            //if (code.Name.Content == "gml_Script___view_set_internal" || code.Name.Content == "gml_Script___view_get")
-            //    propType = AssetIDType.e__VW;
-            //if (code.Name.Content == "gml_Script___background_set_internal" || code.Name.Content == "gml_Script___background_get_internal")
-            //    propType = AssetIDType.e__BG;
-            if (propType != AssetIDType.Other)
-            {
-                var v = code.FindReferencedVars().Where((x) => x.Name.Content == "__prop").FirstOrDefault();
-                if (v != null)
-                    ExpressionVar.assetTypes.Add(v, propType);
-            }
-
             return blocks;
         }
 
@@ -2485,8 +2473,6 @@ namespace UndertaleModLib.Decompiler
         {
             context.Setup(code);
 
-            TempVar.TempVarId = 0; // TODO: This should be context-specific.
-            ExpressionVar.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
             DecompileFromBlock(context, blocks[0]);
             FunctionCall.scriptArgs = new Dictionary<string, AssetIDType[]>();
@@ -2552,7 +2538,7 @@ namespace UndertaleModLib.Decompiler
 
             // Add tempvars to locals
             string oldStr = tempBuilder.ToString();
-            for (int i = 0; i < TempVar.TempVarId; i++)
+            for (int i = 0; i < context.TempVarId; i++)
             {
                 string tempVarName = TempVar.MakeTemporaryVarName(i + 1);
                 if (decompiledCode.Contains(tempVarName) && !oldStr.Contains(tempVarName))
