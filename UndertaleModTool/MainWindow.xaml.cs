@@ -203,6 +203,7 @@ namespace UndertaleModTool
 
         private void Command_New(object sender, ExecutedRoutedEventArgs e)
         {
+            FilePath = null;
             Data = UndertaleData.CreateNew();
             CloseChildFiles();
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
@@ -888,22 +889,24 @@ namespace UndertaleModTool
         {
             if (Data == null)
                 return;
-            
-            RuntimePicker picker = new RuntimePicker();
-            picker.Owner = this;
-            var runtime = picker.Pick(FilePath, Data);
-            if (runtime == null)
-                return;
 
             bool origDbg = Data.GeneralInfo.DisableDebugger;
             Data.GeneralInfo.DisableDebugger = true;
             bool saveOk = true;
             if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 saveOk = await DoSaveDialog();
-            if (saveOk)
+
+            if (FilePath == null) {
+                MessageBox.Show("The file must be saved in order to be run.", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            } else if (saveOk)
             {
-                Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + System.IO.Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
+                RuntimePicker picker = new RuntimePicker();
+                picker.Owner = this;
+                var runtime = picker.Pick(FilePath, Data);
+                if (runtime != null)
+                    Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + System.IO.Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
             }
+
             Data.GeneralInfo.DisableDebugger = origDbg;
         }
         
@@ -911,22 +914,29 @@ namespace UndertaleModTool
         {
             if (Data == null)
                 return;
-            
-            RuntimePicker picker = new RuntimePicker();
-            picker.Owner = this;
-            var runtime = picker.Pick(FilePath, Data);
-            if (runtime == null)
-                return;
-            if (runtime.DebuggerPath == null)
-            {
-                MessageBox.Show("The selected runtime does not support debugging.", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
 
             bool origDbg = Data.GeneralInfo.DisableDebugger;
             Data.GeneralInfo.DisableDebugger = false;
-            if (await DoSaveDialog())
+
+            bool saveOk = await DoSaveDialog();
+            if (FilePath == null)
             {
+                MessageBox.Show("The file must be saved in order to be run.", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
+            else if (saveOk)
+            {
+                RuntimePicker picker = new RuntimePicker();
+                picker.Owner = this;
+                var runtime = picker.Pick(FilePath, Data);
+                if (runtime == null)
+                    return;
+                if (runtime.DebuggerPath == null)
+                {
+                    MessageBox.Show("The selected runtime does not support debugging.", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+
                 string tempProject = System.IO.Path.GetTempFileName().Replace(".tmp", ".gmx");
                 File.WriteAllText(tempProject, @"<!-- Without this file the debugger crashes, but it doesn't actually need to contain anything! -->
 <assets>
