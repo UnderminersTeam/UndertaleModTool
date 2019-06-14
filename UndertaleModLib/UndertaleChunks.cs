@@ -374,7 +374,7 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
-            if (Length == 0) // YYC, bytecode <= 16, chunk is empty but exists
+            if (Length == 0 && reader.undertaleData.GeneralInfo?.BytecodeVersion > 14) // YYC, 14 < bytecode <= 16, chunk is empty but exists
             {
                 Functions = null;
                 CodeLocals = null;
