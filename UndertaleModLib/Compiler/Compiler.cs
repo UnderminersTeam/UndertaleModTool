@@ -4,68 +4,100 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
+using static UndertaleModLib.Compiler.Compiler.AssemblyWriter;
 
 namespace UndertaleModLib.Compiler
 {
-    public static partial class Compiler
+    public class CompileContext
     {
-        private static UndertaleData data;
-        private static Dictionary<string, int> assetIds = new Dictionary<string, int>();
-        private static List<string> scripts = new List<string>();
-        private static Dictionary<string, VariableInfo> userDefinedVariables = new Dictionary<string, VariableInfo>();
-        private static bool ensureFunctionsDefined = true;
-        private static bool ensureVariablesDefined = true;
-        public static int LastCompiledArgumentCount = 0;
-        public static bool SuccessfulCompile = false;
-        public static Dictionary<string, string> LocalVars = new Dictionary<string, string>();
-        public static Dictionary<string, string> GlobalVars = new Dictionary<string, string>();
-        public static Dictionary<string, Dictionary<string, int>> Enums = new Dictionary<string, Dictionary<string, int>>();
-        public static UndertaleCode OriginalCode;
+        public UndertaleData Data;
+        public Dictionary<string, int> assetIds = new Dictionary<string, int>();
+        public List<string> scripts = new List<string>();
+        public Dictionary<string, VariableInfo> userDefinedVariables = new Dictionary<string, VariableInfo>();
+        public bool ensureFunctionsDefined = true;
+        public bool ensureVariablesDefined = true;
+        public int LastCompiledArgumentCount = 0;
+        public Dictionary<string, string> LocalVars = new Dictionary<string, string>();
+        public Dictionary<string, string> GlobalVars = new Dictionary<string, string>();
+        public Dictionary<string, Dictionary<string, int>> Enums = new Dictionary<string, Dictionary<string, int>>();
+        public UndertaleCode OriginalCode;
+        public BuiltinList BuiltInList;
 
-        private static void AddAssetsFromList<T>(IList<T> list) where T : UndertaleNamedResource
+        public bool SuccessfulCompile = false;
+        public bool HasError = false;
+        public string ResultError = null;
+        public string ResultAssembly = null;
+
+        public CompileContext(UndertaleData data, UndertaleCode oldCode)
         {
-            if (list == null)
-                return;
-            for (int i = 0; i < list.Count; i++)
-            {
-                string name = list[i].Name?.Content;
-                if (name != null)
-                    assetIds[name] = i;
-            }
+            Data = data;
+            OriginalCode = oldCode;
         }
 
-        // A simple matching convenience
-        public static bool In<T>(this T obj, params T[] args)
+        public int GetAssetIndexByName(string name)
         {
-            return args.Contains(obj);
+            return assetIds.TryGetValue(name, out int val) ? val : -1;
         }
 
-        private static void MakeAssetDictionary()
+        public void OnSuccessfulFinish()
+        {
+            if (ensureVariablesDefined)
+                foreach (KeyValuePair<string, string> v in GlobalVars)
+                    Data?.Variables?.EnsureDefined(v.Key, UndertaleInstruction.InstanceType.Global, false, Data.Strings, Data);
+
+            SuccessfulCompile = true;
+        }
+
+        public void SetError(string error)
+        {
+            HasError = true;
+            ResultError = error;
+
+            string[] split = error.Split('\n');
+            StringBuilder sb = new StringBuilder();
+            foreach (string line in split)
+                sb.Append("; " + line + "\n");
+            ResultAssembly = sb.ToString();
+        }
+
+        public void Setup()
+        {
+            SuccessfulCompile = false;
+            HasError = false;
+            ResultError = null;
+            ResultAssembly = null;
+
+            LastCompiledArgumentCount = 0;
+            userDefinedVariables.Clear();
+            MakeAssetDictionary();
+        }
+
+        private void MakeAssetDictionary()
         {
             assetIds.Clear();
-            AddAssetsFromList(data?.GameObjects);
-            AddAssetsFromList(data?.Sprites);
-            AddAssetsFromList(data?.Sounds);
-            AddAssetsFromList(data?.Backgrounds);
-            AddAssetsFromList(data?.Paths);
-            AddAssetsFromList(data?.Fonts);
-            AddAssetsFromList(data?.Timelines);
-            AddAssetsFromList(data?.Scripts);
-            AddAssetsFromList(data?.Shaders);
-            AddAssetsFromList(data?.Rooms);
-            AddAssetsFromList(data?.AudioGroups);
+            AddAssetsFromList(Data?.GameObjects);
+            AddAssetsFromList(Data?.Sprites);
+            AddAssetsFromList(Data?.Sounds);
+            AddAssetsFromList(Data?.Backgrounds);
+            AddAssetsFromList(Data?.Paths);
+            AddAssetsFromList(Data?.Fonts);
+            AddAssetsFromList(Data?.Timelines);
+            AddAssetsFromList(Data?.Scripts);
+            AddAssetsFromList(Data?.Shaders);
+            AddAssetsFromList(Data?.Rooms);
+            AddAssetsFromList(Data?.AudioGroups);
 
             scripts.Clear();
-            if (data?.Scripts != null)
+            if (Data?.Scripts != null)
             {
-                foreach (UndertaleScript s in data.Scripts)
+                foreach (UndertaleScript s in Data.Scripts)
                 {
                     scripts.Add(s.Name.Content);
                 }
             }
-            if (data?.Extensions != null)
+            if (Data?.Extensions != null)
             {
-                foreach (UndertaleExtension e in data.Extensions)
+                foreach (UndertaleExtension e in Data.Extensions)
                 {
                     foreach (UndertaleExtension.ExtensionFile file in e.Files)
                     {
@@ -78,98 +110,77 @@ namespace UndertaleModLib.Compiler
             }
         }
 
-        private static int GetAssetIndexByName(string name)
+        private void AddAssetsFromList<T>(IList<T> list) where T : UndertaleNamedResource
         {
-            if (assetIds.TryGetValue(name, out int val))
+            if (list == null)
+                return;
+            for (int i = 0; i < list.Count; i++)
             {
-                return val;
+                string name = list[i].Name?.Content;
+                if (name != null)
+                    assetIds[name] = i;
             }
-            return -1;
+        }
+    }
+
+    public static partial class Compiler
+    {
+
+        // A simple matching convenience
+        public static bool In<T>(this T obj, params T[] args)
+        {
+            return args.Contains(obj);
         }
 
-        public static void SetUndertaleData(UndertaleData data)
+        public static CompileContext CompileGMLText(string input, UndertaleData data, UndertaleCode code)
         {
-            Compiler.data = data;
-            MakeAssetDictionary();
+            return CompileGMLText(input, new CompileContext(data, code));
         }
 
-        public static void SetEnsureFunctionsDefined(bool val)
+        public static CompileContext CompileGMLText(string input, CompileContext context)
         {
-            ensureFunctionsDefined = val;
-        }
-
-        public static void SetEnsureVariablesDefined(bool val)
-        {
-            ensureVariablesDefined = val;
-        }
-
-        public static string CompileGMLText(string input, UndertaleData data = null, UndertaleCode oldCode = null)
-        {
-            // Set up
-            if (data != null)
-                SetUndertaleData(data);
-            Compiler.OriginalCode = oldCode;
-            LastCompiledArgumentCount = 0;
-            userDefinedVariables.Clear();
-
-            // Peform lexical analysis
-            List<Lexer.Token> tokens = Lexer.LexString(input);
-
-            // Parse tokens, make syntax tree
-            Parser.Statement block = Parser.ParseTokens(tokens);
+            
+            context.Setup(); // Set up
+            List<Lexer.Token> tokens = Lexer.LexString(context, input); // Peform lexical analysis
+            Parser.Statement block = Parser.ParseTokens(context, tokens); // Parse tokens, make syntax tree
 
             // Optimize and process syntax tree
             Parser.Statement optimizedBlock = null;
             if (Parser.ErrorMessages.Count == 0)
-                optimizedBlock = Parser.Optimize(block);
+                optimizedBlock = Parser.Optimize(context, block);
 
             // Handle errors from either function
             if (Parser.ErrorMessages.Count > 0)
             {
-                SuccessfulCompile = false;
                 StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("; Error{0} parsing code:", Parser.ErrorMessages.Count == 1 ? "" : "s");
+                sb.AppendFormat("Error{0} parsing code:", Parser.ErrorMessages.Count == 1 ? "" : "s");
                 sb.AppendLine();
-                sb.AppendLine("; ");
+                sb.AppendLine("");
                 foreach (string msg in Parser.ErrorMessages)
-                {
-                    sb.AppendFormat("; {0}", msg);
-                    sb.AppendLine();
-                }
-                return sb.ToString();
+                    sb.AppendLine(msg);
+                context.SetError(sb.ToString());
+                return context;
             }
 
-            // Write assembly code
-            AssemblyWriter.Reset();
-            string result = AssemblyWriter.GetAssemblyCodeFromStatement(optimizedBlock);
+            CodeWriter codeWriter = AssemblyWriter.AssembleStatement(context, optimizedBlock); // Write assembly code
+            context.ResultAssembly = codeWriter.Finish();
 
-            if (AssemblyWriter.ErrorMessages.Count > 0)
+            if (codeWriter.ErrorMessages.Count > 0)
             {
-                SuccessfulCompile = false;
                 StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("; Error{0} writing assembly code:", AssemblyWriter.ErrorMessages.Count == 1 ? "" : "s");
+                sb.AppendFormat("Error{0} writing assembly code:", codeWriter.ErrorMessages.Count == 1 ? "" : "s");
                 sb.AppendLine();
-                sb.AppendLine("; ");
-                foreach (string msg in AssemblyWriter.ErrorMessages)
-                {
-                    sb.AppendFormat("; {0}", msg);
-                    sb.AppendLine();
-                }
+                sb.AppendLine("");
+                foreach (string msg in codeWriter.ErrorMessages)
+                    sb.AppendLine(msg);
                 sb.AppendLine();
-                sb.Append(result);
-                return sb.ToString();
+                sb.Append(context.ResultAssembly);
+                context.SetError(sb.ToString());
+                return context;
             }
 
-            if (ensureVariablesDefined)
-            {
-                foreach (KeyValuePair<string, string> v in GlobalVars)
-                {
-                    data?.Variables?.EnsureDefined(v.Key, UndertaleInstruction.InstanceType.Global, false, data.Strings, data);
-                }
-            }
-
-            SuccessfulCompile = true;
-            return result;
+            context.OnSuccessfulFinish();
+            return context;
         }
     }
 }

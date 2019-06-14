@@ -620,10 +620,17 @@ namespace UndertaleModTool
 
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
 
-            string assembledString = Compiler.CompileGMLText(DecompiledEditor.Text, data, code);
-            if (!Compiler.SuccessfulCompile) // There were errors.
+            CompileContext compileContext = Compiler.CompileGMLText(DecompiledEditor.Text, data, code);
+            //string assembledString = compileContext.ResultAssembly;
+            if (compileContext.HasError) // There were errors.
             {
-                MessageBox.Show(assembledString, "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(compileContext.ResultError, "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!compileContext.SuccessfulCompile)
+            {
+                MessageBox.Show(compileContext.ResultAssembly, "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -639,7 +646,7 @@ namespace UndertaleModTool
                     }
                     return false;
                 }
-                foreach (var l in Compiler.LocalVars)
+                foreach (var l in compileContext.LocalVars)
                 {
                     string name = l.Key;
                     if (!hasLocal(name))
@@ -652,7 +659,7 @@ namespace UndertaleModTool
 
             try
             {
-                var instructions = Assembler.Assemble(assembledString, data);
+                var instructions = Assembler.Assemble(compileContext.ResultAssembly, data);
                 code.Replace(instructions);
             }
             catch (Exception ex)

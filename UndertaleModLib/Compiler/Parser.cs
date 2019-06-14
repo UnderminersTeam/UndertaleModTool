@@ -356,16 +356,19 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            public static Statement ParseTokens(List<Lexer.Token> tokens)
+            public static Statement ParseTokens(CompileContext context, List<Lexer.Token> tokens)
             {
                 // Basic initialization
-                if (BuiltinList.Constants == null)
-                    BuiltinList.Initialize(data);
+                if (context.BuiltInList == null)
+                {
+                    context.BuiltInList = new BuiltinList();
+                    context.BuiltInList.Initialize(context.Data);
+                }
                 remainingStageOne.Clear();
                 ErrorMessages.Clear();
-                LocalVars.Clear();
-                GlobalVars.Clear();
-                Enums.Clear();
+                context.LocalVars.Clear();
+                context.GlobalVars.Clear();
+                context.Enums.Clear();
                 hasError = false;
 
                 // Ensuring an EOF exists
@@ -388,10 +391,10 @@ namespace UndertaleModLib.Compiler
                     {
                         // Convert identifiers into their proper references, at least sort of.
                         ExpressionConstant constant;
-                        if (!ResolveIdentifier(tokens[i].Content, out constant))
+                        if (!ResolveIdentifier(context, tokens[i].Content, out constant))
                         {
                             bool isGlobalBuiltin;
-                            int ID = GetVariableID(tokens[i].Content, out isGlobalBuiltin);
+                            int ID = GetVariableID(context, tokens[i].Content, out isGlobalBuiltin);
                             if (ID >= 0 && ID < 100000)
                                 firstPass.Add(new Statement(TokenKind.ProcVariable, tokens[i], -1)); // becomes self anyway?
                             else
@@ -460,14 +463,14 @@ namespace UndertaleModLib.Compiler
                 Statement rootBlock = new Statement(Statement.StatementKind.Block);
                 firstPass.ForEach(remainingStageOne.Enqueue);
 
-                rootBlock = ParseBlock(true);
+                rootBlock = ParseBlock(context, true);
                 if (hasError)
                     return null;
 
                 return rootBlock;
             }
 
-            private static Statement ParseBlock(bool isRoot = false)
+            private static Statement ParseBlock(CompileContext context, bool isRoot = false)
             {
                 Statement s = new Statement(Statement.StatementKind.Block);
 
@@ -476,7 +479,7 @@ namespace UndertaleModLib.Compiler
 
                 while (remainingStageOne.Count > 0 && !IsNextToken(TokenKind.CloseBlock, TokenKind.EOF))
                 {
-                    Statement parsed = ParseStatement();
+                    Statement parsed = ParseStatement(context);
                     if (parsed != null) // Sometimes it can be null, for instance if there's a bunch of semicolons, or an error
                         s.Children.Add(parsed);
                 }
@@ -487,23 +490,23 @@ namespace UndertaleModLib.Compiler
                 return s;
             }
 
-            private static Statement ParseStatement()
+            private static Statement ParseStatement(CompileContext context)
             {
                 hasError = false;
                 Statement s = null;
                 switch (GetNextTokenKind())
                 {
                     case TokenKind.OpenBlock:
-                        s = ParseBlock();
+                        s = ParseBlock(context);
                         break;
                     case TokenKind.ProcFunction:
-                        s = ParseFunctionCall();
+                        s = ParseFunctionCall(context);
                         break;
                     case TokenKind.KeywordVar:
-                        s = ParseLocalVarDeclare(); // can be multiple
+                        s = ParseLocalVarDeclare(context); // can be multiple
                         break;
                     case TokenKind.KeywordGlobalVar:
-                        s = ParseGlobalVarDeclare(); // can be multiple
+                        s = ParseGlobalVarDeclare(context); // can be multiple
                         break;
                     case TokenKind.KeywordBreak:
                         s = new Statement(Statement.StatementKind.Break, remainingStageOne.Dequeue().Token);
@@ -515,47 +518,47 @@ namespace UndertaleModLib.Compiler
                         s = new Statement(Statement.StatementKind.Exit, remainingStageOne.Dequeue().Token);
                         break;
                     case TokenKind.KeywordReturn:
-                        s = ParseReturn();
+                        s = ParseReturn(context);
                         break;
                     case TokenKind.KeywordWith:
-                        s = ParseWith();
+                        s = ParseWith(context);
                         break;
                     case TokenKind.KeywordWhile:
-                        s = ParseWhile();
+                        s = ParseWhile(context);
                         break;
                     case TokenKind.KeywordRepeat:
-                        s = ParseRepeat();
+                        s = ParseRepeat(context);
                         break;
                     case TokenKind.KeywordFor:
-                        s = ParseFor();
+                        s = ParseFor(context);
                         break;
                     case TokenKind.KeywordSwitch:
-                        s = ParseSwitch();
+                        s = ParseSwitch(context);
                         break;
                     case TokenKind.KeywordCase:
-                        s = ParseSwitchCase();
+                        s = ParseSwitchCase(context);
                         break;
                     case TokenKind.KeywordDefault:
-                        s = ParseSwitchDefault();
+                        s = ParseSwitchDefault(context);
                         break;
                     case TokenKind.KeywordIf:
-                        s = ParseIf();
+                        s = ParseIf(context);
                         break;
                     case TokenKind.KeywordDo:
-                        s = ParseDoUntil();
+                        s = ParseDoUntil(context);
                         break;
                     case TokenKind.EOF:
                         ReportCodeError("Unexpected end of code.", false);
                         break;
                     case TokenKind.Enum:
-                        s = ParseEnum();
+                        s = ParseEnum(context);
                         break;
                     case TokenKind.EndStatement:
                         break;
                     case TokenKind.Increment:
                     case TokenKind.Decrement:
                         s = new Statement(Statement.StatementKind.Pre, remainingStageOne.Dequeue().Token);
-                        s.Children.Add(ParsePostAndRef());
+                        s.Children.Add(ParsePostAndRef(context));
                         break;
                     case TokenKind.Error:
                         if (remainingStageOne.Count > 0)
@@ -566,7 +569,7 @@ namespace UndertaleModLib.Compiler
                     default:
                         // Assumes it's a variable assignment
                         if (remainingStageOne.Count > 0)
-                            s = ParseAssign();
+                            s = ParseAssign(context);
                         break;
                 }
                 // Ignore any semicolons
@@ -575,15 +578,15 @@ namespace UndertaleModLib.Compiler
                 return s;
             }
 
-            private static Statement ParseRepeat()
+            private static Statement ParseRepeat(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.RepeatLoop, EnsureTokenKind(TokenKind.KeywordRepeat).Token);
-                result.Children.Add(ParseExpression());
-                result.Children.Add(ParseStatement());
+                result.Children.Add(ParseExpression(context));
+                result.Children.Add(ParseStatement(context));
                 return result;
             }
 
-            private static Statement ParseFor()
+            private static Statement ParseFor(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.ForLoop, EnsureTokenKind(TokenKind.KeywordFor).Token);
                 EnsureTokenKind(TokenKind.OpenParen);
@@ -596,7 +599,7 @@ namespace UndertaleModLib.Compiler
                 }
                 else
                 {
-                    result.Children.Add(ParseStatement());
+                    result.Children.Add(ParseStatement(context));
                 }
 
                 // Parse expression/condition
@@ -608,7 +611,7 @@ namespace UndertaleModLib.Compiler
                 }
                 else
                 {
-                    result.Children.Add(ParseExpression());
+                    result.Children.Add(ParseExpression(context));
                     IsNextTokenDiscard(TokenKind.EndStatement);
                 }
 
@@ -620,19 +623,19 @@ namespace UndertaleModLib.Compiler
                 }
                 else
                 {
-                    result.Children.Add(ParseStatement());
+                    result.Children.Add(ParseStatement(context));
                     EnsureTokenKind(TokenKind.CloseParen);
                 }
 
                 // Parse the body
-                result.Children.Add(ParseStatement());
+                result.Children.Add(ParseStatement(context));
 
                 return result;
             }
 
-            private static Statement ParseAssign()
+            private static Statement ParseAssign(CompileContext context)
             {
-                Statement left = ParsePostAndRef();
+                Statement left = ParsePostAndRef(context);
                 if (left != null)
                 {
                     if (!left.Kind.In(Statement.StatementKind.Pre, Statement.StatementKind.Post))
@@ -645,10 +648,10 @@ namespace UndertaleModLib.Compiler
                             name = left.Children[0].Text;
 
                         VariableInfo vi;
-                        if ((BuiltinList.GlobalNotArray.TryGetValue(name, out vi) ||
-                            BuiltinList.GlobalArray.TryGetValue(name, out vi) ||
-                            BuiltinList.Instance.TryGetValue(name, out vi) ||
-                            BuiltinList.InstanceLimitedEvent.TryGetValue(name, out vi)
+                        if ((context.BuiltInList.GlobalNotArray.TryGetValue(name, out vi) ||
+                            context.BuiltInList.GlobalArray.TryGetValue(name, out vi) ||
+                            context.BuiltInList.Instance.TryGetValue(name, out vi) ||
+                            context.BuiltInList.InstanceLimitedEvent.TryGetValue(name, out vi)
                             ) && !vi.CanSet)
                         {
                             ReportCodeError("Attempt to set a read-only variable.", left.Token, false);
@@ -670,7 +673,7 @@ namespace UndertaleModLib.Compiler
                             ))
                         {
                             assign.Children.Add(new Statement(Statement.StatementKind.Token, assign.Token));
-                            assign.Children.Add(ParseExpression());
+                            assign.Children.Add(ParseExpression(context));
                         }
                         else
                         {
@@ -691,7 +694,7 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static Statement ParseEnum()
+            private static Statement ParseEnum(CompileContext context)
             {
                 ReportCodeError("Enums not currently supported.", true);
                 return null;
@@ -755,51 +758,51 @@ namespace UndertaleModLib.Compiler
                 return result;*/
             }
 
-            private static Statement ParseDoUntil()
+            private static Statement ParseDoUntil(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.DoUntilLoop, EnsureTokenKind(TokenKind.KeywordDo).Token);
-                result.Children.Add(ParseStatement());
+                result.Children.Add(ParseStatement(context));
                 EnsureTokenKind(TokenKind.KeywordUntil);
-                result.Children.Add(ParseExpression());
+                result.Children.Add(ParseExpression(context));
                 return result;
             }
 
-            private static Statement ParseIf()
+            private static Statement ParseIf(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.If, EnsureTokenKind(TokenKind.KeywordIf).Token);
-                result.Children.Add(ParseExpression());
+                result.Children.Add(ParseExpression(context));
                 IsNextTokenDiscard(TokenKind.KeywordThen);
-                result.Children.Add(ParseStatement());
+                result.Children.Add(ParseStatement(context));
                 if (IsNextTokenDiscard(TokenKind.KeywordElse))
-                    result.Children.Add(ParseStatement());
+                    result.Children.Add(ParseStatement(context));
                 return result;
             }
 
-            private static Statement ParseSwitchDefault()
+            private static Statement ParseSwitchDefault(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.SwitchDefault, EnsureTokenKind(TokenKind.KeywordDefault).Token);
                 EnsureTokenKind(TokenKind.Colon);
                 return result;
             }
 
-            private static Statement ParseSwitchCase()
+            private static Statement ParseSwitchCase(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.SwitchCase, EnsureTokenKind(TokenKind.KeywordCase).Token);
-                result.Children.Add(ParseExpression());
+                result.Children.Add(ParseExpression(context));
                 EnsureTokenKind(TokenKind.Colon);
                 return result;
             }
 
-            private static Statement ParseSwitch()
+            private static Statement ParseSwitch(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.Switch, EnsureTokenKind(TokenKind.KeywordSwitch).Token);
-                result.Children.Add(ParseExpression());
+                result.Children.Add(ParseExpression(context));
                 EnsureTokenKind(TokenKind.OpenBlock);
 
                 while (!hasError && remainingStageOne.Count > 0 && !IsNextToken(TokenKind.CloseBlock, TokenKind.EOF))
                 {
                     // Apparently the compiler allows any statement here, no validation until later
-                    Statement c = ParseStatement();
+                    Statement c = ParseStatement(context);
                     if (c != null)
                         result.Children.Add(c);
                 }
@@ -809,35 +812,35 @@ namespace UndertaleModLib.Compiler
                 return result;
             }
 
-            private static Statement ParseWhile()
+            private static Statement ParseWhile(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.WhileLoop, EnsureTokenKind(TokenKind.KeywordWhile).Token);
-                result.Children.Add(ParseExpression());
+                result.Children.Add(ParseExpression(context));
                 IsNextTokenDiscard(TokenKind.KeywordDo);
-                result.Children.Add(ParseStatement());
+                result.Children.Add(ParseStatement(context));
                 return result;
             }
 
-            private static Statement ParseWith()
+            private static Statement ParseWith(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.With, EnsureTokenKind(TokenKind.KeywordWith).Token);
-                result.Children.Add(ParseExpression());
+                result.Children.Add(ParseExpression(context));
                 IsNextTokenDiscard(TokenKind.KeywordDo);
-                result.Children.Add(ParseStatement());
+                result.Children.Add(ParseStatement(context));
                 return result;
             }
 
-            private static Statement ParseReturn()
+            private static Statement ParseReturn(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.Return, EnsureTokenKind(TokenKind.KeywordReturn).Token);
                 if (remainingStageOne.Count > 0 && !IsKeyword(GetNextTokenKind()) && !IsNextToken(TokenKind.EndStatement, TokenKind.EOF))
                 {
-                    result.Children.Add(ParseExpression());
+                    result.Children.Add(ParseExpression(context));
                 }
                 return result;
             }
 
-            private static Statement ParseLocalVarDeclare()
+            private static Statement ParseLocalVarDeclare(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.TempVarDeclare, EnsureTokenKind(TokenKind.KeywordVar).Token);
                 while (remainingStageOne.Count > 0 && IsNextToken(TokenKind.ProcVariable))
@@ -847,14 +850,14 @@ namespace UndertaleModLib.Compiler
                     // Error checking on variable
                     if (var.ID < 100000)
                         ReportCodeError("Redeclaration of builtin variable.", var.Token, false);
-                    if (BuiltinList.Functions.ContainsKey(var.Text) || scripts.Contains(var.Text))
+                    if (context.BuiltInList.Functions.ContainsKey(var.Text) || context.scripts.Contains(var.Text))
                         ReportCodeError(string.Format("Variable name {0} cannot be used; a function or script already has the name.", var.Text), var.Token, false);
-                    if (assetIds.ContainsKey(var.Text))
+                    if (context.assetIds.ContainsKey(var.Text))
                         ReportCodeError(string.Format("Variable name {0} cannot be used; a resource already has the name.", var.Text), var.Token, false);
 
                     Statement variable = new Statement(var) { Kind = Statement.StatementKind.ExprSingleVariable };
                     result.Children.Add(variable);
-                    LocalVars[var.Text] = var.Text;
+                    context.LocalVars[var.Text] = var.Text;
 
                     // Read assignments if necessary
                     if (remainingStageOne.Count > 0 && IsNextToken(TokenKind.Assign))
@@ -867,7 +870,7 @@ namespace UndertaleModLib.Compiler
 
                         a.Children.Add(left);
                         a.Children.Add(new Statement(TokenKind.Assign, a.Token));
-                        a.Children.Add(ParseExpression());
+                        a.Children.Add(ParseExpression(context));
                     }
 
                     if (!IsNextTokenDiscard(TokenKind.Comma))
@@ -877,7 +880,7 @@ namespace UndertaleModLib.Compiler
                 return result;
             }
 
-            private static Statement ParseGlobalVarDeclare()
+            private static Statement ParseGlobalVarDeclare(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.GlobalVarDeclare, EnsureTokenKind(TokenKind.KeywordGlobalVar).Token);
                 while (remainingStageOne.Count > 0 && IsNextToken(TokenKind.ProcVariable))
@@ -887,14 +890,14 @@ namespace UndertaleModLib.Compiler
                     // Error checking on variable
                     if (var.ID < 100000)
                         ReportCodeError("Redeclaration of builtin variable.", var.Token, false);
-                    if (BuiltinList.Functions.ContainsKey(var.Text) || scripts.Contains(var.Text))
+                    if (context.BuiltInList.Functions.ContainsKey(var.Text) || context.scripts.Contains(var.Text))
                         ReportCodeError(string.Format("Variable name {0} cannot be used; a function or script already has the name.", var.Text), var.Token, false);
-                    if (assetIds.ContainsKey(var.Text))
+                    if (context.assetIds.ContainsKey(var.Text))
                         ReportCodeError(string.Format("Variable name {0} cannot be used; a resource already has the name.", var.Text), var.Token, false);
 
                     Statement variable = new Statement(var) { Kind = Statement.StatementKind.ExprSingleVariable };
                     result.Children.Add(variable);
-                    GlobalVars[var.Text] = var.Text;
+                    context.LocalVars[var.Text] = var.Text;
 
                     if (!IsNextTokenDiscard(TokenKind.Comma))
                         break;
@@ -903,7 +906,7 @@ namespace UndertaleModLib.Compiler
                 return result;
             }
 
-            private static Statement ParseFunctionCall(bool expression = false)
+            private static Statement ParseFunctionCall(CompileContext context, bool expression = false)
             {
                 Statement s = EnsureTokenKind(TokenKind.ProcFunction);
 
@@ -917,7 +920,7 @@ namespace UndertaleModLib.Compiler
                 // Parse the parameters/arguments
                 while (remainingStageOne.Count > 0 && !hasError && !IsNextToken(TokenKind.EOF) && !IsNextToken(TokenKind.CloseParen))
                 {
-                    Statement expr = ParseExpression();
+                    Statement expr = ParseExpression(context);
                     if (expr != null)
                         result.Children.Add(expr);
                     if (!IsNextTokenDiscard(TokenKind.Comma))
@@ -934,7 +937,7 @@ namespace UndertaleModLib.Compiler
 
                 // Check for proper argument count, at least for builtins
                 FunctionInfo fi;
-                if (BuiltinList.Functions.TryGetValue(s.Text, out fi) && fi.ArgumentCount != -1 && result.Children.Count != fi.ArgumentCount)
+                if (context.BuiltInList.Functions.TryGetValue(s.Text, out fi) && fi.ArgumentCount != -1 && result.Children.Count != fi.ArgumentCount)
                     ReportCodeError(string.Format("Function {0} expects {1} arguments, got {2}.",
                                                   s.Text, fi.ArgumentCount, result.Children.Count)
                                                   , s.Token, false);
@@ -942,17 +945,17 @@ namespace UndertaleModLib.Compiler
                 return result;
             }
 
-            private static Statement ParseExpression()
+            private static Statement ParseExpression(CompileContext context)
             {
-                return ParseConditionalOp();
+                return ParseConditionalOp(context);
             }
 
-            private static Statement ParseConditionalOp()
+            private static Statement ParseConditionalOp(CompileContext context)
             {
-                Statement left = ParseOrOp();
+                Statement left = ParseOrOp(context);
                 if (!hasError && IsNextToken(TokenKind.Conditional))
                 {
-                    if (data?.GeneralInfo.Major < 2)
+                    if (context.Data?.GeneralInfo.Major < 2)
                     {
                         ReportCodeError("Attempt to use conditional operator in GameMaker version earlier than 2.", remainingStageOne.Dequeue().Token, true);
                         return left;
@@ -961,11 +964,11 @@ namespace UndertaleModLib.Compiler
                     Statement result = new Statement(Statement.StatementKind.ExprConditional,
                                                     EnsureTokenKind(TokenKind.Conditional).Token);
 
-                    Statement expr1 = ParseOrOp();
+                    Statement expr1 = ParseOrOp(context);
 
                     if (EnsureTokenKind(TokenKind.Colon) != null)
                     {
-                        Statement expr2 = ParseExpression();
+                        Statement expr2 = ParseExpression(context);
 
                         result.Children.Add(left);
                         result.Children.Add(expr1);
@@ -983,18 +986,18 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static Statement ParseOrOp()
+            private static Statement ParseOrOp(CompileContext context)
             {
-                Statement left = ParseAndOp();
+                Statement left = ParseAndOp(context);
                 if (!hasError && IsNextToken(TokenKind.LogicalOr))
                 {
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp,
                                                      EnsureTokenKind(TokenKind.LogicalOr).Token);
                     result.Children.Add(left);
-                    result.Children.Add(ParseExpression());
+                    result.Children.Add(ParseExpression(context));
                     while (remainingStageOne.Count > 0 && IsNextTokenDiscard(TokenKind.LogicalOr))
                     {
-                        result.Children.Add(ParseExpression());
+                        result.Children.Add(ParseExpression(context));
                     }
                     
                     return result;
@@ -1005,18 +1008,18 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static Statement ParseAndOp()
+            private static Statement ParseAndOp(CompileContext context)
             {
-                Statement left = ParseXorOp();
+                Statement left = ParseXorOp(context);
                 if (!hasError && IsNextToken(TokenKind.LogicalAnd))
                 {
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp,
                                                      EnsureTokenKind(TokenKind.LogicalAnd).Token);
                     result.Children.Add(left);
-                    result.Children.Add(ParseExpression());
+                    result.Children.Add(ParseExpression(context));
                     while (remainingStageOne.Count > 0 && IsNextTokenDiscard(TokenKind.LogicalAnd))
                     {
-                        result.Children.Add(ParseExpression());
+                        result.Children.Add(ParseExpression(context));
                     }
 
                     return result;
@@ -1027,14 +1030,14 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static Statement ParseXorOp()
+            private static Statement ParseXorOp(CompileContext context)
             {
-                Statement left = ParseCompare();
+                Statement left = ParseCompare(context);
                 if (!hasError && IsNextToken(TokenKind.LogicalXor))
                 {
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp,
                                                      EnsureTokenKind(TokenKind.LogicalXor).Token);
-                    Statement right = ParseCompare();
+                    Statement right = ParseCompare(context);
 
                     result.Children.Add(left);
                     result.Children.Add(right);
@@ -1046,9 +1049,9 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static Statement ParseCompare()
+            private static Statement ParseCompare(CompileContext context)
             {
-                Statement left = ParseBitwise();
+                Statement left = ParseBitwise(context);
                 if (!hasError && IsNextToken(
                     TokenKind.CompareEqual,
                     TokenKind.Assign, // Legacy
@@ -1066,7 +1069,7 @@ namespace UndertaleModLib.Compiler
 
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp, t);
 
-                    Statement right = ParseBitwise();
+                    Statement right = ParseBitwise(context);
 
                     result.Children.Add(left);
                     result.Children.Add(right);
@@ -1078,9 +1081,9 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static Statement ParseBitwise()
+            private static Statement ParseBitwise(CompileContext context)
             {
-                Statement left = ParseBitShift();
+                Statement left = ParseBitShift(context);
                 if (!hasError && IsNextToken(
                     TokenKind.BitwiseOr,
                     TokenKind.BitwiseAnd,
@@ -1089,7 +1092,7 @@ namespace UndertaleModLib.Compiler
                 {
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp, remainingStageOne.Dequeue().Token);
 
-                    Statement right = ParseBitShift();
+                    Statement right = ParseBitShift(context);
 
                     result.Children.Add(left);
                     result.Children.Add(right);
@@ -1100,7 +1103,7 @@ namespace UndertaleModLib.Compiler
                             TokenKind.BitwiseXor
                     ))
                     {
-                        result.Children.Add(ParseBitShift());
+                        result.Children.Add(ParseBitShift(context));
                     }
 
                     return result;
@@ -1111,9 +1114,9 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static Statement ParseBitShift()
+            private static Statement ParseBitShift(CompileContext context)
             {
-                Statement left = ParseAddSub();
+                Statement left = ParseAddSub(context);
                 if (!hasError && IsNextToken(
                     TokenKind.BitwiseShiftLeft,
                     TokenKind.BitwiseShiftRight
@@ -1121,7 +1124,7 @@ namespace UndertaleModLib.Compiler
                 {
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp, remainingStageOne.Dequeue().Token);
 
-                    Statement right = ParseAddSub();
+                    Statement right = ParseAddSub(context);
 
                     result.Children.Add(left);
                     result.Children.Add(right);
@@ -1131,7 +1134,7 @@ namespace UndertaleModLib.Compiler
                             TokenKind.BitwiseShiftRight
                             ))
                     {
-                        result.Children.Add(ParseAddSub());
+                        result.Children.Add(ParseAddSub(context));
                     }
                     return result;
                 }
@@ -1141,9 +1144,9 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static Statement ParseAddSub()
+            private static Statement ParseAddSub(CompileContext context)
             {
-                Statement left = ParseMulDiv();
+                Statement left = ParseMulDiv(context);
                 if (!hasError && IsNextToken(
                     TokenKind.Plus,
                     TokenKind.Minus
@@ -1151,7 +1154,7 @@ namespace UndertaleModLib.Compiler
                 {
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp, remainingStageOne.Dequeue().Token);
 
-                    Statement right = ParseMulDiv();
+                    Statement right = ParseMulDiv(context);
 
                     result.Children.Add(left);
                     result.Children.Add(right);
@@ -1161,7 +1164,7 @@ namespace UndertaleModLib.Compiler
                             TokenKind.Minus
                             ))
                     {
-                        result.Children.Add(ParseMulDiv());
+                        result.Children.Add(ParseMulDiv(context));
                     }
 
                     return result;
@@ -1172,9 +1175,9 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static Statement ParseMulDiv()
+            private static Statement ParseMulDiv(CompileContext context)
             {
-                Statement left = ParsePostAndRef();
+                Statement left = ParsePostAndRef(context);
                 if (!hasError && IsNextToken(
                     TokenKind.Times,
                     TokenKind.Divide,
@@ -1184,7 +1187,7 @@ namespace UndertaleModLib.Compiler
                 {
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp, remainingStageOne.Dequeue().Token);
 
-                    Statement right = ParsePostAndRef();
+                    Statement right = ParsePostAndRef(context);
 
                     result.Children.Add(left);
                     result.Children.Add(right);
@@ -1196,7 +1199,7 @@ namespace UndertaleModLib.Compiler
                         TokenKind.Mod
                             ))
                     {
-                        result.Children.Add(ParsePostAndRef());
+                        result.Children.Add(ParsePostAndRef(context));
                     }
 
                     return result;
@@ -1207,9 +1210,9 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static Statement ParsePostAndRef()
+            private static Statement ParsePostAndRef(CompileContext context)
             {
-                Statement left = ParseLowLevel();
+                Statement left = ParseLowLevel(context);
                 if (!hasError && IsNextToken(TokenKind.Dot))
                 {
                     // Parse chain variable reference
@@ -1221,7 +1224,7 @@ namespace UndertaleModLib.Compiler
                         combine = true;
                     while (remainingStageOne.Count > 0 && IsNextTokenDiscard(TokenKind.Dot))
                     {
-                        Statement next = ParseSingleVar();
+                        Statement next = ParseSingleVar(context);
                         if (combine)
                         {
                             if (left.Constant.kind != ExpressionConstant.Kind.Number)
@@ -1251,12 +1254,12 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static Statement ParseSingleVar()
+            private static Statement ParseSingleVar(CompileContext context)
             {
                 Statement s = EnsureTokenKind(TokenKind.ProcVariable);
 
                 // Check to make sure we aren't overriding a script/function name
-                if (BuiltinList.Functions.ContainsKey(s.Text) || scripts.Contains(s.Text))
+                if (context.BuiltInList.Functions.ContainsKey(s.Text) || context.scripts.Contains(s.Text))
                 {
                     ReportCodeError(string.Format("Variable name {0} cannot be used; a function or script already has the name.", s.Text), false);
                 }
@@ -1281,23 +1284,23 @@ namespace UndertaleModLib.Compiler
                         result.Children.Add(new Statement(t, tok));
 
                     // Index
-                    Statement index = ParseExpression();
+                    Statement index = ParseExpression(context);
                     result.Children.Add(index);
                     if (!hasError && t != TokenKind.OpenArrayMap)
                     {
                         // Make sure the map accessor is the only one that uses strings
-                        CheckNormalArrayIndex(index);
+                        CheckNormalArrayIndex(context, index);
                     }
 
                     // Second index (2D array)
                     if (IsNextTokenDiscard(TokenKind.Comma))
                     {
-                        Statement index2d = ParseExpression();
+                        Statement index2d = ParseExpression(context);
                         result.Children.Add(index2d);
                         if (!hasError && t != TokenKind.OpenArrayMap)
                         {
                             // Make sure the map accessor is the only one that uses strings
-                            CheckNormalArrayIndex(index2d);
+                            CheckNormalArrayIndex(context, index2d);
                         }
                     }
 
@@ -1307,7 +1310,7 @@ namespace UndertaleModLib.Compiler
 
                     if (EnsureTokenKind(TokenKind.CloseArray) == null) return null;
                 }
-                else if (BuiltinList.GlobalArray.TryGetValue(result.Text, out vi) || BuiltinList.InstanceLimitedEvent.TryGetValue(result.Text, out vi))
+                else if (context.BuiltInList.GlobalArray.TryGetValue(result.Text, out vi) || context.BuiltInList.InstanceLimitedEvent.TryGetValue(result.Text, out vi))
                 {
                     // The compiler apparently does this
                     // I think this makes some undefined value for whatever reason
@@ -1319,27 +1322,27 @@ namespace UndertaleModLib.Compiler
                 return result;
             }
 
-            private static void CheckNormalArrayIndex(Statement index)
+            private static void CheckNormalArrayIndex(CompileContext context, Statement index)
             {
-                Statement optimized = Optimize(index);
+                Statement optimized = Optimize(context, index);
                 if (optimized.Kind == Statement.StatementKind.ExprConstant
                     && optimized.Constant?.kind == ExpressionConstant.Kind.String)
                     ReportCodeError("Strings cannot be used for array indices, unless in a map accessor.", index.Token, false);
             }
 
-            private static Statement ParseLowLevel()
+            private static Statement ParseLowLevel(CompileContext context)
             {
                 switch (GetNextTokenKind())
                 {
                     case TokenKind.OpenArray:
-                        if (data?.GeneralInfo?.Major >= 2)
-                            return ParseArrayLiteral();
+                        if (context.Data?.GeneralInfo?.Major >= 2)
+                            return ParseArrayLiteral(context);
                         ReportCodeError("Cannot use array literal prior to GMS2 version.", remainingStageOne.Dequeue().Token, true);
                         return null;
                     case TokenKind.OpenParen:
                         {
                             remainingStageOne.Dequeue();
-                            Statement expr = ParseExpression();
+                            Statement expr = ParseExpression(context);
                             EnsureTokenKind(TokenKind.CloseParen);
                             return expr;
                         }
@@ -1349,10 +1352,10 @@ namespace UndertaleModLib.Compiler
                             return new Statement(Statement.StatementKind.ExprConstant, next.Token, next.Constant);
                         }
                     case TokenKind.ProcFunction:
-                        return ParseFunctionCall(true);
+                        return ParseFunctionCall(context, true);
                     case TokenKind.ProcVariable:
                         {
-                            Statement variableRef = ParseSingleVar();
+                            Statement variableRef = ParseSingleVar(context);
                             if (!IsNextToken(TokenKind.Increment, TokenKind.Decrement))
                             {
                                 return variableRef;
@@ -1372,7 +1375,7 @@ namespace UndertaleModLib.Compiler
                     case TokenKind.Decrement:
                         {
                             Statement pre = new Statement(Statement.StatementKind.Pre, remainingStageOne.Dequeue().Token);
-                            pre.Children.Add(ParsePostAndRef());
+                            pre.Children.Add(ParsePostAndRef(context));
                             if (pre.Children[0].Kind == Statement.StatementKind.Post)
                                 ReportCodeError("Unexpected pre/post combination.", pre.Token, true);
                             return pre;
@@ -1383,7 +1386,7 @@ namespace UndertaleModLib.Compiler
                     case TokenKind.BitwiseNegate:
                         {
                             Statement unary = new Statement(Statement.StatementKind.ExprUnary, remainingStageOne.Dequeue().Token);
-                            unary.Children.Add(ParsePostAndRef());
+                            unary.Children.Add(ParsePostAndRef(context));
                             return unary;
                         }
                 }
@@ -1392,7 +1395,7 @@ namespace UndertaleModLib.Compiler
             }
 
             // Example: [1, 2, 3, 4]
-            private static Statement ParseArrayLiteral()
+            private static Statement ParseArrayLiteral(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.ExprFunctionCall,
                                                 EnsureTokenKind(TokenKind.OpenArray)?.Token);
@@ -1402,7 +1405,7 @@ namespace UndertaleModLib.Compiler
 
                 while (!hasError && remainingStageOne.Count > 0 && !IsNextToken(TokenKind.CloseArray, TokenKind.EOF))
                 {
-                    result.Children.Add(ParseExpression());
+                    result.Children.Add(ParseExpression(context));
                     if (!IsNextTokenDiscard(TokenKind.Comma))
                     {
                         if (!IsNextToken(TokenKind.CloseArray))
@@ -1418,7 +1421,7 @@ namespace UndertaleModLib.Compiler
                 return result;
             }
 
-            public static Statement Optimize(Statement s)
+            public static Statement Optimize(CompileContext context, Statement s)
             {
                 Statement result = new Statement(s);
 
@@ -1427,7 +1430,7 @@ namespace UndertaleModLib.Compiler
                 {
                     for (int i = 0; i < result.Children.Count; i++)
                     {
-                        result.Children[i] = Optimize(result.Children[i]);
+                        result.Children[i] = Optimize(context, result.Children[i]);
                     }
                 }
 
@@ -1450,38 +1453,38 @@ namespace UndertaleModLib.Compiler
                             for (int i = 0; i < left.Children.Count; i++)
                             {
                                 if (left.Children[i].Children.Count != 2 || left.Children[i].Children[0].Kind != Statement.StatementKind.Token)
-                                    left.Children[i] = Optimize(left.Children[i]);
+                                    left.Children[i] = Optimize(context, left.Children[i]);
                                 else
                                 {
                                     // Change accessors to proper functions, embedding inside each other if needed
                                     Statement curr = left.Children[i];
 
-                                    if (ensureVariablesDefined)
-                                        data?.Variables?.EnsureDefined(curr.Text, (UndertaleInstruction.InstanceType)(short)curr.ID, BuiltinList.Instance.ContainsKey(curr.Text) || BuiltinList.InstanceLimitedEvent.ContainsKey(curr.Text), data?.Strings, data);
+                                    if (context.ensureVariablesDefined)
+                                        context.Data?.Variables?.EnsureDefined(curr.Text, (UndertaleInstruction.InstanceType)(short)curr.ID, context.BuiltInList.Instance.ContainsKey(curr.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(curr.Text), context.Data?.Strings, context.Data);
 
-                                    AccessorInfo ai = GetAccessorInfoFromStatement(curr);
+                                    AccessorInfo ai = GetAccessorInfoFromStatement(context, curr);
                                     if (ai != null)
                                     {
                                         if ((i + 1) >= left.Children.Count)
                                         {
                                             // Final set function
                                             Statement accessorFunc = new Statement(Statement.StatementKind.FunctionCall, ai.LFunc);
-                                            accessorFunc.Children.Add(Optimize(curr.Children[1]));
+                                            accessorFunc.Children.Add(Optimize(context, curr.Children[1]));
                                             if (curr.Children.Count == 3)
-                                                accessorFunc.Children.Add(Optimize(curr.Children[2]));
+                                                accessorFunc.Children.Add(Optimize(context, curr.Children[2]));
                                             curr.Children.Clear();
                                             if (left.Children.Count == 1)
                                                 left = left.Children[0];
                                             accessorFunc.Children.Insert(0, left);
-                                            accessorFunc.Children.Add(Optimize(result.Children[2]));
+                                            accessorFunc.Children.Add(Optimize(context, result.Children[2]));
                                             return accessorFunc;
                                         } else
                                         {
                                             // Not the final set function
                                             Statement accessorFunc = new Statement(Statement.StatementKind.ExprFunctionCall, ai.RFunc);
-                                            accessorFunc.Children.Add(Optimize(curr.Children[1]));
+                                            accessorFunc.Children.Add(Optimize(context, curr.Children[1]));
                                             if (curr.Children.Count == 3)
-                                                accessorFunc.Children.Add(Optimize(curr.Children[2]));
+                                                accessorFunc.Children.Add(Optimize(context, curr.Children[2]));
                                             curr.Children.Clear();
                                             Statement newVarChain = new Statement(Statement.StatementKind.ExprVariableRef);
                                             newVarChain.Children.AddRange(left.Children.GetRange(0, i + 1));
@@ -1500,13 +1503,13 @@ namespace UndertaleModLib.Compiler
 
                             for (int i = 0; i < result.Children.Count; i++)
                             {
-                                result.Children[i] = Optimize(result.Children[i]);
+                                result.Children[i] = Optimize(context, result.Children[i]);
                             }
                         } else
                         {
                             for (int i = 0; i < result.Children.Count; i++)
                             {
-                                result.Children[i] = Optimize(result.Children[i]);
+                                result.Children[i] = Optimize(context, result.Children[i]);
                             }
 
                             // (Don't use "left" here because it's not optimized)
@@ -1719,11 +1722,11 @@ namespace UndertaleModLib.Compiler
                         }
                         break;
                     case Statement.StatementKind.ExprSingleVariable:
-                        if (ensureVariablesDefined)
-                            data?.Variables?.EnsureDefined(result.Text, (UndertaleInstruction.InstanceType)(short)result.ID, BuiltinList.Instance.ContainsKey(result.Text) || BuiltinList.InstanceLimitedEvent.ContainsKey(result.Text), data?.Strings, data);
+                        if (context.ensureVariablesDefined)
+                            context.Data?.Variables?.EnsureDefined(result.Text, (UndertaleInstruction.InstanceType)(short)result.ID, context.BuiltInList.Instance.ContainsKey(result.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(result.Text), context.Data?.Strings, context.Data);
                         if (result.Children.Count >= 2 && result.Children[0].Kind == Statement.StatementKind.Token)
                         {
-                            AccessorInfo ai = GetAccessorInfoFromStatement(result);
+                            AccessorInfo ai = GetAccessorInfoFromStatement(context, result);
                             if (ai != null)
                             {
                                 Statement accessorFunc = new Statement(Statement.StatementKind.ExprFunctionCall, ai.RFunc);
@@ -1740,22 +1743,22 @@ namespace UndertaleModLib.Compiler
                         for (int i = 0; i < result.Children.Count; i++)
                         {
                             if (result.Children[i].Children.Count != 2 || result.Children[i].Children[0].Kind != Statement.StatementKind.Token)
-                                result.Children[i] = Optimize(result.Children[i]);
+                                result.Children[i] = Optimize(context, result.Children[i]);
                             else
                             {
                                 // Change accessors to proper right-value functions, embedding inside each other if needed
                                 Statement curr = result.Children[i];
 
-                                if (ensureVariablesDefined)
-                                    data?.Variables?.EnsureDefined(curr.Text, (UndertaleInstruction.InstanceType)(short)curr.ID, BuiltinList.Instance.ContainsKey(curr.Text) || BuiltinList.InstanceLimitedEvent.ContainsKey(curr.Text), data?.Strings, data);
+                                if (context.ensureVariablesDefined)
+                                    context.Data?.Variables?.EnsureDefined(curr.Text, (UndertaleInstruction.InstanceType)(short)curr.ID, context.BuiltInList.Instance.ContainsKey(curr.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(curr.Text), context.Data?.Strings, context.Data);
 
-                                AccessorInfo ai = GetAccessorInfoFromStatement(curr);
+                                AccessorInfo ai = GetAccessorInfoFromStatement(context, curr);
                                 if (ai != null)
                                 {
                                     Statement accessorFunc = new Statement(Statement.StatementKind.ExprFunctionCall, ai.RFunc);
-                                    accessorFunc.Children.Add(Optimize(curr.Children[1]));
+                                    accessorFunc.Children.Add(Optimize(context, curr.Children[1]));
                                     if (curr.Children.Count == 3)
-                                        accessorFunc.Children.Add(Optimize(curr.Children[2]));
+                                        accessorFunc.Children.Add(Optimize(context, curr.Children[2]));
                                     curr.Children.Clear();
                                     Statement newVarChain = new Statement(Statement.StatementKind.ExprVariableRef);
                                     newVarChain.Children.AddRange(result.Children.GetRange(0, i + 1));
@@ -1782,20 +1785,20 @@ namespace UndertaleModLib.Compiler
                 return result;
             }
 
-            private static AccessorInfo GetAccessorInfoFromStatement(Statement s)
+            private static AccessorInfo GetAccessorInfoFromStatement(CompileContext context, Statement s)
             {
                 AccessorInfo ai = null;
                 TokenKind kind = s.Children[0].Token.Kind;
                 if (s.Children.Count == 2)
                 {
-                    if (BuiltinList.Accessors1D.ContainsKey(kind))
-                        ai = BuiltinList.Accessors1D[kind];
+                    if (context.BuiltInList.Accessors1D.ContainsKey(kind))
+                        ai = context.BuiltInList.Accessors1D[kind];
                     else
                         ReportCodeError("Accessor has incorrect number of arguments", s.Children[0].Token, false);
                 } else
                 {
-                    if (BuiltinList.Accessors2D.ContainsKey(kind))
-                        ai = BuiltinList.Accessors2D[kind];
+                    if (context.BuiltInList.Accessors2D.ContainsKey(kind))
+                        ai = context.BuiltInList.Accessors2D[kind];
                     else
                         ReportCodeError("Accessor has incorrect number of arguments", s.Children[0].Token, false);
                 }
@@ -2542,13 +2545,13 @@ namespace UndertaleModLib.Compiler
                     TokenKind.KeywordWith);
             }
 
-            private static bool ResolveIdentifier(string identifier, out ExpressionConstant constant)
+            private static bool ResolveIdentifier(CompileContext context, string identifier, out ExpressionConstant constant)
             {
                 constant = new ExpressionConstant(0d);
-                int index = GetAssetIndexByName(identifier);
+                int index = context.GetAssetIndexByName(identifier);
                 if (index == -1)
                 {
-                    if (BuiltinList.Constants.TryGetValue(identifier, out double val))
+                    if (context.BuiltInList.Constants.TryGetValue(identifier, out double val))
                     {
                         constant.valueNumber = val;
                         return true;
@@ -2559,30 +2562,30 @@ namespace UndertaleModLib.Compiler
                 return true;
             }
 
-            private static int GetVariableID(string name, out bool isGlobalBuiltin)
+            private static int GetVariableID(CompileContext context, string name, out bool isGlobalBuiltin)
             {
                 VariableInfo vi = null;
 
                 isGlobalBuiltin = true;
-                if (!BuiltinList.GlobalNotArray.TryGetValue(name, out vi) && !BuiltinList.GlobalArray.TryGetValue(name, out vi))
+                if (!context.BuiltInList.GlobalNotArray.TryGetValue(name, out vi) && !context.BuiltInList.GlobalArray.TryGetValue(name, out vi))
                 {
                     isGlobalBuiltin = false;
-                    if (!BuiltinList.Instance.TryGetValue(name, out vi) && !BuiltinList.InstanceLimitedEvent.TryGetValue(name, out vi) && !userDefinedVariables.TryGetValue(name, out vi))
+                    if (!context.BuiltInList.Instance.TryGetValue(name, out vi) && !context.BuiltInList.InstanceLimitedEvent.TryGetValue(name, out vi) && !context.userDefinedVariables.TryGetValue(name, out vi))
                     {
                         vi = new VariableInfo()
                         {
-                            ID = 100000 + userDefinedVariables.Count
+                            ID = 100000 + context.userDefinedVariables.Count
                         };
-                        userDefinedVariables[name] = vi;
+                        context.userDefinedVariables[name] = vi;
                     }
                 }
 
-                if (vi.ID >= BuiltinList.Argument0ID && vi.ID <= BuiltinList.Argument15ID)
+                if (vi.ID >= context.BuiltInList.Argument0ID && vi.ID <= context.BuiltInList.Argument15ID)
                 {
-                    int arg_index = vi.ID - BuiltinList.Argument0ID + 1;
-                    if (arg_index > LastCompiledArgumentCount)
+                    int arg_index = vi.ID - context.BuiltInList.Argument0ID + 1;
+                    if (arg_index > context.LastCompiledArgumentCount)
                     {
-                        LastCompiledArgumentCount = arg_index;
+                        context.LastCompiledArgumentCount = arg_index;
                     }
                 }
 

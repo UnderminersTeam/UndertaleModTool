@@ -21,6 +21,7 @@ namespace UndertaleModLib.Compiler
             // You can even (try to) read out of bounds and it won't die. It'll just return '\0'
             public class CodeReader
             {
+                public CompileContext compileContext;
                 private int _Position;
                 public int Position
                 {
@@ -39,8 +40,9 @@ namespace UndertaleModLib.Compiler
                 public bool EOF; // end-of-file
                 public List<int> LineStartPositions;
 
-                public CodeReader(string text)
+                public CodeReader(CompileContext context, string text)
                 {
+                    compileContext = context;
                     Position = 0;
                     Text = text;
                     EOF = (Text.Length == 0);
@@ -130,10 +132,10 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            public static List<Token> LexString(string input)
+            public static List<Token> LexString(CompileContext context, string input)
             {
                 List<Token> output = new List<Token>();
-                CodeReader reader = new CodeReader(input);
+                CodeReader reader = new CodeReader(context, input);
                 Token currentToken = null;
                 while (currentToken?.Kind != Token.TokenKind.EOF)
                 {
@@ -174,7 +176,7 @@ namespace UndertaleModLib.Compiler
                     }
 
                     // Strings
-                    if (data?.GeneralInfo?.Major >= 2)
+                    if (cr.compileContext.Data?.IsGameMaker2() ?? false)
                     {
                         if (c == '@' && cr.PeekCharAhead().In('"', '\''))
                         {
@@ -540,7 +542,7 @@ namespace UndertaleModLib.Compiler
                     {
                         // Escape character
                         case '\\':
-                            if (data?.IsGameMaker2() == false)
+                            if (cr.compileContext.Data?.IsGameMaker2() == false)
                             {
                                 sb.Append(c);
                                 cr.AdvancePosition();
