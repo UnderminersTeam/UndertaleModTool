@@ -67,10 +67,14 @@ namespace UndertaleModLib.Models
             Volume = reader.ReadSingle();
             Pitch = reader.ReadSingle();
             _AudioGroup = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP>>();
-            if (GroupID == 0)
+
+            if (GroupID == reader.undertaleData.GetBuiltinSoundGroupID()) {
                 _AudioFile = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO>>();
+            }
             else
+            {
                 _AudioFile.CachedId = reader.ReadInt32();
+            }
         }
 
         public override string ToString()

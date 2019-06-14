@@ -89,7 +89,19 @@ namespace UndertaleModLib
         // Test if this data.win was built by GameMaker Studio 2.
         public bool IsGameMaker2()
         {
-            return GeneralInfo.Major >= 2;
+            return IsVersionAtLeast(2, 0, 0, 0);
+        }
+
+        public bool IsVersionAtLeast(uint major, uint minor, uint release, uint build)
+        {
+            return GeneralInfo.Major >= major && GeneralInfo.Minor >= minor && GeneralInfo.Release >= release && GeneralInfo.Build >= build;
+        }
+
+        public int GetBuiltinSoundGroupID()
+        {
+            // It is known it works this way in 1.0.1266. The exact version which changed this is unknown.
+            // If we find a game which does not fit the version identified here, we should this check.
+            return IsVersionAtLeast(1, 0, 0, 1354) ? 0 : 1;
         }
 
         public static UndertaleData CreateNew()
