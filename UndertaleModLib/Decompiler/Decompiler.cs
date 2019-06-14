@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using static UndertaleModLib.Decompiler.Decompiler;
@@ -28,6 +24,7 @@ namespace UndertaleModLib.Decompiler
         public AssignmentStatement CompilerTempVar;
         public Dictionary<UndertaleVariable, AssetIDType> assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
         public int TempVarId;
+        public Dictionary<string, AssetIDType[]> scriptArgs = new Dictionary<string, AssetIDType[]>();
 
         public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
 
@@ -35,6 +32,13 @@ namespace UndertaleModLib.Decompiler
         {
             this.Data = data;
             this.EnableStringLabels = enableStringLabels;
+        }
+
+        public void ClearScriptArgs()
+        {
+            // This will not be done automatically, because it would cause significant slowdown having to recalculate this each time, and there's no reason to reset it if it's decompiling a bunch at once.
+            // But, since it is possible to invalidate this data, we add this here so we'll be able to invalidate it if we need to.
+            scriptArgs.Clear();
         }
 
         public void Setup(UndertaleCode code)
@@ -942,31 +946,28 @@ namespace UndertaleModLib.Decompiler
                 return this;
             }
 
-            [ThreadStatic]
-            public static Dictionary<string, AssetIDType[]> scriptArgs; // TODO: damnit stop using globals you stupid... this needs a big refactor anyway
-
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 var script_code = context.Data?.Scripts.ByName(Function.Name.Content)?.Code;
-                if (script_code != null && !scriptArgs.ContainsKey(Function.Name.Content))
+                if (script_code != null && !context.scriptArgs.ContainsKey(Function.Name.Content))
                 {
-                    scriptArgs.Add(Function.Name.Content, null); // stop the recursion from looping
+                    context.scriptArgs.Add(Function.Name.Content, null); // stop the recursion from looping
                     var xxx = context.assetTypes;
                     context.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>(); // Apply a temporary dictionary which types will be applied to.
                     Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code);
                     Decompiler.DecompileFromBlock(context, blocks[0]);
                     Decompiler.DoTypePropagation(context, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
-                    scriptArgs[Function.Name.Content] = new AssetIDType[15];
+                    context.scriptArgs[Function.Name.Content] = new AssetIDType[15];
                     for (int i = 0; i < 15; i++)
                     {
                         var v = context.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
-                        scriptArgs[Function.Name.Content][i] = v.Count() > 0 ? v.First().Value : AssetIDType.Other;
+                        context.scriptArgs[Function.Name.Content][i] = v.Count() > 0 ? v.First().Value : AssetIDType.Other;
                     }
                     context.assetTypes = xxx; // restore original / proper map.
                 }
 
                 AssetIDType[] args = new AssetIDType[Arguments.Count];
-                AssetTypeResolver.AnnotateTypesForFunctionCall(Function.Name.Content, args, scriptArgs);
+                AssetTypeResolver.AnnotateTypesForFunctionCall(Function.Name.Content, args, context.scriptArgs);
                 for (var i = 0; i < Arguments.Count; i++)
                 {
                     Arguments[i].DoTypePropagation(context, args[i]);
@@ -2475,7 +2476,6 @@ namespace UndertaleModLib.Decompiler
 
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
             DecompileFromBlock(context, blocks[0]);
-            FunctionCall.scriptArgs = new Dictionary<string, AssetIDType[]>();
             // TODO: add self to scriptArgs
             DoTypePropagation(context, blocks);
             List<Statement> stmts = HLDecompile(context, blocks, blocks[0], blocks[code.Length / 4]);
