@@ -94,7 +94,19 @@ namespace UndertaleModLib
 
         public bool IsVersionAtLeast(uint major, uint minor, uint release, uint build)
         {
-            return GeneralInfo.Major >= major && GeneralInfo.Minor >= minor && GeneralInfo.Release >= release && GeneralInfo.Build >= build;
+            if (GeneralInfo.Major != major)
+                return (GeneralInfo.Major > major);
+
+            if (GeneralInfo.Minor != minor)
+                return (GeneralInfo.Minor > minor);
+
+            if (GeneralInfo.Release != release)
+                return (GeneralInfo.Release > release);
+
+            if (GeneralInfo.Build != build)
+                return (GeneralInfo.Build > build);
+
+            return true; // The version is exactly what supplied.
         }
 
         public int GetBuiltinSoundGroupID()
@@ -102,6 +114,11 @@ namespace UndertaleModLib
             // It is known it works this way in 1.0.1266. The exact version which changed this is unknown.
             // If we find a game which does not fit the version identified here, we should this check.
             return IsVersionAtLeast(1, 0, 0, 1354) ? 0 : 1;
+        }
+
+        public bool IsYYC()
+        {
+            return GeneralInfo != null && Code == null;
         }
 
         public static UndertaleData CreateNew()
