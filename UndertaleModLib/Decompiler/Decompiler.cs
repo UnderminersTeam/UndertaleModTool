@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -2476,9 +2477,9 @@ namespace UndertaleModLib.Decompiler
 
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
             DecompileFromBlock(context, blocks[0]);
-            // TODO: add self to scriptArgs
             DoTypePropagation(context, blocks);
             List<Statement> stmts = HLDecompile(context, blocks, blocks[0], blocks[code.Length / 4]);
+
             StringBuilder sb = new StringBuilder();
 
             // Mark local variables as local.
