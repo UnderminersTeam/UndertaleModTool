@@ -310,9 +310,13 @@ namespace UndertaleModLib.Decompiler
             uint? id = null;
             if (at >= 0)
             {
-                if (str.Substring(at + 1) != "-1") // TODO
-                    id = UInt32.Parse(str.Substring(at + 1));
-                str = str.Substring(0, at);
+                // First make certain that this is actually an ID, not part of the string content
+                if ((at - 1) == str.LastIndexOf('"'))
+                {
+                    if (str.Substring(at + 1) != "-1") // TODO
+                        id = UInt32.Parse(str.Substring(at + 1));
+                    str = str.Substring(0, at);
+                }
             }
             if (!String.IsNullOrEmpty(str))
             {

@@ -842,7 +842,7 @@ namespace UndertaleModTool
 
         public void ScriptMessage(string message)
         {
-            MessageBox.Show(message, "Script mesage", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(message, "Script message", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public bool ScriptQuestion(string message)
@@ -1019,7 +1019,6 @@ namespace UndertaleModTool
                 DecompileContext context = new DecompileContext(Data, false);
                 Parallel.ForEach(Data.Code, (code) =>
                 {
-                    //Debug.WriteLine(code.Name.Content);
                     string path = System.IO.Path.Combine(outdir, code.Name.Content + ".gml");
                     try
                     {

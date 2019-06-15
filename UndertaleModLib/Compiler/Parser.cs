@@ -645,7 +645,7 @@ namespace UndertaleModLib.Compiler
                         if (left.Children.Count == 0 || left.Kind == Statement.StatementKind.ExprSingleVariable)
                             name = left.Text;
                         else
-                            name = left.Children[0].Text;
+                            name = left.Children[left.Children.Count - 1].Text;
 
                         VariableInfo vi;
                         if ((context.BuiltInList.GlobalNotArray.TryGetValue(name, out vi) ||
