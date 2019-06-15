@@ -1707,10 +1707,10 @@ namespace UndertaleModLib.Decompiler
                 int myIndex = block.Statements.IndexOf(this);
 
                 // Prevents if (tempvar - 1), when it should be if (tempvar)
-                if ((condition as ExpressionCast)?.Argument is ExpressionTwo)
+                if ((condition as ExpressionCast)?.Argument is ExpressionTwo && myIndex > 0)
                 {
                     ExpressionTwo conditionExpression = ((ExpressionCast)condition).Argument as ExpressionTwo;
-                    Statement lastStatement = block.Statements[block.Statements.IndexOf(this) - 1];
+                    Statement lastStatement = block.Statements[myIndex - 1];
 
                     if (conditionExpression.Argument1 is ExpressionTempVar && lastStatement is TempVarAssigmentStatement && conditionExpression.Argument2 is ExpressionConstant
                         && ((ExpressionTempVar)conditionExpression.Argument1).Var.Var == ((TempVarAssigmentStatement)lastStatement).Var.Var)
@@ -2218,7 +2218,11 @@ namespace UndertaleModLib.Decompiler
                 {
                     if (block != currentLoop)
                     {
+                        Block old = block;
                         output.Statements.Add(new LoopHLStatement() { Block = HLDecompileBlocks(context, ref block, blocks, loops, reverseDominators, alreadyVisited, block, true, null) });
+                        if (block == old)
+                            break;
+
                         continue;
                     }
                     else
