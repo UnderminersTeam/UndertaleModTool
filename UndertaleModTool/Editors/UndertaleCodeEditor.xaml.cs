@@ -621,8 +621,8 @@ namespace UndertaleModTool
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
 
             CompileContext compileContext = Compiler.CompileGMLText(DecompiledEditor.Text, data, code);
-            //string assembledString = compileContext.ResultAssembly;
-            if (compileContext.HasError) // There were errors.
+
+            if (compileContext.HasError)
             {
                 MessageBox.Show(compileContext.ResultError, "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -632,29 +632,6 @@ namespace UndertaleModTool
             {
                 MessageBox.Show(compileContext.ResultAssembly, "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
-            }
-
-            UndertaleCodeLocals locals = data.CodeLocals.For(code);
-            if (locals != null)
-            {
-                bool hasLocal(string name)
-                {
-                    foreach (var l in locals.Locals)
-                    {
-                        if (name == l.Name.Content)
-                            return true;
-                    }
-                    return false;
-                }
-                foreach (var l in compileContext.LocalVars)
-                {
-                    string name = l.Key;
-                    if (!hasLocal(name))
-                    {
-                        locals.Locals.Add(new UndertaleCodeLocals.LocalVar() { Index = (uint)locals.Locals.Count, Name = data.Strings.MakeString(name) });
-                        code.LocalsCount++;
-                    }
-                }
             }
 
             try

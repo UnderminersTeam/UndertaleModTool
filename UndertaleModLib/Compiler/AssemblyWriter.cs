@@ -199,9 +199,12 @@ namespace UndertaleModLib.Compiler
 
                     if (compileContext.OriginalCode != null)
                     {
-                        UndertaleCodeLocals locals = compileContext.Data.CodeLocals.For(compileContext.OriginalCode);
+                        UndertaleCodeLocals locals = compileContext.Data?.CodeLocals.For(compileContext.OriginalCode);
                         if (locals != null)
                         {
+                            // Update the code locals of the UndertaleCode
+
+                            // First, remove unnecessary locals
                             for (var i = 1; i < locals.Locals.Count; i++)
                             {
                                 string localName = locals.Locals[i].Name.Content;
@@ -210,6 +213,26 @@ namespace UndertaleModLib.Compiler
                                 {
                                     compileContext.LocalVars.Remove(localName);
                                     locals.Locals.RemoveAt(i--);
+                                }
+                            }
+
+                            // Now add in the ones we are actually using that don't already exist
+                            bool hasLocal(string name)
+                            {
+                                foreach (var l in locals.Locals)
+                                {
+                                    if (name == l.Name.Content)
+                                        return true;
+                                }
+                                return false;
+                            }
+                            foreach (var l in compileContext.LocalVars)
+                            {
+                                string name = l.Key;
+                                if (!hasLocal(name))
+                                {
+                                    locals.Locals.Add(new UndertaleCodeLocals.LocalVar() { Index = (uint)locals.Locals.Count, Name = compileContext.Data?.Strings?.MakeString(name) });
+                                    compileContext.OriginalCode.LocalsCount++;
                                 }
                             }
                         }

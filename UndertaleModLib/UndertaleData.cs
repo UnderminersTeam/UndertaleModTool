@@ -112,7 +112,7 @@ namespace UndertaleModLib
         public int GetBuiltinSoundGroupID()
         {
             // It is known it works this way in 1.0.1266. The exact version which changed this is unknown.
-            // If we find a game which does not fit the version identified here, we should this check.
+            // If we find a game which does not fit the version identified here, we should fix this check.
             return IsVersionAtLeast(1, 0, 0, 1354) ? 0 : 1;
         }
 
