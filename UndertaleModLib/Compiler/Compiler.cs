@@ -60,7 +60,7 @@ namespace UndertaleModLib.Compiler
             ResultAssembly = sb.ToString();
         }
 
-        public void Setup()
+        public void Setup(bool redoAssets = false)
         {
             SuccessfulCompile = false;
             HasError = false;
@@ -69,7 +69,8 @@ namespace UndertaleModLib.Compiler
 
             LastCompiledArgumentCount = 0;
             userDefinedVariables.Clear();
-            MakeAssetDictionary();
+            if (redoAssets || assetIds.Count == 0)
+                MakeAssetDictionary();
         }
 
         private void MakeAssetDictionary()
@@ -137,10 +138,9 @@ namespace UndertaleModLib.Compiler
             return CompileGMLText(input, new CompileContext(data, code));
         }
 
-        public static CompileContext CompileGMLText(string input, CompileContext context)
+        public static CompileContext CompileGMLText(string input, CompileContext context, bool redoAssets = false)
         {
-            
-            context.Setup(); // Set up
+            context.Setup(redoAssets); // Set up
             List<Lexer.Token> tokens = Lexer.LexString(context, input); // Peform lexical analysis
             Parser.Statement block = Parser.ParseTokens(context, tokens); // Parse tokens, make syntax tree
 
@@ -155,7 +155,7 @@ namespace UndertaleModLib.Compiler
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Error{0} parsing code:", Parser.ErrorMessages.Count == 1 ? "" : "s");
                 sb.AppendLine();
-                sb.AppendLine("");
+                sb.AppendLine();
                 foreach (string msg in Parser.ErrorMessages)
                     sb.AppendLine(msg);
                 context.SetError(sb.ToString());
@@ -170,7 +170,7 @@ namespace UndertaleModLib.Compiler
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Error{0} writing assembly code:", codeWriter.ErrorMessages.Count == 1 ? "" : "s");
                 sb.AppendLine();
-                sb.AppendLine("");
+                sb.AppendLine();
                 foreach (string msg in codeWriter.ErrorMessages)
                     sb.AppendLine(msg);
                 sb.AppendLine();
