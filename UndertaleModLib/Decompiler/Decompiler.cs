@@ -1837,7 +1837,7 @@ namespace UndertaleModLib.Decompiler
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
             {
-                // This goes after.
+                int myIndex = block.Statements.IndexOf(this);
                 Block = Block?.CleanBlockStatement(context);
                 Condition = Condition?.CleanStatement(context, block);
                 InitializeStatement = InitializeStatement?.CleanStatement(context, block) as AssignmentStatement;
@@ -1855,7 +1855,7 @@ namespace UndertaleModLib.Decompiler
                         if (firstStatement is IfHLStatement && (secondStatement is ContinueHLStatement || secondStatement is BreakHLStatement))
                         {
                             IfHLStatement ifStatement = (IfHLStatement)firstStatement;
-                            if (ifStatement.falseBlock is BlockHLStatement && ((BlockHLStatement)ifStatement.falseBlock).Statements.Count == 0)
+                            if (ifStatement.falseBlock is BlockHLStatement && ((BlockHLStatement)ifStatement.falseBlock).Statements.Count == 0 && !ifStatement.HasElseIf)
                             {
                                 Condition = ifStatement.condition;
                                 Block.Statements.Remove(firstStatement); // Remove if statement.
@@ -1870,12 +1870,26 @@ namespace UndertaleModLib.Decompiler
                         if (firstStatement is IfHLStatement)
                         {
                             IfHLStatement ifStatement = (IfHLStatement)firstStatement;
-                            if (ifStatement.falseBlock is BlockHLStatement && ((BlockHLStatement)ifStatement.falseBlock).Statements.Count == 0)
+                            if (ifStatement.falseBlock is BlockHLStatement && ((BlockHLStatement)ifStatement.falseBlock).Statements.Count == 0 && !ifStatement.HasElseIf)
                             {
                                 Condition = ifStatement.condition;
                                 Block.Statements.Remove(firstStatement); // Remove if statement.
                                 Block.Statements.InsertRange(0, ifStatement.trueBlock.Statements); // Add if contents.
                             }
+                        }
+                    }
+
+                    // If it's been shoved into an if else, take it out of there.
+                    if (Block.Statements.Count > 0 && Block.Statements.Last() is IfHLStatement)
+                    {
+                        IfHLStatement ifStatement = Block.Statements.Last() as IfHLStatement;
+                        BlockHLStatement blockStatement = ifStatement.falseBlock as BlockHLStatement;
+
+                        if (blockStatement != null && blockStatement.Statements.Count > 0 && blockStatement.Statements.Last() is ContinueHLStatement)
+                        {
+                            blockStatement.Statements.Remove(blockStatement.Statements.Last());
+                            Block.Statements.AddRange(blockStatement.Statements);
+                            ifStatement.falseBlock.Statements.Clear();
                         }
                     }
 
@@ -1888,7 +1902,6 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     // Convert into a for loop.
-                    int myIndex = block.Statements.IndexOf(this);
                     if (myIndex > 0 && block.Statements[myIndex - 1] is AssignmentStatement && Block.Statements.Count > 0 && Block.Statements.Last() is AssignmentStatement && Condition is ExpressionCompare)
                     {
                         ExpressionCompare compare = (ExpressionCompare)Condition;
@@ -1929,7 +1942,7 @@ namespace UndertaleModLib.Decompiler
                 if (IsDoUntilLoop)
                     return "do " + Block.ToString(context, false) + " until " + Condition.ToString(context) + ";\n";
 
-                return "while " + (Condition != null ? Condition.ToString(context) : "(1)") + "\n" + Block.ToString(context);
+                return "while " + (Condition != null ? Condition.ToString(context) : "(true)") + "\n" + Block.ToString(context);
             }
         };
 
@@ -2204,12 +2217,6 @@ namespace UndertaleModLib.Decompiler
         {
             BlockHLStatement output = new BlockHLStatement();
 
-            // While
-            // Do Until
-            // Repeat
-            // For
-            // Switch
-            // With
             Block lastBlock = null;
             while (block != stopAt && block != null)
             {
