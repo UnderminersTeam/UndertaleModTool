@@ -198,7 +198,7 @@ namespace UndertaleModLib.Decompiler
             }
 
             // Helper function to carefully check if an object is in fact an integer, for asset types.
-            private static int? ConvertToInt(object val)
+            public static int? ConvertToInt(object val)
             {
                  if (val is int || val is short || val is ushort || val is UndertaleInstruction.InstanceType)
                  {
@@ -222,7 +222,7 @@ namespace UndertaleModLib.Decompiler
              }
 
              // Helper function, using the one above, to convert an object into its respective asset type enum, if possible.
-             private static string ConvertToEnumStr<T>(object val)
+             public static string ConvertToEnumStr<T>(object val)
              {
                  int? intVal = ConvertToInt(val);
                  if (intVal == null)
@@ -244,11 +244,58 @@ namespace UndertaleModLib.Decompiler
 
                 if (AssetType == AssetIDType.GameObject && !(Value is Int64)) // When the value is Int64, an example value is 343434343434. It is unknown what it represents, but it's not an InstanceType.
                 {
-                    if (Convert.ToInt32(Value) < 0)
+                    int? val = ConvertToInt(Value);
+                    if (val != null && val < 0)
                         return ((UndertaleInstruction.InstanceType)Value).ToString().ToLower();
                 }
+                // Need to put else because otherwise it gets terribly unoptimized with GameObject type
+                else if (AssetType == AssetIDType.e__VW)
+                    return "e__VW." + ConvertToEnumStr<e__VW>(Value);
+                else if (AssetType == AssetIDType.e__BG)
+                    return "e__BG." + ConvertToEnumStr<e__BG>(Value);
 
-                if (context.Data != null && AssetType != AssetIDType.Other && AssetType != AssetIDType.Color && AssetType != AssetIDType.KeyboardKey && AssetType != AssetIDType.e__VW && AssetType != AssetIDType.e__BG && AssetType != AssetIDType.Enum_HAlign && AssetType != AssetIDType.Enum_VAlign)
+                else if (AssetType == AssetIDType.Enum_HAlign)
+                    return ConvertToEnumStr<HAlign>(Value);
+                else if (AssetType == AssetIDType.Enum_VAlign)
+                    return ConvertToEnumStr<VAlign>(Value);
+                else if (AssetType == AssetIDType.Enum_OSType)
+                    return ConvertToEnumStr<OSType>(Value);
+                else if (AssetType == AssetIDType.Enum_GamepadButton)
+                    return ConvertToEnumStr<GamepadButton>(Value);
+                else if (AssetType == AssetIDType.Enum_PathEndAction)
+                    return ConvertToEnumStr<PathEndAction>(Value);
+                else if (AssetType == AssetIDType.Enum_BufferKind)
+                    return ConvertToEnumStr<BufferKind>(Value);
+                else if (AssetType == AssetIDType.Enum_BufferType)
+                    return ConvertToEnumStr<BufferType>(Value);
+                else if (AssetType == AssetIDType.Enum_BufferSeek)
+                    return ConvertToEnumStr<BufferSeek>(Value);
+                else if (AssetType == AssetIDType.Boolean)
+                    return ConvertToEnumStr<Boolean>(Value);
+
+                else if (AssetType == AssetIDType.Color && Value is IFormattable && !(Value is float) && !(Value is double) && !(Value is decimal))
+                    return (context.isGameMaker2 ? "0x" : "$") + ((IFormattable)Value).ToString("X8", CultureInfo.InvariantCulture);
+
+                else if (AssetType == AssetIDType.KeyboardKey)
+                {
+                    int? tryVal = ConvertToInt(Value);
+                    if (tryVal != null)
+                    {
+                        int val = tryVal ?? -1;
+                        if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
+                        {
+                            bool isAlphaNumeric = val >= (int)EventSubtypeKey.Digit0 && val <= (int)EventSubtypeKey.Z;
+                            return isAlphaNumeric ? "ord(\"" + (char)val + "\")" : ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
+                        }
+
+                        if (!Char.IsControl((char)val) && !Char.IsLower((char)val)) // The special keys overlay with the uppercase letters (ugh)
+                            return ((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
+                                : (((char)val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
+                                : "\"" + (char)val + "\"");
+                    }
+                }
+
+                if (context.Data != null && AssetType != AssetIDType.Other)
                 {
                     IList assetList = null;
                     switch (AssetType)
@@ -295,52 +342,6 @@ namespace UndertaleModLib.Decompiler
                              if (assetList != null && val >= 0 && val < assetList.Count)
                                  return ((UndertaleNamedResource)assetList[val]).Name.Content;
                          }
-                    }
-                }
-
-                if (AssetType == AssetIDType.e__VW)
-                    return "e__VW." + ConvertToEnumStr<e__VW>(Value);
-                if (AssetType == AssetIDType.e__BG)
-                    return "e__BG." + ConvertToEnumStr<e__BG>(Value);
-
-                if (AssetType == AssetIDType.Enum_HAlign)
-                    return ConvertToEnumStr<HAlign>(Value);
-                if (AssetType == AssetIDType.Enum_VAlign)
-                    return ConvertToEnumStr<VAlign>(Value);
-                if (AssetType == AssetIDType.Enum_OSType)
-                    return ConvertToEnumStr<OSType>(Value);
-                if (AssetType == AssetIDType.Enum_GamepadButton)
-                    return ConvertToEnumStr<GamepadButton>(Value);
-                if (AssetType == AssetIDType.Enum_PathEndAction)
-                    return ConvertToEnumStr<PathEndAction>(Value);
-                if (AssetType == AssetIDType.Enum_BufferKind)
-                    return ConvertToEnumStr<BufferKind>(Value);
-                if (AssetType == AssetIDType.Enum_BufferType)
-                    return ConvertToEnumStr<BufferType>(Value);
-                if (AssetType == AssetIDType.Enum_BufferSeek)
-                    return ConvertToEnumStr<BufferSeek>(Value);
-                if (AssetType == AssetIDType.Boolean)
-                    return ConvertToEnumStr<Boolean>(Value);
-
-                if (AssetType == AssetIDType.Color && Value is IFormattable && !(Value is float) && !(Value is double) && !(Value is decimal))
-                    return (context.isGameMaker2 ? "0x" : "$") + ((IFormattable)Value).ToString("X8", CultureInfo.InvariantCulture);
-
-                if (AssetType == AssetIDType.KeyboardKey)
-                {
-                    int? tryVal = ConvertToInt(Value);
-                    if (tryVal != null)
-                    {
-                        int val = tryVal ?? -1;
-                        if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
-                        {
-                            bool isAlphaNumeric = val >= (int)EventSubtypeKey.Digit0 && val <= (int)EventSubtypeKey.Z;
-                            return isAlphaNumeric ? "ord(\"" + (char)val + "\")" : ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
-                        }
-
-                        if (!Char.IsControl((char)val) && !Char.IsLower((char)val)) // The special keys overlay with the uppercase letters (ugh)
-                            return ((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
-                                : (((char)val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
-                                : "\"" + (char)val + "\"");
                     }
                 }
 
@@ -701,7 +702,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
-        // Assignement statement for tempvars.
+        // Assignment statement for tempvars.
         public class TempVarAssigmentStatement : Statement
         {
             public TempVarReference Var;
@@ -828,14 +829,31 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                if (Value is ExpressionTwo && ((Value as ExpressionTwo).Argument1 is ExpressionVar) && ((Value as ExpressionTwo).Argument1 as ExpressionVar).Var == Destination.Var
-                    && ((Value as ExpressionTwo).Argument2 is ExpressionConstant) && ((Value as ExpressionTwo).Argument2 as ExpressionConstant).IsPushE
-                    && Convert.ToInt32(((Value as ExpressionTwo).Argument2 as ExpressionConstant).Value) == 1)
+                // Check for possible ++, --, or operation equal (for single vars)
+                if (Value is ExpressionTwo && ((Value as ExpressionTwo).Argument1 is ExpressionVar) && 
+                    ((Value as ExpressionTwo).Argument1 as ExpressionVar).Var == Destination.Var)
                 {
-                    return String.Format("{0}" + (((Value as ExpressionTwo).Opcode == UndertaleInstruction.Opcode.Add) ? "++" : "--"), Destination.ToString(context));
+                    ExpressionTwo two = (Value as ExpressionTwo);
+                    if (two.Argument2 is ExpressionConstant)
+                    {
+                        ExpressionConstant c = (two.Argument2 as ExpressionConstant);
+                        if (c.IsPushE && ExpressionConstant.ConvertToInt(c.Value) == 1)
+                            return String.Format("{0}" + ((two.Opcode == UndertaleInstruction.Opcode.Add) ? "++" : "--"), Destination.ToString(context));
+                    }
+                    
+                    // Not ++ or --, could potentially be an operation equal
+                    bool checkEqual(ExpressionVar a, ExpressionVar b)
+                    {
+                        if (a.InstType.GetType() != b.InstType.GetType())
+                            return false;
+                        ExpressionConstant ac = (a.InstType as ExpressionConstant), bc = (b.InstType as ExpressionConstant);
+                        return ac.Value.Equals(bc.Value) && ac.IsPushE == bc.IsPushE && ac.Type == bc.Type && ac.WasDuplicated == bc.WasDuplicated &&
+                               a.VarType == b.VarType && a.ArrayIndex1 == b.ArrayIndex1 && a.ArrayIndex2 == b.ArrayIndex2;
+                    }
+                    if (Destination.InstType is ExpressionConstant && checkEqual(Destination, (ExpressionVar)two.Argument1) && two.Opcode != UndertaleInstruction.Opcode.Shl && two.Opcode != UndertaleInstruction.Opcode.Shr && two.Opcode != UndertaleInstruction.Opcode.Rem)
+                        return String.Format("{0} {1}= {2}", Destination.ToString(context), Expression.OperationToPrintableString(two.Opcode), two.Argument2.ToString(context));
                 }
-                else
-                    return String.Format("{0} = {1}", Destination.ToString(context), Value.ToString(context));
+                return String.Format("{0} = {1}", Destination.ToString(context), Value.ToString(context));
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
@@ -853,14 +871,14 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
-        // Represents a high-level assignment-equals statement, such as a += 1.
-        public class AssignmentEqualsStatement : Statement
+        // Represents a high-level operation-equals statement, such as a += 1.
+        public class OperationEqualsStatement : Statement
         {
             public ExpressionVar Destination;
             public UndertaleInstruction.Opcode Operation;
             public Expression Value;
 
-            public AssignmentEqualsStatement(ExpressionVar destination, UndertaleInstruction.Opcode operation, Expression value)
+            public OperationEqualsStatement(ExpressionVar destination, UndertaleInstruction.Opcode operation, Expression value)
             {
                 Destination = destination;
                 Operation = operation;
@@ -975,6 +993,12 @@ namespace UndertaleModLib.Decompiler
                 }
                 return suggestedType; // TODO: maybe we should handle returned values too?
             }
+
+            internal override bool IsDuplicationSafe()
+            {
+                // Not sure if this is completely correct or if it needs to check arguments. TODO?
+                return true;
+            }
         }
 
         // Represents a variable in an expression, of any type.
@@ -1043,23 +1067,30 @@ namespace UndertaleModLib.Decompiler
                     name = name + "[" + ArrayIndex1.ToString(context) + "]";
 
                 // NOTE: The "var" prefix is handled in Decompiler.Decompile. 
-
-                string prefix = InstType.ToString(context) + ".";
+                
                 if (InstType is ExpressionConstant) // Only use "global." and "other.", not "self." or "local.". GMS doesn't recognize those.
                 {
+                    string prefix = InstType.ToString(context) + ".";
                     ExpressionConstant constant = (ExpressionConstant)InstType;
                     if (!(constant.Value is Int64))
                     {
-                        int val = Convert.ToInt32(constant.Value);
-                        if (constant.AssetType == AssetIDType.GameObject && val < 0)
+                        int? val = ExpressionConstant.ConvertToInt(constant.Value);
+                        if (val != null)
                         {
-                            UndertaleInstruction.InstanceType instanceType = (UndertaleInstruction.InstanceType)val;
-                            prefix = (instanceType == UndertaleInstruction.InstanceType.Global || instanceType == UndertaleInstruction.InstanceType.Other) ? prefix.ToLower() : "";
+                            if (constant.AssetType == AssetIDType.GameObject && val < 0)
+                            {
+                                UndertaleInstruction.InstanceType instanceType = (UndertaleInstruction.InstanceType)val;
+                                prefix = (instanceType == UndertaleInstruction.InstanceType.Global || instanceType == UndertaleInstruction.InstanceType.Other) ? prefix.ToLower() : "";
+                            }
                         }
                     }
+                    return prefix + name;
+                } else if (InstType is ExpressionCast && !(((ExpressionCast)InstType).Argument is ExpressionVar))
+                {
+                    return "(" + InstType.ToString(context) + ")." + name; // Make sure to put parentheses around these cases
                 }
 
-                return prefix + name;
+                return InstType.ToString(context) + "." + name;
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -1326,7 +1357,8 @@ namespace UndertaleModLib.Decompiler
                         {
                             if ((target.NeedsInstanceParameters || target.NeedsArrayParameters) && target.InstType.WasDuplicated)
                             {
-                                // Should be safe to assume that this is a +=, -=, etc.
+                                // Almost safe to assume that this is a +=, -=, etc.
+                                // Need to confirm a few things first. It's not certain, could be ++ even.
                                 if (val is ExpressionTwo)
                                 {
                                     var two = (val as ExpressionTwo);
@@ -1339,9 +1371,11 @@ namespace UndertaleModLib.Decompiler
                                         {
                                             var v = arg as ExpressionVar;
                                             if (v.Var == target.Var && v.InstType == target.InstType &&
-                                                v.ArrayIndex1 == target.ArrayIndex1 && v.ArrayIndex2 == target.ArrayIndex2) // even if null
+                                                v.ArrayIndex1 == target.ArrayIndex1 && v.ArrayIndex2 == target.ArrayIndex2 && // even if null
+                                                (!(two.Argument2 is ExpressionConstant) || // Also check to make sure it's not a ++ or --
+                                                (!((two.Argument2 as ExpressionConstant).IsPushE && ExpressionConstant.ConvertToInt((two.Argument2 as ExpressionConstant).Value) == 1))))
                                             {
-                                                statements.Add(new AssignmentEqualsStatement(target, two.Opcode, two.Argument2));
+                                                statements.Add(new OperationEqualsStatement(target, two.Opcode, two.Argument2));
                                                 break;
                                             }
                                         }

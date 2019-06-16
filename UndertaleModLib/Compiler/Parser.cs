@@ -657,6 +657,11 @@ namespace UndertaleModLib.Compiler
                             ReportCodeError("Attempt to set a read-only variable.", left.Token, false);
                         }
 
+                        if (remainingStageOne.Count == 0)
+                        {
+                            ReportCodeError("Malformed assignment statement.", true);
+                            return null;
+                        }
                         Statement assign = new Statement(Statement.StatementKind.Assign, remainingStageOne.Dequeue().Token);
                         assign.Children.Add(left);
 

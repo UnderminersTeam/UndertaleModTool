@@ -350,7 +350,7 @@ namespace UndertaleModTool
 
                             foreach (var line in lines)
                             {
-                                char[] special = { '.', ',', ')', '(', '[', ']', '>', '<', ':', ';', '=', '"' };
+                                char[] special = { '.', ',', ')', '(', '[', ']', '>', '<', ':', ';', '=', '"', '!' };
                                 Func<char, bool> IsSpecial = (c) => Char.IsWhiteSpace(c) || special.Contains(c);
                                 List<string> split = new List<string>();
                                 string tok = "";

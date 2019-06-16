@@ -1016,12 +1016,12 @@ namespace UndertaleModTool
             object countLock = new object();
             Task t = Task.Run(() =>
             {
-                DecompileContext context = new DecompileContext(Data, false);
                 Parallel.ForEach(Data.Code, (code) =>
                 {
                     string path = System.IO.Path.Combine(outdir, code.Name.Content + ".gml");
                     try
                     {
+                        DecompileContext context = new DecompileContext(Data, false);
                         string decomp = Decompiler.Decompile(code, context);
                         File.WriteAllText(path, decomp);
                     }
