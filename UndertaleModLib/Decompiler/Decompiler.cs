@@ -1881,23 +1881,7 @@ namespace UndertaleModLib.Decompiler
                 if (IsWhileLoop)
                 {
                     // While loops have conditions.
-                    if (Block.Statements.Count == 2)
-                    {
-                        Statement firstStatement = Block.Statements[0];
-                        Statement secondStatement = Block.Statements[1];
-
-                        if (firstStatement is IfHLStatement && (secondStatement is ContinueHLStatement || secondStatement is BreakHLStatement))
-                        {
-                            IfHLStatement ifStatement = (IfHLStatement)firstStatement;
-                            if (ifStatement.falseBlock is BlockHLStatement && ((BlockHLStatement)ifStatement.falseBlock).Statements.Count == 0 && !ifStatement.HasElseIf)
-                            {
-                                Condition = ifStatement.condition;
-                                Block.Statements.Remove(firstStatement); // Remove if statement.
-                                Block.Statements.Remove(secondStatement); // Remove break.
-                                Block.Statements.InsertRange(0, ifStatement.trueBlock.Statements); // Add if contents.
-                            }
-                        }
-                    } else if (Block.Statements.Count == 1)
+                    if (Block.Statements.Count == 1)
                     {
                         Statement firstStatement = Block.Statements[0];
 
@@ -1914,7 +1898,8 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     // If it's been shoved into an if else, take it out of there.
-                    if (Block.Statements.Count > 0 && Block.Statements.Last() is IfHLStatement)
+                    //TODO: This is disabled until further notice. The problem is that for loops that do this can use continues. The issue there is we don't have an easy way to remove the increment from the decompile at the moment.
+                    /*if (Block.Statements.Count > 0 && Block.Statements.Last() is IfHLStatement)
                     {
                         IfHLStatement ifStatement = Block.Statements.Last() as IfHLStatement;
                         BlockHLStatement blockStatement = ifStatement.falseBlock as BlockHLStatement;
@@ -1925,7 +1910,7 @@ namespace UndertaleModLib.Decompiler
                             Block.Statements.AddRange(blockStatement.Statements);
                             ifStatement.falseBlock.Statements.Clear();
                         }
-                    }
+                    }*/
 
                     // Remove redundant continues at the end of the loop.
                     if (Block.Statements.Count > 0)
