@@ -359,6 +359,35 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
+            private static int HelpUseBreakLabel(ref Stack<LoopContext> s)
+            {
+                LoopContext c = s.Pop();
+                int res = c.UseBreakLabel();
+                s.Push(c);
+                return res;
+            }
+            private static int HelpUseContinueLabel(ref Stack<LoopContext> s)
+            {
+                LoopContext c = s.Pop();
+                int res = c.UseContinueLabel();
+                s.Push(c);
+                return res;
+            }
+            private static int HelpUseBreakLabel(ref Stack<OtherContext> s)
+            {
+                OtherContext c = s.Pop();
+                int res = c.UseBreakLabel();
+                s.Push(c);
+                return res;
+            }
+            private static int HelpUseContinueLabel(ref Stack<OtherContext> s)
+            {
+                OtherContext c = s.Pop();
+                int res = c.UseContinueLabel();
+                s.Push(c);
+                return res;
+            }
+
             // Returns the label ID
             private static int AssembleNewLabel(CodeWriter cw)
             {
@@ -765,9 +794,9 @@ namespace UndertaleModLib.Compiler
                         else
                         {
                             if (cw.otherContexts.Count > 0 && cw.otherContexts.Peek().ContinueLabel != -1)
-                                cw.Write("b", cw.otherContexts.Peek().UseContinueLabel());
+                                cw.Write("b", HelpUseContinueLabel(ref cw.otherContexts));
                             else
-                                cw.Write("b", cw.loopContexts.Peek().UseContinueLabel());
+                                cw.Write("b", HelpUseContinueLabel(ref cw.loopContexts));
                         }
                         break;
                     case Parser.Statement.StatementKind.Break:
@@ -778,9 +807,9 @@ namespace UndertaleModLib.Compiler
                         else
                         {
                             if (cw.otherContexts.Count > 0 && cw.otherContexts.Peek().BreakLabel != -1)
-                                cw.Write("b", cw.otherContexts.Peek().UseBreakLabel());
+                                cw.Write("b", HelpUseBreakLabel(ref cw.otherContexts));
                             else
-                                cw.Write("b", cw.loopContexts.Peek().UseBreakLabel());
+                                cw.Write("b", HelpUseBreakLabel(ref cw.loopContexts));
                         }
                         break;
                     case Parser.Statement.StatementKind.FunctionCall:

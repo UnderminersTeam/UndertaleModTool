@@ -645,7 +645,9 @@ namespace UndertaleModLib.Compiler
                         if (left.Children.Count == 0 || left.Kind == Statement.StatementKind.ExprSingleVariable)
                             name = left.Text;
                         else
-                            name = left.Children[left.Children.Count - 1].Text;
+                            name = left.Children[left.Children.Count - 1]?.Text;
+                        if (name == null)
+                            return null;
 
                         VariableInfo vi;
                         if ((context.BuiltInList.GlobalNotArray.TryGetValue(name, out vi) ||
@@ -1262,6 +1264,8 @@ namespace UndertaleModLib.Compiler
             private static Statement ParseSingleVar(CompileContext context)
             {
                 Statement s = EnsureTokenKind(TokenKind.ProcVariable);
+                if (s == null)
+                    return null;
 
                 // Check to make sure we aren't overriding a script/function name
                 if (context.BuiltInList.Functions.ContainsKey(s.Text) || context.scripts.Contains(s.Text))
