@@ -1,0 +1,16 @@
+version: 99.99.{build}
+os: Visual Studio 2017
+platform:
+  - Any CPU
+configuration: Debug
+before_build:
+  - nuget restore
+build:
+  project: UndertaleModTool.sln
+  verbosity: minimal
+after_build:
+  - cd UndertaleModTool
+  - 7z a -tzip ..\UndertaleModTool-Debug.zip .\bin\Debug\UndertaleMod* SampleScripts\*
+artifacts:
+  - path: UndertaleModTool-Debug.zip
+    name: UndertaleModTool
