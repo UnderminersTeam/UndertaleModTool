@@ -2360,8 +2360,8 @@ namespace UndertaleModLib.Decompiler
                             Block switchEnd = blocks[instructionId];
 
                             Block start = meetPoint;
-                            Console.WriteLine(start + " -> " + switchEnd);
                             defaultCase.Block = HLDecompileBlocks(context, ref start, blocks, loops, reverseDominators, alreadyVisited, currentLoop, switchEnd, switchEnd);
+                            block = start; // Start changed in HLDecompileBlocks.
                         }
                         else
                         {
