@@ -63,7 +63,7 @@ namespace UndertaleModLib.Decompiler
         os_ps3 = 16,
         os_ps4 = 14,
         os_psvita = 12,
-        os_xbox = 15,
+        os_xboxone = 15,
         os_unknown = -1,
         os_3ds = 11,
         os_bb10 = 13,
@@ -73,7 +73,6 @@ namespace UndertaleModLib.Decompiler
         os_wiiu = 10,
         os_win8native = 9,
         os_xbox360 = 17,
-        os_xboxone = 15,
         os_switch_beta = 20, // this one was used while switch support was in beta and changed later?
         os_switch = 21,
     }
