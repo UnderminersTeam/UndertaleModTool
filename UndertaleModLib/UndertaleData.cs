@@ -96,9 +96,9 @@ namespace UndertaleModLib
         // Old Versions: https://store.yoyogames.com/downloads/gm-studio/release-notes-studio-old.html
         // https://web.archive.org/web/20150304025626/https://store.yoyogames.com/downloads/gm-studio/release-notes-studio.html
         // Early Access: https://web.archive.org/web/20181002232646/http://store.yoyogames.com:80/downloads/gm-studio-ea/release-notes-studio.html
-        public bool TestGMS1Version(uint stableBuild, uint betaBuild)
+        public bool TestGMS1Version(uint stableBuild, uint betaBuild, bool allowGMS2 = false)
         {
-            return !IsGameMaker2() && (IsVersionAtLeast(1, 0, 0, stableBuild) || (IsVersionAtLeast(1, 0, 0, betaBuild) && !IsVersionAtLeast(1, 0, 0, 1000)));
+            return (allowGMS2 || !IsGameMaker2()) && (IsVersionAtLeast(1, 0, 0, stableBuild) || (IsVersionAtLeast(1, 0, 0, betaBuild) && !IsVersionAtLeast(1, 0, 0, 1000)));
         }
 
         public bool IsVersionAtLeast(uint major, uint minor, uint release, uint build)
@@ -122,7 +122,7 @@ namespace UndertaleModLib
         {
             // It is known it works this way in 1.0.1266. The exact version which changed this is unknown.
             // If we find a game which does not fit the version identified here, we should fix this check.
-            return TestGMS1Version(1354, 161) ? 0 : 1;
+            return TestGMS1Version(1354, 161, true) ? 0 : 1;
         }
 
         public bool IsYYC()
