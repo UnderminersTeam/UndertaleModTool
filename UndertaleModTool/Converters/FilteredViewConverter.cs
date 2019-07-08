@@ -38,7 +38,7 @@ namespace UndertaleModTool
                 if (obj is ISearchable)
                     return (obj as ISearchable)?.SearchMatches(Filter) ?? false;
                 if (obj is UndertaleNamedResource)
-                    return (obj as UndertaleNamedResource)?.Name?.Content?.Contains(Filter) ?? false;
+                    return ((obj as UndertaleNamedResource)?.Name?.Content?.IndexOf(Filter, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0;
                 return true;
             };
             return filteredView;
