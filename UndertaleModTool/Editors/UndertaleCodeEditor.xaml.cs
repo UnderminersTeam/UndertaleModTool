@@ -464,6 +464,9 @@ namespace UndertaleModTool
                                         par.Inlines.Add(new Run(token) { Cursor = Cursors.Hand });
                                         par.Inlines.LastInline.MouseDown += (sender, ev) =>
                                         {
+                                            if (token[0] == '0' && token[1] == 'x')
+                                                return; // Hex numbers aren't objects.
+
                                             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
                                             int id = Int32.Parse(token);
                                             List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
