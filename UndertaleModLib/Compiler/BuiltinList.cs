@@ -3147,6 +3147,7 @@ namespace UndertaleModLib.Compiler
             Constants["os_ps3"] = 16.0;
             Constants["os_xbox360"] = 17.0;
             Constants["os_uwp"] = 18.0;
+            Constants["os_switch_beta"] = 20.0; // This is what NXTALE identifies itself as. It likely was an old version name(?) Unfortunately, it shares an id with tvos. However, since this tool is written for Undertale, we give it priority over tvos.
             Constants["os_tvos"] = 20.0;
             Constants["os_switch"] = 21.0;
             Constants["os_llvm_win32"] = 65536.0;
