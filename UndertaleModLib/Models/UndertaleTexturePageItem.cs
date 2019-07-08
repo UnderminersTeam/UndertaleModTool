@@ -1,4 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Drawing;
+using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models
 {
@@ -70,6 +73,40 @@ namespace UndertaleModLib.Models
         public override string ToString()
         {
             return "(" + GetType().Name + ")";
+        }
+
+        public void ReplaceTexture(Image replaceImage, bool disposeImage = true)
+        {
+            Image finalImage = TextureWorker.ResizeImage(replaceImage, SourceWidth, SourceHeight);
+            
+            // Apply the image to the TexturePage.
+            lock (TexturePage.TextureData)
+            {
+                TextureWorker worker = new TextureWorker();
+                Bitmap embImage = worker.GetEmbeddedTexture(TexturePage);
+
+                Graphics g = Graphics.FromImage(embImage);
+                g.DrawImage(finalImage, SourceX, SourceY);
+                g.Dispose();
+
+                TexturePage.TextureData.TextureBlob = TextureWorker.GetImageBytes(embImage);
+                worker.Cleanup();
+            }
+
+            // Update settings.
+            if (BoundingWidth == TargetWidth && BoundingHeight == TargetHeight)
+            {
+                BoundingWidth = (ushort)replaceImage.Width;
+                BoundingHeight = (ushort)replaceImage.Height;
+            }
+
+            TargetWidth = (ushort)replaceImage.Width;
+            TargetHeight = (ushort)replaceImage.Height;
+
+            // Cleanup.
+            finalImage.Dispose();
+            if (disposeImage)
+                replaceImage.Dispose();
         }
     }
 }

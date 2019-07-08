@@ -13,6 +13,15 @@ namespace UndertaleModLib.Util
         private Dictionary<UndertaleEmbeddedTexture, Bitmap> embeddedDictionary = new Dictionary<UndertaleEmbeddedTexture, Bitmap>();
         private static readonly ImageConverter _imageConverter = new ImageConverter();
 
+        // Cleans up all the images when usage of this worker is finished.
+        // Should be called when a TextureWorker will never be used again.
+        public void Cleanup()
+        {
+            foreach (Bitmap img in embeddedDictionary.Values)
+                img.Dispose();
+            embeddedDictionary.Clear();
+        }
+
         public Bitmap GetEmbeddedTexture(UndertaleEmbeddedTexture embeddedTexture)
         {
             lock (embeddedDictionary)
@@ -54,6 +63,11 @@ namespace UndertaleModLib.Util
             g.Dispose();
 
             return finalImage;
+        }
+
+        public static Bitmap ReadImageFromFile(string filePath)
+        {
+            return GetImageFromByteArray(File.ReadAllBytes(filePath));
         }
 
         // Grabbed from https://stackoverflow.com/questions/3801275/how-to-convert-image-to-byte-array/16576471#16576471
@@ -103,7 +117,7 @@ namespace UndertaleModLib.Util
 
         public static byte[] ReadMaskData(string filePath)
         {
-            Bitmap image = GetImageFromByteArray(File.ReadAllBytes(filePath));
+            Bitmap image = ReadImageFromFile(filePath);
             List<byte> bytes = new List<byte>();
 
             int enableColor = Color.White.ToArgb();
@@ -164,6 +178,18 @@ namespace UndertaleModLib.Util
         public static void ExportCollisionMaskPNG(UndertaleSprite sprite, UndertaleSprite.MaskEntry mask, string fullPath)
         {
             SaveImageToFile(fullPath, GetCollisionMaskImage(sprite, mask));
+        }
+
+        public static byte[] GetImageBytes(Image image, bool disposeImage = true)
+        {
+            using (var ms = new MemoryStream())
+            {
+                image.Save(ms, image.RawFormat);
+                byte[] result = ms.ToArray();
+                if (disposeImage)
+                    image.Dispose();
+                return result;
+            }
         }
 
         public static void SaveImageToFile(string FullPath, Image image, Boolean disposeImage = true)

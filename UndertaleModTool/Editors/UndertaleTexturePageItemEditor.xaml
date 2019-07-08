@@ -87,6 +87,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
+            <Button Grid.Column="0" Content="Import" Click="Import_Click"/>
             <Button Grid.Column="3" Content="Export" Click="Export_Click"/>
         </Grid>
 
