@@ -440,7 +440,7 @@ namespace UndertaleModTool
                                             if (split[i + 1] == "(" && split[i + 2].StartsWith("\"") && split[i + 3].StartsWith("@") && split[i + 4] == ")")
                                             {
                                                 string id = split[i + 2].Substring(1, split[i + 2].Length - 2);
-                                                if (!usedObjects.ContainsKey(id))
+                                                if (!usedObjects.ContainsKey(id) && gettext.ContainsKey(id))
                                                     usedObjects.Add(id, (Application.Current.MainWindow as MainWindow).Data.Strings[gettext[id]]);
                                             }
                                         }
@@ -449,7 +449,7 @@ namespace UndertaleModTool
                                             if (split[i + 1] == "(" && split[i + 2].StartsWith("\"") && split[i + 3].StartsWith("@") && split[i + 4] == ")")
                                             {
                                                 string id = split[i + 2].Substring(1, split[i + 2].Length - 2);
-                                                if (!usedObjects.ContainsKey(id))
+                                                if (!usedObjects.ContainsKey(id) && gettextJSON.ContainsKey(id))
                                                     usedObjects.Add(id, gettextJSON[id]);
                                             }
                                         }
