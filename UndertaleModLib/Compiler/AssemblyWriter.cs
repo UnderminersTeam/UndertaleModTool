@@ -1455,7 +1455,7 @@ namespace UndertaleModLib.Compiler
                                 if (cw.compileContext.BuiltInList.GlobalArray.ContainsKey(name) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(name))
                                 {
                                     // Builtin global
-                                    cw.Write("pushvar.v self." + name);
+                                    cw.Write("pushbltn.v self." + name);
                                     if (cw.compileContext.ensureVariablesDefined)
                                     {
                                         cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Self, true, cw.compileContext.Data.Strings, cw.compileContext.Data);

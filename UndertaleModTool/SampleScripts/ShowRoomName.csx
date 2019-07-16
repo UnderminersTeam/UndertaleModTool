@@ -20,7 +20,7 @@ push.i " + 0xFFFF00.ToString() /* TODO: add this syntax to the assembler */ + @"
 conv.i.v
 call.i draw_set_color(argc=1)
 popz.v
-pushvar.v self.room
+pushbltn.v self.room
 pushi.e 30
 conv.i.v
 pushi.e 10
@@ -29,7 +29,7 @@ call.i draw_text(argc=3)
 popz.v
 
 ; draw room name at x=50 y=30
-pushvar.v self.room
+pushbltn.v self.room
 call.i room_get_name(argc=1)
 pushi.e 30
 conv.i.v

@@ -17,7 +17,7 @@ bf func_end
 ; show a dialog box and call room_goto with the result
 ; the default value for the dialog box is the current room
 ; TODO: don't click cancel or it'll break :P
-pushvar.v self.room
+pushbltn.v self.room
 push.s ""Go to room""
 conv.s.v
 call.i get_integer(argc=2)

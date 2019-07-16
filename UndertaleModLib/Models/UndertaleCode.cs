@@ -42,7 +42,7 @@ namespace UndertaleModLib.Models
             Push = 0xC0, // Push(Value) // push constant
             PushLoc = 0xC1, // Push(Value) // push local
             PushGlb = 0xC2, // Push(Value) // push global
-            PushVar = 0xC3, // Push(Value) // push other variable
+            PushBltn = 0xC3, // Push(Value) // push builtin variable
             PushI = 0x84, // Push(Value) // push int16
             Call = 0xD9, // Function(arg0, arg1, ..., argn) where arg = Pop() and n = ArgumentsCount
             Break = 0xFF, // Invalid access guard?
@@ -102,7 +102,7 @@ namespace UndertaleModLib.Models
                 case Opcode.Push:
                 case Opcode.PushLoc:
                 case Opcode.PushGlb:
-                case Opcode.PushVar:
+                case Opcode.PushBltn:
                 case Opcode.PushI:
                     return InstructionType.PushInstruction;
 
@@ -175,7 +175,7 @@ namespace UndertaleModLib.Models
                 case Opcode.Push:
                 case Opcode.PushLoc:
                 case Opcode.PushGlb:
-                case Opcode.PushVar:
+                case Opcode.PushBltn:
                 case Opcode.PushI:
                     if (instr.Value is Reference<UndertaleVariable>)
                     {
@@ -816,7 +816,7 @@ namespace UndertaleModLib.Models
                                         Kind = Opcode.PushGlb;
                                         break;
                                     case -6: // builtin
-                                        Kind = Opcode.PushVar;
+                                        Kind = Opcode.PushBltn;
                                         break;
                                     case -7:
                                         Kind = Opcode.PushLoc;

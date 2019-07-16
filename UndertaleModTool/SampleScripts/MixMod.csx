@@ -124,7 +124,7 @@ popz.v
 push.v self.youtube_song_title
 pushi.e 0
 conv.i.v
-pushvar.v self.application_surface
+pushbltn.v self.application_surface
 call.i surface_get_width(argc=1)
 pushglb.v global.window_scale
 mul.v.v
@@ -142,7 +142,7 @@ popz.v
 var MOD_get_mus_query = new UndertaleCode() { Name = Data.Strings.MakeString("gml_Script_MOD_get_mus_query") };
 MOD_get_mus_query.Append(Assembler.Assemble(@"
 ; yeah, I compiled that in GameMaker: Studio :P
-00000: pushvar.v self.argument0
+00000: pushbltn.v self.argument0
 00002: pushi.e 213
 00003: cmp.i.v EQ
 00004: bf 00009
@@ -150,7 +150,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00007: conv.s.v
 00008: ret.v
 
-00009: pushvar.v self.argument0
+00009: pushbltn.v self.argument0
 00011: pushi.e 214
 00012: cmp.i.v EQ
 00013: bf 00018
@@ -158,7 +158,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00016: conv.s.v
 00017: ret.v
 
-00018: pushvar.v self.argument0
+00018: pushbltn.v self.argument0
 00020: pushi.e 216
 00021: cmp.i.v EQ
 00022: bf 00027
@@ -166,7 +166,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00025: conv.s.v
 00026: ret.v
 
-00027: pushvar.v self.argument0
+00027: pushbltn.v self.argument0
 00029: pushi.e 217
 00030: cmp.i.v EQ
 00031: bf 00036
@@ -174,7 +174,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00034: conv.s.v
 00035: ret.v
 
-00036: pushvar.v self.argument0
+00036: pushbltn.v self.argument0
 00038: pushi.e 218
 00039: cmp.i.v EQ
 00040: bf 00045
@@ -182,7 +182,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00043: conv.s.v
 00044: ret.v
 
-00045: pushvar.v self.argument0
+00045: pushbltn.v self.argument0
 00047: pushi.e 219
 00048: cmp.i.v EQ
 00049: bf 00054
@@ -190,7 +190,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00052: conv.s.v
 00053: ret.v
 
-00054: pushvar.v self.argument0
+00054: pushbltn.v self.argument0
 00056: pushi.e 220
 00057: cmp.i.v EQ
 00058: bf 00063
@@ -198,7 +198,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00061: conv.s.v
 00062: ret.v
 
-00063: pushvar.v self.argument0
+00063: pushbltn.v self.argument0
 00065: pushi.e 221
 00066: cmp.i.v EQ
 00067: bf 00072
@@ -206,7 +206,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00070: conv.s.v
 00071: ret.v
 
-00072: pushvar.v self.argument0
+00072: pushbltn.v self.argument0
 00074: pushi.e 222
 00075: cmp.i.v EQ
 00076: bf 00081
@@ -214,7 +214,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00079: conv.s.v
 00080: ret.v
 
-00081: pushvar.v self.argument0
+00081: pushbltn.v self.argument0
 00083: pushi.e 223
 00084: cmp.i.v EQ
 00085: bf 00090
@@ -222,7 +222,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00088: conv.s.v
 00089: ret.v
 
-00090: pushvar.v self.argument0
+00090: pushbltn.v self.argument0
 00092: pushi.e 224
 00093: cmp.i.v EQ
 00094: bf 00099
@@ -230,7 +230,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00097: conv.s.v
 00098: ret.v
 
-00099: pushvar.v self.argument0
+00099: pushbltn.v self.argument0
 00101: pushi.e 225
 00102: cmp.i.v EQ
 00103: bf 00108
@@ -238,7 +238,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00106: conv.s.v
 00107: ret.v
 
-00108: pushvar.v self.argument0
+00108: pushbltn.v self.argument0
 00110: pushi.e 226
 00111: cmp.i.v EQ
 00112: bf 00117
@@ -246,7 +246,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00115: conv.s.v
 00116: ret.v
 
-00117: pushvar.v self.argument0
+00117: pushbltn.v self.argument0
 00119: pushi.e 227
 00120: cmp.i.v EQ
 00121: bf 00126
@@ -254,7 +254,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00124: conv.s.v
 00125: ret.v
 
-00126: pushvar.v self.argument0
+00126: pushbltn.v self.argument0
 00128: pushi.e 232
 00129: cmp.i.v EQ
 00130: bf 00135
@@ -262,7 +262,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00133: conv.s.v
 00134: ret.v
 
-00135: pushvar.v self.argument0
+00135: pushbltn.v self.argument0
 00137: pushi.e 233
 00138: cmp.i.v EQ
 00139: bf 00144
@@ -270,7 +270,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00142: conv.s.v
 00143: ret.v
 
-00144: pushvar.v self.argument0
+00144: pushbltn.v self.argument0
 00146: pushi.e 234
 00147: cmp.i.v EQ
 00148: bf 00153
@@ -278,7 +278,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00151: conv.s.v
 00152: ret.v
 
-00153: pushvar.v self.argument0
+00153: pushbltn.v self.argument0
 00155: pushi.e 235
 00156: cmp.i.v EQ
 00157: bf 00162
@@ -286,7 +286,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00160: conv.s.v
 00161: ret.v
 
-00162: pushvar.v self.argument0
+00162: pushbltn.v self.argument0
 00164: pushi.e 236
 00165: cmp.i.v EQ
 00166: bf 00171
@@ -295,7 +295,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00169: conv.s.v
 00170: ret.v
 
-00171: pushvar.v self.argument0
+00171: pushbltn.v self.argument0
 00173: pushi.e 241
 00174: cmp.i.v EQ
 00175: bf 00180
@@ -303,7 +303,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00178: conv.s.v
 00179: ret.v
 
-00180: pushvar.v self.argument0
+00180: pushbltn.v self.argument0
 00182: pushi.e 242
 00183: cmp.i.v EQ
 00184: bf 00189
@@ -311,7 +311,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00187: conv.s.v
 00188: ret.v
 
-00189: pushvar.v self.argument0
+00189: pushbltn.v self.argument0
 00191: pushi.e 243
 00192: cmp.i.v EQ
 00193: bf 00198
@@ -319,7 +319,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00196: conv.s.v
 00197: ret.v
 
-00198: pushvar.v self.argument0
+00198: pushbltn.v self.argument0
 00200: pushi.e 244
 00201: cmp.i.v EQ
 00202: bf 00216
@@ -327,7 +327,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00205: conv.s.v
 00206: ret.v
 
-;00207: pushvar.v self.argument0
+;00207: pushbltn.v self.argument0
 ;00209: pushi.e 246
 ;00210: cmp.i.v EQ
 ;00211: bf 00216
@@ -335,7 +335,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00214: conv.s.v
 ;00215: ret.v
 
-00216: pushvar.v self.argument0
+00216: pushbltn.v self.argument0
 00218: pushi.e 251
 00219: cmp.i.v EQ
 00220: bf 00225
@@ -343,7 +343,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00223: conv.s.v
 00224: ret.v
 
-00225: pushvar.v self.argument0
+00225: pushbltn.v self.argument0
 00227: pushi.e 252
 00228: cmp.i.v EQ
 00229: bf 00234
@@ -351,7 +351,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00232: conv.s.v
 00233: ret.v
 
-00234: pushvar.v self.argument0
+00234: pushbltn.v self.argument0
 00236: pushi.e 253
 00237: cmp.i.v EQ
 00238: bf 00243
@@ -359,7 +359,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00241: conv.s.v
 00242: ret.v
 
-00243: pushvar.v self.argument0
+00243: pushbltn.v self.argument0
 00245: pushi.e 254
 00246: cmp.i.v EQ
 00247: bf 00252
@@ -367,7 +367,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00250: conv.s.v
 00251: ret.v
 
-00252: pushvar.v self.argument0
+00252: pushbltn.v self.argument0
 00254: pushi.e 255
 00255: cmp.i.v EQ
 00256: bf 00270
@@ -375,7 +375,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00259: conv.s.v
 00260: ret.v
 
-;00261: pushvar.v self.argument0
+;00261: pushbltn.v self.argument0
 ;00263: pushi.e 256
 ;00264: cmp.i.v EQ
 ;00265: bf 00270
@@ -386,7 +386,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00268: conv.s.v
 ;00269: ret.v
 
-00270: pushvar.v self.argument0
+00270: pushbltn.v self.argument0
 00272: pushi.e 257
 00273: cmp.i.v EQ
 00274: bf 00297
@@ -394,7 +394,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00277: conv.s.v
 00278: ret.v
 
-;00279: pushvar.v self.argument0
+;00279: pushbltn.v self.argument0
 ;00281: pushi.e 260
 ;00282: cmp.i.v EQ
 ;00283: bf 00288
@@ -402,7 +402,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00286: conv.s.v
 ;00287: ret.v
 
-;00288: pushvar.v self.argument0
+;00288: pushbltn.v self.argument0
 ;00290: pushi.e 261
 ;00291: cmp.i.v EQ
 ;00292: bf 00297
@@ -410,7 +410,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00295: conv.s.v
 ;00296: ret.v
 
-00297: pushvar.v self.argument0
+00297: pushbltn.v self.argument0
 00299: pushi.e 262
 00300: cmp.i.v EQ
 00301: bf 00315
@@ -418,7 +418,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00304: conv.s.v
 00305: ret.v
 
-;00306: pushvar.v self.argument0
+;00306: pushbltn.v self.argument0
 ;00308: pushi.e 263
 ;00309: cmp.i.v EQ
 ;00310: bf 00315
@@ -426,7 +426,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00313: conv.s.v
 ;00314: ret.v
 
-00315: pushvar.v self.argument0
+00315: pushbltn.v self.argument0
 00317: pushi.e 264
 00318: cmp.i.v EQ
 00319: bf 00324
@@ -434,7 +434,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00322: conv.s.v
 00323: ret.v
 
-00324: pushvar.v self.argument0
+00324: pushbltn.v self.argument0
 00326: pushi.e 267
 00327: cmp.i.v EQ
 00328: bf 00333
@@ -442,7 +442,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00331: conv.s.v
 00332: ret.v
 
-00333: pushvar.v self.argument0
+00333: pushbltn.v self.argument0
 00335: pushi.e 268
 00336: cmp.i.v EQ
 00337: bf 00342
@@ -450,7 +450,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00340: conv.s.v
 00341: ret.v
 
-00342: pushvar.v self.argument0
+00342: pushbltn.v self.argument0
 00344: pushi.e 269
 00345: cmp.i.v EQ
 00346: bf 00351
@@ -458,7 +458,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00349: conv.s.v
 00350: ret.v
 
-00351: pushvar.v self.argument0
+00351: pushbltn.v self.argument0
 00353: pushi.e 270
 00354: cmp.i.v EQ
 00355: bf 00360
@@ -466,7 +466,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00358: conv.s.v
 00359: ret.v
 
-00360: pushvar.v self.argument0
+00360: pushbltn.v self.argument0
 00362: pushi.e 271
 00363: cmp.i.v EQ
 00364: bf 00369
@@ -474,7 +474,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00367: conv.s.v
 00368: ret.v
 
-00369: pushvar.v self.argument0
+00369: pushbltn.v self.argument0
 00371: pushi.e 273
 00372: cmp.i.v EQ
 00373: bf 00387
@@ -482,7 +482,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00376: conv.s.v
 00377: ret.v
 
-;00378: pushvar.v self.argument0
+;00378: pushbltn.v self.argument0
 ;00380: pushi.e 274
 ;00381: cmp.i.v EQ
 ;00382: bf 00387
@@ -490,7 +490,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00385: conv.s.v
 ;00386: ret.v
 
-00387: pushvar.v self.argument0
+00387: pushbltn.v self.argument0
 00389: pushi.e 276
 00390: cmp.i.v EQ
 00391: bf 00396
@@ -498,7 +498,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00394: conv.s.v
 00395: ret.v
 
-00396: pushvar.v self.argument0
+00396: pushbltn.v self.argument0
 00398: pushi.e 279
 00399: cmp.i.v EQ
 00400: bf 00405
@@ -506,7 +506,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00403: conv.s.v
 00404: ret.v
 
-00405: pushvar.v self.argument0
+00405: pushbltn.v self.argument0
 00407: pushi.e 282
 00408: cmp.i.v EQ
 00409: bf 00414
@@ -514,7 +514,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00412: conv.s.v
 00413: ret.v
 
-00414: pushvar.v self.argument0
+00414: pushbltn.v self.argument0
 00416: pushi.e 283
 00417: cmp.i.v EQ
 00418: bf 00423
@@ -522,7 +522,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00421: conv.s.v
 00422: ret.v
 
-00423: pushvar.v self.argument0
+00423: pushbltn.v self.argument0
 00425: pushi.e 284
 00426: cmp.i.v EQ
 00427: bf 00432
@@ -530,7 +530,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00430: conv.s.v
 00431: ret.v
 
-00432: pushvar.v self.argument0
+00432: pushbltn.v self.argument0
 00434: pushi.e 285
 00435: cmp.i.v EQ
 00436: bf 00441
@@ -538,7 +538,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00439: conv.s.v
 00440: ret.v
 
-00441: pushvar.v self.argument0
+00441: pushbltn.v self.argument0
 00443: pushi.e 286
 00444: cmp.i.v EQ
 ;00445: bf 00450
@@ -549,7 +549,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 
 ; this one just like never works
 ; people remix it please
-;00450: pushvar.v self.argument0
+;00450: pushbltn.v self.argument0
 ;00452: pushi.e 289
 ;00453: cmp.i.v EQ
 ;00454: bf 00459
@@ -557,7 +557,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00457: conv.s.v
 ;00458: ret.v
 
-00459: pushvar.v self.argument0
+00459: pushbltn.v self.argument0
 00461: pushi.e 290
 00462: cmp.i.v EQ
 00463: bf 00468
@@ -565,7 +565,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00466: conv.s.v
 00467: ret.v
 
-00468: pushvar.v self.argument0
+00468: pushbltn.v self.argument0
 00470: pushi.e 291
 00471: cmp.i.v EQ
 00472: bf 00477
@@ -573,7 +573,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00475: conv.s.v
 00476: ret.v
 
-00477: pushvar.v self.argument0
+00477: pushbltn.v self.argument0
 00479: pushi.e 292
 00480: cmp.i.v EQ
 00481: bf 00495
@@ -581,7 +581,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00484: conv.s.v
 00485: ret.v
 
-;00486: pushvar.v self.argument0
+;00486: pushbltn.v self.argument0
 ;00488: pushi.e 293
 ;00489: cmp.i.v EQ
 ;00490: bf 00495
@@ -589,7 +589,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00493: conv.s.v
 ;00494: ret.v
 
-00495: pushvar.v self.argument0
+00495: pushbltn.v self.argument0
 00497: pushi.e 294
 00498: cmp.i.v EQ
 00499: bf 00504
@@ -597,7 +597,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00502: conv.s.v
 00503: ret.v
 
-00504: pushvar.v self.argument0
+00504: pushbltn.v self.argument0
 00506: pushi.e 295
 00507: cmp.i.v EQ
 00508: bf 00513
@@ -605,7 +605,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00511: conv.s.v
 00512: ret.v
 
-00513: pushvar.v self.argument0
+00513: pushbltn.v self.argument0
 00515: pushi.e 297
 00516: cmp.i.v EQ
 00517: bf 00522
@@ -613,7 +613,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00520: conv.s.v
 00521: ret.v
 
-00522: pushvar.v self.argument0
+00522: pushbltn.v self.argument0
 00524: pushi.e 298
 00525: cmp.i.v EQ
 00526: bf 00531
@@ -621,7 +621,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00529: conv.s.v
 00530: ret.v
 
-00531: pushvar.v self.argument0
+00531: pushbltn.v self.argument0
 00533: pushi.e 299
 00534: cmp.i.v EQ
 00535: bf 00540
@@ -629,7 +629,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00538: conv.s.v
 00539: ret.v
 
-00540: pushvar.v self.argument0
+00540: pushbltn.v self.argument0
 00542: pushi.e 300
 00543: cmp.i.v EQ
 00544: bf 00549
@@ -637,7 +637,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00547: conv.s.v
 00548: ret.v
 
-00549: pushvar.v self.argument0
+00549: pushbltn.v self.argument0
 00551: pushi.e 301
 00552: cmp.i.v EQ
 00553: bf 00576
@@ -645,7 +645,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00556: conv.s.v
 00557: ret.v
 
-;00558: pushvar.v self.argument0
+;00558: pushbltn.v self.argument0
 ;00560: pushi.e 302
 ;00561: cmp.i.v EQ
 ;00562: bf 00567
@@ -653,7 +653,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00565: conv.s.v
 ;00566: ret.v
 
-;00567: pushvar.v self.argument0
+;00567: pushbltn.v self.argument0
 ;00569: pushi.e 303
 ;00570: cmp.i.v EQ
 ;00571: bf 00576
@@ -661,7 +661,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00574: conv.s.v
 ;00575: ret.v
 
-00576: pushvar.v self.argument0
+00576: pushbltn.v self.argument0
 00578: pushi.e 304
 00579: cmp.i.v EQ
 00580: bf 00585
@@ -669,7 +669,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00583: conv.s.v
 00584: ret.v
 
-00585: pushvar.v self.argument0
+00585: pushbltn.v self.argument0
 00587: pushi.e 312
 00588: cmp.i.v EQ
 00589: bf 00594
@@ -677,7 +677,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00592: conv.s.v
 00593: ret.v
 
-00594: pushvar.v self.argument0
+00594: pushbltn.v self.argument0
 00596: pushi.e 313
 00597: cmp.i.v EQ
 00598: bf 00603
@@ -685,7 +685,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00601: conv.s.v
 00602: ret.v
 
-00603: pushvar.v self.argument0
+00603: pushbltn.v self.argument0
 00605: pushi.e 314
 00606: cmp.i.v EQ
 00607: bf 00612
@@ -693,7 +693,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00610: conv.s.v
 00611: ret.v
 
-00612: pushvar.v self.argument0
+00612: pushbltn.v self.argument0
 00614: pushi.e 315
 00615: cmp.i.v EQ
 00616: bf 00621
@@ -701,7 +701,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00619: conv.s.v
 00620: ret.v
 
-00621: pushvar.v self.argument0
+00621: pushbltn.v self.argument0
 00623: pushi.e 316
 00624: cmp.i.v EQ
 00625: bf 00684
@@ -709,7 +709,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00628: conv.s.v
 00629: ret.v
 
-;00630: pushvar.v self.argument0
+;00630: pushbltn.v self.argument0
 ;00632: pushi.e 321
 ;00633: cmp.i.v EQ
 ;00634: bf 00639
@@ -717,7 +717,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00637: conv.s.v
 ;00638: ret.v
 
-;00639: pushvar.v self.argument0
+;00639: pushbltn.v self.argument0
 ;00641: pushi.e 322
 ;00642: cmp.i.v EQ
 ;00643: bf 00648
@@ -725,7 +725,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00646: conv.s.v
 ;00647: ret.v
 
-;00648: pushvar.v self.argument0
+;00648: pushbltn.v self.argument0
 ;00650: pushi.e 323
 ;00651: cmp.i.v EQ
 ;00652: bf 00657
@@ -733,7 +733,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00655: conv.s.v
 ;00656: ret.v
 
-;00657: pushvar.v self.argument0
+;00657: pushbltn.v self.argument0
 ;00659: pushi.e 332
 ;00660: cmp.i.v EQ
 ;00661: bf 00684
@@ -742,7 +742,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00665: ret.v
 
 ; Too hard to query for that, and all remixes I found don't match the mood too well
-;00666: pushvar.v self.argument0
+;00666: pushbltn.v self.argument0
 ;00668: pushi.e 333
 ;00669: cmp.i.v EQ
 ;00670: bf 00675
@@ -750,7 +750,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00673: conv.s.v
 ;00674: ret.v
 
-;00675: pushvar.v self.argument0
+;00675: pushbltn.v self.argument0
 ;00677: pushi.e 337
 ;00678: cmp.i.v EQ
 ;00679: bf 00684
@@ -758,7 +758,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00682: conv.s.v
 ;00683: ret.v
 
-00684: pushvar.v self.argument0
+00684: pushbltn.v self.argument0
 00686: pushi.e 338
 00687: cmp.i.v EQ
 00688: bf 00720
@@ -767,7 +767,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00692: ret.v
 
 ; Too hard to query for that, and all remixes I found don't match the mood too well
-;00693: pushvar.v self.argument0
+;00693: pushbltn.v self.argument0
 ;00695: pushi.e 339
 ;00696: cmp.i.v EQ
 ;00697: bf 00702
@@ -775,7 +775,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00700: conv.s.v
 ;00701: ret.v
 
-;00702: pushvar.v self.argument0
+;00702: pushbltn.v self.argument0
 ;00704: pushi.e 340
 ;00705: cmp.i.v EQ
 ;00706: bf 00711
@@ -783,7 +783,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00709: conv.s.v
 ;00710: ret.v
 
-;00711: pushvar.v self.argument0
+;00711: pushbltn.v self.argument0
 ;00713: pushi.e 349
 ;00714: cmp.i.v EQ
 ;00715: bf 00720
@@ -791,7 +791,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00718: conv.s.v
 ;00719: ret.v
 
-00720: pushvar.v self.argument0
+00720: pushbltn.v self.argument0
 00722: pushi.e 383
 00723: cmp.i.v EQ
 00724: bf 00729
@@ -799,7 +799,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00727: conv.s.v
 00728: ret.v
 
-00729: pushvar.v self.argument0
+00729: pushbltn.v self.argument0
 00731: pushi.e 387
 00732: cmp.i.v EQ
 00733: bf 00738
@@ -807,7 +807,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00736: conv.s.v
 00737: ret.v
 
-00738: pushvar.v self.argument0
+00738: pushbltn.v self.argument0
 00740: pushi.e 388
 00741: cmp.i.v EQ
 00742: bf 00747
@@ -815,7 +815,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00745: conv.s.v
 00746: ret.v
 
-00747: pushvar.v self.argument0
+00747: pushbltn.v self.argument0
 00749: pushi.e 390
 00750: cmp.i.v EQ
 00751: bf 00756
@@ -823,7 +823,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00754: conv.s.v
 00755: ret.v
 
-00756: pushvar.v self.argument0
+00756: pushbltn.v self.argument0
 00758: pushi.e 391
 00759: cmp.i.v EQ
 00760: bf 00765
@@ -831,7 +831,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00763: conv.s.v
 00764: ret.v
 
-00765: pushvar.v self.argument0
+00765: pushbltn.v self.argument0
 00767: pushi.e 392
 00768: cmp.i.v EQ
 00769: bf 00774
@@ -839,7 +839,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00772: conv.s.v
 00773: ret.v
 
-00774: pushvar.v self.argument0
+00774: pushbltn.v self.argument0
 00776: pushi.e 393
 00777: cmp.i.v EQ
 00778: bf 00783
@@ -847,7 +847,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00781: conv.s.v
 00782: ret.v
 
-00783: pushvar.v self.argument0
+00783: pushbltn.v self.argument0
 00785: pushi.e 394
 00786: cmp.i.v EQ
 00787: bf 00792
@@ -855,7 +855,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00790: conv.s.v
 00791: ret.v
 
-00792: pushvar.v self.argument0
+00792: pushbltn.v self.argument0
 00794: pushi.e 395
 00795: cmp.i.v EQ
 00796: bf 00801
@@ -863,7 +863,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00799: conv.s.v
 00800: ret.v
 
-00801: pushvar.v self.argument0
+00801: pushbltn.v self.argument0
 00803: pushi.e 404
 00804: cmp.i.v EQ
 00805: bf 00810
@@ -871,7 +871,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00808: conv.s.v
 00809: ret.v
 
-00810: pushvar.v self.argument0
+00810: pushbltn.v self.argument0
 00812: pushi.e 405
 00813: cmp.i.v EQ
 00814: bf 00819
@@ -879,7 +879,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00817: conv.s.v
 00818: ret.v
 
-00819: pushvar.v self.argument0
+00819: pushbltn.v self.argument0
 00821: pushi.e 408
 00822: cmp.i.v EQ
 00823: bf 00828
@@ -887,7 +887,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00826: conv.s.v
 00827: ret.v
 
-00828: pushvar.v self.argument0
+00828: pushbltn.v self.argument0
 00830: pushi.e 409
 00831: cmp.i.v EQ
 00832: bf 00846
@@ -895,7 +895,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00835: conv.s.v
 00836: ret.v
 
-;00837: pushvar.v self.argument0
+;00837: pushbltn.v self.argument0
 ;00839: pushi.e 410
 ;00840: cmp.i.v EQ
 ;00841: bf 00846
@@ -903,7 +903,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 ;00844: conv.s.v
 ;00845: ret.v
 
-00846: pushvar.v self.argument0
+00846: pushbltn.v self.argument0
 00848: pushi.e 411
 00849: cmp.i.v EQ
 00850: bf 00855
@@ -911,7 +911,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00853: conv.s.v
 00854: ret.v
 
-00855: pushvar.v self.argument0
+00855: pushbltn.v self.argument0
 00857: pushi.e 412
 00858: cmp.i.v EQ
 00859: bf 00864
@@ -919,7 +919,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00862: conv.s.v
 00863: ret.v
 
-00864: pushvar.v self.argument0
+00864: pushbltn.v self.argument0
 00866: pushi.e 413
 00867: cmp.i.v EQ
 00868: bf 00873
@@ -927,7 +927,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00871: conv.s.v
 00872: ret.v
 
-00873: pushvar.v self.argument0
+00873: pushbltn.v self.argument0
 00875: pushi.e 415
 00876: cmp.i.v EQ
 00877: bf 00882
@@ -935,7 +935,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00880: conv.s.v
 00881: ret.v
 
-00882: pushvar.v self.argument0
+00882: pushbltn.v self.argument0
 00884: pushi.e 421
 00885: cmp.i.v EQ
 00886: bf 00891
@@ -943,7 +943,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00889: conv.s.v
 00890: ret.v
 
-00891: pushvar.v self.argument0
+00891: pushbltn.v self.argument0
 00893: pushi.e 422
 00894: cmp.i.v EQ
 00895: bf 00900
@@ -951,7 +951,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00898: conv.s.v
 00899: ret.v
 
-00900: pushvar.v self.argument0
+00900: pushbltn.v self.argument0
 00902: pushi.e 424
 00903: cmp.i.v EQ
 00904: bf 00909
@@ -959,7 +959,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00907: conv.s.v
 00908: ret.v
 
-00909: pushvar.v self.argument0
+00909: pushbltn.v self.argument0
 00911: pushi.e 425
 00912: cmp.i.v EQ
 00913: bf 00918
@@ -967,7 +967,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00916: conv.s.v
 00917: ret.v
 
-00918: pushvar.v self.argument0
+00918: pushbltn.v self.argument0
 00920: pushi.e 432
 00921: cmp.i.v EQ
 00922: bf 00927
@@ -975,7 +975,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00925: conv.s.v
 00926: ret.v
 
-00927: pushvar.v self.argument0
+00927: pushbltn.v self.argument0
 00929: pushi.e 433
 00930: cmp.i.v EQ
 00931: bf 00936
@@ -983,7 +983,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00934: conv.s.v
 00935: ret.v
 
-00936: pushvar.v self.argument0
+00936: pushbltn.v self.argument0
 00938: pushi.e 434
 00939: cmp.i.v EQ
 00940: bf 00945
@@ -991,7 +991,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00943: conv.s.v
 00944: ret.v
 
-00945: pushvar.v self.argument0
+00945: pushbltn.v self.argument0
 00947: pushi.e 435
 00948: cmp.i.v EQ
 00949: bf 00954
@@ -999,7 +999,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00952: conv.s.v
 00953: ret.v
 
-00954: pushvar.v self.argument0
+00954: pushbltn.v self.argument0
 00956: pushi.e 436
 00957: cmp.i.v EQ
 00958: bf 00963
@@ -1007,7 +1007,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00961: conv.s.v
 00962: ret.v
 
-00963: pushvar.v self.argument0
+00963: pushbltn.v self.argument0
 00965: pushi.e 437
 00966: cmp.i.v EQ
 00967: bf 00972
@@ -1015,7 +1015,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00970: conv.s.v
 00971: ret.v
 
-00972: pushvar.v self.argument0
+00972: pushbltn.v self.argument0
 00974: pushi.e 438
 00975: cmp.i.v EQ
 00976: bf 00981
@@ -1023,7 +1023,7 @@ MOD_get_mus_query.Append(Assembler.Assemble(@"
 00979: conv.s.v
 00980: ret.v
 
-00981: pushvar.v self.argument0
+00981: pushbltn.v self.argument0
 00983: pushi.e 442
 00984: cmp.i.v EQ
 00985: bf 00990
@@ -1044,7 +1044,7 @@ var MOD_get_mus_count = new UndertaleCode() { Name = Data.Strings.MakeString("gm
 MOD_get_mus_count.Append(Assembler.Assemble(@"
 ; i can't decide if there are more songs that should be unlocked to 50 (or more if i had pagination support) entries or those which should be limited to ~15 :P
 
-pushvar.v self.argument0
+pushbltn.v self.argument0
 push.s ""game+over+theme""
 cmp.s.v EQ
 bf dating
@@ -1053,7 +1053,7 @@ conv.i.v
 ret.v
 b func_end
 
-dating: pushvar.v self.argument0
+dating: pushbltn.v self.argument0
 push.s ""%22Dating+Tense%21%22""
 cmp.s.v EQ
 bf confess
@@ -1062,7 +1062,7 @@ conv.i.v
 ret.v
 b func_end
 
-confess: pushvar.v self.argument0
+confess: pushbltn.v self.argument0
 push.s ""Confession""
 cmp.s.v EQ
 bf premo
@@ -1071,7 +1071,7 @@ conv.i.v
 ret.v
 b func_end
 
-premo: pushvar.v self.argument0
+premo: pushbltn.v self.argument0
 push.s ""Premonition""
 cmp.s.v EQ
 bf dogs
@@ -1080,7 +1080,7 @@ conv.i.v
 ret.v
 b func_end
 
-dogs: pushvar.v self.argument0
+dogs: pushbltn.v self.argument0
 push.s ""Dogsong""
 cmp.s.v EQ
 bf run
@@ -1089,7 +1089,7 @@ conv.i.v
 ret.v
 b func_end
 
-run: pushvar.v self.argument0
+run: pushbltn.v self.argument0
 push.s ""Run%21""
 cmp.s.v EQ
 bf respite
@@ -1098,7 +1098,7 @@ conv.i.v
 ret.v
 b func_end
 
-respite: pushvar.v self.argument0
+respite: pushbltn.v self.argument0
 push.s ""Respite""
 cmp.s.v EQ
 bf ending
@@ -1107,7 +1107,7 @@ conv.i.v
 ret.v
 b func_end
 
-ending: pushvar.v self.argument0
+ending: pushbltn.v self.argument0
 push.s ""%22An+Ending%22""
 cmp.s.v EQ
 bf undyne
@@ -1116,7 +1116,7 @@ conv.i.v
 ret.v
 b func_end
 
-undyne: pushvar.v self.argument0
+undyne: pushbltn.v self.argument0
 push.s ""Battle+Against+a+True+Hero""
 cmp.s.v EQ
 bf waterfall
@@ -1125,7 +1125,7 @@ conv.i.v
 ret.v
 b func_end
 
-waterfall: pushvar.v self.argument0
+waterfall: pushbltn.v self.argument0
 push.s ""Waterfall""
 cmp.s.v EQ
 bf waterfall2
@@ -1134,7 +1134,7 @@ conv.i.v
 ret.v
 b func_end
 
-waterfall2: pushvar.v self.argument0
+waterfall2: pushbltn.v self.argument0
 push.s ""Quiet+Water""
 cmp.s.v EQ
 bf snowy
@@ -1143,7 +1143,7 @@ conv.i.v
 ret.v
 b func_end
 
-snowy: pushvar.v self.argument0
+snowy: pushbltn.v self.argument0
 push.s ""Snowy""
 cmp.s.v EQ
 bf core
@@ -1152,7 +1152,7 @@ conv.i.v
 ret.v
 b func_end
 
-core: pushvar.v self.argument0
+core: pushbltn.v self.argument0
 push.s ""CORE""
 cmp.s.v EQ
 bf spider
@@ -1161,7 +1161,7 @@ conv.i.v
 ret.v
 b func_end
 
-spider: pushvar.v self.argument0
+spider: pushbltn.v self.argument0
 push.s ""Spider+Dance""
 cmp.s.v EQ
 bf memory
@@ -1170,7 +1170,7 @@ conv.i.v
 ret.v
 b func_end
 
-memory: pushvar.v self.argument0
+memory: pushbltn.v self.argument0
 push.s ""Memory""
 cmp.s.v EQ
 bf intro
@@ -1179,7 +1179,7 @@ conv.i.v
 ret.v
 b func_end
 
-intro: pushvar.v self.argument0
+intro: pushbltn.v self.argument0
 push.s ""Once+Upon+a+Time""
 cmp.s.v EQ
 bf enemy
@@ -1188,7 +1188,7 @@ conv.i.v
 ret.v
 b func_end
 
-enemy: pushvar.v self.argument0
+enemy: pushbltn.v self.argument0
 push.s ""Enemy+Approaching""
 cmp.s.v EQ
 bf toriel
@@ -1197,7 +1197,7 @@ conv.i.v
 ret.v
 b func_end
 
-toriel: pushvar.v self.argument0
+toriel: pushbltn.v self.argument0
 push.s ""Heatache""
 cmp.s.v EQ
 bf asgore
@@ -1206,7 +1206,7 @@ conv.i.v
 ret.v
 b func_end
 
-asgore: pushvar.v self.argument0
+asgore: pushbltn.v self.argument0
 push.s ""ASGORE""
 cmp.s.v EQ
 bf itsthesanssong
@@ -1215,7 +1215,7 @@ conv.i.v
 ret.v
 b func_end
 
-itsthesanssong: pushvar.v self.argument0
+itsthesanssong: pushbltn.v self.argument0
 push.s ""MEGALOVANIA""
 cmp.s.v EQ
 bf ihopeanddreamthisisthelastone
@@ -1224,7 +1224,7 @@ conv.i.v
 ret.v
 b func_end
 
-ihopeanddreamthisisthelastone: pushvar.v self.argument0
+ihopeanddreamthisisthelastone: pushbltn.v self.argument0
 push.s ""Hopes+and+Dreams""
 cmp.s.v EQ
 bf normal
@@ -1304,7 +1304,7 @@ youtube_play.Append(Assembler.Assemble(@"
 .localvar 1 song " + var_song + @"
 pushi.e obj_time
 pushenv func_end
-00000: pushvar.v self.argument0
+00000: pushbltn.v self.argument0
 00002: call.i MOD_get_mus_query(argc=1)
 00004: pop.v.v local.song
 00006: pushloc.v local.song
@@ -1364,19 +1364,19 @@ pushenv func_end
 00092: conv.i.v
 00093: ret.v
 00094: b func_end
-00095: pushvar.v self.argument4
-00097: pushvar.v self.argument3
-00099: pushvar.v self.argument0
+00095: pushbltn.v self.argument4
+00097: pushbltn.v self.argument3
+00099: pushbltn.v self.argument0
 00101: call.i audio_play_sound(argc=3)
 00103: pop.v.v self.this_song_i
-00105: pushvar.v self.argument2
-00107: pushvar.v self.argument0
+00105: pushbltn.v self.argument2
+00107: pushbltn.v self.argument0
 00109: call.i audio_sound_pitch(argc=2)
 00111: popz.v
 00112: pushi.e 0
 00113: conv.i.v
-00114: pushvar.v self.argument1
-00116: pushvar.v self.argument0
+00114: pushbltn.v self.argument1
+00116: pushbltn.v self.argument0
 00118: call.i audio_sound_gain(argc=3)
 00120: popz.v
 00121: push.v self.this_song_i
@@ -1419,7 +1419,7 @@ pushenv func_end
 00002: push.s """"
 00004: cmp.s.v NEQ
 00005: bf 00012
-00006: pushvar.v self.argument0
+00006: pushbltn.v self.argument0
 00008: push.v self.youtube_current_song
 00010: cmp.v.v EQ
 00011: b 00013
@@ -1438,21 +1438,21 @@ Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Other, (uint)62u, 
 .localvar 1 data " + var_data + @"
 00000: push.s ""id""
 00002: conv.s.v
-00003: pushvar.v self.async_load
+00003: pushbltn.v self.async_load
 00005: call.i ds_map_find_value(argc=2)
 00007: push.v self.youtube_request
 00009: cmp.v.v EQ
 00010: bf func_end
 00011: push.s ""status""
 00013: conv.s.v
-00014: pushvar.v self.async_load
+00014: pushbltn.v self.async_load
 00016: call.i ds_map_find_value(argc=2)
 00018: pushi.e 0
 00019: cmp.i.v EQ
 00020: bf func_end
 00021: push.s ""result""
 00023: conv.s.v
-00024: pushvar.v self.async_load
+00024: pushbltn.v self.async_load
 00026: call.i ds_map_find_value(argc=2)
 00028: call.i json_decode(argc=1)
 00030: pop.v.v local.data
@@ -1475,14 +1475,14 @@ Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Other, (uint)70u, 
 
 00000: push.s ""id""
 00002: conv.s.v
-00003: pushvar.v self.async_load
+00003: pushbltn.v self.async_load
 00005: call.i ds_map_find_value(argc=2)
 00011: pushi.e 1337
 00012: cmp.i.v EQ
 00013: bf func_end
 00014: push.s ""type""
 00016: conv.s.v
-00017: pushvar.v self.async_load
+00017: pushbltn.v self.async_load
 00019: call.i ds_map_find_value(argc=2)
 00021: pop.v.v local.type
 
@@ -1515,9 +1515,9 @@ Data.Scripts.ByName("caster_play").Code.Replace(Assembler.Assemble(@"
 00001: conv.i.v
 00002: pushi.e 100
 00003: conv.i.v
-00004: pushvar.v self.argument2
-00006: pushvar.v self.argument1
-00008: pushvar.v self.argument0
+00004: pushbltn.v self.argument2
+00006: pushbltn.v self.argument1
+00008: pushbltn.v self.argument0
 00010: call.i youtube_play(argc=5)
 00012: ret.v
 ", Data));
@@ -1527,9 +1527,9 @@ Data.Scripts.ByName("caster_play_l").Code.Replace(Assembler.Assemble(@"
 00001: conv.i.v
 00002: pushi.e 100
 00003: conv.i.v
-00004: pushvar.v self.argument2
-00006: pushvar.v self.argument1
-00008: pushvar.v self.argument0
+00004: pushbltn.v self.argument2
+00006: pushbltn.v self.argument1
+00008: pushbltn.v self.argument0
 00010: call.i youtube_play(argc=5)
 00012: ret.v
 ", Data));
@@ -1539,15 +1539,15 @@ Data.Scripts.ByName("caster_loop").Code.Replace(Assembler.Assemble(@"
 00001: conv.i.v
 00002: pushi.e 120
 00003: conv.i.v
-00004: pushvar.v self.argument2
-00006: pushvar.v self.argument1
-00008: pushvar.v self.argument0
+00004: pushbltn.v self.argument2
+00006: pushbltn.v self.argument1
+00008: pushbltn.v self.argument0
 00010: call.i youtube_play(argc=5)
 00012: ret.v
 ", Data));
 
 Data.Scripts.ByName("caster_resume").Code.Replace(Assembler.Assemble(@"
-00000: pushvar.v self.argument0
+00000: pushbltn.v self.argument0
 00002: call.i MOD_get_mus_query(argc=1)
 00004: push.s """"
 00006: cmp.s.v NEQ
@@ -1560,17 +1560,17 @@ Data.Scripts.ByName("caster_resume").Code.Replace(Assembler.Assemble(@"
 00013: conv.i.v
 00014: pushi.e 0
 00015: conv.i.v
-00016: pushvar.v self.argument0
+00016: pushbltn.v self.argument0
 00018: call.i youtube_play(argc=5)
 00020: popz.v
 00021: b func_end
-00022: pushvar.v self.argument0
+00022: pushbltn.v self.argument0
 00024: call.i audio_resume_sound(argc=1)
 00026: popz.v
 ", Data));
 
 Data.Scripts.ByName("caster_pause").Code.Replace(Assembler.Assemble(@"
-00000: pushvar.v self.argument0
+00000: pushbltn.v self.argument0
 00002: call.i MOD_get_mus_query(argc=1)
 00004: call.i youtube_is_playing(argc=1)
 00006: conv.v.b
@@ -1578,17 +1578,17 @@ Data.Scripts.ByName("caster_pause").Code.Replace(Assembler.Assemble(@"
 00008: call.i youtube_stop(argc=0)
 00010: popz.v
 00011: b func_end
-00012: pushvar.v self.argument0
+00012: pushbltn.v self.argument0
 00014: call.i audio_pause_sound(argc=1)
 00016: popz.v
 ", Data));
 
 Data.Scripts.ByName("caster_free").Code.Replace(Assembler.Assemble(@"
-00000: pushvar.v self.argument0
+00000: pushbltn.v self.argument0
 00002: pushi.e -3
 00003: cmp.i.v NEQ
 00004: bf 00023
-00005: pushvar.v self.argument0
+00005: pushbltn.v self.argument0
 00007: call.i MOD_get_mus_query(argc=1)
 00009: call.i youtube_is_playing(argc=1)
 00011: conv.v.b
@@ -1596,7 +1596,7 @@ Data.Scripts.ByName("caster_free").Code.Replace(Assembler.Assemble(@"
 00013: call.i youtube_stop(argc=0)
 00015: popz.v
 00016: b 00022
-00017: pushvar.v self.argument0
+00017: pushbltn.v self.argument0
 00019: call.i audio_stop_sound(argc=1)
 00021: popz.v
 00022: b func_end

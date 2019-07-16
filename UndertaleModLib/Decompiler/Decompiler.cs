@@ -1391,7 +1391,7 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.Push:
                     case UndertaleInstruction.Opcode.PushLoc:
                     case UndertaleInstruction.Opcode.PushGlb:
-                    case UndertaleInstruction.Opcode.PushVar:
+                    case UndertaleInstruction.Opcode.PushBltn:
                     case UndertaleInstruction.Opcode.PushI:
                         if (instr.Value is UndertaleInstruction.Reference<UndertaleVariable>)
                         {

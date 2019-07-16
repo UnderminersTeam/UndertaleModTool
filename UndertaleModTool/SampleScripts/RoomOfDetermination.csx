@@ -100,7 +100,7 @@ room_of_determination.GameObjects.Add(new UndertaleRoom.GameObject()
 
 // Actually link the door
 obj_door_ruins13.EventHandlerFor(EventType.Alarm, 2, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushvar.v self.room
+pushbltn.v self.room
 pushi.e room_ruins1
 cmp.i.v EQ
 bf func_end
@@ -561,7 +561,7 @@ SCR_TEXT.Code.Append(Assembler.Assemble(@"
 ; Toby, why did you think this was a good idea
 ; actually, it's not as bad as I thought it was going to be :P
 
-pushvar.v self.argument0
+pushbltn.v self.argument0
 pushi.e 11337
 cmp.i.v EQ
 bf not_11337
@@ -586,7 +586,7 @@ pop.v.v [array]msg
 
 b func_end
 
-not_11337: pushvar.v self.argument0
+not_11337: pushbltn.v self.argument0
 pushi.e 11338
 cmp.i.v EQ
 bf func_end

@@ -6,12 +6,12 @@ ScriptMessage("Border enabler (1080p edition)\nby krzys_h");
 
 // Change os_type == 14 checks in scr_draw_screen_border to always pass
 // This:
-// 00028: pushvar.v os_type
+// 00028: pushbltn.v os_type
 // 00030: pushi.e 14
 // 00031: cmp.i.v EQ
 // 00032: bf $+10
 // Changes to:
-// 00028: pushvar.v os_type
+// 00028: pushbltn.v os_type
 // 00030: pushi.e 14
 // 00031: popz.i
 // 00032: popz.v
@@ -21,7 +21,7 @@ for(int i = 0; i < scr_draw_screen_border.Instructions.Count; i++)
 	if (scr_draw_screen_border.Instructions[i  ].Kind == UndertaleInstruction.Opcode.Bf      &&
 		scr_draw_screen_border.Instructions[i-1].Kind == UndertaleInstruction.Opcode.Cmp     && scr_draw_screen_border.Instructions[i-1].ComparisonKind == UndertaleInstruction.ComparisonType.EQ &&
 		scr_draw_screen_border.Instructions[i-2].Kind == UndertaleInstruction.Opcode.PushI   && (short)scr_draw_screen_border.Instructions[i-2].Value == 14 &&
-		scr_draw_screen_border.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushVar && (scr_draw_screen_border.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "os_type")
+		scr_draw_screen_border.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushBltn && (scr_draw_screen_border.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "os_type")
 	{
         scr_draw_screen_border.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data);
         scr_draw_screen_border.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data);
@@ -66,7 +66,7 @@ for(int i = 0; i < scr_draw_background_ps4.Instructions.Count; i++)
 	if (scr_draw_background_ps4.Instructions[i  ].Kind == UndertaleInstruction.Opcode.Bf      &&
 		scr_draw_background_ps4.Instructions[i-1].Kind == UndertaleInstruction.Opcode.Cmp     && scr_draw_background_ps4.Instructions[i-1].ComparisonKind == UndertaleInstruction.ComparisonType.EQ &&
 		scr_draw_background_ps4.Instructions[i-2].Kind == UndertaleInstruction.Opcode.PushI   && (short)scr_draw_background_ps4.Instructions[i-2].Value == 14 &&
-		scr_draw_background_ps4.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushVar && (scr_draw_background_ps4.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "os_type")
+		scr_draw_background_ps4.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushBltn && (scr_draw_background_ps4.Instructions[i-3].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "os_type")
     {
         scr_draw_background_ps4.Instructions[i-1] = Assembler.AssembleOne("popz.i", Data);
         scr_draw_background_ps4.Instructions[i  ] = Assembler.AssembleOne("popz.v", Data);

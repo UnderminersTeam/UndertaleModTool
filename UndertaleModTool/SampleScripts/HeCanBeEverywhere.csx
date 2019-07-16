@@ -63,7 +63,7 @@ for (int i = 0; i < obj_joker_User10.Instructions.Count; i++)
     }
 }
 obj_joker_User10.Append(Assembler.Assemble(@"
-pushvar.v self.room
+pushbltn.v self.room
 pushi.e room_cc_joker
 cmp.i.v NEQ
 bf func_end
@@ -78,7 +78,7 @@ Data.Variables.EnsureDefined("jevilizer", UndertaleInstruction.InstanceType.Glob
 
 var scr_encountersetup = Data.Scripts.ByName("scr_encountersetup");
 scr_encountersetup.Code.Append(Assembler.Assemble(@"
-pushvar.v self.argument0
+pushbltn.v self.argument0
 pushi.e 25
 cmp.i.v EQ
 bf func_end
@@ -112,7 +112,7 @@ pushi.e -5
 pushi.e 0
 pop.v.v [array]battlemsg
 
-pushvar.v self.room
+pushbltn.v self.room
 pushi.e room_cc_joker
 cmp.i.v EQ
 bf func_end
@@ -292,11 +292,11 @@ pop.v.v [array]battlemsg
 var scr_text = Data.Scripts.ByName("scr_text");
 scr_text.Code.Append(Assembler.Assemble(@"
 ; if (argument0 == 405 or argument0 == 410)
-pushvar.v self.argument0
+pushbltn.v self.argument0
 pushi.e 405
 cmp.i.v EQ
 bt is_ok
-pushvar.v self.argument0
+pushbltn.v self.argument0
 pushi.e 410
 cmp.i.v EQ
 b is_not_ok
@@ -403,7 +403,7 @@ spr_jokerdoor.Textures[1].Texture = spr_jokerdoor.Textures[2].Texture;
 
 var obj_doorX_musfade = Data.GameObjects.ByName("obj_doorX_musfade");
 obj_doorX_musfade.EventHandlerFor(EventType.Other, EventSubtypeOther.User9, Data.Strings, Data.Code, Data.CodeLocals).Replace(Assembler.Assemble(@"
-pushvar.v self.room
+pushbltn.v self.room
 pushi.e room_cc_prison_prejoker
 cmp.i.v EQ
 bf 00000
@@ -806,7 +806,7 @@ var scr_roomname = Data.Scripts.ByName("scr_roomname");
 scr_roomname.Code.Instructions.RemoveAt(scr_roomname.Code.Instructions.Count - 1); // push.v self.roomname
 scr_roomname.Code.Instructions.RemoveAt(scr_roomname.Code.Instructions.Count - 1); // ret.v
 scr_roomname.Code.Append(Assembler.Assemble(@"
-pushvar.v self.argument0
+pushbltn.v self.argument0
 pushi.e room_cc_joker
 cmp.i.v EQ
 bf go_ret
@@ -874,7 +874,7 @@ pop.v.i [array]flag
 ", Data));
 
 Data.GameObjects.ByName("obj_jokerbg_triangle_real").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushvar.v self.room
+pushbltn.v self.room
 pushi.e room_cc_joker
 cmp.i.v EQ
 bf func_end

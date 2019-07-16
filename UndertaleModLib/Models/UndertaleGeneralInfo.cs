@@ -201,6 +201,7 @@ namespace UndertaleModLib.Models
             UseRearTouch = 0x2000000,
             UseFastCollision = 0x4000000,
             FastCollisionCompatibility = 0x8000000,
+            DisableSandbox = 0x10000000
         }
 
         public uint Unknown1 { get; set; } = 0x80000000;
