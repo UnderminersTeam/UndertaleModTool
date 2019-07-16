@@ -225,7 +225,10 @@ namespace UndertaleModTool
             e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && (sourceItem is UndertaleGameObject || sourceItem is UndertalePath) ? DragDropEffects.Link : DragDropEffects.None;
             if (e.Effects == DragDropEffects.Link)
             {
-                if (sourceItem is UndertaleGameObject)
+                if (sourceItem is UndertaleBackground)
+                {
+
+                } else if (sourceItem is UndertaleGameObject)
                 {
                     UndertaleGameObject droppedObject = sourceItem as UndertaleGameObject;
                     var mousePos = e.GetPosition(RoomGraphics);
@@ -400,8 +403,8 @@ namespace UndertaleModTool
                     }
                     var other = copied as UndertaleRoom.Tile;
                     var obj = new UndertaleRoom.Tile();
-                    obj.X = other.X;
-                    obj.Y = other.Y;
+                    obj.X = -(int)other.Height; //other.X;
+                    obj.Y = -(int) other.Height; //other.Y;
                     obj._SpriteMode = other._SpriteMode;
                     obj.ObjectDefinition = other.ObjectDefinition;
                     obj.SourceX = other.SourceX;
