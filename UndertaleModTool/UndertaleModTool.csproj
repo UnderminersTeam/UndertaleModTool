@@ -251,6 +251,9 @@
     <Compile Include="Editors\UndertaleVariableEditor.xaml.cs">
       <DependentUpon>UndertaleVariableEditor.xaml</DependentUpon>
     </Compile>
+    <None Include="SampleScripts\RunSwitchOnPC.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="SampleScripts\BorderEnabler.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
