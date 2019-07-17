@@ -7,7 +7,8 @@
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleBackground}">
-    <Grid>
+
+  <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
@@ -18,27 +19,24 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Unknown</TextBlock>
-        <Grid Grid.Row="1" Grid.Column="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Margin="3" Text="{Binding Unknown1}"/>
-            <TextBox Grid.Column="1" Margin="3" Text="{Binding Unknown2}"/>
-            <TextBox Grid.Column="2" Margin="3" Text="{Binding Unknown3}"/>
-        </Grid>
+      <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Transparent</TextBlock>
+      <CheckBox Grid.Row="1" Grid.Column="1" Margin="3" IsChecked="{Binding Transparent}"/>
+      <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Smooth</TextBlock>
+      <CheckBox Grid.Row="2" Grid.Column="1" Margin="3" IsChecked="{Binding Smooth}"/>
+      <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Preload</TextBlock>
+      <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Preload}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Texture</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Texture</TextBlock>
+        <local:UndertaleObjectReference Grid.Row="4" Grid.Column="1" Margin="3" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
 
-        <Grid Grid.Row="3" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+        <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="3*"/>
@@ -126,7 +124,7 @@
             </DataGrid>
         </Grid>
 
-        <Viewbox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly">
+        <Viewbox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly">
             <Border>
                 <Border.Background>
                     <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
