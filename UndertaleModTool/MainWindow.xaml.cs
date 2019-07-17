@@ -79,6 +79,11 @@ namespace UndertaleModTool
             CanSafelySave = false;
         }
 
+        private void SetIDString(string str)
+        {
+            ((Label)this.FindName("ObjectLabel")).Content = str;
+        }
+
         [DllImport("shell32.dll")]
         static extern void SHChangeNotify(long wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
         const long SHCNE_ASSOCCHANGED = 0x08000000;
@@ -981,16 +986,24 @@ namespace UndertaleModTool
             UpdateTree();
         }
 
+        private void UpdateObjectLabel(object obj)
+        {
+            int foundIndex = obj is UndertaleNamedResource ? Data.IndexOf(obj as UndertaleNamedResource) : -1;
+            SetIDString(foundIndex == -1 ? "None" : Convert.ToString(foundIndex));
+        }
+
         public void ChangeSelection(object newsel)
         {
             SelectionHistory.Add(Selected);
             Selected = newsel;
+            UpdateObjectLabel(newsel);
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
             Selected = SelectionHistory.Last();
             SelectionHistory.RemoveAt(SelectionHistory.Count - 1);
+            UpdateObjectLabel(Selected);
         }
 
         public void EnsureDataLoaded()

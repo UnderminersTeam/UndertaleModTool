@@ -57,7 +57,8 @@
                         </MenuItem.Style>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="_Run game" Command="Print" InputGestureText="F5"> <!-- TODO: I think I need a custom command for that... -->
+                    <MenuItem Header="_Run game" Command="Print" InputGestureText="F5">
+                        <!-- TODO: I think I need a custom command for that... -->
                         <MenuItem.Style>
                             <Style TargetType="{x:Type MenuItem}">
                                 <Setter Property="IsEnabled" Value="{Binding CanSave}"/>
@@ -90,7 +91,10 @@
                     <MenuItem Header="_About" Click="MenuItem_About_Click"/>
                 </MenuItem>
             </Menu>
-            <TextBox DockPanel.Dock="Bottom" Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown"/>
+            <Grid DockPanel.Dock="Bottom">
+                <TextBox x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,35,0"/>
+                <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" VerticalContentAlignment="Top" Name="ObjectLabel"/>
+            </Grid>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -323,7 +327,7 @@
                         </TreeViewItem>
                     </TreeViewItem>
                 </TreeView>
-                
+
                 <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
 
                 <ScrollViewer Grid.Column="2" Grid.RowSpan="2" VerticalScrollBarVisibility="Auto">
@@ -340,7 +344,7 @@
                             <DataTemplate DataType="{x:Type local:GeneralInfoEditor}">
                                 <local:UndertaleGeneralInfoEditor/>
                             </DataTemplate>
-                            
+
                             <DataTemplate DataType="{x:Type local:GlobalInitEditor}">
                                 <local:UndertaleGlobalInitEditor/>
                             </DataTemplate>
@@ -352,7 +356,7 @@
                             <DataTemplate DataType="{x:Type undertale:UndertaleSound}">
                                 <local:UndertaleSoundEditor/>
                             </DataTemplate>
-                            
+
                             <DataTemplate DataType="{x:Type undertale:UndertaleBackground}">
                                 <local:UndertaleBackgroundEditor/>
                             </DataTemplate>
