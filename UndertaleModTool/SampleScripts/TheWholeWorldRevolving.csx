@@ -1,70 +1,16 @@
 EnsureDataLoaded();
 
-if (Data.GeneralInfo.Major < 2)
-	throw new Exception("GMS1.4 is not supported... yet!");
+if (!Data.IsGameMaker2()) {
+    ScriptMessage("This is not a GMS2 game.");
+    return;
+}
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Step, EventSubtypeStep.BeginStep, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-; 4 = view_angle
-pushi.e 0
-conv.i.v
-pushi.e 4
-conv.i.v
-call.i __view_get(argc=2)
-pushglb.v global.time
-push.d 15
-div.d.v
-call.i sin(argc=1)
-push.d 2
-div.d.v
-add.v.v
-push.d 1
-add.d.v
-pushi.e 0
-conv.i.v
-pushi.e 4
-conv.i.v
-call.i __view_set(argc=3)
-popz.v
+var gml_Object_obj_time_Step_1 = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Step, EventSubtypeStep.BeginStep, Data.Strings, Data.Code, Data.CodeLocals);
 
-; 11 = view_xport
-pushi.e 0
-conv.i.v
-pushi.e 11
-conv.i.v
-call.i __view_get(argc=2)
-pushglb.v global.time
-push.d 10
-div.d.v
-call.i cos(argc=1)
-push.d 1.5
-mul.d.v
-add.v.v
-pushi.e 0
-conv.i.v
-pushi.e 11
-conv.i.v
-call.i __view_set(argc=3)
-popz.v
+gml_Object_obj_time_Step_1.AppendGML(@"
+__view_set(4, 0, ((__view_get(e__VW.Angle, 0) + (sin((global.time / 15)) / 2)) + 1)); // 4 -> e__VW.Angle
+__view_set(11, 0, (__view_get(11, 0) + (cos((global.time / 10)) * 1.5))); // 11 -> e__VW.XPort
+__view_set(12, 0, (__view_get(12, 0) + (sin((global.time / 10)) * 1.5))); // 12 -> e__VW.YPort", Data);
 
-; 12 = view_yport
-pushi.e 0
-conv.i.v
-pushi.e 12
-conv.i.v
-call.i __view_get(argc=2)
-pushglb.v global.time
-push.d 10
-div.d.v
-call.i sin(argc=1)
-push.d 1.5
-mul.d.v
-add.v.v
-pushi.e 0
-conv.i.v
-pushi.e 12
-conv.i.v
-call.i __view_set(argc=3)
-popz.v
-", Data));
-
-ScriptMessage("* The whole world is spinning, spinning\n\nJEVIL HARDMODE CHAOS LOADED\nI CAN DO ANYTHING\nby krzys_h");
+ChangeSelection(gml_Object_obj_time_Step_1);
+ScriptMessage("* The whole world is spinning, spinning\n\nJEVIL HARDMODE CHAOS LOADED\nI CAN DO ANYTHING\nby krzys_h, Kneesnap");

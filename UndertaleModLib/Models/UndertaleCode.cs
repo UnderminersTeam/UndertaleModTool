@@ -6,7 +6,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using UndertaleModLib.Compiler;
+using UndertaleModLib.Decompiler;
+using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Models
 {
@@ -1105,6 +1107,7 @@ namespace UndertaleModLib.Models
                 writer.Write(BytecodeRelativeAddress);
                 writer.Write(UnknownProbablyZero);
             }
+
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -1246,6 +1249,40 @@ namespace UndertaleModLib.Models
         {
             Instructions.Clear();
             Append(instructions);
+        }
+
+        public void AppendGML(string gmlCode, UndertaleData data)
+        {
+            CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);
+            if (!context.SuccessfulCompile || context.HasError)
+            {
+                Console.WriteLine(gmlCode);
+                throw new Exception("GML Compile Error: " + context.ResultError);
+            }
+
+            try
+            {
+                this.Append(Assembler.Assemble(context.ResultAssembly, data));
+            } catch (Exception ex) {
+                throw new Exception("Assembler Error: " + ex.ToString());
+            }
+        }
+
+        public void ReplaceGML(string gmlCode, UndertaleData data)
+        {
+            CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);
+            if (!context.SuccessfulCompile || context.HasError)
+            {
+                Console.WriteLine(gmlCode);
+                throw new Exception("GML Compile Error: " + context.ResultError);
+            }
+
+            try
+            {
+                this.Replace(Assembler.Assemble(context.ResultAssembly, data));
+            } catch (Exception ex) {
+                throw new Exception("Assembler Error: " + ex.ToString());
+            }
         }
 
         public override string ToString()

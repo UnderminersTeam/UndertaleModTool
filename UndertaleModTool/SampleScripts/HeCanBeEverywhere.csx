@@ -1,6 +1,6 @@
 ﻿EnsureDataLoaded();
 
-ScriptMessage("HeCanBeEverywhere mod by krzys_h\nVersion 2");
+ScriptMessage("HeCanBeEverywhere mod by krzys_h and Kneesnap\nVersion 3");
 
 // spr_joker_main has an offset, so we need to make our own one
 var spr_joker_main = Data.Sprites.ByName("spr_joker_main");
@@ -26,28 +26,16 @@ Data.Sprites.Add(spr_joker_enemy);
 var obj_joker = Data.GameObjects.ByName("obj_joker");
 
 var obj_chaseenemy = Data.GameObjects.ByName("obj_chaseenemy");
-obj_chaseenemy.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-; 25 = Jevil
-pushi.e 25
-pop.v.i self.myencounter
-pushi.e spr_joker_enemy
-pop.v.i self.touchsprite
-pushi.e spr_joker_enemy
-pop.v.i self.sprite_index
-pushi.e 0
-pop.v.i self.chasetype
-pushi.e 1
-pop.v.i self.pacetype
-", Data));
+obj_chaseenemy.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+myencounter = 25; // Jevil.
+touchsprite = spr_joker_enemy;
+sprite_index = spr_joker_enemy;
+chasetype = 0;
+pacetype = 1;", Data);
 
 var obj_testoverworldenemy = Data.GameObjects.ByName("obj_testoverworldenemy");
 var obj_testoverworldenemy_User0 = obj_testoverworldenemy.EventHandlerFor(EventType.Other, EventSubtypeOther.User0, Data.Strings, Data.Code, Data.CodeLocals);
-obj_testoverworldenemy_User0.Append(Assembler.Assemble(@"
-pushi.e snd_joker_laugh0
-conv.i.v
-call.i snd_play(argc=1)
-popz.v
-", Data));
+obj_testoverworldenemy_User0.AppendGML("snd_play(snd_joker_laugh0);", Data);
 obj_testoverworldenemy_User0.Instructions[3].JumpOffset += 5; // Ugly hack to redirect exit of if()
 
 var obj_joker_User10 = obj_joker.EventHandlerFor(EventType.Other, EventSubtypeOther.User10, Data.Strings, Data.Code, Data.CodeLocals);
@@ -62,339 +50,74 @@ for (int i = 0; i < obj_joker_User10.Instructions.Count; i++)
         obj_joker_User10.Instructions[i].Function.Target = Data.Functions.ByName("scr_84_debug"); // just redirect it to something useless
     }
 }
-obj_joker_User10.Append(Assembler.Assemble(@"
-pushbltn.v self.room
-pushi.e room_cc_joker
-cmp.i.v NEQ
-bf func_end
-
-pushi.e obj_joker_body
-conv.i.v
-call.i instance_destroy(argc=1)
-popz.v
-", Data));
+obj_joker_User10.AppendGML(@"
+if (room != room_cc_joker)
+    instance_destroy(obj_joker_body);", Data);
 
 Data.Variables.EnsureDefined("jevilizer", UndertaleInstruction.InstanceType.Global, false, Data.Strings, Data);
 
 var scr_encountersetup = Data.Scripts.ByName("scr_encountersetup");
-scr_encountersetup.Code.Append(Assembler.Assemble(@"
-pushbltn.v self.argument0
-pushi.e 25
-cmp.i.v EQ
-bf func_end
-
-; Jevil seen is the same as visited the Jevil room
-; so that the shopkeeper interaction works
-pushi.e -5
-pushi.e 241
-push.v [array]flag
-pushi.e 1
-cmp.i.v LT
-bf noflag
-
-pushi.e 1
-pushi.e -5
-pushi.e 241
-pop.v.i [array]flag
-
-noflag: push.s ""* JEVIL BLOCKED YOUR WAY""
-conv.s.v
-push.s ""* ANOTHER ONE OF THESE""
-conv.s.v
-push.s ""* IT'S JUST A SIMPLE CHAOS""
-conv.s.v
-push.s ""* THE JOKER CARD REPLACED ANOTHER ENEMY""
-conv.s.v
-push.s ""* HE REALLY CAN BE ANYTHING""
-conv.s.v
-call.i choose(argc=5)
-pushi.e -5
-pushi.e 0
-pop.v.v [array]battlemsg
-
-pushbltn.v self.room
-pushi.e room_cc_joker
-cmp.i.v EQ
-bf func_end
-
-; some randomness would be nice
-pushi.e 1
-conv.i.v
-call.i random(argc=1)
-pop.v.v global.jevilizer
-
-pushglb.v global.jevilizer
-push.d 0.95
-cmp.d.v GT
-bf notachance
-
-push.s ""* JEVIL DECIDED TO GIVE YOU A CHANCE""
-conv.s.v
-push.s ""* THAT WAS TOO UNFAIR, TO BE HONEST""
-conv.s.v
-call.i choose(argc=2)
-pushi.e -5
-pushi.e 0
-pop.v.v [array]battlemsg
-
-b conti
-
-notachance: pushglb.v global.jevilizer
-push.d 0.75
-cmp.d.v GT
-bf notreally
-
-pushi.e obj_joker
-pushi.e -5
-pushi.e 0
-pop.v.i [array]monsterinstancetype
-pushi.e 20
-pushi.e -5
-pushi.e 0
-pop.v.i [array]monstertype
-push.v self.xx
-pushi.e 480
-add.i.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]monstermakex
-push.v self.yy
-pushi.e 20
-add.i.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]monstermakey
-pushi.e obj_joker
-pushi.e -5
-pushi.e 1
-pop.v.i [array]monsterinstancetype
-pushi.e 20
-pushi.e -5
-pushi.e 1
-pop.v.i [array]monstertype
-push.v self.xx
-pushi.e 460
-add.i.v
-pushi.e -5
-pushi.e 1
-pop.v.v [array]monstermakex
-push.v self.yy
-pushi.e 220
-add.i.v
-pushi.e -5
-pushi.e 1
-pop.v.v [array]monstermakey
-
-push.s ""* HOW ABOUT WE MAKE IT A TWO?""
-conv.s.v
-push.s ""* IT'S THE DOUBLE CHAOS""
-conv.s.v
-call.i choose(argc=2)
-pushi.e -5
-pushi.e 0
-pop.v.v [array]battlemsg
-
-b conti
-
-notreally: pushi.e obj_joker
-pushi.e -5
-pushi.e 0
-pop.v.i [array]monsterinstancetype
-pushi.e 20
-pushi.e -5
-pushi.e 0
-pop.v.i [array]monstertype
-push.v self.xx
-pushi.e 480
-add.i.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]monstermakex
-push.v self.yy
-pushi.e 20
-add.i.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]monstermakey
-pushi.e obj_joker
-pushi.e -5
-pushi.e 1
-pop.v.i [array]monsterinstancetype
-pushi.e 20
-pushi.e -5
-pushi.e 1
-pop.v.i [array]monstertype
-push.v self.xx
-pushi.e 500
-add.i.v
-pushi.e -5
-pushi.e 1
-pop.v.v [array]monstermakex
-push.v self.yy
-pushi.e 120
-add.i.v
-pushi.e -5
-pushi.e 1
-pop.v.v [array]monstermakey
-pushi.e obj_joker
-pushi.e -5
-pushi.e 2
-pop.v.i [array]monsterinstancetype
-pushi.e 20
-pushi.e -5
-pushi.e 2
-pop.v.i [array]monstertype
-push.v self.xx
-pushi.e 460
-add.i.v
-pushi.e -5
-pushi.e 2
-pop.v.v [array]monstermakex
-push.v self.yy
-pushi.e 220
-add.i.v
-pushi.e -5
-pushi.e 2
-pop.v.v [array]monstermakey
-
-push.s ""* NONONONONONO RUN!!!! YOU ARE GONNA DIE""
-conv.s.v
-push.s ""* IT'S THE TRIPLE CHAOS""
-conv.s.v
-push.s ""* THREE JEVILS BLOCKED YOUR WAY""
-conv.s.v
-push.s ""* BIRDS ARE SINGING, JEVILS ARE CHAOSING""
-conv.s.v
-call.i choose(argc=4)
-pushi.e -5
-pushi.e 0
-pop.v.v [array]battlemsg
-
-b conti
-
-conti: pushglb.v global.jevilizer
-push.d 0.15
-cmp.d.v LT
-bf func_end
-
-push.s ""* LOOKS LIKE THE WORLD IS LITERALLY REVOLVING""
-conv.s.v
-push.s ""* WHO KEEPS SPINNING THE WORLD AROUND""
-conv.s.v
-push.s ""* JEVIL TURNED ON THE CAROUSEL FOR REAL""
-conv.s.v
-call.i choose(argc=3)
-pushi.e -5
-pushi.e 0
-pop.v.v [array]battlemsg
-", Data));
+scr_encountersetup.Code.AppendGML(@"
+if (argument0 == 25) {
+    if (global.flag[241] < 1)
+        global.flag[241] = 1;
+    
+    global.battlemsg[0] = choose(""* HE REALLY CAN BE ANYTHING"", ""* THE JOKER CARD REPLACED ANOTHER ENEMY"", ""* IT'S JUST A SIMPLE CHAOS"", ""* ANOTHER ONE OF THESE"", ""* JEVIL BLOCKED YOUR WAY"");
+    if (room == room_cc_joker) {
+        global.jevilizer = random(1);
+        if (global.jevilizer > 0.95)
+            global.battlemsg[0] = choose(""* THAT WAS TOO UNFAIR, TO BE HONEST"", ""* JEVIL DECIDED TO GIVE YOU A CHANCE"");
+        else if (global.jevilizer > 0.75) {
+            global.monsterinstancetype[0] = 284;
+            global.monstertype[0] = 20;
+            global.monstermakex[0] = (xx + 480);
+            global.monstermakey[0] = (yy + 20);
+            global.monsterinstancetype[1] = 284;
+            global.monstertype[1] = 20;
+            global.monstermakex[1] = (xx + 460);
+            global.monstermakey[1] = (yy + 220);
+            global.battlemsg[0] = choose(""* IT'S THE DOUBLE CHAOS"", ""* HOW ABOUT WE MAKE IT A TWO?"");
+        } else {
+            global.monsterinstancetype[0] = 284;
+            global.monstertype[0] = 20;
+            global.monstermakex[0] = (xx + 480);
+            global.monstermakey[0] = (yy + 20);
+            global.monsterinstancetype[1] = 284;
+            global.monstertype[1] = 20;
+            global.monstermakex[1] = (xx + 500);
+            global.monstermakey[1] = (yy + 120);
+            global.monsterinstancetype[2] = 284;
+            global.monstertype[2] = 20;
+            global.monstermakex[2] = (xx + 460);
+            global.monstermakey[2] = (yy + 220);
+            global.battlemsg[0] = choose(""* BIRDS ARE SINGING, JEVILS ARE CHAOSING"", ""* THREE JEVILS BLOCKED YOUR WAY"", ""* IT'S THE TRIPLE CHAOS"", ""* NONONONONONO RUN!!!! YOU ARE GONNA DIE"");
+        }
+        if (global.jevilizer < 0.15)
+            global.battlemsg[0] = choose(""* JEVIL TURNED ON THE CAROUSEL FOR REAL"", ""* WHO KEEPS SPINNING THE WORLD AROUND"", ""* LOOKS LIKE THE WORLD IS LITERALLY REVOLVING"");
+    }
+}", Data);
 
 var scr_text = Data.Scripts.ByName("scr_text");
-scr_text.Code.Append(Assembler.Assemble(@"
-; if (argument0 == 405 or argument0 == 410)
-pushbltn.v self.argument0
-pushi.e 405
-cmp.i.v EQ
-bt is_ok
-pushbltn.v self.argument0
-pushi.e 410
-cmp.i.v EQ
-b is_not_ok
-is_ok: push.e 1
-is_not_ok: bf func_end
-
-pushi.e -5
-pushi.e 241
-push.v [array]flag
-pushi.e 5
-cmp.i.v LT
-bf noflag
-pushi.e 5
-pushi.e -5
-pushi.e 241
-pop.v.i [array]flag
-
-; scr_ralface(0, 0)
-noflag: pushi.e 0
-conv.i.v
-pushi.e 0
-conv.i.v
-call.i scr_ralface(argc=2)
-popz.v
-
-push.s ""* I think JEVIL might have escaped.../""
-pushi.e -5
-pushi.e 1
-pop.v.s [array]msg
-
-; scr_susface(2, 2)
-pushi.e 2
-conv.i.v
-pushi.e 2
-conv.i.v
-call.i scr_susface(argc=2)
-popz.v
-
-push.s ""* You THINK so? I KNOW he escaped! Didn't you notice him yet?/""
-pushi.e -5
-pushi.e 3
-pop.v.s [array]msg
-
-push.s ""* He is everywhere!/""
-pushi.e -5
-pushi.e 4
-pop.v.s [array]msg
-
-; scr_ralface(5, 0)
-pushi.e 0
-conv.i.v
-pushi.e 5
-conv.i.v
-call.i scr_ralface(argc=2)
-popz.v
-
-push.s ""* Do you think he is still inside too?/""
-pushi.e -5
-pushi.e 6
-pop.v.s [array]msg
-
-; scr_noface(7)
-pushi.e 7
-conv.i.v
-call.i scr_noface(argc=1)
-popz.v
-
-push.s ""\TJ* I JUST WANTED TO PLAY A GAME^1, GAME./""
-pushi.e -5
-pushi.e 8
-pop.v.s [array]msg
-
-push.s ""* YOU CAME BECAUSE YOU WANT TO PLAY WITH ME^1, ME./""
-pushi.e -5
-pushi.e 9
-pop.v.s [array]msg
-
-push.s ""* A MARVELLOUS CHAOS IS ABOUT TO BREAK FREE./""
-pushi.e -5
-pushi.e 10
-pop.v.s [array]msg
-
-push.s ""* WON'T YOU LET YOURSELF INSIDE?/""
-pushi.e -5
-pushi.e 11
-pop.v.s [array]msg
-
-push.s ""* (You will regret this. Don't say I didn't warn you.)/%""
-pushi.e -5
-pushi.e 12
-pop.v.s [array]msg
-
-pushi.e obj_event_room
-pushenv func_end
-start_pushenv: pushi.e 10
-pop.v.i self.con
-popenv start_pushenv
-", Data));
+scr_text.Code.AppendGML(@"
+if ((argument0 == 405) || (argument0 == 410)) {
+    if (global.flag[241] < 5)
+        global.flag[241] = 5;
+    scr_ralface(0, 0);
+    global.msg[1] = ""* I think JEVIL might have escaped.../"";
+    scr_susface(2, 2);
+    global.msg[3] = ""* You THINK so? I KNOW he escaped! Didn't you notice him yet?/"";
+    global.msg[4] = ""* He is everywhere!/"";
+    scr_ralface(5, 0);
+    global.msg[6] = ""* Do you think he is still inside too?/"";
+    scr_noface(7);
+    global.msg[8] = ""\\TJ* I JUST WANTED TO PLAY A GAME^1, GAME./"";
+    global.msg[9] = ""* YOU CAME BECAUSE YOU WANT TO PLAY WITH ME^1, ME./"";
+    global.msg[10] = ""* A MARVELLOUS CHAOS IS ABOUT TO BREAK FREE./"";
+    global.msg[11] = ""* WON'T YOU LET YOURSELF INSIDE?/"";
+    global.msg[12] = ""* (You will regret this. Don't say I didn't warn you.)/%"";
+    with(obj_event_room)
+        con = 10;
+}", Data);
 
 var spr_jokerdoor = Data.Sprites.ByName("spr_jokerdoor");
 spr_jokerdoor.Textures[0].Texture = spr_jokerdoor.Textures[2].Texture;
@@ -402,420 +125,98 @@ spr_jokerdoor.Textures[1].Texture = spr_jokerdoor.Textures[2].Texture;
 
 
 var obj_doorX_musfade = Data.GameObjects.ByName("obj_doorX_musfade");
-obj_doorX_musfade.EventHandlerFor(EventType.Other, EventSubtypeOther.User9, Data.Strings, Data.Code, Data.CodeLocals).Replace(Assembler.Assemble(@"
-pushbltn.v self.room
-pushi.e room_cc_prison_prejoker
-cmp.i.v EQ
-bf 00000
-
-; already beaten
-pushi.e -5
-pushi.e 241
-push.v [array]flag
-pushi.e 6
-cmp.i.v LT
-bf 00000
-
-pushi.e 666
-pop.v.i global.typer
-pushi.e 0
-pop.v.i global.fc
-
-push.s ""* WHAT ARE YOU DOING? ALREADY FORGOT?/""
-pushi.e -5
-pushi.e 0
-pop.v.s [array]msg
-
-push.s ""* YOUR CHOICES DON'T MATTER/""
-pushi.e -5
-pushi.e 1
-pop.v.s [array]msg
-
-push.s ""* SINCE WHEN DOES THIS GAME GIVE YOU A CHOICE?/%""
-pushi.e -5
-pushi.e 2
-pop.v.s [array]msg
-
-pushi.e obj_dialoguer
-conv.i.v
-pushi.e 0
-conv.i.v
-pushi.e 0
-conv.i.v
-call.i instance_create(argc=3)
-popz.v
-
-call.i instance_destroy(argc=0)
-popz.v
-
-exit.v
-
-00000: pushi.e 3
-00001: pop.v.i global.interact
-00003: pushi.e 14
-00004: conv.i.v
-00005: pushi.e 0
-00006: conv.i.v
-00007: pushi.e -5
-00008: pushi.e 1
-00009: push.v [array]currentsong
-00011: call.i mus_volume(argc=3)
-00013: popz.v
-00014: pushi.e 137
-00015: conv.i.v
-00016: pushi.e 0
-00017: conv.i.v
-00018: pushi.e 0
-00019: conv.i.v
-00020: call.i instance_create(argc=3)
-00022: popz.v
-00023: push.v self.touched
-00025: pushi.e 0
-00026: cmp.i.v EQ
-00027: bf func_end
-00028: pushi.e 15
-00029: pushi.e -1
-00030: pushi.e 2
-00031: pop.v.i [array]alarm
-00033: pushi.e 14
-00034: pushi.e -1
-00035: pushi.e 3
-00036: pop.v.i [array]alarm
-00038: pushi.e 1
-00039: pop.v.i self.touched
-", Data));
+obj_doorX_musfade.EventHandlerFor(EventType.Other, EventSubtypeOther.User9, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+if (room == room_cc_prison_prejoker && global.flag[241] < 6) {
+    global.typer = 666;
+    global.fc = 0;
+    global.msg[0] = ""* WHAT ARE YOU DOING? ALREADY FORGOT?/"";
+    global.msg[1] = ""* YOUR CHOICES DON'T MATTER/"";
+    global.msg[2] = ""* SINCE WHEN DOES THIS GAME GIVE YOU A CHOICE?/%"";
+    instance_create(0, 0, obj_dialoguer);
+    instance_destroy();
+    return;
+}
+global.interact = 3;
+mus_volume(global.currentsong[1], 0, 14);
+instance_create(0, 0, obj_fadeout);
+if (touched == 0) {
+    alarm[2] = 15;
+    alarm[3] = 14;
+    touched = 1;
+}", Data);
 
 var obj_jokerbattleevent = Data.GameObjects.ByName("obj_jokerbattleevent");
-obj_jokerbattleevent.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushi.e obj_battlecontroller
-conv.i.v
-call.i instance_exists(argc=1)
-conv.v.b
-bf not_in_battle
+obj_jokerbattleevent.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+if (instance_exists(obj_battlecontroller) && global.jevilizer < 0.15) {
+    __view_set(4, 0, ((__view_get(4, 0) + (sin((global.time / 15)) / 2)) + 1));
+    __view_set(11, 0, (__view_get(11, 0) + (cos((global.time / 10)) * 1.5)));
+    __view_set(12, 0, (__view_get(12, 0) + (sin((global.time / 10)) * 1.5)));
+}
+if (con == 4)
+    con = 1337;
+if (con == 1338) {
+    snd_play(snd_joker_laugh1);
+    global.typer = 35;
+    global.fc = 0;
+    global.msg[0] = ""* UEE HEE^1!&* VISITORS^1, VISITORS^1!&* NOW WE CAN PLAY^1, PLAY!/"";
+    global.msg[1] = ""* I CAN BE IN MULTIPLE PLACES AT ONCE TODAY!/"";
+    global.msg[2] = ""* BUT TO HAVE SOME MORE CHAOS^1, CHAOS/"";
+    global.msg[3] = ""* WOULDN'T IT BE MORE FUN TO HAVE MULTIPLE OF ME IN ONE PLACE?/%"";
+    instance_create(0, 0, obj_dialoguer)
+    con = 1339
+}
+if ((con == 1339) && (!d_ex())) {
+    image_speed = 0.5;
+    snd_play(snd_joker_laugh0);
+    con = 1340;
+    alarm[4] = 10;
+}
+if (con == 1341) {
+    snd_play(snd_dooropen);
+    snd_play(snd_locker);
+    con = 1342;
+    alarm[4] = 10;
+}
+if (con == 1343) {
+    snd_play(snd_save);
+    scr_save();
+    con = 1344;
+    alarm[4] = 10;
+}
+if (con == 1345) {
+    image_speed = 0;
+    global.typer = 30;
+    global.fe = 0;
+    global.typer = 35;
+    global.fc = 0;
+    scr_noface(0);
+    global.msg[1] = ""* (Another JEVIL closed the door behind you.)/"";
+    scr_susface(2, 0);
+    global.msg[3] = ""* So that's the kinda game you wanna play^1, huh...?/"";
+    global.msg[4] = ""\\E2* Then^1, I gotta warn you.../%"";
+    instance_create(0, 0, obj_dialoguer);
+    con = 15.1;
+}", Data);
 
-pushglb.v global.jevilizer
-push.d 0.15
-cmp.d.v LT
-bf not_in_battle
+obj_jokerbattleevent.EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+if (global.debug) {
+    draw_set_color(0xFFFF);
+    draw_text(50, 50, global.jevilizer);
+}", Data);
 
-; 4 = view_angle
-pushi.e 0
-conv.i.v
-pushi.e 4
-conv.i.v
-call.i __view_get(argc=2)
-pushglb.v global.time
-push.d 15
-div.d.v
-call.i sin(argc=1)
-push.d 2
-div.d.v
-add.v.v
-push.d 1
-add.d.v
-pushi.e 0
-conv.i.v
-pushi.e 4
-conv.i.v
-call.i __view_set(argc=3)
-popz.v
-
-; 11 = view_xport
-pushi.e 0
-conv.i.v
-pushi.e 11
-conv.i.v
-call.i __view_get(argc=2)
-pushglb.v global.time
-push.d 10
-div.d.v
-call.i cos(argc=1)
-push.d 1.5
-mul.d.v
-add.v.v
-pushi.e 0
-conv.i.v
-pushi.e 11
-conv.i.v
-call.i __view_set(argc=3)
-popz.v
-
-; 12 = view_yport
-pushi.e 0
-conv.i.v
-pushi.e 12
-conv.i.v
-call.i __view_get(argc=2)
-pushglb.v global.time
-push.d 10
-div.d.v
-call.i sin(argc=1)
-push.d 1.5
-mul.d.v
-add.v.v
-pushi.e 0
-conv.i.v
-pushi.e 12
-conv.i.v
-call.i __view_set(argc=3)
-popz.v
-
-not_in_battle: push.v self.con
-pushi.e 4
-cmp.i.v EQ
-bf no_detour
-
-pushi.e 1337
-pop.v.i self.con
-
-no_detour: push.v self.con
-pushi.e 1338
-cmp.i.v EQ
-bf not_1338
-
-pushi.e snd_joker_laugh1
-conv.i.v
-call.i snd_play(argc=1)
-popz.v
-
-pushi.e 35
-pop.v.i global.typer
-pushi.e 0
-pop.v.i global.fc
-
-push.s ""* UEE HEE^1!&* VISITORS^1, VISITORS^1!&* NOW WE CAN PLAY^1, PLAY!/""
-pushi.e -5
-pushi.e 0
-pop.v.s [array]msg
-
-push.s ""* I CAN BE IN MULTIPLE PLACES AT ONCE TODAY!/""
-pushi.e -5
-pushi.e 1
-pop.v.s [array]msg
-
-push.s ""* BUT TO HAVE SOME MORE CHAOS^1, CHAOS/""
-pushi.e -5
-pushi.e 2
-pop.v.s [array]msg
-
-push.s ""* WOULDN'T IT BE MORE FUN TO HAVE MULTIPLE OF ME IN ONE PLACE?/%""
-pushi.e -5
-pushi.e 3
-pop.v.s [array]msg
-
-pushi.e obj_dialoguer
-conv.i.v
-pushi.e 0
-conv.i.v
-pushi.e 0
-conv.i.v
-call.i instance_create(argc=3)
-popz.v
-
-pushi.e 1339
-pop.v.i self.con
-
-not_1338: push.v self.con
-pushi.e 1339
-cmp.i.v EQ
-bf 1339_set_0
-call.i d_ex(argc=0)
-conv.v.b
-not.b
-b 1339_check_complete
-1339_set_0: push.e 0
-1339_check_complete: bf not_1339
-
-push.d 0.5
-pop.v.d self.image_speed
-
-pushi.e 119
-conv.i.v
-call.i snd_play(argc=1)
-popz.v
-
-pushi.e 1340
-pop.v.i self.con
-
-pushi.e 10
-pushi.e -1
-pushi.e 4
-pop.v.i [array]alarm
-
-not_1339: push.v self.con
-pushi.e 1341
-cmp.i.v EQ
-bf not_1341
-
-pushi.e snd_dooropen
-conv.i.v
-call.i snd_play(argc=1)
-popz.v
-
-pushi.e snd_locker
-conv.i.v
-call.i snd_play(argc=1)
-popz.v
-
-pushi.e 1342
-pop.v.i self.con
-
-pushi.e 10
-pushi.e -1
-pushi.e 4
-pop.v.i [array]alarm
-
-not_1341: push.v self.con
-pushi.e 1343
-cmp.i.v EQ
-bf not_1343
-
-pushi.e snd_save
-conv.i.v
-call.i snd_play(argc=1)
-popz.v
-
-; You will regret this
-call.i scr_save(argc=0)
-popz.v
-
-pushi.e 1344
-pop.v.i self.con
-
-pushi.e 10
-pushi.e -1
-pushi.e 4
-pop.v.i [array]alarm
-
-not_1343: push.v self.con
-pushi.e 1345
-cmp.i.v EQ
-bf func_end
-
-pushi.e 0
-pop.v.i self.image_speed
-
-pushi.e 30
-pop.v.i global.typer
-pushi.e 0
-pop.v.i global.fe
-pushi.e 35
-pop.v.i global.typer
-pushi.e 0
-pop.v.i global.fc
-
-pushi.e 0
-conv.i.v
-call.i scr_noface(argc=1)
-popz.v
-
-push.s ""* (Another JEVIL closed the door behind you.)/""
-pushi.e -5
-pushi.e 1
-pop.v.s [array]msg
-
-pushi.e 0
-conv.i.v
-pushi.e 2
-conv.i.v
-call.i scr_susface(argc=2)
-popz.v
-
-push.s ""* So that's the kinda game you wanna play^1, huh...?/""
-pushi.e -5
-pushi.e 3
-pop.v.s [array]msg
-
-push.s ""\E2* Then^1, I gotta warn you.../%""
-pushi.e -5
-pushi.e 4
-pop.v.s [array]msg
-
-pushi.e obj_dialoguer
-conv.i.v
-pushi.e 0
-conv.i.v
-pushi.e 0
-conv.i.v
-call.i instance_create(argc=3)
-popz.v
-
-push.d 15.1
-pop.v.d self.con
-", Data));
-
-obj_jokerbattleevent.EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushglb.v global.debug
-pushi.e 1
-cmp.i.v EQ
-bf func_end
-
-push.i " + 0xFFFF00.ToString() /* TODO: add this syntax to the assembler */ + @"
-conv.i.v
-call.i draw_set_color(argc=1)
-popz.v
-pushglb.v global.jevilizer
-pushi.e 50
-conv.i.v
-pushi.e 50
-conv.i.v
-call.i draw_text(argc=3)
-popz.v
-", Data));
-
-obj_jokerbattleevent.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushi.e -5
-pushi.e 1
-push.v [array]currentsong
-call.i snd_is_playing(argc=1)
-conv.v.b
-not.b
-bf func_end
-
-push.s ""prejoker.ogg""
-conv.s.v
-call.i snd_init(argc=1)
-pushi.e -5
-pushi.e 0
-pop.v.v [array]currentsong
-
-push.d 0.85
-conv.d.v
-pushi.e 1
-conv.i.v
-pushi.e -5
-pushi.e 0
-push.v [array]currentsong
-call.i mus_loop_ext(argc=3)
-pushi.e -5
-pushi.e 1
-pop.v.v [array]currentsong
-
-;pushi.e 0
-;conv.i.v
-;pushi.e 0
-;conv.i.v
-;pushi.e -5
-;pushi.e 1
-;push.v [array]currentsong
-;call.i mus_volume(argc=3)
-;popz.v
-", Data));
+obj_jokerbattleevent.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+if (!snd_is_playing(global.currentsong[1])) {
+    global.currentsong[0] = snd_init(""prejoker.ogg"");
+    global.currentsong[1] = mus_loop_ext(global.currentsong[0], 1, 0.85);
+}", Data);
 
 var scr_roomname = Data.Scripts.ByName("scr_roomname");
 scr_roomname.Code.Instructions.RemoveAt(scr_roomname.Code.Instructions.Count - 1); // push.v self.roomname
 scr_roomname.Code.Instructions.RemoveAt(scr_roomname.Code.Instructions.Count - 1); // ret.v
-scr_roomname.Code.Append(Assembler.Assemble(@"
-pushbltn.v self.argument0
-pushi.e room_cc_joker
-cmp.i.v EQ
-bf go_ret
-push.s ""CHAOS, CHAOS!""
-pop.v.s self.roomname
-
-go_ret: push.v self.roomname
-ret.v
-", Data));
+scr_roomname.Code.AppendGML(@"
+if (argument0 == room_cc_joker)
+    roomname = ""CHAOS, CHAOS!"";
+return roomname;", Data);
 
 var obj_shop1 = Data.GameObjects.ByName("obj_shop1");
 var obj_shop1_Draw = obj_shop1.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals);
@@ -849,50 +250,19 @@ for (int i = 0; i < obj_shop1_Draw.Instructions.Count; i++)
 obj_shop1_Draw.UpdateAddresses();
 obj_shop1_Draw.Replace(Assembler.Assemble(obj_shop1_Draw.Disassemble(Data.Variables, Data.CodeLocals.For(obj_shop1_Draw)), Data)); // TODO: no idea why this is needed
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f6, Data.Strings, Data.Code, Data.CodeLocals).Replace(Assembler.Assemble(@"
-pushglb.v global.debug
-pushi.e 1
-cmp.i.v EQ
-bf func_end
+Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f6, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+if (global.debug == 1)
+    global.flag[241] = 1;", Data);
 
-pushi.e 1
-pushi.e -5
-pushi.e 241
-pop.v.i [array]flag
-", Data));
+Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f7, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+if (global.debug == 1)
+    global.flag[241] = 7;", Data);
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f7, Data.Strings, Data.Code, Data.CodeLocals).Replace(Assembler.Assemble(@"
-pushglb.v global.debug
-pushi.e 1
-cmp.i.v EQ
-bf func_end
-
-pushi.e 7
-pushi.e -5
-pushi.e 241
-pop.v.i [array]flag
-", Data));
-
-Data.GameObjects.ByName("obj_jokerbg_triangle_real").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushbltn.v self.room
-pushi.e room_cc_joker
-cmp.i.v EQ
-bf func_end
-
-pushi.e obj_joker
-conv.i.v
-call.i instance_number(argc=1)
-conv.v.i
-dup.i 0
-
-pushi.e 0
-cmp.i.i NEQ
-pop.v.i self.on
-
-dup.i 0
-mul.i.i
-pop.v.i self.rotspeed
-", Data));
+Data.GameObjects.ByName("obj_jokerbg_triangle_real").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+if (room == room_cc_joker) {
+    on = (instance_number(obj_joker) != 0);
+    rotspeed = (instance_number(obj_joker) * instance_number(obj_joker));
+}", Data);
 
 var obj_joker_Draw = obj_joker.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals);
 var obj_joker_Draw_code = obj_joker_Draw.Disassemble(Data.Variables, Data.CodeLocals.For(obj_joker_Draw));
@@ -905,4 +275,4 @@ obj_joker_Draw.Replace(Assembler.Assemble(obj_joker_Draw_code, Data));
 
 ChangeSelection(spr_joker_enemy);
 
-ScriptMessage("* I'M FREE!");
+ScriptMessage("* I'M FREE!\n\nDebug mode may be required for this to work.");

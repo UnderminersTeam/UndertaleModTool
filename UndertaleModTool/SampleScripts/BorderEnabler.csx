@@ -117,14 +117,7 @@ for(int i = 0; i < gml_Object_obj_time_Step_1.Instructions.Count; i++)
 
 // Also resize the window so that the border can be seen without going fullscreen
 Data.Functions.EnsureDefined("window_set_size", Data.Strings);
-gml_Object_obj_time_Create_0.Append(Assembler.Assemble(@"
-pushi.e 540
-conv.i.v
-pushi.e 960
-conv.i.v
-call.i window_set_size(argc=2)
-popz.i
-", Data));
+gml_Object_obj_time_Create_0.AppendGML("window_set_size(960, 540);", Data);
 
 // Load border textures
 Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, UndertaleEmbeddedTexture>();
