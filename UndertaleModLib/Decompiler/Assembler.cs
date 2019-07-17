@@ -178,7 +178,11 @@ namespace UndertaleModLib.Decompiler
         {
             if (data != null)
             {
-                int id = data.IndexOf(data.ByName(line));
+                UndertaleNamedResource byName = data.ByName(line);
+                if (byName == null)
+                    throw new FormatException("Could not locate resource named '" + line + "'.");
+
+                int id = data.IndexOf(byName);
                 if (id >= 0)
                     return id;
             }
@@ -200,14 +204,23 @@ namespace UndertaleModLib.Decompiler
                     continue;
                 string label = null;
                 int labelEnd = line.IndexOf(':');
-                if (labelEnd >= 0)
+
+                if (labelEnd > 0)
                 {
-                    if (line.Take(labelEnd).All(c => Char.IsLetterOrDigit(c) || c.Equals('_')))
+                    bool isLabel = true;
+                    for (var i = 0; i < labelEnd; i++)
+                    {
+                        if (!Char.IsLetterOrDigit(line[i]) && line[i] != '_')
+                        {
+                            isLabel = false;
+                            break;
+                        }
+                    }
+
+                    if (isLabel)
                     {
                         label = line.Substring(0, labelEnd).Trim();
                         line = line.Substring(labelEnd + 1);
-                        if (String.IsNullOrEmpty(label))
-                            throw new Exception("Empty label");
                     }
                 }
                 line = line.Trim();

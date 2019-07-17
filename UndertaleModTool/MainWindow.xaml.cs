@@ -673,7 +673,7 @@ namespace UndertaleModTool
                         loader.RegisterDependency(typeof(JsonConvert).GetTypeInfo().Assembly);
 
                         var script = CSharpScript.Create<object>(CommandBox.Text, ScriptOptions.Default
-                            .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting")
+                            .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "UndertaleModLib.Compiler")
                             .AddImports("UndertaleModTool", "System", "System.IO", "System.Collections.Generic", "System.Text.RegularExpressions")
                             .AddReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly))
                             .AddReferences(GetType().GetTypeInfo().Assembly)
@@ -814,7 +814,7 @@ namespace UndertaleModTool
                     loader.RegisterDependency(typeof(JsonConvert).GetTypeInfo().Assembly);
 
                     var script = CSharpScript.Create<object>(File.ReadAllText(path), ScriptOptions.Default
-                        .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting")
+                        .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "UndertaleModLib.Compiler")
                         .AddImports("UndertaleModTool", "System", "System.IO", "System.Collections.Generic", "System.Text.RegularExpressions")
                         .AddReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly))
                         .AddReferences(GetType().GetTypeInfo().Assembly)
@@ -843,6 +843,11 @@ namespace UndertaleModTool
         public void ScriptMessage(string message)
         {
             MessageBox.Show(message, "Script message", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        public void ScriptError(string error, string title)
+        {
+            MessageBox.Show(error, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         public bool ScriptQuestion(string message)

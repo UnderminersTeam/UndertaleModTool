@@ -46,17 +46,17 @@ namespace UndertaleModLib
         public bool UnsupportedBytecodeVersion = false;
         public int PaddingAlignException = -1;
 
-        public UndertaleNamedResource ByName(string name)
+        public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {
             // TODO: Check if those are all possible types
-            return Sounds.ByName(name) ??
-                Sprites.ByName(name) ??
-                Backgrounds.ByName(name) ??
-                Paths.ByName(name) ??
-                Scripts.ByName(name) ??
-                Fonts.ByName(name) ??
-                GameObjects.ByName(name) ??
-                Rooms.ByName(name) ??
+            return Sounds.ByName(name, ignoreCase) ??
+                Sprites.ByName(name, ignoreCase) ??
+                Backgrounds.ByName(name, ignoreCase) ??
+                Paths.ByName(name, ignoreCase) ??
+                Scripts.ByName(name, ignoreCase) ??
+                Fonts.ByName(name, ignoreCase) ??
+                GameObjects.ByName(name, ignoreCase) ??
+                Rooms.ByName(name, ignoreCase) ??
                 (UndertaleNamedResource)null;
         }
 
@@ -176,13 +176,11 @@ namespace UndertaleModLib
 
     public static class UndertaleDataExtensionMethods
     {
-        public static T ByName<T>(this IList<T> list, string name) where T : UndertaleNamedResource
+        public static T ByName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
         {
             foreach(var item in list)
-            {
-                if (item.Name.Content == name)
+                if (ignoreCase ? (item.Name.Content.Equals(name, StringComparison.OrdinalIgnoreCase)) : (item.Name.Content == name))
                     return item;
-            }
             return default(T);
         }
 
