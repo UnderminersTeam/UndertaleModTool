@@ -988,8 +988,8 @@ namespace UndertaleModTool
 
         private void UpdateObjectLabel(object obj)
         {
-            int foundIndex = obj is UndertaleNamedResource ? Data.IndexOf(obj as UndertaleNamedResource) : -1;
-            SetIDString(foundIndex == -1 ? "None" : Convert.ToString(foundIndex));
+            int foundIndex = obj is UndertaleNamedResource ? Data.IndexOf(obj as UndertaleNamedResource, false) : -1;
+            SetIDString(foundIndex == -1 ? "None" : (foundIndex == -2 ? "N/A" : Convert.ToString(foundIndex)));
         }
 
         public void ChangeSelection(object newsel)

@@ -57,10 +57,13 @@ namespace UndertaleModLib
                 Fonts.ByName(name, ignoreCase) ??
                 GameObjects.ByName(name, ignoreCase) ??
                 Rooms.ByName(name, ignoreCase) ??
+                Extensions.ByName(name, ignoreCase) ??
+                Shaders.ByName(name, ignoreCase) ??
+                Timelines.ByName(name, ignoreCase) ??
                 (UndertaleNamedResource)null;
         }
 
-        public int IndexOf(UndertaleNamedResource obj)
+        public int IndexOf(UndertaleNamedResource obj, bool panicIfInvalid = true)
         {
             if (obj is UndertaleSound)
                 return Sounds.IndexOf(obj as UndertaleSound);
@@ -78,7 +81,16 @@ namespace UndertaleModLib
                 return GameObjects.IndexOf(obj as UndertaleGameObject);
             if (obj is UndertaleRoom)
                 return Rooms.IndexOf(obj as UndertaleRoom);
-            throw new InvalidOperationException();
+            if (obj is UndertaleExtension)
+                return Extensions.IndexOf(obj as UndertaleExtension);
+            if (obj is UndertaleShader)
+                return Shaders.IndexOf(obj as UndertaleShader);
+            if (obj is UndertaleTimeline)
+                return Timelines.IndexOf(obj as UndertaleTimeline);
+
+            if (panicIfInvalid)
+                throw new InvalidOperationException();
+            return -2;
         }
 
         internal int IndexOfByName(string line)
