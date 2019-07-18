@@ -616,6 +616,18 @@
   <ItemGroup>
     <Resource Include="Resources\mus_dance_of_dog.wav" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="SampleScripts\ExportAllTextures.csx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SampleScripts\ExportAllSounds.csx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SampleScripts\ExportAllCode.csx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SampleScripts\ExportAllFonts.csx" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterResolveReferences">
     <ItemGroup>

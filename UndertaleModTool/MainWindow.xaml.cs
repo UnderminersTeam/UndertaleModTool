@@ -1012,56 +1012,6 @@ namespace UndertaleModTool
                 throw new Exception("Please load data.win first!");
         }
 
-        private async void MenuItem_BatchDecompile_Click(object sender, RoutedEventArgs e)
-        {
-            if (Data == null)
-                return; // TODO: disable menu item
-            
-            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            dialog.IsFolderPicker = true;
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
-            {
-                await BatchDecompile(dialog.FileName);
-            }
-        }
-        private async Task BatchDecompile(string outdir)
-        {
-            LoaderDialog dialog = new LoaderDialog("Decompiling", "Decompiling, please wait...");
-            dialog.Owner = this;
-            dialog.Maximum = Data.Code.Count;
-            IProgress<Tuple<int, string>> progress = new Progress<Tuple<int, string>>(i => { dialog.ReportProgress(i.Item2, i.Item1); });
-            int count = 0;
-            object countLock = new object();
-            Task t = Task.Run(() =>
-            {
-                Parallel.ForEach(Data.Code, (code) =>
-                {
-                    string path = System.IO.Path.Combine(outdir, code.Name.Content + ".gml");
-                    try
-                    {
-                        DecompileContext context = new DecompileContext(Data, false);
-                        string decomp = Decompiler.Decompile(code, context);
-                        File.WriteAllText(path, decomp);
-                    }
-                    catch (Exception e)
-                    {
-                        File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
-                    }
-                    lock(countLock)
-                    {
-                        progress.Report(new Tuple<int, string>(++count, code.Name.Content));
-                    }
-                });
-
-                Dispatcher.Invoke(() =>
-                {
-                    dialog.Hide();
-                });
-            });
-            dialog.ShowDialog();
-            await t;
-        }
-
         private async void MenuItem_OffsetMap_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();

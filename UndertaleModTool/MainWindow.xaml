@@ -73,7 +73,6 @@
                         </MenuItem.Style>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="_Batch decompile" Click="MenuItem_BatchDecompile_Click"/>
                     <MenuItem Header="Generate o_ffset map" Click="MenuItem_OffsetMap_Click"/>
                     <MenuItem Header="Export to GameMaker project" Click="MenuItem_GameMaker_Click"/>
                     <Separator/>
