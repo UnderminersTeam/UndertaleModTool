@@ -21,6 +21,7 @@ namespace UndertaleModLib.Decompiler
         public bool EnableStringLabels;
 
         // Decompilation instance data
+        public HashSet<string> LocalVarDefines = new HashSet<string>();
         public Dictionary<string, TempVarAssigmentStatement> TempVarMap = new Dictionary<string, TempVarAssigmentStatement>();
         public AssignmentStatement CompilerTempVar;
         public Dictionary<UndertaleVariable, AssetIDType> assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
@@ -49,6 +50,7 @@ namespace UndertaleModLib.Decompiler
             TempVarMap.Clear();
             CompilerTempVar = null;
             assetTypes.Clear();
+            LocalVarDefines.Clear();
         }
 
         public TempVar NewTempVar()
@@ -708,6 +710,8 @@ namespace UndertaleModLib.Decompiler
             public TempVarReference Var;
             public Expression Value;
 
+            public bool HasVarKeyword;
+
             public TempVarAssigmentStatement(TempVarReference var, Expression value)
             {
                 Var = var;
@@ -716,7 +720,10 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                return String.Format("{0} = {1}", Var.Var.Name, Value.ToString(context));
+                if (context.isGameMaker2 && !HasVarKeyword && context.LocalVarDefines.Add(Var.Var.Name))
+                    HasVarKeyword = true;
+
+                return String.Format("{0}{1} = {2}", (HasVarKeyword ? "var " : ""), Var.Var.Name, Value.ToString(context));
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
@@ -821,6 +828,8 @@ namespace UndertaleModLib.Decompiler
             public ExpressionVar Destination;
             public Expression Value;
 
+            public bool HasVarKeyword;
+
             public AssignmentStatement(ExpressionVar destination, Expression value)
             {
                 Destination = destination;
@@ -829,6 +838,13 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
+                string varName = Destination.ToString(context);
+
+                if (context.isGameMaker2 && !HasVarKeyword && (context.Data != null && context.Data.CodeLocals.For(context.TargetCode).HasLocal(varName)) && context.LocalVarDefines.Add(varName))
+                    HasVarKeyword = true;
+
+                string varPrefix = (HasVarKeyword ? "var " : "");
+
                 // Check for possible ++, --, or operation equal (for single vars)
                 if (Value is ExpressionTwo && ((Value as ExpressionTwo).Argument1 is ExpressionVar) && 
                     ((Value as ExpressionTwo).Argument1 as ExpressionVar).Var == Destination.Var)
@@ -838,7 +854,7 @@ namespace UndertaleModLib.Decompiler
                     {
                         ExpressionConstant c = (two.Argument2 as ExpressionConstant);
                         if (c.IsPushE && ExpressionConstant.ConvertToInt(c.Value) == 1)
-                            return String.Format("{0}" + ((two.Opcode == UndertaleInstruction.Opcode.Add) ? "++" : "--"), Destination.ToString(context));
+                            return String.Format("{0}" + ((two.Opcode == UndertaleInstruction.Opcode.Add) ? "++" : "--"), varName);
                     }
                     
                     // Not ++ or --, could potentially be an operation equal
@@ -851,9 +867,9 @@ namespace UndertaleModLib.Decompiler
                                a.VarType == b.VarType && a.ArrayIndex1 == b.ArrayIndex1 && a.ArrayIndex2 == b.ArrayIndex2;
                     }
                     if (Destination.InstType is ExpressionConstant && checkEqual(Destination, (ExpressionVar)two.Argument1) && two.Opcode != UndertaleInstruction.Opcode.Shl && two.Opcode != UndertaleInstruction.Opcode.Shr && two.Opcode != UndertaleInstruction.Opcode.Rem)
-                        return String.Format("{0} {1}= {2}", Destination.ToString(context), Expression.OperationToPrintableString(two.Opcode), two.Argument2.ToString(context));
+                        return String.Format("{0}{1} {2}= {3}", varPrefix, varName, Expression.OperationToPrintableString(two.Opcode), two.Argument2.ToString(context));
                 }
-                return String.Format("{0} = {1}", Destination.ToString(context), Value.ToString(context));
+                return String.Format("{0}{1} = {2}", varPrefix, varName, Value.ToString(context));
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
@@ -2523,7 +2539,7 @@ namespace UndertaleModLib.Decompiler
 
             foreach (var possibleName in possibleVars)
             {
-                if (possibleName == "arguments" || possibleName == "$$$$temp$$$$")
+                if (possibleName == "arguments" || possibleName == "$$$$temp$$$$" || context.LocalVarDefines.Contains(possibleName))
                     continue;
 
                 if (tempBuilder.Length > 0)

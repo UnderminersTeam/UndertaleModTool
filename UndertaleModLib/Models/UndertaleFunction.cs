@@ -80,6 +80,11 @@ namespace UndertaleModLib.Models
             }
             Debug.Assert(Locals.Count == count);
         }
+
+        public bool HasLocal(string varName)
+        {
+            return Locals.Any(local=>local.Name.Content == varName);
+        }
         
         // TODO: INotifyPropertyChanged
         public class LocalVar : UndertaleObject
