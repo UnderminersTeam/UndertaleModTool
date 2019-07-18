@@ -2487,70 +2487,49 @@ namespace UndertaleModLib.Decompiler
             return blocks;
         }
 
-        public static string Decompile(UndertaleCode code, DecompileContext context)
+        private static string MakeLocalVars(DecompileContext context, string decompiledCode)
         {
-            context.Setup(code);
-
-            Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
-            DecompileFromBlock(context, blocks[0]);
-            DoTypePropagation(context, blocks);
-            List<Statement> stmts = HLDecompile(context, blocks, blocks[0], blocks[code.Length / 4]);
-
-            StringBuilder sb = new StringBuilder();
-
             // Mark local variables as local.
+            UndertaleCode code = context.TargetCode;
             StringBuilder tempBuilder = new StringBuilder();
             UndertaleCodeLocals locals = context.Data != null ? context.Data.CodeLocals.For(code) : null;
 
-            // Write code.
-            foreach (var stmt in stmts)
-                sb.Append(stmt.ToString(context) + "\n");
-            string decompiledCode = sb.ToString();
-
-            // Build a list of code locals
+            List<string> possibleVars = new List<string>();
             if (locals != null)
             {
                 foreach (var local in locals.Locals)
-                {
-                    if (local.Name.Content == "arguments" || local.Name.Content == "$$$$temp$$$$")
-                        continue;
-
-                    if (tempBuilder.Length > 0)
-                        tempBuilder.Append(", ");
-
-                    tempBuilder.Append(local.Name.Content);
-                }
+                    possibleVars.Add(local.Name.Content);
             }
             else
             {
                 // Time to search through this thing manually.
-                List<string> localSearch = new List<string>();
                 for (int i = 0; i < code.Instructions.Count; i++)
                 {
                     var inst = code.Instructions[i];
                     if (inst.Kind == UndertaleInstruction.Opcode.PushLoc)
                     {
                         string name = (inst.Value as UndertaleInstruction.Reference<UndertaleVariable>)?.Target?.Name?.Content;
-                        if (name != null && !localSearch.Contains(name))
-                            localSearch.Add(name);
+                        if (name != null && !possibleVars.Contains(name))
+                            possibleVars.Add(name);
                     }
                     else if (inst.Kind == UndertaleInstruction.Opcode.Pop && inst.TypeInst == UndertaleInstruction.InstanceType.Local)
                     {
                         string name = inst.Destination.Target?.Name?.Content;
-                        if (name != null && !localSearch.Contains(name))
-                            localSearch.Add(name);
+                        if (name != null && !possibleVars.Contains(name))
+                            possibleVars.Add(name);
                     }
                 }
-                foreach (string local in localSearch)
-                {
-                    if (local == "arguments" || local == "$$$$temp$$$$")
-                        continue;
+            }
 
-                    if (tempBuilder.Length > 0)
-                        tempBuilder.Append(", ");
+            foreach (var possibleName in possibleVars)
+            {
+                if (possibleName == "arguments" || possibleName == "$$$$temp$$$$")
+                    continue;
 
-                    tempBuilder.Append(local);
-                }
+                if (tempBuilder.Length > 0)
+                    tempBuilder.Append(", ");
+
+                tempBuilder.Append(possibleName);
             }
 
             // Add tempvars to locals
@@ -2566,11 +2545,28 @@ namespace UndertaleModLib.Decompiler
                 }
             }
 
-            // Add the locals to the top of the code
+            string result = "";
             if (tempBuilder.Length > 0)
-                decompiledCode = "var " + tempBuilder.ToString() + ";\n" + decompiledCode;
+                result = "var " + tempBuilder.ToString() + ";\n";
+            return result;
+        }
 
-            return decompiledCode;
+        public static string Decompile(UndertaleCode code, DecompileContext context)
+        {
+            context.Setup(code);
+
+            Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
+            DecompileFromBlock(context, blocks[0]);
+            DoTypePropagation(context, blocks);
+            List<Statement> stmts = HLDecompile(context, blocks, blocks[0], blocks[code.Length / 4]);
+
+            // Write code.
+            StringBuilder sb = new StringBuilder();
+            foreach (var stmt in stmts)
+                sb.Append(stmt.ToString(context) + "\n");
+
+            string decompiledCode = sb.ToString();
+            return MakeLocalVars(context, decompiledCode) + decompiledCode;
         }
 
         private static void DoTypePropagation(DecompileContext context, Dictionary<uint, Block> blocks)
