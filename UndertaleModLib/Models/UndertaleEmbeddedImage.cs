@@ -11,7 +11,7 @@ namespace UndertaleModLib.Models
     public class UndertaleEmbeddedImage : UndertaleNamedResource
     {
         public UndertaleString Name { get; set; }
-        public UndertaleTexturePageItem TextureEntry;
+        public UndertaleTexturePageItem TextureEntry { get; set; }
 
         public UndertaleEmbeddedImage()
         {
