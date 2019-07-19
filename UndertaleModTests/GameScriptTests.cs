@@ -70,6 +70,21 @@ namespace UndertaleModTests
                 return await script.RunAsync(this);
             }
         }
+
+        public void ScriptError(string error, string title)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string PromptChooseDirectory(string prompt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string PromptLoadFile(string defaultExt, string filter)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     [TestClass]
