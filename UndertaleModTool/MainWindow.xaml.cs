@@ -845,6 +845,26 @@ namespace UndertaleModTool
             }
         }
 
+        public string PromptLoadFile(string defaultExt, string filter)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.DefaultExt = defaultExt != null ? default : "win";
+            dlg.Filter = filter != null ? filter : "Game Maker Studio data files (.win, .unx, .ios, audiogroup*.dat)|*.win;*.unx;*.ios;audiogroup*.dat|All files|*";
+            return dlg.ShowDialog() == true ? dlg.FileName : null;
+        }
+
+        public string PromptChooseDirectory(string prompt)
+        {
+            OpenFileDialog folderBrowser = new OpenFileDialog();
+            // Set validate names and check file exists to false otherwise windows will
+            // not let you select "Folder Selection."
+            folderBrowser.ValidateNames = false;
+            folderBrowser.CheckFileExists = false;
+            folderBrowser.CheckPathExists = true;
+            folderBrowser.FileName = prompt != null ? prompt : "Folder Selection.";
+            return folderBrowser.ShowDialog() == true ? System.IO.Path.GetDirectoryName(folderBrowser.FileName) + Path.DirectorySeparatorChar : null;
+        }
+
         public void ScriptMessage(string message)
         {
             MessageBox.Show(message, "Script message", MessageBoxButton.OK, MessageBoxImage.Information);

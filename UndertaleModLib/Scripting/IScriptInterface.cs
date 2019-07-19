@@ -24,5 +24,9 @@ namespace UndertaleModLib.Scripting
         void HideProgressBar();
 
         void ChangeSelection(object newsel);
+
+        string PromptChooseDirectory(string prompt);
+
+        string PromptLoadFile(string defaultExt, string filter);
     }
 }
