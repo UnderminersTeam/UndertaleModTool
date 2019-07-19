@@ -861,7 +861,7 @@ namespace UndertaleModTool
             folderBrowser.ValidateNames = false;
             folderBrowser.CheckFileExists = false;
             folderBrowser.CheckPathExists = true;
-            folderBrowser.FileName = prompt != null ? prompt : "Folder Selection.";
+            folderBrowser.FileName = prompt != null ? prompt + "." : "Folder Selection."; // Adding the . at the end makes sure it will accept the folder.
             return folderBrowser.ShowDialog() == true ? System.IO.Path.GetDirectoryName(folderBrowser.FileName) + System.IO.Path.DirectorySeparatorChar : null;
         }
 
