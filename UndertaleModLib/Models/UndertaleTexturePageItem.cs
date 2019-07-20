@@ -13,15 +13,15 @@ namespace UndertaleModLib.Models
      */
     public class UndertaleTexturePageItem : UndertaleResource, INotifyPropertyChanged
     {
-        private ushort _SourceX;
+        private ushort _SourceX; // The position in the texture sheet.
         private ushort _SourceY;
-        private ushort _SourceWidth;
+        private ushort _SourceWidth; // The dimensions of the image in the texture sheet.
         private ushort _SourceHeight;
         private ushort _TargetX;
         private ushort _TargetY;
-        private ushort _TargetWidth;
+        private ushort _TargetWidth; // The dimensions to scale the image to. (Is this BoundingWidth - TargetX)?
         private ushort _TargetHeight;
-        private ushort _BoundingWidth;
+        private ushort _BoundingWidth; // The UndertaleSprite dimensions. (Yes, it matches.)
         private ushort _BoundingHeight;
         private UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR> _TexturePage = new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();
 
@@ -83,21 +83,15 @@ namespace UndertaleModLib.Models
             lock (TexturePage.TextureData)
             {
                 TextureWorker worker = new TextureWorker();
-                Bitmap embImage = worker.GetEmbeddedTexture(TexturePage);
+                Bitmap embImage = worker.GetEmbeddedTexture(TexturePage); // Use SetPixel if needed.
 
                 Graphics g = Graphics.FromImage(embImage);
+                g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
                 g.DrawImage(finalImage, SourceX, SourceY);
                 g.Dispose();
 
                 TexturePage.TextureData.TextureBlob = TextureWorker.GetImageBytes(embImage);
                 worker.Cleanup();
-            }
-
-            // Update settings.
-            if (BoundingWidth == TargetWidth && BoundingHeight == TargetHeight)
-            {
-                BoundingWidth = (ushort)replaceImage.Width;
-                BoundingHeight = (ushort)replaceImage.Height;
             }
 
             TargetWidth = (ushort)replaceImage.Width;

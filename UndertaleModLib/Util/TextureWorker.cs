@@ -32,19 +32,19 @@ namespace UndertaleModLib.Util
             }
         }
 
-        public void ExportAsPNG(UndertaleTexturePageItem texPageItem, string FullPath, string imageName = null)
+        public void ExportAsPNG(UndertaleTexturePageItem texPageItem, string FullPath, string imageName = null, bool includePadding = false)
         {
-            SaveImageToFile(FullPath, GetTextureFor(texPageItem, imageName != null ? imageName : Path.GetFileNameWithoutExtension(FullPath)));
+            SaveImageToFile(FullPath, GetTextureFor(texPageItem, imageName != null ? imageName : Path.GetFileNameWithoutExtension(FullPath), includePadding));
         }
 
-        public Bitmap GetTextureFor(UndertaleTexturePageItem texPageItem, string imageName)
+        public Bitmap GetTextureFor(UndertaleTexturePageItem texPageItem, string imageName, bool includePadding = false)
         {
             int exportWidth = texPageItem.BoundingWidth; // sprite.Width
             int exportHeight = texPageItem.BoundingHeight; // sprite.Height
             Bitmap embeddedImage = GetEmbeddedTexture(texPageItem.TexturePage);
 
             // Sanity checks.
-            if ((texPageItem.TargetWidth > exportWidth) || (texPageItem.TargetHeight > exportHeight))
+            if (includePadding && ((texPageItem.TargetWidth > exportWidth) || (texPageItem.TargetHeight > exportHeight)))
                 throw new InvalidDataException(imageName + "'s texture is larger than its bounding box!");
 
             // Create a bitmap representing that part of the texture page.
@@ -57,12 +57,16 @@ namespace UndertaleModLib.Util
                 resultImage = ResizeImage(resultImage, texPageItem.TargetWidth, texPageItem.TargetHeight);
 
             // Put it in the final holder image.
-            Bitmap finalImage = new Bitmap(exportWidth, exportHeight);
-            Graphics g = Graphics.FromImage(finalImage);
-            g.DrawImage(resultImage, new Rectangle(texPageItem.TargetX, texPageItem.TargetY, resultImage.Width, resultImage.Height), new Rectangle(0, 0, resultImage.Width, resultImage.Height), GraphicsUnit.Pixel);
-            g.Dispose();
+            Bitmap returnImage = resultImage;
+            if (includePadding)
+            {
+                returnImage = new Bitmap(exportWidth, exportHeight);
+                Graphics g = Graphics.FromImage(returnImage);
+                g.DrawImage(resultImage, new Rectangle(texPageItem.TargetX, texPageItem.TargetY, resultImage.Width, resultImage.Height), new Rectangle(0, 0, resultImage.Width, resultImage.Height), GraphicsUnit.Pixel);
+                g.Dispose();
+            }
 
-            return finalImage;
+            return returnImage;
         }
 
         public static Bitmap ReadImageFromFile(string filePath)

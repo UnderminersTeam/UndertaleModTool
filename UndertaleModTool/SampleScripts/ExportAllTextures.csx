@@ -39,7 +39,7 @@ async Task DumpSprites() {
 void DumpSprite(UndertaleSprite sprite) {
     for (int i = 0; i < sprite.Textures.Count; i++)
         if (sprite.Textures[i]?.Texture != null)
-            worker.ExportAsPNG(sprite.Textures[i].Texture, texFolder + sprite.Name.Content + "_" + i + ".png", sprite.Name.Content + "_" + i);
+            worker.ExportAsPNG(sprite.Textures[i].Texture, texFolder + sprite.Name.Content + "_" + i + ".png");
 
     UpdateProgress();
 }
