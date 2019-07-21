@@ -284,16 +284,18 @@ namespace UndertaleModLib.Decompiler
                     if (tryVal != null)
                     {
                         int val = tryVal ?? -1;
+
+                        bool isAlphaNumeric = val >= (int)EventSubtypeKey.Digit0 && val <= (int)EventSubtypeKey.Z;
+                        if (isAlphaNumeric)
+                            return "ord(\"" + (char)val + "\")";
+
                         if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
-                        {
-                            bool isAlphaNumeric = val >= (int)EventSubtypeKey.Digit0 && val <= (int)EventSubtypeKey.Z;
-                            return isAlphaNumeric ? "ord(\"" + (char)val + "\")" : ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
-                        }
+                            return  ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
 
                         if (!Char.IsControl((char)val) && !Char.IsLower((char)val)) // The special keys overlay with the uppercase letters (ugh)
-                            return ((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
+                            return "ord(" + (((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
                                 : (((char)val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
-                                : "\"" + (char)val + "\"");
+                                : "\"" + (char)val + "\"")) + ")";
                     }
                 }
 
