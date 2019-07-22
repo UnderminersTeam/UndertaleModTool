@@ -1237,6 +1237,9 @@ namespace UndertaleModLib.Decompiler
                         for (int j = 0; j < count; j++)
                         {
                             var item = stack.Pop();
+                            if ((j % 2) == 0 && item.Type == UndertaleInstruction.DataType.Int32 && instr.Type1 == UndertaleInstruction.DataType.Int64)
+                                j++; // Skip the next iteration in the case on dup.l 0 replacing dup.i 1
+
                             if (item.IsDuplicationSafe())
                             {
                                 item.WasDuplicated = true;
@@ -1244,7 +1247,7 @@ namespace UndertaleModLib.Decompiler
                                 topExpressions2.Add(item);
                             }
                             else
-                            {
+                            { //TODO: @Knee, look into reducing temp vars, by reducing the usages of this.
                                 TempVar var = context.NewTempVar();
                                 var.Type = item.Type;
                                 TempVarReference varref = new TempVarReference(var);
