@@ -1236,9 +1236,12 @@ namespace UndertaleModLib.Decompiler
                         int count = ((instr.DupExtra + 1) * (instr.Type1 == UndertaleInstruction.DataType.Int64 ? 2 : 1));
                         for (int j = 0; j < count; j++)
                         {
+                            if ((j % 2) > 0 && stack.Count == 0)
+                                continue;
+
                             var item = stack.Pop();
-                            if ((j % 2) == 0 && item.Type == UndertaleInstruction.DataType.Int32 && instr.Type1 == UndertaleInstruction.DataType.Int64)
-                                j++; // Skip the next iteration in the case on dup.l 0 replacing dup.i 1
+                            //if ((j % 2) == 0 && item.Type != UndertaleInstruction.DataType.Int64 && instr.Type1 == UndertaleInstruction.DataType.Int64)
+                            //    j++; // Skip the next iteration in the case on dup.l 0 replacing dup.i 1
 
                             if (item.IsDuplicationSafe())
                             {
@@ -2338,8 +2341,10 @@ namespace UndertaleModLib.Decompiler
                             {
                                 if (block.nextBlockFalse != null)
                                     block = block.nextBlockFalse;
-                                else
+                                else if (block.nextBlockTrue != null)
                                     block = block.nextBlockTrue;
+                                else
+                                    break;
                             }
 
                             break;
