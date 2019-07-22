@@ -1045,7 +1045,7 @@ namespace UndertaleModLib.Decompiler
                 if (Var.Name?.Content == "$$$$temp$$$$" && context.CompilerTempVar != null)
                 {
                     block.Statements.Remove(context.CompilerTempVar);
-                    return context.CompilerTempVar.Value;
+                    return context.CompilerTempVar.Value.CleanStatement(context, block);
                 }
 
                 InstType = InstType?.CleanExpression(context, block);
@@ -1250,7 +1250,7 @@ namespace UndertaleModLib.Decompiler
                                 topExpressions2.Add(item);
                             }
                             else
-                            { //TODO: @Knee, look into reducing temp vars, by reducing the usages of this.
+                            {
                                 TempVar var = context.NewTempVar();
                                 var.Type = item.Type;
                                 TempVarReference varref = new TempVarReference(var);
