@@ -809,7 +809,7 @@ namespace UndertaleModLib.Compiler
                     KeywordWith,
                     KeywordSwitch,
                     KeywordCase,
-                    KeywordDefault, // Apparently this exists
+                    KeywordDefault,
                     KeywordReturn,
                     KeywordExit,
                     KeywordBreak,
