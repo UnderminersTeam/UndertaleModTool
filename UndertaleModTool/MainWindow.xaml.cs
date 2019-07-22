@@ -848,7 +848,7 @@ namespace UndertaleModTool
         public string PromptLoadFile(string defaultExt, string filter)
         {
             OpenFileDialog dlg = new OpenFileDialog();
-            dlg.DefaultExt = defaultExt != null ? default : "win";
+            dlg.DefaultExt = defaultExt != null ? defaultExt : "win";
             dlg.Filter = filter != null ? filter : "Game Maker Studio data files (.win, .unx, .ios, audiogroup*.dat)|*.win;*.unx;*.ios;audiogroup*.dat|All files|*";
             return dlg.ShowDialog() == true ? dlg.FileName : null;
         }
