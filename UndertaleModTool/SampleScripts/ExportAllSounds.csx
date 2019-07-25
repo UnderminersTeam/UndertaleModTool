@@ -5,8 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 int progress = 0;
-string dataFolder = GetFolder(FilePath);
-string sndFolder = dataFolder + "Export_Sounds" + Path.DirectorySeparatorChar;
+string sndFolder = GetFolder(FilePath) + "Export_Sounds" + Path.DirectorySeparatorChar;
 
 if (Directory.Exists(sndFolder)) {
     ScriptError("A sound export already exists. Please remove it.", "Error");
@@ -33,7 +32,7 @@ async Task DumpSounds() {
 }
 
 void DumpSound(UndertaleSound sound) {
-    if (sound.AudioFile != null && !File.Exists(dataFolder + sound.File.Content))
+    if (sound.AudioFile != null && !File.Exists(sndFolder + sound.File.Content))
         File.WriteAllBytes(sndFolder + sound.File.Content, sound.AudioFile.Data);
     UpdateProgress();
 }
