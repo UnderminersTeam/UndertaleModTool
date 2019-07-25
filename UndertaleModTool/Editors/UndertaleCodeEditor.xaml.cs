@@ -279,7 +279,8 @@ namespace UndertaleModTool
             if (gettext == null)
                 gettextCode = (Application.Current.MainWindow as MainWindow).Data.Code.ByName("gml_Script_textdata_en");
 
-            string gettextJsonPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), "lang/lang_en.json");
+            string dataPath = System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
+            string gettextJsonPath = (dataPath != null) ? System.IO.Path.Combine(dataPath, "lang/lang_en.json") : null;
 
             var dataa = (Application.Current.MainWindow as MainWindow).Data;
             Task t = Task.Run(() =>
@@ -302,7 +303,7 @@ namespace UndertaleModTool
                 if (gettextCode != null)
                     UpdateGettext(gettextCode);
 
-                if (gettextJSON == null && File.Exists(gettextJsonPath))
+                if (gettextJSON == null && gettextJsonPath != null && File.Exists(gettextJsonPath))
                     UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
 
                 Dispatcher.Invoke(() =>
