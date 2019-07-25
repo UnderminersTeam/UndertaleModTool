@@ -1439,7 +1439,10 @@ namespace UndertaleModLib.Compiler
                 {
                     for (int i = 0; i < result.Children.Count; i++)
                     {
-                        result.Children[i] = Optimize(context, result.Children[i]);
+                        if (result.Children[i] == null)
+                            result.Children[i] = new Statement(Statement.StatementKind.Discard);
+                        else
+                            result.Children[i] = Optimize(context, result.Children[i]);
                     }
                 }
 
