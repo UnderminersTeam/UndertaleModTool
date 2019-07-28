@@ -1399,7 +1399,10 @@ namespace UndertaleModLib.Compiler
                             return unary;
                         }
                 }
-                ReportCodeError("Unexpected token in expression.", remainingStageOne.Dequeue().Token, true);
+                if (remainingStageOne.Count > 0)
+                    ReportCodeError("Unexpected token in expression.", remainingStageOne.Dequeue().Token, true);
+                else
+                    ReportCodeError("Unexpected end of code.", false);
                 return null;
             }
 
