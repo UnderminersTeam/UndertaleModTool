@@ -1960,6 +1960,20 @@ namespace UndertaleModLib.Decompiler
                             StepStatement = increment;
                         }
                     }
+
+                    if (Condition == null)
+                    {
+                        if (Block.Statements.Last() is IfHLStatement)
+                        {
+                            IfHLStatement ifStatement = Block.Statements.Last() as IfHLStatement;
+                            if (ifStatement.trueBlock.Statements.Count == 0 && ifStatement.falseBlock.Statements.Count == 1 && ifStatement.falseBlock.Statements[0] is ContinueHLStatement && ifStatement.elseConditions.Count == 0)
+                            {
+                                IsDoUntilLoop = true;
+                                Condition = ifStatement.condition;
+                                Block.Statements.Remove(ifStatement);
+                            }
+                        }
+                    }
                 }
 
                 return this;
@@ -1983,7 +1997,7 @@ namespace UndertaleModLib.Decompiler
                 }
 
                 if (IsDoUntilLoop)
-                    return "do " + Block.ToString(context, false) + " until " + Condition.ToString(context) + ";\n";
+                    return "do " + Block.ToString(context, false) + " until " + (Condition?.ToString(context) ?? "(false)") + ";\n";
 
                 return "while " + (Condition != null ? Condition.ToString(context) : "(true)") + "\n" + Block.ToString(context);
             }
@@ -2274,7 +2288,8 @@ namespace UndertaleModLib.Decompiler
                     }
                     else
                     {
-                        output.Statements.Add(new LoopHLStatement() { Block = HLDecompileBlocks(context, ref block, blocks, loops, reverseDominators, alreadyVisited, block, null, block.nextBlockFalse, true) });
+                        LoopHLStatement statement = new LoopHLStatement() { Block = HLDecompileBlocks(context, ref block, blocks, loops, reverseDominators, alreadyVisited, block, null, block.nextBlockFalse, true) };
+                        output.Statements.Add(statement);
                         continue;
                     }
                 } else if (currentLoop != null && !loops[currentLoop].Contains(block) && decompileTheLoop) {
@@ -2420,15 +2435,6 @@ namespace UndertaleModLib.Decompiler
                 {
                     Debug.Assert(!block.conditionalExit, "Block ending in popenv does not have a conditional exit");
                     break;
-                }
-
-                if (block.conditionalExit && block.ConditionStatement == null && block.nextBlockFalse != null && block.nextBlockFalse.ConditionStatement != null) // Do...until statement
-                {
-                    LoopHLStatement doUntilLoop = new LoopHLStatement();
-                    doUntilLoop.Condition = block.nextBlockFalse.ConditionStatement;
-                    doUntilLoop.Block = HLDecompileBlocks(context, ref block.nextBlockFalse, blocks, loops, reverseDominators, alreadyVisited, currentLoop, block.nextBlockTrue, block.nextBlockTrue); // TODO: This doesn't support continue or break atm. Need to figure out the normal behavior for those.
-                    doUntilLoop.IsDoUntilLoop = true;
-                    output.Statements.Add(doUntilLoop);
                 }
 
                 if (block.conditionalExit && block.ConditionStatement != null) // If statement
