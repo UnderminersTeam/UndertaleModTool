@@ -980,7 +980,7 @@
                                 <Style TargetType="Rectangle">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ObjectDefinition.Visible}" Value="False">
-                                            <Setter Property="Opacity"  Value=".35"/>
+                                            <Setter Property="Opacity"  Value="1"/>
                                         </DataTrigger>
 
                                         <DataTrigger Value="True">

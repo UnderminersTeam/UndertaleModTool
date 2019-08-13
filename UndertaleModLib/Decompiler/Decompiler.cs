@@ -292,7 +292,7 @@ namespace UndertaleModLib.Decompiler
                         if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
                             return  ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
 
-                        if (!Char.IsControl((char)val) && !Char.IsLower((char)val)) // The special keys overlay with the uppercase letters (ugh)
+                        if (!Char.IsControl((char)val) && !Char.IsLower((char)val) && val > 0) // The special keys overlay with the uppercase letters (ugh)
                             return "ord(" + (((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
                                 : (((char)val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
                                 : "\"" + (char)val + "\"")) + ")";
@@ -1190,7 +1190,7 @@ namespace UndertaleModLib.Decompiler
                 // Reroute tempvars to alias them to our ones
                 if (block.TempVarsOnEntry.Count != tempvars.Count)
                 {
-                    throw new Exception("Reentered block with different amount of vars on stack");
+                    throw new Exception("Reentered block with different amount of vars on stack (Entry: " + block.TempVarsOnEntry.Count + ", Actual Count: " + tempvars.Count + ")");
                 }
                 else
                 {
