@@ -22,8 +22,8 @@ namespace UndertaleModLib.Decompiler
 
         // Decompilation instance data
         public HashSet<string> LocalVarDefines = new HashSet<string>();
-        public Dictionary<string, TempVarAssigmentStatement> TempVarMap = new Dictionary<string, TempVarAssigmentStatement>();
-        public AssignmentStatement CompilerTempVar;
+        //public Dictionary<string, TempVarAssigmentStatement> TempVarMap = new Dictionary<string, TempVarAssigmentStatement>();
+        //public AssignmentStatement CompilerTempVar;
         public Dictionary<UndertaleVariable, AssetIDType> assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
         public int TempVarId;
         public Dictionary<string, AssetIDType[]> scriptArgs = new Dictionary<string, AssetIDType[]>();
@@ -47,16 +47,18 @@ namespace UndertaleModLib.Decompiler
         {
             TempVarId = 0;
             TargetCode = code;
-            TempVarMap.Clear();
-            CompilerTempVar = null;
+            //TempVarMap.Clear();
+            //CompilerTempVar = null;
             assetTypes.Clear();
             LocalVarDefines.Clear();
         }
 
+        /*
         public TempVar NewTempVar()
         {
             return new TempVar(++TempVarId);
         }
+        */
     }
 
     public static class Decompiler
@@ -64,17 +66,13 @@ namespace UndertaleModLib.Decompiler
         // Represents a block node of instructions from GML bytecode (for control flow).
         public class Block
         {
-            public uint? Address;
+            public uint Address;
             public List<UndertaleInstruction> Instructions = new List<UndertaleInstruction>();
-            public List<Statement> Statements = null;
-            public Expression ConditionStatement = null;
-            public bool conditionalExit;
-            public Block nextBlockTrue;
-            public Block nextBlockFalse;
-            public List<Block> entryPoints = new List<Block>();
-            internal List<TempVarReference> TempVarsOnEntry;
+            //public List<Statement> Statements = null;
+            //public List<Block> entryPoints = new List<Block>();
+            //internal List<TempVarReference> TempVarsOnEntry;
 
-            public Block(uint? address)
+            public Block(uint address)
             {
                 Address = address;
             }
@@ -84,7 +82,7 @@ namespace UndertaleModLib.Decompiler
                 return "Block " + Address;
             }
         }
-
+        /*
         // Represents all kinds of high-level decompilation results, to be stringified at the end.
         public abstract class Statement
         {
@@ -1279,7 +1277,7 @@ namespace UndertaleModLib.Decompiler
                                 if (!(expr is ExpressionTempVar))
                                     statements.Add(expr);
                             stack.Clear();
-                        */
+                        *//*
                         statements.Add(stmt);
                         end = true;
                         returned = true;
@@ -1546,137 +1544,7 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
-        public static Dictionary<uint, Block> DecompileFlowGraph(UndertaleCode code)
-        {
-            Dictionary<uint, Block> blockByAddress = new Dictionary<uint, Block>();
-            blockByAddress[0] = new Block(0);
-            Block entryBlock = new Block(null);
-            Block finalBlock = new Block(code.Length / 4);
-            blockByAddress[code.Length / 4] = finalBlock;
-            Block currentBlock = entryBlock;
-
-            foreach (var instr in code.Instructions)
-            {
-                if (blockByAddress.ContainsKey(instr.Address))
-                {
-                    if (currentBlock != null)
-                    {
-                        currentBlock.conditionalExit = false;
-                        currentBlock.nextBlockTrue = blockByAddress[instr.Address];
-                        currentBlock.nextBlockFalse = blockByAddress[instr.Address];
-                        blockByAddress[instr.Address].entryPoints.Add(currentBlock);
-                    }
-                    currentBlock = blockByAddress[instr.Address];
-                }
-
-                if (currentBlock == null)
-                {
-                    blockByAddress[instr.Address] = currentBlock = new Block(instr.Address);
-                }
-
-                currentBlock.Instructions.Add(instr);
-
-                Func<uint, Block> GetBlock = (uint addr) =>
-                {
-                    Block nextBlock;
-                    if (!blockByAddress.TryGetValue(addr, out nextBlock))
-                    {
-                        if (addr <= instr.Address)
-                        {
-                            // We have a jump into INSIDE one of previous blocks
-                            // This is likely a loop or something
-                            // We'll have to split that block into two
-
-                            // First, find the block we have to split
-                            Block blockToSplit = null;
-                            foreach (var block in blockByAddress)
-                            {
-                                if (block.Key < addr && (blockToSplit == null || block.Key > blockToSplit.Address))
-                                    blockToSplit = block.Value;
-                            }
-
-                            // Now, split the list of instructions into two
-                            List<UndertaleInstruction> instrBefore = new List<UndertaleInstruction>();
-                            List<UndertaleInstruction> instrAfter = new List<UndertaleInstruction>();
-                            foreach (UndertaleInstruction inst in blockToSplit.Instructions)
-                            {
-                                if (inst.Address < addr)
-                                    instrBefore.Add(inst);
-                                else
-                                    instrAfter.Add(inst);
-                            }
-
-                            // Create the newly split block
-                            Block newBlock = new Block(addr);
-                            blockToSplit.Instructions = instrBefore;
-                            newBlock.Instructions = instrAfter;
-                            newBlock.conditionalExit = blockToSplit.conditionalExit;
-                            newBlock.nextBlockTrue = blockToSplit.nextBlockTrue;
-                            newBlock.nextBlockFalse = blockToSplit.nextBlockFalse;
-                            blockToSplit.conditionalExit = false;
-                            blockToSplit.nextBlockTrue = newBlock;
-                            blockToSplit.nextBlockFalse = newBlock;
-                            blockByAddress[addr] = newBlock;
-                            return newBlock;
-                        }
-                        else
-                        {
-                            blockByAddress.Add(addr, nextBlock = new Block(addr));
-                        }
-                    }
-                    return nextBlock;
-                };
-
-                if (instr.Kind == UndertaleInstruction.Opcode.B)
-                {
-                    uint addr = (uint)(instr.Address + instr.JumpOffset);
-                    Block nextBlock = GetBlock(addr);
-                    currentBlock.conditionalExit = false;
-                    currentBlock.nextBlockTrue = nextBlock;
-                    currentBlock.nextBlockFalse = nextBlock;
-                    currentBlock = null;
-                }
-                else if (instr.Kind == UndertaleInstruction.Opcode.Bt || instr.Kind == UndertaleInstruction.Opcode.Bf)
-                {
-                    Block nextBlockIfMet = GetBlock((uint)(instr.Address + instr.JumpOffset));
-                    Block nextBlockIfNotMet = GetBlock(instr.Address + 1);
-                    currentBlock.conditionalExit = true;
-                    currentBlock.nextBlockTrue = instr.Kind == UndertaleInstruction.Opcode.Bt ? nextBlockIfMet : nextBlockIfNotMet;
-                    currentBlock.nextBlockFalse = instr.Kind == UndertaleInstruction.Opcode.Bt ? nextBlockIfNotMet : nextBlockIfMet;
-                    currentBlock = null;
-                }
-                else if (instr.Kind == UndertaleInstruction.Opcode.PushEnv || instr.Kind == UndertaleInstruction.Opcode.PopEnv)
-                {
-                    Block nextBlock = GetBlock(instr.Address + 1);
-                    currentBlock.conditionalExit = false;
-                    currentBlock.nextBlockTrue = nextBlock;
-                    currentBlock.nextBlockFalse = nextBlock;
-                    currentBlock = null;
-                }
-                else if (instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit)
-                {
-                    Block nextBlock = GetBlock(instr.Address + 1);
-                    currentBlock.conditionalExit = false;
-                    currentBlock.nextBlockTrue = nextBlock;
-                    currentBlock.nextBlockFalse = nextBlock;
-                    currentBlock = null;
-                }
-            }
-            if (currentBlock != null)
-            {
-                currentBlock.nextBlockTrue = finalBlock;
-                currentBlock.nextBlockFalse = finalBlock;
-            }
-            foreach (var block in blockByAddress.Values)
-            {
-                if (block.nextBlockTrue != null && !block.nextBlockTrue.entryPoints.Contains(block))
-                    block.nextBlockTrue.entryPoints.Add(block);
-                if (block.nextBlockFalse != null && !block.nextBlockFalse.entryPoints.Contains(block))
-                    block.nextBlockFalse.entryPoints.Add(block);
-            }
-            return blockByAddress;
-        }
-
+            /*
         public abstract class HLStatement : Statement
         {
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -1937,7 +1805,7 @@ namespace UndertaleModLib.Decompiler
                     }*/
 
                     // Remove redundant continues at the end of the loop.
-                    if (Block.Statements.Count > 0)
+                    /*if (Block.Statements.Count > 0)
                     {
                         Statement lastStatement = Block.Statements.Last();
                         if (lastStatement is ContinueHLStatement)
@@ -2583,9 +2451,10 @@ namespace UndertaleModLib.Decompiler
             return result;
         }
 
+*/
         public static string Decompile(UndertaleCode code, DecompileContext context)
         {
-            context.Setup(code);
+            /*context.Setup(code);
 
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
             DecompileFromBlock(context, blocks[0]);
@@ -2598,8 +2467,10 @@ namespace UndertaleModLib.Decompiler
                 sb.Append(stmt.ToString(context) + "\n");
 
             string decompiledCode = sb.ToString();
-            return MakeLocalVars(context, decompiledCode) + decompiledCode;
-        }
+            return MakeLocalVars(context, decompiledCode) + decompiledCode;*/
+            context.Setup(code);
+            return AssemblyTree.CreateTree(context).ToString();
+        }/*
 
         private static void DoTypePropagation(DecompileContext context, Dictionary<uint, Block> blocks)
         {
@@ -2638,40 +2509,6 @@ namespace UndertaleModLib.Decompiler
 
             return meetPoint;
         }
-
-        public static string ExportFlowGraph(Dictionary<uint, Block> blocks)
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("digraph G {");
-            foreach (var pair in blocks)
-            {
-                var block = pair.Value;
-                sb.Append("    block_" + pair.Key + " [label=\"");
-                sb.Append("[" + block.ToString() + ", Exit: " + block.conditionalExit + (block.nextBlockTrue != null ? ", T: " + block.nextBlockTrue.Address : "") + (block.nextBlockFalse != null ? ", F: " + block.nextBlockFalse.Address : "") + "]\n");
-                foreach (var instr in block.Instructions)
-                    sb.Append(instr.ToString().Replace("\"", "\\\"") + "\\n");
-                sb.Append("\"");
-                sb.Append(pair.Key == 0 ? ", color=\"blue\"" : "");
-                sb.AppendLine(", shape=\"box\"];");
-            }
-            sb.AppendLine("");
-            foreach (var block in blocks)
-            {
-                if (block.Value.conditionalExit)
-                {
-                    if (block.Value.nextBlockTrue != null)
-                        sb.AppendLine("    block_" + block.Key + " -> block_" + block.Value.nextBlockTrue.Address + " [color=\"green\"];");
-                    if (block.Value.nextBlockFalse != null)
-                        sb.AppendLine("    block_" + block.Key + " -> block_" + block.Value.nextBlockFalse.Address + " [color=\"red\"];");
-                }
-                else
-                {
-                    if (block.Value.nextBlockTrue != null)
-                        sb.AppendLine("    block_" + block.Key + " -> block_" + block.Value.nextBlockTrue.Address + ";");
-                }
-            }
-            sb.AppendLine("}");
-            return sb.ToString();
-        }
+        */
     }
 }

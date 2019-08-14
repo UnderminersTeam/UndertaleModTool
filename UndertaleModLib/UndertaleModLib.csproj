@@ -43,6 +43,7 @@
     <Compile Include="Compiler\Lexer.cs" />
     <Compile Include="Compiler\Parser.cs" />
     <Compile Include="Decompiler\Assembler.cs" />
+    <Compile Include="Decompiler\AssemblyTree.cs" />
     <Compile Include="Decompiler\AssetTypeResolver.cs" />
     <Compile Include="Decompiler\Decompiler.cs" />
     <Compile Include="ModelsDebug\UndertaleDebugInfo.cs" />

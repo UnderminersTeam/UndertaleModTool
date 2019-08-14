@@ -559,16 +559,21 @@ namespace UndertaleModTool
 
         private async void GraphCode(UndertaleCode code)
         {
+            //TODO: Update graph to display tree.
+
             LoaderDialog dialog = new LoaderDialog("Generating graph", "Generating graph, please wait...");
             dialog.Owner = Window.GetWindow(this);
+            UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
             Task t = Task.Run(() =>
             {
                 ImageSource image = null;
                 try
                 {
                     code.UpdateAddresses();
-                    var blocks = Decompiler.DecompileFlowGraph(code);
-                    string dot = Decompiler.ExportFlowGraph(blocks);
+
+                    DecompileContext context = new DecompileContext(data, true);
+                    context.Setup(code);
+                    string dot = AssemblyTree.CreateTree(context).ExportFlowGraph();
 
                     try
                     {
