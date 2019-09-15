@@ -75,8 +75,8 @@ namespace UndertaleModLib.Decompiler
                         return "*";
                     case UndertaleInstruction.Opcode.Div:
                         return "/";
-                    /*case UndertaleInstruction.Opcode.Rem:
-                        return "%";*/ // TODO: ?
+                    case UndertaleInstruction.Opcode.Rem:
+                        return "div";
                     case UndertaleInstruction.Opcode.Mod:
                         return "%";
                     case UndertaleInstruction.Opcode.Add:
