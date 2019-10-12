@@ -1687,10 +1687,10 @@ namespace UndertaleModLib.Compiler
                                     switch (val.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
-                                            newConstant.Constant = new ExpressionConstant((double)(!(val.valueNumber >= 0.5) ? 1 : 0));
+                                            newConstant.Constant = new ExpressionConstant((double)(!(val.valueNumber > 0.5) ? 1 : 0));
                                             break;
                                         case ExpressionConstant.Kind.Int64:
-                                            newConstant.Constant = new ExpressionConstant((long)(!((double)val.valueInt64 >= 0.5) ? 1 : 0));
+                                            newConstant.Constant = new ExpressionConstant((long)(!((double)val.valueInt64 > 0.5) ? 1 : 0));
                                             break;
                                         default:
                                             optimized = false;
@@ -1840,10 +1840,10 @@ namespace UndertaleModLib.Compiler
                                     switch (right.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
-                                            newConstant.Constant = new ExpressionConstant((left.valueNumber >= 0.5 && right.valueNumber >= 0.5) ? 1d : 0d);
+                                            newConstant.Constant = new ExpressionConstant((left.valueNumber > 0.5 && right.valueNumber > 0.5) ? 1d : 0d);
                                             break;
                                         case ExpressionConstant.Kind.Int64:
-                                            newConstant.Constant = new ExpressionConstant((left.valueNumber >= 0.5 && (double)right.valueInt64 >= 0.5) ? 1d : 0d);
+                                            newConstant.Constant = new ExpressionConstant((left.valueNumber > 0.5 && (double)right.valueInt64 > 0.5) ? 1d : 0d);
                                             break;
                                         default:
                                             optimized = false;
@@ -1854,10 +1854,10 @@ namespace UndertaleModLib.Compiler
                                     switch (right.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
-                                            newConstant.Constant = new ExpressionConstant(((double)left.valueInt64 >= 0.5 && right.valueNumber >= 0.5) ? 1d : 0d);
+                                            newConstant.Constant = new ExpressionConstant(((double)left.valueInt64 > 0.5 && right.valueNumber > 0.5) ? 1d : 0d);
                                             break;
                                         case ExpressionConstant.Kind.Int64:
-                                            newConstant.Constant = new ExpressionConstant(((double)left.valueInt64 >= 0.5 && (double)right.valueInt64 >= 0.5) ? 1d : 0d);
+                                            newConstant.Constant = new ExpressionConstant(((double)left.valueInt64 > 0.5 && (double)right.valueInt64 > 0.5) ? 1d : 0d);
                                             break;
                                         default:
                                             optimized = false;
@@ -1877,10 +1877,10 @@ namespace UndertaleModLib.Compiler
                                     switch (right.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
-                                            newConstant.Constant = new ExpressionConstant((left.valueNumber >= 0.5 || right.valueNumber >= 0.5) ? 1d : 0d);
+                                            newConstant.Constant = new ExpressionConstant((left.valueNumber > 0.5 || right.valueNumber > 0.5) ? 1d : 0d);
                                             break;
                                         case ExpressionConstant.Kind.Int64:
-                                            newConstant.Constant = new ExpressionConstant((left.valueNumber >= 0.5 || (double)right.valueInt64 >= 0.5) ? 1d : 0d);
+                                            newConstant.Constant = new ExpressionConstant((left.valueNumber > 0.5 || (double)right.valueInt64 > 0.5) ? 1d : 0d);
                                             break;
                                         default:
                                             optimized = false;
@@ -1891,10 +1891,10 @@ namespace UndertaleModLib.Compiler
                                     switch (right.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
-                                            newConstant.Constant = new ExpressionConstant(((double)left.valueInt64 >= 0.5 || right.valueNumber >= 0.5) ? 1d : 0d);
+                                            newConstant.Constant = new ExpressionConstant(((double)left.valueInt64 > 0.5 || right.valueNumber > 0.5) ? 1d : 0d);
                                             break;
                                         case ExpressionConstant.Kind.Int64:
-                                            newConstant.Constant = new ExpressionConstant(((double)left.valueInt64 >= 0.5 || (double)right.valueInt64 >= 0.5) ? 1d : 0d);
+                                            newConstant.Constant = new ExpressionConstant(((double)left.valueInt64 > 0.5 || (double)right.valueInt64 > 0.5) ? 1d : 0d);
                                             break;
                                         default:
                                             optimized = false;
@@ -2220,10 +2220,10 @@ namespace UndertaleModLib.Compiler
                                     switch (right.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
-                                            newConstant.Constant = new ExpressionConstant(((left.valueNumber >= 0.5) ? 1 : 0) ^ ((right.valueNumber >= 0.5) ? 1 : 0));
+                                            newConstant.Constant = new ExpressionConstant(((left.valueNumber > 0.5) ? 1 : 0) ^ ((right.valueNumber > 0.5) ? 1 : 0));
                                             break;
                                         case ExpressionConstant.Kind.Int64:
-                                            newConstant.Constant = new ExpressionConstant(((left.valueNumber >= 0.5) ? 1 : 0) ^ (((double)right.valueInt64 >= 0.5) ? 1 : 0));
+                                            newConstant.Constant = new ExpressionConstant(((left.valueNumber > 0.5) ? 1 : 0) ^ (((double)right.valueInt64 > 0.5) ? 1 : 0));
                                             break;
                                         default:
                                             optimized = false;
@@ -2234,10 +2234,10 @@ namespace UndertaleModLib.Compiler
                                     switch (right.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
-                                            newConstant.Constant = new ExpressionConstant((((double)left.valueInt64 >= 0.5) ? 1 : 0) ^ ((right.valueNumber >= 0.5) ? 1 : 0));
+                                            newConstant.Constant = new ExpressionConstant((((double)left.valueInt64 > 0.5) ? 1 : 0) ^ ((right.valueNumber > 0.5) ? 1 : 0));
                                             break;
                                         case ExpressionConstant.Kind.Int64:
-                                            newConstant.Constant = new ExpressionConstant((((double)left.valueInt64 >= 0.5) ? 1 : 0) ^ (((double)right.valueInt64 >= 0.5) ? 1 : 0));
+                                            newConstant.Constant = new ExpressionConstant((((double)left.valueInt64 > 0.5) ? 1 : 0) ^ (((double)right.valueInt64 > 0.5) ? 1 : 0));
                                             break;
                                         default:
                                             optimized = false;
