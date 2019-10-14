@@ -15,10 +15,10 @@ namespace UndertaleModLib.Models
         private UndertaleString _Name;
         private uint _Width;
         private uint _Height;
-        private uint _MarginLeft;
-        private uint _MarginRight;
-        private uint _MarginBottom;
-        private uint _MarginTop;
+        private int _MarginLeft;
+        private int _MarginRight;
+        private int _MarginBottom;
+        private int _MarginTop;
         private bool _Transparent;
         private bool _Smooth;
         private bool _Preload;
@@ -35,10 +35,10 @@ namespace UndertaleModLib.Models
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public uint Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
         public uint Height { get => _Height; set { _Height = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Height")); } }
-        public uint MarginLeft { get => _MarginLeft; set { _MarginLeft = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginLeft")); } }
-        public uint MarginRight { get => _MarginRight; set { _MarginRight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginRight")); } }
-        public uint MarginBottom { get => _MarginBottom; set { _MarginBottom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginBottom")); } }
-        public uint MarginTop { get => _MarginTop; set { _MarginTop = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginTop")); } }
+        public int MarginLeft { get => _MarginLeft; set { _MarginLeft = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginLeft")); } }
+        public int MarginRight { get => _MarginRight; set { _MarginRight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginRight")); } }
+        public int MarginBottom { get => _MarginBottom; set { _MarginBottom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginBottom")); } }
+        public int MarginTop { get => _MarginTop; set { _MarginTop = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginTop")); } }
         public bool Transparent { get => _Transparent; set { _Transparent = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Transparent")); } }
         public bool Smooth { get => _Smooth; set { _Smooth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Smooth")); } }
         public bool Preload { get => _Preload; set { _Preload = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Preload")); } }
@@ -213,10 +213,10 @@ namespace UndertaleModLib.Models
             Name = reader.ReadUndertaleString();
             Width = reader.ReadUInt32();
             Height = reader.ReadUInt32();
-            MarginLeft = reader.ReadUInt32();
-            MarginRight = reader.ReadUInt32();
-            MarginBottom = reader.ReadUInt32();
-            MarginTop = reader.ReadUInt32();
+            MarginLeft = reader.ReadInt32();
+            MarginRight = reader.ReadInt32();
+            MarginBottom = reader.ReadInt32();
+            MarginTop = reader.ReadInt32();
             Transparent = reader.ReadBoolean();
             Smooth = reader.ReadBoolean();
             Preload = reader.ReadBoolean();

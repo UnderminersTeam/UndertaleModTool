@@ -543,5 +543,18 @@ namespace UndertaleModLib.Models
         User13 = 23,
         User14 = 24,
         User15 = 25,
+        AsyncImageLoaded = 60,
+        AsyncHTTP = 62,
+        AsyncDialog = 63,
+        AsyncIAP = 66,
+        AsyncCloud = 67,
+        AsyncNetworking = 68,
+        AsyncSteam = 69,
+        AsyncSocial = 70,
+        AsyncPushNotification = 71,
+        AsyncSaveAndLoad = 72,
+        AsyncAudioRecording = 73,
+        AsyncAudioPlayback = 74,
+        AsyncSystem = 75,
     }
 }
