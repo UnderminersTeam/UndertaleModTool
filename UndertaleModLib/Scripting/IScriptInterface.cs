@@ -13,6 +13,7 @@ namespace UndertaleModLib.Scripting
         object Highlighted { get; }
         object Selected { get; }
         bool CanSave { get; }
+        ScriptConfiguration Configuration { get; }
 
         void EnsureDataLoaded();
 

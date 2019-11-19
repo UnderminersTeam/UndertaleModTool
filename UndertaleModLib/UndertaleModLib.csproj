@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
@@ -72,6 +75,7 @@
     <Compile Include="Models\UndertaleUnused.cs" />
     <Compile Include="Models\UndertaleVariable.cs" />
     <Compile Include="Scripting\IScriptInterface.cs" />
+    <Compile Include="Scripting\ScriptConfiguration.cs" />
     <Compile Include="UndertaleChunks.cs" />
     <Compile Include="UndertaleChunkTypes.cs" />
     <Compile Include="UndertaleDebugChunks.cs" />
@@ -85,6 +89,9 @@
     <Compile Include="Util\Pair.cs" />
     <Compile Include="Util\TextureWorker.cs" />
     <Compile Include="Util\DictionaryExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

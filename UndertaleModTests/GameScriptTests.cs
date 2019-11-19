@@ -19,6 +19,7 @@ namespace UndertaleModTests
 
         public UndertaleData Data => data;
         public string FilePath => path;
+        public ScriptConfiguration Configuration => new ScriptConfiguration("test_configuration.cfg");
         public object Highlighted => throw new NotImplementedException();
         public object Selected => throw new NotImplementedException();
         public bool CanSave => throw new NotImplementedException();
