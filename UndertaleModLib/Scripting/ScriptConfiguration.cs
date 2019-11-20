@@ -36,7 +36,8 @@ namespace UndertaleModLib.Scripting
         private Dictionary<string, string> GetConfigurationData()
         {
             var configuration_file_text = System.IO.File.ReadAllText(ConfigurationFile);
-            return JsonConvert.DeserializeObject<Dictionary<string, string>>(configuration_file_text);
+            var output = JsonConvert.DeserializeObject<Dictionary<string, string>>(configuration_file_text);
+            return output ?? new Dictionary<string, string>();
         }
 
         public string this[string key]
@@ -44,7 +45,7 @@ namespace UndertaleModLib.Scripting
             get
             {
                 GetConfigurationData().TryGetValue(key, out var output);
-                return output;
+                return output ?? "";
             }
 
             set
