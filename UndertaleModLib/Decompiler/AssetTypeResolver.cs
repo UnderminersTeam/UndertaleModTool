@@ -659,6 +659,16 @@ namespace UndertaleModLib.Decompiler
 
             // TODO: make proper file/manifest for all games to use, not just UT/DR, and also not these specific names
             string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower();
+            //Just Undertale
+            if (lowerName != null && (lowerName == "undertale"))
+            {
+                builtin_vars.Add("king", AssetIDType.GameObject);
+            }
+            //Just deltarune
+            if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
+            {
+            }
+            //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
                 builtin_vars.Add("currentroom", AssetIDType.Room);
@@ -674,6 +684,22 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("hurtsprite", AssetIDType.Sprite);
                 builtin_vars.Add("hurtsound", AssetIDType.Sound);
                 //New built in vars found by Grossley
+                //From v1.11 Undertale comparison, not tested unlike v1.001!
+                builtin_vars.Add("asprite", AssetIDType.Sprite);
+                builtin_vars.Add("bsprite", AssetIDType.Sprite);
+                builtin_vars.Add("tailobj", AssetIDType.GameObject);
+                builtin_vars.Add("draedmode", AssetIDType.Boolean);
+                builtin_vars.Add("op", AssetIDType.GameObject);
+                builtin_vars.Add("background_color", AssetIDType.Color);
+                builtin_vars.Add("object0", AssetIDType.GameObject);
+                builtin_vars.Add("part1", AssetIDType.GameObject);
+                builtin_vars.Add("pap", AssetIDType.GameObject);
+                builtin_vars.Add("fileerased", AssetIDType.Sprite);
+                builtin_vars.Add("catty", AssetIDType.GameObject);
+                builtin_vars.Add("bratty", AssetIDType.GameObject);
+                builtin_vars.Add("creator", AssetIDType.GameObject);
+                builtin_vars.Add("parent", AssetIDType.GameObject);
+                builtin_vars.Add("pop", AssetIDType.Script);
                 //From v1.001 Undertale via comparison
                 //A TIER quality:
                 builtin_vars.Add("onionsprite", AssetIDType.Sprite);
