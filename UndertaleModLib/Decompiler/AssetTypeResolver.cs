@@ -671,9 +671,10 @@ namespace UndertaleModLib.Decompiler
             //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
-                name["scr_bouncer"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
-                name["action_create_object"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other };
-                name["instance_activate_object"] = new AssetIDType[] { AssetIDType.GameObject };
+                //Comment out until I can fix this
+                //name["scr_bouncer"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                //name["action_create_object"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other };
+                //name["instance_activate_object"] = new AssetIDType[] { AssetIDType.GameObject };
                 builtin_vars.Add("currentroom", AssetIDType.Room);
                 builtin_vars.Add("dsprite", AssetIDType.Sprite);
                 builtin_vars.Add("usprite", AssetIDType.Sprite);
