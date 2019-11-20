@@ -673,6 +673,33 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("normalsprite", AssetIDType.Sprite);
                 builtin_vars.Add("hurtsprite", AssetIDType.Sprite);
                 builtin_vars.Add("hurtsound", AssetIDType.Sound);
+                //New built in vars found by Grossley
+                //From v1.001 Undertale via comparison
+                //A TIER quality:
+                builtin_vars.Add("onionsprite", AssetIDType.Sprite);
+                builtin_vars.Add("headsprite", AssetIDType.Sprite);
+                builtin_vars.Add("breaksprite", AssetIDType.Sprite);
+                builtin_vars.Add("foodimg", AssetIDType.Sprite);
+                builtin_vars.Add("facespr", AssetIDType.Sprite);
+                builtin_vars.Add("bombsprite", AssetIDType.Sprite);
+                builtin_vars.Add("mysprite", AssetIDType.Sprite);
+                builtin_vars.Add("arms", AssetIDType.Sprite);
+                builtin_vars.Add("levelpic", AssetIDType.Sprite);
+                builtin_vars.Add("image", AssetIDType.Sprite);
+                builtin_vars.Add("song_index", AssetIDType.Sound);
+                builtin_vars.Add("thischara", AssetIDType.GameObject);
+                //B TIER quality:
+                builtin_vars.Add("tspr5", AssetIDType.Sprite);
+                builtin_vars.Add("tspr3", AssetIDType.Sprite);
+                builtin_vars.Add("tspr2", AssetIDType.Sprite);
+                builtin_vars.Add("tspr1", AssetIDType.Sprite);
+                builtin_vars.Add("tspr4", AssetIDType.Sprite);
+                builtin_vars.Add("snapper", AssetIDType.GameObject);
+                builtin_vars.Add("subject", AssetIDType.GameObject);
+                builtin_vars.Add("clip", AssetIDType.GameObject);
+                //C TIER quality:
+                builtin_vars.Add("sound1", AssetIDType.Sound);
+                builtin_vars.Add("sound2", AssetIDType.Sound);
             }
         }
     }
