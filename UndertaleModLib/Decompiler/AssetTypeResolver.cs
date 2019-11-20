@@ -689,12 +689,13 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("hurtsound", AssetIDType.Sound);
                 //New built in vars found by Grossley
                 builtin_vars.Add("interact", AssetIDType.Other);
+                //Test me!
+                builtin_vars.Add("sound0", AssetIDType.Sound);
                 //From v1.11 Undertale comparison, not tested unlike v1.001!
                 builtin_vars.Add("asprite", AssetIDType.Sprite);
                 builtin_vars.Add("bsprite", AssetIDType.Sprite);
-                builtin_vars.Add("tailobj", AssetIDType.GameObject);
+                builtin_vars.Add("tailobj", AssetIDType.GameObject);sound0
                 builtin_vars.Add("draedmode", AssetIDType.Boolean);
-                builtin_vars.Add("op", AssetIDType.GameObject);
                 builtin_vars.Add("background_color", AssetIDType.Color);
                 builtin_vars.Add("object0", AssetIDType.GameObject);
                 builtin_vars.Add("part1", AssetIDType.GameObject);
@@ -703,8 +704,11 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("catty", AssetIDType.GameObject);
                 builtin_vars.Add("bratty", AssetIDType.GameObject);
                 builtin_vars.Add("creator", AssetIDType.GameObject);
+                //These are not so consistent... ;-;
+                builtin_vars.Add("op", AssetIDType.GameObject);
                 builtin_vars.Add("parent", AssetIDType.GameObject);
-                builtin_vars.Add("pop", AssetIDType.Script);
+                //Toby messed up in "gml_Object_obj_wizardorb_chaser_Alarm_0", "pop" is never a script.
+                //builtin_vars.Add("pop", AssetIDType.Script);
                 //From v1.001 Undertale via comparison
                 //A TIER quality:
                 builtin_vars.Add("onionsprite", AssetIDType.Sprite);
