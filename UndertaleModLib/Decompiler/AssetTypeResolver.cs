@@ -687,6 +687,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("hurtsprite", AssetIDType.Sprite);
                 builtin_vars.Add("hurtsound", AssetIDType.Sound);
                 //New built in vars found by Grossley
+                builtin_vars.Add("interact", AssetIDType.Other);
                 //From v1.11 Undertale comparison, not tested unlike v1.001!
                 builtin_vars.Add("asprite", AssetIDType.Sprite);
                 builtin_vars.Add("bsprite", AssetIDType.Sprite);
