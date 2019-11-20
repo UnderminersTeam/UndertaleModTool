@@ -38,6 +38,7 @@ namespace UndertaleModLib.Decompiler
         public List<uint> BlockStarts = new List<uint>();
         public Dictionary<uint, UndertaleInstruction> BlockAddresses = new Dictionary<uint, UndertaleInstruction>();
         public uint MaxAddress;
+        public uint FinalAddress;
 
         public void AddNode(AssemblyTreeNode newNode)
         {
@@ -138,6 +139,9 @@ namespace UndertaleModLib.Decompiler
         {
             if (tree.Blocks.ContainsKey(startAddress))
                 return tree.Nodes[startAddress]; // Prevent reading multiple times.
+
+            if (startAddress == tree.FinalAddress)
+                return null;
 
             Block currentBlock = new Block(startAddress);
             for (uint i = startAddress; i <= tree.MaxAddress;)
@@ -244,6 +248,7 @@ namespace UndertaleModLib.Decompiler
             }
 
             MaxAddress = context.TargetCode.Instructions.Last().Address;
+            FinalAddress = MaxAddress + context.TargetCode.Instructions.Last().CalculateInstructionSize();
         }
 
         public static AssemblyTree CreateTree(DecompileContext context)
