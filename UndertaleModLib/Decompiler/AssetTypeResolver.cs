@@ -269,6 +269,8 @@ namespace UndertaleModLib.Decompiler
         {
             builtin_funcs = new Dictionary<string, AssetIDType[]>()
             {
+                { "action_create_object", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
+                { "instance_activate_object", new AssetIDType[] { AssetIDType.GameObject } },
                 { "script_exists", new AssetIDType[] { AssetIDType.Script } },
                 { "script_get_name", new AssetIDType[] { AssetIDType.Script } },
                 // script_execute handled separately
@@ -674,8 +676,6 @@ namespace UndertaleModLib.Decompiler
             {
                 //Comment out until I can fix this
                 //name["scr_bouncer"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
-                //name["action_create_object"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other };
-                //name["instance_activate_object"] = new AssetIDType[] { AssetIDType.GameObject };
                 builtin_vars.Add("currentroom", AssetIDType.Room);
                 builtin_vars.Add("dsprite", AssetIDType.Sprite);
                 builtin_vars.Add("usprite", AssetIDType.Sprite);
