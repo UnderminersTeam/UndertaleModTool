@@ -705,8 +705,8 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("bratty", AssetIDType.GameObject);
                 builtin_vars.Add("creator", AssetIDType.GameObject);
                 //These are not so consistent... ;-;
-                builtin_vars.Add("op", AssetIDType.GameObject);
-                builtin_vars.Add("parent", AssetIDType.GameObject);
+                //builtin_vars.Add("op", AssetIDType.GameObject);
+                //builtin_vars.Add("parent", AssetIDType.GameObject);
                 //Toby messed up in "gml_Object_obj_wizardorb_chaser_Alarm_0", "pop" is never a script.
                 //builtin_vars.Add("pop", AssetIDType.Script);
                 //From v1.001 Undertale via comparison
