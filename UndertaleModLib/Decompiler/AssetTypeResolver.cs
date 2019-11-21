@@ -269,6 +269,8 @@ namespace UndertaleModLib.Decompiler
         {
             builtin_funcs = new Dictionary<string, AssetIDType[]>()
             {
+                { "action_create_object", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
+                { "instance_activate_object", new AssetIDType[] { AssetIDType.GameObject } },
                 { "script_exists", new AssetIDType[] { AssetIDType.Script } },
                 { "script_get_name", new AssetIDType[] { AssetIDType.Script } },
                 // script_execute handled separately
@@ -284,6 +286,7 @@ namespace UndertaleModLib.Decompiler
                 { "instance_number", new AssetIDType[] { AssetIDType.GameObject } },
                 { "instance_place", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
                 { "instance_position", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+                { "instance_deactivate_all", new AssetIDType[] { AssetIDType.Boolean } },
 
                 { "instance_activate_layer", new AssetIDType[] { AssetIDType.Layer } }, // GMS2
                 { "instance_deactivate_layer", new AssetIDType[] { AssetIDType.Layer } }, // GMS2
@@ -659,8 +662,50 @@ namespace UndertaleModLib.Decompiler
 
             // TODO: make proper file/manifest for all games to use, not just UT/DR, and also not these specific names
             string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower();
+            //Just Undertale
+            if (lowerName != null && (lowerName == "undertale"))
+            {
+                //Sometimes used as a bool, should not matter though and be an improvement overall.
+                builtin_vars.Add("king", AssetIDType.GameObject);
+            }
+            //Just deltarune
+            if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
+            {
+                builtin_vars.Add("idlesprite", AssetIDType.Sprite);
+                builtin_vars.Add("actreadysprite", AssetIDType.Sprite);
+                builtin_vars.Add("actsprite", AssetIDType.Sprite);
+                builtin_vars.Add("defendsprite", AssetIDType.Sprite);
+                builtin_vars.Add("attackreadysprite", AssetIDType.Sprite);
+                builtin_vars.Add("attacksprite", AssetIDType.Sprite);
+                builtin_vars.Add("itemsprite", AssetIDType.Sprite);
+                builtin_vars.Add("itemreadysprite", AssetIDType.Sprite);
+                builtin_vars.Add("spellreadysprite", AssetIDType.Sprite);
+                builtin_vars.Add("spellsprite", AssetIDType.Sprite);
+                builtin_vars.Add("defeatsprite", AssetIDType.Sprite);
+                builtin_vars.Add("victorysprite", AssetIDType.Sprite);
+                builtin_vars.Add("dsprite_blush", AssetIDType.Sprite);
+                builtin_vars.Add("usprite_blush", AssetIDType.Sprite);
+                builtin_vars.Add("lsprite_blush", AssetIDType.Sprite);
+                builtin_vars.Add("rsprite_blush", AssetIDType.Sprite);
+                builtin_vars.Add("heartsprite", AssetIDType.Sprite);
+                builtin_vars.Add("msprite", AssetIDType.Sprite);
+                builtin_vars.Add("particlesprite", AssetIDType.Sprite);
+                builtin_vars.Add("s_sprite", AssetIDType.Sprite);
+                builtin_vars.Add("shopkeepsprite", AssetIDType.Sprite);
+                builtin_vars.Add("slidesprite", AssetIDType.Sprite);
+                builtin_vars.Add("smsprite", AssetIDType.Sprite);
+                builtin_vars.Add("sparedsprite", AssetIDType.Sprite);
+                builtin_vars.Add("sussprite", AssetIDType.Sprite);
+                //"targetsprite" seems to be unused but just in case
+                builtin_vars.Add("targetsprite", AssetIDType.Sprite);
+                builtin_vars.Add("thissprite", AssetIDType.Sprite);
+                builtin_vars.Add("touchsprite", AssetIDType.Sprite);
+            }
+            //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
+                //Hope this script works!
+                builtin_funcs["scr_bouncer"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
                 builtin_vars.Add("currentroom", AssetIDType.Room);
                 builtin_vars.Add("dsprite", AssetIDType.Sprite);
                 builtin_vars.Add("usprite", AssetIDType.Sprite);
@@ -673,6 +718,55 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("normalsprite", AssetIDType.Sprite);
                 builtin_vars.Add("hurtsprite", AssetIDType.Sprite);
                 builtin_vars.Add("hurtsound", AssetIDType.Sound);
+                //New built in vars found by Grossley
+                builtin_vars.Add("interact", AssetIDType.Other);
+                //Test me!
+                builtin_vars.Add("sound0", AssetIDType.Sound);
+                //From v1.11 Undertale comparison, not tested unlike v1.001!
+                builtin_vars.Add("asprite", AssetIDType.Sprite);
+                builtin_vars.Add("bsprite", AssetIDType.Sprite);
+                builtin_vars.Add("tailobj", AssetIDType.GameObject);
+                builtin_vars.Add("draedmode", AssetIDType.Boolean);
+                builtin_vars.Add("background_color", AssetIDType.Color);
+                builtin_vars.Add("object0", AssetIDType.GameObject);
+                builtin_vars.Add("part1", AssetIDType.GameObject);
+                builtin_vars.Add("pap", AssetIDType.GameObject);
+                builtin_vars.Add("fileerased", AssetIDType.Sprite);
+                builtin_vars.Add("catty", AssetIDType.GameObject);
+                builtin_vars.Add("bratty", AssetIDType.GameObject);
+                builtin_vars.Add("creator", AssetIDType.GameObject);
+                //It's not 100% accurate to resolve this way but it seems like this variable only gets directly assigned values and is used as a bool, it should be fine.
+                builtin_vars.Add("parent", AssetIDType.GameObject);
+                //These are not so consistent... ;-;
+                //op is used in Muffet's stuff but is critical in Omega flowey positioning... worse to resolve than to not.
+                //builtin_vars.Add("op", AssetIDType.GameObject);
+                //Toby messed up in "gml_Object_obj_wizardorb_chaser_Alarm_0" (should be "scr_monstersum()"), "pop" is never a script.
+                //From v1.001 Undertale via comparison
+                //A TIER quality:
+                builtin_vars.Add("onionsprite", AssetIDType.Sprite);
+                builtin_vars.Add("headsprite", AssetIDType.Sprite);
+                builtin_vars.Add("breaksprite", AssetIDType.Sprite);
+                builtin_vars.Add("foodimg", AssetIDType.Sprite);
+                builtin_vars.Add("facespr", AssetIDType.Sprite);
+                builtin_vars.Add("bombsprite", AssetIDType.Sprite);
+                builtin_vars.Add("mysprite", AssetIDType.Sprite);
+                builtin_vars.Add("arms", AssetIDType.Sprite);
+                builtin_vars.Add("levelpic", AssetIDType.Sprite);
+                builtin_vars.Add("image", AssetIDType.Sprite);
+                builtin_vars.Add("song_index", AssetIDType.Sound);
+                builtin_vars.Add("thischara", AssetIDType.GameObject);
+                //B TIER quality:
+                builtin_vars.Add("tspr5", AssetIDType.Sprite);
+                builtin_vars.Add("tspr3", AssetIDType.Sprite);
+                builtin_vars.Add("tspr2", AssetIDType.Sprite);
+                builtin_vars.Add("tspr1", AssetIDType.Sprite);
+                builtin_vars.Add("tspr4", AssetIDType.Sprite);
+                builtin_vars.Add("snapper", AssetIDType.GameObject);
+                builtin_vars.Add("subject", AssetIDType.GameObject);
+                builtin_vars.Add("clip", AssetIDType.GameObject);
+                //C TIER quality:
+                builtin_vars.Add("sound1", AssetIDType.Sound);
+                builtin_vars.Add("sound2", AssetIDType.Sound);
             }
         }
     }
