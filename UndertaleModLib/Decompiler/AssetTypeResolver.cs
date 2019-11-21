@@ -695,7 +695,7 @@ namespace UndertaleModLib.Decompiler
                 //From v1.11 Undertale comparison, not tested unlike v1.001!
                 builtin_vars.Add("asprite", AssetIDType.Sprite);
                 builtin_vars.Add("bsprite", AssetIDType.Sprite);
-                builtin_vars.Add("tailobj", AssetIDType.GameObject);sound0
+                builtin_vars.Add("tailobj", AssetIDType.GameObject);
                 builtin_vars.Add("draedmode", AssetIDType.Boolean);
                 builtin_vars.Add("background_color", AssetIDType.Color);
                 builtin_vars.Add("object0", AssetIDType.GameObject);
