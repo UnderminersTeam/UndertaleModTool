@@ -684,6 +684,10 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("spellsprite", AssetIDType.Sprite);
                 builtin_vars.Add("defeatsprite", AssetIDType.Sprite);
                 builtin_vars.Add("victorysprite", AssetIDType.Sprite);
+                builtin_vars.Add("dsprite_blush", AssetIDType.Sprite);
+                builtin_vars.Add("usprite_blush", AssetIDType.Sprite);
+                builtin_vars.Add("lsprite_blush", AssetIDType.Sprite);
+                builtin_vars.Add("rsprite_blush", AssetIDType.Sprite);
             }
             //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
