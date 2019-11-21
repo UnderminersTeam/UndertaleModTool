@@ -704,11 +704,12 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("catty", AssetIDType.GameObject);
                 builtin_vars.Add("bratty", AssetIDType.GameObject);
                 builtin_vars.Add("creator", AssetIDType.GameObject);
+                //It's not 100% accurate to resolve this way but it seems like this variable only gets directly assigned values and is used as a bool, it should be fine.
+                builtin_vars.Add("parent", AssetIDType.GameObject);
                 //These are not so consistent... ;-;
+                //op is used in Muffet's stuff but is critical in Omega flowey positioning... worse to resolve than to not.
                 //builtin_vars.Add("op", AssetIDType.GameObject);
-                //builtin_vars.Add("parent", AssetIDType.GameObject);
-                //Toby messed up in "gml_Object_obj_wizardorb_chaser_Alarm_0", "pop" is never a script.
-                //builtin_vars.Add("pop", AssetIDType.Script);
+                //Toby messed up in "gml_Object_obj_wizardorb_chaser_Alarm_0" (should be "scr_monstersum()"), "pop" is never a script.
                 //From v1.001 Undertale via comparison
                 //A TIER quality:
                 builtin_vars.Add("onionsprite", AssetIDType.Sprite);
