@@ -695,7 +695,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("smsprite", AssetIDType.Sprite);
                 builtin_vars.Add("sparedsprite", AssetIDType.Sprite);
                 builtin_vars.Add("sussprite", AssetIDType.Sprite);
-                //Seems to be unused but it wouldn't hurt
+                //"targetsprite" seems to be unused but just in case
                 builtin_vars.Add("targetsprite", AssetIDType.Sprite);
                 builtin_vars.Add("thissprite", AssetIDType.Sprite);
                 builtin_vars.Add("touchsprite", AssetIDType.Sprite);
@@ -703,7 +703,7 @@ namespace UndertaleModLib.Decompiler
             //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
-                //Hope this works!
+                //Hope this script works!
                 builtin_funcs["scr_bouncer"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
                 builtin_vars.Add("currentroom", AssetIDType.Room);
                 builtin_vars.Add("dsprite", AssetIDType.Sprite);
