@@ -688,6 +688,19 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("usprite_blush", AssetIDType.Sprite);
                 builtin_vars.Add("lsprite_blush", AssetIDType.Sprite);
                 builtin_vars.Add("rsprite_blush", AssetIDType.Sprite);
+                builtin_vars.Add("heartsprite", AssetIDType.Sprite);
+                builtin_vars.Add("msprite", AssetIDType.Sprite);
+                builtin_vars.Add("particlesprite", AssetIDType.Sprite);
+                builtin_vars.Add("s_sprite", AssetIDType.Sprite);
+                builtin_vars.Add("shopkeepsprite", AssetIDType.Sprite);
+                builtin_vars.Add("slidesprite", AssetIDType.Sprite);
+                builtin_vars.Add("smsprite", AssetIDType.Sprite);
+                builtin_vars.Add("sparedsprite", AssetIDType.Sprite);
+                builtin_vars.Add("sussprite", AssetIDType.Sprite);
+                //Seems to be unused but it wouldn't hurt
+                builtin_vars.Add("targetsprite", AssetIDType.Sprite);
+                builtin_vars.Add("thissprite", AssetIDType.Sprite);
+                builtin_vars.Add("touchsprite", AssetIDType.Sprite);
             }
             //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
