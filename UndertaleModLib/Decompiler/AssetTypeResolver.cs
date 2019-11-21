@@ -670,6 +670,20 @@ namespace UndertaleModLib.Decompiler
             //Just deltarune
             if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
+                builtin_vars.Add("normalsprite", AssetIDType.Sprite);
+                builtin_vars.Add("idlesprite", AssetIDType.Sprite);
+                builtin_vars.Add("actreadysprite", AssetIDType.Sprite);
+                builtin_vars.Add("actsprite", AssetIDType.Sprite);
+                builtin_vars.Add("hurtsprite", AssetIDType.Sprite);
+                builtin_vars.Add("defendsprite", AssetIDType.Sprite);
+                builtin_vars.Add("attackreadysprite", AssetIDType.Sprite);
+                builtin_vars.Add("attacksprite", AssetIDType.Sprite);
+                builtin_vars.Add("itemsprite", AssetIDType.Sprite);
+                builtin_vars.Add("itemreadysprite", AssetIDType.Sprite);
+                builtin_vars.Add("spellreadysprite", AssetIDType.Sprite);
+                builtin_vars.Add("spellsprite", AssetIDType.Sprite);
+                builtin_vars.Add("defeatsprite", AssetIDType.Sprite);
+                builtin_vars.Add("victorysprite", AssetIDType.Sprite);
             }
             //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
