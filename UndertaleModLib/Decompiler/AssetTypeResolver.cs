@@ -662,6 +662,7 @@ namespace UndertaleModLib.Decompiler
             //Just Undertale
             if (lowerName != null && (lowerName == "undertale"))
             {
+                //Sometimes used as a bool, should not matter though and be an improvement overall.
                 builtin_vars.Add("king", AssetIDType.GameObject);
             }
             //Just deltarune
