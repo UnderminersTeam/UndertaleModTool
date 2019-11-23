@@ -701,6 +701,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("thissprite", AssetIDType.Sprite);
                 builtin_vars.Add("touchsprite", AssetIDType.Sprite);
                 builtin_vars.Add("darkzone", AssetIDType.Boolean);
+                builtin_vars.Add("darkmode", AssetIDType.Boolean); 
             }
             //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
