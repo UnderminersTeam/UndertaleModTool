@@ -704,6 +704,8 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("darkzone", AssetIDType.Boolean);
                 builtin_vars.Add("darkmode", AssetIDType.Boolean); 
                 builtin_vars.Add("darkify", AssetIDType.Boolean);
+                builtin_vars.Add("noroom", AssetIDType.Boolean); 
+                builtin_vars.Add("__loadedroom", AssetIDType.Room); 
                 //Colors weave into a spire of flame
                 builtin_vars.Add("mycolor", AssetIDType.Color);
                 builtin_vars.Add("colorchange", AssetIDType.Boolean);
