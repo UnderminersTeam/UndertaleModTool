@@ -700,6 +700,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("targetsprite", AssetIDType.Sprite);
                 builtin_vars.Add("thissprite", AssetIDType.Sprite);
                 builtin_vars.Add("touchsprite", AssetIDType.Sprite);
+                builtin_vars.Add("sprite_type", AssetIDType.Sprite);
                 builtin_vars.Add("darkzone", AssetIDType.Boolean);
                 builtin_vars.Add("darkmode", AssetIDType.Boolean); 
                 builtin_vars.Add("darkify", AssetIDType.Boolean);
