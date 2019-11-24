@@ -702,7 +702,27 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("touchsprite", AssetIDType.Sprite);
                 builtin_vars.Add("darkzone", AssetIDType.Boolean);
                 builtin_vars.Add("darkmode", AssetIDType.Boolean); 
-                builtin_vars.Add("darkify", AssetIDType.Boolean); 
+                builtin_vars.Add("darkify", AssetIDType.Boolean);
+                //Colors weave into a spire of flame
+                builtin_vars.Add("mycolor", AssetIDType.Color);
+                builtin_vars.Add("colorchange", AssetIDType.Boolean);
+                builtin_vars.Add("xcolor", AssetIDType.Color);
+                builtin_vars.Add("skippable", AssetIDType.Boolean);
+                builtin_vars.Add("charcolor", AssetIDType.Color);
+                builtin_vars.Add("hpcolor", AssetIDType.Color);
+                builtin_vars.Add("bcolor", AssetIDType.Color);
+                builtin_vars.Add("flashcolor", AssetIDType.Color);
+                builtin_vars.Add("smcolor", AssetIDType.Color);
+                builtin_vars.Add("dcolor", AssetIDType.Color);
+                builtin_vars.Add("basecolor", AssetIDType.Color);
+                builtin_vars.Add("_abilitycolor", AssetIDType.Color);
+                builtin_vars.Add("mnamecolor1", AssetIDType.Color);
+                builtin_vars.Add("mnamecolor2", AssetIDType.Color);
+                builtin_vars.Add("scolor", AssetIDType.Color);
+                builtin_vars.Add("arrowcolor", AssetIDType.Color);
+                builtin_vars.Add("particlecolor", AssetIDType.Color);
+                builtin_vars.Add("linecolor", AssetIDType.Color);
+                builtin_vars.Add("fadecolor", AssetIDType.Color);
             }
             //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
