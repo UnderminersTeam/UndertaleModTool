@@ -737,9 +737,12 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("firstnoise", AssetIDType.Boolean);
                 builtin_vars.Add("dmgnoise", AssetIDType.Boolean);
                 builtin_vars.Add("noiseskip", AssetIDType.Boolean);
-//                builtin_vars.Add("chalksound", AssetIDType.Boolean);
-//                builtin_vars.Add("chalksound", AssetIDType.Boolean);
-//                builtin_vars.Add("chalksound", AssetIDType.Boolean);
+                builtin_vars.Add("usable", AssetIDType.Boolean);
+                builtin_vars.Add("tempkeyitemusable", AssetIDType.Boolean);
+                builtin_vars.Add("spellusable", AssetIDType.Boolean);
+                builtin_vars.Add("NAMEFADE_COMPLETE", AssetIDType.Boolean);
+                builtin_vars.Add("dancekris", AssetIDType.GameObject);
+                builtin_vars.Add("noiseskip", AssetIDType.Boolean);
                 //Colors weave into a spire of flame
                 builtin_vars.Add("mycolor", AssetIDType.Color);
                 builtin_vars.Add("colorchange", AssetIDType.Boolean);
@@ -760,6 +763,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("particlecolor", AssetIDType.Color);
                 builtin_vars.Add("linecolor", AssetIDType.Color);
                 builtin_vars.Add("fadecolor", AssetIDType.Color);
+                builtin_vars.Add("color", AssetIDType.Color);
             }
             //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
