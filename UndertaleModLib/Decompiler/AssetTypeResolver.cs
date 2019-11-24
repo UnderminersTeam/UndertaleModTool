@@ -741,6 +741,25 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("NAMEFADE_COMPLETE", AssetIDType.Boolean);
                 builtin_vars.Add("dancekris", AssetIDType.GameObject);
                 builtin_vars.Add("noiseskip", AssetIDType.Boolean);
+                builtin_vars.Add("attacked", AssetIDType.Boolean);
+                builtin_vars.Add("attack_qual", AssetIDType.Boolean);
+                builtin_vars.Add("attacking", AssetIDType.Boolean);
+                builtin_vars.Add("attackedkris", AssetIDType.Boolean);
+                builtin_vars.Add("attacks", AssetIDType.Boolean);
+                builtin_vars.Add("battleend", AssetIDType.Boolean);
+                builtin_vars.Add("battlemode", AssetIDType.Boolean);
+                builtin_vars.Add("battlemoder", AssetIDType.Boolean);
+                builtin_vars.Add("becamebattle", AssetIDType.Boolean);
+                builtin_vars.Add("cancelattack", AssetIDType.Boolean);
+                builtin_vars.Add("seriousbattle", AssetIDType.Boolean);
+                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
+                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
+                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
+                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
+                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
+                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
+                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
+                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
                 //Colors weave into a spire of flame
                 builtin_vars.Add("mycolor", AssetIDType.Color);
                 builtin_vars.Add("colorchange", AssetIDType.Boolean);
