@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -669,8 +669,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("king", AssetIDType.GameObject);
             }
             //Just deltarune
-            if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
-            {
+            if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune"))) {
                 builtin_vars.Add("idlesprite", AssetIDType.Sprite);
                 builtin_vars.Add("actreadysprite", AssetIDType.Sprite);
                 builtin_vars.Add("actsprite", AssetIDType.Sprite);
@@ -702,7 +701,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("touchsprite", AssetIDType.Sprite);
                 builtin_vars.Add("sprite_type", AssetIDType.Sprite);
                 builtin_vars.Add("darkzone", AssetIDType.Boolean);
-                builtin_vars.Add("darkmode", AssetIDType.Boolean); 
+                builtin_vars.Add("darkmode", AssetIDType.Boolean);
                 builtin_vars.Add("darkify", AssetIDType.Boolean);
                 builtin_vars.Add("noroom", AssetIDType.Boolean);
                 builtin_vars.Add("room_persistent", AssetIDType.Boolean);
@@ -736,7 +735,6 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("gnoise", AssetIDType.Boolean);
                 builtin_vars.Add("firstnoise", AssetIDType.Boolean);
                 builtin_vars.Add("dmgnoise", AssetIDType.Boolean);
-                builtin_vars.Add("noiseskip", AssetIDType.Boolean);
                 builtin_vars.Add("usable", AssetIDType.Boolean);
                 builtin_vars.Add("tempkeyitemusable", AssetIDType.Boolean);
                 builtin_vars.Add("spellusable", AssetIDType.Boolean);
@@ -806,7 +804,7 @@ namespace UndertaleModLib.Decompiler
                 //builtin_vars.Add("op", AssetIDType.GameObject);
                 //Toby messed up in "gml_Object_obj_wizardorb_chaser_Alarm_0" (should be "scr_monstersum()"), "pop" is never a script.
                 //From v1.001 Undertale via comparison
-                //A TIER quality:
+                //A TIER quality
                 builtin_vars.Add("onionsprite", AssetIDType.Sprite);
                 builtin_vars.Add("headsprite", AssetIDType.Sprite);
                 builtin_vars.Add("breaksprite", AssetIDType.Sprite);
@@ -819,7 +817,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("image", AssetIDType.Sprite);
                 builtin_vars.Add("song_index", AssetIDType.Sound);
                 builtin_vars.Add("thischara", AssetIDType.GameObject);
-                //B TIER quality:
+                //B TIER quality
                 builtin_vars.Add("tspr5", AssetIDType.Sprite);
                 builtin_vars.Add("tspr3", AssetIDType.Sprite);
                 builtin_vars.Add("tspr2", AssetIDType.Sprite);
@@ -828,7 +826,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("snapper", AssetIDType.GameObject);
                 builtin_vars.Add("subject", AssetIDType.GameObject);
                 builtin_vars.Add("clip", AssetIDType.GameObject);
-                //C TIER quality:
+                //C TIER quality
                 builtin_vars.Add("sound1", AssetIDType.Sound);
                 builtin_vars.Add("sound2", AssetIDType.Sound);
             }
