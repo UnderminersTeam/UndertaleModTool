@@ -667,6 +667,7 @@ namespace UndertaleModLib.Decompiler
             {
                 //Sometimes used as a bool, should not matter though and be an improvement overall.
                 builtin_vars.Add("king", AssetIDType.GameObject);
+                builtin_funcs["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
             }
             //Just deltarune
             if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune"))) {
