@@ -750,7 +750,6 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("battlemode", AssetIDType.Boolean);
                 builtin_vars.Add("battlemoder", AssetIDType.Boolean);
                 builtin_vars.Add("becamebattle", AssetIDType.Boolean);
-                builtin_vars.Add("cancelattack", AssetIDType.Boolean);
                 builtin_vars.Add("seriousbattle", AssetIDType.Boolean);
                 builtin_vars.Add("cango", AssetIDType.Boolean);
                 builtin_vars.Add("canact", AssetIDType.Boolean);
