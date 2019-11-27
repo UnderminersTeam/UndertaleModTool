@@ -670,6 +670,8 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
                 //I should confirm adding this causes no adverse effects later. 
                 builtin_vars.Add("myroom", AssetIDType.Room);
+                //gml_Object_obj_dummytrigger_Collision_1576
+                builtin_vars.Add("dummy", AssetIDType.GameObject);
                 //This should do something to fix the piano room
                 builtin_vars.Add("sprite_id", AssetIDType.Sprite);
                 builtin_funcs["scr_getsprite"] = new AssetIDType[] { AssetIDType.Sprite };
