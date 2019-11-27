@@ -2705,7 +2705,7 @@ namespace UndertaleModLib.Compiler
             Functions["switch_controller_get_supported_styles"] = new FunctionInfo(this, 0);
             Functions["switch_controller_vibration_permitted"] = new FunctionInfo(this, 0);
             Functions["switch_controller_vibrate_hd"] = new FunctionInfo(this, 6);
-            Functions["switch_controller_acceleration"] = new FunctionInfo(this, 2);
+            Functions["switch_controller_acceleration"] = new FunctionInfo(this, 3);
             Functions["switch_controller_angular_velocity"] = new FunctionInfo(this, 2);
             Functions["switch_controller_angle"] = new FunctionInfo(this, 2);
             Functions["switch_controller_direction"] = new FunctionInfo(this, 2);
