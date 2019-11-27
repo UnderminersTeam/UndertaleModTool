@@ -668,6 +668,8 @@ namespace UndertaleModLib.Decompiler
                 //Sometimes used as a bool, should not matter though and be an improvement overall.
                 builtin_vars.Add("king", AssetIDType.GameObject);
                 builtin_funcs["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                //I should confirm adding this causes no adverse effects later. 
+                builtin_vars.Add("myroom", AssetIDType.Room);
                 //This should do something to fix the piano room
                 builtin_vars.Add("sprite_id", AssetIDType.Sprite);
                 builtin_funcs["scr_getsprite"] = new AssetIDType[] { AssetIDType.Sprite };
