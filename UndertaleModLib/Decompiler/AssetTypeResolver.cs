@@ -676,6 +676,11 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("sprite_id", AssetIDType.Sprite);
                 builtin_vars.Add("myfont", AssetIDType.Font);
                 builtin_funcs["scr_getsprite"] = new AssetIDType[] { AssetIDType.Sprite };
+                //gml_Object_obj_barabody_Create_0
+                builtin_vars.Add("hand1pic", AssetIDType.Sprite);
+                builtin_vars.Add("hand2pic", AssetIDType.Sprite);
+                builtin_vars.Add("headpic", AssetIDType.Sprite);
+                builtin_vars.Add("bodypic", AssetIDType.Sprite);
             }
             //Just deltarune
             if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune"))) {
