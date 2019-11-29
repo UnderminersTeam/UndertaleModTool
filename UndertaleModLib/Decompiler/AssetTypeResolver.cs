@@ -672,6 +672,8 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("myroom", AssetIDType.Room);
                 //gml_Object_obj_dummytrigger_Collision_1576
                 builtin_vars.Add("dummy", AssetIDType.GameObject);
+                //gml_Object_obj_asriel_swordarm_Create_0
+                builtin_vars.Add("sm", AssetIDType.GameObject);
                 //This should do something to fix the piano room
                 builtin_vars.Add("sprite_id", AssetIDType.Sprite);
                 builtin_vars.Add("myfont", AssetIDType.Font);
