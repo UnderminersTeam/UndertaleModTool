@@ -685,6 +685,9 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("bodypic", AssetIDType.Sprite);
                 //gml_Object_obj_asgoreb_body_Create_0
                 builtin_vars.Add("bodypic", AssetIDType.Sprite);
+                //gml_Object_obj_castroll_Draw_0
+                builtin_vars.Add("do_room_goto", AssetIDType.Boolean);
+                builtin_vars.Add("do_room_goto_target", AssetIDType.Room);
             }
             //Just deltarune
             if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune"))) {
