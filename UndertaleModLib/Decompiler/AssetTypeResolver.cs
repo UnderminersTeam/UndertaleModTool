@@ -686,8 +686,6 @@ namespace UndertaleModLib.Decompiler
                 //gml_Object_obj_castroll_Draw_0
                 builtin_vars.Add("do_room_goto", AssetIDType.Boolean);
                 builtin_vars.Add("do_room_goto_target", AssetIDType.Room);
-                //gml_Object_obj_vulkinbody_UNDERTALE_Create_0
-                builtin_vars.Add("face", AssetIDType.Sprite);
             }
             //Just deltarune
             if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune"))) {
@@ -845,6 +843,8 @@ namespace UndertaleModLib.Decompiler
             //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
+                //gml_Object_obj_vulkinbody_UNDERTALE_Create_0
+                builtin_vars.Add("face", AssetIDType.Sprite);
                 builtin_vars.Add("myfont", AssetIDType.Font);
                 //Hope this script works!
                 builtin_funcs["scr_bouncer"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
