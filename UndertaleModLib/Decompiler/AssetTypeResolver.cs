@@ -676,7 +676,6 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("sm", AssetIDType.GameObject);
                 //This should do something to fix the piano room
                 builtin_vars.Add("sprite_id", AssetIDType.Sprite);
-                builtin_vars.Add("myfont", AssetIDType.Font);
                 builtin_funcs["scr_getsprite"] = new AssetIDType[] { AssetIDType.Sprite };
                 //gml_Object_obj_barabody_Create_0
                 builtin_vars.Add("hand1pic", AssetIDType.Sprite);
@@ -847,6 +846,7 @@ namespace UndertaleModLib.Decompiler
             //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
+                builtin_vars.Add("myfont", AssetIDType.Font);
                 //Hope this script works!
                 builtin_funcs["scr_bouncer"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
                 builtin_vars.Add("currentroom", AssetIDType.Room);
