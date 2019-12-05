@@ -820,15 +820,6 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("bellcon", AssetIDType.Boolean);
                 builtin_vars.Add("belowzero", AssetIDType.Boolean);
                 //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
-                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
-                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
-                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
-                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
-                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
-                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
-                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
-                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
-                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
                 //Colors weave into a spire of flame
                 builtin_vars.Add("mycolor", AssetIDType.Color);
                 builtin_vars.Add("colorchange", AssetIDType.Boolean);
@@ -850,6 +841,8 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("linecolor", AssetIDType.Color);
                 builtin_vars.Add("fadecolor", AssetIDType.Color);
                 builtin_vars.Add("color", AssetIDType.Color);
+                //Scripts
+                builtin_funcs["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
             }
             //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
