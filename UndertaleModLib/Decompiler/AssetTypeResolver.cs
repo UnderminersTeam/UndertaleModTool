@@ -936,7 +936,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("fadeplease", AssetIDType.Boolean);
                 builtin_vars.Add("active", AssetIDType.Boolean);
                 builtin_vars.Add("alpha_changed", AssetIDType.Boolean);
-                //builtin_vars.Add("itemed", AssetIDType.Boolean);
+                builtin_vars.Add("charinstance", AssetIDType.GameObject);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
