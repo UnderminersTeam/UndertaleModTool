@@ -938,6 +938,13 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("alpha_changed", AssetIDType.Boolean);
                 builtin_vars.Add("charinstance", AssetIDType.GameObject);
                 builtin_vars.Add("reset", AssetIDType.Boolean);
+                //globals pertaining to monsters in Deltarune 
+                builtin_vars.Add("monsterstatus", AssetIDType.Boolean);
+                builtin_vars.Add("monster", AssetIDType.Boolean);
+                //Cutscene
+                builtin_vars.Add("cutscene", AssetIDType.Boolean);
+                //builtin_vars.Add("itemed", AssetIDType.Boolean);
+                //builtin_vars.Add("itemed", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
