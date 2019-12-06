@@ -929,9 +929,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("ralsei_lecture", AssetIDType.Boolean);
                 builtin_vars.Add("choiced", AssetIDType.Boolean);
                 builtin_vars.Add("SELNOISE", AssetIDType.Boolean);
-                builtin_vars.Add("selnoise", AssetIDType.Boolean);
                 builtin_vars.Add("BACKNOISE", AssetIDType.Boolean);
-                builtin_vars.Add("backnoise", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
