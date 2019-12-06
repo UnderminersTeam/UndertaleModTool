@@ -928,8 +928,11 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("secondtime", AssetIDType.Boolean);
                 builtin_vars.Add("ralsei_lecture", AssetIDType.Boolean);
                 builtin_vars.Add("choiced", AssetIDType.Boolean);
-                builtin_vars.Add("SELNOISE", AssetIDType.Boolean);
-                builtin_vars.Add("BACKNOISE", AssetIDType.Boolean);
+                builtin_vars.Add("FINISH", AssetIDType.Boolean);
+                builtin_vars.Add("LOCK", AssetIDType.Boolean);
+                builtin_vars.Add("locked", AssetIDType.Boolean);
+                //builtin_vars.Add("itemed", AssetIDType.Boolean);
+                //builtin_vars.Add("itemed", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
