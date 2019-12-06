@@ -844,7 +844,7 @@ namespace UndertaleModLib.Decompiler
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
                 //gml_Object_obj_vulkinbody_UNDERTALE_Create_0
-                //Breaks gml_Object_obj_friendscene_Step_0, gml_Object_obj_papyrus_friendscene_Create_0, gml_Object_obj_ripoff_asgore_Create_0, 
+                //Seems to be used a lot as a regular value between the values of around 0-20. 
                 builtin_vars.Add("face", AssetIDType.Sprite);
                 builtin_vars.Add("myfont", AssetIDType.Font);
                 //Hope this script works!
