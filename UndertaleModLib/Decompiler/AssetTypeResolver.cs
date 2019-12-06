@@ -871,6 +871,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("tailobj", AssetIDType.GameObject);
                 builtin_vars.Add("heart", AssetIDType.GameObject);
                 builtin_vars.Add("draedmode", AssetIDType.Boolean);
+                builtin_vars.Add("haveauto", AssetIDType.Boolean);
                 builtin_vars.Add("background_color", AssetIDType.Color);
                 builtin_vars.Add("myblend", AssetIDType.Color);
                 builtin_vars.Add("object0", AssetIDType.GameObject);
