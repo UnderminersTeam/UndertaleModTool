@@ -943,7 +943,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("monster", AssetIDType.Boolean);
                 //Cutscene
                 builtin_vars.Add("cutscene", AssetIDType.Boolean);
-                //builtin_vars.Add("itemed", AssetIDType.Boolean);
+                builtin_vars.Add("black", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
