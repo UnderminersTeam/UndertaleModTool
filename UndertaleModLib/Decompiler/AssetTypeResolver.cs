@@ -932,7 +932,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("LOCK", AssetIDType.Boolean);
                 builtin_vars.Add("locked", AssetIDType.Boolean);
                 builtin_vars.Add("ERASE", AssetIDType.Boolean);
-                //builtin_vars.Add("itemed", AssetIDType.Boolean);
+                builtin_vars.Add("fastmode", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
                 //builtin_vars.Add("itemed", AssetIDType.Boolean);
