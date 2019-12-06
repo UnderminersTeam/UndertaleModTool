@@ -844,7 +844,7 @@ namespace UndertaleModLib.Decompiler
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
                 //gml_Object_obj_vulkinbody_UNDERTALE_Create_0
-                //Breaks gml_Object_obj_friendscene_Step_0
+                //Breaks gml_Object_obj_friendscene_Step_0, gml_Object_obj_papyrus_friendscene_Create_0, gml_Object_obj_ripoff_asgore_Create_0, 
                 builtin_vars.Add("face", AssetIDType.Sprite);
                 builtin_vars.Add("myfont", AssetIDType.Font);
                 //Hope this script works!
@@ -872,6 +872,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("heart", AssetIDType.GameObject);
                 builtin_vars.Add("draedmode", AssetIDType.Boolean);
                 builtin_vars.Add("background_color", AssetIDType.Color);
+                builtin_vars.Add("myblend", AssetIDType.Color);
                 builtin_vars.Add("object0", AssetIDType.GameObject);
                 builtin_vars.Add("part1", AssetIDType.GameObject);
                 builtin_vars.Add("pap", AssetIDType.GameObject);
