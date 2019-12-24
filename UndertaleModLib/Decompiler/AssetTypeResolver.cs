@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -667,10 +667,28 @@ namespace UndertaleModLib.Decompiler
             {
                 //Sometimes used as a bool, should not matter though and be an improvement overall.
                 builtin_vars.Add("king", AssetIDType.GameObject);
+                builtin_funcs["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                //I should confirm adding this causes no adverse effects later. 
+                builtin_vars.Add("myroom", AssetIDType.Room);
+                //gml_Object_obj_dummytrigger_Collision_1576
+                builtin_vars.Add("dummy", AssetIDType.GameObject);
+                //gml_Object_obj_asriel_swordarm_Create_0
+                builtin_vars.Add("sm", AssetIDType.GameObject);
+                //This should do something to fix the piano room
+                builtin_vars.Add("sprite_id", AssetIDType.Sprite);
+                builtin_funcs["scr_getsprite"] = new AssetIDType[] { AssetIDType.Sprite };
+                //gml_Object_obj_barabody_Create_0
+                builtin_vars.Add("hand1pic", AssetIDType.Sprite);
+                builtin_vars.Add("hand2pic", AssetIDType.Sprite);
+                builtin_vars.Add("headpic", AssetIDType.Sprite);
+                //gml_Object_obj_asgoreb_body_Create_0
+                builtin_vars.Add("bodypic", AssetIDType.Sprite);
+                //gml_Object_obj_castroll_Draw_0
+                builtin_vars.Add("do_room_goto", AssetIDType.Boolean);
+                builtin_vars.Add("do_room_goto_target", AssetIDType.Room);
             }
             //Just deltarune
-            if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
-            {
+            if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune"))) {
                 builtin_vars.Add("idlesprite", AssetIDType.Sprite);
                 builtin_vars.Add("actreadysprite", AssetIDType.Sprite);
                 builtin_vars.Add("actsprite", AssetIDType.Sprite);
@@ -700,10 +718,135 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("targetsprite", AssetIDType.Sprite);
                 builtin_vars.Add("thissprite", AssetIDType.Sprite);
                 builtin_vars.Add("touchsprite", AssetIDType.Sprite);
+                builtin_vars.Add("sprite_type", AssetIDType.Sprite);
+                builtin_vars.Add("darkzone", AssetIDType.Boolean);
+                builtin_vars.Add("darkmode", AssetIDType.Boolean);
+                builtin_vars.Add("darkify", AssetIDType.Boolean);
+                builtin_vars.Add("noroom", AssetIDType.Boolean);
+                builtin_vars.Add("room_persistent", AssetIDType.Boolean);
+                builtin_vars.Add("loop", AssetIDType.Boolean);
+                builtin_vars.Add("__loadedroom", AssetIDType.Room);
+                builtin_vars.Add("roomchoice", AssetIDType.Room);
+                builtin_vars.Add("writersnd", AssetIDType.Sound);
+                builtin_vars.Add("sndchange", AssetIDType.Boolean);
+                builtin_vars.Add("muschange", AssetIDType.Boolean);
+                builtin_vars.Add("audchange", AssetIDType.Boolean);
+                builtin_vars.Add("sndplay", AssetIDType.Boolean);
+                builtin_vars.Add("sound_played", AssetIDType.Boolean);
+                builtin_vars.Add("chalksound", AssetIDType.Boolean);
+                builtin_vars.Add("grabsounded", AssetIDType.Boolean);
+                builtin_vars.Add("hatsounded", AssetIDType.Boolean);
+                builtin_vars.Add("soundplayed", AssetIDType.Boolean);
+                builtin_vars.Add("windsound", AssetIDType.Boolean);
+                builtin_vars.Add("playtextsound", AssetIDType.Boolean);
+                builtin_vars.Add("textsound", AssetIDType.Sound);
+                builtin_vars.Add("selectnoise", AssetIDType.Boolean);
+                builtin_vars.Add("movenoise", AssetIDType.Boolean);
+                builtin_vars.Add("grazenoise", AssetIDType.Boolean);
+                builtin_vars.Add("selnoise", AssetIDType.Boolean);
+                builtin_vars.Add("damagenoise", AssetIDType.Boolean);
+                builtin_vars.Add("laznoise", AssetIDType.Boolean);
+                builtin_vars.Add("stepnoise", AssetIDType.Boolean);
+                builtin_vars.Add("bumpnoise", AssetIDType.Boolean);
+                builtin_vars.Add("burstnoise", AssetIDType.Boolean);
+                builtin_vars.Add("BACKNOISE", AssetIDType.Boolean);
+                builtin_vars.Add("DEATHNOISE", AssetIDType.Boolean);
+                builtin_vars.Add("gnoise", AssetIDType.Boolean);
+                builtin_vars.Add("firstnoise", AssetIDType.Boolean);
+                builtin_vars.Add("dmgnoise", AssetIDType.Boolean);
+                builtin_vars.Add("usable", AssetIDType.Boolean);
+                builtin_vars.Add("tempkeyitemusable", AssetIDType.Boolean);
+                builtin_vars.Add("spellusable", AssetIDType.Boolean);
+                builtin_vars.Add("NAMEFADE_COMPLETE", AssetIDType.Boolean);
+                builtin_vars.Add("dancekris", AssetIDType.GameObject);
+                builtin_vars.Add("noiseskip", AssetIDType.Boolean);
+                builtin_vars.Add("attacked", AssetIDType.Boolean);
+                builtin_vars.Add("attack_qual", AssetIDType.Boolean);
+                builtin_vars.Add("attacking", AssetIDType.Boolean);
+                builtin_vars.Add("attackedkris", AssetIDType.Boolean);
+                builtin_vars.Add("attacks", AssetIDType.Boolean);
+                builtin_vars.Add("battleend", AssetIDType.Boolean);
+                builtin_vars.Add("battlemoder", AssetIDType.Boolean);
+                builtin_vars.Add("becamebattle", AssetIDType.Boolean);
+                builtin_vars.Add("seriousbattle", AssetIDType.Boolean);
+                //A little bit wrong, but probably fine.
+                builtin_vars.Add("cango", AssetIDType.Boolean);
+                builtin_vars.Add("canact", AssetIDType.Boolean);
+                builtin_vars.Add("CANCEL", AssetIDType.Boolean);
+                builtin_vars.Add("cancelwalk", AssetIDType.Boolean);
+                builtin_vars.Add("cancelattack", AssetIDType.Boolean);
+                builtin_vars.Add("canchoose", AssetIDType.Boolean);
+                builtin_vars.Add("canclick", AssetIDType.Boolean);
+                builtin_vars.Add("cancollide", AssetIDType.Boolean);
+                builtin_vars.Add("candodge", AssetIDType.Boolean);
+                builtin_vars.Add("candraw", AssetIDType.Boolean);
+                builtin_vars.Add("canequip", AssetIDType.Boolean);
+                builtin_vars.Add("canpress", AssetIDType.Boolean);
+                builtin_vars.Add("cant", AssetIDType.Boolean);
+                builtin_vars.Add("depthcancel", AssetIDType.Boolean);
+                builtin_vars.Add("defend_command", AssetIDType.Boolean);
+                builtin_vars.Add("automiss", AssetIDType.Boolean);
+                builtin_vars.Add("awoke", AssetIDType.Boolean);
+                builtin_vars.Add("act_command", AssetIDType.Boolean);
+                builtin_vars.Add("acted", AssetIDType.Boolean);
+                builtin_vars.Add("activated", AssetIDType.Boolean);
+                builtin_vars.Add("activatethrow", AssetIDType.Boolean);
+                builtin_vars.Add("addflag", AssetIDType.Boolean);
+                builtin_vars.Add("addup", AssetIDType.Boolean);
+                builtin_vars.Add("afford", AssetIDType.Boolean);
+                builtin_vars.Add("aftercon", AssetIDType.Boolean);
+                builtin_vars.Add("ALREADY", AssetIDType.Boolean);
+                builtin_vars.Add("ambushed", AssetIDType.Boolean);
+                builtin_vars.Add("permashake", AssetIDType.Boolean);
+                builtin_vars.Add("aster", AssetIDType.Boolean);
+                builtin_vars.Add("autoaster", AssetIDType.Boolean);
+                builtin_vars.Add("autoed", AssetIDType.Boolean);
+                builtin_vars.Add("betray", AssetIDType.Boolean);
+                builtin_vars.Add("abovemaxhp", AssetIDType.Boolean);
+                builtin_vars.Add("abletotarget", AssetIDType.Boolean);
+                builtin_vars.Add("accept", AssetIDType.Boolean);
+                builtin_vars.Add("actual", AssetIDType.Boolean);
+                builtin_vars.Add("currentsong", AssetIDType.Sound);
+                builtin_vars.Add("batmusic", AssetIDType.Sound);
+                builtin_vars.Add("beanie", AssetIDType.Boolean);
+                builtin_vars.Add("beaten", AssetIDType.Boolean);
+                builtin_vars.Add("becomeflash", AssetIDType.Boolean);
+                builtin_vars.Add("becomesleep", AssetIDType.Boolean);
+                builtin_vars.Add("sleeping", AssetIDType.Boolean);
+                builtin_vars.Add("bellcon", AssetIDType.Boolean);
+                builtin_vars.Add("belowzero", AssetIDType.Boolean);
+                //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
+                //Colors weave into a spire of flame
+                builtin_vars.Add("mycolor", AssetIDType.Color);
+                builtin_vars.Add("colorchange", AssetIDType.Boolean);
+                builtin_vars.Add("xcolor", AssetIDType.Color);
+                builtin_vars.Add("skippable", AssetIDType.Boolean);
+                builtin_vars.Add("charcolor", AssetIDType.Color);
+                builtin_vars.Add("hpcolor", AssetIDType.Color);
+                builtin_vars.Add("bcolor", AssetIDType.Color);
+                builtin_vars.Add("flashcolor", AssetIDType.Color);
+                builtin_vars.Add("smcolor", AssetIDType.Color);
+                builtin_vars.Add("dcolor", AssetIDType.Color);
+                builtin_vars.Add("basecolor", AssetIDType.Color);
+                builtin_vars.Add("_abilitycolor", AssetIDType.Color);
+                builtin_vars.Add("mnamecolor1", AssetIDType.Color);
+                builtin_vars.Add("mnamecolor2", AssetIDType.Color);
+                builtin_vars.Add("scolor", AssetIDType.Color);
+                builtin_vars.Add("arrowcolor", AssetIDType.Color);
+                builtin_vars.Add("particlecolor", AssetIDType.Color);
+                builtin_vars.Add("linecolor", AssetIDType.Color);
+                builtin_vars.Add("fadecolor", AssetIDType.Color);
+                builtin_vars.Add("color", AssetIDType.Color);
+                //Scripts
+                builtin_funcs["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
             }
             //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
+                //gml_Object_obj_vulkinbody_UNDERTALE_Create_0
+                //Seems to be used a lot as a regular value between the values of around 0-20. 
+                builtin_vars.Add("face", AssetIDType.Sprite);
+                builtin_vars.Add("myfont", AssetIDType.Font);
                 //Hope this script works!
                 builtin_funcs["scr_bouncer"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
                 builtin_vars.Add("currentroom", AssetIDType.Room);
@@ -726,8 +869,89 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("asprite", AssetIDType.Sprite);
                 builtin_vars.Add("bsprite", AssetIDType.Sprite);
                 builtin_vars.Add("tailobj", AssetIDType.GameObject);
+                builtin_vars.Add("heart", AssetIDType.GameObject);
                 builtin_vars.Add("draedmode", AssetIDType.Boolean);
+                //Deltarune
+                builtin_vars.Add("haveauto", AssetIDType.Boolean);
+                builtin_vars.Add("goahead", AssetIDType.Boolean);
+                builtin_vars.Add("is_auto_susie", AssetIDType.Boolean);
+                builtin_vars.Add("techwon", AssetIDType.Boolean);
+                builtin_vars.Add("itemed", AssetIDType.Boolean);
+                builtin_vars.Add("critical", AssetIDType.Boolean);
+                builtin_vars.Add("tile_fade", AssetIDType.Boolean);
+                builtin_vars.Add("boss", AssetIDType.Boolean);
+                builtin_vars.Add("skipvictory", AssetIDType.Boolean);
+                builtin_vars.Add("victory", AssetIDType.Boolean);
+                builtin_vars.Add("fighting", AssetIDType.Boolean);
+                builtin_vars.Add("charmove", AssetIDType.Boolean);
+                builtin_vars.Add("charcantarget", AssetIDType.Boolean);
+                builtin_vars.Add("chardead", AssetIDType.Boolean);
+                builtin_vars.Add("targeted", AssetIDType.Boolean);
+                builtin_vars.Add("havechar", AssetIDType.Boolean);
+                builtin_vars.Add("noreturn", AssetIDType.Boolean);
+                builtin_vars.Add("timeron", AssetIDType.Boolean);
+                builtin_vars.Add("flash", AssetIDType.Boolean);
+                builtin_vars.Add("mercydraw", AssetIDType.Boolean);
+                builtin_vars.Add("tireddraw", AssetIDType.Boolean);
+                builtin_vars.Add("pacify_glow", AssetIDType.Boolean);
+                builtin_vars.Add("drawsus", AssetIDType.Boolean);
+                builtin_vars.Add("drawral", AssetIDType.Boolean);
+                builtin_vars.Add("susblend", AssetIDType.Color);
+                builtin_vars.Add("ralblend", AssetIDType.Color);
+                builtin_vars.Add("hurt", AssetIDType.Boolean);
+                builtin_vars.Add("skipme", AssetIDType.Boolean);
+                builtin_vars.Add("darken", AssetIDType.Boolean);
+                builtin_vars.Add("combatdarken", AssetIDType.Boolean);
+                builtin_vars.Add("stepped", AssetIDType.Boolean);
+                //warned being a bool is probably mostly correct.
+                builtin_vars.Add("warned", AssetIDType.Boolean);
+                builtin_vars.Add("tired", AssetIDType.Boolean);
+                builtin_vars.Add("fixed", AssetIDType.Boolean);
+                builtin_vars.Add("nexttry", AssetIDType.Boolean);
+                builtin_vars.Add("floating", AssetIDType.Boolean);
+                builtin_vars.Add("bodyfade", AssetIDType.Boolean);
+                builtin_vars.Add("selected", AssetIDType.Boolean);
+                builtin_vars.Add("hurk", AssetIDType.Boolean);
+                builtin_vars.Add("persistent", AssetIDType.Boolean);
+                builtin_vars.Add("dhaver", AssetIDType.Boolean);
+                builtin_vars.Add("walk", AssetIDType.Boolean);
+                builtin_vars.Add("fun", AssetIDType.Boolean);
+                builtin_vars.Add("runmove", AssetIDType.Boolean);
+                builtin_vars.Add("frozen", AssetIDType.Boolean);
+                builtin_vars.Add("hadfrozen", AssetIDType.Boolean);
+                builtin_vars.Add("offscreen_frozen", AssetIDType.Boolean);
+                builtin_vars.Add("ignoresolid", AssetIDType.Boolean);
+                builtin_vars.Add("eraser", AssetIDType.Boolean);
+                builtin_vars.Add("visible", AssetIDType.Boolean);
+                builtin_vars.Add("bikeflip", AssetIDType.Boolean);
+                builtin_vars.Add("checked", AssetIDType.Boolean);
+                builtin_vars.Add("secondtime", AssetIDType.Boolean);
+                builtin_vars.Add("ralsei_lecture", AssetIDType.Boolean);
+                builtin_vars.Add("choiced", AssetIDType.Boolean);
+                builtin_vars.Add("FINISH", AssetIDType.Boolean);
+                builtin_vars.Add("LOCK", AssetIDType.Boolean);
+                builtin_vars.Add("locked", AssetIDType.Boolean);
+                builtin_vars.Add("ERASE", AssetIDType.Boolean);
+                builtin_vars.Add("fastmode", AssetIDType.Boolean);
+                builtin_vars.Add("fadeplease", AssetIDType.Boolean);
+                builtin_vars.Add("active", AssetIDType.Boolean);
+                builtin_vars.Add("alpha_changed", AssetIDType.Boolean);
+                builtin_vars.Add("charinstance", AssetIDType.GameObject);
+                builtin_vars.Add("reset", AssetIDType.Boolean);
+                //globals pertaining to monsters in Deltarune 
+                builtin_vars.Add("monsterstatus", AssetIDType.Boolean);
+                builtin_vars.Add("monster", AssetIDType.Boolean);
+                //Cutscene
+                builtin_vars.Add("cutscene", AssetIDType.Boolean);
+                builtin_vars.Add("black", AssetIDType.Boolean);
+                builtin_vars.Add("monsterinstancetype", AssetIDType.GameObject);
+                //builtin_vars.Add("itemed", AssetIDType.Boolean);
+                //builtin_vars.Add("itemed", AssetIDType.Boolean);
+                //builtin_vars.Add("itemed", AssetIDType.Boolean);
+                //builtin_vars.Add("itemed", AssetIDType.Boolean);
+                //Undertale
                 builtin_vars.Add("background_color", AssetIDType.Color);
+                builtin_vars.Add("myblend", AssetIDType.Color);
                 builtin_vars.Add("object0", AssetIDType.GameObject);
                 builtin_vars.Add("part1", AssetIDType.GameObject);
                 builtin_vars.Add("pap", AssetIDType.GameObject);
@@ -742,7 +966,7 @@ namespace UndertaleModLib.Decompiler
                 //builtin_vars.Add("op", AssetIDType.GameObject);
                 //Toby messed up in "gml_Object_obj_wizardorb_chaser_Alarm_0" (should be "scr_monstersum()"), "pop" is never a script.
                 //From v1.001 Undertale via comparison
-                //A TIER quality:
+                //A TIER quality
                 builtin_vars.Add("onionsprite", AssetIDType.Sprite);
                 builtin_vars.Add("headsprite", AssetIDType.Sprite);
                 builtin_vars.Add("breaksprite", AssetIDType.Sprite);
@@ -755,7 +979,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("image", AssetIDType.Sprite);
                 builtin_vars.Add("song_index", AssetIDType.Sound);
                 builtin_vars.Add("thischara", AssetIDType.GameObject);
-                //B TIER quality:
+                //B TIER quality
                 builtin_vars.Add("tspr5", AssetIDType.Sprite);
                 builtin_vars.Add("tspr3", AssetIDType.Sprite);
                 builtin_vars.Add("tspr2", AssetIDType.Sprite);
@@ -764,7 +988,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("snapper", AssetIDType.GameObject);
                 builtin_vars.Add("subject", AssetIDType.GameObject);
                 builtin_vars.Add("clip", AssetIDType.GameObject);
-                //C TIER quality:
+                //C TIER quality
                 builtin_vars.Add("sound1", AssetIDType.Sound);
                 builtin_vars.Add("sound2", AssetIDType.Sound);
             }

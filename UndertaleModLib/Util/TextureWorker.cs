@@ -50,7 +50,16 @@ namespace UndertaleModLib.Util
             // Create a bitmap representing that part of the texture page.
             Bitmap resultImage = null;
             lock (embeddedImage)
-                resultImage = embeddedImage.Clone(new Rectangle(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight), PixelFormat.DontCare);
+            {
+                try
+                {
+                    resultImage = embeddedImage.Clone(new Rectangle(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight), PixelFormat.DontCare);
+                }
+                catch (OutOfMemoryException e)
+                {
+                    throw new OutOfMemoryException(imageName + "'s texture is abnormal. 'Source Position/Size' boxes 3 & 4 on texture page may be bigger than the sprite itself or it's set to '0'.");
+                }
+            }
 
             // Resize the image, if necessary.
             if ((texPageItem.SourceWidth != texPageItem.TargetWidth) || (texPageItem.SourceHeight != texPageItem.TargetHeight))
