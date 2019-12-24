@@ -2,6 +2,8 @@
 using System;
 using System.Drawing;
 using System.Windows;
+using System.IO;
+using System.Drawing;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 
@@ -29,9 +31,11 @@ namespace UndertaleModTool
 
             try
             {
-                Image image = TextureWorker.ReadImageFromFile(dlg.FileName);
+                Bitmap image = TextureWorker.ReadImageFromFile(dlg.FileName);
+                image.SetResolution(96.0F, 96.0F);
                 (this.DataContext as UndertaleTexturePageItem).ReplaceTexture(image);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Failed to import image", MessageBoxButton.OK, MessageBoxImage.Error);
             }
