@@ -272,13 +272,13 @@
     <None Include="SampleScripts\EnableDebug.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-	<None Include="SampleScripts\ExportAllCode.csx">
+    <None Include="SampleScripts\ExportAllCode.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-	<None Include="SampleScripts\ExportAllSounds.csx">
+    <None Include="SampleScripts\ExportAllSounds.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-	<None Include="SampleScripts\ExportAllTextures.csx">
+    <None Include="SampleScripts\ExportAllTextures.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SampleScripts\GoToRoom.csx">
@@ -633,4 +633,37 @@
       </EmbeddedResource>
     </ItemGroup>
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>pushd $(TargetDir) || exit /B 1 
+for /D %25%25D in ("*") do ( 
+  if /I not "%25%25~nxD"=="SampleScripts" rd /S /Q "%25%25~D" 
+) 
+for %25%25F in ("System.*.dll") do ( 
+  del "%25%25~F" 
+)
+for %25%25F in ("System.*.xml") do ( 
+  del "%25%25~F" 
+)
+for %25%25F in ("Microsoft.*.dll") do ( 
+  del "%25%25~F" 
+)
+for %25%25F in ("Microsoft.*.pdb") do ( 
+  del "%25%25~F" 
+)
+for %25%25F in ("Microsoft.*.xml") do ( 
+  del "%25%25~F" 
+)
+for %25%25F in ("Newtonsoft.*.dll") do ( 
+  del "%25%25~F" 
+)
+for %25%25F in ("Newtonsoft.*.pdb") do ( 
+  del "%25%25~F" 
+)
+for %25%25F in ("Newtonsoft.*.xml") do ( 
+  del "%25%25~F" 
+)
+del "netstandard.dll"
+del "GraphVizWrapper.dll" 
+popd</PostBuildEvent>
+  </PropertyGroup>
 </Project>
