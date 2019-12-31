@@ -272,13 +272,13 @@
     <None Include="SampleScripts\EnableDebug.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-	<None Include="SampleScripts\ExportAllCode.csx">
+    <None Include="SampleScripts\ExportAllCode.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-	<None Include="SampleScripts\ExportAllSounds.csx">
+    <None Include="SampleScripts\ExportAllSounds.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-	<None Include="SampleScripts\ExportAllTextures.csx">
+    <None Include="SampleScripts\ExportAllTextures.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SampleScripts\GoToRoom.csx">
