@@ -44,6 +44,7 @@ namespace UndertaleModLib
         public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO?.List;
 
         public bool UnsupportedBytecodeVersion = false;
+        public bool IsTPAG4ByteAligned = false;
         public int PaddingAlignException = -1;
 
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)

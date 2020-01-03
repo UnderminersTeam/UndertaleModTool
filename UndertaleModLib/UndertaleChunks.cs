@@ -265,9 +265,23 @@ namespace UndertaleModLib
         {
             base.SerializeChunk(writer);
 
-            // padding
-            while (writer.Position % 0x4 != 0)
-                writer.Write((byte)0);
+            if (writer.undertaleData.IsTPAG4ByteAligned)
+            {
+                // padding present in ARM platforms apparently
+                while (writer.Position % 0x4 != 0)
+                    writer.Write((byte)0);
+            }
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            if (Length % 0x4 == 0)
+            {
+                reader.undertaleData.IsTPAG4ByteAligned = true;
+            }
+
+            base.UnserializeChunk(reader);
+
         }
     }
 
