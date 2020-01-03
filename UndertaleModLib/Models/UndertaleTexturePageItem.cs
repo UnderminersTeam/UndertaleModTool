@@ -77,9 +77,7 @@ namespace UndertaleModLib.Models
 
         public void ReplaceTexture(Image replaceImage, bool disposeImage = true)
         {
-            Bitmap res = (Bitmap)replaceImage;
-            res.SetResolution(96.0F, 96.0F);
-            Image finalImage = TextureWorker.ResizeImage(res, SourceWidth, SourceHeight);
+            Image finalImage = TextureWorker.ResizeImage(replaceImage, SourceWidth, SourceHeight);
             
             // Apply the image to the TexturePage.
             lock (TexturePage.TextureData)

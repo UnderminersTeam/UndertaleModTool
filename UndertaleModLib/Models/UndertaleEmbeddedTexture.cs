@@ -58,18 +58,7 @@ namespace UndertaleModLib.Models
         {
             private byte[] _TextureBlob;
 
-            public byte[] TextureBlob { get => _TextureBlob; set {
-                    Bitmap bmp;
-                    using (var ms = new MemoryStream(value))
-                    {
-                        bmp = new Bitmap(ms);
-                        bmp.SetResolution(96.0F, 96.0F);
-                    }
-                    using (var stream = new MemoryStream())
-                    {
-                        bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                        _TextureBlob = stream.ToArray();
-                    }  PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureBlob")); } }
+            public byte[] TextureBlob { get => _TextureBlob; set { _TextureBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureBlob")); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
