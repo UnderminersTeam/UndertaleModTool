@@ -59,7 +59,7 @@ namespace UndertaleModLib.Models
         {
             private byte[] _TextureBlob;
 
-            public byte[] TextureBlob { get => _TextureBlob; set {
+            public byte[] TextureBlob { get => _TextureBlob;     set {
                     Bitmap bmp;
                     using (var ms = new MemoryStream(value))
                     {
@@ -71,6 +71,12 @@ namespace UndertaleModLib.Models
                         bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                         _TextureBlob = stream.ToArray();
                     }  PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureBlob")); } }
+
+            public void loadRawTextureBlob(byte[] input)
+            {
+                _TextureBlob = input;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureBlob"));
+            }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -100,7 +106,7 @@ namespace UndertaleModLib.Models
 
                 uint length = reader.Position - startAddress;
                 reader.Position = startAddress;
-                TextureBlob = reader.ReadBytes((int)length);
+                loadRawTextureBlob(reader.ReadBytes((int)length));
             }
         }
 
