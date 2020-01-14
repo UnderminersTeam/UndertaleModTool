@@ -27,31 +27,30 @@ namespace UndertaleModLib.Decompiler
         public Dictionary<UndertaleVariable, AssetIDType> assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
         public int TempVarId;
         public Dictionary<string, AssetIDType[]> scriptArgs = new Dictionary<string, AssetIDType[]>();
-		
-		// Color dictionary for color resolving
-		public static Dictionary<string, uint> ColorDictionary = new Dictionary<string, uint>
-            {
-                ["c_aqua"] = 16776960,
-                ["c_black"] = 0,
-                ["c_blue"] = 16711680,
-                ["c_dkgray"] = 4210752,
-                ["c_fuchsia"] = 16711935,
-                ["c_gray"] = 8421504,
-                ["c_green"] = 32768,
-                ["c_lime"] = 65280,
-                ["c_ltgray"] = 12632256,
-                ["c_maroon"] = 128,
-                ["c_navy"] = 8388608,
-                ["c_olive"] = 32896,
-                ["c_purple"] = 8388736,
-                ["c_red"] = 255,
-                ["c_silver"] = 12632256,
-                ["c_teal"] = 8421376,
-                ["c_white"] = 16777215,
-                ["c_yellow"] = 65535,
-                ["c_orange"] = 4235519
-            };
 
+        // Color dictionary for color resolving
+        public static Dictionary<string, uint> ColorDictionary = new Dictionary<string, uint>
+        {
+            ["c_aqua"] = 16776960,
+            ["c_black"] = 0,
+            ["c_blue"] = 16711680,
+            ["c_dkgray"] = 4210752,
+            ["c_fuchsia"] = 16711935,
+            ["c_gray"] = 8421504,
+            ["c_green"] = 32768,
+            ["c_lime"] = 65280,
+            ["c_ltgray"] = 12632256,
+            ["c_maroon"] = 128,
+            ["c_navy"] = 8388608,
+            ["c_olive"] = 32896,
+            ["c_purple"] = 8388736,
+            ["c_red"] = 255,
+            ["c_silver"] = 12632256,
+            ["c_teal"] = 8421376,
+            ["c_white"] = 16777215,
+            ["c_yellow"] = 65535,
+            ["c_orange"] = 4235519
+        };
 
         public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
 
@@ -302,16 +301,16 @@ namespace UndertaleModLib.Decompiler
 
                 else if (AssetType == AssetIDType.Color && Value is IFormattable && !(Value is float) && !(Value is double) && !(Value is decimal))
                 {
-					uint Color = Convert.ToUInt32(Value); //color represented as Unsigned Integer.
-					foreach (KeyValuePair<string, uint> Entry in DecompileContext.ColorDictionary)
-					{
-						if (Entry.Value == Color)
+                    uint Color = Convert.ToUInt32(Value); //color represented as Unsigned Integer.
+                    foreach (KeyValuePair<string, uint> Entry in DecompileContext.ColorDictionary)
+                    {
+                        if (Entry.Value == Color)
                         {
-							return Entry.Key; //if our color integer is the same to one in the constant, we return the constant's name.
+                            return Entry.Key; //if our color integer is the same to one in the constant, we return the constant's name.
                         }
-					}
-					return Color.ToString(); //not any of above colors, just return a number.
-				}
+                    }
+                    return Color.ToString(); //not any of above colors, just return a number.
+                }
 
                 else if (AssetType == AssetIDType.KeyboardKey)
                 {
