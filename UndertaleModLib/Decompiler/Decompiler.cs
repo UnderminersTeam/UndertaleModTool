@@ -27,6 +27,28 @@ namespace UndertaleModLib.Decompiler
         public Dictionary<UndertaleVariable, AssetIDType> assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
         public int TempVarId;
         public Dictionary<string, AssetIDType[]> scriptArgs = new Dictionary<string, AssetIDType[]>();
+		
+		// Color dictionary for color resolving
+		public Dictionary<string, uint> ColorDictionary = new Dictionary<string, uint>();
+		ColorDictionary["c_aqua"] = 16776960;
+		ColorDictionary["c_black"] = 0;
+		ColorDictionary["c_blue"] = 16711680;
+		ColorDictionary["c_dkgray"] = 4210752;
+		ColorDictionary["c_fuchsia"] = 16711935;
+		ColorDictionary["c_gray"] = 8421504;
+		ColorDictionary["c_green"] = 32768;
+		ColorDictionary["c_lime"] = 65280;
+		ColorDictionary["c_ltgray"] = 12632256;
+		ColorDictionary["c_maroon"] = 128;
+		ColorDictionary["c_navy"] = 8388608;
+		ColorDictionary["c_olive"] = 32896;
+		ColorDictionary["c_purple"] = 8388736;
+		ColorDictionary["c_red"] = 255;
+		ColorDictionary["c_silver"] = 12632256;
+		ColorDictionary["c_teal"] = 8421376;
+		ColorDictionary["c_white"] = 16777215;
+		ColorDictionary["c_yellow"] = 65535;
+		ColorDictionary["c_orange"] = 4235519;
 
         public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
 
@@ -276,7 +298,17 @@ namespace UndertaleModLib.Decompiler
                     return ConvertToEnumStr<Boolean>(Value);
 
                 else if (AssetType == AssetIDType.Color && Value is IFormattable && !(Value is float) && !(Value is double) && !(Value is decimal))
-                    return (context.isGameMaker2 ? "0x" : "$") + ((IFormattable)Value).ToString("X8", CultureInfo.InvariantCulture);
+                {
+					uint Color = Convert.ToUInt32(Value); //color represented as Unsigned Integer.
+					foreach (KeyValuePair<string, uint> Entry in ColorDictionary)
+					{
+						if (Entry.Value == Color)
+                        {
+							return Entry.Key; //if our color integer is the same to one in the constant, we return the constant's name.
+                        }
+					}
+					return Color.ToString(); //not any of above colors, just return a number.
+				}
 
                 else if (AssetType == AssetIDType.KeyboardKey)
                 {
