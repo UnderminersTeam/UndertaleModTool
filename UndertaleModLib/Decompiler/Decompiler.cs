@@ -29,26 +29,29 @@ namespace UndertaleModLib.Decompiler
         public Dictionary<string, AssetIDType[]> scriptArgs = new Dictionary<string, AssetIDType[]>();
 		
 		// Color dictionary for color resolving
-		public Dictionary<string, uint> ColorDictionary = new Dictionary<string, uint>();
-		ColorDictionary["c_aqua"] = 16776960;
-		ColorDictionary["c_black"] = 0;
-		ColorDictionary["c_blue"] = 16711680;
-		ColorDictionary["c_dkgray"] = 4210752;
-		ColorDictionary["c_fuchsia"] = 16711935;
-		ColorDictionary["c_gray"] = 8421504;
-		ColorDictionary["c_green"] = 32768;
-		ColorDictionary["c_lime"] = 65280;
-		ColorDictionary["c_ltgray"] = 12632256;
-		ColorDictionary["c_maroon"] = 128;
-		ColorDictionary["c_navy"] = 8388608;
-		ColorDictionary["c_olive"] = 32896;
-		ColorDictionary["c_purple"] = 8388736;
-		ColorDictionary["c_red"] = 255;
-		ColorDictionary["c_silver"] = 12632256;
-		ColorDictionary["c_teal"] = 8421376;
-		ColorDictionary["c_white"] = 16777215;
-		ColorDictionary["c_yellow"] = 65535;
-		ColorDictionary["c_orange"] = 4235519;
+		public static Dictionary<string, uint> ColorDictionary = new Dictionary<string, uint>
+            {
+                ["c_aqua"] = 16776960,
+                ["c_black"] = 0,
+                ["c_blue"] = 16711680,
+                ["c_dkgray"] = 4210752,
+                ["c_fuchsia"] = 16711935,
+                ["c_gray"] = 8421504,
+                ["c_green"] = 32768,
+                ["c_lime"] = 65280,
+                ["c_ltgray"] = 12632256,
+                ["c_maroon"] = 128,
+                ["c_navy"] = 8388608,
+                ["c_olive"] = 32896,
+                ["c_purple"] = 8388736,
+                ["c_red"] = 255,
+                ["c_silver"] = 12632256,
+                ["c_teal"] = 8421376,
+                ["c_white"] = 16777215,
+                ["c_yellow"] = 65535,
+                ["c_orange"] = 4235519
+            };
+
 
         public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
 
@@ -300,7 +303,7 @@ namespace UndertaleModLib.Decompiler
                 else if (AssetType == AssetIDType.Color && Value is IFormattable && !(Value is float) && !(Value is double) && !(Value is decimal))
                 {
 					uint Color = Convert.ToUInt32(Value); //color represented as Unsigned Integer.
-					foreach (KeyValuePair<string, uint> Entry in ColorDictionary)
+					foreach (KeyValuePair<string, uint> Entry in DecompileContext.ColorDictionary)
 					{
 						if (Entry.Value == Color)
                         {
