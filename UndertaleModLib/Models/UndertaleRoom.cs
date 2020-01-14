@@ -263,8 +263,8 @@ namespace UndertaleModLib.Models
                 Enabled = reader.ReadBoolean();
                 Foreground = reader.ReadBoolean();
                 _BackgroundDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>>();
-                X = reader.ReadUInt32();
-                Y = reader.ReadUInt32();
+                X = reader.ReadInt32();
+                Y = reader.ReadInt32();
                 TileX = reader.ReadUInt32();
                 TileY = reader.ReadUInt32();
                 SpeedX = reader.ReadInt32();
