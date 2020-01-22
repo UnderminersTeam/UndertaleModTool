@@ -30,7 +30,7 @@ namespace UndertaleModLib.Models
         private bool _DrawBackgroundColor = true;
         private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCodeId = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
         private RoomEntryFlags _Flags = RoomEntryFlags.EnableViews;
-        private uint _World = 0;
+        private bool _World = false;
         private uint _Top = 0;
         private uint _Left = 0;
         private uint _Right = 1024;
@@ -49,7 +49,7 @@ namespace UndertaleModLib.Models
         public bool DrawBackgroundColor { get => _DrawBackgroundColor; set { _DrawBackgroundColor = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("DrawBackgroundColor")); } }
         public UndertaleCode CreationCodeId { get => _CreationCodeId.Resource; set { _CreationCodeId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CreationCodeId")); } }
         public RoomEntryFlags Flags { get => _Flags; set { _Flags = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Flags")); } }
-        public uint World { get => _World; set { _World = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("World")); } }
+        public bool World { get => _World; set { _World = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("World")); } }
         public uint Top { get => _Top; set { _Top = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Top")); } }
         public uint Left { get => _Left; set { _Left = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Left")); } }
         public uint Right { get => _Right; set { _Right = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Right")); } }
@@ -140,7 +140,7 @@ namespace UndertaleModLib.Models
             GameObjects = reader.ReadUndertaleObjectPointer<UndertalePointerListLenCheck<GameObject>>();
             uint tilePtr = reader.ReadUInt32();
             Tiles = reader.GetUndertaleObjectAtAddress<UndertalePointerList<Tile>>(tilePtr);
-            World = reader.ReadUInt32();
+            World = reader.ReadBoolean();
             Top = reader.ReadUInt32();
             Left = reader.ReadUInt32();
             Right = reader.ReadUInt32();
@@ -205,8 +205,8 @@ namespace UndertaleModLib.Models
             private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>();
             private int _X = 0;
             private int _Y = 0;
-            private uint _TileX = 1;
-            private uint _TileY = 1;
+            private int _TileX = 1;
+            private int _TileY = 1;
             private int _SpeedX = 0;
             private int _SpeedY = 0;
             private bool _Stretch = false;
@@ -220,8 +220,8 @@ namespace UndertaleModLib.Models
             public UndertaleBackground BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BackgroundDefinition")); } }
             public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); UpdateStretch(); } }
             public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); UpdateStretch(); } }
-            public uint TileX { get => _TileX; set { _TileX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileX")); } }
-            public uint TileY { get => _TileY; set { _TileY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileY")); } }
+            public int TileX { get => _TileX; set { _TileX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileX")); } }
+            public int TileY { get => _TileY; set { _TileY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileY")); } }
             public int SpeedX { get => _SpeedX; set { _SpeedX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpeedX")); } }
             public int SpeedY { get => _SpeedY; set { _SpeedY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpeedY")); } }
             public bool Stretch { get => _Stretch; set { _Stretch = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Stretch")); UpdateStretch(); } }
@@ -265,8 +265,8 @@ namespace UndertaleModLib.Models
                 _BackgroundDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>>();
                 X = reader.ReadInt32();
                 Y = reader.ReadInt32();
-                TileX = reader.ReadUInt32();
-                TileY = reader.ReadUInt32();
+                TileX = reader.ReadInt32();
+                TileY = reader.ReadInt32();
                 SpeedX = reader.ReadInt32();
                 SpeedY = reader.ReadInt32();
                 Stretch = reader.ReadBoolean();
