@@ -54,7 +54,7 @@ namespace UndertaleModLib.Decompiler
 
     public enum OSType : int
     {
-        os_windows = 0,
+        os_windows = 0, // legacy constant os_win32 is equal to os_windows
         os_macosx = 1,
         os_psp = 2,
         os_ios = 3,
@@ -73,7 +73,7 @@ namespace UndertaleModLib.Decompiler
         os_ps3 = 16,
         os_xbox360 = 17,
         os_uwp = 18,
-        // constant number 19 is missing... no idea why it was skipped...
+        os_amazon = 19, // the same as android but... different?
         os_switch_beta = 20, // this one was used while switch support was in beta and changed later? In newer runtimes 20 is now os_tvos...
         os_switch = 21,
         os_unknown = -1
