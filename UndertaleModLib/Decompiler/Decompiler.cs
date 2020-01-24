@@ -307,9 +307,8 @@ namespace UndertaleModLib.Decompiler
                     else // might be an unsigned int.
                     {
                         uint vuint = Convert.ToUInt32(Value);
-                        string dict = DecompileContext.ColorDictionary[vuint];
-                        if (dict != null)
-                            return dict;
+                        if (DecompileContext.ColorDictionary.ContainsKey(vuint))
+                            return DecompileContext.ColorDictionary[vuint];
                         else
                             return (context.isGameMaker2 ? "0x" : "$") + ((IFormattable)Value).ToString("X6", CultureInfo.InvariantCulture); // not a known color and not negative.
                     }
