@@ -304,9 +304,9 @@ namespace UndertaleModLib.Decompiler
                     int vint = Convert.ToInt32(Value);
                     if (vint < 0) // negative value.
                         return vint.ToString();
-                    else // might be an unsigned int.
+                    else // guaranteed be an unsigned int.
                     {
-                        uint vuint = Convert.ToUInt32(Value);
+                        uint vuint = (uint)vint;
                         if (DecompileContext.ColorDictionary.ContainsKey(vuint))
                             return DecompileContext.ColorDictionary[vuint];
                         else
