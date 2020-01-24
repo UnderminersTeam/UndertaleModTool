@@ -17,6 +17,30 @@ namespace UndertaleModLib.Decompiler
         public UndertaleData Data;
         public UndertaleCode TargetCode;
 
+        // Color dictionary for resolving.
+        public static Dictionary<uint, string> ColorDictionary = new Dictionary<uint, string>
+        {
+            [16776960] = "c_aqua",
+            [0] = "c_black",
+            [16711680] = "c_blue",
+            [4210752] = "c_dkgray",
+            [16711935] = "c_fuchsia",
+            [8421504] = "c_gray",
+            [32768] = "c_green",
+            [65280] = "c_lime",
+            [12632256] = "c_ltgray",
+            [128] = "c_maroon",
+            [8388608] = "c_navy",
+            [32896] = "c_olive",
+            [8388736] = "c_purple",
+            [255] = "c_red",
+            [12632256] = "c_silver",
+            [8421376] = "c_teal",
+            [16777215] = "c_white", // maximum color value
+            [65535] = "c_yellow",
+            [4235519] = "c_orange"
+        };
+
         // Settings
         public bool EnableStringLabels;
 
@@ -276,7 +300,20 @@ namespace UndertaleModLib.Decompiler
                     return ConvertToEnumStr<Boolean>(Value);
 
                 else if (AssetType == AssetIDType.Color && Value is IFormattable && !(Value is float) && !(Value is double) && !(Value is decimal))
-                    return (context.isGameMaker2 ? "0x" : "$") + ((IFormattable)Value).ToString("X8", CultureInfo.InvariantCulture);
+                {
+                    int vint = Convert.ToInt32(Value);
+                    if (vint < 0) // negative value.
+                        return vint.ToString();
+                    else // might be an unsigned int.
+                    {
+                        uint vuint = Convert.ToUInt32(Value);
+                        string dict = DecompileContext.ColorDictionary[vuint];
+                        if (dict != null)
+                            return dict;
+                        else
+                            return (context.isGameMaker2 ? "0x" : "$") + ((IFormattable)Value).ToString("X6", CultureInfo.InvariantCulture); // not a known color and not negative.
+                    }
+                }
 
                 else if (AssetType == AssetIDType.KeyboardKey)
                 {
