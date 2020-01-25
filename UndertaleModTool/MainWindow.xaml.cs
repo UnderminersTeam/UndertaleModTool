@@ -140,7 +140,7 @@ namespace UndertaleModTool
                 }
                 else
                 {
-                    ListenChildConnection(args[2]);
+                    await ListenChildConnection(args[2]);
                 }
             }
         }
@@ -250,19 +250,19 @@ namespace UndertaleModTool
             return false;
         }
 
-        private void Command_Open(object sender, ExecutedRoutedEventArgs e)
+        private async void Command_Open(object sender, ExecutedRoutedEventArgs e)
         {
-            DoOpenDialog();
+            await DoOpenDialog();
         }
 
-        private void Command_Save(object sender, ExecutedRoutedEventArgs e)
+        private async void Command_Save(object sender, ExecutedRoutedEventArgs e)
         {
             if (CanSave)
             {
                 if (!CanSafelySave)
                     MessageBox.Show("Errors occurred during loading. High chance of data loss! Proceed at your own risk.", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning);
 
-                DoSaveDialog();
+                await DoSaveDialog();
             }
         }
 
@@ -281,7 +281,11 @@ namespace UndertaleModTool
                 {
                     TextReader tr = new StreamReader(stream);
                     string fileContents = tr.ReadToEnd();
-                    File.WriteAllText(xmlpath, fileContents);
+                    try { File.WriteAllText(xmlpath, fileContents); }
+                    catch
+                    {
+                        MessageBox.Show("Could not write default AssetTypeResolverProfile.xml to disk!\nBuilt-in database will be loaded,\nTo fix this please move UndertaleModTool to another folder.", "Error", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                 }
             }
             LoaderDialog dialog = new LoaderDialog("Loading", "Loading, please wait...");
