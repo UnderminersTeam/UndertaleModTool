@@ -625,6 +625,9 @@
   <ItemGroup>
     <Resource Include="Resources\mus_dance_of_dog.wav" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\AssetTypeResolverEmbed.xml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterResolveReferences">
     <ItemGroup>

@@ -273,6 +273,17 @@ namespace UndertaleModTool
 
         private async Task LoadFile(string filename)
         {
+            // The resolving stuff will happen next, let's be sure our XML file exists...
+            string xmlpath = AppDomain.CurrentDomain.BaseDirectory + "AssetTypeResolverProfile.xml";
+            if (!File.Exists(xmlpath))
+            {
+                using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UndertaleModTool.Resources.AssetTypeResolverEmbed.xml"))
+                {
+                    TextReader tr = new StreamReader(stream);
+                    string fileContents = tr.ReadToEnd();
+                    File.WriteAllText(xmlpath, fileContents);
+                }
+            }
             LoaderDialog dialog = new LoaderDialog("Loading", "Loading, please wait...");
             dialog.Owner = this;
             Task t = Task.Run(() =>
