@@ -284,7 +284,7 @@ namespace UndertaleModTool
                     try { File.WriteAllText(xmlpath, fileContents); }
                     catch
                     {
-                        MessageBox.Show("Could not write default AssetTypeResolverProfile.xml to disk!\nBuilt-in database will be loaded,\nTo fix this please move UndertaleModTool to another folder.", "Error", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("Could not write default AssetTypeResolverProfile.xml to disk!\nExternal database support is disabled,\nto fix this please move UndertaleModTool to another folder.", "Error", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
             }
