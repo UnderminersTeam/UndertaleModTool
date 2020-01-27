@@ -292,6 +292,8 @@ namespace UndertaleModLib.Decompiler
                 case "Other": return AssetIDType.Other;
                 case "Layer": return AssetIDType.Layer;
                 case "Color": return AssetIDType.Color;
+                case "KeyboardKey": return AssetIDType.KeyboardKey;
+                case "OSType": return AssetIDType.Enum_OSType;
 
                 default: throw new ArgumentException("Could not evaluate AssetType! Your type was: " + xmltype); // ??? oh no.
             }
@@ -700,369 +702,440 @@ namespace UndertaleModLib.Decompiler
             custom_funcs = new Dictionary<string, AssetIDType[]>();
             custom_vars = new Dictionary<string, AssetIDType>();
 
+            Dictionary<string, AssetIDType>[] cv_arr = new Dictionary<string, AssetIDType>[3];
+            Dictionary<string, AssetIDType[]>[] cf_arr = new Dictionary<string, AssetIDType[]>[3];
+            string[] cv_conditions = new string[3];
+
             if (lowerName != null && File.Exists("AssetTypeResolverProfile.xml"))
             {
                 LoadAssetDataFromXML(lowerName);
+
+                foreach (KeyValuePair<string, AssetIDType> custom_var in custom_vars)
+                    builtin_vars.Add(custom_var.Key, custom_var.Value);
+
+                foreach (KeyValuePair<string, AssetIDType[]> custom_func in custom_funcs)
+                    builtin_funcs.Add(custom_func.Key, custom_func.Value);
             }
             else // The file doesn't exist, load internal data.
             {
                 //Just Undertale
-                if (lowerName != null && (lowerName == "undertale"))
-                {
-                    //Sometimes used as a bool, should not matter though and be an improvement overall.
-                    custom_vars.Add("king", AssetIDType.GameObject);
-                    custom_funcs["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
-                    //I should confirm adding this causes no adverse effects later. 
-                    custom_vars.Add("myroom", AssetIDType.Room);
-                    //gml_Object_obj_dummytrigger_Collision_1576
-                    custom_vars.Add("dummy", AssetIDType.GameObject);
-                    //gml_Object_obj_asriel_swordarm_Create_0
-                    custom_vars.Add("sm", AssetIDType.GameObject);
-                    //This should do something to fix the piano room
-                    custom_vars.Add("sprite_id", AssetIDType.Sprite);
-                    custom_funcs["scr_getsprite"] = new AssetIDType[] { AssetIDType.Sprite };
-                    //gml_Object_obj_barabody_Create_0
-                    custom_vars.Add("hand1pic", AssetIDType.Sprite);
-                    custom_vars.Add("hand2pic", AssetIDType.Sprite);
-                    custom_vars.Add("headpic", AssetIDType.Sprite);
-                    //gml_Object_obj_asgoreb_body_Create_0
-                    custom_vars.Add("bodypic", AssetIDType.Sprite);
-                    //gml_Object_obj_castroll_Draw_0
-                    custom_vars.Add("do_room_goto", AssetIDType.Boolean);
-                    custom_vars.Add("do_room_goto_target", AssetIDType.Room);
-                }
+                //Sometimes used as a bool, should not matter though and be an improvement overall.
+                cv_arr[0] = new Dictionary<string, AssetIDType>();
+                cf_arr[0] = new Dictionary<string, AssetIDType[]>();
+                cv_arr[0].Add("king", AssetIDType.GameObject);
+                cf_arr[0]["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                //I should confirm adding this causes no adverse effects later. 
+                cv_arr[0].Add("myroom", AssetIDType.Room);
+                //gml_Object_obj_dummytrigger_Collision_1576
+                cv_arr[0].Add("dummy", AssetIDType.GameObject);
+                //gml_Object_obj_asriel_swordarm_Create_0
+                cv_arr[0].Add("sm", AssetIDType.GameObject);
+                //This should do something to fix the piano room
+                cv_arr[0].Add("sprite_id", AssetIDType.Sprite);
+                cf_arr[0]["scr_getsprite"] = new AssetIDType[] { AssetIDType.Sprite };
+                //gml_Object_obj_barabody_Create_0
+                cv_arr[0].Add("hand1pic", AssetIDType.Sprite);
+                cv_arr[0].Add("hand2pic", AssetIDType.Sprite);
+                cv_arr[0].Add("headpic", AssetIDType.Sprite);
+                //gml_Object_obj_asgoreb_body_Create_0
+                cv_arr[0].Add("bodypic", AssetIDType.Sprite);
+                //gml_Object_obj_castroll_Draw_0
+                cv_arr[0].Add("do_room_goto", AssetIDType.Boolean);
+                cv_arr[0].Add("do_room_goto_target", AssetIDType.Room);
+
+                cv_conditions[0] = "undertale";
+
+
                 //Just deltarune
-                if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
-                {
-                    custom_vars.Add("idlesprite", AssetIDType.Sprite);
-                    custom_vars.Add("actreadysprite", AssetIDType.Sprite);
-                    custom_vars.Add("actsprite", AssetIDType.Sprite);
-                    custom_vars.Add("defendsprite", AssetIDType.Sprite);
-                    custom_vars.Add("attackreadysprite", AssetIDType.Sprite);
-                    custom_vars.Add("attacksprite", AssetIDType.Sprite);
-                    custom_vars.Add("itemsprite", AssetIDType.Sprite);
-                    custom_vars.Add("itemreadysprite", AssetIDType.Sprite);
-                    custom_vars.Add("spellreadysprite", AssetIDType.Sprite);
-                    custom_vars.Add("spellsprite", AssetIDType.Sprite);
-                    custom_vars.Add("defeatsprite", AssetIDType.Sprite);
-                    custom_vars.Add("victorysprite", AssetIDType.Sprite);
-                    custom_vars.Add("dsprite_blush", AssetIDType.Sprite);
-                    custom_vars.Add("usprite_blush", AssetIDType.Sprite);
-                    custom_vars.Add("lsprite_blush", AssetIDType.Sprite);
-                    custom_vars.Add("rsprite_blush", AssetIDType.Sprite);
-                    custom_vars.Add("heartsprite", AssetIDType.Sprite);
-                    custom_vars.Add("msprite", AssetIDType.Sprite);
-                    custom_vars.Add("particlesprite", AssetIDType.Sprite);
-                    custom_vars.Add("s_sprite", AssetIDType.Sprite);
-                    custom_vars.Add("shopkeepsprite", AssetIDType.Sprite);
-                    custom_vars.Add("slidesprite", AssetIDType.Sprite);
-                    custom_vars.Add("smsprite", AssetIDType.Sprite);
-                    custom_vars.Add("sparedsprite", AssetIDType.Sprite);
-                    custom_vars.Add("sussprite", AssetIDType.Sprite);
-                    //"targetsprite" seems to be unused but just in case
-                    custom_vars.Add("targetsprite", AssetIDType.Sprite);
-                    custom_vars.Add("thissprite", AssetIDType.Sprite);
-                    custom_vars.Add("touchsprite", AssetIDType.Sprite);
-                    custom_vars.Add("sprite_type", AssetIDType.Sprite);
-                    custom_vars.Add("darkzone", AssetIDType.Boolean);
-                    custom_vars.Add("darkmode", AssetIDType.Boolean);
-                    custom_vars.Add("darkify", AssetIDType.Boolean);
-                    custom_vars.Add("noroom", AssetIDType.Boolean);
-                    custom_vars.Add("room_persistent", AssetIDType.Boolean);
-                    custom_vars.Add("loop", AssetIDType.Boolean);
-                    custom_vars.Add("__loadedroom", AssetIDType.Room);
-                    custom_vars.Add("roomchoice", AssetIDType.Room);
-                    custom_vars.Add("writersnd", AssetIDType.Sound);
-                    custom_vars.Add("sndchange", AssetIDType.Boolean);
-                    custom_vars.Add("muschange", AssetIDType.Boolean);
-                    custom_vars.Add("audchange", AssetIDType.Boolean);
-                    custom_vars.Add("sndplay", AssetIDType.Boolean);
-                    custom_vars.Add("sound_played", AssetIDType.Boolean);
-                    custom_vars.Add("chalksound", AssetIDType.Boolean);
-                    custom_vars.Add("grabsounded", AssetIDType.Boolean);
-                    custom_vars.Add("hatsounded", AssetIDType.Boolean);
-                    custom_vars.Add("soundplayed", AssetIDType.Boolean);
-                    custom_vars.Add("windsound", AssetIDType.Boolean);
-                    custom_vars.Add("playtextsound", AssetIDType.Boolean);
-                    custom_vars.Add("textsound", AssetIDType.Sound);
-                    custom_vars.Add("selectnoise", AssetIDType.Boolean);
-                    custom_vars.Add("movenoise", AssetIDType.Boolean);
-                    custom_vars.Add("grazenoise", AssetIDType.Boolean);
-                    custom_vars.Add("selnoise", AssetIDType.Boolean);
-                    custom_vars.Add("damagenoise", AssetIDType.Boolean);
-                    custom_vars.Add("laznoise", AssetIDType.Boolean);
-                    custom_vars.Add("stepnoise", AssetIDType.Boolean);
-                    custom_vars.Add("bumpnoise", AssetIDType.Boolean);
-                    custom_vars.Add("burstnoise", AssetIDType.Boolean);
-                    custom_vars.Add("BACKNOISE", AssetIDType.Boolean);
-                    custom_vars.Add("DEATHNOISE", AssetIDType.Boolean);
-                    custom_vars.Add("gnoise", AssetIDType.Boolean);
-                    custom_vars.Add("firstnoise", AssetIDType.Boolean);
-                    custom_vars.Add("dmgnoise", AssetIDType.Boolean);
-                    custom_vars.Add("usable", AssetIDType.Boolean);
-                    custom_vars.Add("tempkeyitemusable", AssetIDType.Boolean);
-                    custom_vars.Add("spellusable", AssetIDType.Boolean);
-                    custom_vars.Add("NAMEFADE_COMPLETE", AssetIDType.Boolean);
-                    custom_vars.Add("dancekris", AssetIDType.GameObject);
-                    custom_vars.Add("noiseskip", AssetIDType.Boolean);
-                    custom_vars.Add("attacked", AssetIDType.Boolean);
-                    custom_vars.Add("attack_qual", AssetIDType.Boolean);
-                    custom_vars.Add("attacking", AssetIDType.Boolean);
-                    custom_vars.Add("attackedkris", AssetIDType.Boolean);
-                    custom_vars.Add("attacks", AssetIDType.Boolean);
-                    custom_vars.Add("battleend", AssetIDType.Boolean);
-                    custom_vars.Add("battlemoder", AssetIDType.Boolean);
-                    custom_vars.Add("becamebattle", AssetIDType.Boolean);
-                    custom_vars.Add("seriousbattle", AssetIDType.Boolean);
-                    //A little bit wrong, but probably fine.
-                    custom_vars.Add("cango", AssetIDType.Boolean);
-                    custom_vars.Add("canact", AssetIDType.Boolean);
-                    custom_vars.Add("CANCEL", AssetIDType.Boolean);
-                    custom_vars.Add("cancelwalk", AssetIDType.Boolean);
-                    custom_vars.Add("cancelattack", AssetIDType.Boolean);
-                    custom_vars.Add("canchoose", AssetIDType.Boolean);
-                    custom_vars.Add("canclick", AssetIDType.Boolean);
-                    custom_vars.Add("cancollide", AssetIDType.Boolean);
-                    custom_vars.Add("candodge", AssetIDType.Boolean);
-                    custom_vars.Add("candraw", AssetIDType.Boolean);
-                    custom_vars.Add("canequip", AssetIDType.Boolean);
-                    custom_vars.Add("canpress", AssetIDType.Boolean);
-                    custom_vars.Add("cant", AssetIDType.Boolean);
-                    custom_vars.Add("depthcancel", AssetIDType.Boolean);
-                    custom_vars.Add("defend_command", AssetIDType.Boolean);
-                    custom_vars.Add("automiss", AssetIDType.Boolean);
-                    custom_vars.Add("awoke", AssetIDType.Boolean);
-                    custom_vars.Add("act_command", AssetIDType.Boolean);
-                    custom_vars.Add("acted", AssetIDType.Boolean);
-                    custom_vars.Add("activated", AssetIDType.Boolean);
-                    custom_vars.Add("activatethrow", AssetIDType.Boolean);
-                    custom_vars.Add("addflag", AssetIDType.Boolean);
-                    custom_vars.Add("addup", AssetIDType.Boolean);
-                    custom_vars.Add("afford", AssetIDType.Boolean);
-                    custom_vars.Add("aftercon", AssetIDType.Boolean);
-                    custom_vars.Add("ALREADY", AssetIDType.Boolean);
-                    custom_vars.Add("ambushed", AssetIDType.Boolean);
-                    custom_vars.Add("permashake", AssetIDType.Boolean);
-                    custom_vars.Add("aster", AssetIDType.Boolean);
-                    custom_vars.Add("autoaster", AssetIDType.Boolean);
-                    custom_vars.Add("autoed", AssetIDType.Boolean);
-                    custom_vars.Add("betray", AssetIDType.Boolean);
-                    custom_vars.Add("abovemaxhp", AssetIDType.Boolean);
-                    custom_vars.Add("abletotarget", AssetIDType.Boolean);
-                    custom_vars.Add("accept", AssetIDType.Boolean);
-                    custom_vars.Add("actual", AssetIDType.Boolean);
-                    custom_vars.Add("currentsong", AssetIDType.Sound);
-                    custom_vars.Add("batmusic", AssetIDType.Sound);
-                    custom_vars.Add("beanie", AssetIDType.Boolean);
-                    custom_vars.Add("beaten", AssetIDType.Boolean);
-                    custom_vars.Add("becomeflash", AssetIDType.Boolean);
-                    custom_vars.Add("becomesleep", AssetIDType.Boolean);
-                    custom_vars.Add("sleeping", AssetIDType.Boolean);
-                    custom_vars.Add("bellcon", AssetIDType.Boolean);
-                    custom_vars.Add("belowzero", AssetIDType.Boolean);
-                    //custom_vars.Add("noiseskip", AssetIDType.Boolean);
-                    //Colors weave into a spire of flame
-                    custom_vars.Add("mycolor", AssetIDType.Color);
-                    custom_vars.Add("colorchange", AssetIDType.Boolean);
-                    custom_vars.Add("xcolor", AssetIDType.Color);
-                    custom_vars.Add("skippable", AssetIDType.Boolean);
-                    custom_vars.Add("charcolor", AssetIDType.Color);
-                    custom_vars.Add("hpcolor", AssetIDType.Color);
-                    custom_vars.Add("bcolor", AssetIDType.Color);
-                    custom_vars.Add("flashcolor", AssetIDType.Color);
-                    custom_vars.Add("smcolor", AssetIDType.Color);
-                    custom_vars.Add("dcolor", AssetIDType.Color);
-                    custom_vars.Add("basecolor", AssetIDType.Color);
-                    custom_vars.Add("_abilitycolor", AssetIDType.Color);
-                    custom_vars.Add("mnamecolor1", AssetIDType.Color);
-                    custom_vars.Add("mnamecolor2", AssetIDType.Color);
-                    custom_vars.Add("scolor", AssetIDType.Color);
-                    custom_vars.Add("arrowcolor", AssetIDType.Color);
-                    custom_vars.Add("particlecolor", AssetIDType.Color);
-                    custom_vars.Add("linecolor", AssetIDType.Color);
-                    custom_vars.Add("fadecolor", AssetIDType.Color);
-                    custom_vars.Add("color", AssetIDType.Color);
-                    //Scripts
-                    custom_funcs["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                }
+                cv_arr[1] = new Dictionary<string, AssetIDType>();
+                cf_arr[1] = new Dictionary<string, AssetIDType[]>();
+                cv_arr[1].Add("idlesprite", AssetIDType.Sprite);
+                cv_arr[1].Add("actreadysprite", AssetIDType.Sprite);
+                cv_arr[1].Add("actsprite", AssetIDType.Sprite);
+                cv_arr[1].Add("defendsprite", AssetIDType.Sprite);
+                cv_arr[1].Add("attackreadysprite", AssetIDType.Sprite);
+                cv_arr[1].Add("attacksprite", AssetIDType.Sprite);
+                cv_arr[1].Add("itemsprite", AssetIDType.Sprite);
+                cv_arr[1].Add("itemreadysprite", AssetIDType.Sprite);
+                cv_arr[1].Add("spellreadysprite", AssetIDType.Sprite);
+                cv_arr[1].Add("spellsprite", AssetIDType.Sprite);
+                cv_arr[1].Add("defeatsprite", AssetIDType.Sprite);
+                cv_arr[1].Add("victorysprite", AssetIDType.Sprite);
+                cv_arr[1].Add("dsprite_blush", AssetIDType.Sprite);
+                cv_arr[1].Add("usprite_blush", AssetIDType.Sprite);
+                cv_arr[1].Add("lsprite_blush", AssetIDType.Sprite);
+                cv_arr[1].Add("rsprite_blush", AssetIDType.Sprite);
+                cv_arr[1].Add("heartsprite", AssetIDType.Sprite);
+                cv_arr[1].Add("msprite", AssetIDType.Sprite);
+                cv_arr[1].Add("particlesprite", AssetIDType.Sprite);
+                cv_arr[1].Add("s_sprite", AssetIDType.Sprite);
+                cv_arr[1].Add("shopkeepsprite", AssetIDType.Sprite);
+                cv_arr[1].Add("slidesprite", AssetIDType.Sprite);
+                cv_arr[1].Add("smsprite", AssetIDType.Sprite);
+                cv_arr[1].Add("sparedsprite", AssetIDType.Sprite);
+                cv_arr[1].Add("sussprite", AssetIDType.Sprite);
+                //"targetsprite" seems to be unused but just in case
+                cv_arr[1].Add("targetsprite", AssetIDType.Sprite);
+                cv_arr[1].Add("thissprite", AssetIDType.Sprite);
+                cv_arr[1].Add("touchsprite", AssetIDType.Sprite);
+                cv_arr[1].Add("sprite_type", AssetIDType.Sprite);
+                cv_arr[1].Add("darkzone", AssetIDType.Boolean);
+                cv_arr[1].Add("darkmode", AssetIDType.Boolean);
+                cv_arr[1].Add("darkify", AssetIDType.Boolean);
+                cv_arr[1].Add("noroom", AssetIDType.Boolean);
+                cv_arr[1].Add("room_persistent", AssetIDType.Boolean);
+                cv_arr[1].Add("loop", AssetIDType.Boolean);
+                cv_arr[1].Add("__loadedroom", AssetIDType.Room);
+                cv_arr[1].Add("roomchoice", AssetIDType.Room);
+                cv_arr[1].Add("writersnd", AssetIDType.Sound);
+                cv_arr[1].Add("sndchange", AssetIDType.Boolean);
+                cv_arr[1].Add("muschange", AssetIDType.Boolean);
+                cv_arr[1].Add("audchange", AssetIDType.Boolean);
+                cv_arr[1].Add("sndplay", AssetIDType.Boolean);
+                cv_arr[1].Add("sound_played", AssetIDType.Boolean);
+                cv_arr[1].Add("chalksound", AssetIDType.Boolean);
+                cv_arr[1].Add("grabsounded", AssetIDType.Boolean);
+                cv_arr[1].Add("hatsounded", AssetIDType.Boolean);
+                cv_arr[1].Add("soundplayed", AssetIDType.Boolean);
+                cv_arr[1].Add("windsound", AssetIDType.Boolean);
+                cv_arr[1].Add("playtextsound", AssetIDType.Boolean);
+                cv_arr[1].Add("textsound", AssetIDType.Sound);
+                cv_arr[1].Add("selectnoise", AssetIDType.Boolean);
+                cv_arr[1].Add("movenoise", AssetIDType.Boolean);
+                cv_arr[1].Add("grazenoise", AssetIDType.Boolean);
+                cv_arr[1].Add("selnoise", AssetIDType.Boolean);
+                cv_arr[1].Add("damagenoise", AssetIDType.Boolean);
+                cv_arr[1].Add("laznoise", AssetIDType.Boolean);
+                cv_arr[1].Add("stepnoise", AssetIDType.Boolean);
+                cv_arr[1].Add("bumpnoise", AssetIDType.Boolean);
+                cv_arr[1].Add("burstnoise", AssetIDType.Boolean);
+                cv_arr[1].Add("BACKNOISE", AssetIDType.Boolean);
+                cv_arr[1].Add("DEATHNOISE", AssetIDType.Boolean);
+                cv_arr[1].Add("gnoise", AssetIDType.Boolean);
+                cv_arr[1].Add("firstnoise", AssetIDType.Boolean);
+                cv_arr[1].Add("dmgnoise", AssetIDType.Boolean);
+                cv_arr[1].Add("usable", AssetIDType.Boolean);
+                cv_arr[1].Add("tempkeyitemusable", AssetIDType.Boolean);
+                cv_arr[1].Add("spellusable", AssetIDType.Boolean);
+                cv_arr[1].Add("NAMEFADE_COMPLETE", AssetIDType.Boolean);
+                cv_arr[1].Add("dancekris", AssetIDType.GameObject);
+                cv_arr[1].Add("noiseskip", AssetIDType.Boolean);
+                cv_arr[1].Add("attacked", AssetIDType.Boolean);
+                cv_arr[1].Add("attack_qual", AssetIDType.Boolean);
+                cv_arr[1].Add("attacking", AssetIDType.Boolean);
+                cv_arr[1].Add("attackedkris", AssetIDType.Boolean);
+                cv_arr[1].Add("attacks", AssetIDType.Boolean);
+                cv_arr[1].Add("battleend", AssetIDType.Boolean);
+                cv_arr[1].Add("battlemoder", AssetIDType.Boolean);
+                cv_arr[1].Add("becamebattle", AssetIDType.Boolean);
+                cv_arr[1].Add("seriousbattle", AssetIDType.Boolean);
+                //A little bit wrong, but probably fine.
+                cv_arr[1].Add("cango", AssetIDType.Boolean);
+                cv_arr[1].Add("canact", AssetIDType.Boolean);
+                cv_arr[1].Add("CANCEL", AssetIDType.Boolean);
+                cv_arr[1].Add("cancelwalk", AssetIDType.Boolean);
+                cv_arr[1].Add("cancelattack", AssetIDType.Boolean);
+                cv_arr[1].Add("canchoose", AssetIDType.Boolean);
+                cv_arr[1].Add("canclick", AssetIDType.Boolean);
+                cv_arr[1].Add("cancollide", AssetIDType.Boolean);
+                cv_arr[1].Add("candodge", AssetIDType.Boolean);
+                cv_arr[1].Add("candraw", AssetIDType.Boolean);
+                cv_arr[1].Add("canequip", AssetIDType.Boolean);
+                cv_arr[1].Add("canpress", AssetIDType.Boolean);
+                cv_arr[1].Add("cant", AssetIDType.Boolean);
+                cv_arr[1].Add("depthcancel", AssetIDType.Boolean);
+                cv_arr[1].Add("defend_command", AssetIDType.Boolean);
+                cv_arr[1].Add("automiss", AssetIDType.Boolean);
+                cv_arr[1].Add("awoke", AssetIDType.Boolean);
+                cv_arr[1].Add("act_command", AssetIDType.Boolean);
+                cv_arr[1].Add("acted", AssetIDType.Boolean);
+                cv_arr[1].Add("activated", AssetIDType.Boolean);
+                cv_arr[1].Add("activatethrow", AssetIDType.Boolean);
+                cv_arr[1].Add("addflag", AssetIDType.Boolean);
+                cv_arr[1].Add("addup", AssetIDType.Boolean);
+                cv_arr[1].Add("afford", AssetIDType.Boolean);
+                cv_arr[1].Add("aftercon", AssetIDType.Boolean);
+                cv_arr[1].Add("ALREADY", AssetIDType.Boolean);
+                cv_arr[1].Add("ambushed", AssetIDType.Boolean);
+                cv_arr[1].Add("permashake", AssetIDType.Boolean);
+                cv_arr[1].Add("aster", AssetIDType.Boolean);
+                cv_arr[1].Add("autoaster", AssetIDType.Boolean);
+                cv_arr[1].Add("autoed", AssetIDType.Boolean);
+                cv_arr[1].Add("betray", AssetIDType.Boolean);
+                cv_arr[1].Add("abovemaxhp", AssetIDType.Boolean);
+                cv_arr[1].Add("abletotarget", AssetIDType.Boolean);
+                cv_arr[1].Add("accept", AssetIDType.Boolean);
+                cv_arr[1].Add("actual", AssetIDType.Boolean);
+                cv_arr[1].Add("currentsong", AssetIDType.Sound);
+                cv_arr[1].Add("batmusic", AssetIDType.Sound);
+                cv_arr[1].Add("beanie", AssetIDType.Boolean);
+                cv_arr[1].Add("beaten", AssetIDType.Boolean);
+                cv_arr[1].Add("becomeflash", AssetIDType.Boolean);
+                cv_arr[1].Add("becomesleep", AssetIDType.Boolean);
+                cv_arr[1].Add("sleeping", AssetIDType.Boolean);
+                cv_arr[1].Add("bellcon", AssetIDType.Boolean);
+                cv_arr[1].Add("belowzero", AssetIDType.Boolean);
+                //cv_arr[1].Add("noiseskip", AssetIDType.Boolean);
+                //Colors weave into a spire of flame
+                cv_arr[1].Add("mycolor", AssetIDType.Color);
+                cv_arr[1].Add("colorchange", AssetIDType.Boolean);
+                cv_arr[1].Add("xcolor", AssetIDType.Color);
+                cv_arr[1].Add("skippable", AssetIDType.Boolean);
+                cv_arr[1].Add("charcolor", AssetIDType.Color);
+                cv_arr[1].Add("hpcolor", AssetIDType.Color);
+                cv_arr[1].Add("bcolor", AssetIDType.Color);
+                cv_arr[1].Add("flashcolor", AssetIDType.Color);
+                cv_arr[1].Add("smcolor", AssetIDType.Color);
+                cv_arr[1].Add("dcolor", AssetIDType.Color);
+                cv_arr[1].Add("basecolor", AssetIDType.Color);
+                cv_arr[1].Add("_abilitycolor", AssetIDType.Color);
+                cv_arr[1].Add("mnamecolor1", AssetIDType.Color);
+                cv_arr[1].Add("mnamecolor2", AssetIDType.Color);
+                cv_arr[1].Add("scolor", AssetIDType.Color);
+                cv_arr[1].Add("arrowcolor", AssetIDType.Color);
+                cv_arr[1].Add("particlecolor", AssetIDType.Color);
+                cv_arr[1].Add("linecolor", AssetIDType.Color);
+                cv_arr[1].Add("fadecolor", AssetIDType.Color);
+                cv_arr[1].Add("color", AssetIDType.Color);
+                //Scripts
+                cf_arr[1]["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+
+                cv_conditions[1] = "survey_program|&deltarune";
+
+
                 //Both UT and DR
-                if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
+                cv_arr[2] = new Dictionary<string, AssetIDType>();
+                cf_arr[2] = new Dictionary<string, AssetIDType[]>();
+                //gml_Object_obj_vulkinbody_UNDERTALE_Create_0
+                //Seems to be used a lot as a regular value between the values of around 0-20. 
+                cv_arr[2].Add("face", AssetIDType.Sprite);
+                cv_arr[2].Add("myfont", AssetIDType.Font);
+                //Hope this script works!
+                cf_arr[2]["scr_bouncer"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                cv_arr[2].Add("currentroom", AssetIDType.Room);
+                cv_arr[2].Add("dsprite", AssetIDType.Sprite);
+                cv_arr[2].Add("usprite", AssetIDType.Sprite);
+                cv_arr[2].Add("lsprite", AssetIDType.Sprite);
+                cv_arr[2].Add("rsprite", AssetIDType.Sprite);
+                cv_arr[2].Add("dtsprite", AssetIDType.Sprite);
+                cv_arr[2].Add("utsprite", AssetIDType.Sprite);
+                cv_arr[2].Add("ltsprite", AssetIDType.Sprite);
+                cv_arr[2].Add("rtsprite", AssetIDType.Sprite);
+                cv_arr[2].Add("normalsprite", AssetIDType.Sprite);
+                cv_arr[2].Add("hurtsprite", AssetIDType.Sprite);
+                cv_arr[2].Add("hurtsound", AssetIDType.Sound);
+                //New built in vars found by Grossley
+                cv_arr[2].Add("interact", AssetIDType.Other);
+                //Test me!
+                cv_arr[2].Add("sound0", AssetIDType.Sound);
+                //From v1.11 Undertale comparison, not tested unlike v1.001!
+                cv_arr[2].Add("asprite", AssetIDType.Sprite);
+                cv_arr[2].Add("bsprite", AssetIDType.Sprite);
+                cv_arr[2].Add("tailobj", AssetIDType.GameObject);
+                cv_arr[2].Add("heart", AssetIDType.GameObject);
+                cv_arr[2].Add("draedmode", AssetIDType.Boolean);
+                //Deltarune
+                cv_arr[2].Add("haveauto", AssetIDType.Boolean);
+                cv_arr[2].Add("goahead", AssetIDType.Boolean);
+                cv_arr[2].Add("is_auto_susie", AssetIDType.Boolean);
+                cv_arr[2].Add("techwon", AssetIDType.Boolean);
+                cv_arr[2].Add("itemed", AssetIDType.Boolean);
+                cv_arr[2].Add("critical", AssetIDType.Boolean);
+                cv_arr[2].Add("tile_fade", AssetIDType.Boolean);
+                cv_arr[2].Add("boss", AssetIDType.Boolean);
+                cv_arr[2].Add("skipvictory", AssetIDType.Boolean);
+                cv_arr[2].Add("victory", AssetIDType.Boolean);
+                cv_arr[2].Add("fighting", AssetIDType.Boolean);
+                cv_arr[2].Add("charmove", AssetIDType.Boolean);
+                cv_arr[2].Add("charcantarget", AssetIDType.Boolean);
+                cv_arr[2].Add("chardead", AssetIDType.Boolean);
+                cv_arr[2].Add("targeted", AssetIDType.Boolean);
+                cv_arr[2].Add("havechar", AssetIDType.Boolean);
+                cv_arr[2].Add("noreturn", AssetIDType.Boolean);
+                cv_arr[2].Add("timeron", AssetIDType.Boolean);
+                cv_arr[2].Add("flash", AssetIDType.Boolean);
+                cv_arr[2].Add("mercydraw", AssetIDType.Boolean);
+                cv_arr[2].Add("tireddraw", AssetIDType.Boolean);
+                cv_arr[2].Add("pacify_glow", AssetIDType.Boolean);
+                cv_arr[2].Add("drawsus", AssetIDType.Boolean);
+                cv_arr[2].Add("drawral", AssetIDType.Boolean);
+                cv_arr[2].Add("susblend", AssetIDType.Color);
+                cv_arr[2].Add("ralblend", AssetIDType.Color);
+                cv_arr[2].Add("hurt", AssetIDType.Boolean);
+                cv_arr[2].Add("skipme", AssetIDType.Boolean);
+                cv_arr[2].Add("darken", AssetIDType.Boolean);
+                cv_arr[2].Add("combatdarken", AssetIDType.Boolean);
+                cv_arr[2].Add("stepped", AssetIDType.Boolean);
+                //warned being a bool is probably mostly correct.
+                cv_arr[2].Add("warned", AssetIDType.Boolean);
+                cv_arr[2].Add("tired", AssetIDType.Boolean);
+                cv_arr[2].Add("fixed", AssetIDType.Boolean);
+                cv_arr[2].Add("nexttry", AssetIDType.Boolean);
+                cv_arr[2].Add("floating", AssetIDType.Boolean);
+                cv_arr[2].Add("bodyfade", AssetIDType.Boolean);
+                cv_arr[2].Add("selected", AssetIDType.Boolean);
+                cv_arr[2].Add("hurk", AssetIDType.Boolean);
+                cv_arr[2].Add("persistent", AssetIDType.Boolean);
+                cv_arr[2].Add("dhaver", AssetIDType.Boolean);
+                cv_arr[2].Add("walk", AssetIDType.Boolean);
+                cv_arr[2].Add("fun", AssetIDType.Boolean);
+                cv_arr[2].Add("runmove", AssetIDType.Boolean);
+                cv_arr[2].Add("frozen", AssetIDType.Boolean);
+                cv_arr[2].Add("hadfrozen", AssetIDType.Boolean);
+                cv_arr[2].Add("offscreen_frozen", AssetIDType.Boolean);
+                cv_arr[2].Add("ignoresolid", AssetIDType.Boolean);
+                cv_arr[2].Add("eraser", AssetIDType.Boolean);
+                cv_arr[2].Add("visible", AssetIDType.Boolean);
+                cv_arr[2].Add("bikeflip", AssetIDType.Boolean);
+                cv_arr[2].Add("checked", AssetIDType.Boolean);
+                cv_arr[2].Add("secondtime", AssetIDType.Boolean);
+                cv_arr[2].Add("ralsei_lecture", AssetIDType.Boolean);
+                cv_arr[2].Add("choiced", AssetIDType.Boolean);
+                cv_arr[2].Add("FINISH", AssetIDType.Boolean);
+                cv_arr[2].Add("LOCK", AssetIDType.Boolean);
+                cv_arr[2].Add("locked", AssetIDType.Boolean);
+                cv_arr[2].Add("ERASE", AssetIDType.Boolean);
+                cv_arr[2].Add("fastmode", AssetIDType.Boolean);
+                cv_arr[2].Add("fadeplease", AssetIDType.Boolean);
+                cv_arr[2].Add("active", AssetIDType.Boolean);
+                cv_arr[2].Add("alpha_changed", AssetIDType.Boolean);
+                cv_arr[2].Add("charinstance", AssetIDType.GameObject);
+                cv_arr[2].Add("reset", AssetIDType.Boolean);
+                //globals pertaining to monsters in Deltarune 
+                cv_arr[2].Add("monsterstatus", AssetIDType.Boolean);
+                cv_arr[2].Add("monster", AssetIDType.Boolean);
+                //Cutscene
+                cv_arr[2].Add("cutscene", AssetIDType.Boolean);
+                cv_arr[2].Add("black", AssetIDType.Boolean);
+                cv_arr[2].Add("monsterinstancetype", AssetIDType.GameObject);
+                //cv_arr[2].Add("itemed", AssetIDType.Boolean);
+                //cv_arr[2].Add("itemed", AssetIDType.Boolean);
+                //cv_arr[2].Add("itemed", AssetIDType.Boolean);
+                //cv_arr[2].Add("itemed", AssetIDType.Boolean);
+                //Undertale
+                cv_arr[2].Add("background_color", AssetIDType.Color);
+                cv_arr[2].Add("myblend", AssetIDType.Color);
+                cv_arr[2].Add("object0", AssetIDType.GameObject);
+                cv_arr[2].Add("part1", AssetIDType.GameObject);
+                cv_arr[2].Add("pap", AssetIDType.GameObject);
+                cv_arr[2].Add("fileerased", AssetIDType.Sprite);
+                cv_arr[2].Add("catty", AssetIDType.GameObject);
+                cv_arr[2].Add("bratty", AssetIDType.GameObject);
+                cv_arr[2].Add("creator", AssetIDType.GameObject);
+                //It's not 100% accurate to resolve this way but it seems like this variable only gets directly assigned values and is used as a bool, it should be fine.
+                cv_arr[2].Add("parent", AssetIDType.GameObject);
+                //These are not so consistent... ;-;
+                //op is used in Muffet's stuff but is critical in Omega flowey positioning... worse to resolve than to not.
+                //cv_arr[2].Add("op", AssetIDType.GameObject);
+                //Toby messed up in "gml_Object_obj_wizardorb_chaser_Alarm_0" (should be "scr_monstersum()"), "pop" is never a script.
+                //From v1.001 Undertale via comparison
+                //A TIER quality
+                cv_arr[2].Add("onionsprite", AssetIDType.Sprite);
+                cv_arr[2].Add("headsprite", AssetIDType.Sprite);
+                cv_arr[2].Add("breaksprite", AssetIDType.Sprite);
+                cv_arr[2].Add("foodimg", AssetIDType.Sprite);
+                cv_arr[2].Add("facespr", AssetIDType.Sprite);
+                cv_arr[2].Add("bombsprite", AssetIDType.Sprite);
+                cv_arr[2].Add("mysprite", AssetIDType.Sprite);
+                cv_arr[2].Add("arms", AssetIDType.Sprite);
+                cv_arr[2].Add("levelpic", AssetIDType.Sprite);
+                cv_arr[2].Add("image", AssetIDType.Sprite);
+                cv_arr[2].Add("song_index", AssetIDType.Sound);
+                cv_arr[2].Add("thischara", AssetIDType.GameObject);
+                //B TIER quality
+                cv_arr[2].Add("tspr5", AssetIDType.Sprite);
+                cv_arr[2].Add("tspr3", AssetIDType.Sprite);
+                cv_arr[2].Add("tspr2", AssetIDType.Sprite);
+                cv_arr[2].Add("tspr1", AssetIDType.Sprite);
+                cv_arr[2].Add("tspr4", AssetIDType.Sprite);
+                cv_arr[2].Add("snapper", AssetIDType.GameObject);
+                cv_arr[2].Add("subject", AssetIDType.GameObject);
+                cv_arr[2].Add("clip", AssetIDType.GameObject);
+                //C TIER quality
+                cv_arr[2].Add("sound1", AssetIDType.Sound);
+                cv_arr[2].Add("sound2", AssetIDType.Sound);
+
+                cv_conditions[2] = "undertale|survey_program|&deltarune";
+
+
+                // Parse condition
+                for (int i = 0; i < cv_conditions.Length; i++)
                 {
-                    //gml_Object_obj_vulkinbody_UNDERTALE_Create_0
-                    //Seems to be used a lot as a regular value between the values of around 0-20. 
-                    custom_vars.Add("face", AssetIDType.Sprite);
-                    custom_vars.Add("myfont", AssetIDType.Font);
-                    //Hope this script works!
-                    custom_funcs["scr_bouncer"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
-                    custom_vars.Add("currentroom", AssetIDType.Room);
-                    custom_vars.Add("dsprite", AssetIDType.Sprite);
-                    custom_vars.Add("usprite", AssetIDType.Sprite);
-                    custom_vars.Add("lsprite", AssetIDType.Sprite);
-                    custom_vars.Add("rsprite", AssetIDType.Sprite);
-                    custom_vars.Add("dtsprite", AssetIDType.Sprite);
-                    custom_vars.Add("utsprite", AssetIDType.Sprite);
-                    custom_vars.Add("ltsprite", AssetIDType.Sprite);
-                    custom_vars.Add("rtsprite", AssetIDType.Sprite);
-                    custom_vars.Add("normalsprite", AssetIDType.Sprite);
-                    custom_vars.Add("hurtsprite", AssetIDType.Sprite);
-                    custom_vars.Add("hurtsound", AssetIDType.Sound);
-                    //New built in vars found by Grossley
-                    custom_vars.Add("interact", AssetIDType.Other);
-                    //Test me!
-                    custom_vars.Add("sound0", AssetIDType.Sound);
-                    //From v1.11 Undertale comparison, not tested unlike v1.001!
-                    custom_vars.Add("asprite", AssetIDType.Sprite);
-                    custom_vars.Add("bsprite", AssetIDType.Sprite);
-                    custom_vars.Add("tailobj", AssetIDType.GameObject);
-                    custom_vars.Add("heart", AssetIDType.GameObject);
-                    custom_vars.Add("draedmode", AssetIDType.Boolean);
-                    //Deltarune
-                    custom_vars.Add("haveauto", AssetIDType.Boolean);
-                    custom_vars.Add("goahead", AssetIDType.Boolean);
-                    custom_vars.Add("is_auto_susie", AssetIDType.Boolean);
-                    custom_vars.Add("techwon", AssetIDType.Boolean);
-                    custom_vars.Add("itemed", AssetIDType.Boolean);
-                    custom_vars.Add("critical", AssetIDType.Boolean);
-                    custom_vars.Add("tile_fade", AssetIDType.Boolean);
-                    custom_vars.Add("boss", AssetIDType.Boolean);
-                    custom_vars.Add("skipvictory", AssetIDType.Boolean);
-                    custom_vars.Add("victory", AssetIDType.Boolean);
-                    custom_vars.Add("fighting", AssetIDType.Boolean);
-                    custom_vars.Add("charmove", AssetIDType.Boolean);
-                    custom_vars.Add("charcantarget", AssetIDType.Boolean);
-                    custom_vars.Add("chardead", AssetIDType.Boolean);
-                    custom_vars.Add("targeted", AssetIDType.Boolean);
-                    custom_vars.Add("havechar", AssetIDType.Boolean);
-                    custom_vars.Add("noreturn", AssetIDType.Boolean);
-                    custom_vars.Add("timeron", AssetIDType.Boolean);
-                    custom_vars.Add("flash", AssetIDType.Boolean);
-                    custom_vars.Add("mercydraw", AssetIDType.Boolean);
-                    custom_vars.Add("tireddraw", AssetIDType.Boolean);
-                    custom_vars.Add("pacify_glow", AssetIDType.Boolean);
-                    custom_vars.Add("drawsus", AssetIDType.Boolean);
-                    custom_vars.Add("drawral", AssetIDType.Boolean);
-                    custom_vars.Add("susblend", AssetIDType.Color);
-                    custom_vars.Add("ralblend", AssetIDType.Color);
-                    custom_vars.Add("hurt", AssetIDType.Boolean);
-                    custom_vars.Add("skipme", AssetIDType.Boolean);
-                    custom_vars.Add("darken", AssetIDType.Boolean);
-                    custom_vars.Add("combatdarken", AssetIDType.Boolean);
-                    custom_vars.Add("stepped", AssetIDType.Boolean);
-                    //warned being a bool is probably mostly correct.
-                    custom_vars.Add("warned", AssetIDType.Boolean);
-                    custom_vars.Add("tired", AssetIDType.Boolean);
-                    custom_vars.Add("fixed", AssetIDType.Boolean);
-                    custom_vars.Add("nexttry", AssetIDType.Boolean);
-                    custom_vars.Add("floating", AssetIDType.Boolean);
-                    custom_vars.Add("bodyfade", AssetIDType.Boolean);
-                    custom_vars.Add("selected", AssetIDType.Boolean);
-                    custom_vars.Add("hurk", AssetIDType.Boolean);
-                    custom_vars.Add("persistent", AssetIDType.Boolean);
-                    custom_vars.Add("dhaver", AssetIDType.Boolean);
-                    custom_vars.Add("walk", AssetIDType.Boolean);
-                    custom_vars.Add("fun", AssetIDType.Boolean);
-                    custom_vars.Add("runmove", AssetIDType.Boolean);
-                    custom_vars.Add("frozen", AssetIDType.Boolean);
-                    custom_vars.Add("hadfrozen", AssetIDType.Boolean);
-                    custom_vars.Add("offscreen_frozen", AssetIDType.Boolean);
-                    custom_vars.Add("ignoresolid", AssetIDType.Boolean);
-                    custom_vars.Add("eraser", AssetIDType.Boolean);
-                    custom_vars.Add("visible", AssetIDType.Boolean);
-                    custom_vars.Add("bikeflip", AssetIDType.Boolean);
-                    custom_vars.Add("checked", AssetIDType.Boolean);
-                    custom_vars.Add("secondtime", AssetIDType.Boolean);
-                    custom_vars.Add("ralsei_lecture", AssetIDType.Boolean);
-                    custom_vars.Add("choiced", AssetIDType.Boolean);
-                    custom_vars.Add("FINISH", AssetIDType.Boolean);
-                    custom_vars.Add("LOCK", AssetIDType.Boolean);
-                    custom_vars.Add("locked", AssetIDType.Boolean);
-                    custom_vars.Add("ERASE", AssetIDType.Boolean);
-                    custom_vars.Add("fastmode", AssetIDType.Boolean);
-                    custom_vars.Add("fadeplease", AssetIDType.Boolean);
-                    custom_vars.Add("active", AssetIDType.Boolean);
-                    custom_vars.Add("alpha_changed", AssetIDType.Boolean);
-                    custom_vars.Add("charinstance", AssetIDType.GameObject);
-                    custom_vars.Add("reset", AssetIDType.Boolean);
-                    //globals pertaining to monsters in Deltarune 
-                    custom_vars.Add("monsterstatus", AssetIDType.Boolean);
-                    custom_vars.Add("monster", AssetIDType.Boolean);
-                    //Cutscene
-                    custom_vars.Add("cutscene", AssetIDType.Boolean);
-                    custom_vars.Add("black", AssetIDType.Boolean);
-                    custom_vars.Add("monsterinstancetype", AssetIDType.GameObject);
-                    //custom_vars.Add("itemed", AssetIDType.Boolean);
-                    //custom_vars.Add("itemed", AssetIDType.Boolean);
-                    //custom_vars.Add("itemed", AssetIDType.Boolean);
-                    //custom_vars.Add("itemed", AssetIDType.Boolean);
-                    //Undertale
-                    custom_vars.Add("background_color", AssetIDType.Color);
-                    custom_vars.Add("myblend", AssetIDType.Color);
-                    custom_vars.Add("object0", AssetIDType.GameObject);
-                    custom_vars.Add("part1", AssetIDType.GameObject);
-                    custom_vars.Add("pap", AssetIDType.GameObject);
-                    custom_vars.Add("fileerased", AssetIDType.Sprite);
-                    custom_vars.Add("catty", AssetIDType.GameObject);
-                    custom_vars.Add("bratty", AssetIDType.GameObject);
-                    custom_vars.Add("creator", AssetIDType.GameObject);
-                    //It's not 100% accurate to resolve this way but it seems like this variable only gets directly assigned values and is used as a bool, it should be fine.
-                    custom_vars.Add("parent", AssetIDType.GameObject);
-                    //These are not so consistent... ;-;
-                    //op is used in Muffet's stuff but is critical in Omega flowey positioning... worse to resolve than to not.
-                    //custom_vars.Add("op", AssetIDType.GameObject);
-                    //Toby messed up in "gml_Object_obj_wizardorb_chaser_Alarm_0" (should be "scr_monstersum()"), "pop" is never a script.
-                    //From v1.001 Undertale via comparison
-                    //A TIER quality
-                    custom_vars.Add("onionsprite", AssetIDType.Sprite);
-                    custom_vars.Add("headsprite", AssetIDType.Sprite);
-                    custom_vars.Add("breaksprite", AssetIDType.Sprite);
-                    custom_vars.Add("foodimg", AssetIDType.Sprite);
-                    custom_vars.Add("facespr", AssetIDType.Sprite);
-                    custom_vars.Add("bombsprite", AssetIDType.Sprite);
-                    custom_vars.Add("mysprite", AssetIDType.Sprite);
-                    custom_vars.Add("arms", AssetIDType.Sprite);
-                    custom_vars.Add("levelpic", AssetIDType.Sprite);
-                    custom_vars.Add("image", AssetIDType.Sprite);
-                    custom_vars.Add("song_index", AssetIDType.Sound);
-                    custom_vars.Add("thischara", AssetIDType.GameObject);
-                    //B TIER quality
-                    custom_vars.Add("tspr5", AssetIDType.Sprite);
-                    custom_vars.Add("tspr3", AssetIDType.Sprite);
-                    custom_vars.Add("tspr2", AssetIDType.Sprite);
-                    custom_vars.Add("tspr1", AssetIDType.Sprite);
-                    custom_vars.Add("tspr4", AssetIDType.Sprite);
-                    custom_vars.Add("snapper", AssetIDType.GameObject);
-                    custom_vars.Add("subject", AssetIDType.GameObject);
-                    custom_vars.Add("clip", AssetIDType.GameObject);
-                    //C TIER quality
-                    custom_vars.Add("sound1", AssetIDType.Sound);
-                    custom_vars.Add("sound2", AssetIDType.Sound);
+                    string[] conditions = cv_conditions[i].Split("|".ToCharArray());
+                    for (int j = 0; j < conditions.Length; j++)
+                    {
+                        bool checktype = false;
+                        string condition = conditions[i];
+                        if (condition.Contains("&"))
+                        {
+                            condition = condition.Remove(0, 1);
+                            checktype = true;
+                        }
+
+                        if (((checktype) && lowerName.Contains(condition)) || ((!checktype) && (lowerName == condition)))
+                        {
+                            foreach (KeyValuePair<string, AssetIDType> custom_var in cv_arr[i])
+                                builtin_vars.Add(custom_var.Key, custom_var.Value);
+
+                            foreach (KeyValuePair<string, AssetIDType[]> custom_func in cf_arr[i])
+                                builtin_funcs.Add(custom_func.Key, custom_func.Value);
+
+                            break;
+                        }
+                    }
                 }
+
+                // Try to generate an XML file from custom_ dictionaries...
+                GenerateAssetData(cv_arr, cf_arr, lowerName, cv_conditions);
             }
-
-            // Merge custom_ dictionaries into builtin_ dictionaries
-            foreach (var custom_var in custom_vars)
-                builtin_vars.Add(custom_var.Key, custom_var.Value);
-
-            foreach (var custom_func in custom_funcs)
-                builtin_funcs.Add(custom_func.Key, custom_func.Value);
         }
 
-        /*
-         * TODO: finish this.
-        public static void GenerateAssetData(Dictionary<string, AssetIDType> vars, Dictionary<string, AssetIDType[]> funcs)
+        public static void GenerateAssetData(Dictionary<string, AssetIDType>[] vars, Dictionary<string, AssetIDType[]>[] funcs, string gname, string[] conds)
         {
-            XDocument AssetXML = new XDocument(
-                new XComment("This file was autogenerated by GenerateAssetData()"),
-                new XElement("Games",
-                    new XElement("Game",
-                        new XAttribute("gname", 
-                );
+            XDocument AssetXML = new XDocument(new XComment(" This file was autogenerated by GenerateAssetData() "), new XElement("Games"));
+
+            XElement pointerToGames = AssetXML.Element("Games");
+
+            for (int i = 0; i < conds.Length; i++)
+            {
+                string cur_cond = conds[i];
+                XElement _game = new XElement("Game");
+                if (!cur_cond.Contains("|")) // only one game
+                {
+                    _game.Add(new XAttribute("gname", cur_cond));
+                }
+                else //multiple games
+                {
+                    string[] parsedcont = conds[i].Split("|".ToCharArray());
+                    for (int c = 0; c < parsedcont.Length; c++)
+                    {
+                        _game.Add(new XAttribute("gname" + (c + 1).ToString(), parsedcont[c]));
+                    }
+                }
+
+                foreach (var cur_var in vars[i])
+                {
+                    _game.Add(new XElement("Resolve", new XAttribute("type", "variable"), new XAttribute("name", cur_var.Key), cur_var.Value.ToString("g").Replace("Enum_", "")));
+                }
+
+                foreach (var cur_func in funcs[i])
+                {
+                    string temp = "";
+                    for (int f = 0; f < cur_func.Value.Length; f++)
+                    {
+                        temp += cur_func.Value[f].ToString("g").Replace("Enum_", "") + ((f != cur_func.Value.Length - 1) ? ", " : "");
+                    }
+                    _game.Add(new XElement("Resolve", new XAttribute("type", "function"), new XAttribute("name", cur_func.Key), temp));
+                }
+                pointerToGames.Add(_game);
+
+            }
 
             string AXString = AssetXML.ToString();
 
-            // ...
+            File.WriteAllText("AssetTypeResolverProfile.xml", AXString);
         }
-        */
+        
 
         public static void LoadAssetDataFromXML(string lowerName)
         {
@@ -1083,7 +1156,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     for (int i = 1; i < 10; i++) // loop from game1 to game9
                     {
-                        string _n = xn.Attributes["gname" + i.ToString()] != null ? xn.Attributes["gname" + i.ToString()].FirstChild.InnerText : "";
+                        string _n = (xn.Attributes["gname" + i.ToString()] != null) ? xn.Attributes["gname" + i.ToString()].FirstChild.InnerText : "";
                         if (i == 1 && _n == "") throw new ArgumentException("Could not find gname attribute in Game node!"); // gname doesn't exist (it's OK), but gname1 also doesn't exist (that's bad).
                         checktype = _n.StartsWith("&");
                         if (checktype) _n = _n.Remove(0, 1);
