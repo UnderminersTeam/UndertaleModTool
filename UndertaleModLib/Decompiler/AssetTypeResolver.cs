@@ -201,6 +201,8 @@ namespace UndertaleModLib.Decompiler
         public static Dictionary<string, AssetIDType> builtin_vars;
         public static Dictionary<string, AssetIDType> custom_vars;
 
+        public static string programDir = AppDomain.CurrentDomain.BaseDirectory;
+
         internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, Dictionary<string, AssetIDType[]> scriptArgs)
         {
             // Scripts overload builtins because in GMS2 some functions are just backwards-compatibility scripts
@@ -706,7 +708,7 @@ namespace UndertaleModLib.Decompiler
             Dictionary<string, AssetIDType[]>[] cf_arr = new Dictionary<string, AssetIDType[]>[3];
             string[] cv_conditions = new string[3];
 
-            if (lowerName != null && File.Exists("AssetTypeResolverProfile.xml"))
+            if (lowerName != null && File.Exists(programDir + "AssetTypeResolverProfile.xml"))
             {
                 LoadAssetDataFromXML(lowerName);
 
@@ -716,7 +718,7 @@ namespace UndertaleModLib.Decompiler
                 foreach (KeyValuePair<string, AssetIDType[]> custom_func in custom_funcs)
                     builtin_funcs.Add(custom_func.Key, custom_func.Value);
             }
-            else // The file doesn't exist, load internal data.
+            else if (lowerName != null) // The file doesn't exist, load internal data.
             {
                 //Just Undertale
                 //Sometimes used as a bool, should not matter though and be an improvement overall.
@@ -1133,7 +1135,7 @@ namespace UndertaleModLib.Decompiler
 
             string AXString = AssetXML.ToString();
 
-            File.WriteAllText("AssetTypeResolverProfile.xml", AXString);
+            File.WriteAllText(programDir + "AssetTypeResolverProfile.xml", AXString);
         }
         
 
@@ -1141,7 +1143,7 @@ namespace UndertaleModLib.Decompiler
         {
             // XML loading
             XmlDocument xml = new XmlDocument();
-            xml.Load("AssetTypeResolverProfile.xml");
+            xml.Load(programDir + "AssetTypeResolverProfile.xml");
             XmlNodeList xnList = xml.SelectNodes("/Games/Game");
             bool ourgame = false; // if lowerName matches the name in our Node.
             foreach (XmlNode xn in xnList)
