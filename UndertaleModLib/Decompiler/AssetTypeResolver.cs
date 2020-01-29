@@ -276,26 +276,28 @@ namespace UndertaleModLib.Decompiler
         public static AssetIDType StringToAssetIDRef(string xmltype)
         {
             // Returns an AssetIDType, used only in XML stuff.
+            xmltype = xmltype.ToLower(); // case-insensitive.
             switch (xmltype)
             {
-                case "Sprite": return AssetIDType.Sprite;
-                case "Sound": return AssetIDType.Sound;
-                case "Background": return AssetIDType.Background;
-                case "Font": return AssetIDType.Font;
-                case "Path": return AssetIDType.Path;
-                case "Timeline": return AssetIDType.Timeline;
-                case "GameObject":
-                case "Object":
+                case "sprite": return AssetIDType.Sprite;
+                case "sound": return AssetIDType.Sound;
+                case "background": return AssetIDType.Background;
+                case "font": return AssetIDType.Font;
+                case "path": return AssetIDType.Path;
+                case "timeline": return AssetIDType.Timeline;
+                case "gameobject":
+                case "object":
                     return AssetIDType.GameObject; // i allow both.
-                case "Boolean": return AssetIDType.Boolean;
-                case "GamepadButton": return AssetIDType.Enum_GamepadButton;
-                case "Room": return AssetIDType.Room;
-                case "Shader": return AssetIDType.Shader;
-                case "Other": return AssetIDType.Other;
-                case "Layer": return AssetIDType.Layer;
-                case "Color": return AssetIDType.Color;
-                case "KeyboardKey": return AssetIDType.KeyboardKey;
-                case "OSType": return AssetIDType.Enum_OSType;
+                case "boolean": return AssetIDType.Boolean;
+                case "gamepadbutton": return AssetIDType.Enum_GamepadButton;
+                case "room": return AssetIDType.Room;
+                case "shader": return AssetIDType.Shader;
+                case "other": return AssetIDType.Other;
+                case "layer": return AssetIDType.Layer;
+                case "color": return AssetIDType.Color;
+                case "keyboardkey": return AssetIDType.KeyboardKey;
+                case "ostype": return AssetIDType.Enum_OSType;
+                case "script": return AssetIDType.Script;
 
                 default: throw new ArgumentException("Could not evaluate AssetType! Your type was: " + xmltype); // ??? oh no.
             }
@@ -1135,7 +1137,11 @@ namespace UndertaleModLib.Decompiler
 
             string AXString = AssetXML.ToString();
 
-            File.WriteAllText(programDir + "AssetTypeResolverProfile.xml", AXString);
+            try
+            {
+                File.WriteAllText(programDir + "AssetTypeResolverProfile.xml", AXString);
+            }
+            catch { } // silently fail if can't write XML, data is loaded into custom_ dictionaries anyway...
         }
         
 
