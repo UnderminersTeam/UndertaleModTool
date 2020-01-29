@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using UndertaleModLib.Models;
@@ -295,7 +292,10 @@ namespace UndertaleModLib.Decompiler
                 case "other": return AssetIDType.Other;
                 case "layer": return AssetIDType.Layer;
                 case "color": return AssetIDType.Color;
-                case "keyboardkey": return AssetIDType.KeyboardKey;
+                case "keyboardkey":
+                case "keyboard":
+                case "key":
+                    return AssetIDType.KeyboardKey;
                 case "ostype": return AssetIDType.Enum_OSType;
                 case "script": return AssetIDType.Script;
 
@@ -706,21 +706,28 @@ namespace UndertaleModLib.Decompiler
             custom_funcs = new Dictionary<string, AssetIDType[]>();
             custom_vars = new Dictionary<string, AssetIDType>();
 
-            Dictionary<string, AssetIDType>[] cv_arr = new Dictionary<string, AssetIDType>[3];
-            Dictionary<string, AssetIDType[]>[] cf_arr = new Dictionary<string, AssetIDType[]>[3];
-            string[] cv_conditions = new string[3];
+            int length = 3;
 
+            Dictionary<string, AssetIDType>[] cv_arr = new Dictionary<string, AssetIDType>[length];
+            Dictionary<string, AssetIDType[]>[] cf_arr = new Dictionary<string, AssetIDType[]>[length];
+            string[] cv_conditions = new string[length];
+
+            bool errorOccured = false;
             if (lowerName != null && File.Exists(programDir + "AssetTypeResolverProfile.xml"))
             {
-                LoadAssetDataFromXML(lowerName);
+                try { LoadAssetDataFromXML(lowerName); }
+                catch { errorOccured = true; }
 
-                foreach (KeyValuePair<string, AssetIDType> custom_var in custom_vars)
-                    builtin_vars.Add(custom_var.Key, custom_var.Value);
+                if (!errorOccured)
+                {
+                    foreach (KeyValuePair<string, AssetIDType> custom_var in custom_vars)
+                        builtin_vars.Add(custom_var.Key, custom_var.Value);
 
-                foreach (KeyValuePair<string, AssetIDType[]> custom_func in custom_funcs)
-                    builtin_funcs.Add(custom_func.Key, custom_func.Value);
-            }
-            else if (lowerName != null) // The file doesn't exist, load internal data.
+                    foreach (KeyValuePair<string, AssetIDType[]> custom_func in custom_funcs)
+                        builtin_funcs.Add(custom_func.Key, custom_func.Value);
+                }
+            } else errorOccured = true;
+            if (lowerName != null || errorOccured) // The file doesn't exist, load internal data.
             {
                 //Just Undertale
                 //Sometimes used as a bool, should not matter though and be an improvement overall.
@@ -1143,13 +1150,14 @@ namespace UndertaleModLib.Decompiler
             }
             catch { } // silently fail if can't write XML, data is loaded into custom_ dictionaries anyway...
         }
-        
 
         public static void LoadAssetDataFromXML(string lowerName)
         {
             // XML loading
             XmlDocument xml = new XmlDocument();
-            xml.Load(programDir + "AssetTypeResolverProfile.xml");
+            try { xml.Load(programDir + "AssetTypeResolverProfile.xml"); }
+            catch { throw new ArgumentException("Invalid XML!"); } // if XML is not valid, stop.
+
             XmlNodeList xnList = xml.SelectNodes("/Games/Game");
             bool ourgame = false; // if lowerName matches the name in our Node.
             foreach (XmlNode xn in xnList)
