@@ -55,7 +55,7 @@ namespace UndertaleModLib.Util
                 {
                     resultImage = embeddedImage.Clone(new Rectangle(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight), PixelFormat.DontCare);
                 }
-                catch (OutOfMemoryException e)
+                catch (OutOfMemoryException)
                 {
                     throw new OutOfMemoryException(imageName + "'s texture is abnormal. 'Source Position/Size' boxes 3 & 4 on texture page may be bigger than the sprite itself or it's set to '0'.");
                 }
