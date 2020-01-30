@@ -54,8 +54,8 @@ namespace UndertaleModLib.Models
         public UndertaleRawShaderData HLSL11_PixelData;
         public UndertaleRawShaderData PSSL_VertexData;
         public UndertaleRawShaderData PSSL_PixelData;
-        public UndertaleRawShaderData Cg_VertexData;
-        public UndertaleRawShaderData Cg_PixelData;
+        public UndertaleRawShaderData Cg_PSVita_VertexData;
+        public UndertaleRawShaderData Cg_PSVita_PixelData;
         public UndertaleRawShaderData Cg_PS3_VertexData;
         public UndertaleRawShaderData Cg_PS3_PixelData;
 
@@ -69,8 +69,8 @@ namespace UndertaleModLib.Models
             HLSL11_PixelData = new UndertaleRawShaderData();
             PSSL_VertexData = new UndertaleRawShaderData();
             PSSL_PixelData = new UndertaleRawShaderData();
-            Cg_VertexData = new UndertaleRawShaderData();
-            Cg_PixelData = new UndertaleRawShaderData();
+            Cg_PSVita_VertexData = new UndertaleRawShaderData();
+            Cg_PSVita_PixelData = new UndertaleRawShaderData();
             Cg_PS3_VertexData = new UndertaleRawShaderData();
             Cg_PS3_PixelData = new UndertaleRawShaderData();
         }
@@ -118,8 +118,8 @@ namespace UndertaleModLib.Models
 
             PSSL_VertexData.Serialize(writer);
             PSSL_PixelData.Serialize(writer);
-            Cg_VertexData.Serialize(writer);
-            Cg_PixelData.Serialize(writer);
+            Cg_PSVita_VertexData.Serialize(writer);
+            Cg_PSVita_PixelData.Serialize(writer);
             Cg_PS3_VertexData.Serialize(writer);
             Cg_PS3_PixelData.Serialize(writer);
 
@@ -149,17 +149,17 @@ namespace UndertaleModLib.Models
                 PSSL_PixelData.WriteData(writer);
             }
 
-            if (!Cg_VertexData.IsNull)
+            if (!Cg_PSVita_VertexData.IsNull)
             {
                 WritePadding(writer, 7);
 
-                Cg_VertexData.WriteData(writer);
+                Cg_PSVita_VertexData.WriteData(writer);
             }
-            if (!Cg_PixelData.IsNull)
+            if (!Cg_PSVita_PixelData.IsNull)
             {
                 WritePadding(writer, 7);
 
-                Cg_PixelData.WriteData(writer);
+                Cg_PSVita_PixelData.WriteData(writer);
             }
 
             if (!Cg_PS3_VertexData.IsNull)
@@ -198,8 +198,8 @@ namespace UndertaleModLib.Models
 
             PSSL_VertexData.Unserialize(reader);
             PSSL_PixelData.Unserialize(reader);
-            Cg_VertexData.Unserialize(reader);
-            Cg_PixelData.Unserialize(reader);
+            Cg_PSVita_VertexData.Unserialize(reader);
+            Cg_PSVita_PixelData.Unserialize(reader);
             Cg_PS3_VertexData.Unserialize(reader);
             Cg_PS3_PixelData.Unserialize(reader);
 
@@ -249,28 +249,28 @@ namespace UndertaleModLib.Models
 
                 // Calculate length of data
                 uint next = 0;
-                if (!Cg_VertexData.IsNull)
-                    next = Cg_VertexData._Position;
+                if (!Cg_PSVita_VertexData.IsNull)
+                    next = Cg_PSVita_VertexData._Position;
                 else
                     next = _EntryEnd;
                 int length = (int)(next - reader.Position);
                 PSSL_PixelData.ReadData(reader, length);
             }
 
-            if (!Cg_VertexData.IsNull)
+            if (!Cg_PSVita_VertexData.IsNull)
             {
                 ReadPadding(reader, 7);
 
                 // Calculate length of data
                 uint next = 0;
-                if (!Cg_PixelData.IsNull)
-                    next = Cg_PixelData._Position;
+                if (!Cg_PSVita_PixelData.IsNull)
+                    next = Cg_PSVita_PixelData._Position;
                 else
                     next = _EntryEnd;
                 int length = (int)(next - reader.Position);
-                Cg_VertexData.ReadData(reader, length);
+                Cg_PSVita_VertexData.ReadData(reader, length);
             }
-            if (!Cg_PixelData.IsNull)
+            if (!Cg_PSVita_PixelData.IsNull)
             {
                 ReadPadding(reader, 7);
 
@@ -281,7 +281,7 @@ namespace UndertaleModLib.Models
                 else
                     next = _EntryEnd;
                 int length = (int)(next - reader.Position);
-                Cg_PixelData.ReadData(reader, length);
+                Cg_PSVita_PixelData.ReadData(reader, length);
             }
 
             if (!Cg_PS3_VertexData.IsNull)
@@ -308,18 +308,18 @@ namespace UndertaleModLib.Models
             }
         }
 
-        // The "unknown" types are actually known, but what they correspond to is unknown.
-        // They are PSSL (PlayStation Shader Language), Cg, and Cg_PS3 (for PS3 seemingly)
-        // This enum is not the direct value in the file
+        // PSSL is a shading language used only in PS4, based on HLSL11.
+        // Cg stands for "C for graphics" made by NVIDIA and used in PSVita and PS3 (they have their own variants of Cg), based on HLSL9.
+        // All console shaders (and HLSL11?) are compiled using confidential SDK tools when GMAssetCompiler builds the game (for PSVita it's psp2cgc shader compiler).
         public enum ShaderType : uint
         {
             GLSL_ES = 1,
             GLSL = 2,
             HLSL9 = 3,
             HLSL11 = 4,
-            Unknown2 = 5,
-            Unknown3 = 6,
-            Unknown4 = 7
+            PSSL = 5,
+            Cg_PSVita = 6,
+            Cg_PS3 = 7
         }
 
         public class UndertaleRawShaderData
