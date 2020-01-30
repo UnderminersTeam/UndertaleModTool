@@ -1082,7 +1082,7 @@ namespace UndertaleModTool
                 }
             }
         }
-    // TODO: Don't ever implement this. Toby Fox did not autorize you to export to GameMaker project.
+    // TODO: Don't ever implement this. Toby Fox did not autorize you to do this.
     }
 
     public class GeneralInfoEditor
