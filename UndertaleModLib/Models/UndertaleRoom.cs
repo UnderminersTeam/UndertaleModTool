@@ -356,7 +356,7 @@ namespace UndertaleModLib.Models
             private uint _Color = 0xFFFFFFFF;
             private float _Rotation = 0;
             private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _PreCreateCode = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
-            private bool _GMS2_2_2 = false;
+            private static bool _GMS2_2_2_302 = false;
             private float _ImageSpeed = 0;
             private int _ImageIndex = 0;
 
@@ -370,7 +370,7 @@ namespace UndertaleModLib.Models
             public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
             public float Rotation { get => _Rotation; set { _Rotation = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Rotation")); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OppositeRotation")); } }
             public UndertaleCode PreCreateCode { get => _PreCreateCode.Resource; set { _PreCreateCode.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PreCreateCode")); } }
-            public bool GMS2_2_2 { get => _GMS2_2_2; set { _GMS2_2_2 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2_2_2")); } }
+            public static bool GMS2_2_2_302 { get => _GMS2_2_2_302; set { _GMS2_2_2_302 = value; } }
             public float ImageSpeed { get => _ImageSpeed; set { _ImageSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ImageSpeed")); } }
             public int ImageIndex { get => _ImageIndex; set { _ImageIndex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ImageIndex")); } }
 
@@ -386,7 +386,7 @@ namespace UndertaleModLib.Models
                 writer.WriteUndertaleObject(_CreationCode);
                 writer.Write(ScaleX);
                 writer.Write(ScaleY);
-                if (GMS2_2_2)
+                if (GMS2_2_2_302)
                 {
                     writer.Write(ImageSpeed);
                     writer.Write(ImageIndex);
@@ -413,7 +413,7 @@ namespace UndertaleModLib.Models
                 ScaleY = reader.ReadSingle();
                 if (length == 48)
                 {
-                    GMS2_2_2 = true;
+                    GMS2_2_2_302 = true;
                     ImageSpeed = reader.ReadSingle();
                     ImageIndex = reader.ReadInt32();
                 }
