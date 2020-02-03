@@ -270,6 +270,18 @@ namespace UndertaleModLib.Decompiler
             return null;
         }
 
+        public static void ATRLog(string line)
+        {
+            try
+            {
+                File.AppendAllLines(programDir + "ATR.log", line);
+            }
+            catch
+            {
+                // Do nothing.
+            }
+        }
+
         public static AssetIDType StringToAssetIDRef(string xmltype)
         {
             // Returns an AssetIDType, used only in XML stuff.
@@ -299,7 +311,11 @@ namespace UndertaleModLib.Decompiler
                 case "ostype": return AssetIDType.Enum_OSType;
                 case "script": return AssetIDType.Script;
 
-                default: throw new ArgumentException("Could not evaluate AssetType! Your type was: " + xmltype); // ??? oh no.
+                default:
+                {
+                    ATRLog("Could not evaluate AssetType! Your type was: " + xmltype); // ??? Oh no.
+                    return AssetIDType.Other;
+                }
             }
         }
 
@@ -1098,6 +1114,9 @@ namespace UndertaleModLib.Decompiler
 
                 // Try to generate an XML file from custom_ dictionaries...
                 GenerateAssetData(cv_arr, cf_arr, lowerName, cv_conditions);
+
+                // Log that we couldn't write or load external XML...
+                ATRLog("WARNING: Internal data is used because XML wasn't written or your XML had an error, check lines above.");
             }
         }
 
@@ -1213,7 +1232,10 @@ namespace UndertaleModLib.Decompiler
                             AssetIDType parsedtype = StringToAssetIDRef(assettypes[0]);
                             custom_vars.Add(name, parsedtype);
                         }
-                        else throw new ArgumentException("Could not parse type attribute! Your type is: " + type); // type="alasbdassda" ??
+                        else
+                        {
+                            ATRLog("Could not parse type attribute! Your item's name is: " + name + " and it's type is: " + type); // type="alasbdassda" ??
+                        }
                     }
                 }
             }
