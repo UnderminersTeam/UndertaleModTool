@@ -274,7 +274,7 @@ namespace UndertaleModLib.Decompiler
         {
             try
             {
-                File.AppendAllLines(programDir + "ATR.log", line);
+                File.AppendAllText(programDir + "ATR_Error.log", line + Environment.NewLine);
             }
             catch
             {
@@ -743,7 +743,8 @@ namespace UndertaleModLib.Decompiler
                         builtin_funcs.Add(custom_func.Key, custom_func.Value);
                 }
             } else errorOccured = true;
-            if (lowerName != null || errorOccured) // The file doesn't exist, load internal data.
+
+            if (lowerName != null && (errorOccured || !File.Exists(programDir + "AssetTypeResolverProfile.xml"))) // The file doesn't exist, load internal data.
             {
                 //Just Undertale
                 //Sometimes used as a bool, should not matter though and be an improvement overall.
@@ -1113,7 +1114,7 @@ namespace UndertaleModLib.Decompiler
                 }
 
                 // Try to generate an XML file from custom_ dictionaries...
-                GenerateAssetData(cv_arr, cf_arr, lowerName, cv_conditions);
+                if (!File.Exists(programDir + "AssetTypeResolverProfile.xml")) GenerateAssetData(cv_arr, cf_arr, lowerName, cv_conditions);
 
                 // Log that we couldn't write or load external XML...
                 ATRLog("WARNING: Internal data is used because XML wasn't written or your XML had an error, check lines above.");
@@ -1175,7 +1176,7 @@ namespace UndertaleModLib.Decompiler
             // XML loading
             XmlDocument xml = new XmlDocument();
             try { xml.Load(programDir + "AssetTypeResolverProfile.xml"); }
-            catch { throw new ArgumentException("Invalid XML!"); } // if XML is not valid, stop.
+            catch (Exception e) { ATRLog(e.ToString()); throw new ArgumentException("Invalid XML!"); } // if XML is not valid, stop.
 
             XmlNodeList xnList = xml.SelectNodes("/Games/Game");
             bool ourgame = false; // if lowerName matches the name in our Node.
