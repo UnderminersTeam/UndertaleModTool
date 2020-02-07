@@ -416,6 +416,10 @@ namespace UndertaleModLib.Models
                     GMS2_2_2_302 = true;
                     ImageSpeed = reader.ReadSingle();
                     ImageIndex = reader.ReadInt32();
+                } 
+                else 
+                {
+                    GMS2_2_2_302 = false;
                 }
                 Color = reader.ReadUInt32();
                 Rotation = reader.ReadSingle();
