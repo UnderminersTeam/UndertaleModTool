@@ -104,7 +104,7 @@ namespace UndertaleModTool
                 UndertaleModTool_app.CreateSubKey(@"shell\open\command").SetValue("", "\"" + Assembly.GetExecutingAssembly().Location + "\" \"%1\"", RegistryValueKind.String);
                 UndertaleModTool_app.CreateSubKey(@"shell\launch\command").SetValue("", "\"" + Assembly.GetExecutingAssembly().Location + "\" \"%1\" launch", RegistryValueKind.String);
                 UndertaleModTool_app.CreateSubKey(@"shell\launch").SetValue("", "Run game", RegistryValueKind.String);
-                foreach (var extStr in new string[] { ".win", ".unx", ".ios" })
+                foreach (var extStr in new string[] { ".win", ".unx", ".ios", ".droid" })
                 {
                     var ext = HKCU_Classes.CreateSubKey(extStr);
                     ext.SetValue("", "UndertaleModTool", RegistryValueKind.String);
