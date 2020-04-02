@@ -1110,7 +1110,10 @@ namespace UndertaleModLib.Compiler
                             TokenKind.BitwiseXor
                     ))
                     {
-                        result.Children.Add(ParseBitShift(context));
+                        Statement nextRight = new Statement(Statement.StatementKind.ExprBinaryOp, remainingStageOne.Dequeue().Token);
+                        nextRight.Children.Add(result);
+                        nextRight.Children.Add(ParseBitShift(context));
+                        result = nextRight;
                     }
 
                     return result;
@@ -1136,13 +1139,17 @@ namespace UndertaleModLib.Compiler
                     result.Children.Add(left);
                     result.Children.Add(right);
 
-                    while (IsNextTokenDiscard(
+                    while (IsNextToken(
                             TokenKind.BitwiseShiftLeft,
                             TokenKind.BitwiseShiftRight
                             ))
                     {
-                        result.Children.Add(ParseAddSub(context));
+                        Statement nextRight = new Statement(Statement.StatementKind.ExprBinaryOp, remainingStageOne.Dequeue().Token);
+                        nextRight.Children.Add(result);
+                        nextRight.Children.Add(ParseAddSub(context));
+                        result = nextRight;
                     }
+
                     return result;
                 }
                 else
@@ -1166,12 +1173,15 @@ namespace UndertaleModLib.Compiler
                     result.Children.Add(left);
                     result.Children.Add(right);
 
-                    while (IsNextTokenDiscard(
+                    while (IsNextToken(
                             TokenKind.Plus,
                             TokenKind.Minus
                             ))
                     {
-                        result.Children.Add(ParseMulDiv(context));
+                        Statement nextRight = new Statement(Statement.StatementKind.ExprBinaryOp, remainingStageOne.Dequeue().Token);
+                        nextRight.Children.Add(result);
+                        nextRight.Children.Add(ParseMulDiv(context));
+                        result = nextRight;
                     }
 
                     return result;
@@ -1199,14 +1209,17 @@ namespace UndertaleModLib.Compiler
                     result.Children.Add(left);
                     result.Children.Add(right);
 
-                    while (IsNextTokenDiscard(
+                    while (IsNextToken(
                         TokenKind.Times,
                         TokenKind.Divide,
                         TokenKind.Div,
                         TokenKind.Mod
                             ))
                     {
-                        result.Children.Add(ParsePostAndRef(context));
+                        Statement nextRight = new Statement(Statement.StatementKind.ExprBinaryOp, remainingStageOne.Dequeue().Token);
+                        nextRight.Children.Add(result);
+                        nextRight.Children.Add(ParsePostAndRef(context));
+                        result = nextRight;
                     }
 
                     return result;
