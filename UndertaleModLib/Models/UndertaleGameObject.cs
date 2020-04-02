@@ -244,6 +244,12 @@ namespace UndertaleModLib.Models
                 set => EventSubtype = (uint)value;
             }
 
+            public EventSubtypeGesture EventSubtypeGesture
+            {
+                get => (EventSubtypeGesture)EventSubtype;
+                set => EventSubtype = (uint)value;
+            }
+
             public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
@@ -371,9 +377,9 @@ namespace UndertaleModLib.Models
         Draw = 8, // subtype is EventSubtypeDraw
         KeyPress = 9, // subtype is key ID, see EventSubtypeKey
         KeyRelease = 10, // subtype is key ID, see EventSubtypeKey
-        Gesture = 11, // TODO: mapping is a guess // TODO: subtypes
-        Asynchronous = 12, // TODO: mapping is a guess // TODO: subtypes
-        Unknown13 = 13, //TODO: Unknown!
+        Trigger = 11, // no subtypes, always 0
+        CleanUp = 12, // no subtypes, always 0
+        Gesture = 13, // subtype is EventSubtypeGesture
         PreCreate = 14
     }
 
@@ -556,5 +562,34 @@ namespace UndertaleModLib.Models
         AsyncAudioRecording = 73,
         AsyncAudioPlayback = 74,
         AsyncSystem = 75,
+    }
+
+    public enum EventSubtypeGesture : uint
+    {
+        Tap = 0,
+        DoubleTap = 1,
+        DragStart = 2,
+        DragMove = 3,
+        DragEnd = 4,
+        Flick = 5,
+        PinchStart = 6,
+        PinchIn = 7,
+        PinchOut = 8,
+        PinchEnd = 9,
+        RotateStart = 10,
+        Rotating = 11,
+        RotateEnd = 12,
+        GlobalTap = 64,
+        GlobalDoubleTap = 65,
+        GlobalDragStart = 66,
+        GlobalDragMove = 67,
+        GlobalDragEnd = 68,
+        GlobalFlick = 69,
+        GlobalPInchStart = 70,
+        GlobalPInchIn = 71,
+        GlobalPInchOut = 72,
+        GlobalPInchEnd = 73,
+        GlobalRotateStart = 74,
+        GlobalRotating = 75,
     }
 }
