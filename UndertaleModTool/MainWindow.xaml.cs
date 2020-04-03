@@ -653,9 +653,9 @@ namespace UndertaleModTool
         {
             if (e.Key == Key.Delete)
             {
-                if (Selected != null && Selected is UndertaleObject)
+                if (Highlighted != null && Highlighted is UndertaleObject)
                 {
-                    UndertaleObject obj = Selected as UndertaleObject;
+                    UndertaleObject obj = Highlighted as UndertaleObject;
                     DeleteItem(obj);
                 }
             }
