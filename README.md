@@ -41,10 +41,8 @@ I also included some of my test scripts. They are:
 ### Bug reports, contributing
 All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is my current list of stuff that needs to be worked on:
 * Add missing chunk editors for Timelines and Extensions
-* Write a matching GML compiler, so that edits of high-level code are possible (@colinator27 is already working on it)
-* Add support for other bytecode versions, at least for bytecode 14 so that Undertale 1.00 can be opened as well
 * Add support for YYC games - you won't be able to edit code, but everything else should technically work
-* Maybe try to write a GameMaker Project output module, should be technically possible after decompiler is done but I'm not sure I really want to do that for legal reasons... (@Kneesnap has it almost working)
+* Maybe try to write a GameMaker Project output module? Not sure we want to do this because of legal reasons...
 
 ### data.win file format
 Interested in the file and instruction format research I've done while working on this? Check out these:
@@ -63,7 +61,7 @@ Special thanks to everybody who did previous research on unpacking and decompili
 * https://github.com/PoroCYon/Altar.NET
 * https://github.com/WarlockD/GMdsam
 * [@NarryG](https://github.com/NarryG) for [helping me figure out](https://github.com/krzys-h/UndertaleModTool/issues/3) the missing stuff for GMS2 and Nintendo Switch release
-* [@colinator27](https://github.com/colinator27) for [figuring out Extensions](https://github.com/krzys-h/UndertaleModTool/issues/4), [Sha](https://github.com/krzys-h/UndertaleModTool/issues/13)[ders](https://github.com/krzys-h/UndertaleModTool/pull/25) and [a bunch of other stuff](https://github.com/krzys-h/UndertaleModTool/pull/30)
+* [@colinator27](https://github.com/colinator27) for [lots of things, including the gml compiler](https://github.com/krzys-h/UndertaleModTool/issues/4), [Sha](https://github.com/krzys-h/UndertaleModTool/issues/13)[ders](https://github.com/krzys-h/UndertaleModTool/pull/25) and [a bunch of other stuff](https://github.com/krzys-h/UndertaleModTool/pull/30)
 * [@Kneesnap](https://github.com/Kneesnap) for [improving the decompiler a bunch](https://github.com/krzys-h/UndertaleModTool/pull/162)
 
 And of course, special thanks to Toby Fox and the whole Undertale team for making the game ;)

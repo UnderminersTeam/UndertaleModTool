@@ -56,6 +56,9 @@ namespace UndertaleModLib.Models
 
         public string ToString(bool isGMS2)
         {
+            if (Content == null)
+                return "\"null\""; // NPE Fix.
+
             if (isGMS2)
                 return "\"" + Content.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"") + "\"";
 

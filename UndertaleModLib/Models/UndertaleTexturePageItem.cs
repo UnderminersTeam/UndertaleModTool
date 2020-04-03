@@ -1,4 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Drawing;
+using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models
 {
@@ -10,15 +13,15 @@ namespace UndertaleModLib.Models
      */
     public class UndertaleTexturePageItem : UndertaleResource, INotifyPropertyChanged
     {
-        private ushort _SourceX;
+        private ushort _SourceX; // The position in the texture sheet.
         private ushort _SourceY;
-        private ushort _SourceWidth;
+        private ushort _SourceWidth; // The dimensions of the image in the texture sheet.
         private ushort _SourceHeight;
         private ushort _TargetX;
         private ushort _TargetY;
-        private ushort _TargetWidth;
+        private ushort _TargetWidth; // The dimensions to scale the image to. (Is this BoundingWidth - TargetX)?
         private ushort _TargetHeight;
-        private ushort _BoundingWidth;
+        private ushort _BoundingWidth; // The UndertaleSprite dimensions. (Yes, it matches.)
         private ushort _BoundingHeight;
         private UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR> _TexturePage = new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();
 
@@ -70,6 +73,34 @@ namespace UndertaleModLib.Models
         public override string ToString()
         {
             return "(" + GetType().Name + ")";
+        }
+
+        public void ReplaceTexture(Image replaceImage, bool disposeImage = true)
+        {
+            Image finalImage = TextureWorker.ResizeImage(replaceImage, SourceWidth, SourceHeight);
+            
+            // Apply the image to the TexturePage.
+            lock (TexturePage.TextureData)
+            {
+                TextureWorker worker = new TextureWorker();
+                Bitmap embImage = worker.GetEmbeddedTexture(TexturePage); // Use SetPixel if needed.
+
+                Graphics g = Graphics.FromImage(embImage);
+                g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                g.DrawImage(finalImage, SourceX, SourceY);
+                g.Dispose();
+
+                TexturePage.TextureData.TextureBlob = TextureWorker.GetImageBytes(embImage);
+                worker.Cleanup();
+            }
+
+            TargetWidth = (ushort)replaceImage.Width;
+            TargetHeight = (ushort)replaceImage.Height;
+
+            // Cleanup.
+            finalImage.Dispose();
+            if (disposeImage)
+                replaceImage.Dispose();
         }
     }
 }

@@ -1,34 +1,24 @@
 ﻿// Makes it possible to switch debug mode on and off using F12
 
 EnsureDataLoaded();
+ScriptMessage("Toggle debug mode with F12\nby krzys-h, Kneesnap");
 
-ScriptMessage("Toggle debug mode with F12\nby krzys_h");
 
 var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f12, Data.Strings, Data.Code, Data.CodeLocals);
 
-// i could just use NOT... but I wanted to test branches in the assembler
-code.Append(Assembler.Assemble(@"
-pushglb.v global.debug
-pushi.e 1
-cmp.i.v EQ
-bf go_enable
+// Toggle global.debug.
+code.ReplaceGML(@"
+if (global.debug) {
+    global.debug = false;
+} else{
+    global.debug = true;
+}", Data);
 
-pushi.e 0
-pop.v.i global.debug
-b func_end
-
-go_enable: pushi.e 1
-pop.v.i global.debug
-", Data));
-
+// Deltarune.
 var scr_debug = Data.Scripts.ByName("scr_debug")?.Code;
-if (scr_debug != null) // Deltarune
-{
-    scr_debug.Replace(Assembler.Assemble(@"
-pushglb.v global.debug
-ret.v
-", Data));
-}
+if (scr_debug != null) // Deltarune. scr_debug will always return false for global.debug, so we modify it to return global.debug
+    scr_debug.ReplaceGML(@"return global.debug;", Data);
 
 ChangeSelection(code);
-ScriptMessage("Patched!");
+ScriptMessage("F12 will now toggle debug mode.");
+

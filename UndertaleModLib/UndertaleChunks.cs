@@ -159,12 +159,12 @@ namespace UndertaleModLib
     {
         public override string Name => "SCPT";
     }
-    
+
     public class UndertaleChunkGLOB : UndertaleSimpleListChunk<UndertaleGlobalInit>
     {
         public override string Name => "GLOB";
     }
-    
+
     public class UndertaleChunkSHDR : UndertaleListChunk<UndertaleShader>
     {
         public override string Name => "SHDR";
@@ -304,11 +304,17 @@ namespace UndertaleModLib
             if (List == null)
                 return;
 
+            if (writer.undertaleData.UnsupportedBytecodeVersion)
+                return;
+
             UndertaleInstruction.Reference<UndertaleVariable>.SerializeReferenceChain(writer, writer.undertaleData.Code, List);
 
-            writer.Write(InstanceVarCount);
-            writer.Write(InstanceVarCountAgain);
-            writer.Write(MaxLocalVarCount);
+            if (writer.undertaleData.GeneralInfo?.BytecodeVersion >= 15)
+            {
+                writer.Write(InstanceVarCount);
+                writer.Write(InstanceVarCountAgain);
+                writer.Write(MaxLocalVarCount);
+            }
             foreach (UndertaleVariable var in List)
                 writer.WriteUndertaleObject(var);
         }
@@ -324,11 +330,18 @@ namespace UndertaleModLib
             if (reader.undertaleData.UnsupportedBytecodeVersion)
                 return;
             uint startPosition = reader.Position;
-            InstanceVarCount = reader.ReadUInt32();
-            InstanceVarCountAgain = reader.ReadUInt32();
-            MaxLocalVarCount = reader.ReadUInt32();
+            uint varLength;
+            if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 15)
+            {
+                InstanceVarCount = reader.ReadUInt32();
+                InstanceVarCountAgain = reader.ReadUInt32();
+                MaxLocalVarCount = reader.ReadUInt32();
+                varLength = 20;
+            }
+            else
+                varLength = 12;
             List.Clear();
-            while (reader.Position + 20 <= startPosition + Length)
+            while (reader.Position + varLength <= startPosition + Length)
                 List.Add(reader.ReadUndertaleObject<UndertaleVariable>());
         }
     }
@@ -347,13 +360,21 @@ namespace UndertaleModLib
 
             UndertaleInstruction.Reference<UndertaleFunction>.SerializeReferenceChain(writer, writer.undertaleData.Code, Functions);
 
-            writer.WriteUndertaleObject(Functions);
-            writer.WriteUndertaleObject(CodeLocals);
+            if (writer.undertaleData.GeneralInfo?.BytecodeVersion <= 14)
+            {
+                foreach (UndertaleFunction f in Functions)
+                    writer.WriteUndertaleObject(f);
+            }
+            else
+            {
+                writer.WriteUndertaleObject(Functions);
+                writer.WriteUndertaleObject(CodeLocals);
+            }
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
-            if (Length == 0) // YYC, bytecode <= 16, chunk is empty but exists
+            if (Length == 0 && reader.undertaleData.GeneralInfo?.BytecodeVersion > 14) // YYC, 14 < bytecode <= 16, chunk is empty but exists
             {
                 Functions = null;
                 CodeLocals = null;
@@ -362,8 +383,18 @@ namespace UndertaleModLib
 
             if (reader.undertaleData.UnsupportedBytecodeVersion)
                 return;
-            Functions = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleFunction>>();
-            CodeLocals = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleCodeLocals>>();
+            if (reader.undertaleData.GeneralInfo?.BytecodeVersion <= 14)
+            {
+                uint startPosition = reader.Position;
+                Functions.Clear();
+                while (reader.Position + 12 <= startPosition + Length)
+                    Functions.Add(reader.ReadUndertaleObject<UndertaleFunction>());
+            }
+            else
+            {
+                Functions = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleFunction>>();
+                CodeLocals = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleCodeLocals>>();
+            }
         }
     }
 

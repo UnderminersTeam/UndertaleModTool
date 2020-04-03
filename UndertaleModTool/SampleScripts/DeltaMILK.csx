@@ -8,7 +8,5 @@ foreach (var sprite in Data.Sprites)
     if (sprite.Name.Content.StartsWith("bg_"))
         continue;
     foreach (var tex in sprite.Textures)
-    {
         tex.Texture = milk;
-    }
 }

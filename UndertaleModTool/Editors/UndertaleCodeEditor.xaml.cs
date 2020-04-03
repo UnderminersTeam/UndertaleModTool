@@ -21,6 +21,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib;
+using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 
@@ -84,14 +85,29 @@ namespace UndertaleModTool
 
             FlowDocument document = new FlowDocument();
             document.PagePadding = new Thickness(0);
+            document.PageWidth = 2048; // Speed-up.
             document.FontFamily = new FontFamily("Lucida Console");
             Paragraph par = new Paragraph();
+            par.Margin = new Thickness(0);
 
             if (code.Instructions.Count > 5000)
             {
                 // Disable syntax highlighting. Loading it can take a few MINUTES on large scripts.
                 var data = (Application.Current.MainWindow as MainWindow).Data;
-                par.Inlines.Add(new Run(code.Disassemble(data.Variables, data.CodeLocals.For(code))));
+                string[] split = code.Disassemble(data.Variables, data.CodeLocals.For(code)).Split('\n');
+
+                for (var i = 0; i < split.Length; i++)
+                { // Makes it possible to select text.
+                    if (i > 0 && (i % 100) == 0)
+                    {
+                        document.Blocks.Add(par);
+                        par = new Paragraph();
+                        par.Margin = new Thickness(0);
+                    }
+
+                    par.Inlines.Add(split[i] + (split.Length > i + 1 && ((i + 1) % 100) != 0 ? "\n" : ""));
+                }
+
             }
             else
             {
@@ -210,7 +226,16 @@ namespace UndertaleModTool
                             break;
                     }
 
-                    par.Inlines.Add(new Run("\n"));
+                    if (par.Inlines.Count >= 250)
+                    { // Makes selecting text possible.
+                        document.Blocks.Add(par);
+                        par = new Paragraph();
+                        par.Margin = new Thickness(0);
+                    }
+                    else
+                    {
+                        par.Inlines.Add(new Run("\n"));
+                    }
                 }
             }
             document.Blocks.Add(par);
@@ -245,19 +270,25 @@ namespace UndertaleModTool
 
             FlowDocument document = new FlowDocument();
             document.PagePadding = new Thickness(0);
+            document.PageWidth = 2048; // Speed-up.
             document.FontFamily = new FontFamily("Lucida Console");
             Paragraph par = new Paragraph();
+            par.Margin = new Thickness(0);
 
             UndertaleCode gettextCode = null;
             if (gettext == null)
                 gettextCode = (Application.Current.MainWindow as MainWindow).Data.Code.ByName("gml_Script_textdata_en");
 
-            string gettextJsonPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), "lang/lang_en.json");
+            string dataPath = System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
+            string gettextJsonPath = (dataPath != null) ? System.IO.Path.Combine(dataPath, "lang/lang_en.json") : null;
 
             var dataa = (Application.Current.MainWindow as MainWindow).Data;
             Task t = Task.Run(() =>
             {
-                DecompileContext context = new DecompileContext(dataa, true);
+                int estimatedLineCount = (int)Math.Round(code.Length * .056D);
+                bool skipFormatting = (estimatedLineCount > 5000);
+
+                DecompileContext context = new DecompileContext(dataa, !skipFormatting);
                 string decompiled = null;
                 Exception e = null;
                 try
@@ -272,7 +303,7 @@ namespace UndertaleModTool
                 if (gettextCode != null)
                     UpdateGettext(gettextCode);
 
-                if (gettextJSON == null && File.Exists(gettextJsonPath))
+                if (gettextJSON == null && gettextJsonPath != null && File.Exists(gettextJsonPath))
                     UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
 
                 Dispatcher.Invoke(() =>
@@ -286,9 +317,23 @@ namespace UndertaleModTool
                     else if (decompiled != null)
                     {
                         string[] lines = decompiled.Split('\n');
-                        if (lines.Length > 5000)
+                        if (skipFormatting)
                         {
-                            par.Inlines.Add(new Run(decompiled));
+                            for (var i = 0; i < lines.Length; i++)
+                            {
+                                string toWrite = lines[i];
+                                if (((i + 1) % 100) != 0 && lines.Length > i + 1)
+                                    toWrite += "\n"; // Write a new-line if we're not making a new paragraph.
+
+                                if (i > 0 && i % 100 == 0)
+                                { // Splitting into different paragraphs significantly increases selection performance.
+                                    document.Blocks.Add(par);
+                                    par = new Paragraph();
+                                    par.Margin = new Thickness(0);
+                                }
+
+                                par.Inlines.Add(toWrite); 
+                            }
                         }
                         else
                         {
@@ -298,6 +343,7 @@ namespace UndertaleModTool
                             Brush commentBrush = new SolidColorBrush(Color.FromRgb(0, 150, 0));
                             Brush funcBrush = new SolidColorBrush(Color.FromRgb(100, 100, 0));
                             Brush assetBrush = new SolidColorBrush(Color.FromRgb(0, 150, 100));
+                            Brush argumentBrush = new SolidColorBrush(Color.FromRgb(80, 131, 80));
 
                             Dictionary<string, UndertaleFunction> funcs = new Dictionary<string, UndertaleFunction>();
                             foreach (var x in (Application.Current.MainWindow as MainWindow).Data.Functions)
@@ -305,7 +351,7 @@ namespace UndertaleModTool
 
                             foreach (var line in lines)
                             {
-                                char[] special = { '.', ',', ')', '(', '[', ']', '>', '<', ':', ';', '=', '"' };
+                                char[] special = { '.', ',', ')', '(', '[', ']', '>', '<', ':', ';', '=', '"', '!' };
                                 Func<char, bool> IsSpecial = (c) => Char.IsWhiteSpace(c) || special.Contains(c);
                                 List<string> split = new List<string>();
                                 string tok = "";
@@ -367,8 +413,10 @@ namespace UndertaleModTool
                                     string token = split[i];
                                     if (token == "if" || token == "else" || token == "return" || token == "break" || token == "continue" || token == "while" || token == "for" || token == "repeat" || token == "with" || token == "switch" || token == "case" || token == "default" || token == "exit" || token == "var" || token == "do" || token == "until")
                                         par.Inlines.Add(new Run(token) { Foreground = keywordBrush, FontWeight = FontWeights.Bold });
-                                    else if (token == "self" || token == "global" || token == "local" || token == "other" || token == "noone" || token == "true" || token == "false")
+                                    else if (token == "self" || token == "global" || token == "local" || token == "other" || token == "noone" || token == "true" || token == "false" || token == "undefined" || token == "all")
                                         par.Inlines.Add(new Run(token) { Foreground = keywordBrush });
+                                    else if (token.StartsWith("argument"))
+                                        par.Inlines.Add(new Run(token) { Foreground = argumentBrush });
                                     else if ((val = AssetTypeResolver.FindConstValue(token)) != null)
                                         par.Inlines.Add(new Run(token) { Foreground = constBrush, FontStyle = FontStyles.Italic, ToolTip = val.ToString() });
                                     else if (token.StartsWith("\""))
@@ -393,7 +441,7 @@ namespace UndertaleModTool
                                             if (split[i + 1] == "(" && split[i + 2].StartsWith("\"") && split[i + 3].StartsWith("@") && split[i + 4] == ")")
                                             {
                                                 string id = split[i + 2].Substring(1, split[i + 2].Length - 2);
-                                                if (!usedObjects.ContainsKey(id))
+                                                if (!usedObjects.ContainsKey(id) && gettext.ContainsKey(id))
                                                     usedObjects.Add(id, (Application.Current.MainWindow as MainWindow).Data.Strings[gettext[id]]);
                                             }
                                         }
@@ -402,7 +450,7 @@ namespace UndertaleModTool
                                             if (split[i + 1] == "(" && split[i + 2].StartsWith("\"") && split[i + 3].StartsWith("@") && split[i + 4] == ")")
                                             {
                                                 string id = split[i + 2].Substring(1, split[i + 2].Length - 2);
-                                                if (!usedObjects.ContainsKey(id))
+                                                if (!usedObjects.ContainsKey(id) && gettextJSON.ContainsKey(id))
                                                     usedObjects.Add(id, gettextJSON[id]);
                                             }
                                         }
@@ -417,6 +465,9 @@ namespace UndertaleModTool
                                         par.Inlines.Add(new Run(token) { Cursor = Cursors.Hand });
                                         par.Inlines.LastInline.MouseDown += (sender, ev) =>
                                         {
+                                            if (token.Length > 2 && token[0] == '0' && token[1] == 'x')
+                                                return; // Hex numbers aren't objects.
+
                                             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
                                             int id = Int32.Parse(token);
                                             List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
@@ -442,7 +493,7 @@ namespace UndertaleModTool
                                                 possibleObjects.Add(data.Timelines[id]);
 
                                             ContextMenu contextMenu = new ContextMenu();
-                                            foreach(UndertaleObject obj in possibleObjects)
+                                            foreach (UndertaleObject obj in possibleObjects)
                                             {
                                                 MenuItem item = new MenuItem();
                                                 item.Header = obj.ToString().Replace("_", "__");
@@ -460,7 +511,7 @@ namespace UndertaleModTool
                                         };
                                     }
                                     else
-                                        par.Inlines.Add(new Run(token));
+                                        par.Inlines.Add(token);
 
                                     if (token == "." && (Char.IsLetter(split[i + 1][0]) || split[i + 1][0] == '_'))
                                     {
@@ -473,16 +524,25 @@ namespace UndertaleModTool
                                         }
                                     }
                                 }
+
+                                // Add used object comments.
                                 foreach (var gt in usedObjects)
                                 {
-                                    par.Inlines.Add(new Run(" // ") { Foreground = commentBrush });
-                                    par.Inlines.Add(new Run(gt.Key) { Foreground = commentBrush });
-                                    par.Inlines.Add(new Run(" = ") { Foreground = commentBrush });
+                                    par.Inlines.Add(new Run(" // " + gt.Key + " = ") { Foreground = commentBrush });
                                     par.Inlines.Add(new Run(gt.Value is string ? "\"" + (string)gt.Value + "\"" : gt.Value.ToString()) { Foreground = commentBrush, Cursor = Cursors.Hand });
                                     if (gt.Value is UndertaleObject)
                                         par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(gt.Value);
                                 }
-                                par.Inlines.Add(new Run("\n"));
+
+                                if (par.Inlines.Count >= 250)
+                                { // Splitting into different paragraphs significantly increases selection performance.
+                                    document.Blocks.Add(par);
+                                    par = new Paragraph();
+                                    par.Margin = new Thickness(0);
+                                } else
+                                {
+                                    par.Inlines.Add(new Run("\n"));
+                                }
                             }
                         }
                     }
@@ -545,6 +605,60 @@ namespace UndertaleModTool
             await t;
         }
 
+        private void DecompiledView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            DecompiledView.Visibility = Visibility.Collapsed;
+            DecompiledEditor.Visibility = Visibility.Visible;
+            DecompiledEditor.Text = new TextRange(DecompiledView.Document.ContentStart, DecompiledView.Document.ContentEnd).Text;
+            int index = DisassemblyEditor.GetCharacterIndexFromPoint(Mouse.GetPosition(DecompiledView), true);
+            if (index >= 0)
+                DecompiledEditor.CaretIndex = index;
+            DecompiledEditor.Focus();
+        }
+
+        private void DecompiledEditor_LostFocus(object sender, RoutedEventArgs e)
+        {
+            UndertaleCode code = this.DataContext as UndertaleCode;
+            if (code == null)
+                return; // Probably loaded another data.win or something.
+
+            UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
+
+            CompileContext compileContext = Compiler.CompileGMLText(DecompiledEditor.Text, data, code);
+
+            if (compileContext.HasError)
+            {
+                MessageBox.Show(compileContext.ResultError, "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!compileContext.SuccessfulCompile)
+            {
+                MessageBox.Show(compileContext.ResultAssembly, "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                var instructions = Assembler.Assemble(compileContext.ResultAssembly, data);
+                code.Replace(instructions);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Show new code, decompiled.
+            CurrentDisassembled = null;
+            CurrentDecompiled = null;
+            CurrentGraphed = null;
+            DecompileCode(code);
+
+            DecompiledView.Visibility = Visibility.Visible;
+            DecompiledEditor.Visibility = Visibility.Collapsed;
+        }
+
         private void DisassemblyView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             DisassemblyView.Visibility = Visibility.Collapsed;
@@ -559,7 +673,8 @@ namespace UndertaleModTool
         private void DisassemblyEditor_LostFocus(object sender, RoutedEventArgs e)
         {
             UndertaleCode code = this.DataContext as UndertaleCode;
-            Debug.Assert(code != null);
+            if (code == null)
+                return; // Probably loaded another data.win or something.
 
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
             try

@@ -79,7 +79,11 @@ namespace UndertaleModLib.Decompiler
                     else
                     {
                         if (line == "[drop]")
+                        {
                             instr.JumpOffsetPopenvExitMagic = true;
+                            if (data?.GeneralInfo?.BytecodeVersion <= 14)
+                                instr.JumpOffset = -1048576; // I really don't know at this point. Magic for little endian 00 00 F0
+                        }
                         else
                             label = line;
                     }
@@ -96,7 +100,7 @@ namespace UndertaleModLib.Decompiler
                     else
                     {
                         UndertaleInstruction.InstanceType inst = instr.TypeInst;
-                        instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, instr, lookOnStack);
+                        instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, instr, lookOnStack, data);
                         instr.TypeInst = inst;
                     }
                     line = "";
@@ -126,11 +130,11 @@ namespace UndertaleModLib.Decompiler
                                 instr.Value = (long)ParseResourceName(line, data);
                             break;
                         case UndertaleInstruction.DataType.Boolean:
-                            instr.Value = Boolean.Parse(line);
+                            instr.Value = bool.Parse(line);
                             break;
                         case UndertaleInstruction.DataType.Variable:
                             UndertaleInstruction.InstanceType inst2 = instr.TypeInst;
-                            instr.Value = ParseVariableReference(line, vars, localvars, ref inst2, instr, lookOnStack);
+                            instr.Value = ParseVariableReference(line, vars, localvars, ref inst2, instr, lookOnStack, data);
                             instr.TypeInst = inst2;
                             break;
                         case UndertaleInstruction.DataType.String:
@@ -174,7 +178,11 @@ namespace UndertaleModLib.Decompiler
         {
             if (data != null)
             {
-                int id = data.IndexOf(data.ByName(line));
+                UndertaleNamedResource byName = data.ByName(line);
+                if (byName == null)
+                    throw new FormatException("Could not locate resource named '" + line + "'.");
+
+                int id = data.IndexOf(byName);
                 if (id >= 0)
                     return id;
             }
@@ -196,12 +204,24 @@ namespace UndertaleModLib.Decompiler
                     continue;
                 string label = null;
                 int labelEnd = line.IndexOf(':');
-                if (labelEnd >= 0)
+
+                if (labelEnd > 0)
                 {
-                    label = line.Substring(0, labelEnd).Trim();
-                    line = line.Substring(labelEnd + 1);
-                    if (String.IsNullOrEmpty(label))
-                        throw new Exception("Empty label");
+                    bool isLabel = true;
+                    for (var i = 0; i < labelEnd; i++)
+                    {
+                        if (!Char.IsLetterOrDigit(line[i]) && line[i] != '_')
+                        {
+                            isLabel = false;
+                            break;
+                        }
+                    }
+
+                    if (isLabel)
+                    {
+                        label = line.Substring(0, labelEnd).Trim();
+                        line = line.Substring(labelEnd + 1);
+                    }
                 }
                 line = line.Trim();
                 if (String.IsNullOrEmpty(line))
@@ -222,7 +242,7 @@ namespace UndertaleModLib.Decompiler
                         if (aaa.Length >= 4)
                         {
                             var varii = vars[Int32.Parse(aaa[3])];
-                            if (varii.InstanceType != UndertaleInstruction.InstanceType.Local)
+                            if (data?.GeneralInfo?.BytecodeVersion >= 15 && varii.InstanceType != UndertaleInstruction.InstanceType.Local)
                                 throw new Exception("Not a local var");
                             if (varii.Name.Content != aaa[2])
                                 throw new Exception("Name mismatch");
@@ -246,6 +266,8 @@ namespace UndertaleModLib.Decompiler
                         {
                             if (i.Kind == UndertaleInstruction.Opcode.Push)
                                 return UndertaleInstruction.InstanceType.Self; // This is probably an instance variable then (e.g. pushi.e 1337; push.v self.someinstance; conv.v.i; pushi.e 0; pop.v.v [array]alarm)
+                            else if (i.Kind == UndertaleInstruction.Opcode.PushLoc)
+                                return UndertaleInstruction.InstanceType.Local;
                         }
                         //int old = stackCounter;
                         stackCounter -= UndertaleInstruction.CalculateStackDiff(i);
@@ -282,7 +304,7 @@ namespace UndertaleModLib.Decompiler
             if (labels.ContainsKey("func_end"))
                 throw new Exception("func_end is a reserved label name");
             labels.Add("func_end", addr);
-            foreach(var pair in labelTargets)
+            foreach (var pair in labelTargets)
             {
                 pair.Key.JumpOffset = (int)labels[pair.Value] - (int)pair.Key.Address;
             }
@@ -301,9 +323,13 @@ namespace UndertaleModLib.Decompiler
             uint? id = null;
             if (at >= 0)
             {
-                if (str.Substring(at + 1) != "-1") // TODO
-                    id = UInt32.Parse(str.Substring(at + 1));
-                str = str.Substring(0, at);
+                // First make certain that this is actually an ID, not part of the string content
+                if ((at - 1) == str.LastIndexOf('"'))
+                {
+                    if (str.Substring(at + 1) != "-1") // TODO
+                        id = UInt32.Parse(str.Substring(at + 1));
+                    str = str.Substring(0, at);
+                }
             }
             if (!String.IsNullOrEmpty(str))
             {
@@ -321,7 +347,7 @@ namespace UndertaleModLib.Decompiler
             return new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>() { Resource = strobj, CachedId = (int)id.Value };
         }
 
-        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance, UndertaleInstruction instr, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null)
+        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance, UndertaleInstruction instr, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null, UndertaleData data = null)
         {
             string str = line;
             string inst = null;
@@ -373,9 +399,11 @@ namespace UndertaleModLib.Decompiler
             }
             if (realinstance >= 0)
                 realinstance = UndertaleInstruction.InstanceType.Self;
-            if (realinstance == UndertaleInstruction.InstanceType.Other)
+            else if (realinstance == UndertaleInstruction.InstanceType.Other)
                 realinstance = UndertaleInstruction.InstanceType.Self;
 
+            if (data?.GeneralInfo?.BytecodeVersion <= 14)
+                realinstance = UndertaleInstruction.InstanceType.Undefined;
 
             UndertaleVariable varobj;
             if (realinstance == UndertaleInstruction.InstanceType.Local)

@@ -8,8 +8,19 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleEmbeddedImage}">
     <Grid>
-        <Border Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3">
-            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">TODO: Implement the Embedded Image editor</TextBlock>
-        </Border>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Texture</TextBlock>
+        <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding TextureEntry}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
     </Grid>
 </UserControl>

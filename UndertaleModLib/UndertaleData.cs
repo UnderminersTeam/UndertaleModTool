@@ -44,22 +44,26 @@ namespace UndertaleModLib
         public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO?.List;
 
         public bool UnsupportedBytecodeVersion = false;
+        public int PaddingAlignException = -1;
 
-        public UndertaleNamedResource ByName(string name)
+        public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {
             // TODO: Check if those are all possible types
-            return Sounds.ByName(name) ??
-                Sprites.ByName(name) ??
-                Backgrounds.ByName(name) ??
-                Paths.ByName(name) ??
-                Scripts.ByName(name) ??
-                Fonts.ByName(name) ??
-                GameObjects.ByName(name) ??
-                Rooms.ByName(name) ??
+            return Sounds.ByName(name, ignoreCase) ??
+                Sprites.ByName(name, ignoreCase) ??
+                Backgrounds.ByName(name, ignoreCase) ??
+                Paths.ByName(name, ignoreCase) ??
+                Scripts.ByName(name, ignoreCase) ??
+                Fonts.ByName(name, ignoreCase) ??
+                GameObjects.ByName(name, ignoreCase) ??
+                Rooms.ByName(name, ignoreCase) ??
+                Extensions.ByName(name, ignoreCase) ??
+                Shaders.ByName(name, ignoreCase) ??
+                Timelines.ByName(name, ignoreCase) ??
                 (UndertaleNamedResource)null;
         }
 
-        public int IndexOf(UndertaleNamedResource obj)
+        public int IndexOf(UndertaleNamedResource obj, bool panicIfInvalid = true)
         {
             if (obj is UndertaleSound)
                 return Sounds.IndexOf(obj as UndertaleSound);
@@ -77,7 +81,16 @@ namespace UndertaleModLib
                 return GameObjects.IndexOf(obj as UndertaleGameObject);
             if (obj is UndertaleRoom)
                 return Rooms.IndexOf(obj as UndertaleRoom);
-            throw new InvalidOperationException();
+            if (obj is UndertaleExtension)
+                return Extensions.IndexOf(obj as UndertaleExtension);
+            if (obj is UndertaleShader)
+                return Shaders.IndexOf(obj as UndertaleShader);
+            if (obj is UndertaleTimeline)
+                return Timelines.IndexOf(obj as UndertaleTimeline);
+
+            if (panicIfInvalid)
+                throw new InvalidOperationException();
+            return -2;
         }
 
         internal int IndexOfByName(string line)
@@ -88,7 +101,45 @@ namespace UndertaleModLib
         // Test if this data.win was built by GameMaker Studio 2.
         public bool IsGameMaker2()
         {
-            return GeneralInfo.Major >= 2;
+            return IsVersionAtLeast(2, 0, 0, 0);
+        }
+
+
+        // Old Versions: https://store.yoyogames.com/downloads/gm-studio/release-notes-studio-old.html
+        // https://web.archive.org/web/20150304025626/https://store.yoyogames.com/downloads/gm-studio/release-notes-studio.html
+        // Early Access: https://web.archive.org/web/20181002232646/http://store.yoyogames.com:80/downloads/gm-studio-ea/release-notes-studio.html
+        public bool TestGMS1Version(uint stableBuild, uint betaBuild, bool allowGMS2 = false)
+        {
+            return (allowGMS2 || !IsGameMaker2()) && (IsVersionAtLeast(1, 0, 0, stableBuild) || (IsVersionAtLeast(1, 0, 0, betaBuild) && !IsVersionAtLeast(1, 0, 0, 1000)));
+        }
+
+        public bool IsVersionAtLeast(uint major, uint minor, uint release, uint build)
+        {
+            if (GeneralInfo.Major != major)
+                return (GeneralInfo.Major > major);
+
+            if (GeneralInfo.Minor != minor)
+                return (GeneralInfo.Minor > minor);
+
+            if (GeneralInfo.Release != release)
+                return (GeneralInfo.Release > release);
+
+            if (GeneralInfo.Build != build)
+                return (GeneralInfo.Build > build);
+
+            return true; // The version is exactly what supplied.
+        }
+
+        public int GetBuiltinSoundGroupID()
+        {
+            // It is known it works this way in 1.0.1266. The exact version which changed this is unknown.
+            // If we find a game which does not fit the version identified here, we should fix this check.
+            return TestGMS1Version(1354, 161, true) ? 0 : 1;
+        }
+
+        public bool IsYYC()
+        {
+            return GeneralInfo != null && Code == null;
         }
 
         public static UndertaleData CreateNew()
@@ -137,13 +188,11 @@ namespace UndertaleModLib
 
     public static class UndertaleDataExtensionMethods
     {
-        public static T ByName<T>(this IList<T> list, string name) where T : UndertaleNamedResource
+        public static T ByName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
         {
             foreach(var item in list)
-            {
-                if (item.Name.Content == name)
+                if (ignoreCase ? (item.Name.Content.Equals(name, StringComparison.OrdinalIgnoreCase)) : (item.Name.Content == name))
                     return item;
-            }
             return default(T);
         }
 
@@ -187,35 +236,73 @@ namespace UndertaleModLib
         {
             if (inst == UndertaleInstruction.InstanceType.Local)
                 throw new InvalidOperationException("Use DefineLocal instead");
+            bool bytecode14 = (data?.GeneralInfo?.BytecodeVersion <= 14);
+            if (bytecode14)
+                inst = UndertaleInstruction.InstanceType.Undefined;
             UndertaleVariable vari = list.Where((x) => x.Name.Content == name && x.InstanceType == inst).FirstOrDefault();
             if (vari == null)
             {
-                if (data.InstanceVarCount != data.InstanceVarCountAgain)
-                    throw new Exception("Integrity error - instance var count broken");
+                var oldId = data.InstanceVarCount;
+                if (!bytecode14)
+                {
+                    if (data.InstanceVarCount == data.InstanceVarCountAgain)
+                    { // Example games that use this mode: Undertale v1.08, Undertale v1.11.
+                        data.InstanceVarCount++;
+                        data.InstanceVarCountAgain++;
+                    }
+                    else
+                    { // Example Games which use this mode: Undertale v1.001.
+                        if (inst == UndertaleInstruction.InstanceType.Self)
+                        {
+                            data.InstanceVarCountAgain++;
+                        }
+                        else if (inst == UndertaleInstruction.InstanceType.Global)
+                        {
+                            data.InstanceVarCount++;
+                        }
+                    }
+                }
+
                 vari = new UndertaleVariable()
                 {
                     Name = strg.MakeString(name),
                     InstanceType = inst,
-                    VarID = isBuiltin ? (int)UndertaleInstruction.InstanceType.Builtin : (int)data.InstanceVarCount++,
+                    VarID = bytecode14 ? 0 : (isBuiltin ? (int)UndertaleInstruction.InstanceType.Builtin : (int)oldId),
                     UnknownChainEndingValue = 0 // TODO: seems to work...
                 };
-                data.InstanceVarCountAgain = data.InstanceVarCount;
                 list.Add(vari);
             }
             return vari;
         }
 
-        public static UndertaleVariable DefineLocal(this IList<UndertaleVariable> list, uint idx, string name, IList<UndertaleString> strg, UndertaleData data)
+        public static UndertaleVariable DefineLocal(this IList<UndertaleVariable> list, UndertaleCode originalCode, int localId, string name, IList<UndertaleString> strg, UndertaleData data)
         {
+            bool bytecode14 = (data?.GeneralInfo?.BytecodeVersion <= 14);
+            if (bytecode14)
+            {
+                UndertaleVariable search = list.Where((x) => x.Name.Content == name).FirstOrDefault();
+                if (search != null)
+                    return search;
+            }
+
+            // Use existing registered variables.
+            if (originalCode != null)
+            {
+                var referenced = originalCode.FindReferencedLocalVars();
+                var refvar = referenced.Where((x) => x.Name.Content == name && x.VarID == localId).FirstOrDefault();
+                if (refvar != null)
+                    return refvar;
+            }
+
             UndertaleVariable vari = new UndertaleVariable()
             {
                 Name = strg.MakeString(name),
-                InstanceType = UndertaleInstruction.InstanceType.Local,
-                VarID = (int)idx,
+                InstanceType = bytecode14 ? UndertaleInstruction.InstanceType.Undefined : UndertaleInstruction.InstanceType.Local,
+                VarID = bytecode14 ? 0 : localId,
                 UnknownChainEndingValue = 0 // TODO: seems to work...
             };
-            if (idx >= data.MaxLocalVarCount)
-                data.MaxLocalVarCount = idx + 1;
+            if (!bytecode14 && list?.Count >= data.MaxLocalVarCount)
+                data.MaxLocalVarCount = (uint) list?.Count + 1;
             list.Add(vari);
             return vari;
         }

@@ -13,45 +13,74 @@ namespace UndertaleModLib.Util
         private Dictionary<UndertaleEmbeddedTexture, Bitmap> embeddedDictionary = new Dictionary<UndertaleEmbeddedTexture, Bitmap>();
         private static readonly ImageConverter _imageConverter = new ImageConverter();
 
-        public void ExportAsPNG(UndertaleTexturePageItem texPageItem, string FullPath, string imageName = null)
+        // Cleans up all the images when usage of this worker is finished.
+        // Should be called when a TextureWorker will never be used again.
+        public void Cleanup()
         {
-            SaveImageToFile(FullPath, GetTextureFor(texPageItem, imageName != null ? imageName : Path.GetFileNameWithoutExtension(FullPath)));
+            foreach (Bitmap img in embeddedDictionary.Values)
+                img.Dispose();
+            embeddedDictionary.Clear();
         }
 
-        public Bitmap GetTextureFor(UndertaleTexturePageItem texPageItem, string imageName)
+        public Bitmap GetEmbeddedTexture(UndertaleEmbeddedTexture embeddedTexture)
+        {
+            lock (embeddedDictionary)
+            {
+                if (!embeddedDictionary.ContainsKey(embeddedTexture))
+                    embeddedDictionary[embeddedTexture] = GetImageFromByteArray(embeddedTexture.TextureData.TextureBlob);
+                return embeddedDictionary[embeddedTexture];
+            }
+        }
+
+        public void ExportAsPNG(UndertaleTexturePageItem texPageItem, string FullPath, string imageName = null, bool includePadding = false)
+        {
+            SaveImageToFile(FullPath, GetTextureFor(texPageItem, imageName != null ? imageName : Path.GetFileNameWithoutExtension(FullPath), includePadding));
+        }
+
+        public Bitmap GetTextureFor(UndertaleTexturePageItem texPageItem, string imageName, bool includePadding = false)
         {
             int exportWidth = texPageItem.BoundingWidth; // sprite.Width
             int exportHeight = texPageItem.BoundingHeight; // sprite.Height
-
-            Bitmap embeddedImage = null;
-
-            lock (embeddedDictionary)
-            {
-                if (!embeddedDictionary.ContainsKey(texPageItem.TexturePage))
-                    embeddedDictionary[texPageItem.TexturePage] = GetImageFromByteArray(texPageItem.TexturePage.TextureData.TextureBlob);
-                embeddedImage = embeddedDictionary[texPageItem.TexturePage];
-            }
+            Bitmap embeddedImage = GetEmbeddedTexture(texPageItem.TexturePage);
 
             // Sanity checks.
-            if ((texPageItem.TargetWidth > exportWidth) || (texPageItem.TargetHeight > exportHeight))
+            if (includePadding && ((texPageItem.TargetWidth > exportWidth) || (texPageItem.TargetHeight > exportHeight)))
                 throw new InvalidDataException(imageName + "'s texture is larger than its bounding box!");
 
             // Create a bitmap representing that part of the texture page.
             Bitmap resultImage = null;
             lock (embeddedImage)
-                resultImage = embeddedImage.Clone(new Rectangle(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight), PixelFormat.DontCare);
+            {
+                try
+                {
+                    resultImage = embeddedImage.Clone(new Rectangle(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight), PixelFormat.DontCare);
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw new OutOfMemoryException(imageName + "'s texture is abnormal. 'Source Position/Size' boxes 3 & 4 on texture page may be bigger than the sprite itself or it's set to '0'.");
+                }
+            }
 
             // Resize the image, if necessary.
             if ((texPageItem.SourceWidth != texPageItem.TargetWidth) || (texPageItem.SourceHeight != texPageItem.TargetHeight))
                 resultImage = ResizeImage(resultImage, texPageItem.TargetWidth, texPageItem.TargetHeight);
 
             // Put it in the final holder image.
-            Bitmap finalImage = new Bitmap(exportWidth, exportHeight);
-            Graphics g = Graphics.FromImage(finalImage);
-            g.DrawImage(resultImage, new Rectangle(texPageItem.TargetX, texPageItem.TargetY, resultImage.Width, resultImage.Height), new Rectangle(0, 0, resultImage.Width, resultImage.Height), GraphicsUnit.Pixel);
-            g.Dispose();
+            Bitmap returnImage = resultImage;
+            if (includePadding)
+            {
+                returnImage = new Bitmap(exportWidth, exportHeight);
+                Graphics g = Graphics.FromImage(returnImage);
+                g.DrawImage(resultImage, new Rectangle(texPageItem.TargetX, texPageItem.TargetY, resultImage.Width, resultImage.Height), new Rectangle(0, 0, resultImage.Width, resultImage.Height), GraphicsUnit.Pixel);
+                g.Dispose();
+            }
 
-            return finalImage;
+            return returnImage;
+        }
+
+        public static Bitmap ReadImageFromFile(string filePath)
+        {
+            return GetImageFromByteArray(File.ReadAllBytes(filePath));
         }
 
         // Grabbed from https://stackoverflow.com/questions/3801275/how-to-convert-image-to-byte-array/16576471#16576471
@@ -101,7 +130,7 @@ namespace UndertaleModLib.Util
 
         public static byte[] ReadMaskData(string filePath)
         {
-            Bitmap image = GetImageFromByteArray(File.ReadAllBytes(filePath));
+            Bitmap image = ReadImageFromFile(filePath);
             List<byte> bytes = new List<byte>();
 
             int enableColor = Color.White.ToArgb();
@@ -162,6 +191,18 @@ namespace UndertaleModLib.Util
         public static void ExportCollisionMaskPNG(UndertaleSprite sprite, UndertaleSprite.MaskEntry mask, string fullPath)
         {
             SaveImageToFile(fullPath, GetCollisionMaskImage(sprite, mask));
+        }
+
+        public static byte[] GetImageBytes(Image image, bool disposeImage = true)
+        {
+            using (var ms = new MemoryStream())
+            {
+                image.Save(ms, image.RawFormat);
+                byte[] result = ms.ToArray();
+                if (disposeImage)
+                    image.Dispose();
+                return result;
+            }
         }
 
         public static void SaveImageToFile(string FullPath, Image image, Boolean disposeImage = true)

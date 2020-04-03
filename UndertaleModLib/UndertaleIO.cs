@@ -85,7 +85,7 @@ namespace UndertaleModLib
             IList<T> list = FindListChunk(reader.undertaleData)?.List;
             if (list != null)
             {
-                if (typeof(ChunkT) == typeof(UndertaleChunkAGRP) && CachedId == 0 && list.Count == 0) // I won't even ask why this works like that
+                if (typeof(ChunkT) == typeof(UndertaleChunkAGRP) && CachedId == reader.undertaleData.GetBuiltinSoundGroupID() && list.Count == 0) // I won't even ask why this works like that
                 {
                     Resource = default(T);
                     return;
@@ -178,6 +178,8 @@ namespace UndertaleModLib
             foreach (UndertaleResourceRef res in resUpdate)
                 res.PostUnserialize(this);
             resUpdate.Clear();
+
+            Decompiler.AssetTypeResolver.InitializeTypes(data);
 
             return data;
         }

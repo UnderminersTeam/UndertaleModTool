@@ -1,19 +1,9 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.IO;
+using System.Drawing;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 
@@ -22,11 +12,33 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertaleTexturePageItemEditor.xaml
     /// </summary>
-    public partial class UndertaleTexturePageItemEditor : UserControl
+    public partial class UndertaleTexturePageItemEditor : System.Windows.Controls.UserControl
     {
         public UndertaleTexturePageItemEditor()
         {
             InitializeComponent();
+        }
+
+        private void Import_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.DefaultExt = ".png";
+            dlg.Filter = "PNG files (.png)|*.png|All files|*";
+
+            if (!(dlg.ShowDialog() ?? false))
+                return;
+
+            try
+            {
+                Bitmap image = TextureWorker.ReadImageFromFile(dlg.FileName);
+                image.SetResolution(96.0F, 96.0F);
+                (this.DataContext as UndertaleTexturePageItem).ReplaceTexture(image);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Failed to import image", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Export_Click(object sender, RoutedEventArgs e)
@@ -38,14 +50,16 @@ namespace UndertaleModTool
 
             if (dlg.ShowDialog() == true)
             {
+                TextureWorker worker = new TextureWorker();
                 try
                 {
-                    new TextureWorker().ExportAsPNG((UndertaleTexturePageItem)this.DataContext, dlg.FileName);
+                    worker.ExportAsPNG((UndertaleTexturePageItem)this.DataContext, dlg.FileName);
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+                worker.Cleanup();
             }
         }
     }

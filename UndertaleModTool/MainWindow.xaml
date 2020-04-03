@@ -57,7 +57,8 @@
                         </MenuItem.Style>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="_Run game" Command="Print" InputGestureText="F5"> <!-- TODO: I think I need a custom command for that... -->
+                    <MenuItem Header="_Run game" Command="Print" InputGestureText="F5">
+                        <!-- TODO: I think I need a custom command for that... -->
                         <MenuItem.Style>
                             <Style TargetType="{x:Type MenuItem}">
                                 <Setter Property="IsEnabled" Value="{Binding CanSave}"/>
@@ -72,9 +73,7 @@
                         </MenuItem.Style>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="_Batch decompile" Click="MenuItem_BatchDecompile_Click"/>
                     <MenuItem Header="Generate o_ffset map" Click="MenuItem_OffsetMap_Click"/>
-                    <MenuItem Header="Export to GameMaker project" Click="MenuItem_GameMaker_Click"/>
                     <Separator/>
                     <MenuItem Header="S_ettings" Command="Properties"/>
                     <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+W"/>
@@ -90,7 +89,10 @@
                     <MenuItem Header="_About" Click="MenuItem_About_Click"/>
                 </MenuItem>
             </Menu>
-            <TextBox DockPanel.Dock="Bottom" Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown"/>
+            <Grid DockPanel.Dock="Bottom">
+                <TextBox x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,35,0"/>
+                <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" VerticalContentAlignment="Top" Name="ObjectLabel"/>
+            </Grid>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -188,19 +190,7 @@
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem ItemsSource="{Binding Backgrounds, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Backgrounds, Converter={StaticResource VisibleIfNotNull}}">
-                            <TreeViewItem.Style>
-                                <Style TargetType="{x:Type TreeViewItem}">
-                                    <Setter Property="Header" Value="Backgrounds &amp; Tile sets"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType=local:MainWindow}}" Value="Visible">
-                                            <DataTrigger.Setters>
-                                                <Setter Property="Header" Value="Tile sets"/>
-                                            </DataTrigger.Setters>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TreeViewItem.Style>
+                        <TreeViewItem Header="Backgrounds &amp; Tile sets" ItemsSource="{Binding Backgrounds, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Backgrounds, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleBackground}">
                                     <TextBlock Text="{Binding Name.Content}" />
@@ -335,7 +325,7 @@
                         </TreeViewItem>
                     </TreeViewItem>
                 </TreeView>
-                
+
                 <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
 
                 <ScrollViewer Grid.Column="2" Grid.RowSpan="2" VerticalScrollBarVisibility="Auto">
@@ -352,7 +342,7 @@
                             <DataTemplate DataType="{x:Type local:GeneralInfoEditor}">
                                 <local:UndertaleGeneralInfoEditor/>
                             </DataTemplate>
-                            
+
                             <DataTemplate DataType="{x:Type local:GlobalInitEditor}">
                                 <local:UndertaleGlobalInitEditor/>
                             </DataTemplate>
@@ -364,7 +354,7 @@
                             <DataTemplate DataType="{x:Type undertale:UndertaleSound}">
                                 <local:UndertaleSoundEditor/>
                             </DataTemplate>
-                            
+
                             <DataTemplate DataType="{x:Type undertale:UndertaleBackground}">
                                 <local:UndertaleBackgroundEditor/>
                             </DataTemplate>
@@ -453,42 +443,5 @@
                 </ScrollViewer>
             </Grid>
         </DockPanel>
-        <Border Background="Black" Name="room_dogcheck" Visibility="Collapsed">
-            <Grid RenderOptions.BitmapScalingMode="NearestNeighbor">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="2*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="2*"/>
-                    <RowDefinition Height="1*"/>
-                    <RowDefinition Height="2*"/>
-                </Grid.RowDefinitions>
-                <Image Grid.Row="1" Grid.Column="1">
-                    <Image.Triggers>
-                        <EventTrigger RoutedEvent="Loaded">
-                            <BeginStoryboard>
-                                <Storyboard RepeatBehavior="Forever">
-                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Source"
-                                                   Duration="0:0:0.4">
-                                        <DiscreteObjectKeyFrame KeyTime="0:0:0.00">
-                                            <DiscreteObjectKeyFrame.Value>
-                                                <BitmapImage UriSource="Resources/spr_tobdogl/0.png"/>
-                                            </DiscreteObjectKeyFrame.Value>
-                                        </DiscreteObjectKeyFrame>
-                                        <DiscreteObjectKeyFrame KeyTime="0:0:0.2">
-                                            <DiscreteObjectKeyFrame.Value>
-                                                <BitmapImage UriSource="Resources/spr_tobdogl/1.png"/>
-                                            </DiscreteObjectKeyFrame.Value>
-                                        </DiscreteObjectKeyFrame>
-                                    </ObjectAnimationUsingKeyFrames>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </Image.Triggers>
-                </Image>
-            </Grid>
-        </Border>
     </Grid>
 </Window>

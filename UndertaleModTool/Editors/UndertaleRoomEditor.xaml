@@ -7,7 +7,7 @@
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib" 
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleRoom}" x:Name="StupidBug">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleRoom}" x:Name="RoomEditor">
     <UserControl.Resources>
         <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
         <local:ColorConverter x:Key="ColorConverter"/>
@@ -16,10 +16,10 @@
         <local:ObjCenterYConverter x:Key="ObjCenterYConverter" />
         <local:LayerFlattenerConverter x:Key="LayerFlattenerConverter" />
         <CompositeCollection x:Key="AllObjectsGMS1">
-            <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.Backgrounds}"/>
-            <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.Tiles}"/>
-            <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=DataContext.GameObjects}"/>
-            <CollectionContainer Collection="{Binding Source={x:Reference StupidBug}, Path=PreviewPath, Converter={StaticResource SimplePointsDisplayConverter}}"/>
+            <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Backgrounds}"/>
+            <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Tiles}"/>
+            <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.GameObjects}"/>
+            <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=PreviewPath, Converter={StaticResource SimplePointsDisplayConverter}}"/>
         </CompositeCollection>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="AnimationSpeedType">
             <ObjectDataProvider.MethodParameters>
@@ -371,8 +371,8 @@
                                 <TextBox Grid.Column="1" Margin="3" Text="{Binding SpeedY}" ToolTip="Y"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Object id</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="6" Grid.Column="1" Margin="3" ObjectReference="{Binding ObjectId}" ObjectType="{x:Type undertale:UndertaleGameObject}"/>
+                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Stretch</TextBlock>
+                            <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Stretch}"/>
                         </Grid>
                     </DataTemplate>
 
@@ -874,7 +874,10 @@
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Background}">
                         <Rectangle Width="{Binding BackgroundDefinition.Texture.SourceWidth}" Height="{Binding BackgroundDefinition.Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
                             <Rectangle.RenderTransform>
-                                <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
+                                <TransformGroup>
+                                  <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
+                                  <ScaleTransform ScaleX="{Binding CalcScaleX}" ScaleY="{Binding CalcScaleY}"  CenterX="{Binding X}" CenterY="{Binding Y}"/>
+                                </TransformGroup>
                             </Rectangle.RenderTransform>
                             <Rectangle.Style>
                                 <Style>
@@ -904,7 +907,7 @@
                                 ImageSource="{Binding BackgroundDefinition.Texture.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
                                 ViewboxUnits="Absolute"
                                 TileMode="None"
-                                Stretch="UniformToFill">
+                                Stretch="Fill">
                                     <ImageBrush.Viewbox>
                                         <MultiBinding>
                                             <MultiBinding.Converter>
@@ -977,7 +980,7 @@
                                 <Style TargetType="Rectangle">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ObjectDefinition.Visible}" Value="False">
-                                            <Setter Property="Opacity"  Value=".35"/>
+                                            <Setter Property="Opacity"  Value="1"/>
                                         </DataTrigger>
 
                                         <DataTrigger Value="True">
@@ -1003,6 +1006,7 @@
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
                                     <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
+                                    <RotateTransform CenterX="{Binding Converter={StaticResource ObjCenterXConverter}}" CenterY="{Binding Converter={StaticResource ObjCenterYConverter}}" Angle="{Binding OppositeRotation}"/>
                                     <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}" CenterX="{Binding Converter={StaticResource ObjCenterXConverter}}" CenterY="{Binding Converter={StaticResource ObjCenterYConverter}}"/>
                                 </TransformGroup>
                                 <!-- TODO: X + TargetX? -->
@@ -1031,12 +1035,17 @@
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
                         <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
-                            <Rectangle.Fill>
-                                <ImageBrush
+                          
+                          <Rectangle.RenderTransform>
+                            <ScaleTransform ScaleX="{Binding CalcScaleX}" ScaleY="{Binding CalcScaleY}" CenterX="0" CenterY="0"/>
+                          </Rectangle.RenderTransform>
+                          
+                          <Rectangle.Fill>
+                              <ImageBrush
                                 ImageSource="{Binding Sprite.Textures[0].Texture.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
                                 ViewboxUnits="Absolute"
                                 TileMode="None"
-                                Stretch="UniformToFill">
+                                Stretch="Fill">
                                     <ImageBrush.Viewbox>
                                         <MultiBinding>
                                             <MultiBinding.Converter>
@@ -1048,8 +1057,8 @@
                                             <Binding Path="Sprite.Textures[0].Texture.SourceHeight"/>
                                         </MultiBinding>
                                     </ImageBrush.Viewbox>
-                                </ImageBrush>
-                            </Rectangle.Fill>
+                              </ImageBrush>
+                          </Rectangle.Fill>
                         </Rectangle>
                     </DataTemplate>
 

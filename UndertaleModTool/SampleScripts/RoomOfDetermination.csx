@@ -1,6 +1,6 @@
 EnsureDataLoaded();
 
-ScriptMessage("Adds... a new room?\nJust start playing the game as usual and you'll see\nFor Undertale 1.08\nby krzys_h");
+ScriptMessage("Adds... a new room?\nJust start playing the game as usual and you'll see\nFor Undertale 1.08\nby krzys_h and Kneesnap");
 
 var room_ruins1 = Data.Rooms.ByName("room_ruins1");
 var room_water_dogroom = Data.Rooms.ByName("room_water_dogroom");
@@ -99,16 +99,9 @@ room_of_determination.GameObjects.Add(new UndertaleRoom.GameObject()
 });
 
 // Actually link the door
-obj_door_ruins13.EventHandlerFor(EventType.Alarm, 2, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushvar.v self.room
-pushi.e room_ruins1
-cmp.i.v EQ
-bf func_end
-pushi.e room_of_determination
-conv.i.v
-call.i room_goto(argc=1)
-popz.v
-", Data));
+obj_door_ruins13.EventHandlerFor(EventType.Alarm, 2, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+if (room == room_ruins1)
+    room_goto(room_of_determination);", Data);
 
 // A floor would be nice
 for(int x = 0; x <= 940; x += 20)
@@ -204,97 +197,41 @@ var obj_something_changed_trigger = new UndertaleGameObject()
     Sprite = spr_event,
     Visible = false
 };
-obj_something_changed_trigger.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushi.e 0
-pop.v.i self.con
 
-pushi.e 30
-pushi.e -1
-pushi.e 0
-pop.v.i [array]alarm
-", Data));
-obj_something_changed_trigger.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushi.e 5
-pop.v.i global.typer
-pushi.e 0
-pop.v.i global.msc
-pushi.e 0
-pop.v.i global.facechoice
-pushi.e 0
-pop.v.i global.faceemotion
+obj_something_changed_trigger.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+con = 0;
+alarm[0] = 30;", Data);
 
-push.v self.room
-pushi.e room_of_determination
-cmp.i.v NEQ
-bf enter_the_determination
 
-push.s ""* You see a weird door hidden&  behind the left pillar/""
-conv.s.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]msg
+obj_something_changed_trigger.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+global.typer = 5;
+global.msc = 0;
+global.facechoice = 0;
+global.faceemotion = 0;
+if (room != room_of_determination) {
+    global.msg[0] = ""* You see a weird door hidden & behind the left pillar /"";
+    global.msg[1] = ""* You wonder how you missed it&  the last time you played/"";
+    global.msg[2] = ""* You don't even remember&  seeing this door in any&  other timeline/%%"";
+} else
+    global.msg[0] = "" * You wonder how you managed & to miss such a long corridor /%%"";
 
-push.s ""* You wonder how you missed it&  the last time you played/""
-conv.s.v
-pushi.e -5
-pushi.e 1
-pop.v.v [array]msg
+instance_create(0, 0, obj_dialoguer);
+global.interact = 1;
+con = 1;", Data);
 
-push.s ""* You don't even remember&  seeing this door in any&  other timeline/%%""
-conv.s.v
-pushi.e -5
-pushi.e 2
-pop.v.v [array]msg
+obj_something_changed_trigger.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+// Toby, please, why can't you just make the obj_dialoguer block movement automatically
+// writing this every time will get really painful really fast
 
-b go_display
+// Actual comment to explain what this is doing:
+// movement block is managed via global variable 'interact', but
+// you have to set and unset it manually every time you want
+// to invoke the dialog box
 
-enter_the_determination: push.s ""* You wonder how you managed& to miss such a long corridor/%%""
-conv.s.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]msg
-
-go_display: pushi.e obj_dialoguer
-conv.i.v
-pushi.e 0
-conv.i.v
-pushi.e 0
-conv.i.v
-call.i instance_create(argc=3)
-popz.v
-
-pushi.e 1
-pop.v.i global.interact
-pushi.e 1
-pop.v.i self.con
-", Data));
-obj_something_changed_trigger.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-; Toby, please, why
-; why can't you just make the obj_dialoguer block movement automatically
-; writing this every time will get really painful really fast
-; but DETERMINATION will save me
-
-; Actual comment to explain what this is doing:
-; movement block is managed via global variable 'interact', but
-; you have to set and unset it manually every time you want
-; to invoke the dialog box
-
-push.v self.con
-pushi.e 1
-cmp.i.v EQ
-bf func_end
-pushi.e OBJ_WRITER
-conv.i.v
-call.i instance_exists(argc=1)
-pushi.e 0
-cmp.i.v EQ
-bf func_end
-
-pushi.e 0
-pop.v.i global.interact
-pushi.e 0
-pop.v.i self.con
-", Data));
+if (con == 1 && instance_exists(OBJ_WRITER) == 0) {
+    global.interact = 0;
+    global.con = 0;
+}", Data);
 Data.GameObjects.Add(obj_something_changed_trigger);
 
 room_ruins1.GameObjects.Add(new UndertaleRoom.GameObject()
@@ -318,138 +255,38 @@ var obj_readable_determination = new UndertaleGameObject()
     ParentId = obj_readable,
     Visible = false
 };
-obj_readable_determination.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushi.e 0
-pop.v.i self.myinteract
-pushi.e 0
-pop.v.i self.specialread
-pushi.e 1
-pop.v.i self.cantalk
-; wtf is this value
-push.i 438274832
-pop.v.i self.mydialoguer
-pushi.e 1
-pop.v.i self.image_xscale
-pushi.e 1
-pop.v.i self.image_yscale
-", Data));
-obj_readable_determination.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushi.e 3
-pop.v.i self.myinteract
-pushi.e 0
-pop.v.i global.msc
-pushi.e 5
-pop.v.i global.typer
-pushi.e 0
-pop.v.i global.facechoice
-pushi.e 0
-pop.v.i global.faceemotion
+obj_readable_determination.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+myinteract = 0;
+specialread = 0;
+cantalk = 1;
+mydialoguer = 438274832;
+image_xscale = 1;
+image_yscale = 1;", Data);
 
-push.v self.x
-pushi.e 700
-cmp.i.v GTE
-bf not_1
-
-push.s ""* This is a special room/""
-conv.s.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]msg
-
-push.s ""* I call it the ROOM OF&  DETERMINATION/%%""
-conv.s.v
-pushi.e -5
-pushi.e 1
-pop.v.v [array]msg
-
-b finish
-
-not_1: push.v self.x
-pushi.e 600
-cmp.i.v GTE
-bf not_2
-
-push.s ""* This room shows just how much&  you can modify a game if you&  are DETERMINED enough/%%""
-conv.s.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]msg
-
-b finish
-
-not_2: push.v self.x
-pushi.e 500
-cmp.i.v GTE
-bf not_3
-
-push.s ""* A month ago, all we could do&  was modify some sprites&  and text/""
-conv.s.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]msg
-
-push.s ""* And now? I'm putting code,&  rooms and objects in the game!/%%""
-conv.s.v
-pushi.e -5
-pushi.e 1
-pop.v.v [array]msg
-
-b finish
-
-not_3: push.v self.x
-pushi.e 400
-cmp.i.v GTE
-bf not_4
-
-push.s ""* Pretty cool, huh?/%%""
-conv.s.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]msg
-
-b finish
-
-not_4: push.v self.x
-pushi.e 300
-cmp.i.v GTE
-bf not_5
-
-push.s ""* So it's finally time/%%""
-conv.s.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]msg
-
-b finish
-
-not_5: push.v self.x
-pushi.e 200
-cmp.i.v GTE
-bf not_6
-
-push.s ""* We will now finally see what&  happens if you pick up this orb&  without the annoying dog.../%%""
-conv.s.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]msg
-
-b finish
-
-not_6: push.s ""* It's broken%  Assembly scripting is hard/%%""
-conv.s.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]msg
-
-finish: pushi.e obj_dialoguer
-conv.i.v
-pushi.e 0
-conv.i.v
-pushi.e 0
-conv.i.v
-call.i instance_create(argc=3)
-pop.v.v self.mydialoguer
-", Data));
+obj_readable_determination.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+myinteract = 3;
+global.msc = 0;
+global.typer = 5;
+global.facechoice = 0;
+global.faceemotion = 0;
+if (x >= 700) {
+    global.msg[0] = ""* This is a special room /"";
+    global.msg[1] = ""* I call it the ROOM OF&  DETERMINATION/%%"";
+} else if (x >= 600) {
+    global.msg[0] = ""* This room shows just how much&  you can modify a game if you&  are DETERMINED enough/%%"";
+} else if (x >= 500) {
+    global.msg[0] = ""* A month ago, all we could do&  was modify some sprites&  and text/"";
+    global.msg[1] = ""* And now? I'm putting code,&  rooms and objects in the game!/%%"";
+} else if (x >= 400) {
+    global.msg[0] = ""* Pretty cool, huh?/%%"";
+} else if (x >= 300) {
+    global.msg[0] = ""* So it's finally time/%%"";
+} else if (x >= 200) {
+    global.msg[0] = ""* We will now finally see what&  happens if you pick up this orb&  without the annoying dog.../%%"";
+} else {
+    global.msg[0] = ""* It's broken%  Assembly scripting is hard/%%"";
+}
+mydialoguer = instance_create(0, 0, obj_dialoguer);", Data);
 Data.GameObjects.Add(obj_readable_determination);
 
 for (int i = 0; i < 6; i++)
@@ -485,129 +322,42 @@ var obj_determined_rarependant = new UndertaleGameObject()
     Solid = obj_rarependant.Solid,
     ParentId = obj_rarependant.ParentId
 };
-obj_determined_rarependant.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushi.e 0
-pop.v.i self.myinteract
-pushi.e 0
-pop.v.i self.facing
-pushi.e 270
-pop.v.i self.direction
-pushi.e 0
-pop.v.i self.image_speed
-pushi.e 0
-pop.v.i self.con
-", Data));
-obj_determined_rarependant.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushi.e 3
-pop.v.i self.myinteract
-; this is using SCR_TEXT because you are basically forced to do that with dialog prompts
-pushi.e 11337
-pop.v.i global.msc
-pushi.e 5
-pop.v.i global.typer
-pushi.e 0
-pop.v.i global.facechoice
-pushi.e 0
-pop.v.i global.faceemotion
-pushi.e 1
-pop.v.i self.con
+obj_determined_rarependant.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+myinteract = 0;
+facing = 0;
+direction = 270;
+image_speed = 0;
+con = 0;", Data);
 
-pushi.e obj_dialoguer
-conv.i.v
-pushi.e 0
-conv.i.v
-pushi.e 0
-conv.i.v
-call.i instance_create(argc=3)
-pop.v.v self.mydialoguer
-", Data));
-obj_determined_rarependant.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-push.v self.con
-pushi.e 1
-cmp.i.v EQ
-bf end
-pushi.e OBJ_WRITER
-conv.i.v
-call.i instance_exists(argc=1)
-pushi.e 0
-cmp.i.v EQ
-bf end
+obj_determined_rarependant.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+myinteract = 3;
+global.msc = 11337;
+global.typer = 5;
+global.facechoice = 0;
+global.faceemotion = 0;
+con = 1;
+mydialoguer = instance_create(0, 0, obj_dialoguer);", Data);
 
-pushglb.v global.choice
-pushi.e 0
-cmp.i.v EQ
-bf end
+obj_determined_rarependant.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+if (con == 1 && instance_exists(OBJ_WRITER) == 0 && global.choice == 0) {
+    alarm[1] = 40;
+    con = 0;
+}
+event_inherited();", Data);
 
-pushi.e 40
-pushi.e -1
-pushi.e 1
-pop.v.i [array]alarm
-
-pushi.e 0
-pop.v.i self.con
-
-end: call.i event_inherited(argc=0)
-popz.i
-", Data));
-obj_determined_rarependant.EventHandlerFor(EventType.Alarm, (uint)1, Data.Strings, Data.Code, Data.CodeLocals).Append(Assembler.Assemble(@"
-pushi.e room_of_dog
-conv.i.v
-call.i room_goto(argc=1)
-popz.v
-", Data));
+obj_determined_rarependant.EventHandlerFor(EventType.Alarm, (uint)1, Data.Strings, Data.Code, Data.CodeLocals).AppendGML("room_goto(room_of_dog);", Data);
 Data.GameObjects.Add(obj_determined_rarependant);
 
-SCR_TEXT.Code.Append(Assembler.Assemble(@"
-; Toby, why did you think this was a good idea
-; actually, it's not as bad as I thought it was going to be :P
-
-pushvar.v self.argument0
-pushi.e 11337
-cmp.i.v EQ
-bf not_11337
-
-push.s ""* (It's a legendary artifact.)/""
-conv.s.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]msg
-
-push.s ""* (Will you take it?)& &         Take it     Leave it  \C ""
-conv.s.v
-pushi.e -5
-pushi.e 1
-pop.v.v [array]msg
-
-push.s "" ""
-conv.s.v
-pushi.e -5
-pushi.e 2
-pop.v.v [array]msg
-
-b func_end
-
-not_11337: pushvar.v self.argument0
-pushi.e 11338
-cmp.i.v EQ
-bf func_end
-
-push.s ""* (You took the legendary&  artifact.)/%%""
-conv.s.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]msg
-
-pushglb.v global.choice
-pushi.e 1
-cmp.i.v EQ
-bf func_end
-
-push.s "" %%""
-conv.s.v
-pushi.e -5
-pushi.e 0
-pop.v.v [array]msg
-", Data));
+SCR_TEXT.Code.AppendGML(@"
+if (argument0 == 11337) {
+    global.msg[0] = ""* (It's a legendary artifact.)/"";
+    global.msg[1] = ""* (Will you take it?)& &         Take it     Leave it  \C "";
+    global.msg[2] = "" "";
+} else if (argument0 == 11338) {
+    global.msg[0] = ""* (You took the legendary&  artifact.)/%%"";
+    if (global.choice == 1)
+        global.msg[0] = "" %%"";
+}", Data);
 
 // Okay, now for some copying
 var room_of_determined_dog = new UndertaleRoom()

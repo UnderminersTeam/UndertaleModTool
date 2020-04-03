@@ -15,10 +15,10 @@ namespace UndertaleModLib.Models
         private UndertaleString _Name;
         private uint _Width;
         private uint _Height;
-        private uint _MarginLeft;
-        private uint _MarginRight;
-        private uint _MarginBottom;
-        private uint _MarginTop;
+        private int _MarginLeft;
+        private int _MarginRight;
+        private int _MarginBottom;
+        private int _MarginTop;
         private bool _Transparent;
         private bool _Smooth;
         private bool _Preload;
@@ -35,10 +35,10 @@ namespace UndertaleModLib.Models
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public uint Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
         public uint Height { get => _Height; set { _Height = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Height")); } }
-        public uint MarginLeft { get => _MarginLeft; set { _MarginLeft = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginLeft")); } }
-        public uint MarginRight { get => _MarginRight; set { _MarginRight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginRight")); } }
-        public uint MarginBottom { get => _MarginBottom; set { _MarginBottom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginBottom")); } }
-        public uint MarginTop { get => _MarginTop; set { _MarginTop = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginTop")); } }
+        public int MarginLeft { get => _MarginLeft; set { _MarginLeft = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginLeft")); } }
+        public int MarginRight { get => _MarginRight; set { _MarginRight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginRight")); } }
+        public int MarginBottom { get => _MarginBottom; set { _MarginBottom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginBottom")); } }
+        public int MarginTop { get => _MarginTop; set { _MarginTop = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginTop")); } }
         public bool Transparent { get => _Transparent; set { _Transparent = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Transparent")); } }
         public bool Smooth { get => _Smooth; set { _Smooth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Smooth")); } }
         public bool Preload { get => _Preload; set { _Preload = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Preload")); } }
@@ -213,10 +213,10 @@ namespace UndertaleModLib.Models
             Name = reader.ReadUndertaleString();
             Width = reader.ReadUInt32();
             Height = reader.ReadUInt32();
-            MarginLeft = reader.ReadUInt32();
-            MarginRight = reader.ReadUInt32();
-            MarginBottom = reader.ReadUInt32();
-            MarginTop = reader.ReadUInt32();
+            MarginLeft = reader.ReadInt32();
+            MarginRight = reader.ReadInt32();
+            MarginBottom = reader.ReadInt32();
+            MarginTop = reader.ReadInt32();
             Transparent = reader.ReadBoolean();
             Smooth = reader.ReadBoolean();
             Preload = reader.ReadBoolean();
@@ -323,80 +323,6 @@ namespace UndertaleModLib.Models
             }
             Debug.Assert(total == CalculateMaskDataSize(Width, Height, MaskCount));
         }
-
-        /**
-         * This is just a stream of bits, with each row aligned to a full byte
-         * and the whole array aligned to 4 bytes
-         * For some reason this code looks scary even though the concept is really simple :P
-         */
-
-        /*private byte[] PackMaskData(bool[][][] unpacked)
-        {
-            byte[] packed = new byte[CalculateMaskDataSize()];
-            uint i = 0;
-            byte temp = 0;
-
-            for(uint maskId = 0; maskId < MaskCount; maskId++)
-            {
-                for(uint y = 0; y < Height; y++)
-                {
-                    for(uint x = 0; x < (Width+7) / 8 * 8; x++)
-                    {
-                        temp = (byte)((temp << 1) | (x < Width ? (unpacked[maskId][y][x] ? 1 : 0) : 0));
-                        i++;
-                        if (i % 8 == 0)
-                        {
-                            packed[(i/8)-1] = temp;
-                            temp = 0;
-                        }
-                    }
-                }
-            }
-            if (i % 32 != 0)
-            {
-                while (i % 32 != 0)
-                {
-                    while (i % 8 != 0 || (i%8 == 0 && i%32 != 0))
-                    {
-                        temp <<= 1;
-                        i++;
-                    }
-                    packed[(i / 8) - 1] = temp;
-                    temp = 0;
-                }
-            }
-            Debug.Assert(i / 8 == packed.Length);
-            return packed;
-        }
-
-        private bool[][][] UnpackMaskData(byte[] packed)
-        {
-            bool[][][] unpacked = new bool[MaskCount][][];
-            uint i = 0;
-            byte temp = packed[0];
-
-            for (uint maskId = 0; maskId < MaskCount; maskId++)
-            {
-                unpacked[maskId] = new bool[Height][];
-                for (uint y = 0; y < Height; y++)
-                {
-                    unpacked[maskId][y] = new bool[Width];
-                    for (uint x = 0; x < (Width + 7) / 8 * 8; x++)
-                    {
-                        if (x < Width)
-                            unpacked[maskId][y][x] = (temp & 0x80) != 0;
-                        temp <<= 1;
-                        i++;
-                        if (i % 8 == 0)
-                        {
-                            temp = i/8 < packed.Length ? packed[i / 8] : (byte)0;
-                        }
-                    }
-                }
-            }
-            Debug.Assert(((i + 31) / 32 * 32)/8 == packed.Length);
-            return unpacked;
-        }*/
 
         public uint CalculateMaskDataSize(uint width, uint height, uint maskcount)
         {

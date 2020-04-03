@@ -22,20 +22,26 @@ namespace UndertaleModLib.Models
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
-            writer.Write((int)InstanceType);
-            writer.Write(VarID);
+            if (writer.undertaleData.GeneralInfo?.BytecodeVersion >= 15)
+            {
+                writer.Write((int)InstanceType);
+                writer.Write(VarID);
+            }
             writer.Write(Occurrences);
             if (Occurrences > 0)
                 writer.Write(writer.GetAddressForUndertaleObject(FirstAddress));
             else
                 writer.Write((int)-1);
         }
-        
+
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
-            InstanceType = (UndertaleInstruction.InstanceType)reader.ReadInt32();
-            VarID = reader.ReadInt32();
+            if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 15)
+            {
+                InstanceType = (UndertaleInstruction.InstanceType)reader.ReadInt32();
+                VarID = reader.ReadInt32();
+            }
             Occurrences = reader.ReadUInt32();
             if (Occurrences > 0)
             {
@@ -52,7 +58,7 @@ namespace UndertaleModLib.Models
 
         public override string ToString()
         {
-            return Name.Content;
+            return Name != null && Name.Content != null ? Name.Content : "<NULL_VAR_NAME>";
         }
 
         public bool SearchMatches(string filter)

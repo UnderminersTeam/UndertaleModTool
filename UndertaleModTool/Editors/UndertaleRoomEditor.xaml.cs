@@ -86,11 +86,13 @@ namespace UndertaleModTool
         private void UndertaleRoomEditor_Loaded(object sender, RoutedEventArgs e)
         {
             RoomRootItem.IsSelected = true;
+            (this.DataContext as UndertaleRoom)?.SetupRoom();
         }
 
         private void UndertaleRoomEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             RoomRootItem.IsSelected = true;
+            (this.DataContext as UndertaleRoom)?.SetupRoom();
         }
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -110,7 +112,7 @@ namespace UndertaleModTool
 
         private UndertaleObject movingObj;
         private double hotpointX, hotpointY;
-        
+
         private void Rectangle_MouseDown(object sender, MouseButtonEventArgs e)
         {
             UndertaleObject clickedObj = (sender as Rectangle).DataContext as UndertaleObject;
@@ -223,7 +225,10 @@ namespace UndertaleModTool
             e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && (sourceItem is UndertaleGameObject || sourceItem is UndertalePath) ? DragDropEffects.Link : DragDropEffects.None;
             if (e.Effects == DragDropEffects.Link)
             {
-                if (sourceItem is UndertaleGameObject)
+                if (sourceItem is UndertaleBackground)
+                {
+
+                } else if (sourceItem is UndertaleGameObject)
                 {
                     UndertaleGameObject droppedObject = sourceItem as UndertaleGameObject;
                     var mousePos = e.GetPosition(RoomGraphics);
@@ -261,6 +266,8 @@ namespace UndertaleModTool
                 }
             }
             e.Handled = true;
+
+            (this.DataContext as UndertaleRoom)?.SetupRoom();
         }
 
         private void RoomObjectsTree_KeyDown(object sender, KeyEventArgs e)
@@ -396,8 +403,8 @@ namespace UndertaleModTool
                     }
                     var other = copied as UndertaleRoom.Tile;
                     var obj = new UndertaleRoom.Tile();
-                    obj.X = other.X;
-                    obj.Y = other.Y;
+                    obj.X = -(int)other.Height; //other.X;
+                    obj.Y = -(int) other.Height; //other.Y;
                     obj._SpriteMode = other._SpriteMode;
                     obj.ObjectDefinition = other.ObjectDefinition;
                     obj.SourceX = other.SourceX;
@@ -416,6 +423,8 @@ namespace UndertaleModTool
                     SelectObject(obj);
                 }
             }
+
+            (this.DataContext as UndertaleRoom)?.SetupRoom();
         }
 
         private void AddLayer<T>(UndertaleRoom.LayerType type, string name) where T : UndertaleRoom.Layer.LayerData, new()
@@ -430,6 +439,7 @@ namespace UndertaleModTool
             room.Layers.Add(layer);
 
             SelectObject(layer);
+            (this.DataContext as UndertaleRoom)?.SetupRoom();
         }
         
         private void MenuItem_NewLayerInstances_Click(object sender, RoutedEventArgs e)

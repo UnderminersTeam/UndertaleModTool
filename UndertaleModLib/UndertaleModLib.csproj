@@ -37,6 +37,11 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compiler\AssemblyWriter.cs" />
+    <Compile Include="Compiler\BuiltinList.cs" />
+    <Compile Include="Compiler\Compiler.cs" />
+    <Compile Include="Compiler\Lexer.cs" />
+    <Compile Include="Compiler\Parser.cs" />
     <Compile Include="Decompiler\Assembler.cs" />
     <Compile Include="Decompiler\AssetTypeResolver.cs" />
     <Compile Include="Decompiler\Decompiler.cs" />
@@ -77,6 +82,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UndertaleIO.cs" />
     <Compile Include="UndertaleSerializationException.cs" />
+    <Compile Include="Util\Pair.cs" />
     <Compile Include="Util\TextureWorker.cs" />
     <Compile Include="Util\DictionaryExtensions.cs" />
   </ItemGroup>

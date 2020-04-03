@@ -87,6 +87,8 @@ namespace UndertaleModTool
                     MessageBox.Show("Failed to export: " + ex.Message, "Failed to export sprite", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+
+            worker.Cleanup();
         }
 
         private void MaskList_AddingNewItem(object sender, AddingNewItemEventArgs e)

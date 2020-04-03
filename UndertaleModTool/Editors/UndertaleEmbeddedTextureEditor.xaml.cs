@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Drawing;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 
@@ -42,7 +43,17 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    target.TextureData.TextureBlob = TextureWorker.ReadTextureBlob(dlg.FileName);
+                    Bitmap bmp;
+                    using (var ms = new MemoryStream(TextureWorker.ReadTextureBlob(dlg.FileName)))
+                    {
+                        bmp = new Bitmap(ms);
+                    }
+					bmp.SetResolution(96.0F, 96.0F);
+                    using (var stream = new MemoryStream())
+                    {
+                        bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                        target.TextureData.TextureBlob = stream.ToArray();
+                    }
                 }
                 catch (Exception ex)
                 {
