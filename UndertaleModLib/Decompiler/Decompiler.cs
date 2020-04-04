@@ -455,7 +455,7 @@ namespace UndertaleModLib.Decompiler
 
             AssemblyTree assemblyTree = AssemblyTree.CreateTree(context); //TODO: The DecompileTree should probably manage the AssemlyTree creation.
             DecompileTree decompileTree = new DecompileTree() { Context = context, AssemblyTree = assemblyTree };
-            decompileTree.Root = CreateNode(decompileTree, assemblyTree.Root, null);
+            decompileTree.Root = null;// CreateNode(decompileTree, assemblyTree.Root, null);
             // TODO: After building the tree, combine blocks which overlap.
             // TODO: Type Propogation.
             // TODO: Cleanup.
@@ -477,7 +477,7 @@ namespace UndertaleModLib.Decompiler
 
             public string ToString(bool includeLocalVars)
             {
-                string codeStr = Root.ToString(Context);
+                string codeStr = Root?.ToString(Context) ?? "";
                 if (includeLocalVars)
                     codeStr = DeclareLocalVars() + "\n" + codeStr;
 

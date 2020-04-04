@@ -38,8 +38,8 @@ namespace UndertaleModLib.Decompiler
         public List<uint> BlockStarts = new List<uint>();
         public Dictionary<uint, UndertaleInstruction> BlockAddresses = new Dictionary<uint, UndertaleInstruction>();
         public Stack<AssemblyTreeNode> PushEnvNodes = new Stack<AssemblyTreeNode>();
-        public uint MaxAddress;
-        public uint FinalAddress;
+        public uint MaxAddress = 0;
+        public uint FinalAddress = 0;
 
         public void AddNode(AssemblyTreeNode newNode)
         {
@@ -140,9 +140,11 @@ namespace UndertaleModLib.Decompiler
 
         public static AssemblyTreeNode ReadNode(AssemblyTree tree, uint startAddress, AssemblyTreeNode parent)
         {
+            // Prevent infinite recursion resulting from loops; read a block only one time
             if (tree.Blocks.ContainsKey(startAddress))
-                return tree.Nodes[startAddress]; // Prevent reading multiple times.
+                return tree.Nodes[startAddress];
 
+            // If this is the final block, don't deal with reading nothing
             if (startAddress == tree.FinalAddress)
                 return null;
 
@@ -150,7 +152,9 @@ namespace UndertaleModLib.Decompiler
             for (uint i = startAddress; i <= tree.MaxAddress;)
             {
                 UndertaleInstruction instr = tree.BlockAddresses[i];
-                if (tree.Blocks.ContainsKey(instr.Address)) { // Using some already existing block, while also having instructions before it.
+                if (tree.Blocks.ContainsKey(instr.Address))
+                { 
+                    // Using some already existing block, while also having instructions before it.
                     AssemblyTreeNode newNode = new AssemblyTreeNode(parent, currentBlock);
                     tree.AddNode(newNode);
                     if (parent != null)
@@ -159,8 +163,10 @@ namespace UndertaleModLib.Decompiler
                     return newNode;
                 }
 
-                currentBlock.Instructions.Add(instr); // Add instruction.
+                // Add the instruction to the block for this node
+                currentBlock.Instructions.Add(instr);
 
+                // Handle reading branching nodes recursively
                 if (instr.Kind == UndertaleInstruction.Opcode.B)
                 {
                     AssemblyTreeNode addNode = new AssemblyTreeNode(parent, currentBlock);
@@ -180,11 +186,11 @@ namespace UndertaleModLib.Decompiler
 
                     addNode.IsConditional = true;
                     addNode.IsConditionSwapped = (instr.Kind == UndertaleInstruction.Opcode.Bf);
-                    addNode.ConditionFailNode = ReadNode(tree, instr.Address + instr.CalculateInstructionSize(), addNode); // The next block is just after this instruction.
-                    addNode.Next = ReadNode(tree, (uint)(instr.Address + instr.JumpOffset), addNode); // The next block is where it jumps to.
+                    addNode.ConditionFailNode = ReadNode(tree, instr.Address + instr.CalculateInstructionSize(), addNode); // The "fail" adjacent block is just after this instruction
+                    addNode.Next = ReadNode(tree, (uint)(instr.Address + instr.JumpOffset), addNode); // The next block is where it jumps to
 
 
-                    // Calculate the meetpoint where the two paths will come together again.
+                    // Calculate the meetpoint where the two paths will come together again
                     HashSet<AssemblyTreeNode> failNodes = new HashSet<AssemblyTreeNode>();
 
                     Queue<AssemblyTreeNode> queue = new Queue<AssemblyTreeNode>();
@@ -199,9 +205,9 @@ namespace UndertaleModLib.Decompiler
                         queue.Enqueue(node.ConditionFailNode);
                     }
 
-                    // Search the other branch for the first shared node.
+                    // Search the other branch for the first shared node
                     HashSet<AssemblyTreeNode> nextNodes = new HashSet<AssemblyTreeNode>();
-                    AssemblyTreeNode bestMeetpoint = null; // The best node is the node whose Block is the earliest.
+                    AssemblyTreeNode bestMeetpoint = null; // The best node is the node whose Block is the earliest
                     queue.Enqueue(addNode.Next);
                     while (queue.Count > 0)
                     {
@@ -232,14 +238,14 @@ namespace UndertaleModLib.Decompiler
                 }
                 else if (instr.Kind == UndertaleInstruction.Opcode.PopEnv)
                 {
-                    AssemblyTreeNode addNode = new AssemblyTreeNode(parent, currentBlock); // Reached the end of the code.
+                    AssemblyTreeNode addNode = new AssemblyTreeNode(parent, currentBlock);
                     tree.AddNode(addNode);
                     if (parent != null)
                         parent.Next = addNode;
 
                     AssemblyTreeNode afterWith = ReadNode(tree, (instr.Address + instr.CalculateInstructionSize()), addNode);
                     addNode.Next = afterWith;
-                    tree.PushEnvNodes.Pop().Meetpoint = afterWith; // Set the meetpoint to be the block after the popenv.
+                    tree.PushEnvNodes.Pop().Meetpoint = afterWith; // Set the meetpoint to be the block after the popenv
                     return addNode;
                 }
                 else if (instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit)
@@ -248,7 +254,7 @@ namespace UndertaleModLib.Decompiler
                 }
 
                 uint nextAddress = instr.Address + instr.CalculateInstructionSize();
-                if (tree.BlockStarts.Contains(nextAddress)) // The next instruction is the start of a new block, read it as one.
+                if (tree.BlockStarts.Contains(nextAddress)) // The next instruction is the start of a new block; read it as one
                 {
                     AssemblyTreeNode newNode = new AssemblyTreeNode(parent, currentBlock);
                     tree.AddNode(newNode);
@@ -258,10 +264,12 @@ namespace UndertaleModLib.Decompiler
                     return newNode;
                 }
 
-                i = nextAddress; // Move to the next instruction.
+                // Move to the next instruction
+                i = nextAddress;
             }
 
-            AssemblyTreeNode lastNode = new AssemblyTreeNode(parent, currentBlock); // Reached the end of the code.
+            // Reached the end of the code
+            AssemblyTreeNode lastNode = new AssemblyTreeNode(parent, currentBlock);
             tree.AddNode(lastNode);
             if (parent != null)
                 parent.Next = lastNode;
@@ -270,13 +278,17 @@ namespace UndertaleModLib.Decompiler
 
         public void Setup(DecompileContext context)
         {
+            // Assign the context to this AssemblyTree instance
             Context = context;
 
-            // Calculate BlockStarts.
+            // Shorthand
+            var instructions = Context.TargetCode.Instructions;
+
+            // Calculate the addresses of the start of each block
             BlockStarts.Clear();
-            for (uint i = 0; i < Context.TargetCode.Instructions.Count; i++)
+            for (int i = 0; i < instructions.Count; i++)
             {
-                UndertaleInstruction instr = Context.TargetCode.Instructions[(int)i];
+                UndertaleInstruction instr = instructions[i];
 
                 if (instr.Kind == UndertaleInstruction.Opcode.B)
                 {
@@ -289,16 +301,21 @@ namespace UndertaleModLib.Decompiler
                 }
             }
 
-            // Setup instruction address map.
+            // Map addresses to their corresponding instructions, for easy access
             BlockAddresses.Clear();
-            for (int i = 0; i < context.TargetCode.Instructions.Count; i++)
+            for (int i = 0; i < instructions.Count; i++)
             {
-                UndertaleInstruction instr = context.TargetCode.Instructions[i];
+                UndertaleInstruction instr = instructions[i];
                 BlockAddresses[instr.Address] = instr;
             }
 
-            MaxAddress = context.TargetCode.Instructions.Last().Address;
-            FinalAddress = MaxAddress + context.TargetCode.Instructions.Last().CalculateInstructionSize();
+            // Figure out the addresses of the last instruction, and the end of the last instruction
+            if (instructions.Count != 0)
+            {
+                var lastInstruction = instructions.Last();
+                MaxAddress = lastInstruction.Address;
+                FinalAddress = MaxAddress + lastInstruction.CalculateInstructionSize();
+            }
         }
 
         public static AssemblyTree CreateTree(DecompileContext context)
