@@ -15,7 +15,7 @@ namespace UndertaleModLib.Decompiler
         public Block Block { get; set;  } // The code for this node.
         public AssemblyTreeNode Parent { get; set; } // This is the code that preceeds this. In the case of this being a new block, this is the last block. In the case of this continuing after, it's the last one.
         public AssemblyTreeNode Next { get; set;  } // This is the code that follows this node. (FOLLOWING, NOT CHILD BLOCKS) Child blocks are set in sub-classes.
-        public bool IsNextWithBlock { get; set; }
+        public AssemblyTreeNode Meetpoint { get; set; } // This is where code execution resumes after any branching.
         public AssemblyTreeNode ConditionFailNode { get; set; }
         public bool IsConditional { get; set; }
         public bool IsConditionSwapped { get; set; }
@@ -37,6 +37,7 @@ namespace UndertaleModLib.Decompiler
         public Dictionary<uint, AssemblyTreeNode> Nodes { get; set; } = new Dictionary<uint, AssemblyTreeNode>();
         public List<uint> BlockStarts = new List<uint>();
         public Dictionary<uint, UndertaleInstruction> BlockAddresses = new Dictionary<uint, UndertaleInstruction>();
+        public Stack<AssemblyTreeNode> PushEnvNodes = new Stack<AssemblyTreeNode>();
         public uint MaxAddress;
         public uint FinalAddress;
 
@@ -87,6 +88,8 @@ namespace UndertaleModLib.Decompiler
                 sb.Append("    block_" + block.Address + " [label=\"");
                 bool SwapCondition = node.IsConditional && node.IsConditionSwapped;
                 sb.Append("[" + block.ToString() + (node.IsConditional ? ", Conditional" : ""));
+                if (node.Meetpoint != null)
+                    sb.Append(", MP: " + node.Meetpoint.Address);
 
                 AssemblyTreeNode trueNode = SwapCondition ? node.ConditionFailNode : node.Next;
                 AssemblyTreeNode falseNode = SwapCondition ? node.Next : node.ConditionFailNode;
@@ -165,7 +168,7 @@ namespace UndertaleModLib.Decompiler
                     if (parent != null)
                         parent.Next = addNode;
 
-                    addNode.Next = ReadNode(tree, (uint) (instr.Address + instr.JumpOffset), addNode);
+                    addNode.Next = ReadNode(tree, (uint)(instr.Address + instr.JumpOffset), addNode);
                     return addNode;
                 }
                 else if (instr.Kind == UndertaleInstruction.Opcode.Bt || instr.Kind == UndertaleInstruction.Opcode.Bf)
@@ -177,19 +180,66 @@ namespace UndertaleModLib.Decompiler
 
                     addNode.IsConditional = true;
                     addNode.IsConditionSwapped = (instr.Kind == UndertaleInstruction.Opcode.Bf);
-                    addNode.ConditionFailNode = ReadNode(tree, instr.Address + 1, addNode); // The next block is just after this instruction.
+                    addNode.ConditionFailNode = ReadNode(tree, instr.Address + instr.CalculateInstructionSize(), addNode); // The next block is just after this instruction.
                     addNode.Next = ReadNode(tree, (uint)(instr.Address + instr.JumpOffset), addNode); // The next block is where it jumps to.
+
+
+                    // Calculate the meetpoint where the two paths will come together again.
+                    HashSet<AssemblyTreeNode> failNodes = new HashSet<AssemblyTreeNode>();
+
+                    Queue<AssemblyTreeNode> queue = new Queue<AssemblyTreeNode>();
+                    queue.Enqueue(addNode.ConditionFailNode);
+                    while (queue.Count > 0)
+                    {
+                        AssemblyTreeNode node = queue.Dequeue();
+                        if (node == null || !failNodes.Add(node))
+                            continue;
+
+                        queue.Enqueue(node.Next);
+                        queue.Enqueue(node.ConditionFailNode);
+                    }
+
+                    // Search the other branch for the first shared node.
+                    HashSet<AssemblyTreeNode> nextNodes = new HashSet<AssemblyTreeNode>();
+                    AssemblyTreeNode bestMeetpoint = null; // The best node is the node whose Block is the earliest.
+                    queue.Enqueue(addNode.Next);
+                    while (queue.Count > 0)
+                    {
+                        AssemblyTreeNode node = queue.Dequeue();
+                        if (node == null || !nextNodes.Add(node))
+                            continue;
+
+                        if (failNodes.Contains(node) && (bestMeetpoint == null || bestMeetpoint.Block.Address > node.Block.Address))
+                            bestMeetpoint = node; // If the node is shared on both branches, then check if it's better than the best node we've found so far.
+
+                        queue.Enqueue(node.Next);
+                        queue.Enqueue(node.ConditionFailNode);
+                    }
+
+                    addNode.Meetpoint = bestMeetpoint;
                     return addNode;
                 }
-                else if (instr.Kind == UndertaleInstruction.Opcode.PushEnv || instr.Kind == UndertaleInstruction.Opcode.PopEnv)
+                else if (instr.Kind == UndertaleInstruction.Opcode.PushEnv)
                 {
                     AssemblyTreeNode addNode = new AssemblyTreeNode(parent, currentBlock);
                     tree.AddNode(addNode);
                     if (parent != null)
                         parent.Next = addNode;
 
-                    addNode.Next = ReadNode(tree, (instr.Address + 1), addNode);
-                    addNode.IsNextWithBlock = true;
+                    addNode.Next = ReadNode(tree, (instr.Address + instr.CalculateInstructionSize()), addNode);
+                    tree.PushEnvNodes.Push(addNode);
+                    return addNode;
+                }
+                else if (instr.Kind == UndertaleInstruction.Opcode.PopEnv)
+                {
+                    AssemblyTreeNode addNode = new AssemblyTreeNode(parent, currentBlock); // Reached the end of the code.
+                    tree.AddNode(addNode);
+                    if (parent != null)
+                        parent.Next = addNode;
+
+                    AssemblyTreeNode afterWith = ReadNode(tree, (instr.Address + instr.CalculateInstructionSize()), addNode);
+                    addNode.Next = afterWith;
+                    tree.PushEnvNodes.Pop().Meetpoint = afterWith; // Set the meetpoint to be the block after the popenv.
                     return addNode;
                 }
                 else if (instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit)
@@ -212,9 +262,9 @@ namespace UndertaleModLib.Decompiler
             }
 
             AssemblyTreeNode lastNode = new AssemblyTreeNode(parent, currentBlock); // Reached the end of the code.
+            tree.AddNode(lastNode);
             if (parent != null)
                 parent.Next = lastNode;
-            tree.AddNode(lastNode);
             return lastNode;
         }
 
@@ -259,15 +309,4 @@ namespace UndertaleModLib.Decompiler
             return newTree;
         }
     }
-
-    
-
-    // with,
-    // switch,
-    // if,
-    // for,
-    // while,
-    // repeat,
-    // do until.
-    // Operation.
 }
