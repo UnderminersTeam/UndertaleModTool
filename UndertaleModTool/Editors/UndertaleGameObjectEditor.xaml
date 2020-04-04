@@ -24,6 +24,11 @@
                 <x:Type TypeName="undertale:EventSubtypeStep" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeMouse">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="undertale:EventSubtypeMouse" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeOther">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="undertale:EventSubtypeOther" />
@@ -418,6 +423,15 @@
                                                                     <Setter.Value>
                                                                         <DataTemplate>
                                                                             <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeStep}}" SelectedItem="{Binding DataContext.EventSubtypeStep, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                        </DataTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Mouse">
+                                                                <Setter Property="ContentTemplate">
+                                                                    <Setter.Value>
+                                                                        <DataTemplate>
+                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeMouse}}" SelectedItem="{Binding DataContext.EventSubtypeMouse, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
