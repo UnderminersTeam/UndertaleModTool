@@ -16,10 +16,12 @@ namespace UndertaleModLib.Decompiler
         public AssemblyTreeNode Parent { get; set; } // This is the code that preceeds this. In the case of this being a new block, this is the last block. In the case of this continuing after, it's the last one.
         public AssemblyTreeNode Next { get; set;  } // This is the code that follows this node. (FOLLOWING, NOT CHILD BLOCKS) Child blocks are set in sub-classes.
         public AssemblyTreeNode Meetpoint { get; set; } // This is where code execution resumes after any branching.
-        public AssemblyTreeNode ConditionFailNode { get; set; }
+        public AssemblyTreeNode ConditionFailNode { get; set; } // This is the code that follows the node (not directly after), if not Next
+        public AssemblyTreeNode Unreachable { get; set; } // This is the code following the node if it is unreachable
         public bool IsConditional { get; set; }
         public bool IsConditionSwapped { get; set; }
         public uint Address { get => Block.Address; }
+        public bool IsUnreachable { get; set; }
 
         public AssemblyTreeNode(AssemblyTreeNode parent, Block code)
         {
@@ -87,7 +89,11 @@ namespace UndertaleModLib.Decompiler
                 var block = node.Block;
                 sb.Append("    block_" + block.Address + " [label=\"");
                 bool SwapCondition = node.IsConditional && node.IsConditionSwapped;
-                sb.Append("[" + block.ToString() + (node.IsConditional ? ", Conditional" : ""));
+                sb.Append("[" + block.ToString());
+                if (node.IsUnreachable)
+                    sb.Append(", Unreachable");
+                if (node.IsConditional)
+                    sb.Append(", Conditional");
                 if (node.Meetpoint != null)
                     sb.Append(", MP: " + node.Meetpoint.Address);
 
@@ -100,12 +106,13 @@ namespace UndertaleModLib.Decompiler
 
                 sb.Append("]\n");
                 foreach (var instr in block.Instructions)
-                    sb.Append(instr.ToString().Replace("\"", "\\\"") + "\\n");
+                    sb.Append(instr.ToString().Replace("\\\"", "\\\\\"").Replace("\"", "\\\"") + "\\n");
                 sb.Append("\"");
                 sb.Append(block.Address == 0 ? ", color=\"blue\"" : "");
                 sb.AppendLine(", shape=\"box\"];");
                 nodeQueue.Enqueue(node.Next);
                 nodeQueue.Enqueue(node.ConditionFailNode);
+                nodeQueue.Enqueue(node.Unreachable);
             }
 
             sb.AppendLine("");
@@ -129,17 +136,22 @@ namespace UndertaleModLib.Decompiler
                 }
                 else if (node.Next != null)
                         sb.AppendLine("    block_" + block.Address + " -> block_" + node.Next.Address + ";");
+                if (node.Unreachable != null)
+                    sb.AppendLine("    block_" + block.Address + " -> block_" + node.Unreachable.Address + " [color=\"gray\"];");
 
                 nodeQueue.Enqueue(node.Next);
                 nodeQueue.Enqueue(node.ConditionFailNode);
+                nodeQueue.Enqueue(node.Unreachable);
             }
 
             sb.AppendLine("}");
             return sb.ToString();
         }
 
-        public static AssemblyTreeNode ReadNode(AssemblyTree tree, uint startAddress, AssemblyTreeNode parent)
+        public static AssemblyTreeNode ReadNode(AssemblyTree tree, uint startAddress, AssemblyTreeNode parent, bool unreachable = false)
         {
+            uint i; // Declare this field up here so it can be reused properly
+
             // Prevent infinite recursion resulting from loops; read a block only one time
             if (tree.Blocks.ContainsKey(startAddress))
                 return tree.Nodes[startAddress];
@@ -148,13 +160,31 @@ namespace UndertaleModLib.Decompiler
             if (startAddress == tree.FinalAddress)
                 return null;
 
+            uint maxAddress;
+            if (unreachable)
+            {
+                // Calculate the end of the unreachable block
+                UndertaleInstruction instr = null;
+                for (i = startAddress; !tree.BlockStarts.Contains(i) && i <= tree.MaxAddress; i += instr.CalculateInstructionSize())
+                {
+                    instr = tree.BlockAddresses[i];
+                }
+                maxAddress = instr?.Address ?? startAddress;
+
+                // Calculate BlockStarts for this range
+                tree.CalculateBlockStarts(startAddress, maxAddress);
+            }
+            else
+                maxAddress = tree.MaxAddress; // Go all the way until the end or until a branch is hit
+
             Block currentBlock = new Block(startAddress);
-            for (uint i = startAddress; i <= tree.MaxAddress;)
+            bool readUnreachable = false;
+            for (i = startAddress; i <= maxAddress;)
             {
                 UndertaleInstruction instr = tree.BlockAddresses[i];
                 if (tree.Blocks.ContainsKey(instr.Address))
                 { 
-                    // Using some already existing block, while also having instructions before it.
+                    // Using some already existing block, while also having instructions before it
                     AssemblyTreeNode newNode = new AssemblyTreeNode(parent, currentBlock);
                     tree.AddNode(newNode);
                     if (parent != null)
@@ -175,6 +205,10 @@ namespace UndertaleModLib.Decompiler
                         parent.Next = addNode;
 
                     addNode.Next = ReadNode(tree, (uint)(instr.Address + instr.JumpOffset), addNode);
+                    if (tree.BlockAddresses.ContainsKey(instr.Address + 1) && !tree.BlockStarts.Contains(instr.Address + 1))
+                        addNode.Unreachable = ReadNode(tree, instr.Address + 1, null, true);
+                    if (unreachable)
+                        addNode.IsUnreachable = true;
                     return addNode;
                 }
                 else if (instr.Kind == UndertaleInstruction.Opcode.Bt || instr.Kind == UndertaleInstruction.Opcode.Bf)
@@ -188,7 +222,8 @@ namespace UndertaleModLib.Decompiler
                     addNode.IsConditionSwapped = (instr.Kind == UndertaleInstruction.Opcode.Bf);
                     addNode.ConditionFailNode = ReadNode(tree, instr.Address + instr.CalculateInstructionSize(), addNode); // The "fail" adjacent block is just after this instruction
                     addNode.Next = ReadNode(tree, (uint)(instr.Address + instr.JumpOffset), addNode); // The next block is where it jumps to
-
+                    if (tree.BlockAddresses.ContainsKey(instr.Address + 1) && !tree.BlockStarts.Contains(instr.Address + 1))
+                        addNode.Unreachable = ReadNode(tree, instr.Address + 1, null, true);
 
                     // Calculate the meetpoint where the two paths will come together again
                     HashSet<AssemblyTreeNode> failNodes = new HashSet<AssemblyTreeNode>();
@@ -223,6 +258,8 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     addNode.Meetpoint = bestMeetpoint;
+                    if (unreachable)
+                        addNode.IsUnreachable = true;
                     return addNode;
                 }
                 else if (instr.Kind == UndertaleInstruction.Opcode.PushEnv)
@@ -232,8 +269,8 @@ namespace UndertaleModLib.Decompiler
                     if (parent != null)
                         parent.Next = addNode;
 
-                    addNode.Next = ReadNode(tree, (instr.Address + instr.CalculateInstructionSize()), addNode);
                     tree.PushEnvNodes.Push(addNode);
+                    addNode.Next = ReadNode(tree, (instr.Address + instr.CalculateInstructionSize()), addNode);
                     return addNode;
                 }
                 else if (instr.Kind == UndertaleInstruction.Opcode.PopEnv)
@@ -245,22 +282,30 @@ namespace UndertaleModLib.Decompiler
 
                     AssemblyTreeNode afterWith = ReadNode(tree, (instr.Address + instr.CalculateInstructionSize()), addNode);
                     addNode.Next = afterWith;
-                    tree.PushEnvNodes.Pop().Meetpoint = afterWith; // Set the meetpoint to be the block after the popenv
+                    // Set the meetpoint to be the block after the popenv
+                    if (instr.JumpOffsetPopenvExitMagic)
+                        tree.PushEnvNodes.Peek().Meetpoint = afterWith;
+                    else
+                        tree.PushEnvNodes.Pop().Meetpoint = afterWith;
                     return addNode;
                 }
                 else if (instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit)
                 {
+                    if (tree.BlockAddresses.ContainsKey(instr.Address + 1) && !tree.BlockStarts.Contains(instr.Address + 1))
+                        readUnreachable = true;
                     break;
                 }
 
                 uint nextAddress = instr.Address + instr.CalculateInstructionSize();
-                if (tree.BlockStarts.Contains(nextAddress)) // The next instruction is the start of a new block; read it as one
+                if (tree.BlockStarts.Contains(nextAddress) && nextAddress <= maxAddress) // The next instruction is the start of a new block; read it as one
                 {
                     AssemblyTreeNode newNode = new AssemblyTreeNode(parent, currentBlock);
                     tree.AddNode(newNode);
                     if (parent != null)
                         parent.Next = newNode;
                     newNode.Next = ReadNode(tree, nextAddress, newNode);
+                    if (unreachable)
+                        newNode.IsUnreachable = true;
                     return newNode;
                 }
 
@@ -271,9 +316,61 @@ namespace UndertaleModLib.Decompiler
             // Reached the end of the code
             AssemblyTreeNode lastNode = new AssemblyTreeNode(parent, currentBlock);
             tree.AddNode(lastNode);
-            if (parent != null)
+            if (unreachable)
+            {
+                lastNode.IsUnreachable = true;
+            } else if (parent != null)
                 parent.Next = lastNode;
+
+            if (readUnreachable)
+                lastNode.Unreachable = ReadNode(tree, i + 1, null, true);
+
             return lastNode;
+        }
+
+        public void CalculateBlockStarts(uint start, uint end)
+        {
+            // Calculate the addresses of the start of each block from start to end (including end), using a queue, ignoring unreachable blocks
+            Queue<uint> toSearchNext = new Queue<uint>();
+            toSearchNext.Enqueue(start);
+            do
+            {
+                uint addr = toSearchNext.Dequeue();
+                if (addr < start || addr > end) // Ignore addresses out of bounds
+                    continue;
+
+                UndertaleInstruction instr;
+                for (uint i = addr; i <= end; i += instr.CalculateInstructionSize())
+                {
+                    instr = BlockAddresses[i];
+                    if (instr.Kind == UndertaleInstruction.Opcode.B)
+                    {
+                        addr = (uint)(instr.Address + instr.JumpOffset);
+                        if (!BlockStarts.Contains(addr))
+                        {
+                            toSearchNext.Enqueue(addr);
+                            BlockStarts.Add(addr);
+                        }
+                        break;
+                    }
+                    else if (instr.Kind == UndertaleInstruction.Opcode.Bt || instr.Kind == UndertaleInstruction.Opcode.Bf)
+                    {
+                        addr = instr.Address + instr.CalculateInstructionSize();
+                        if (!BlockStarts.Contains(addr))
+                        {
+                            toSearchNext.Enqueue(addr);
+                            BlockStarts.Add(addr);
+                        }
+                        addr = (uint)(instr.Address + instr.JumpOffset);
+                        if (!BlockStarts.Contains(addr))
+                        {
+                            toSearchNext.Enqueue(addr);
+                            BlockStarts.Add(addr);
+                        }
+                        break;
+                    }
+                }
+            } while (toSearchNext.Count != 0);
         }
 
         public void Setup(DecompileContext context)
@@ -284,23 +381,6 @@ namespace UndertaleModLib.Decompiler
             // Shorthand
             var instructions = Context.TargetCode.Instructions;
 
-            // Calculate the addresses of the start of each block
-            BlockStarts.Clear();
-            for (int i = 0; i < instructions.Count; i++)
-            {
-                UndertaleInstruction instr = instructions[i];
-
-                if (instr.Kind == UndertaleInstruction.Opcode.B)
-                {
-                    BlockStarts.Add((uint)(instr.Address + instr.JumpOffset));
-                }
-                else if (instr.Kind == UndertaleInstruction.Opcode.Bt || instr.Kind == UndertaleInstruction.Opcode.Bf)
-                {
-                    BlockStarts.Add(instr.Address + instr.CalculateInstructionSize());
-                    BlockStarts.Add((uint)(instr.Address + instr.JumpOffset));
-                }
-            }
-
             // Map addresses to their corresponding instructions, for easy access
             BlockAddresses.Clear();
             for (int i = 0; i < instructions.Count; i++)
@@ -309,12 +389,16 @@ namespace UndertaleModLib.Decompiler
                 BlockAddresses[instr.Address] = instr;
             }
 
-            // Figure out the addresses of the last instruction, and the end of the last instruction
             if (instructions.Count != 0)
             {
+                // Figure out the addresses of the last instruction, and the end of the last instruction
                 var lastInstruction = instructions.Last();
                 MaxAddress = lastInstruction.Address;
                 FinalAddress = MaxAddress + lastInstruction.CalculateInstructionSize();
+
+                // Calculate the block starts
+                BlockStarts.Clear();
+                CalculateBlockStarts(0, MaxAddress);
             }
         }
 
