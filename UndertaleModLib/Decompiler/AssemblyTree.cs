@@ -22,6 +22,7 @@ namespace UndertaleModLib.Decompiler
         public bool IsConditionSwapped { get; set; }
         public uint Address { get => Block.Address; }
         public bool IsUnreachable { get; set; }
+        public bool IsLoopHeader { get; set; }
 
         public AssemblyTreeNode(AssemblyTreeNode parent, Block code)
         {
@@ -74,6 +75,12 @@ namespace UndertaleModLib.Decompiler
 
         public string ExportFlowGraph()
         {
+            // Solely for graph purposes
+            List<AssemblyTreeNode> loopEnds = new List<AssemblyTreeNode>();
+            foreach (AssemblyTreeNode n in Nodes.Values)
+                if (n.IsLoopHeader && n.Meetpoint != null)
+                    loopEnds.Add(n.Meetpoint);
+
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("digraph G {");
 
@@ -94,6 +101,10 @@ namespace UndertaleModLib.Decompiler
                     sb.Append(", Unreachable");
                 if (node.IsConditional)
                     sb.Append(", Conditional");
+                if (loopEnds.Contains(node))
+                    sb.Append(", Loop End");
+                if (node.IsLoopHeader)
+                    sb.Append(", Loop Head");
                 if (node.Meetpoint != null)
                     sb.Append(", MP: " + node.Meetpoint.Address);
 
@@ -108,7 +119,10 @@ namespace UndertaleModLib.Decompiler
                 foreach (var instr in block.Instructions)
                     sb.Append(instr.ToString().Replace("\\\"", "\\\\\"").Replace("\"", "\\\"") + "\\n");
                 sb.Append("\"");
-                sb.Append(block.Address == 0 ? ", color=\"blue\"" : "");
+                if (node.IsLoopHeader)
+                    sb.Append(", color=\"purple\"");
+                else
+                    sb.Append(block.Address == 0 ? ", color=\"blue\"" : "");
                 sb.AppendLine(", shape=\"box\"];");
                 nodeQueue.Enqueue(node.Next);
                 nodeQueue.Enqueue(node.ConditionFailNode);
@@ -337,7 +351,7 @@ namespace UndertaleModLib.Decompiler
             {
                 uint addr = toSearchNext.Dequeue();
                 if (addr < start || addr > end) // Ignore addresses out of bounds
-                    continue;
+                    continue; // TODO? If it's out of this range, split any blocks created at that point if necessary? May not be possible in GML
 
                 UndertaleInstruction instr;
                 for (uint i = addr; i <= end; i += instr.CalculateInstructionSize())
@@ -371,6 +385,17 @@ namespace UndertaleModLib.Decompiler
                     }
                 }
             } while (toSearchNext.Count != 0);
+        }
+
+        public void CalculateLoopHeaders()
+        {
+            foreach (AssemblyTreeNode node in Nodes.Values)
+            {
+                if (node.Next != null && node.Next.Address <= node.Address)
+                    node.Next.IsLoopHeader = true;
+                if (node.ConditionFailNode != null && node.ConditionFailNode.Address <= node.Address)
+                    node.ConditionFailNode.IsLoopHeader = true;
+            }
         }
 
         public void Setup(DecompileContext context)
@@ -407,6 +432,7 @@ namespace UndertaleModLib.Decompiler
             AssemblyTree newTree = new AssemblyTree();
             newTree.Setup(context);
             newTree.Root = ReadNode(newTree, 0, null);
+            newTree.CalculateLoopHeaders();
             return newTree;
         }
     }
