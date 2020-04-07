@@ -241,6 +241,7 @@ namespace UndertaleModLib.Decompiler
 
                     // Calculate the meetpoint where the two paths will come together again
                     HashSet<AssemblyTreeNode> failNodes = new HashSet<AssemblyTreeNode>();
+                    failNodes.Add(addNode);
 
                     Queue<AssemblyTreeNode> queue = new Queue<AssemblyTreeNode>();
                     queue.Enqueue(addNode.ConditionFailNode);
@@ -256,6 +257,7 @@ namespace UndertaleModLib.Decompiler
 
                     // Search the other branch for the first shared node
                     HashSet<AssemblyTreeNode> nextNodes = new HashSet<AssemblyTreeNode>();
+                    nextNodes.Add(addNode);
                     AssemblyTreeNode bestMeetpoint = null; // The best node is the node whose Block is the earliest
                     queue.Enqueue(addNode.Next);
                     while (queue.Count > 0)
