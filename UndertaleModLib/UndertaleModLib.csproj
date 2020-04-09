@@ -46,6 +46,7 @@
     <Compile Include="Decompiler\AssemblyTree.cs" />
     <Compile Include="Decompiler\AssetTypeResolver.cs" />
     <Compile Include="Decompiler\Decompiler.cs" />
+    <Compile Include="Decompiler\DecompilerOldReference.cs" />
     <Compile Include="ModelsDebug\UndertaleDebugInfo.cs" />
     <Compile Include="ModelsDebug\UndertaleInstanceVars.cs" />
     <Compile Include="ModelsDebug\UndertaleScriptSource.cs" />

@@ -9,7 +9,24 @@ using static UndertaleModLib.Decompiler.Decompiler;
 
 namespace UndertaleModLib.Decompiler
 {
+    // Represents a block of instructions from GML bytecode
+    public class Block
+    {
+        public uint Address;
+        public List<UndertaleInstruction> Instructions = new List<UndertaleInstruction>();
 
+        public Block(uint address)
+        {
+            Address = address;
+        }
+
+        public override string ToString()
+        {
+            return "Block " + Address;
+        }
+    }
+
+    // Encapsulates a Block as a node in relation to other not
     public class AssemblyTreeNode
     {
         public Block Block { get; set;  } // The code for this node.
@@ -18,6 +35,7 @@ namespace UndertaleModLib.Decompiler
         public AssemblyTreeNode Meetpoint { get; set; } // This is where code execution resumes after any branching.
         public AssemblyTreeNode ConditionFailNode { get; set; } // This is the code that follows the node (not directly after), if not Next
         public AssemblyTreeNode Unreachable { get; set; } // This is the code following the node if it is unreachable
+        public AssemblyTreeNode LoopTail { get; set; } // The tail of the loop, if IsLoopHeader is true
         public bool IsConditional { get; set; }
         public bool IsConditionSwapped { get; set; }
         public uint Address { get => Block.Address; }
@@ -248,17 +266,19 @@ namespace UndertaleModLib.Decompiler
                     while (queue.Count > 0)
                     {
                         AssemblyTreeNode node = queue.Dequeue();
-                        if (node == null || !failNodes.Add(node))
+                        if (node == null || node.Address <= addNode.Address || !failNodes.Add(node))
                             continue;
-
+                        
                         queue.Enqueue(node.Next);
                         queue.Enqueue(node.ConditionFailNode);
+                        queue.Enqueue(node.Unreachable);
                     }
 
                     // Search the other branch for the first shared node
                     HashSet<AssemblyTreeNode> nextNodes = new HashSet<AssemblyTreeNode>();
                     nextNodes.Add(addNode);
                     AssemblyTreeNode bestMeetpoint = null; // The best node is the node whose Block is the earliest
+                    uint bestMeetpointCompareAddr = 0;
                     queue.Enqueue(addNode.Next);
                     while (queue.Count > 0)
                     {
@@ -266,11 +286,17 @@ namespace UndertaleModLib.Decompiler
                         if (node == null || !nextNodes.Add(node))
                             continue;
 
-                        if (failNodes.Contains(node) && (bestMeetpoint == null || bestMeetpoint.Block.Address > node.Block.Address))
+                        uint compareAddr = (node.Address > addNode.Address) ? (node.Address - addNode.Address) : (node.Address + (tree.FinalAddress - addNode.Address));
+
+                        if (failNodes.Contains(node) && (bestMeetpoint == null || bestMeetpointCompareAddr > compareAddr))
+                        {
+                            bestMeetpointCompareAddr = compareAddr;
                             bestMeetpoint = node; // If the node is shared on both branches, then check if it's better than the best node we've found so far.
+                        }
 
                         queue.Enqueue(node.Next);
                         queue.Enqueue(node.ConditionFailNode);
+                        queue.Enqueue(node.Unreachable);
                     }
 
                     addNode.Meetpoint = bestMeetpoint;
@@ -389,14 +415,23 @@ namespace UndertaleModLib.Decompiler
             } while (toSearchNext.Count != 0);
         }
 
-        public void CalculateLoopHeaders()
+        public void CalculateLoops()
         {
+            // Sets the flag on the header Node to be a loop header, and also calculate the highest loop tail
+            void SetLoopHead(AssemblyTreeNode node, AssemblyTreeNode header)
+            {
+                header.IsLoopHeader = true;
+                if (header.LoopTail == null || header.LoopTail.Address < node.Address)
+                    header.LoopTail = node;
+            }
+
+            // Find the loop heads (and also their tails each time we find a head)
             foreach (AssemblyTreeNode node in Nodes.Values)
             {
                 if (node.Next != null && node.Next.Address <= node.Address)
-                    node.Next.IsLoopHeader = true;
+                    SetLoopHead(node, node.Next); 
                 if (node.ConditionFailNode != null && node.ConditionFailNode.Address <= node.Address)
-                    node.ConditionFailNode.IsLoopHeader = true;
+                    SetLoopHead(node, node.ConditionFailNode);
             }
         }
 
@@ -434,7 +469,7 @@ namespace UndertaleModLib.Decompiler
             AssemblyTree newTree = new AssemblyTree();
             newTree.Setup(context);
             newTree.Root = ReadNode(newTree, 0, null);
-            newTree.CalculateLoopHeaders();
+            newTree.CalculateLoops();
             return newTree;
         }
     }
