@@ -252,8 +252,8 @@ namespace UndertaleModLib.Decompiler
 
                     addNode.IsConditional = true;
                     addNode.IsConditionSwapped = (instr.Kind == UndertaleInstruction.Opcode.Bf);
-                    addNode.ConditionFailNode = ReadNode(tree, instr.Address + instr.CalculateInstructionSize(), addNode); // The "fail" adjacent block is just after this instruction
                     addNode.Next = ReadNode(tree, (uint)(instr.Address + instr.JumpOffset), addNode); // The next block is where it jumps to
+                    addNode.ConditionFailNode = ReadNode(tree, instr.Address + instr.CalculateInstructionSize(), addNode); // The "fail" adjacent block is just after this instruction
                     if (tree.BlockAddresses.ContainsKey(instr.Address + 1) && !tree.BlockStarts.Contains(instr.Address + 1))
                         addNode.Unreachable = ReadNode(tree, instr.Address + 1, null, true);
 
@@ -266,7 +266,7 @@ namespace UndertaleModLib.Decompiler
                     while (queue.Count > 0)
                     {
                         AssemblyTreeNode node = queue.Dequeue();
-                        if (node == null || node.Address <= addNode.Address || !failNodes.Add(node))
+                        if (node == null || !failNodes.Add(node))
                             continue;
                         
                         queue.Enqueue(node.Next);
