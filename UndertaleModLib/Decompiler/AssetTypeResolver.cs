@@ -277,8 +277,8 @@ namespace UndertaleModLib.Decompiler
                 { "script_get_name", new AssetIDType[] { AssetIDType.Script } },
                 // script_execute handled separately
 
-                { "instance_change", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.GameObject } },
-                { "instance_copy", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.GameObject } },
+                { "instance_change", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Boolean } },
+                { "instance_copy", new AssetIDType[] { AssetIDType.Boolean } },
                 { "instance_create", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
                 { "instance_destroy", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Boolean } },
                 { "instance_exists", new AssetIDType[] { AssetIDType.GameObject } },
