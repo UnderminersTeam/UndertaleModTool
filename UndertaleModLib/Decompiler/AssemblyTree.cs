@@ -59,6 +59,7 @@ namespace UndertaleModLib.Decompiler
         public List<uint> BlockStarts = new List<uint>();
         public Dictionary<uint, UndertaleInstruction> BlockAddresses = new Dictionary<uint, UndertaleInstruction>();
         public Stack<AssemblyTreeNode> PushEnvNodes = new Stack<AssemblyTreeNode>();
+        public List<AssemblyTreeNode> BranchNodes = new List<AssemblyTreeNode>();
         public uint MaxAddress = 0;
         public uint FinalAddress = 0;
 
@@ -252,54 +253,13 @@ namespace UndertaleModLib.Decompiler
 
                     addNode.IsConditional = true;
                     addNode.IsConditionSwapped = (instr.Kind == UndertaleInstruction.Opcode.Bf);
-                    addNode.Next = ReadNode(tree, (uint)(instr.Address + instr.JumpOffset), addNode); // The next block is where it jumps to
-                    addNode.ConditionFailNode = ReadNode(tree, instr.Address + instr.CalculateInstructionSize(), addNode); // The "fail" adjacent block is just after this instruction
+                    addNode.Next = ReadNode(tree, (uint)(instr.Address + instr.JumpOffset), null); // The next block is where it jumps to
+                    addNode.ConditionFailNode = ReadNode(tree, instr.Address + instr.CalculateInstructionSize(), null); // The "fail" adjacent block is just after this instruction
                     if (tree.BlockAddresses.ContainsKey(instr.Address + 1) && !tree.BlockStarts.Contains(instr.Address + 1))
                         addNode.Unreachable = ReadNode(tree, instr.Address + 1, null, true);
 
-                    // Calculate the meetpoint where the two paths will come together again
-                    HashSet<AssemblyTreeNode> failNodes = new HashSet<AssemblyTreeNode>();
-                    failNodes.Add(addNode);
+                    tree.BranchNodes.Add(addNode);
 
-                    Queue<AssemblyTreeNode> queue = new Queue<AssemblyTreeNode>();
-                    queue.Enqueue(addNode.ConditionFailNode);
-                    while (queue.Count > 0)
-                    {
-                        AssemblyTreeNode node = queue.Dequeue();
-                        if (node == null || !failNodes.Add(node))
-                            continue;
-                        
-                        queue.Enqueue(node.Next);
-                        queue.Enqueue(node.ConditionFailNode);
-                        queue.Enqueue(node.Unreachable);
-                    }
-
-                    // Search the other branch for the first shared node
-                    HashSet<AssemblyTreeNode> nextNodes = new HashSet<AssemblyTreeNode>();
-                    nextNodes.Add(addNode);
-                    AssemblyTreeNode bestMeetpoint = null; // The best node is the node whose Block is the earliest
-                    uint bestMeetpointCompareAddr = 0;
-                    queue.Enqueue(addNode.Next);
-                    while (queue.Count > 0)
-                    {
-                        AssemblyTreeNode node = queue.Dequeue();
-                        if (node == null || !nextNodes.Add(node))
-                            continue;
-
-                        uint compareAddr = (node.Address > addNode.Address) ? (node.Address - addNode.Address) : (node.Address + (tree.FinalAddress - addNode.Address));
-
-                        if (failNodes.Contains(node) && (bestMeetpoint == null || bestMeetpointCompareAddr > compareAddr))
-                        {
-                            bestMeetpointCompareAddr = compareAddr;
-                            bestMeetpoint = node; // If the node is shared on both branches, then check if it's better than the best node we've found so far.
-                        }
-
-                        queue.Enqueue(node.Next);
-                        queue.Enqueue(node.ConditionFailNode);
-                        queue.Enqueue(node.Unreachable);
-                    }
-
-                    addNode.Meetpoint = bestMeetpoint;
                     if (unreachable)
                         addNode.IsUnreachable = true;
                     return addNode;
@@ -415,6 +375,56 @@ namespace UndertaleModLib.Decompiler
             } while (toSearchNext.Count != 0);
         }
 
+        public void CalculateMeetpoints()
+        {
+            foreach (AssemblyTreeNode branchNode in BranchNodes)
+            {
+                // Calculate the meetpoint where the two paths will come together again
+                HashSet<AssemblyTreeNode> failNodes = new HashSet<AssemblyTreeNode>();
+                failNodes.Add(branchNode);
+
+                Queue<AssemblyTreeNode> queue = new Queue<AssemblyTreeNode>();
+                queue.Enqueue(branchNode.ConditionFailNode);
+                while (queue.Count > 0)
+                {
+                    AssemblyTreeNode node = queue.Dequeue();
+                    if (node == null || !failNodes.Add(node))
+                        continue;
+
+                    queue.Enqueue(node.Next);
+                    queue.Enqueue(node.ConditionFailNode);
+                    queue.Enqueue(node.Unreachable);
+                }
+
+                // Search the other branch for the first shared node
+                HashSet<AssemblyTreeNode> nextNodes = new HashSet<AssemblyTreeNode>();
+                nextNodes.Add(branchNode);
+                AssemblyTreeNode bestMeetpoint = null; // The best node is the node whose Block is the earliest
+                uint bestMeetpointCompareAddr = 0;
+                queue.Enqueue(branchNode.Next);
+                while (queue.Count > 0)
+                {
+                    AssemblyTreeNode node = queue.Dequeue();
+                    if (node == null || !nextNodes.Add(node))
+                        continue;
+
+                    uint compareAddr = (node.Address > branchNode.Address) ? (node.Address - branchNode.Address) : (node.Address + (FinalAddress - branchNode.Address));
+
+                    if (failNodes.Contains(node) && (bestMeetpoint == null || bestMeetpointCompareAddr > compareAddr))
+                    {
+                        bestMeetpointCompareAddr = compareAddr;
+                        bestMeetpoint = node; // If the node is shared on both branches, then check if it's better than the best node we've found so far.
+                    }
+
+                    queue.Enqueue(node.Next);
+                    queue.Enqueue(node.ConditionFailNode);
+                    queue.Enqueue(node.Unreachable);
+                }
+
+                branchNode.Meetpoint = bestMeetpoint;
+            }
+        }
+
         public void CalculateLoops()
         {
             // Sets the flag on the header Node to be a loop header, and also calculate the highest loop tail
@@ -469,6 +479,7 @@ namespace UndertaleModLib.Decompiler
             AssemblyTree newTree = new AssemblyTree();
             newTree.Setup(context);
             newTree.Root = ReadNode(newTree, 0, null);
+            newTree.CalculateMeetpoints();
             newTree.CalculateLoops();
             return newTree;
         }

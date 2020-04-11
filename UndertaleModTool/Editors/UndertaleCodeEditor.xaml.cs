@@ -300,8 +300,9 @@ namespace UndertaleModTool
                     e = ex;
                 }
 
-                if (gettextCode != null)
-                    UpdateGettext(gettextCode);
+                // todo reimplement this
+                //if (gettextCode != null)
+                //    UpdateGettext(gettextCode);
 
                 if (gettextJSON == null && gettextJsonPath != null && File.Exists(gettextJsonPath))
                     UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
