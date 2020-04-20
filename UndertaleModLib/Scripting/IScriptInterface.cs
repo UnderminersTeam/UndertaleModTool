@@ -10,6 +10,7 @@ namespace UndertaleModLib.Scripting
     {
         UndertaleData Data { get; }
         string FilePath { get; }
+        string ScriptPath { get; }
         object Highlighted { get; }
         object Selected { get; }
         bool CanSave { get; }

@@ -45,6 +45,7 @@ namespace UndertaleModTool
     {
         public UndertaleData Data { get; set; }
         public string FilePath { get; set; }
+        public string ScriptPath { get; set; } // For the scripting interface specifically
 
         public string TitleMain { get; set; }
 
@@ -685,6 +686,8 @@ namespace UndertaleModTool
                             .AddReferences(Program.GetAssemblyMetadata(typeof(JsonConvert).GetTypeInfo().Assembly))
                             .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                             typeof(IScriptInterface), loader);
+                            
+                        ScriptPath = null;
 
                         result = (await script.RunAsync(this)).ReturnValue;
                     }
@@ -826,6 +829,8 @@ namespace UndertaleModTool
                         .AddReferences(Program.GetAssemblyMetadata(typeof(JsonConvert).GetTypeInfo().Assembly))
                         .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                         typeof(IScriptInterface), loader);
+                        
+                    ScriptPath = path;
 
                     object result = (await script.RunAsync(this)).ReturnValue;
                     Dispatcher.Invoke(() => CommandBox.Text = result != null ? result.ToString() : System.IO.Path.GetFileName(path) + " finished!");
