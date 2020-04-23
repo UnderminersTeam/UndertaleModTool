@@ -14,6 +14,7 @@ namespace UndertaleModLib.Decompiler
     {
         public uint Address;
         public List<UndertaleInstruction> Instructions = new List<UndertaleInstruction>();
+        public uint LastAddress { get { return (Instructions.Count == 0) ? Address : Instructions.Last().Address; } }
 
         public Block(uint address)
         {
@@ -39,6 +40,7 @@ namespace UndertaleModLib.Decompiler
         public bool IsConditional { get; set; }
         public bool IsConditionSwapped { get; set; }
         public uint Address { get => Block.Address; }
+        public uint LastAddress { get => Block.LastAddress; }
         public bool IsUnreachable { get; set; }
         public bool IsLoopHeader { get; set; }
 
@@ -205,6 +207,7 @@ namespace UndertaleModLib.Decompiler
                 maxAddress = instr?.Address ?? startAddress;
 
                 // Calculate BlockStarts for this range
+                tree.BlockStarts.Add(startAddress);
                 tree.CalculateBlockStarts(startAddress, maxAddress);
             }
             else
@@ -238,6 +241,8 @@ namespace UndertaleModLib.Decompiler
                         parent.Next = addNode;
 
                     addNode.Next = ReadNode(tree, (uint)(instr.Address + instr.JumpOffset), addNode);
+                    if (addNode.Next != null && addNode.Next.IsUnreachable)
+                        addNode.Next = null; // It's already unreachable from somewhere else
                     if (tree.BlockAddresses.ContainsKey(instr.Address + 1) && !tree.BlockStarts.Contains(instr.Address + 1))
                         addNode.Unreachable = ReadNode(tree, instr.Address + 1, null, true);
                     if (unreachable)
@@ -339,7 +344,23 @@ namespace UndertaleModLib.Decompiler
             {
                 uint addr = toSearchNext.Dequeue();
                 if (addr < start || addr > end) // Ignore addresses out of bounds
-                    continue; // TODO? If it's out of this range, split any blocks created at that point if necessary? May not be possible in GML
+                {
+                    // If it's out of the range (in an unreachable block), split any other unreachable blocks created at that point,
+                    // and sever those blocks' connections
+                    foreach (AssemblyTreeNode n in Nodes.Values)
+                    {
+                        if (n.IsUnreachable && addr >= n.Address && addr <= n.LastAddress)
+                        {
+                            // addr is in the middle of node n, so remove everything from addr to the end of that block
+                            int startIndex = n.Block.Instructions.FindIndex((i) => (i.Address == addr));
+                            n.Block.Instructions.RemoveRange(startIndex, n.Block.Instructions.Count - startIndex);
+                            n.Next = null;
+                            n.ConditionFailNode = null;
+                            n.Unreachable = null;
+                        }
+                    }
+                    continue;
+                }
 
                 UndertaleInstruction instr;
                 for (uint i = addr; i <= end; i += instr.CalculateInstructionSize())
@@ -381,7 +402,6 @@ namespace UndertaleModLib.Decompiler
             {
                 // Calculate the meetpoint where the two paths will come together again
                 HashSet<AssemblyTreeNode> failNodes = new HashSet<AssemblyTreeNode>();
-                failNodes.Add(branchNode);
 
                 Queue<AssemblyTreeNode> queue = new Queue<AssemblyTreeNode>();
                 queue.Enqueue(branchNode.ConditionFailNode);
@@ -390,6 +410,8 @@ namespace UndertaleModLib.Decompiler
                     AssemblyTreeNode node = queue.Dequeue();
                     if (node == null || !failNodes.Add(node))
                         continue;
+                    if (node.IsLoopHeader) // Invalidate meetpoint
+                        break;
 
                     queue.Enqueue(node.Next);
                     queue.Enqueue(node.ConditionFailNode);
@@ -398,7 +420,6 @@ namespace UndertaleModLib.Decompiler
 
                 // Search the other branch for the first shared node
                 HashSet<AssemblyTreeNode> nextNodes = new HashSet<AssemblyTreeNode>();
-                nextNodes.Add(branchNode);
                 AssemblyTreeNode bestMeetpoint = null; // The best node is the node whose Block is the earliest
                 uint bestMeetpointCompareAddr = 0;
                 queue.Enqueue(branchNode.Next);
@@ -407,10 +428,12 @@ namespace UndertaleModLib.Decompiler
                     AssemblyTreeNode node = queue.Dequeue();
                     if (node == null || !nextNodes.Add(node))
                         continue;
+                    if (node.IsLoopHeader) // Invalidate meetpoint
+                        break;
 
-                    uint compareAddr = (node.Address > branchNode.Address) ? (node.Address - branchNode.Address) : (node.Address + (FinalAddress - branchNode.Address));
+                    uint compareAddr = (node.Address >= branchNode.Address) ? (node.Address - branchNode.Address) : (node.Address + (FinalAddress - branchNode.Address));
 
-                    if (failNodes.Contains(node) && (bestMeetpoint == null || bestMeetpointCompareAddr > compareAddr))
+                    if (node != branchNode && failNodes.Contains(node) && (bestMeetpoint == null || bestMeetpointCompareAddr > compareAddr))
                     {
                         bestMeetpointCompareAddr = compareAddr;
                         bestMeetpoint = node; // If the node is shared on both branches, then check if it's better than the best node we've found so far.
@@ -479,8 +502,8 @@ namespace UndertaleModLib.Decompiler
             AssemblyTree newTree = new AssemblyTree();
             newTree.Setup(context);
             newTree.Root = ReadNode(newTree, 0, null);
-            newTree.CalculateMeetpoints();
             newTree.CalculateLoops();
+            newTree.CalculateMeetpoints();
             return newTree;
         }
     }

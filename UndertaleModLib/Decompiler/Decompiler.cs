@@ -146,10 +146,12 @@ namespace UndertaleModLib.Decompiler
                             ifNode.FalseBlock = CreateNode(dTree, treeNode.Next, treeNode.Meetpoint);
                             ifNode.TrueBlock = CreateNode(dTree, treeNode.ConditionFailNode, treeNode.Meetpoint);
                             res.Nodes.Add(ifNode);
+                            IfContext ctx = dTree.IfContexts.Pop();
 
                             // Let's test if an else block existed in the source code
                             // (there would be a B instruction emitted by the compiler)
-                            if (dTree.IfContexts.Pop().BAtEndTarget == (treeNode.Meetpoint?.Address ?? dTree.AssemblyTree.FinalAddress))
+                            if ((ctx.BAtEndTarget == (treeNode.Meetpoint?.Address ?? dTree.AssemblyTree.FinalAddress)) ||
+                                (dTree.Loops.Count != 0 && ctx.BAtEndTarget == dTree.Loops.Peek().LoopTail?.Address))
                             {
                                 if (ifNode.FalseBlock == null)
                                     ifNode.FalseBlock = new BlockTreeNode(); // Just make an empty else block
@@ -161,8 +163,13 @@ namespace UndertaleModLib.Decompiler
                                 ifNode.FalseBlock = null;
                             }
 
+                            // Also, if there's no true block, make an empty one
+                            if (ifNode.TrueBlock == null)
+                                ifNode.TrueBlock = new BlockTreeNode();
+
                             // Any code that comes after
-                            if (treeNode.Meetpoint != null && treeNode.Meetpoint != stopAt)
+                            if (treeNode.Meetpoint != null && treeNode.Meetpoint != stopAt &&
+                                (dTree.Loops.Count == 0 || treeNode.Meetpoint != dTree.Loops.Peek()))
                                 res.Nodes.AddRange(CreateNode(dTree, treeNode.Meetpoint, stopAt).Nodes);
                         }
                         break;
@@ -170,6 +177,7 @@ namespace UndertaleModLib.Decompiler
                         // TODO switch statement and repeat handling here
                         break;
                     case UndertaleInstruction.Opcode.B:
+                        bool isNextLoopTail = false;
                         if (dTree.Loops.Count != 0)
                         {
                             AssemblyTreeNode loopHead = dTree.Loops.Peek();
@@ -191,8 +199,9 @@ namespace UndertaleModLib.Decompiler
                                     break;
                                 }
                             }
+                            isNextLoopTail = (treeNode.Next == loopHead.LoopTail); // Store this for below
                         }
-                        if (treeNode.Next != null && stopAt != treeNode.Next && !dTree.ReadNodes.ContainsKey(treeNode.Next))
+                        if (treeNode.Next != null && stopAt != treeNode.Next && !isNextLoopTail && !dTree.ReadNodes.ContainsKey(treeNode.Next))
                         {
                             res.Nodes.AddRange(CreateNode(dTree, treeNode.Next, stopAt).Nodes);
                         } else
@@ -225,7 +234,7 @@ namespace UndertaleModLib.Decompiler
                 res.Nodes.AddRange(CreateNode(dTree, treeNode.Next, stopAt).Nodes);
 
             if (treeNode.Unreachable != null)
-                res.Nodes.AddRange(CreateNode(dTree, treeNode.Unreachable, stopAt).Nodes); // TODO: use a different stopAt, like meetpoint?
+                res.Nodes.AddRange(CreateNode(dTree, treeNode.Unreachable, treeNode.Meetpoint).Nodes);
 
             return res;
         }
