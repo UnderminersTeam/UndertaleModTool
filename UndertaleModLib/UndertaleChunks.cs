@@ -595,8 +595,6 @@ namespace UndertaleModLib
 
             writer.Write((uint)1); // Version
 
-            // TODO
-
             base.SerializeChunk(writer);
         }
 
@@ -612,8 +610,6 @@ namespace UndertaleModLib
 
             if (reader.ReadUInt32() != 1)
                 throw new IOException("Expected SEQN version 1");
-
-            // TODO
 
             base.UnserializeChunk(reader);
         }
