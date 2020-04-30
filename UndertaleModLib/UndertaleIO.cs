@@ -146,6 +146,7 @@ namespace UndertaleModLib
         }
 
         public string LastChunkName;
+        public List<string> AllChunkNames;
 
         public UndertaleChunk ReadUndertaleChunk()
         {

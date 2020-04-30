@@ -210,6 +210,9 @@ namespace UndertaleModLib.Models
             String,
             [Obsolete("Unused")]
             Instance,
+            Delete, // these 3 types apparently exist
+            Undefined,
+            UnsignedInt,
             Int16 = 0x0f
         }
 
@@ -224,6 +227,7 @@ namespace UndertaleModLib.Models
             Global = -5,
             Builtin = -6, // Note: Used only in UndertaleVariable.VarID (which is not really even InstanceType)
             Local = -7,
+            Static = -16
 
             // anything > 0 => GameObjectIndex
         }

@@ -39,6 +39,26 @@ namespace UndertaleModLib
         void SerializePrePadding(UndertaleWriter writer);
         void UnserializePrePadding(UndertaleReader reader);
     }
+    
+    public enum ResourceType : int
+    {
+        None = -1,
+        Object = 0,
+        Sprite = 1,
+        Sound = 2,
+        Room = 3,
+        Unknown = 4, // Probably removed
+        Path = 5,
+        Script = 6,
+        Font = 7,
+        Timeline = 8,
+        Background = 9,
+        Shader = 10,
+
+        // GMS2.3+
+        Sequence = 11,
+        AnimCurve = 12
+    }
 
     public interface UndertaleResource : UndertaleObject
     {

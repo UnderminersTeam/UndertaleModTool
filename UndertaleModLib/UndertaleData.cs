@@ -43,6 +43,10 @@ namespace UndertaleModLib
         public IList<UndertaleTextureGroupInfo> TextureGroupInfo => FORM.TGIN?.List;
         public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO?.List;
 
+        public UndertaleTags Tags => FORM.TAGS?.Object;
+        public IList<UndertaleAnimationCurve> AnimationCurves => FORM.ACRV?.List;
+        public IList<UndertaleSequence> Sequences => FORM.SEQN?.List;
+
         public bool UnsupportedBytecodeVersion = false;
         public int PaddingAlignException = -1;
 
@@ -60,6 +64,8 @@ namespace UndertaleModLib
                 Extensions.ByName(name, ignoreCase) ??
                 Shaders.ByName(name, ignoreCase) ??
                 Timelines.ByName(name, ignoreCase) ??
+                AnimationCurves?.ByName(name, ignoreCase) ??
+                Sequences?.ByName(name, ignoreCase) ??
                 (UndertaleNamedResource)null;
         }
 
@@ -87,6 +93,10 @@ namespace UndertaleModLib
                 return Shaders.IndexOf(obj as UndertaleShader);
             if (obj is UndertaleTimeline)
                 return Timelines.IndexOf(obj as UndertaleTimeline);
+            if (obj is UndertaleAnimationCurve)
+                return AnimationCurves.IndexOf(obj as UndertaleAnimationCurve);
+            if (obj is UndertaleSequence)
+                return Sequences.IndexOf(obj as UndertaleSequence);
 
             if (panicIfInvalid)
                 throw new InvalidOperationException();

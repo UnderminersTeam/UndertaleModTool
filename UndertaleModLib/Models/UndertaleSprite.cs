@@ -10,6 +10,12 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
+    public enum AnimSpeedType : uint
+    {
+        FramesPerSecond = 0,
+        FramesPerGameFrame = 1
+    }
+
     public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyPropertyChanged
     {
         private UndertaleString _Name;
@@ -26,10 +32,10 @@ namespace UndertaleModLib.Models
         private SepMaskType _SepMasks; // Whether or not multiple collision masks will be used. 0-2.
         private int _OriginX;
         private int _OriginY;
-        private uint _GMS2UnknownAlways1 = 1;
+        private uint _GMS2Version = 1;
         private SpriteType _SSpriteType = 0;
         private float _GMS2PlaybackSpeed = 15.0f;
-        private uint _GMS2PlaybackSpeedType = 0;
+        private AnimSpeedType _GMS2PlaybackSpeedType = 0;
         private bool _IsSpecialType = false;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
@@ -50,14 +56,16 @@ namespace UndertaleModLib.Models
         public ObservableCollection<MaskEntry> CollisionMasks { get; } = new ObservableCollection<MaskEntry>();
         
         // Special sprite types (always used in GMS2)
-        public uint SUnknownAlways1 { get => _GMS2UnknownAlways1; set { _GMS2UnknownAlways1 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SUnknownAlways1")); } }
+        public uint SVersion { get => _GMS2Version; set { _GMS2Version = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SVersion")); } }
         public SpriteType SSpriteType { get => _SSpriteType; set { _SSpriteType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SSpriteType")); } }
         public float GMS2PlaybackSpeed { get => _GMS2PlaybackSpeed; set { _GMS2PlaybackSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2PlaybackSpeed")); } }
-        public uint GMS2PlaybackSpeedType { get => _GMS2PlaybackSpeedType; set { _GMS2PlaybackSpeedType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2PlaybackSpeedType")); } }
+        public AnimSpeedType GMS2PlaybackSpeedType { get => _GMS2PlaybackSpeedType; set { _GMS2PlaybackSpeedType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2PlaybackSpeedType")); } }
         public bool IsSpecialType { get => _IsSpecialType; set { _IsSpecialType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsSpecialType")); } }
 
         public byte[] S_Spine_Data;
         public byte[] S_SWF_Data;
+
+        public UndertaleSequence V2Sequence;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -141,13 +149,20 @@ namespace UndertaleModLib.Models
             writer.Write(OriginY);
             if (IsSpecialType)
             {
+                uint patchPos = 0;
+
                 writer.Write(-1);
-                writer.Write(SUnknownAlways1);
+                writer.Write(SVersion);
                 writer.Write((uint)SSpriteType);
                 if (writer.undertaleData.GeneralInfo?.Major >= 2)
                 {
                     writer.Write(GMS2PlaybackSpeed);
-                    writer.Write(GMS2PlaybackSpeedType);
+                    writer.Write((uint)GMS2PlaybackSpeedType);
+                    if (SVersion >= 2)
+                    {
+                        patchPos = writer.Position;
+                        writer.Write((int)0);
+                    }
                 }
 
                 switch (SSpriteType)
@@ -166,6 +181,17 @@ namespace UndertaleModLib.Models
                         Align3(writer);
                         writer.Write(S_Spine_Data);
                         break;
+                }
+
+                // Sequence
+                if (patchPos != 0 && V2Sequence != null) // Normal compiler also checks for sprite type to be normal, but whatever!
+                {
+                    uint returnTo = writer.Position;
+                    writer.Position = patchPos;
+                    writer.Write(returnTo);
+                    writer.Position = returnTo;
+                    writer.Write((int)1);
+                    writer.WriteUndertaleObject(V2Sequence);
                 }
             }
             else
@@ -226,13 +252,17 @@ namespace UndertaleModLib.Models
             OriginY = reader.ReadInt32();
             if (reader.ReadInt32() == -1) // technically this seems to be able to occur on older versions, for special sprite types
             {
+                bool sequence = false;
+
                 IsSpecialType = true;
-                SUnknownAlways1 = reader.ReadUInt32();
+                SVersion = reader.ReadUInt32();
                 SSpriteType = (SpriteType)reader.ReadUInt32();
                 if (reader.undertaleData.GeneralInfo?.Major >= 2)
                 {
                     GMS2PlaybackSpeed = reader.ReadSingle();
-                    GMS2PlaybackSpeedType = reader.ReadUInt32();
+                    GMS2PlaybackSpeedType = (AnimSpeedType)reader.ReadUInt32();
+                    if (SVersion >= 2 && reader.ReadInt32() != 0)
+                        sequence = true;
                 }
 
                 switch (SSpriteType)
@@ -294,6 +324,13 @@ namespace UndertaleModLib.Models
                             S_Spine_Data = reader.ReadBytes((int)(24 + jsonLength + atlasLength + textureLength));
                         }
                         break;
+                }
+
+                if (sequence)
+                {
+                    if (reader.ReadInt32() != 1)
+                        throw new IOException("Expected 1");
+                    V2Sequence = reader.ReadUndertaleObject<UndertaleSequence>();
                 }
             }
             else

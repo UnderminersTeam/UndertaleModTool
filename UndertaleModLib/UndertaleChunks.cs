@@ -43,6 +43,10 @@ namespace UndertaleModLib
         public UndertaleChunkSTRG STRG => Chunks.GetValueOrDefault("STRG") as UndertaleChunkSTRG;
         public UndertaleChunkTXTR TXTR => Chunks.GetValueOrDefault("TXTR") as UndertaleChunkTXTR;
         public UndertaleChunkAUDO AUDO => Chunks.GetValueOrDefault("AUDO") as UndertaleChunkAUDO;
+        // GMS2.3+ for the below chunks
+        public UndertaleChunkACRV ACRV => Chunks.GetValueOrDefault("ACRV") as UndertaleChunkACRV;
+        public UndertaleChunkSEQN SEQN => Chunks.GetValueOrDefault("SEQN") as UndertaleChunkSEQN;
+        public UndertaleChunkTAGS TAGS => Chunks.GetValueOrDefault("TAGS") as UndertaleChunkTAGS;
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
@@ -58,10 +62,13 @@ namespace UndertaleModLib
             uint startPos = reader.Position;
 
             // First, find the last chunk in the file because of padding changes
+            // (also, calculate all present chunks while we're at it)
+            reader.AllChunkNames = new List<string>();
             string lastChunk = "";
             while (reader.Position < reader.BaseStream.Length)
             {
                 lastChunk = new string(reader.ReadChars(4));
+                reader.AllChunkNames.Add(lastChunk);
                 uint length = reader.ReadUInt32();
                 reader.Position += length;
             }
@@ -492,7 +499,7 @@ namespace UndertaleModLib
         {
             if (writer.undertaleData.GeneralInfo.Major < 2)
                 throw new InvalidOperationException();
-            writer.Write((uint)1); // Hardcoded 1
+            writer.Write((uint)1); // Version
             base.SerializeChunk(writer);
         }
 
@@ -501,7 +508,148 @@ namespace UndertaleModLib
             if (reader.undertaleData.GeneralInfo.Major < 2)
                 throw new InvalidOperationException();
             if (reader.ReadUInt32() != 1)
-                throw new Exception("Expected TGIN version 1");
+                throw new IOException("Expected TGIN version 1");
+            base.UnserializeChunk(reader);
+        }
+    }
+
+    // Unknown if possible yet, GMS2.3+ only
+    public class UndertaleChunkNINE : UndertaleChunk
+    {
+        public override string Name => "NINE";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    // Unknown if possible yet, GMS2.3+ only
+    public class UndertaleChunkGMEN : UndertaleChunk
+    {
+        public override string Name => "GMEN";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    // GMS2.3+ only
+    public class UndertaleChunkACRV : UndertaleListChunk<UndertaleAnimationCurve>
+    {
+        public override string Name => "ACRV";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            if (writer.undertaleData.GeneralInfo.Major < 2)
+                throw new InvalidOperationException();
+
+            while (writer.Position % 4 != 0)
+                writer.Write((byte)0);
+
+            writer.Write((uint)1); // Version
+
+            base.SerializeChunk(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            if (reader.undertaleData.GeneralInfo.Major < 2)
+                throw new InvalidOperationException();
+
+            // Padding
+            while (reader.Position % 4 != 0)
+                if (reader.ReadByte() != 0)
+                    throw new IOException("Padding error!");
+
+            if (reader.ReadUInt32() != 1)
+                throw new IOException("Expected ACRV version 1");
+
+            base.UnserializeChunk(reader);
+        }
+    }
+
+    // GMS2.3+ only
+    public class UndertaleChunkSEQN : UndertaleListChunk<UndertaleSequence>
+    {
+        public override string Name => "SEQN";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            if (writer.undertaleData.GeneralInfo.Major < 2)
+                throw new InvalidOperationException();
+
+            while (writer.Position % 4 != 0)
+                writer.Write((byte)0);
+
+            writer.Write((uint)1); // Version
+
+            // TODO
+
+            base.SerializeChunk(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            if (reader.undertaleData.GeneralInfo.Major < 2)
+                throw new InvalidOperationException();
+
+            // Padding
+            while (reader.Position % 4 != 0)
+                if (reader.ReadByte() != 0)
+                    throw new IOException("Padding error!");
+
+            if (reader.ReadUInt32() != 1)
+                throw new IOException("Expected SEQN version 1");
+
+            // TODO
+
+            base.UnserializeChunk(reader);
+        }
+    }
+
+    // GMS2.3+ only
+    public class UndertaleChunkTAGS : UndertaleSingleChunk<UndertaleTags>
+    {
+        public override string Name => "TAGS";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            if (writer.undertaleData.GeneralInfo.Major < 2)
+                throw new InvalidOperationException();
+
+            while (writer.Position % 4 != 0)
+                writer.Write((byte)0);
+
+            writer.Write((uint)1); // Version
+
+            base.SerializeChunk(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            if (reader.undertaleData.GeneralInfo.Major < 2)
+                throw new InvalidOperationException();
+
+            // Padding
+            while (reader.Position % 4 != 0)
+                if (reader.ReadByte() != 0)
+                    throw new IOException("Padding error!");
+
+            if (reader.ReadUInt32() != 1)
+                throw new IOException("Expected TAGS version 1");
+
             base.UnserializeChunk(reader);
         }
     }

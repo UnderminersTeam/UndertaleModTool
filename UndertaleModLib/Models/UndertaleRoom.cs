@@ -62,6 +62,7 @@ namespace UndertaleModLib.Models
         public UndertalePointerListLenCheck<GameObject> GameObjects { get; private set; } = new UndertalePointerListLenCheck<GameObject>();
         public UndertalePointerList<Tile> Tiles { get; private set; } = new UndertalePointerList<Tile>();
         public UndertalePointerList<Layer> Layers { get; private set; } = new UndertalePointerList<Layer>();
+        public UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>> Sequences { get; private set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -113,14 +114,25 @@ namespace UndertaleModLib.Models
             writer.Write(GravityX);
             writer.Write(GravityY);
             writer.Write(MetersPerPixel);
+            bool sequences = false;
             if (writer.undertaleData.GeneralInfo.Major >= 2)
+            {
                 writer.WriteUndertaleObjectPointer(Layers);
+                sequences = writer.undertaleData.FORM.Chunks.ContainsKey("SEQN");
+                if (sequences)
+                    writer.WriteUndertaleObjectPointer(Sequences);
+            }
             writer.WriteUndertaleObject(Backgrounds);
             writer.WriteUndertaleObject(Views);
             writer.WriteUndertaleObject(GameObjects);
             writer.WriteUndertaleObject(Tiles);
             if (writer.undertaleData.GeneralInfo.Major >= 2)
+            {
                 writer.WriteUndertaleObject(Layers);
+                
+                if (sequences)
+                    writer.WriteUndertaleObject(Sequences);
+            }
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -148,8 +160,14 @@ namespace UndertaleModLib.Models
             GravityX = reader.ReadSingle();
             GravityY = reader.ReadSingle();
             MetersPerPixel = reader.ReadSingle();
+            bool sequences = false;
             if (reader.undertaleData.GeneralInfo.Major >= 2)
+            {
                 Layers = reader.ReadUndertaleObjectPointer<UndertalePointerList<Layer>>();
+                sequences = reader.AllChunkNames.Contains("SEQN");
+                if (sequences)
+                    Sequences = reader.ReadUndertaleObjectPointer<UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>>();
+            }
             reader.ReadUndertaleObject(Backgrounds);
             reader.ReadUndertaleObject(Views);
             reader.ReadUndertaleObject(GameObjects, tilePtr);
@@ -170,6 +188,9 @@ namespace UndertaleModLib.Models
                         }
                     }
                 }
+                
+                if (sequences)
+                    reader.ReadUndertaleObject(Sequences);
             }
         }
 

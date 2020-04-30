@@ -267,8 +267,8 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             
-            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Unknown always 1</TextBlock>
-            <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding SUnknownAlways1}"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Version</TextBlock>
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding SVersion}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Type</TextBlock>
             <ComboBox ItemsSource="{Binding Source={StaticResource SpriteType}}" SelectedItem="{Binding Path=SSpriteType}"
