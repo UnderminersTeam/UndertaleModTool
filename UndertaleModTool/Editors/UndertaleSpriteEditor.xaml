@@ -19,6 +19,11 @@
                 <x:Type TypeName="undertale:UndertaleSprite+SepMaskType" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="AnimSpeedType">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="undertale:AnimSpeedType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </UserControl.Resources>
     <Grid>
@@ -288,7 +293,8 @@
                 <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2PlaybackSpeed}"/>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Playback speed type</TextBlock>
-                <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GMS2PlaybackSpeedType}"/>
+                <ComboBox ItemsSource="{Binding Source={StaticResource AnimSpeedType}}" SelectedItem="{Binding Path=GMS2PlaybackSpeedType}"
+                    Grid.Row="1" Grid.Column="1" Margin="3"/>
             </Grid>
         </Grid>
     </Grid>
