@@ -6,7 +6,7 @@
 
 heya. I heard you like digging deep into Undertale data so I made a tool just for you! **Downloads** are **HERE**: :point_right::point_right::point_right: https://github.com/krzys-h/UndertaleModTool/releases :point_left::point_left::point_left:
 
-**Have questions? Want to talk?** Join us on Discord! https://discord.gg/hqpQvUX
+**Have questions? Want to talk?** Join us on Discord! https://discord.gg/RxXpdwJ
 
 ![flowey](flowey.png)
 
