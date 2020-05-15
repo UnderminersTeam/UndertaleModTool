@@ -288,6 +288,8 @@ namespace UndertaleModLib.Decompiler
                     return ConvertToEnumStr<OSType>(Value);
                 else if (AssetType == AssetIDType.Enum_GamepadButton)
                     return ConvertToEnumStr<GamepadButton>(Value);
+                else if (AssetType == AssetIDType.MouseButton)
+                    return ConvertToEnumStr<MouseButton>(Value);
                 else if (AssetType == AssetIDType.Enum_PathEndAction)
                     return ConvertToEnumStr<PathEndAction>(Value);
                 else if (AssetType == AssetIDType.Enum_BufferKind)
@@ -326,7 +328,7 @@ namespace UndertaleModLib.Decompiler
                             return "ord(\"" + (char)val + "\")";
 
                         if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
-                            return  ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
+                            return ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
 
                         if (!Char.IsControl((char)val) && !Char.IsLower((char)val) && val > 0) // The special keys overlay with the uppercase letters (ugh)
                             return "ord(" + (((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")

@@ -12,6 +12,7 @@ namespace UndertaleModLib.Decompiler
         Other = 0,
         Color,
         KeyboardKey,
+        MouseButton,
         Enum_HAlign,
         Enum_VAlign,
         Enum_OSType,
@@ -145,6 +146,15 @@ namespace UndertaleModLib.Decompiler
         buffer_seek_end = 2
     }
 
+    public enum MouseButton : int
+    {
+        mb_any = -1,
+        mb_none,
+        mb_left,
+        mb_right,
+        mb_middle
+    }
+
     public enum e__VW : int
     {
         XView = 0,
@@ -252,6 +262,8 @@ namespace UndertaleModLib.Decompiler
                 return (int)Enum.Parse(typeof(OSType), const_name);
             if (Enum.IsDefined(typeof(GamepadButton), const_name))
                 return (int)Enum.Parse(typeof(GamepadButton), const_name);
+            if (Enum.IsDefined(typeof(MouseButton), const_name))
+                return (int)Enum.Parse(typeof(MouseButton), const_name);
             if (Enum.IsDefined(typeof(HAlign), const_name))
                 return (int)Enum.Parse(typeof(HAlign), const_name);
             if (Enum.IsDefined(typeof(VAlign), const_name))
@@ -597,14 +609,20 @@ namespace UndertaleModLib.Decompiler
 
                 { "shader_is_compiled", new AssetIDType[] { AssetIDType.Shader } },
                 { "shader_set", new AssetIDType[] { AssetIDType.Shader } },
+                { "shader_get_uniform", new AssetIDType[] { AssetIDType.Shader, AssetIDType.Other } },
+                { "shader_get_sampler_index", new AssetIDType[] { AssetIDType.Shader, AssetIDType.Other } },
+                { "shader_enable_corner_id", new AssetIDType[] { AssetIDType.Boolean } },
+
                 // { "shader_current", new AssetIDType[] { } }, returns shader.
+
+                // Interpolation
+                { "texture_set_interpolation", new AssetIDType[] { AssetIDType.Boolean } },
+                { "gpu_set_texfilter", new AssetIDType[] { AssetIDType.Boolean } }, // GMS2 equivalent of texture_set_interpolation.
 
                 // TODO: GMS2 tilemaps
                 // TODO: GMS2 layers
             
                 { "io_clear", new AssetIDType[] { } },
-                { "keyboard_multicheck", new AssetIDType[] { AssetIDType.KeyboardKey } },
-                { "keyboard_multicheck_pressed", new AssetIDType[] { AssetIDType.KeyboardKey } },
                 { "keyboard_check", new AssetIDType[] { AssetIDType.KeyboardKey } },
                 { "keyboard_check_pressed", new AssetIDType[] { AssetIDType.KeyboardKey } },
                 { "keyboard_check_released", new AssetIDType[] { AssetIDType.KeyboardKey } },
@@ -615,14 +633,27 @@ namespace UndertaleModLib.Decompiler
                 { "keyboard_set_map", new AssetIDType[] { AssetIDType.KeyboardKey, AssetIDType.KeyboardKey } },
                 { "keyboard_get_map", new AssetIDType[] { AssetIDType.KeyboardKey } },
                 { "keyboard_unset_map", new AssetIDType[] { AssetIDType.KeyboardKey } },
-                { "keyboard_set_numlock", new AssetIDType[] { AssetIDType.Other } },
+                { "keyboard_set_numlock", new AssetIDType[] { AssetIDType.Boolean } },
                 { "keyboard_get_numlock", new AssetIDType[] { } },
+
+                // Mouse functions
+                { "mouse_check_button", new AssetIDType[] { AssetIDType.MouseButton } },
+                { "mouse_check_button_pressed", new AssetIDType[] { AssetIDType.MouseButton } },
+                { "mouse_check_button_released", new AssetIDType[] { AssetIDType.MouseButton } },
+                { "mouse_clear", new AssetIDType[] { AssetIDType.MouseButton } },
+
+                // Device Mouse functions
+                { "device_mouse_check_button", new AssetIDType[] { AssetIDType.Other, AssetIDType.MouseButton } },
+                { "device_mouse_check_button_pressed", new AssetIDType[] { AssetIDType.Other, AssetIDType.MouseButton } },
+                { "device_mouse_check_button_released", new AssetIDType[] { AssetIDType.Other, AssetIDType.MouseButton } },
+                { "device_mouse_dbclick_enable", new AssetIDType[] { AssetIDType.Boolean } },
 
                 { "gamepad_button_value", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
                 { "gamepad_button_check", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
                 { "gamepad_button_check_pressed", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
                 { "gamepad_button_check_released", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
                 { "gamepad_axis_value", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
+                { "gamepad_set_color", new AssetIDType[] { AssetIDType.Other, AssetIDType.Color } }, // PS4 only, DualShock pads have an LED panel.
 
                 { "buffer_create", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferKind, AssetIDType.Other } },
                 { "buffer_create_from_vertex_buffer", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferKind, AssetIDType.Other } },
@@ -645,6 +676,7 @@ namespace UndertaleModLib.Decompiler
                 { "background_colour", AssetIDType.Color }, // array
                 { "view_object", AssetIDType.GameObject }, // array
                 { "path_index", AssetIDType.Path },
+                { "room_persistent", AssetIDType.Boolean },
                 { "room_first", AssetIDType.Room },
                 { "room_last", AssetIDType.Room },
                 { "room", AssetIDType.Room },
@@ -655,11 +687,14 @@ namespace UndertaleModLib.Decompiler
                 { "event_object", AssetIDType.GameObject },
                 { "keyboard_key", AssetIDType.KeyboardKey },
                 { "keyboard_lastkey", AssetIDType.KeyboardKey },
+                { "mouse_button", AssetIDType.MouseButton },
+                { "mouse_last_button", AssetIDType.MouseButton },
                 { "os_type", AssetIDType.Enum_OSType },
                 { "timeline_index", AssetIDType.Timeline },
                 { "path_endaction", AssetIDType.Enum_PathEndAction },
                 { "view_enabled", AssetIDType.Boolean },
                 { "view_visible", AssetIDType.Boolean },
+                { "visible", AssetIDType.Boolean }
 
             };
 
@@ -726,7 +761,6 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("darkmode", AssetIDType.Boolean);
                 builtin_vars.Add("darkify", AssetIDType.Boolean);
                 builtin_vars.Add("noroom", AssetIDType.Boolean);
-                builtin_vars.Add("room_persistent", AssetIDType.Boolean);
                 builtin_vars.Add("loop", AssetIDType.Boolean);
                 builtin_vars.Add("__loadedroom", AssetIDType.Room);
                 builtin_vars.Add("roomchoice", AssetIDType.Room);
@@ -846,6 +880,8 @@ namespace UndertaleModLib.Decompiler
             //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
+                builtin_funcs["keyboard_multicheck"] = new AssetIDType[] { AssetIDType.KeyboardKey };
+                builtin_funcs["keyboard_multicheck_pressed"] = new AssetIDType[] { AssetIDType.KeyboardKey };
                 //gml_Object_obj_vulkinbody_UNDERTALE_Create_0
                 //Seems to be used a lot as a regular value between the values of around 0-20. 
                 builtin_vars.Add("face", AssetIDType.Sprite);
@@ -925,7 +961,6 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("offscreen_frozen", AssetIDType.Boolean);
                 builtin_vars.Add("ignoresolid", AssetIDType.Boolean);
                 builtin_vars.Add("eraser", AssetIDType.Boolean);
-                builtin_vars.Add("visible", AssetIDType.Boolean);
                 builtin_vars.Add("bikeflip", AssetIDType.Boolean);
                 builtin_vars.Add("checked", AssetIDType.Boolean);
                 builtin_vars.Add("secondtime", AssetIDType.Boolean);
