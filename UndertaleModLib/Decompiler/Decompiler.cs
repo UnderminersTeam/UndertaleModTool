@@ -284,6 +284,8 @@ namespace UndertaleModLib.Decompiler
                     return ConvertToEnumStr<HAlign>(Value);
                 else if (AssetType == AssetIDType.Enum_VAlign)
                     return ConvertToEnumStr<VAlign>(Value);
+                else if (AssetType == AssetIDType.Enum_GameSpeed)
+                    return ConvertToEnumStr<GameSpeed>(Value);
                 else if (AssetType == AssetIDType.Enum_OSType)
                     return ConvertToEnumStr<OSType>(Value);
                 else if (AssetType == AssetIDType.Enum_GamepadButton)
