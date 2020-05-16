@@ -15,6 +15,7 @@ namespace UndertaleModLib.Decompiler
         MouseButton,
         Enum_HAlign,
         Enum_VAlign,
+        Enum_GameSpeed, // GMS2 only
         Enum_OSType,
         Enum_GamepadButton,
         Enum_PathEndAction,
@@ -51,6 +52,12 @@ namespace UndertaleModLib.Decompiler
         fa_top = 0,
         fa_middle = 1,
         fa_bottom = 2
+    }
+
+    public enum GameSpeed : int
+    {
+        gamespeed_fps,
+        gamespeed_microseconds
     }
 
     public enum OSType : int
@@ -268,6 +275,8 @@ namespace UndertaleModLib.Decompiler
                 return (int)Enum.Parse(typeof(HAlign), const_name);
             if (Enum.IsDefined(typeof(VAlign), const_name))
                 return (int)Enum.Parse(typeof(VAlign), const_name);
+            if (Enum.IsDefined(typeof(GameSpeed), const_name))
+                return (int)Enum.Parse(typeof(GameSpeed), const_name);
             if (Enum.IsDefined(typeof(e__VW), const_name))
                 return (int)Enum.Parse(typeof(e__VW), const_name);
             if (Enum.IsDefined(typeof(e__BG), const_name))
@@ -621,7 +630,11 @@ namespace UndertaleModLib.Decompiler
 
                 // TODO: GMS2 tilemaps
                 // TODO: GMS2 layers
-            
+
+                // GMS2 only equivalents of room_speed.
+                { "game_get_speed", new AssetIDType[] { AssetIDType.Enum_GameSpeed } },
+                { "game_set_speed", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GameSpeed } },
+
                 { "io_clear", new AssetIDType[] { } },
                 { "keyboard_check", new AssetIDType[] { AssetIDType.KeyboardKey } },
                 { "keyboard_check_pressed", new AssetIDType[] { AssetIDType.KeyboardKey } },
