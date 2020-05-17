@@ -292,6 +292,8 @@ namespace UndertaleModLib.Decompiler
                     return ConvertToEnumStr<GamepadButton>(Value);
                 else if (AssetType == AssetIDType.MouseButton)
                     return ConvertToEnumStr<MouseButton>(Value);
+                else if (AssetType == AssetIDType.Enum_MouseCursor)
+                    return ConvertToEnumStr<MouseCursor>(Value);
                 else if (AssetType == AssetIDType.Enum_PathEndAction)
                     return ConvertToEnumStr<PathEndAction>(Value);
                 else if (AssetType == AssetIDType.Enum_BufferKind)

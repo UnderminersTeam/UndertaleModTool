@@ -13,6 +13,7 @@ namespace UndertaleModLib.Decompiler
         Color,
         KeyboardKey,
         MouseButton,
+        Enum_MouseCursor,
         Enum_HAlign,
         Enum_VAlign,
         Enum_GameSpeed, // GMS2 only
@@ -58,6 +59,25 @@ namespace UndertaleModLib.Decompiler
     {
         gamespeed_fps,
         gamespeed_microseconds
+    }
+
+    public enum MouseCursor : int
+    {
+        cr_size_all = -22,
+        cr_handpoint = -21,
+        cr_appstart = -19, // I have no idea why they aren't aligned.
+        cr_drag = -12,
+        cr_hourglass = -11,
+        cr_uparrow = -10,
+        cr_size_we = -9,
+        cr_size_nwse = -8,
+        cr_size_ns = -7,
+        cr_size_nesw = -6,
+        cr_beam = -4,
+        cr_cross = -3,
+        cr_arrow = -2,
+        cr_none = -1,
+        cr_default = 0
     }
 
     public enum OSType : int
@@ -271,6 +291,8 @@ namespace UndertaleModLib.Decompiler
                 return (int)Enum.Parse(typeof(GamepadButton), const_name);
             if (Enum.IsDefined(typeof(MouseButton), const_name))
                 return (int)Enum.Parse(typeof(MouseButton), const_name);
+            if (Enum.IsDefined(typeof(MouseCursor), const_name))
+                return (int)Enum.Parse(typeof(MouseCursor), const_name);
             if (Enum.IsDefined(typeof(HAlign), const_name))
                 return (int)Enum.Parse(typeof(HAlign), const_name);
             if (Enum.IsDefined(typeof(VAlign), const_name))
@@ -634,6 +656,11 @@ namespace UndertaleModLib.Decompiler
                 // GMS2 only equivalents of room_speed.
                 { "game_get_speed", new AssetIDType[] { AssetIDType.Enum_GameSpeed } },
                 { "game_set_speed", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GameSpeed } },
+
+                // window_ functions
+                { "window_set_cursor", new AssetIDType[] { AssetIDType.Enum_MouseCursor } },
+                { "window_set_fullscreen", new AssetIDType[] { AssetIDType.Boolean } },
+                { "window_set_color", new AssetIDType[] { AssetIDType.Color } },
 
                 { "io_clear", new AssetIDType[] { } },
                 { "keyboard_check", new AssetIDType[] { AssetIDType.KeyboardKey } },
