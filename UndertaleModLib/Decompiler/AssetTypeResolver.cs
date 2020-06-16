@@ -23,6 +23,14 @@ namespace UndertaleModLib.Decompiler
         Enum_BufferKind,
         Enum_BufferType,
         Enum_BufferSeek,
+        Enum_Steam_UGC_FileType,
+        Enum_Steam_UGC_List,
+        Enum_Steam_UGC_QueryType,
+        Enum_Steam_UGC_MatchType,
+        Enum_Steam_UGC_SortOrder,
+        Enum_Steam_LeaderBoard_Sort,
+        Enum_Steam_LeaderBoard_Display,
+        Enum_Steam_Overlay,
         e__VW, // The constant used in __view_get and __view_set compatibility scripts
         e__BG, // The constant used in __background_get and __background_set compatibility scripts
         Boolean,
@@ -227,6 +235,93 @@ namespace UndertaleModLib.Decompiler
         @true = 1
     }
 
+    public enum Steam_UGC_FileType : int
+    {
+        ugc_filetype_community,
+        ugc_filetype_microtrans
+    }
+
+    public enum Steam_UGC_MatchType : int
+    {
+        ugc_match_Items,
+        ugc_match_Items_Mtx,
+        ugc_match_Items_ReadyToUse,
+        ugc_match_Collections,
+        ugc_match_Artwork,
+        ugc_match_Videos,
+        ugc_match_Screenshots,
+        ugc_match_AllGuides,
+        ugc_match_WebGuides,
+        ugc_match_IntegratedGuides,
+        ugc_match_UsableInGame,
+        ugc_match_ControllerBindings,
+    }
+
+    public enum Steam_UGC_QueryType : int
+    {
+        ugc_query_RankedByVote,
+        ugc_query_RankedByPublicationDate,
+        ugc_query_AcceptedForGameRankedByAcceptanceDate,
+        ugc_query_RankedByTrend,
+        ugc_query_FavoritedByFriendsRankedByPublicationDate,
+        ugc_query_CreatedByFriendsRankedByPublicationDate,
+        ugc_query_RankedByNumTimesReported,
+        ugc_query_CreatedByFollowedUsersRankedByPublicationDate,
+        ugc_query_NotYetRated,
+        ugc_query_RankedByTotalVotesAsc,
+        ugc_query_RankedByVotesUp,
+        ugc_query_RankedByTextSearch,
+    }
+
+    public enum Steam_UGC_List : int
+    {
+        ugc_list_Published,
+        ugc_list_VotedOn,
+        ugc_list_VotedUp,
+        ugc_list_VotedDown,
+        ugc_list_WillVoteLater,
+        ugc_list_Favorited,
+        ugc_list_Subscribed,
+        ugc_list_UsedOrPlayed,
+        ugc_list_Followed
+    }
+
+    public enum Steam_UGC_SortOrder : int
+    {
+        ugc_sortorder_CreationOrderDesc,
+        ugc_sortorder_CreationOrderAsc,
+        ugc_sortorder_TitleAsc,
+        ugc_sortorder_LastUpdatedDesc,
+        ugc_sortorder_SubscriptionDateDesc,
+        ugc_sortorder_VoteScoreDesc,
+        ugc_sortorder_ForModeration
+    }
+
+    public enum Steam_LeaderBoard_Sort : int
+    {
+        lb_sort_none,
+        lb_sort_ascending,
+        lb_sort_descending,
+    }
+
+    public enum Steam_LeaderBoard_Display : int
+    {
+        lb_disp_none,
+        lb_disp_numeric,
+        lb_disp_time_sec,
+        lb_disp_time_ms,
+    }
+
+    public enum Steam_Overlay : int
+    {
+        ov_friends,
+        ov_community,
+        ov_players,
+        ov_settings,
+        ov_gamegroup,
+        ov_achievements,
+    }
+
     public class AssetTypeResolver
     {
         public static Dictionary<string, AssetIDType[]> builtin_funcs;
@@ -332,6 +427,9 @@ namespace UndertaleModLib.Decompiler
                 { "instance_place", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
                 { "instance_position", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
                 { "instance_deactivate_all", new AssetIDType[] { AssetIDType.Boolean } },
+                { "instance_deactivate_object", new AssetIDType[] { AssetIDType.GameObject } },
+                { "instance_activate_region", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean } },
+                { "instance_deactivate_region", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean } },
 
                 { "instance_activate_layer", new AssetIDType[] { AssetIDType.Layer } }, // GMS2
                 { "instance_deactivate_layer", new AssetIDType[] { AssetIDType.Layer } }, // GMS2
@@ -705,6 +803,23 @@ namespace UndertaleModLib.Decompiler
                 { "buffer_fill", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Enum_BufferType, AssetIDType.Other, AssetIDType.Other } },
                 { "buffer_sizeof", new AssetIDType[] { AssetIDType.Enum_BufferType } },
                 { "buffer_seek", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferSeek, AssetIDType.Other } },
+
+                // Steam functions
+                { "steam_ugc_create_item", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_Steam_UGC_FileType } },
+                { "steam_ugc_create_query_user", new AssetIDType[] { AssetIDType.Enum_Steam_UGC_List, AssetIDType.Enum_Steam_UGC_MatchType, AssetIDType.Enum_Steam_UGC_SortOrder, AssetIDType.Other } },
+                { "steam_ugc_create_query_user_ex", new AssetIDType[] { AssetIDType.Enum_Steam_UGC_List, AssetIDType.Enum_Steam_UGC_MatchType, AssetIDType.Enum_Steam_UGC_SortOrder, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "steam_ugc_create_query_all", new AssetIDType[] { AssetIDType.Enum_Steam_UGC_QueryType, AssetIDType.Enum_Steam_UGC_MatchType, AssetIDType.Other } },
+                { "steam_ugc_create_query_all_ex", new AssetIDType[] { AssetIDType.Enum_Steam_UGC_QueryType, AssetIDType.Enum_Steam_UGC_MatchType, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+
+                { "steam_ugc_query_set_cloud_filename_filter", new AssetIDType[] { AssetIDType.Other, AssetIDType.Boolean } },
+                { "steam_ugc_query_set_match_any_tag", new AssetIDType[] { AssetIDType.Other, AssetIDType.Boolean } },
+                { "steam_ugc_query_set_return_long_description", new AssetIDType[] { AssetIDType.Other, AssetIDType.Boolean } },
+                { "steam_ugc_query_set_return_total_only", new AssetIDType[] { AssetIDType.Other, AssetIDType.Boolean } },
+                { "steam_ugc_query_set_allow_cached_response", new AssetIDType[] { AssetIDType.Other, AssetIDType.Boolean } },
+
+                { "steam_create_leaderboard", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_Steam_LeaderBoard_Sort, AssetIDType.Enum_Steam_LeaderBoard_Display } },
+
+                { "steam_activate_overlay", new AssetIDType[] { AssetIDType.Enum_Steam_Overlay } },
 
                 // Also big TODO: Implement Boolean type for all these functions
             };

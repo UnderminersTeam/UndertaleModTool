@@ -302,6 +302,22 @@ namespace UndertaleModLib.Decompiler
                     return ConvertToEnumStr<BufferType>(Value);
                 else if (AssetType == AssetIDType.Enum_BufferSeek)
                     return ConvertToEnumStr<BufferSeek>(Value);
+                else if (AssetType == AssetIDType.Enum_Steam_UGC_FileType)
+                    return ConvertToEnumStr<Steam_UGC_FileType>(Value);
+                else if (AssetType == AssetIDType.Enum_Steam_UGC_List)
+                    return ConvertToEnumStr<Steam_UGC_List>(Value);
+                else if (AssetType == AssetIDType.Enum_Steam_UGC_MatchType)
+                    return ConvertToEnumStr<Steam_UGC_MatchType>(Value);
+                else if (AssetType == AssetIDType.Enum_Steam_UGC_QueryType)
+                    return ConvertToEnumStr<Steam_UGC_QueryType>(Value);
+                else if (AssetType == AssetIDType.Enum_Steam_UGC_SortOrder)
+                    return ConvertToEnumStr<Steam_UGC_SortOrder>(Value);
+                else if (AssetType == AssetIDType.Enum_Steam_Overlay)
+                    return ConvertToEnumStr<Steam_Overlay>(Value);
+                else if (AssetType == AssetIDType.Enum_Steam_LeaderBoard_Display)
+                    return ConvertToEnumStr<Steam_LeaderBoard_Display>(Value);
+                else if (AssetType == AssetIDType.Enum_Steam_LeaderBoard_Sort)
+                    return ConvertToEnumStr<Steam_LeaderBoard_Sort>(Value);
                 else if (AssetType == AssetIDType.Boolean)
                     return ConvertToEnumStr<Boolean>(Value);
 
