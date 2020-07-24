@@ -325,7 +325,7 @@ namespace UndertaleModLib.Models
                 Dictionary<T, List<UndertaleInstruction>> list = new Dictionary<T, List<UndertaleInstruction>>();
                 foreach (UndertaleCode code in codes)
                 {
-                    if (code.Flags != 0) // GMS 2.3, skip duplicates
+                    if (code.Offset != 0) // GMS 2.3, skip duplicates
                         continue;
                     foreach (UndertaleInstruction instr in code.Instructions)
                     {
@@ -1076,14 +1076,14 @@ namespace UndertaleModLib.Models
         private uint _Length;
         private uint _LocalsCount = 0; // Seems related do UndertaleCodeLocals, TODO: does it also seem unused?
         internal uint _BytecodeAbsoluteAddress;
-        private uint _Flags = 0;
+        private uint _Offset = 0;
         private byte[] _UnsupportedBuffer;
         private bool _NoLocals = false;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public uint Length { get => _Length; internal set { _Length = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Length")); } }
         public uint LocalsCount { get => _LocalsCount; set { _LocalsCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LocalsCount")); } }
-        public uint Flags { get => _Flags; set { _Flags = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Flags")); } }
+        public uint Offset { get => _Offset; set { _Offset = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Offset")); } }
         public List<UndertaleInstruction> Instructions { get; } = new List<UndertaleInstruction>();
         public bool NoLocals { get => _NoLocals; }
 
@@ -1140,7 +1140,7 @@ namespace UndertaleModLib.Models
                 writer.Write(LocalsCount);
                 int BytecodeRelativeAddress = (int)_BytecodeAbsoluteAddress - (int)writer.Position;
                 writer.Write(BytecodeRelativeAddress);
-                writer.Write(Flags);
+                writer.Write(Offset);
             }
 
         }
@@ -1183,7 +1183,7 @@ namespace UndertaleModLib.Models
                     Instructions.Add(instr);
                 }
                 reader.Position = here;
-                Flags = reader.ReadUInt32();
+                Offset = reader.ReadUInt32();
             }
         }
 
