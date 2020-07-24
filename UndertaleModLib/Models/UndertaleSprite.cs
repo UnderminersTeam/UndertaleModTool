@@ -210,12 +210,15 @@ namespace UndertaleModLib.Models
                 writer.Write(mask.Data);
                 total += (uint)mask.Data.Length;
             }
-            while (total % 4 != 0)
+            if (SVersion != 2)
             {
-                writer.Write((byte)0);
-                total++;
+                while (total % 4 != 0)
+                {
+                    writer.Write((byte)0);
+                    total++;
+                }
+                Debug.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count));
             }
-            Debug.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count));
         }
 
         private void Align3(UndertaleReader reader)
@@ -252,7 +255,7 @@ namespace UndertaleModLib.Models
             OriginY = reader.ReadInt32();
             if (reader.ReadInt32() == -1) // technically this seems to be able to occur on older versions, for special sprite types
             {
-                bool sequence = false;
+                int sequenceOffset = 0;
 
                 IsSpecialType = true;
                 SVersion = reader.ReadUInt32();
@@ -261,15 +264,15 @@ namespace UndertaleModLib.Models
                 {
                     GMS2PlaybackSpeed = reader.ReadSingle();
                     GMS2PlaybackSpeedType = (AnimSpeedType)reader.ReadUInt32();
-                    if (SVersion >= 2 && reader.ReadInt32() != 0)
-                        sequence = true;
+                    if (SVersion >= 2)
+                        sequenceOffset = reader.ReadInt32();
                 }
 
                 switch (SSpriteType)
                 {
                     case SpriteType.Normal:
                         Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
-                        ReadMaskData(reader);
+                        ReadMaskData(reader, sequenceOffset == 0 ? -1 : (int)(sequenceOffset - reader.Position));
                         break;
                     case SpriteType.SWF:
                         {
@@ -326,7 +329,7 @@ namespace UndertaleModLib.Models
                         break;
                 }
 
-                if (sequence)
+                if (sequenceOffset != 0)
                 {
                     if (reader.ReadInt32() != 1)
                         throw new IOException("Expected 1");
@@ -341,24 +344,29 @@ namespace UndertaleModLib.Models
             }
         }
 
-        private void ReadMaskData(UndertaleReader reader)
+        private void ReadMaskData(UndertaleReader reader, int totalLen = -1)
         {
             uint MaskCount = reader.ReadUInt32();
+            uint len = (totalLen == -1) ? ((Width + 7) / 8 * Height)
+                                        : (uint)((totalLen - 4) / MaskCount);
             CollisionMasks.Clear();
             uint total = 0;
             for (uint i = 0; i < MaskCount; i++)
             {
-                uint len = (Width + 7) / 8 * Height;
                 CollisionMasks.Add(new MaskEntry(reader.ReadBytes((int)len)));
                 total += len;
             }
-            while (total % 4 != 0)
+
+            if (totalLen == -1)
             {
-                if (reader.ReadByte() != 0)
-                    throw new IOException("Mask padding");
-                total++;
+                while (total % 4 != 0)
+                {
+                    if (reader.ReadByte() != 0)
+                        throw new IOException("Mask padding");
+                    total++;
+                }
+                Debug.Assert(total == CalculateMaskDataSize(Width, Height, MaskCount));
             }
-            Debug.Assert(total == CalculateMaskDataSize(Width, Height, MaskCount));
         }
 
         public uint CalculateMaskDataSize(uint width, uint height, uint maskcount)

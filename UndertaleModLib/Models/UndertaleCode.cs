@@ -293,6 +293,12 @@ namespace UndertaleModLib.Models
                 Target = target;
             }
 
+            public Reference(int int32Value)
+            {
+                NextOccurrenceOffset = (uint)int32Value & 0x00FFFFFF;
+                Type = (VariableType)(int32Value >> 24);
+            }
+
             public void Serialize(UndertaleWriter writer)
             {
                 NextOccurrenceOffset = 0xdead;
@@ -319,6 +325,8 @@ namespace UndertaleModLib.Models
                 Dictionary<T, List<UndertaleInstruction>> list = new Dictionary<T, List<UndertaleInstruction>>();
                 foreach (UndertaleCode code in codes)
                 {
+                    if (code.Flags != 0) // GMS 2.3, skip duplicates
+                        continue;
                     foreach (UndertaleInstruction instr in code.Instructions)
                     {
                         T obj = instr.GetReference<T>()?.Target;
@@ -381,7 +389,7 @@ namespace UndertaleModLib.Models
                 uint addr = reader.GetAddressForUndertaleObject(obj.FirstAddress);
                 for (int i = 0; i < obj.Occurrences; i++)
                 {
-                    reference = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(addr).GetReference<T>();
+                    reference = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(addr).GetReference<T>(obj is UndertaleFunction);
                     if (reference == null)
                         throw new IOException("Failed to find reference at " + addr);
                     reference.Target = obj;
@@ -391,9 +399,15 @@ namespace UndertaleModLib.Models
             }
         }
 
-        public Reference<T> GetReference<T>() where T : class, UndertaleObject, ReferencedObject
+        public Reference<T> GetReference<T>(bool allowResolve = false) where T : class, UndertaleObject, ReferencedObject
         {
-            return (Destination as Reference<T>) ?? (Function as Reference<T>) ?? (Value as Reference<T>);
+            Reference<T> res = (Destination as Reference<T>) ?? (Function as Reference<T>) ?? (Value as Reference<T>);
+            if (allowResolve && res == null && Value is int)
+            {
+                Value = new Reference<T>((int)Value);
+                return (Reference<T>)Value;
+            }
+            return res;
         }
 
         public void Serialize(UndertaleWriter writer)
@@ -581,6 +595,11 @@ namespace UndertaleModLib.Models
                                 writer.Write((float)Value);
                                 break;
                             case DataType.Int32:
+                                if (Value.GetType() == typeof(Reference<UndertaleFunction>))
+                                {
+                                    writer.WriteUndertaleObject((Reference<UndertaleFunction>)Value);
+                                    break;
+                                }
                                 Debug.Assert(Value.GetType() == typeof(int));
                                 writer.Write((int)Value);
                                 break;
@@ -740,8 +759,8 @@ namespace UndertaleModLib.Models
                         if (DupExtra != 0 && Kind != Opcode.Dup)
                             throw new IOException("Invalid padding in " + Kind.ToString().ToUpper());
                         ComparisonKind = (ComparisonType)reader.ReadByte();
-                        if (!bytecode14 && (Kind == Opcode.Cmp) != ((byte)ComparisonKind != 0))
-                            throw new IOException("Got unexpected comparison type in " + Kind.ToString().ToUpper() + " (should be only in CMP)");
+                        //if (!bytecode14 && (Kind == Opcode.Cmp) != ((byte)ComparisonKind != 0))
+                        //    throw new IOException("Got unexpected comparison type in " + Kind.ToString().ToUpper() + " (should be only in CMP)");
                         byte TypePair = reader.ReadByte();
                         Type1 = (DataType)(TypePair & 0xf);
                         Type2 = (DataType)(TypePair >> 4);
@@ -1057,14 +1076,14 @@ namespace UndertaleModLib.Models
         private uint _Length;
         private uint _LocalsCount = 0; // Seems related do UndertaleCodeLocals, TODO: does it also seem unused?
         internal uint _BytecodeAbsoluteAddress;
-        private uint _UnknownProbablyZero = 0;
+        private uint _Flags = 0;
         private byte[] _UnsupportedBuffer;
         private bool _NoLocals = false;
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public uint Length { get => _Length; internal set { _Length = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Length")); } }
         public uint LocalsCount { get => _LocalsCount; set { _LocalsCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LocalsCount")); } }
-        public uint UnknownProbablyZero { get => _UnknownProbablyZero; set { _UnknownProbablyZero = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UnknownProbablyZero")); } }
+        public uint Flags { get => _Flags; set { _Flags = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Flags")); } }
         public List<UndertaleInstruction> Instructions { get; } = new List<UndertaleInstruction>();
         public bool NoLocals { get => _NoLocals; }
 
@@ -1074,11 +1093,23 @@ namespace UndertaleModLib.Models
         {
             if (writer.undertaleData.UnsupportedBytecodeVersion || writer.undertaleData.GeneralInfo.BytecodeVersion <= 14)
                 return;
-            _BytecodeAbsoluteAddress = writer.Position;
-            uint start = writer.Position;
-            foreach (UndertaleInstruction instr in Instructions)
-                writer.WriteUndertaleObject(instr);
-            Length = writer.Position - start;
+            if (Instructions.Count != 0 && writer.GetObjectPool().ContainsKey(Instructions.First()))
+            {
+                // In GMS 2.3, code entries repeat often
+                _BytecodeAbsoluteAddress = writer.LastBytecodeAddress;
+                Length = writer.Position - _BytecodeAbsoluteAddress;
+                // todo? set Flags to something else?
+            }
+            else
+            {
+                writer.LastBytecodeAddress = writer.Position;
+                _BytecodeAbsoluteAddress = writer.Position;
+                uint start = writer.Position;
+                foreach (UndertaleInstruction instr in Instructions)
+                    writer.WriteUndertaleObject(instr);
+                Length = writer.Position - start;
+                // todo? clear Flags? how?
+            }
         }
 
         public void Serialize(UndertaleWriter writer)
@@ -1109,7 +1140,7 @@ namespace UndertaleModLib.Models
                 writer.Write(LocalsCount);
                 int BytecodeRelativeAddress = (int)_BytecodeAbsoluteAddress - (int)writer.Position;
                 writer.Write(BytecodeRelativeAddress);
-                writer.Write(UnknownProbablyZero);
+                writer.Write(Flags);
             }
 
         }
@@ -1152,7 +1183,7 @@ namespace UndertaleModLib.Models
                     Instructions.Add(instr);
                 }
                 reader.Position = here;
-                UnknownProbablyZero = reader.ReadUInt32();
+                Flags = reader.ReadUInt32();
             }
         }
 

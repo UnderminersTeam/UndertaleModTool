@@ -75,6 +75,8 @@ namespace UndertaleModLib
             reader.LastChunkName = lastChunk;
             reader.Position = startPos;
 
+            reader.GMS2_3 = reader.AllChunkNames.Contains("SEQN");
+
             // Now, parse the chunks
             while (reader.Position < startPos + Length)
             {

@@ -25,8 +25,8 @@
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Locals count</TextBlock>
         <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding LocalsCount}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Unknown</TextBlock>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding UnknownProbablyZero}"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Flags</TextBlock>
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding Flags}"/>
         
         <TabControl Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
             <TabItem Header="Disassembly" Name="DisassemblyTab">

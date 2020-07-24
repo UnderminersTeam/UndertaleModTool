@@ -45,6 +45,7 @@ namespace UndertaleModLib.Models
 
             Tracks.Serialize(writer);
 
+            writer.Write(FunctionIDs.Count);
             foreach (KeyValuePair<int, UndertaleString> kvp in FunctionIDs)
             {
                 writer.Write(kvp.Key);
@@ -94,6 +95,7 @@ namespace UndertaleModLib.Models
                 writer.Write(Length);
                 writer.Write(Stretch);
                 writer.Write(Disabled);
+                writer.Write(Channels.Count);
                 foreach (KeyValuePair<int, T> kvp in Channels)
                 {
                     writer.Write(kvp.Key);

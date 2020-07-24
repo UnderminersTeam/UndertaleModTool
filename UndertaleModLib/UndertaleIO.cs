@@ -74,7 +74,7 @@ namespace UndertaleModLib
 
         public void UnserializeById(UndertaleReader reader, int id)
         {
-            if (id < 0 && id != -1)
+            if (id < -1)
                 throw new IOException("Invalid value for resource ID (" + typeof(ChunkT).Name + "): " + id);
             CachedId = id;
             reader.RequestResourceUpdate(this);
@@ -147,6 +147,7 @@ namespace UndertaleModLib
 
         public string LastChunkName;
         public List<string> AllChunkNames;
+        public bool GMS2_3 = false;
 
         public UndertaleChunk ReadUndertaleChunk()
         {
@@ -373,6 +374,7 @@ namespace UndertaleModLib
         internal UndertaleData undertaleData;
 
         public string LastChunkName;
+        public uint LastBytecodeAddress = 0;
 
         public UndertaleWriter(Stream output) : base(output)
         {
@@ -408,6 +410,11 @@ namespace UndertaleModLib
         private Dictionary<UndertaleObject, uint> objectPool = new Dictionary<UndertaleObject, uint>();
         private Dictionary<UndertaleObject, List<uint>> pendingWrites = new Dictionary<UndertaleObject, List<uint>>();
         private Dictionary<UndertaleObject, List<uint>> pendingStringWrites = new Dictionary<UndertaleObject, List<uint>>();
+
+        public Dictionary<UndertaleObject, uint> GetObjectPool()
+        {
+            return objectPool;
+        }
 
         public uint GetAddressForUndertaleObject(UndertaleObject obj)
         {
