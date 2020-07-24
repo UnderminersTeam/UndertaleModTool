@@ -48,6 +48,7 @@ namespace UndertaleModLib
         public IList<UndertaleSequence> Sequences => FORM.SEQN?.List;
 
         public bool UnsupportedBytecodeVersion = false;
+        public bool GMS2_3 = false;
         public int PaddingAlignException = -1;
 
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)

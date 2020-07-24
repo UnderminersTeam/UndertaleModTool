@@ -47,7 +47,8 @@ namespace UndertaleModLib.Models
             PushBltn = 0xC3, // Push(Value) // push builtin variable
             PushI = 0x84, // Push(Value) // push int16
             Call = 0xD9, // Function(arg0, arg1, ..., argn) where arg = Pop() and n = ArgumentsCount
-            Break = 0xFF, // Invalid access guard?
+            CallV = 0x99, // TODO: Unknown, maybe to do with calling using the stack? Generates with "show_message((function(){return 5;})());"
+            Break = 0xFF, // TODO: Several sub-opcodes in GMS 2.3
         }
 
         public enum InstructionType
@@ -72,6 +73,7 @@ namespace UndertaleModLib.Models
                 case Opcode.Ret:
                 case Opcode.Exit:
                 case Opcode.Popz:
+                case Opcode.CallV:
                     return InstructionType.SingleTypeInstruction;
 
                 case Opcode.Conv:
@@ -123,6 +125,8 @@ namespace UndertaleModLib.Models
         {
             switch (instr.Kind)
             {
+                // TODO! Opcode.CallV
+
                 case Opcode.Neg:
                 case Opcode.Not:
                     return 0;
