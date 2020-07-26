@@ -257,14 +257,15 @@ namespace UndertaleModLib
                 if (!bytecode14)
                 {
                     if (data.InstanceVarCount == data.InstanceVarCountAgain)
-                    { // Example games that use this mode: Undertale v1.08, Undertale v1.11.
+                    { // Bytecode 16+.
                         data.InstanceVarCount++;
                         data.InstanceVarCountAgain++;
                     }
                     else
-                    { // Example Games which use this mode: Undertale v1.001.
-                        if (inst == UndertaleInstruction.InstanceType.Self)
+                    { // Bytecode 15.
+                        if (inst == UndertaleInstruction.InstanceType.Self && !isBuiltin)
                         {
+			    oldId = data.InstanceVarCountAgain;
                             data.InstanceVarCountAgain++;
                         }
                         else if (inst == UndertaleInstruction.InstanceType.Global)
