@@ -127,10 +127,10 @@ namespace UndertaleModTool
                         case UndertaleInstruction.InstructionType.SingleTypeInstruction:
                             par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
 
-                            if (instr.Kind == UndertaleInstruction.Opcode.Dup)
+                            if (instr.Kind == UndertaleInstruction.Opcode.Dup || instr.Kind == UndertaleInstruction.Opcode.CallV)
                             {
                                 par.Inlines.Add(new Run(" "));
-                                par.Inlines.Add(new Run(instr.DupExtra.ToString()) { Foreground = argBrush });
+                                par.Inlines.Add(new Run(instr.Extra.ToString()) { Foreground = argBrush });
                             }
                             break;
 

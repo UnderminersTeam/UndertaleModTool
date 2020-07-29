@@ -132,7 +132,7 @@ namespace UndertaleModLib.Models
                     return 0;
 
                 case Opcode.Dup:
-                    return 1 + instr.DupExtra;
+                    return 1 + instr.Extra;
 
                 case Opcode.Ret:
                     return -1;
@@ -266,7 +266,7 @@ namespace UndertaleModLib.Models
         public int JumpOffset { get; set; }
         public bool JumpOffsetPopenvExitMagic { get; set; }
         public ushort ArgumentsCount { get; set; }
-        public byte DupExtra { get; set; }
+        public byte Extra { get; set; }
         public ushort SwapExtra { get; set; }
 
         public interface ReferencedObject
@@ -423,7 +423,7 @@ namespace UndertaleModLib.Models
                 case InstructionType.ComparisonInstruction:
                     {
                         bool bytecode14 = (writer.undertaleData.GeneralInfo?.BytecodeVersion <= 14);
-                        writer.Write(DupExtra);
+                        writer.Write(Extra);
                         if (bytecode14 && Kind == Opcode.Cmp)
                             writer.Write((byte)0);
                         else
@@ -759,8 +759,8 @@ namespace UndertaleModLib.Models
                 case InstructionType.DoubleTypeInstruction:
                 case InstructionType.ComparisonInstruction:
                     {
-                        DupExtra = reader.ReadByte();
-                        if (DupExtra != 0 && Kind != Opcode.Dup)
+                        Extra = reader.ReadByte();
+                        if (Extra != 0 && Kind != Opcode.Dup && Kind != Opcode.CallV)
                             throw new IOException("Invalid padding in " + Kind.ToString().ToUpper());
                         ComparisonKind = (ComparisonType)reader.ReadByte();
                         //if (!bytecode14 && (Kind == Opcode.Cmp) != ((byte)ComparisonKind != 0))
@@ -929,10 +929,10 @@ namespace UndertaleModLib.Models
                 case InstructionType.SingleTypeInstruction:
                     sb.Append("." + Type1.ToOpcodeParam());
 
-                    if (Kind == Opcode.Dup)
+                    if (Kind == Opcode.Dup || Kind == Opcode.CallV)
                     {
                         sb.Append(" ");
-                        sb.Append(DupExtra.ToString());
+                        sb.Append(Extra.ToString());
                     }
                     break;
 

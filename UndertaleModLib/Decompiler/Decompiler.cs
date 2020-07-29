@@ -1291,7 +1291,7 @@ namespace UndertaleModLib.Decompiler
                         List<Expression> topExpressions2 = new List<Expression>();
                         // This "count" is necessary because sometimes dup.i 1 is replaced with dup.l 0...
                         // Seemingly have equivalent behavior, so treat it that way.
-                        int count = ((instr.DupExtra + 1) * (instr.Type1 == UndertaleInstruction.DataType.Int64 ? 2 : 1));
+                        int count = ((instr.Extra + 1) * (instr.Type1 == UndertaleInstruction.DataType.Int64 ? 2 : 1));
                         for (int j = 0; j < count; j++)
                         {
                             if ((j % 2) > 0 && stack.Count == 0)
