@@ -48,6 +48,7 @@ namespace UndertaleModLib
         public IList<UndertaleSequence> Sequences => FORM.SEQN?.List;
 
         public bool UnsupportedBytecodeVersion = false;
+        public bool GMS2_2_2_302 = false;
         public bool GMS2_3 = false;
         public int PaddingAlignException = -1;
 
