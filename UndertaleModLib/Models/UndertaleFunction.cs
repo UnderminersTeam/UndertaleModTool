@@ -12,6 +12,7 @@ namespace UndertaleModLib.Models
     // TODO: INotifyPropertyChanged
     public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject
     {
+        public UndertaleFunctionClassification Classification { get; set; }
         public UndertaleString Name { get; set; }
         public int UnknownChainEndingValue { get; set; }
 
@@ -63,6 +64,18 @@ namespace UndertaleModLib.Models
         {
             return Name.Content;
         }
+    }
+
+    [Flags]
+    public enum UndertaleFunctionClassification
+    {
+        None = 0, // generic instance_*, draw_*, lengthdir_*
+        Internet = 1, // http_*, network_* and other network stuff.
+        Joystick = 2, // joystick_* legacy DirectInput API from legacy GM.
+        Gamepad = 4,  // gamepad_* new XInput API used in GM:Studio
+        Immersion = 8 // immersion_* Immersion Haptics functions, deprecated in GM:S v1.4.1767 and above.
+
+        // There may be more... especially in GMS 2.3...
     }
 
     // Seems to be unused. You can remove all entries and the game still works normally.

@@ -42,10 +42,7 @@ namespace UndertaleModLib.Models
         public uint LastObj { get; set; } = 100000;
         public uint LastTile { get; set; } = 10000000;
         public uint GameID { get; set; } = 13371337;
-        public uint Unknown1 { get; set; } = 0;
-        public uint Unknown2 { get; set; } = 0;
-        public uint Unknown3 { get; set; } = 0;
-        public uint Unknown4 { get; set; } = 0;
+        public Guid DirectPlayGuid { get; set; } = Guid.Empty; // in Studio it's always empty.
         public UndertaleString Name { get; set; }
         public uint Major { get; set; } = 1;
         public uint Minor { get; set; } = 0;
@@ -58,10 +55,8 @@ namespace UndertaleModLib.Models
         public uint LicenseCRC32 { get; set; }
         public ulong Timestamp { get; set; } = 0;
         public UndertaleString DisplayName { get; set; }
-        public uint ActiveTargets1 { get; set; } = 0;
-        public uint ActiveTargets2 { get; set; } = 0;
-        public uint FunctionClassifications1 { get; set; } = 0;
-        public uint FunctionClassifications2 { get; set; } = 0;
+        public ulong ActiveTargets { get; set; } = 0;
+        public ulong FunctionClassifications { get; set; } = 0; // Initializing it with 0 is a very bad idea.
         public int SteamAppID { get; set; } = 0;
         public uint DebuggerPort { get; set; } = 6502;
         public UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM> RoomOrder { get; private set; } = new UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>();
@@ -81,10 +76,7 @@ namespace UndertaleModLib.Models
             writer.Write(LastObj);
             writer.Write(LastTile);
             writer.Write(GameID);
-            writer.Write(Unknown1);
-            writer.Write(Unknown2);
-            writer.Write(Unknown3);
-            writer.Write(Unknown4);
+            writer.Write(DirectPlayGuid.ToByteArray());
             writer.WriteUndertaleString(Name);
             writer.Write(Major);
             writer.Write(Minor);
@@ -99,10 +91,15 @@ namespace UndertaleModLib.Models
             writer.Write(LicenseCRC32);
             writer.Write(Timestamp);
             writer.WriteUndertaleString(DisplayName);
-            writer.Write(ActiveTargets1);
-            writer.Write(ActiveTargets2);
-            writer.Write(FunctionClassifications1);
-            writer.Write(FunctionClassifications2);
+
+            // Should always be zero.
+            writer.Write((uint)(ActiveTargets & uint.MaxValue));
+            writer.Write((uint)((ActiveTargets >> 32) & uint.MaxValue));
+
+            // Very weird value. Decides if Runner should initialize certain subsystems.
+            writer.Write((uint)(FunctionClassifications & uint.MaxValue));
+            writer.Write((uint)((FunctionClassifications >> 32) & uint.MaxValue));
+
             writer.Write(SteamAppID);
             writer.Write(DebuggerPort);
             writer.WriteUndertaleObject(RoomOrder);
@@ -129,10 +126,8 @@ namespace UndertaleModLib.Models
             LastObj = reader.ReadUInt32();
             LastTile = reader.ReadUInt32();
             GameID = reader.ReadUInt32();
-            Unknown1 = reader.ReadUInt32();
-            Unknown2 = reader.ReadUInt32();
-            Unknown3 = reader.ReadUInt32();
-            Unknown4 = reader.ReadUInt32();
+            byte[] GuidData = reader.ReadBytes(16);
+            DirectPlayGuid = new Guid(GuidData);
             Name = reader.ReadUndertaleString();
             Major = reader.ReadUInt32();
             Minor = reader.ReadUInt32();
@@ -145,10 +140,8 @@ namespace UndertaleModLib.Models
             LicenseCRC32 = reader.ReadUInt32();
             Timestamp = reader.ReadUInt64();
             DisplayName = reader.ReadUndertaleString();
-            ActiveTargets1 = reader.ReadUInt32();
-            ActiveTargets2 = reader.ReadUInt32();
-            FunctionClassifications1 = reader.ReadUInt32();
-            FunctionClassifications2 = reader.ReadUInt32();
+            ActiveTargets = (reader.ReadUInt32() & uint.MaxValue) | ((reader.ReadUInt32() & uint.MaxValue) << 32);
+            FunctionClassifications = (reader.ReadUInt32() & uint.MaxValue) | ((reader.ReadUInt32() & uint.MaxValue) << 32);
             SteamAppID = reader.ReadInt32();
             DebuggerPort = reader.ReadUInt32();
             RoomOrder = reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>>();
