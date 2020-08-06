@@ -25,8 +25,7 @@ namespace UndertaleModLib.Models
 
         public void SerializePadding(UndertaleWriter writer)
         {
-            while (writer.Position % 4 != 0)
-                writer.Write((byte)0);
+            writer.Position += (4 - (writer.Position % 4)) % 4;
         }
 
         public void Unserialize(UndertaleReader reader)

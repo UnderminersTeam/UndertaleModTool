@@ -212,11 +212,9 @@ namespace UndertaleModLib.Models
             }
             if (SVersion != 2)
             {
-                while (total % 4 != 0)
-                {
-                    writer.Write((byte)0);
-                    total++;
-                }
+                uint PaddingFix = (4 - (total % 4)) % 4;
+                writer.Position += PaddingFix;
+                total += PaddingFix;
                 Debug.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count));
             }
         }
