@@ -39,17 +39,16 @@ namespace UndertaleModLib.Models
         public void SerializeBlob(UndertaleWriter writer)
         {
             // padding
-            while (writer.Position % 0x80 != 0)
-                writer.Write((byte)0);
+            writer.Position += (0x80 - (writer.Position % 0x80)) % 0x80;
 
             writer.WriteUndertaleObject(TextureData);
         }
 
         public void UnserializeBlob(UndertaleReader reader)
         {
-            while (reader.Position % 0x80 != 0)
-                if (reader.ReadByte() != 0)
-                    throw new IOException("Padding error!");
+            reader.Position += (0x80 - (reader.Position % 0x80)) % 0x80 - 1;
+            if (reader.ReadByte() != 0)
+                throw new IOException("Padding error!");
 
             reader.ReadUndertaleObject(TextureData);
         }

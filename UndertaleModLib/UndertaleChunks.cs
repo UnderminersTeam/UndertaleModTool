@@ -417,8 +417,7 @@ namespace UndertaleModLib
             base.SerializeChunk(writer);
 
             // padding
-            while (writer.Position % 0x80 != 0)
-                writer.Write((byte)0);
+            writer.Position += (0x80 - (writer.Position % 0x80)) % 0x80;
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
@@ -426,8 +425,8 @@ namespace UndertaleModLib
             base.UnserializeChunk(reader);
 
             // padding
-            while (reader.Position % 0x80 != 0)
-                if (reader.ReadByte() != 0)
+            reader.Position += (0x80 - (reader.Position % 0x80)) % 0x80 - 1;
+            if (reader.ReadByte() != 0)
                     throw new IOException("Padding error in STRG");
         }
     }
@@ -446,8 +445,7 @@ namespace UndertaleModLib
 
             // padding
             // TODO: Maybe the padding is more global and every chunk is padded to 4 byte boundaries?
-            while (writer.Position % 4 != 0)
-                writer.Write((byte)0);
+            writer.Position += (4 - (writer.Position % 4)) % 4;
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
@@ -459,9 +457,9 @@ namespace UndertaleModLib
                 obj.UnserializeBlob(reader);
 
             // padding
-            while (reader.Position % 4 != 0)
-                if (reader.ReadByte() != 0)
-                    throw new IOException("Padding error!");
+            reader.Position += (4 - (reader.Position % 4)) % 4 - 1;
+            if (reader.ReadByte() != 0)
+                throw new IOException("Padding error!");
         }
     }
 
@@ -558,8 +556,7 @@ namespace UndertaleModLib
             if (writer.undertaleData.GeneralInfo.Major < 2)
                 throw new InvalidOperationException();
 
-            while (writer.Position % 4 != 0)
-                writer.Write((byte)0);
+            writer.Position += (4 - (writer.Position % 4)) % 4;
 
             writer.Write((uint)1); // Version
 
@@ -572,9 +569,9 @@ namespace UndertaleModLib
                 throw new InvalidOperationException();
 
             // Padding
-            while (reader.Position % 4 != 0)
-                if (reader.ReadByte() != 0)
-                    throw new IOException("Padding error!");
+            reader.Position += (4 - (reader.Position % 4)) % 4 - 1;
+            if (reader.ReadByte() != 0)
+                throw new IOException("Padding error!");
 
             if (reader.ReadUInt32() != 1)
                 throw new IOException("Expected ACRV version 1");
@@ -593,8 +590,7 @@ namespace UndertaleModLib
             if (writer.undertaleData.GeneralInfo.Major < 2)
                 throw new InvalidOperationException();
 
-            while (writer.Position % 4 != 0)
-                writer.Write((byte)0);
+            writer.Position += (4 - (writer.Position % 4)) % 4;
 
             writer.Write((uint)1); // Version
 
@@ -607,9 +603,9 @@ namespace UndertaleModLib
                 throw new InvalidOperationException();
 
             // Padding
-            while (reader.Position % 4 != 0)
-                if (reader.ReadByte() != 0)
-                    throw new IOException("Padding error!");
+            reader.Position += (4 - (reader.Position % 4)) % 4 - 1;
+            if (reader.ReadByte() != 0)
+                throw new IOException("Padding error!");
 
             if (reader.ReadUInt32() != 1)
                 throw new IOException("Expected SEQN version 1");
@@ -628,8 +624,7 @@ namespace UndertaleModLib
             if (writer.undertaleData.GeneralInfo.Major < 2)
                 throw new InvalidOperationException();
 
-            while (writer.Position % 4 != 0)
-                writer.Write((byte)0);
+            writer.Position += (4 - (writer.Position % 4)) % 4;
 
             writer.Write((uint)1); // Version
 
@@ -642,9 +637,9 @@ namespace UndertaleModLib
                 throw new InvalidOperationException();
 
             // Padding
-            while (reader.Position % 4 != 0)
-                if (reader.ReadByte() != 0)
-                    throw new IOException("Padding error!");
+            reader.Position += (4 - (reader.Position % 4)) % 4 - 1;
+            if (reader.ReadByte() != 0)
+                throw new IOException("Padding error!");
 
             if (reader.ReadUInt32() != 1)
                 throw new IOException("Expected TAGS version 1");
