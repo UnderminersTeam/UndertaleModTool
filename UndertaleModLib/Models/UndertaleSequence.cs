@@ -321,14 +321,15 @@ namespace UndertaleModLib.Models
         {
             public virtual void Serialize(UndertaleWriter writer)
             {
-                writer.Position += (4 - (writer.Position % 4)) % 4;
+                while (writer.Position % 4 != 0)
+                    writer.Write((byte)0);
             }
 
             public virtual void Unserialize(UndertaleReader reader)
             {
                 while (reader.Position % 4 != 0)
                     if (reader.ReadByte() != 0)
-                    throw new IOException("Padding error!");
+                        throw new IOException("Padding error!");
             }
         }
 
