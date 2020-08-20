@@ -902,7 +902,12 @@ namespace UndertaleModLib.Compiler
                 bool isSingle;
                 bool isArray;
                 AssembleVariablePush(cw, s.Children[0], out isSingle, out isArray, true, true);
-                cw.typeStack.Pop();
+                if (cw.typeStack.Count == 0)
+                {
+                    AssemblyWriterError(cw, "Type stack empty (invalid syntax)", null);
+                }
+                else
+                    cw.typeStack.Pop();
 
                 // Do the operation... somewhat strangely for expressions...
                 if (isExpression && isPost)
