@@ -1249,7 +1249,8 @@ namespace UndertaleModLib.Compiler
                         {
                             if (left.Constant.kind != ExpressionConstant.Kind.Number)
                                 ReportCodeError("Expected constant to be number in variable reference.", left.Token, false);
-                            next.ID = (int)left.Constant.valueNumber;
+                            if (next != null)
+                                next.ID = (int)left.Constant.valueNumber;
                             combine = false;
                         }
                         result.Children.Add(next);
