@@ -70,7 +70,7 @@ namespace UndertaleModLib
                 lastChunk = reader.ReadChars(4);
                 reader.AllChunkNames.Add(lastChunk);
                 uint length = reader.ReadUInt32();
-                reader.Position += length;
+                reader.SmallReadAt(reader.Position + length, 8);
             }
             reader.LastChunkName = lastChunk;
             reader.Position = startPos;

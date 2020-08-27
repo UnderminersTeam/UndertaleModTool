@@ -653,6 +653,8 @@ namespace UndertaleModLib.Models
                 default:
                     throw new IOException("Unknown opcode " + Kind.ToString().ToUpper());
             }
+            if (writer.Position % 4 != 0)
+                return;
         }
 
         public void Unserialize(UndertaleReader reader)

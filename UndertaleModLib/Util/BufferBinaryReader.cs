@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Util
 {
-    public class BufferBinaryReader
+    public class BufferBinaryReader : IDisposable
     {
         private const int MaxBufferSize = 1024 * 1024 * 16;
 
@@ -59,6 +59,17 @@ namespace UndertaleModLib.Util
                 throw new Exception("Seeking beyond end of stream");
             if (stream.Position != offset)
                 stream.Seek(offset, SeekOrigin.Begin);
+            stream.Read(buffer, 0, bufferSize);
+        }
+
+        public void SmallReadAt(uint position, int size)
+        {
+            offset = position;
+            bufferOffset = 0;
+            bufferSize = (offset + size > streamSize) ? (int)(streamSize - offset) : size;
+            if (bufferSize < 0)
+                throw new Exception("Seeking beyond end of stream");
+            stream.Seek(offset, SeekOrigin.Begin);
             stream.Read(buffer, 0, bufferSize);
         }
 

@@ -447,6 +447,7 @@ namespace UndertaleModTool
                         {
                             debugData.FORM.Serialize(writer);
                             writer.ThrowIfUnwrittenObjects();
+                            writer.Flush();
                         }
                     }
                 }

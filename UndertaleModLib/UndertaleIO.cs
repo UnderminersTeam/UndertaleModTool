@@ -363,7 +363,7 @@ namespace UndertaleModLib
         }
     }
 
-    public class UndertaleWriter : BinaryWriter
+    public class UndertaleWriter : Util.BufferBinaryWriter
     {
         internal UndertaleData undertaleData;
 
@@ -372,12 +372,6 @@ namespace UndertaleModLib
 
         public UndertaleWriter(Stream output) : base(output)
         {
-        }
-
-        public uint Position
-        {
-            get { return (uint)BaseStream.Position; }
-            set { Seek((int)value, SeekOrigin.Begin); }
         }
 
         public void Write(UndertaleChunk obj)
@@ -572,6 +566,7 @@ namespace UndertaleModLib
             UndertaleWriter writer = new UndertaleWriter(stream);
             writer.WriteUndertaleData(data);
             writer.ThrowIfUnwrittenObjects();
+            writer.Flush();
         }
 
         public static Dictionary<uint, UndertaleObject> GenerateOffsetMap(Stream stream)

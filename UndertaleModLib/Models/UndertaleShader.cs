@@ -82,7 +82,7 @@ namespace UndertaleModLib.Models
 
         private void WritePadding(UndertaleWriter writer, int amount)
         {
-            while ((writer.BaseStream.Position & amount) != 0)
+            while ((writer.Position & amount) != 0)
             {
                 writer.Write((byte)0);
             }

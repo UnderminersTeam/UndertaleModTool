@@ -86,6 +86,7 @@
     <Compile Include="UndertaleIO.cs" />
     <Compile Include="UndertaleSerializationException.cs" />
     <Compile Include="Util\BufferBinaryReader.cs" />
+    <Compile Include="Util\BufferBinaryWriter.cs" />
     <Compile Include="Util\Pair.cs" />
     <Compile Include="Util\TextureWorker.cs" />
     <Compile Include="Util\DictionaryExtensions.cs" />
