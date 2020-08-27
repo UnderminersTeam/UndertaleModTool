@@ -2,22 +2,22 @@
 *(seeing such an amazing tool...<br/>
 ... fills you with DETERMINATION)*
 
-![enough](https://i.imgur.com/lwUGMHo.png)
+heya. i heard you like digging deep into Undertale data so i made a tool just for you! 
 
-heya. I heard you like digging deep into Undertale data so I made a tool just for you! **Downloads** are **HERE**: :point_right::point_right::point_right: https://github.com/krzys-h/UndertaleModTool/releases :point_left::point_left::point_left:
+**Downloads** are **HERE**: :point_right::point_right::point_right: https://github.com/krzys-h/UndertaleModTool/releases :point_left::point_left::point_left:
 
 **Have questions? Want to talk?** Join us on Discord! https://discord.gg/RxXpdwJ
 
 ![flowey](flowey.png)
 
 ### Main features
-* Can read every single byte from the data file for lastest version of Undertale, Deltarune, and probably other GameMaker: Studio games (GM:S 1.4 and GM:S 2 bytecode versions 15, 16 and 17 are currently supported, version 14 support may be added at some point) for every platform and then recreate a byte-for-byte exact copy from the decoded data.
+* Can read every single byte from the data file for lastest version of Undertale, Deltarune, and probably other GameMaker: Studio games (GM:S 1.4 and GMS2 bytecode versions 14 to 17 are currently supported) for every platform and then recreate a byte-for-byte exact copy from the decoded data.
 * Properly handles all of the pointers in the file so that if you add/remove stuff, make things longer/shorter, move them around etc. the file format won't break.
 * An editor which lets you change (almost) every single value, including unknown ones. A lot better than a hex editor, huh?
 * Includes a (very) simple level editor
-* Allows for code disassembly and EDITING. This means you can add any custom code to the game, as long as you are determined enough to write it in GML assembly.
+* Allows for code disassembly and EDITING. This means you can add any custom code to the game, either using the built-in GML compiler or GML assembly.
 * Experimental high-level decompiler. The output is accurate and I've not seen it totally break in a long time, but it could use some more cleaning up of the high-level structures.
-* Support for running scripts that automatically modify your data file - this is the way to distribute mods, but creating them is manual job for now. It also serves as a replacement for sharing hex editor offsets - if you make it into a file-format-aware script instead, there is much smaller change of it breaking after an update.
+* Support for running scripts that automatically modify your data file (or perform other nefarious tasks) - this is the way to distribute mods, but creating them is manual job for now. It also serves as a replacement for sharing hex editor offsets - if you make it into a file-format-aware script instead, there is much smaller change of it breaking after an update.
 * All core IO functionality extracted into a library for use in external tools
 * Can generate an .yydebug file for the GM:S debugger so that you can edit variables live (see [here](https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-Game-Maker:-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions#yydebug-file-format))
 
@@ -42,7 +42,6 @@ I also included some of my test scripts. They are:
 All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is my current list of stuff that needs to be worked on:
 * Add missing chunk editors for Timelines and Extensions
 * Add support for YYC games - you won't be able to edit code, but everything else should technically work
-* Maybe try to write a GameMaker Project output module? Not sure we want to do this because of legal reasons...
 
 ### data.win file format
 Interested in the file and instruction format research I've done while working on this? Check out these:
@@ -53,7 +52,7 @@ Interested in the file and instruction format research I've done while working o
 * https://github.com/krzys-h/UndertaleModTool/wiki/YYC-games
 
 ### Special thanks
-Undertale has a special thanks section so I will have one to! No minigame here, though.
+Undertale has a special thanks section so I will have one too! No minigame here, though.
 
 Special thanks to everybody who did previous research on unpacking and decompiling Undertale, it was a really huge help:
 * https://pcy.ulyssis.be/undertale/
