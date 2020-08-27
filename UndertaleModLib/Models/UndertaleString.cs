@@ -29,10 +29,7 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
-            byte[] chars = Encoding.UTF8.GetBytes(Content);
-            writer.Write((uint)chars.Length);
-            writer.Write(chars);
-            writer.Write((byte)0);
+            writer.WriteGMString(_Content);
         }
 
         public void Unserialize(UndertaleReader reader)

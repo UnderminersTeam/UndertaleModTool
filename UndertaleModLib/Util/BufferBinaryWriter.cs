@@ -15,6 +15,7 @@ namespace UndertaleModLib.Util
         private byte[] buffer;
         private long offset;
         private int currentSize;
+        private Encoding encoding;
 
         public uint Position { get => (uint)offset; set
             {
@@ -22,12 +23,17 @@ namespace UndertaleModLib.Util
                 offset = value;
             } }
 
+        public byte[] RawBuffer { get => buffer; }
+        public Encoding Encoding { get => encoding; }
+
         public BufferBinaryWriter(Stream stream)
         {
             this.stream = stream;
             buffer = new byte[BaseBufferSize];
             currentSize = 0;
             offset = 0;
+
+            encoding = new UTF8Encoding(false);
         }
 
         private void ResizeToFit(int size)
@@ -152,7 +158,20 @@ namespace UndertaleModLib.Util
             buffer[offset++] = (byte)((value >> 56) & 0xFF);
         }
 
-        public void Flush()
+        public void WriteGMString(string value)
+        {
+            int len = encoding.GetByteCount(value);
+            ResizeToFit((int)offset + len + 5);
+            buffer[offset++] = (byte)(len & 0xFF);
+            buffer[offset++] = (byte)((len >> 8) & 0xFF);
+            buffer[offset++] = (byte)((len >> 16) & 0xFF);
+            buffer[offset++] = (byte)((len >> 24) & 0xFF);
+            encoding.GetBytes(value, 0, value.Length, buffer, (int)offset);
+            offset += len;
+            buffer[offset++] = 0;
+        }
+
+        public virtual void Flush()
         {
             stream.Write(buffer, 0, currentSize);
         }

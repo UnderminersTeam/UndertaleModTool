@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModLib
 {
@@ -17,6 +20,7 @@ namespace UndertaleModLib
     {
         object Resource { get; set; }
         void PostUnserialize(UndertaleReader reader);
+        int SerializeById(UndertaleWriter writer);
     }
 
     public class UndertaleResourceById<T, ChunkT> : UndertaleResourceRef where T : UndertaleResource, new() where ChunkT : UndertaleListChunk<T>
@@ -111,7 +115,8 @@ namespace UndertaleModLib
 
         public void Serialize(UndertaleWriter writer)
         {
-            writer.Write((int)SerializeById(writer));
+            writer.resourceIDRefsToWrite.Add(new Pair<uint, UndertaleResourceRef>(writer.Position, this));
+            writer.Write((int)0);
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -398,6 +403,30 @@ namespace UndertaleModLib
         private Dictionary<UndertaleObject, uint> objectPool = new Dictionary<UndertaleObject, uint>();
         private Dictionary<UndertaleObject, List<uint>> pendingWrites = new Dictionary<UndertaleObject, List<uint>>();
         private Dictionary<UndertaleObject, List<uint>> pendingStringWrites = new Dictionary<UndertaleObject, List<uint>>();
+        private List<Pair<uint, uint>> intsToWriteParallel = new List<Pair<uint, uint>>();
+        public List<Pair<uint, UndertaleResourceRef>> resourceIDRefsToWrite = new List<Pair<uint, UndertaleResourceRef>>();
+
+        public override void Flush()
+        {
+            Parallel.ForEach(intsToWriteParallel, (pair) =>
+            {
+                RawBuffer[pair.Item1] = (byte)(pair.Item2 & 0xFF);
+                RawBuffer[pair.Item1 + 1] = (byte)((pair.Item2 >> 8) & 0xFF);
+                RawBuffer[pair.Item1 + 2] = (byte)((pair.Item2 >> 16) & 0xFF);
+                RawBuffer[pair.Item1 + 3] = (byte)((pair.Item2 >> 24) & 0xFF);
+            });
+
+            Parallel.ForEach(resourceIDRefsToWrite, (pair) =>
+            {
+                int id = pair.Item2.SerializeById(this);
+                RawBuffer[pair.Item1] = (byte)(id & 0xFF);
+                RawBuffer[pair.Item1 + 1] = (byte)((id >> 8) & 0xFF);
+                RawBuffer[pair.Item1 + 2] = (byte)((id >> 16) & 0xFF);
+                RawBuffer[pair.Item1 + 3] = (byte)((id >> 24) & 0xFF);
+            });
+
+            base.Flush();
+        }
 
         public Dictionary<UndertaleObject, uint> GetObjectPool()
         {
@@ -427,8 +456,7 @@ namespace UndertaleModLib
                     uint currentPos = Position;
                     foreach (uint pointerAddr in pendingWrites[obj])
                     {
-                        Position = pointerAddr;
-                        Write(objectAddr);
+                        intsToWriteParallel.Add(new Pair<uint, uint>(pointerAddr, objectAddr));
                     }
                     Position = currentPos;
                     pendingWrites.Remove(obj);
@@ -438,8 +466,7 @@ namespace UndertaleModLib
                     uint currentPos = Position;
                     foreach (uint pointerAddr in pendingStringWrites[obj])
                     {
-                        Position = pointerAddr;
-                        Write(objectAddr + 4);
+                        intsToWriteParallel.Add(new Pair<uint, uint>(pointerAddr, objectAddr + 4));
                     }
                     Position = currentPos;
                     pendingStringWrites.Remove(obj);

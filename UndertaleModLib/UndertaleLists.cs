@@ -157,7 +157,7 @@ namespace UndertaleModLib
                     writer.WriteUndertaleObject<T>(this[i]);
 
                     // The last object does NOT get padding (TODO: at least in AUDO)
-                    if (IndexOf(this[i]) != Count - 1)
+                    if (i != Count - 1)
                         (this[i] as PaddedObject)?.SerializePadding(writer);
                 }
                 catch (UndertaleSerializationException e)
