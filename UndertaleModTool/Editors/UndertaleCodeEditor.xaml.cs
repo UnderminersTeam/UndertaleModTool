@@ -258,9 +258,17 @@ namespace UndertaleModTool
         }
 
         private static Dictionary<string, string> gettextJSON = null;
-        private void UpdateGettextJSON(string json)
+        private string UpdateGettextJSON(string json)
         {
-            gettextJSON = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            try
+            {
+                gettextJSON = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            } catch (Exception e)
+            {
+                gettextJSON = new Dictionary<string, string>();
+                return "Failed to parse language file: " + e.Message;
+            }
+            return null;
         }
 
         private async void DecompileCode(UndertaleCode code)
@@ -304,7 +312,11 @@ namespace UndertaleModTool
                     UpdateGettext(gettextCode);
 
                 if (gettextJSON == null && gettextJsonPath != null && File.Exists(gettextJsonPath))
-                    UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
+                {
+                    string err = UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
+                    if (err != null)
+                        e = new Exception(err);
+                }
 
                 Dispatcher.Invoke(() =>
                 {
