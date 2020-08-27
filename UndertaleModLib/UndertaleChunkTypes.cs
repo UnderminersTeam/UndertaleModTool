@@ -64,7 +64,7 @@ namespace UndertaleModLib
             string name = "(unknown)";
             try
             {
-                name = new string(reader.ReadChars(4));
+                name = reader.ReadChars(4);
                 uint length = reader.ReadUInt32();
 
                 // TODO: I can't think of a cleaner way to do this...

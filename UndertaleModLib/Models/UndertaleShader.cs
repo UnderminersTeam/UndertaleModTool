@@ -90,7 +90,7 @@ namespace UndertaleModLib.Models
 
         private void ReadPadding(UndertaleReader reader, int amount)
         {
-            while ((reader.BaseStream.Position & amount) != 0)
+            while ((reader.Position & amount) != 0)
             {
                 if (reader.ReadByte() != 0)
                     throw new UndertaleSerializationException("Failed to read shader padding: should be some zero bytes");

@@ -120,7 +120,7 @@ namespace UndertaleModLib
         }
     }
 
-    public class UndertaleReader : BinaryReader
+    public class UndertaleReader : Util.BufferBinaryReader
     {
         public delegate void WarningHandlerDelegate(string warning);
         private WarningHandlerDelegate WarningHandler;
@@ -137,12 +137,6 @@ namespace UndertaleModLib
                 WarningHandler.Invoke(warning);
             else
                 throw new IOException(warning);
-        }
-
-        public uint Position
-        {
-            get { return (uint)BaseStream.Position; }
-            set { BaseStream.Seek((int)value, SeekOrigin.Begin); }
         }
 
         public string LastChunkName;
@@ -164,7 +158,7 @@ namespace UndertaleModLib
 
             resUpdate.Clear();
 
-            string name = new string(ReadChars(4));
+            string name = ReadChars(4);
             if (name != "FORM")
                 throw new IOException("Root chunk is " + name + " not FORM");
             uint length = ReadUInt32();
@@ -334,12 +328,12 @@ namespace UndertaleModLib
             internal EnsureLengthOperation(UndertaleReader reader, uint expectedLength)
             {
                 this.reader = reader;
-                this.startPos = (int)reader.BaseStream.Position;
+                this.startPos = (int)reader.Position;
                 this.expectedLength = expectedLength;
             }
             public void ToHere()
             {
-                int endPos = (int)reader.BaseStream.Position;
+                int endPos = (int)reader.Position;
                 uint length = (uint)(endPos - startPos);
                 if (length != expectedLength)
                 {

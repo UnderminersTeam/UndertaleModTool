@@ -65,9 +65,9 @@ namespace UndertaleModLib
             // (also, calculate all present chunks while we're at it)
             reader.AllChunkNames = new List<string>();
             string lastChunk = "";
-            while (reader.Position < reader.BaseStream.Length)
+            while (reader.Position < reader.Length)
             {
-                lastChunk = new string(reader.ReadChars(4));
+                lastChunk = reader.ReadChars(4);
                 reader.AllChunkNames.Add(lastChunk);
                 uint length = reader.ReadUInt32();
                 reader.Position += length;
