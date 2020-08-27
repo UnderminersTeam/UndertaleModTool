@@ -72,10 +72,7 @@ namespace UndertaleModLib.Models
             if (isGMS2)
                 return text.Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\"", "\"").Replace("\\\\", "\\");
             else 
-            {
-                text = text.Replace("\" + chr(34) + \"", "\"");
-                return text;
-            }
+                return text.Replace("\" + chr(34) + \"", "\"");
         }
     }
 }
