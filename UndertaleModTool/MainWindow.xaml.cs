@@ -209,6 +209,12 @@ namespace UndertaleModTool
 
         private void Command_New(object sender, ExecutedRoutedEventArgs e)
         {
+            if (Data != null)
+            {
+                if (MessageBox.Show("Warning: you currently have a project open.\nAre you sure you want to make a new project?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                    return;
+            }
+
             FilePath = null;
             Data = UndertaleData.CreateNew();
             CloseChildFiles();
@@ -267,8 +273,11 @@ namespace UndertaleModTool
             }
         }
 
-        private void Command_Close(object sender, ExecutedRoutedEventArgs e)
+        private async void Command_Close(object sender, ExecutedRoutedEventArgs e)
         {
+            if (Data != null)
+                if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    await DoSaveDialog();
             Close();
         }
 
@@ -348,6 +357,7 @@ namespace UndertaleModTool
                 return;
 
             LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
+            dialog.PreventClose = true;
             IProgress<Tuple<int, string>> progress = new Progress<Tuple<int, string>>(i => { dialog.ReportProgress(i.Item2, i.Item1); });
             IProgress<double?> setMax = new Progress<double?>(i => { dialog.Maximum = i; });
             dialog.Owner = this;
@@ -936,7 +946,8 @@ namespace UndertaleModTool
             if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 saveOk = await DoSaveDialog();
 
-            if (FilePath == null) {
+            if (FilePath == null) 
+            {
                 MessageBox.Show("The file must be saved in order to be run.", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             } else if (saveOk)
             {

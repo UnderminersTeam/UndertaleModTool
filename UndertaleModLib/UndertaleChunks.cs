@@ -319,7 +319,7 @@ namespace UndertaleModLib
 
             UndertaleInstruction.Reference<UndertaleVariable>.SerializeReferenceChain(writer, writer.undertaleData.Code, List);
 
-            if (writer.undertaleData.GeneralInfo?.BytecodeVersion >= 15)
+            if (!writer.Bytecode14OrLower)
             {
                 writer.Write(InstanceVarCount);
                 writer.Write(InstanceVarCountAgain);
@@ -341,7 +341,7 @@ namespace UndertaleModLib
                 return;
             uint startPosition = reader.Position;
             uint varLength;
-            if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 15)
+            if (!reader.Bytecode14OrLower)
             {
                 InstanceVarCount = reader.ReadUInt32();
                 InstanceVarCountAgain = reader.ReadUInt32();
@@ -370,7 +370,7 @@ namespace UndertaleModLib
 
             UndertaleInstruction.Reference<UndertaleFunction>.SerializeReferenceChain(writer, writer.undertaleData.Code, Functions);
 
-            if (writer.undertaleData.GeneralInfo?.BytecodeVersion <= 14)
+            if (writer.Bytecode14OrLower)
             {
                 foreach (UndertaleFunction f in Functions)
                     writer.WriteUndertaleObject(f);
@@ -393,7 +393,7 @@ namespace UndertaleModLib
 
             if (reader.undertaleData.UnsupportedBytecodeVersion)
                 return;
-            if (reader.undertaleData.GeneralInfo?.BytecodeVersion <= 14)
+            if (reader.Bytecode14OrLower)
             {
                 uint startPosition = reader.Position;
                 Functions.Clear();

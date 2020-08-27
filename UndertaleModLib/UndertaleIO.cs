@@ -147,6 +147,7 @@ namespace UndertaleModLib
         public string LastChunkName;
         public List<string> AllChunkNames;
         public bool GMS2_3 = false;
+        public bool Bytecode14OrLower = false;
 
         public UndertaleChunk ReadUndertaleChunk()
         {
@@ -356,16 +357,6 @@ namespace UndertaleModLib
         {
             return new EnsureLengthOperation(this, expectedLength);
         }
-
-        public int ReadInt24()
-        {
-            return ReadByte() | ReadByte() << 8 | (sbyte)ReadByte() << 16;
-        }
-
-        public uint ReadUInt24()
-        {
-            return (uint)(ReadByte() | ReadByte() << 8 | ReadByte() << 16);
-        }
     }
 
     public class UndertaleWriter : Util.BufferBinaryWriter
@@ -374,6 +365,7 @@ namespace UndertaleModLib
 
         public string LastChunkName;
         public uint LastBytecodeAddress = 0;
+        public bool Bytecode14OrLower;
 
         public UndertaleWriter(Stream output) : base(output)
         {
@@ -392,11 +384,14 @@ namespace UndertaleModLib
         public void WriteUndertaleData(UndertaleData data)
         {
             undertaleData = data;
+            Bytecode14OrLower = data?.GeneralInfo?.BytecodeVersion <= 14;
+
             // Figure out the last chunk by iterating identically as it does when serializing
             foreach (var chunk in data.FORM.Chunks)
             {
                 LastChunkName = chunk.Key;
             }
+
             Write(data.FORM);
         }
 
@@ -437,39 +432,36 @@ namespace UndertaleModLib
         {
             if (obj == null)
                 return 0;
-            if (!objectPool.ContainsKey(obj))
+            uint res;
+            if (!objectPool.TryGetValue(obj, out res))
                 throw new KeyNotFoundException();
-            return objectPool[obj];
+            return res;
         }
 
         public void WriteUndertaleObject<T>(T obj) where T : UndertaleObject, new()
         {
             try
             {
-                if (objectPool.ContainsKey(obj))
-                    throw new IOException("Writing object twice");
+                // This isn't a major issue, and this is a performance waster
+                //if (objectPool.ContainsKey(obj))
+                //    throw new IOException("Writing object twice");
                 uint objectAddr = Position;
-                objectPool.Add(obj, objectAddr);
+                if (obj.GetType() == typeof(UndertaleString))
+                {
+                    if (pendingStringWrites.ContainsKey(obj))
+                    {
+                        foreach (uint pointerAddr in pendingStringWrites[obj])
+                            intsToWriteParallel.Add(new Pair<uint, uint>(pointerAddr, objectAddr + 4));
+                        pendingStringWrites.Remove(obj);
+                    }
+                } else
+                    objectPool.Add(obj, objectAddr); // strings come later in the file, so no need to add them to the pool
                 obj.Serialize(this);
                 if (pendingWrites.ContainsKey(obj))
                 {
-                    uint currentPos = Position;
                     foreach (uint pointerAddr in pendingWrites[obj])
-                    {
                         intsToWriteParallel.Add(new Pair<uint, uint>(pointerAddr, objectAddr));
-                    }
-                    Position = currentPos;
                     pendingWrites.Remove(obj);
-                }
-                if (pendingStringWrites.ContainsKey(obj))
-                {
-                    uint currentPos = Position;
-                    foreach (uint pointerAddr in pendingStringWrites[obj])
-                    {
-                        intsToWriteParallel.Add(new Pair<uint, uint>(pointerAddr, objectAddr + 4));
-                    }
-                    Position = currentPos;
-                    pendingStringWrites.Remove(obj);
                 }
             }
             catch (Exception e)
@@ -522,9 +514,9 @@ namespace UndertaleModLib
 
         public void ThrowIfUnwrittenObjects()
         {
-            var unwrittenObjects = pendingWrites.Concat(pendingStringWrites);
-            if (unwrittenObjects.Count() > 0)
+            if ((pendingWrites.Count + pendingStringWrites.Count) != 0)
             {
+                var unwrittenObjects = pendingWrites.Concat(pendingStringWrites);
                 throw new IOException("Found pointer targets that were never written:\n" + String.Join("\n", unwrittenObjects.Take(10).Select((x) => x.Key + " at " + String.Join(", ", x.Value.Select((y) => "0x" + y.ToString("X8"))))) + (unwrittenObjects.Count() > 10 ? "\n(and more, " + unwrittenObjects.Count() + " total)" : ""));
             }
         }
@@ -561,20 +553,6 @@ namespace UndertaleModLib
         public WriteLengthOperation WriteLengthHere()
         {
             return new WriteLengthOperation(this);
-        }
-
-        public void WriteInt24(int val)
-        {
-            Write((byte)val);
-            Write((byte)(val >> 8));
-            Write((sbyte)(val >> 16));
-        }
-
-        public void WriteUInt24(uint val)
-        {
-            Write((byte)val);
-            Write((byte)(val >> 8));
-            Write((byte)(val >> 16));
         }
     }
 

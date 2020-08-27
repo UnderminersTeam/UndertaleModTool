@@ -17,6 +17,8 @@ namespace UndertaleModLib.Util
         private int bufferSize;
         private long offset;
         private int bufferOffset;
+        private Encoding encoding;
+        public Encoding Encoding { get => encoding; }
 
         public uint Position { get => (uint)offset; set 
             {
@@ -44,6 +46,8 @@ namespace UndertaleModLib.Util
             offset = 0;
             bufferOffset = 0;
             NextBuffer();
+
+            encoding = new UTF8Encoding(false);
         }
 
         private void NextBuffer(bool aboutToRead = true)
@@ -144,6 +148,26 @@ namespace UndertaleModLib.Util
             return val;
         }
 
+        public int ReadInt24()
+        {
+            if (bufferOffset + 3 >= bufferSize)
+                NextBuffer();
+
+            var val = (int)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8 | buffer[bufferOffset++] << 16);
+            offset += 3;
+            return val;
+        }
+
+        public uint ReadUInt24()
+        {
+            if (bufferOffset + 3 >= bufferSize)
+                NextBuffer();
+
+            var val = (uint)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8 | buffer[bufferOffset++] << 16);
+            offset += 3;
+            return val;
+        }
+
         public int ReadInt32()
         {
             if (bufferOffset + 4 >= bufferSize)
@@ -206,6 +230,22 @@ namespace UndertaleModLib.Util
             bufferOffset += 8;
             offset += 8;
             return val;
+        }
+
+        public string ReadGMString()
+        {
+            if (bufferOffset + 5 >= bufferSize)
+                NextBuffer();
+            int length = (int)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8 | buffer[bufferOffset++] << 16 | buffer[bufferOffset++] << 24);
+            offset += 4;
+            if (bufferOffset + length + 1 >= bufferSize)
+                NextBuffer();
+            string res = encoding.GetString(buffer, bufferOffset, length);
+            bufferOffset += length;
+            if (buffer[bufferOffset++] != 0)
+                throw new IOException("String not null terminated!");
+            offset += length + 1;
+            return res;
         }
 
         public void Dispose()

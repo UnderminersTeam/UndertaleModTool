@@ -99,6 +99,21 @@ namespace UndertaleModLib.Util
             buffer[offset++] = bytes[2];
             buffer[offset++] = bytes[3];
         }
+        public void WriteInt24(int value)
+        {
+            ResizeToFit((int)offset + 3);
+            buffer[offset++] = (byte)(value & 0xFF);
+            buffer[offset++] = (byte)((value >> 8) & 0xFF);
+            buffer[offset++] = (byte)((value >> 16) & 0xFF);
+        }
+
+        public void WriteUInt24(uint value)
+        {
+            ResizeToFit((int)offset + 3);
+            buffer[offset++] = (byte)(value & 0xFF);
+            buffer[offset++] = (byte)((value >> 8) & 0xFF);
+            buffer[offset++] = (byte)((value >> 16) & 0xFF);
+        }
 
         public void Write(int value)
         {

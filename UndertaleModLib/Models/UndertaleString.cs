@@ -34,11 +34,7 @@ namespace UndertaleModLib.Models
 
         public void Unserialize(UndertaleReader reader)
         {
-            uint length = reader.ReadUInt32();
-            byte[] chars = reader.ReadBytes((int)length);
-            Content = Encoding.UTF8.GetString(chars);
-            if (reader.ReadByte() != 0)
-                throw new IOException("The string was not null terminated!");
+            Content = reader.ReadGMString();
         }
 
         public override string ToString()
