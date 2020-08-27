@@ -27,6 +27,8 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
@@ -37,10 +39,11 @@
                 </TextBlock.Text>
             </TextBlock>
 
-            <!-- TODO: add embedded audio player -->
-
             <Button Grid.Row="1" Grid.Column="0" Content="Import" Click="Import_Click"/>
             <Button Grid.Row="1" Grid.Column="3" Content="Export" Click="Export_Click"/>
+
+            <Button Grid.Row="3" Grid.Column="0" Name="Play" Click="Play_Click">Play</Button>
+            <Button Grid.Row="3" Grid.Column="2" Name="Stop" Click="Stop_Click">Stop</Button>
         </Grid>
     </Grid>
 </UserControl>

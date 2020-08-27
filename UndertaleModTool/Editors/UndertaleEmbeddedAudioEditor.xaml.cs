@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -23,6 +24,8 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleEmbeddedAudioEditor : UserControl
     {
+        private SoundPlayer player;
+
         public UndertaleEmbeddedAudioEditor()
         {
             InitializeComponent();
@@ -74,6 +77,27 @@ namespace UndertaleModTool
                     MessageBox.Show("Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
+
+        private void Play_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleEmbeddedAudio target = DataContext as UndertaleEmbeddedAudio;
+
+            if (target.Data.Length != 0)
+            {
+                using (MemoryStream ms = new MemoryStream(target.Data))
+                {
+                    player = new SoundPlayer(ms);
+                    player.Play();
+                }
+            }
+        }
+
+
+        private void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            if (player != null)
+                player.Stop();
         }
     }
 }
