@@ -460,53 +460,59 @@ namespace UndertaleModTool
                                         par.Inlines.Add(new Run(token) { Foreground = funcBrush, Cursor = Cursors.Hand });
                                         par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(funcs[token]);
                                     }
-                                    else if (Char.IsDigit(token[0]))
+                                    else if (char.IsDigit(token[0]))
                                     {
                                         par.Inlines.Add(new Run(token) { Cursor = Cursors.Hand });
                                         par.Inlines.LastInline.MouseDown += (sender, ev) =>
                                         {
                                             if (token.Length > 2 && token[0] == '0' && token[1] == 'x')
+                                            {
+                                                ev.Handled = true;
                                                 return; // Hex numbers aren't objects.
+                                            }
 
                                             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
-                                            int id = Int32.Parse(token);
-                                            List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
-                                            if (id < data.Sprites.Count)
-                                                possibleObjects.Add(data.Sprites[id]);
-                                            if (id < data.Rooms.Count)
-                                                possibleObjects.Add(data.Rooms[id]);
-                                            if (id < data.GameObjects.Count)
-                                                possibleObjects.Add(data.GameObjects[id]);
-                                            if (id < data.Backgrounds.Count)
-                                                possibleObjects.Add(data.Backgrounds[id]);
-                                            if (id < data.Scripts.Count)
-                                                possibleObjects.Add(data.Scripts[id]);
-                                            if (id < data.Paths.Count)
-                                                possibleObjects.Add(data.Paths[id]);
-                                            if (id < data.Fonts.Count)
-                                                possibleObjects.Add(data.Fonts[id]);
-                                            if (id < data.Sounds.Count)
-                                                possibleObjects.Add(data.Sounds[id]);
-                                            if (id < data.Shaders.Count)
-                                                possibleObjects.Add(data.Shaders[id]);
-                                            if (id < data.Timelines.Count)
-                                                possibleObjects.Add(data.Timelines[id]);
+                                            int id;
+                                            if (int.TryParse(token, out id))
+                                            {
+                                                List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
+                                                if (id < data.Sprites.Count)
+                                                    possibleObjects.Add(data.Sprites[id]);
+                                                if (id < data.Rooms.Count)
+                                                    possibleObjects.Add(data.Rooms[id]);
+                                                if (id < data.GameObjects.Count)
+                                                    possibleObjects.Add(data.GameObjects[id]);
+                                                if (id < data.Backgrounds.Count)
+                                                    possibleObjects.Add(data.Backgrounds[id]);
+                                                if (id < data.Scripts.Count)
+                                                    possibleObjects.Add(data.Scripts[id]);
+                                                if (id < data.Paths.Count)
+                                                    possibleObjects.Add(data.Paths[id]);
+                                                if (id < data.Fonts.Count)
+                                                    possibleObjects.Add(data.Fonts[id]);
+                                                if (id < data.Sounds.Count)
+                                                    possibleObjects.Add(data.Sounds[id]);
+                                                if (id < data.Shaders.Count)
+                                                    possibleObjects.Add(data.Shaders[id]);
+                                                if (id < data.Timelines.Count)
+                                                    possibleObjects.Add(data.Timelines[id]);
 
-                                            ContextMenu contextMenu = new ContextMenu();
-                                            foreach (UndertaleObject obj in possibleObjects)
-                                            {
-                                                MenuItem item = new MenuItem();
-                                                item.Header = obj.ToString().Replace("_", "__");
-                                                item.Click += (sender2, ev2) => (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
-                                                contextMenu.Items.Add(item);
+                                                ContextMenu contextMenu = new ContextMenu();
+                                                foreach (UndertaleObject obj in possibleObjects)
+                                                {
+                                                    MenuItem item = new MenuItem();
+                                                    item.Header = obj.ToString().Replace("_", "__");
+                                                    item.Click += (sender2, ev2) => (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
+                                                    contextMenu.Items.Add(item);
+                                                }
+                                                if (id > 0x00050000)
+                                                {
+                                                    contextMenu.Items.Add(new MenuItem() { Header = "#" + id.ToString("X6") + " (color)", IsEnabled = false });
+                                                }
+                                                contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
+                                                (sender as Run).ContextMenu = contextMenu;
+                                                contextMenu.IsOpen = true;
                                             }
-                                            if (id > 0x00050000)
-                                            {
-                                                contextMenu.Items.Add(new MenuItem() { Header = "#" + id.ToString("X6") + " (color)", IsEnabled = false });
-                                            }
-                                            contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
-                                            (sender as Run).ContextMenu = contextMenu;
-                                            contextMenu.IsOpen = true;
                                             ev.Handled = true;
                                         };
                                     }

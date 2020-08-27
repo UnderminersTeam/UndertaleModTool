@@ -391,7 +391,7 @@ namespace UndertaleModLib.Compiler
                     {
                         // Convert identifiers into their proper references, at least sort of.
                         ExpressionConstant constant;
-                        if (!ResolveIdentifier(context, tokens[i].Content, out constant))
+                        if ((i != 0 && tokens[i - 1].Kind == TokenKind.Dot) || !ResolveIdentifier(context, tokens[i].Content, out constant))
                         {
                             bool isGlobalBuiltin;
                             int ID = GetVariableID(context, tokens[i].Content, out isGlobalBuiltin);
