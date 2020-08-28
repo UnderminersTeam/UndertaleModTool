@@ -22,6 +22,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
@@ -50,5 +52,17 @@
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Audio file</TextBlock>
         <local:AudioFileReference Grid.Row="8" Grid.Column="1" Margin="3" AudioReference="{Binding AudioFile}" GroupReference="{Binding AudioGroup}" AudioID="{Binding AudioID}" GroupID="{Binding GroupID}"/>
+
+        <Grid Grid.Row="10" Grid.Column="1" Name="AudioPlayer">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Button Grid.Row="10" Grid.Column="0" Name="Play" Click="Play_Click" Margin="3,0">Play</Button>
+            <Button Grid.Row="10" Grid.Column="1" Name="Stop" Click="Stop_Click" Margin="3,0">Stop</Button>
+        </Grid>
     </Grid>
 </UserControl>
