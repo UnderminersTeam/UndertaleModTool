@@ -361,13 +361,16 @@ namespace UndertaleModTool
                             foreach (var x in (Application.Current.MainWindow as MainWindow).Data.Functions)
                                 funcs.Add(x.Name.Content, x);
 
+                            string storedStrTok = "";
+
                             foreach (var line in lines)
                             {
                                 char[] special = { '.', ',', ')', '(', '[', ']', '>', '<', ':', ';', '=', '"', '!' };
                                 Func<char, bool> IsSpecial = (c) => Char.IsWhiteSpace(c) || special.Contains(c);
                                 List<string> split = new List<string>();
-                                string tok = "";
-                                bool readingString = false;
+                                string tok = storedStrTok;
+                                storedStrTok = "";
+                                bool readingString = (tok != "");
                                 bool escaped = false;
                                 for (int i = 0; i < line.Length; i++)
                                 {
@@ -416,7 +419,12 @@ namespace UndertaleModTool
                                     }
                                 }
                                 if (tok != "")
-                                    split.Add(tok);
+                                {
+                                    if (readingString)
+                                        storedStrTok = tok + "\n";
+                                    else
+                                        split.Add(tok);
+                                }
 
                                 Dictionary<string, object> usedObjects = new Dictionary<string, object>();
                                 for (int i = 0; i < split.Count; i++)
@@ -557,7 +565,7 @@ namespace UndertaleModTool
                                     document.Blocks.Add(par);
                                     par = new Paragraph();
                                     par.Margin = new Thickness(0);
-                                } else
+                                } else if (!readingString)
                                 {
                                     par.Inlines.Add(new Run("\n"));
                                 }
