@@ -408,7 +408,7 @@ namespace UndertaleModLib.Models
 
         public class GraphicKeyframes : TrackKeyframes
         {
-            public class Data : ResourceData<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>> { }
+            public class Data : ResourceData<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>> { }
             public UndertaleSimpleList<Keyframe<Data>> List;
 
             public override void Serialize(UndertaleWriter writer)
