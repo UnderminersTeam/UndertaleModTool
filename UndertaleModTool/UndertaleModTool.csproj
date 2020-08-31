@@ -271,6 +271,54 @@
     <Compile Include="Editors\UndertaleVariableEditor.xaml.cs">
       <DependentUpon>UndertaleVariableEditor.xaml</DependentUpon>
     </Compile>
+    <None Include="ExperimentalScripts\BetterVaporiserForUT.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\DisableDogcheck.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\ExportAllEmbeddedTextures.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\ExportAllSounds.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\ExportAllStrings.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\ExportAssetOrder.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\ExternalizeAllOGGs.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\FontDataExport.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\FontDataImport.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\ImportAllEmbeddedTextures.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\ImportAllStrings.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\ImportASound.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\ImportAssetOrder.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\ImportGML.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\ImportGraphics_v1.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\ImportGraphics_v2.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="SampleScripts\RunSwitchOnPC.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -644,6 +692,11 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\mus_dance_of_dog.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ExperimentalScripts\README.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterResolveReferences">
