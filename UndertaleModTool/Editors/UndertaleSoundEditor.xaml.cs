@@ -56,14 +56,20 @@ namespace UndertaleModTool
         {
             UndertaleSound sound = DataContext as UndertaleSound;
 
-            if ((sound.Flags & UndertaleSound.AudioEntryFlags.IsEmbedded) != UndertaleSound.AudioEntryFlags.IsEmbedded)
+            if ((sound.Flags & UndertaleSound.AudioEntryFlags.IsEmbedded) != UndertaleSound.AudioEntryFlags.IsEmbedded &&
+                (sound.Flags & UndertaleSound.AudioEntryFlags.IsCompressed) != UndertaleSound.AudioEntryFlags.IsCompressed)
             {
                 try
                 {
-                    string audioPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), sound.File.Content);
+                    string filename;
+                    if (!sound.File.Content.Contains("."))
+                        filename = sound.File.Content + ".ogg";
+                    else
+                        filename = sound.File.Content;
+                    string audioPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), filename);
                     if (File.Exists(audioPath))
                     {
-                        switch (System.IO.Path.GetExtension(sound.File.Content).ToLower())
+                        switch (System.IO.Path.GetExtension(filename).ToLower())
                         {
                             case ".wav":
                                 wavReader = new WaveFileReader(audioPath);

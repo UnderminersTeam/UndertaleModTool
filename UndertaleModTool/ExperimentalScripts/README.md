@@ -25,11 +25,13 @@ Please report any bugs or issues with the experimental scripts to the Underminer
     * There are two versions.
         - `ImportGraphics_v1.csx`: This only packs new embedded texture sheets and leaves the originals alone.
         - `ImportGraphics_v2.csx`: Import a sprite of arbitrary size easily using this script via a texture packer. This repacks all textures (no duplicate images/bloat) but takes longer to complete.
-
-- There are additionally two new scripts to assist in repairing data files where assets were accidentally moved from their original places.
+- There are additionally two scripts to assist in repairing data files where assets were accidentally moved from their original places.
     * `ExportAssetOrder.csx`: This exports all the names of a game's assets (currently excluding GMS2.3 constructs) to a text file.
     * `ImportAssetOrder.csx`: This takes an existing text file exported from `ExportAssetOrder.csx`, and uses it to reorganize the assets in the current data file.
         - If assets cannot be found, it will fail to fully complete. Assets not in the text file will simply be moved to the end of their respective lists.
+- There are additionally two scripts to import and export GML assembly data.
+    * `ExportASM.csx`: Exports assembly data to an `Export_Assembly` folder in your game files folder.
+    * `ImportASM.csx`: Imports assembly data from a folder into your game.
 
 ## Credits
 
@@ -48,3 +50,5 @@ Please report any bugs or issues with the experimental scripts to the Underminer
 - The Import Graphics scripts were made by samuelroy21 with the help of colinator27, Grossley, and others of the DSG team.
 - `ExportAssetOrder.csx`: By Grossley and colinator27
 - `ImportAssetOrder.csx`: By colinator27
+- `ExportASM.csx`: By mono21400
+- `ImportASM.csx`: By samuelroy21 of the DSG team, mono21400

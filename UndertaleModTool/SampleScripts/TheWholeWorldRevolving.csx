@@ -1,6 +1,7 @@
 EnsureDataLoaded();
 
-if (!Data.IsGameMaker2()) {
+if (!Data.IsGameMaker2()) 
+{
     ScriptMessage("This is not a GMS2 game.");
     return;
 }

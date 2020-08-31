@@ -2,7 +2,8 @@
 
 EnsureDataLoaded();
 
-if (Data.GeneralInfo.Name.Content != "NXTALE") {
+if (Data.GeneralInfo.Name.Content != "NXTALE") 
+{
     ScriptError("This script can only be used with\nThe Nintendo Switch version of Undertale.", "Not NXTALE");
     return;
 }
