@@ -1001,10 +1001,10 @@ namespace UndertaleModLib.Compiler
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp,
                                                      EnsureTokenKind(TokenKind.LogicalOr).Token);
                     result.Children.Add(left);
-                    result.Children.Add(ParseExpression(context));
+                    result.Children.Add(ParseAndOp(context));
                     while (remainingStageOne.Count > 0 && IsNextTokenDiscard(TokenKind.LogicalOr))
                     {
-                        result.Children.Add(ParseExpression(context));
+                        result.Children.Add(ParseAndOp(context));
                     }
                     
                     return result;
@@ -1023,10 +1023,10 @@ namespace UndertaleModLib.Compiler
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp,
                                                      EnsureTokenKind(TokenKind.LogicalAnd).Token);
                     result.Children.Add(left);
-                    result.Children.Add(ParseExpression(context));
+                    result.Children.Add(ParseXorOp(context));
                     while (remainingStageOne.Count > 0 && IsNextTokenDiscard(TokenKind.LogicalAnd))
                     {
-                        result.Children.Add(ParseExpression(context));
+                        result.Children.Add(ParseXorOp(context));
                     }
 
                     return result;

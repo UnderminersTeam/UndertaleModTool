@@ -641,7 +641,32 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                return String.Format("({0} {1} {2})", Argument1.ToString(context), Symbol, Argument2.ToString(context));
+                string arg1;
+                if (Argument1 is ExpressionTwoSymbol && (Argument1 as ExpressionTwoSymbol).Symbol == Symbol)
+                    arg1 = (Argument1 as ExpressionTwoSymbol).ToStringNoParen(context);
+                else
+                    arg1 = Argument1.ToString(context);
+                string arg2;
+                if (Argument2 is ExpressionTwoSymbol && (Argument2 as ExpressionTwoSymbol).Symbol == Symbol)
+                    arg2 = (Argument2 as ExpressionTwoSymbol).ToStringNoParen(context);
+                else
+                    arg2 = Argument2.ToString(context);
+                return String.Format("({0} {1} {2})", arg1, Symbol, arg2);
+            }
+
+            public string ToStringNoParen(DecompileContext context)
+            {
+                string arg1;
+                if (Argument1 is ExpressionTwoSymbol && (Argument1 as ExpressionTwoSymbol).Symbol == Symbol)
+                    arg1 = (Argument1 as ExpressionTwoSymbol).ToStringNoParen(context);
+                else
+                    arg1 = Argument1.ToString(context);
+                string arg2;
+                if (Argument2 is ExpressionTwoSymbol && (Argument2 as ExpressionTwoSymbol).Symbol == Symbol)
+                    arg2 = (Argument2 as ExpressionTwoSymbol).ToStringNoParen(context);
+                else
+                    arg2 = Argument2.ToString(context);
+                return String.Format("{0} {1} {2}", arg1, Symbol, arg2);
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -715,6 +740,11 @@ namespace UndertaleModLib.Decompiler
             }
 
             public override string ToString(DecompileContext context)
+            {
+                return String.Format("{0} {1} {2}", Argument1.ToString(context), OperationToPrintableString(Opcode), Argument2.ToString(context));
+            }
+
+            public string ToStringWithParen(DecompileContext context)
             {
                 return String.Format("({0} {1} {2})", Argument1.ToString(context), OperationToPrintableString(Opcode), Argument2.ToString(context));
             }
@@ -1912,12 +1942,21 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.Append("if " + condition.ToString(context) + "\n");
+                string cond;
+                if (condition is ExpressionCompare)
+                    cond = (condition as ExpressionCompare).ToStringWithParen(context);
+                else
+                    cond = condition.ToString(context);
+                sb.Append("if " + cond + "\n");
                 sb.Append(trueBlock.ToString(context));
 
                 foreach (Pair<Expression, BlockHLStatement> tuple in elseConditions)
                 {
-                    sb.Append("\nelse if " + tuple.Item1.ToString(context) + "\n");
+                    if (tuple.Item1 is ExpressionCompare)
+                        cond = (tuple.Item1 as ExpressionCompare).ToStringWithParen(context);
+                    else
+                        cond = tuple.Item1.ToString(context);
+                    sb.Append("\nelse if " + cond + "\n");
                     sb.Append(tuple.Item2.ToString(context));
                 }
 
@@ -2041,8 +2080,8 @@ namespace UndertaleModLib.Decompiler
             {
                 if (IsRepeatLoop)
                 {
-                    bool isConstant = RepeatStartValue is ExpressionConstant;
-                    return "repeat " + (isConstant ? "(" : "") + RepeatStartValue.ToString(context) + (isConstant ? ")" : "") + "\n" + Block.ToString(context);
+                    bool needsParen = RepeatStartValue is ExpressionConstant || RepeatStartValue is ExpressionCompare;
+                    return "repeat " + (needsParen ? "(" : "") + RepeatStartValue.ToString(context) + (needsParen ? ")" : "") + "\n" + Block.ToString(context);
                 }
 
                 if (IsForLoop)
@@ -2054,10 +2093,18 @@ namespace UndertaleModLib.Decompiler
                     return "for (" + InitializeStatement.ToString(context) + "; " + conditionStr + "; " + StepStatement.ToString(context) + ")\n" + Block.ToString(context);
                 }
 
-                if (IsDoUntilLoop)
-                    return "do " + Block.ToString(context, false) + " until " + (Condition?.ToString(context) ?? "(false)") + ";\n";
+                string cond;
+                if (Condition is ExpressionCompare)
+                    cond = (Condition as ExpressionCompare).ToStringWithParen(context);
+                else if (IsDoUntilLoop)
+                    cond = Condition?.ToString(context) ?? "(false)";
+                else
+                    cond = Condition != null ? Condition.ToString(context) : "(true)";
 
-                return "while " + (Condition != null ? Condition.ToString(context) : "(true)") + "\n" + Block.ToString(context);
+                if (IsDoUntilLoop)
+                    return "do " + Block.ToString(context, false) + " until " + cond + ";\n";
+
+                return "while " + cond + "\n" + Block.ToString(context);
             }
         };
 
