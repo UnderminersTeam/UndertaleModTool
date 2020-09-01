@@ -741,12 +741,32 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                return String.Format("{0} {1} {2}", Argument1.ToString(context), OperationToPrintableString(Opcode), Argument2.ToString(context));
+                string arg1;
+                if (Argument1 is ExpressionCompare)
+                    arg1 = (Argument1 as ExpressionCompare).ToStringWithParen(context);
+                else
+                    arg1 = Argument1.ToString(context);
+                string arg2;
+                if (Argument2 is ExpressionCompare)
+                    arg2 = (Argument2 as ExpressionCompare).ToStringWithParen(context);
+                else
+                    arg2 = Argument2.ToString(context);
+                return String.Format("{0} {1} {2}", arg1, OperationToPrintableString(Opcode), arg2);
             }
 
             public string ToStringWithParen(DecompileContext context)
             {
-                return String.Format("({0} {1} {2})", Argument1.ToString(context), OperationToPrintableString(Opcode), Argument2.ToString(context));
+                string arg1;
+                if (Argument1 is ExpressionCompare)
+                    arg1 = (Argument1 as ExpressionCompare).ToStringWithParen(context);
+                else
+                    arg1 = Argument1.ToString(context);
+                string arg2;
+                if (Argument2 is ExpressionCompare)
+                    arg2 = (Argument2 as ExpressionCompare).ToStringWithParen(context);
+                else
+                    arg2 = Argument2.ToString(context);
+                return String.Format("({0} {1} {2})", arg1, OperationToPrintableString(Opcode), arg2);
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
