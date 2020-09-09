@@ -218,6 +218,10 @@ namespace UndertaleModLib.Models
                     total++;
                 }
                 Debug.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count));
+            } else
+            {
+                while (writer.Position % 4 != 0)
+                    writer.Write((byte)0);
             }
         }
 
@@ -366,6 +370,13 @@ namespace UndertaleModLib.Models
                     total++;
                 }
                 Debug.Assert(total == CalculateMaskDataSize(Width, Height, MaskCount));
+            } else
+            {
+                while (reader.Position % 4 != 0)
+                {
+                    if (reader.ReadByte() != 0)
+                        throw new IOException("Mask padding 2");
+                }
             }
         }
 
