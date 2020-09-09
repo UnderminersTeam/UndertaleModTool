@@ -210,19 +210,13 @@ namespace UndertaleModLib.Models
                 writer.Write(mask.Data);
                 total += (uint)mask.Data.Length;
             }
-            if (SVersion != 2)
+
+            while (total % 4 != 0)
             {
-                while (total % 4 != 0)
-                {
-                    writer.Write((byte)0);
-                    total++;
-                }
-                Debug.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count));
-            } else
-            {
-                while (writer.Position % 4 != 0)
-                    writer.Write((byte)0);
+                writer.Write((byte)0);
+                total++;
             }
+            Debug.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count));
         }
 
         private void Align3(UndertaleReader reader)
@@ -276,7 +270,7 @@ namespace UndertaleModLib.Models
                 {
                     case SpriteType.Normal:
                         Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
-                        ReadMaskData(reader, sequenceOffset == 0 ? -1 : (int)(sequenceOffset - reader.Position));
+                        ReadMaskData(reader);
                         break;
                     case SpriteType.SWF:
                         {
@@ -348,11 +342,10 @@ namespace UndertaleModLib.Models
             }
         }
 
-        private void ReadMaskData(UndertaleReader reader, int totalLen = -1)
+        private void ReadMaskData(UndertaleReader reader)
         {
             uint MaskCount = reader.ReadUInt32();
-            uint len = (totalLen == -1) ? ((Width + 7) / 8 * Height)
-                                        : (uint)((totalLen - 4) / MaskCount);
+            uint len = (Width + 7) / 8 * Height;
             CollisionMasks.Clear();
             uint total = 0;
             for (uint i = 0; i < MaskCount; i++)
@@ -361,23 +354,13 @@ namespace UndertaleModLib.Models
                 total += len;
             }
 
-            if (totalLen == -1)
+            while (total % 4 != 0)
             {
-                while (total % 4 != 0)
-                {
-                    if (reader.ReadByte() != 0)
-                        throw new IOException("Mask padding");
-                    total++;
-                }
-                Debug.Assert(total == CalculateMaskDataSize(Width, Height, MaskCount));
-            } else
-            {
-                while (reader.Position % 4 != 0)
-                {
-                    if (reader.ReadByte() != 0)
-                        throw new IOException("Mask padding 2");
-                }
+                if (reader.ReadByte() != 0)
+                    throw new IOException("Mask padding");
+                total++;
             }
+            Debug.Assert(total == CalculateMaskDataSize(Width, Height, MaskCount));
         }
 
         public uint CalculateMaskDataSize(uint width, uint height, uint maskcount)
