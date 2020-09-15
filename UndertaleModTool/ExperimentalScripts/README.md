@@ -17,6 +17,7 @@ Please report any bugs or issues with the experimental scripts to the Underminer
 - `ImportAllEmbeddedTextures.csx`: This imports all embedded textures from an `EmbeddedTextures` folder in your game files folder.
 - `ImportAllStrings.csx`: Imports all strings from an external `strings.txt` file in your game's file directory, overwriting the current game's strings with new ones.
 - `ImportASound.csx`: Allows you to import a sound easily with many options for special configuration. Does not operate in bulk (only can import one sound at a time).
+- `ImportSoundsBulk.csx`: ImportASound but in bulk (multiple files at a time supported).
 - `ImportGML.csx`: Allows you to import decompiled code in bulk from a folder. It can replace existing code very easily. However, it can link new code to existing objects or scripts. If they do not exist then it can make entirely new objects or scripts for your code to link to. To automatically link your new code to an object or script, it must begin with `gml_Script` or `gml_Object`.
 - There is an import graphics script that allows you to import a sprite of arbitrary size easily via a texture packer. The syntax of the files that can be used with this script is as follows:        
     * `SPRITENAME_FRAMENUMBER.png`
@@ -45,7 +46,8 @@ Please report any bugs or issues with the experimental scripts to the Underminer
 - `FontDataImport.csx`: By mono21400
 - `ImportAllEmbeddedTextures.csx`: Improved from the original script by Grossley
 - `ImportAllStrings.csx`: Improved from the original script by Grossley
-- `ImportASound.csx`: By nik (the cat)
+- `ImportASound.csx`: By nik (the cat), Jockeholm, and Grossley
+- `ImportSoundsBulk.csx`: By nik (the cat), Jockeholm, and Grossley
 - `ImportGML.csx`: By samuelroy21 of the DSG team.
 - The Import Graphics scripts were made by samuelroy21 with the help of colinator27, Grossley, and others of the DSG team.
 - `ExportAssetOrder.csx`: By Grossley and colinator27
