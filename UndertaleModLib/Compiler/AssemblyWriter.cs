@@ -1563,7 +1563,7 @@ namespace UndertaleModLib.Compiler
                         }
                     }
                     fix.Children.Add(fix2);
-                    AssembleVariablePush(cw, fix, out isSingle, out isArray, duplicate, useLongDupForArray);
+                    AssembleVariablePush(cw, fix, out isSingle, out isArray, duplicate, useLongDupForArray, useNoSpecificType);
                 } else
                 {
                     AssemblyWriterError(cw, "Malformed variable push.", e.Token);

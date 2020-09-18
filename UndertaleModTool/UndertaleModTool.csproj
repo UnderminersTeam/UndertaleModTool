@@ -325,6 +325,9 @@
     <None Include="ExperimentalScripts\ImportGraphics_v2.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="ExperimentalScripts\ImportSoundsBulk.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="SampleScripts\RunSwitchOnPC.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
