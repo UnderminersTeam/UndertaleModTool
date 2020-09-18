@@ -901,7 +901,7 @@ namespace UndertaleModLib.Compiler
                 // Variable to operate on, duplicated second-to-last variable if necessary
                 bool isSingle;
                 bool isArray;
-                AssembleVariablePush(cw, s.Children[0], out isSingle, out isArray, true, true);
+                AssembleVariablePush(cw, s.Children[0], out isSingle, out isArray, true, true, true /* seems like a GMAC bug */);
                 if (cw.typeStack.Count == 0)
                 {
                     AssemblyWriterError(cw, "Type stack empty (invalid syntax)", null);
