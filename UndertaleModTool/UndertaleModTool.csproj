@@ -286,6 +286,9 @@
     <None Include="ExperimentalScripts\ExportAllStrings.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="ExperimentalScripts\ExportAllTexturesWithPadding.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="ExperimentalScripts\ExportASM.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
