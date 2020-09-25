@@ -604,7 +604,7 @@ namespace UndertaleModTool
                         var wrapper = new GraphGeneration(getStartProcessQuery, getProcessStartInfoQuery, registerLayoutPluginCommand);
                         
                         byte[] output = wrapper.GenerateGraph(dot, Enums.GraphReturnType.Png); // TODO: Use SVG instead
-
+                        
                         image = new ImageSourceConverter().ConvertFrom(output) as ImageSource;
                     }
                     catch(Exception e)
