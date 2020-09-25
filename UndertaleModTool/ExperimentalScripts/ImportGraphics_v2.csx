@@ -18,6 +18,41 @@ string importFolder = PromptChooseDirectory("Import From Where");
 if (importFolder == null)
 	throw new System.Exception("The import folder was not set.");
 
+//Stop the script if there's missing sprite entries.
+string[] dirFiles = Directory.GetFiles(importFolder);
+foreach (string file in dirFiles) 
+{
+	string stripped = Path.GetFileNameWithoutExtension(file);
+	int lastUnderscore = stripped.LastIndexOf('_');
+	string spriteName = stripped.Substring(0, lastUnderscore);
+	Int32 validFrameNumber = 0;
+	try
+	{
+		validFrameNumber = Int32.Parse(stripped.Substring(lastUnderscore + 1));
+	}
+	catch
+	{
+	    ScriptError(spriteName + " is using letters instead of numbers. The script has stopped for your own protection.", "Error");
+		return;
+	}
+	int frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
+	int prevframe = 0;
+	if (frame != 0)
+	{
+		prevframe = (frame - 1);
+	}
+	if (frame < 0)
+	{
+	    ScriptError(spriteName + " is using an invalid numbering scheme. The script has stopped for your own protection.", "Error");
+		return;
+	}
+	//ScriptError(importFolder + spriteName + "_" + prevframe.ToString() + ".png", "TEST");
+	if (!(File.Exists(importFolder + spriteName + "_" + prevframe.ToString() + ".png")))
+	{
+	    ScriptError(spriteName + " is missing one or more indexes. The script has stopped for your own protection.", "Error");
+		return;
+	}	
+}
 // Get directory paths
 string workDirectory = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).Substring(6);
 System.IO.DirectoryInfo dir = System.IO.Directory.CreateDirectory(workDirectory + Path.DirectorySeparatorChar + "Packager");
