@@ -2,7 +2,7 @@
 
 EnsureDataLoaded();
 
-if (Data.GeneralInfo.Name.Content != "NXTALE") 
+if (Data.GeneralInfo.Name.Content != "NXTALE")
 {
     ScriptError("This script can only be used with\nThe Nintendo Switch version of Undertale.", "Not NXTALE");
     return;
@@ -24,6 +24,14 @@ var obj_kitchenchecker_Alarm_2 = Data.GameObjects.ByName("obj_kitchenchecker").E
 string obj_kitchenchecker_Alarm_2_code = obj_kitchenchecker_Alarm_2.Disassemble(Data.Variables, Data.CodeLocals.For(obj_kitchenchecker_Alarm_2));
 obj_kitchenchecker_Alarm_2_code = obj_kitchenchecker_Alarm_2_code.Replace("00091: pushi.e 4", "00091: pushi.e 1");
 obj_kitchenchecker_Alarm_2.Replace(Assembler.Assemble(obj_kitchenchecker_Alarm_2_code, Data));
+
+var gml_Object_obj_npc_room_Create_0 = Data.Code.ByName("gml_Object_obj_npc_room_Create_0");
+string gml_Object_obj_npc_room_Create_0_code = gml_Object_obj_npc_room_Create_0.Disassemble(Data.Variables, Data.CodeLocals.For(gml_Object_obj_npc_room_Create_0));
+gml_Object_obj_npc_room_Create_0_code = gml_Object_obj_npc_room_Create_0_code.Replace("00727: pushi.e 4", "00727: pushi.e 9999");
+gml_Object_obj_npc_room_Create_0_code = gml_Object_obj_npc_room_Create_0_code.Replace("00728: cmp.i.v NEQ", "00728: cmp.i.v GTE");
+gml_Object_obj_npc_room_Create_0_code = gml_Object_obj_npc_room_Create_0_code.Replace("00732: pushi.e 5", "00732: pushi.e 9999");
+gml_Object_obj_npc_room_Create_0_code = gml_Object_obj_npc_room_Create_0_code.Replace("00733: cmp.i.v NEQ", "00733: cmp.i.v GTE");
+gml_Object_obj_npc_room_Create_0.Replace(Assembler.Assemble(gml_Object_obj_npc_room_Create_0_code, Data));
 
 // Done.
 ScriptMessage(@"NXTALE Enabler by Kneesnap
