@@ -124,28 +124,26 @@
                         </TreeViewItem.ItemTemplate>
                     </TreeViewItem>
                     <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects}">
+                        <TreeViewItem.Resources>
+                            <ContextMenu x:Key="cm">
+                                <MenuItem Header="New Object Instance" Click="MenuItem_NewObjectInstance_Click"/>
+                            </ContextMenu>
+                        </TreeViewItem.Resources>
                         <TreeViewItem.Style>
                             <Style TargetType="{x:Type TreeViewItem}">
-                                <Style.Resources>
-                                    <ContextMenu x:Key="cm">
-                                        <MenuItem Header="New Object Instance" Click="MenuItem_NewObjectInstance_Click"/>
-                                    </ContextMenu>
-                                </Style.Resources>
                                 <Setter Property="ContextMenu" Value="{StaticResource cm}" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
                                         <DataTrigger.Setters>
                                             <Setter Property="IsExpanded" Value="False"/>
                                             <Setter Property="Foreground"  Value="LightGray"/>
+                                            <Setter Property="ContextMenu" Value="{x:Null}"/>
                                         </DataTrigger.Setters>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Collapsed">
                                         <DataTrigger.Setters>
                                             <Setter Property="IsExpanded" Value="True"/>
                                         </DataTrigger.Setters>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
-                                        <Setter Property="ContextMenu" Value="{x:Null}" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
