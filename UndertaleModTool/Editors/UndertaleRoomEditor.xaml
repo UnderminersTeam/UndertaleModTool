@@ -51,7 +51,7 @@
                             <TextBlock.Text>
                                 <MultiBinding StringFormat="{}Instance {0} of {1} (UndertaleRoom+GameObject)">
                                     <Binding Path="InstanceID"/>
-                                    <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?"/>
+                                    <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?" FallbackValue="EmptyInstance"/>
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>
@@ -61,7 +61,7 @@
                             <TextBlock.Text>
                                 <MultiBinding StringFormat="{}Tile {0} of {1} (UndertaleRoom+Tile)">
                                     <Binding Path="InstanceID"/>
-                                    <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?"/>
+                                    <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?" FallbackValue="EmptyTile"/>
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>
@@ -69,9 +69,8 @@
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+SpriteInstance}">
                         <TextBlock>
                             <TextBlock.Text>
-                                <MultiBinding StringFormat="{}Sprite {0} of {1} (UndertaleRoom+SpriteInstance)">
-                                    <Binding Path="Name.Content"/>
-                                    <Binding Path="Sprite.Name.Content" TargetNullValue="?"/>
+                                <MultiBinding StringFormat="{}{0} (UndertaleRoom+SpriteInstance)">
+                                    <Binding Path="Name.Content" TargetNullValue="?" FallbackValue="EmptySprite"/>
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>
@@ -127,6 +126,12 @@
                     <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects}">
                         <TreeViewItem.Style>
                             <Style TargetType="{x:Type TreeViewItem}">
+                                <Style.Resources>
+                                    <ContextMenu x:Key="cm">
+                                        <MenuItem Header="New Object Instance" Click="MenuItem_NewObjectInstance_Click"/>
+                                    </ContextMenu>
+                                </Style.Resources>
+                                <Setter Property="ContextMenu" Value="{StaticResource cm}" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
                                         <DataTrigger.Setters>
@@ -138,6 +143,9 @@
                                         <DataTrigger.Setters>
                                             <Setter Property="IsExpanded" Value="True"/>
                                         </DataTrigger.Setters>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
+                                        <Setter Property="ContextMenu" Value="{x:Null}" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -161,12 +169,17 @@
                                     <TextBlock.Text>
                                         <MultiBinding StringFormat="{}Tile {0} of {1} (UndertaleRoom+Tile)">
                                             <Binding Path="InstanceID"/>
-                                            <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?"/>
+                                            <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?" FallbackValue="EmptyTile"/>
                                         </MultiBinding>
                                     </TextBlock.Text>
                                 </TextBlock>
                             </HierarchicalDataTemplate>
                         </TreeViewItem.ItemTemplate>
+                        <TreeViewItem.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="New Tile" Click="MenuItem_NewGMS1Tile_Click"/>
+                            </ContextMenu>
+                        </TreeViewItem.ContextMenu>
                     </TreeViewItem>
                     <TreeViewItem Header="Layers" ItemsSource="{Binding Layers}" IsExpanded="True">
                         <TreeViewItem.Style>
@@ -192,12 +205,18 @@
                             <local:LayerDataTemplateSelector>
                                 <local:LayerDataTemplateSelector.InstancesDataTemplate>
                                     <HierarchicalDataTemplate ItemsSource="{Binding InstancesData.Instances}" ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                        <TextBlock Text="{Binding LayerName.Content}">
+                                            <TextBlock.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="New Object Instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
+                                                </ContextMenu>
+                                            </TextBlock.ContextMenu>
+                                        </TextBlock>
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.InstancesDataTemplate>
                                 <local:LayerDataTemplateSelector.TilesDataTemplate>
                                     <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                        <TextBlock Text="{Binding LayerName.Content}"/>
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.TilesDataTemplate>
                                 <local:LayerDataTemplateSelector.AssetsDataTemplate>
@@ -212,7 +231,14 @@
                                                 <Binding Path="AssetsData.Sprites"/>
                                             </MultiBinding>
                                         </HierarchicalDataTemplate.ItemsSource>
-                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                        <TextBlock Text="{Binding LayerName.Content}">
+                                            <TextBlock.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="New Legacy Tile" Click="MenuItem_NewLegacyTile_Click"/>
+                                                    <MenuItem Header="New Sprite Instance" Click="MenuItem_NewSprite_Click"/>
+                                                </ContextMenu>
+                                            </TextBlock.ContextMenu>
+                                        </TextBlock>
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.AssetsDataTemplate>
                                 <local:LayerDataTemplateSelector.BackgroundDataTemplate>
