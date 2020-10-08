@@ -26,7 +26,7 @@ if (importFolder == null)
 
 //Stop the script if there's missing sprite entries or w/e.
 string[] dirFiles = Directory.GetFiles(importFolder, "*.png", SearchOption.AllDirectories);
-foreach (string file in dirFiles) 
+foreach (string file in dirFiles)
 {
     string FileNameWithExtension = Path.GetFileName(file);
     string stripped = Path.GetFileNameWithoutExtension(file);
@@ -90,28 +90,28 @@ packer.SaveAtlasses(outName);
 // Import everything into UMT
 string prefix = outName.Replace(Path.GetExtension(outName), "");
 int atlasCount = 0;
-foreach (Atlas atlas in packer.Atlasses) 
+foreach (Atlas atlas in packer.Atlasses)
 {
     string atlasName = String.Format(prefix + "{0:000}" + ".png", atlasCount);
     Bitmap atlasBitmap = new Bitmap(atlasName);
     UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
     texture.TextureData.TextureBlob = File.ReadAllBytes(atlasName);
     Data.EmbeddedTextures.Add(texture);
-    foreach (Node n in atlas.Nodes) 
+    foreach (Node n in atlas.Nodes)
     {
-        if (n.Texture != null) 
+        if (n.Texture != null)
         {
             // Initalize values of this texture
             UndertaleTexturePageItem texturePageItem = new UndertaleTexturePageItem();
-            texturePageItem.SourceX = (ushort)n.Bounds.X; 
-            texturePageItem.SourceY = (ushort)n.Bounds.Y; 
-            texturePageItem.SourceWidth = (ushort)n.Bounds.Width; 
+            texturePageItem.SourceX = (ushort)n.Bounds.X;
+            texturePageItem.SourceY = (ushort)n.Bounds.Y;
+            texturePageItem.SourceWidth = (ushort)n.Bounds.Width;
             texturePageItem.SourceHeight = (ushort)n.Bounds.Height;
-            texturePageItem.TargetX = 0; 
-            texturePageItem.TargetY = 0; 
-            texturePageItem.TargetWidth = (ushort)n.Bounds.Width; 
+            texturePageItem.TargetX = 0;
+            texturePageItem.TargetY = 0;
+            texturePageItem.TargetWidth = (ushort)n.Bounds.Width;
             texturePageItem.TargetHeight = (ushort)n.Bounds.Height;
-            texturePageItem.BoundingWidth = (ushort)n.Bounds.Width; 
+            texturePageItem.BoundingWidth = (ushort)n.Bounds.Width;
             texturePageItem.BoundingHeight = (ushort)n.Bounds.Height;
             texturePageItem.TexturePage = texture;
 
@@ -130,20 +130,20 @@ foreach (Atlas atlas in packer.Atlasses)
             texentry.Texture = texturePageItem;
 
             // Set values for new sprites
-            if (sprite == null) 
+            if (sprite == null)
             {
                 UndertaleString spriteUTString = Data.Strings.MakeString(spriteName);
                 UndertaleSprite newSprite = new UndertaleSprite();
                 newSprite.Name = spriteUTString;
-                newSprite.Width = (uint)n.Bounds.Width; 
+                newSprite.Width = (uint)n.Bounds.Width;
                 newSprite.Height = (uint)n.Bounds.Height;
-                newSprite.MarginLeft = 0; 
-                newSprite.MarginRight = n.Bounds.Width - 1; 
-                newSprite.MarginTop = 0; 
+                newSprite.MarginLeft = 0;
+                newSprite.MarginRight = n.Bounds.Width - 1;
+                newSprite.MarginTop = 0;
                 newSprite.MarginBottom = n.Bounds.Height - 1;
-                newSprite.OriginX = 0; 
+                newSprite.OriginX = 0;
                 newSprite.OriginY = 0;
-                if (frame > 0) 
+                if (frame > 0)
                 {
                     for (int i = 0; i < frame; i++)
                         newSprite.Textures.Add(null);
@@ -154,27 +154,27 @@ foreach (Atlas atlas in packer.Atlasses)
                 Bitmap cloneBitmap = atlasBitmap.Clone(bmpRect, format);
                 int width = ((n.Bounds.Width + 7) / 8) * 8;
                 BitArray maskingBitArray = new BitArray(width * n.Bounds.Height);
-                for (int y = 0; y < n.Bounds.Height; y++) 
+                for (int y = 0; y < n.Bounds.Height; y++)
                 {
-                    for (int x = 0; x < n.Bounds.Width; x++) 
+                    for (int x = 0; x < n.Bounds.Width; x++)
                     {
                         Color pixelColor = cloneBitmap.GetPixel(x, y);
                         maskingBitArray[y * width + x] = (pixelColor.A > 0);
                     }
                 }
                 BitArray tempBitArray = new BitArray(width * n.Bounds.Height);
-                for (int i = 0; i < maskingBitArray.Length; i += 8) 
+                for (int i = 0; i < maskingBitArray.Length; i += 8)
                 {
                     for (int j = 0; j < 8; j++)
                     {
-                        tempBitArray[j + i] = maskingBitArray[-(j-7) + i];
+                        tempBitArray[j + i] = maskingBitArray[-(j - 7) + i];
                     }
                 }
                 int numBytes;
                 numBytes = maskingBitArray.Length / 8;
                 byte[] bytes = new byte[numBytes];
                 tempBitArray.CopyTo(bytes, 0);
-                for (int i = 0; i < bytes.Length; i++) 
+                for (int i = 0; i < bytes.Length; i++)
                     newSprite.CollisionMasks[0].Data[i] = bytes[i];
                 newSprite.Textures.Add(texentry);
                 Data.Sprites.Add(newSprite);
@@ -182,7 +182,7 @@ foreach (Atlas atlas in packer.Atlasses)
             }
             if (frame > sprite.Textures.Count - 1)
             {
-                while (frame > sprite.Textures.Count - 1) 
+                while (frame > sprite.Textures.Count - 1)
                 {
                     sprite.Textures.Add(texentry);
                 }
@@ -198,7 +198,7 @@ foreach (Atlas atlas in packer.Atlasses)
 HideProgressBar();
 ScriptMessage("Import Complete!");
 
-public class TextureInfo 
+public class TextureInfo
 {
     public string Source;
     public int Width;
@@ -211,7 +211,7 @@ public enum SplitType
     Vertical,
 }
 
-public enum BestFitHeuristic 
+public enum BestFitHeuristic
 {
     Area,
     MaxOneAxis,
@@ -241,14 +241,14 @@ public class Packer
     public bool DebugMode;
     public BestFitHeuristic FitHeuristic;
     public List<Atlas> Atlasses;
-    
-    public Packer() 
+
+    public Packer()
     {
         SourceTextures = new List<TextureInfo>();
         Log = new StringWriter();
         Error = new StringWriter();
     }
-    
+
     public void Process(string _SourceDir, string _Pattern, int _AtlasSize, int _Padding, bool _DebugMode)
     {
         Padding = _Padding;
@@ -260,7 +260,7 @@ public class Packer
         textures = SourceTextures.ToList();
         //2: generate as many atlasses as needed (with the latest one as small as possible)
         Atlasses = new List<Atlas>();
-        while (textures.Count > 0) 
+        while (textures.Count > 0)
         {
             Atlas atlas = new Atlas();
             atlas.Width = _AtlasSize;
@@ -269,7 +269,7 @@ public class Packer
             if (leftovers.Count == 0)
             {
                 // we reached the last atlas. Check if this last atlas could have been twice smaller
-                while (leftovers.Count == 0) 
+                while (leftovers.Count == 0)
                 {
                     atlas.Width /= 2;
                     atlas.Height /= 2;
@@ -301,7 +301,7 @@ public class Packer
             //2: save description in file
             foreach (Node n in atlas.Nodes)
             {
-                if (n.Texture != null) 
+                if (n.Texture != null)
                 {
                     tw.Write(n.Texture.Source + ", ");
                     tw.Write(atlasName + ", ");
@@ -326,7 +326,7 @@ public class Packer
     {
         DirectoryInfo di = new DirectoryInfo(_Path);
         FileInfo[] files = di.GetFiles(_Wildcard, SearchOption.AllDirectories);
-        foreach (FileInfo fi in files) 
+        foreach (FileInfo fi in files)
         {
             Image img = Image.FromFile(fi.FullName);
             if (img != null)
@@ -350,7 +350,7 @@ public class Packer
             }
         }
     }
-    
+
     private void HorizontalSplit(Node _ToSplit, int _Width, int _Height, List<Node> _List)
     {
         Node n1 = new Node();
@@ -370,7 +370,7 @@ public class Packer
         if (n2.Bounds.Width > 0 && n2.Bounds.Height > 0)
             _List.Add(n2);
     }
-    
+
     private void VerticalSplit(Node _ToSplit, int _Width, int _Height, List<Node> _List)
     {
         Node n1 = new Node();
@@ -407,7 +407,7 @@ public class Packer
                         float wRatio = (float)ti.Width / (float)_Node.Bounds.Width;
                         float hRatio = (float)ti.Height / (float)_Node.Bounds.Height;
                         float ratio = wRatio > hRatio ? wRatio : hRatio;
-                        if (ratio > maxCriteria) 
+                        if (ratio > maxCriteria)
                         {
                             maxCriteria = ratio;
                             bestFit = ti;
@@ -431,7 +431,7 @@ public class Packer
         }
         return bestFit;
     }
-    
+
     private List<TextureInfo> LayoutAtlas(List<TextureInfo> _Textures, Atlas _Atlas)
     {
         List<Node> freeList = new List<Node>();
@@ -442,18 +442,18 @@ public class Packer
         root.Bounds.Size = new Size(_Atlas.Width, _Atlas.Height);
         root.SplitType = SplitType.Horizontal;
         freeList.Add(root);
-        while (freeList.Count > 0 && textures.Count > 0) 
+        while (freeList.Count > 0 && textures.Count > 0)
         {
             Node node = freeList[0];
             freeList.RemoveAt(0);
             TextureInfo bestFit = FindBestFitForNode(node, textures);
-            if (bestFit != null) 
+            if (bestFit != null)
             {
-                if (node.SplitType == SplitType.Horizontal) 
+                if (node.SplitType == SplitType.Horizontal)
                 {
                     HorizontalSplit(node, bestFit.Width, bestFit.Height, freeList);
                 }
-                else 
+                else
                 {
                     VerticalSplit(node, bestFit.Width, bestFit.Height, freeList);
                 }
@@ -467,39 +467,16 @@ public class Packer
         return textures;
     }
 
-    private Image CreateAtlasImage(Atlas _Atlas) 
+    private Image CreateAtlasImage(Atlas _Atlas)
     {
         Image img = new Bitmap(_Atlas.Width, _Atlas.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         Graphics g = Graphics.FromImage(img);
-        if (DebugMode)
-        {
-            g.FillRectangle(Brushes.Green, new Rectangle(0, 0, _Atlas.Width, _Atlas.Height));
-        }
         foreach (Node n in _Atlas.Nodes)
         {
             if (n.Texture != null)
             {
                 Image sourceImg = Image.FromFile(n.Texture.Source);
                 g.DrawImage(sourceImg, n.Bounds);
-                if (DebugMode)
-                {
-                    string label = Path.GetFileNameWithoutExtension(n.Texture.Source);
-                    SizeF labelBox = g.MeasureString(label, SystemFonts.MenuFont, new SizeF(n.Bounds.Size));
-                    RectangleF rectBounds = new Rectangle(n.Bounds.Location, new Size((int)labelBox.Width, (int)labelBox.Height));
-                    g.FillRectangle(Brushes.Black, rectBounds);
-                    g.DrawString(label, SystemFonts.MenuFont, Brushes.White, rectBounds);
-                }
-            } else
-            {
-                g.FillRectangle(Brushes.DarkMagenta, n.Bounds);
-                if (DebugMode) 
-                {
-                    string label = n.Bounds.Width.ToString() + "x" + n.Bounds.Height.ToString();
-                    SizeF labelBox = g.MeasureString(label, SystemFonts.MenuFont, new SizeF(n.Bounds.Size));
-                    RectangleF rectBounds = new Rectangle(n.Bounds.Location, new Size((int)labelBox.Width, (int)labelBox.Height));
-                    g.FillRectangle(Brushes.Black, rectBounds);
-                    g.DrawString(label, SystemFonts.MenuFont, Brushes.White, rectBounds);
-                }
             }
         }
         // DPI FIX START
