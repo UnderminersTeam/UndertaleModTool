@@ -153,7 +153,7 @@ namespace UndertaleModLib.Util
             if (bufferOffset + 3 >= bufferSize)
                 NextBuffer();
 
-            var val = (int)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8 | buffer[bufferOffset++] << 16);
+            int val = (int)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8 | (sbyte)buffer[bufferOffset++] << 16);
             offset += 3;
             return val;
         }
@@ -173,7 +173,7 @@ namespace UndertaleModLib.Util
             if (bufferOffset + 4 >= bufferSize)
                 NextBuffer();
 
-            var val = (int)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8 | buffer[bufferOffset++] << 16 | buffer[bufferOffset++] << 24);
+            var val = (int)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8 | buffer[bufferOffset++] << 16 | (sbyte)buffer[bufferOffset++] << 24);
             offset += 4;
             return val;
         }
