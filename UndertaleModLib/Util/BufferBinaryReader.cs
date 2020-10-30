@@ -133,7 +133,7 @@ namespace UndertaleModLib.Util
             if (bufferOffset + 2 >= bufferSize)
                 NextBuffer();
 
-            var val = (short)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8);
+            short val = (short)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8);
             offset += 2;
             return val;
         }
@@ -143,7 +143,7 @@ namespace UndertaleModLib.Util
             if (bufferOffset + 2 >= bufferSize)
                 NextBuffer();
 
-            var val = (ushort)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8);
+            ushort val = (ushort)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8);
             offset += 2;
             return val;
         }
@@ -163,7 +163,7 @@ namespace UndertaleModLib.Util
             if (bufferOffset + 3 >= bufferSize)
                 NextBuffer();
 
-            var val = (uint)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8 | buffer[bufferOffset++] << 16);
+            uint val = (uint)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8 | buffer[bufferOffset++] << 16);
             offset += 3;
             return val;
         }
@@ -173,7 +173,7 @@ namespace UndertaleModLib.Util
             if (bufferOffset + 4 >= bufferSize)
                 NextBuffer();
 
-            var val = (int)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8 | buffer[bufferOffset++] << 16 | (sbyte)buffer[bufferOffset++] << 24);
+            int val = (int)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8 | buffer[bufferOffset++] << 16 | (sbyte)buffer[bufferOffset++] << 24);
             offset += 4;
             return val;
         }
@@ -183,7 +183,7 @@ namespace UndertaleModLib.Util
             if (bufferOffset + 4 >= bufferSize)
                 NextBuffer();
 
-            var val = (uint)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8 | buffer[bufferOffset++] << 16 | buffer[bufferOffset++] << 24);
+            uint val = (uint)(buffer[bufferOffset++] | buffer[bufferOffset++] << 8 | buffer[bufferOffset++] << 16 | buffer[bufferOffset++] << 24);
             offset += 4;
             return val;
         }

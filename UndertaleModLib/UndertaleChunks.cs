@@ -457,7 +457,7 @@ namespace UndertaleModLib
             // texture blobs
             foreach (UndertaleEmbeddedTexture obj in List)
                 obj.UnserializeBlob(reader);
-
+            
             // padding
             while (reader.Position % 4 != 0)
                 if (reader.ReadByte() != 0)
