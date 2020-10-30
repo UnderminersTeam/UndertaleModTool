@@ -485,7 +485,7 @@ namespace UndertaleModTool
 
             // add tile to list
             var tile = new UndertaleRoom.Tile { InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastTile++ };
-			tile._SpriteMode = true;
+            tile._SpriteMode = true;
             layer.AssetsData.LegacyTiles.Add(tile);
 
             if (layer != null)
