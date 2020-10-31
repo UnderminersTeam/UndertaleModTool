@@ -479,8 +479,13 @@ namespace UndertaleModTool
             if (layer.AssetsData.LegacyTiles == null)
                 layer.AssetsData.LegacyTiles = new UndertalePointerList<UndertaleRoom.Tile>();
 
+            // add sprite pointer list if one doesn't already exist
+            if (layer.AssetsData.Sprites == null)
+                layer.AssetsData.Sprites = new UndertalePointerList<UndertaleRoom.SpriteInstance>();
+
             // add tile to list
             var tile = new UndertaleRoom.Tile { InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastTile++ };
+            tile._SpriteMode = true;
             layer.AssetsData.LegacyTiles.Add(tile);
 
             if (layer != null)
