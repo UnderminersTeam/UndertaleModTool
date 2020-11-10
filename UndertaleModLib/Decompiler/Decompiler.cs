@@ -976,8 +976,15 @@ namespace UndertaleModLib.Decompiler
                         return ac.Value.Equals(bc.Value) && ac.IsPushE == bc.IsPushE && ac.Type == bc.Type && ac.WasDuplicated == bc.WasDuplicated &&
                                a.VarType == b.VarType && a.ArrayIndex1 == b.ArrayIndex1 && a.ArrayIndex2 == b.ArrayIndex2;
                     }
-                    if (Destination.InstType is ExpressionConstant && checkEqual(Destination, (ExpressionVar)two.Argument1) && two.Opcode != UndertaleInstruction.Opcode.Shl && two.Opcode != UndertaleInstruction.Opcode.Shr && two.Opcode != UndertaleInstruction.Opcode.Rem)
-                        return String.Format("{0}{1} {2}= {3}", varPrefix, varName, Expression.OperationToPrintableString(two.Opcode), two.Argument2.ToString(context));
+                    if (Destination.InstType is ExpressionConstant)
+                    {
+                        ExpressionVar v1 = (ExpressionVar)two.Argument1;
+                        if (checkEqual(Destination, v1) && two.Opcode != UndertaleInstruction.Opcode.Shl && two.Opcode != UndertaleInstruction.Opcode.Shr && two.Opcode != UndertaleInstruction.Opcode.Rem)
+                        {
+                            if (!(context.Data?.GeneralInfo?.BytecodeVersion > 14 && v1.Opcode != UndertaleInstruction.Opcode.Push && Destination.Var.InstanceType != UndertaleInstruction.InstanceType.Self))
+                                return String.Format("{0}{1} {2}= {3}", varPrefix, varName, Expression.OperationToPrintableString(two.Opcode), two.Argument2.ToString(context));
+                        }
+                    }
                 }
                 return String.Format("{0}{1} = {2}", varPrefix, varName, Value.ToString(context));
             }
@@ -1135,6 +1142,7 @@ namespace UndertaleModLib.Decompiler
             public UndertaleInstruction.VariableType VarType;
             public Expression ArrayIndex1;
             public Expression ArrayIndex2;
+            public UndertaleInstruction.Opcode Opcode;
 
             public ExpressionVar(UndertaleVariable var, Expression instType, UndertaleInstruction.VariableType varType)
             {
@@ -1507,8 +1515,11 @@ namespace UndertaleModLib.Decompiler
                                                 (!(two.Argument2 is ExpressionConstant) || // Also check to make sure it's not a ++ or --
                                                 (!((two.Argument2 as ExpressionConstant).IsPushE && ExpressionConstant.ConvertToInt((two.Argument2 as ExpressionConstant).Value) == 1))))
                                             {
-                                                statements.Add(new OperationEqualsStatement(target, two.Opcode, two.Argument2));
-                                                break;
+                                                if (!(context.Data?.GeneralInfo?.BytecodeVersion > 14 && v.Opcode != UndertaleInstruction.Opcode.Push && instr.Destination.Target.InstanceType != UndertaleInstruction.InstanceType.Self))
+                                                {
+                                                    statements.Add(new OperationEqualsStatement(target, two.Opcode, two.Argument2));
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
@@ -1528,6 +1539,7 @@ namespace UndertaleModLib.Decompiler
                         if (instr.Value is UndertaleInstruction.Reference<UndertaleVariable>)
                         {
                             ExpressionVar pushTarget = new ExpressionVar((instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Target, new ExpressionConstant(UndertaleInstruction.DataType.Int16, instr.TypeInst), (instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Type);
+                            pushTarget.Opcode = instr.Kind;
                             if (pushTarget.NeedsInstanceParameters)
                                 pushTarget.InstType = stack.Pop();
                             if (pushTarget.NeedsArrayParameters)
