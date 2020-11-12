@@ -1594,23 +1594,27 @@ namespace UndertaleModLib.Compiler
                         {
                             case "string":
                                 {
-                                    string conversion = "";
-                                    switch (result.Children[0].Constant.kind)
+                                    // Ignore the optimization for GMS build versions less than 1763 and not equal to 1539.
+                                    if ((context.Data?.GeneralInfo.Build >= 1763) || (context.Data?.GeneralInfo.Major >= 2) || (context.Data?.GeneralInfo.Build == 1539))
                                     {
-                                        case ExpressionConstant.Kind.Number:
-                                            conversion = result.Children[0].Constant.valueNumber.ToString();
-                                            break;
-                                        case ExpressionConstant.Kind.Int64:
-                                            conversion = result.Children[0].Constant.valueInt64.ToString();
-                                            break;
-                                        case ExpressionConstant.Kind.String:
-                                            conversion = result.Children[0].Constant.valueString;
-                                            break;
-                                        default:
-                                            return result; // This shouldn't happen
+                                        string conversion = "";
+                                        switch (result.Children[0].Constant.kind)
+                                        {
+                                            case ExpressionConstant.Kind.Number:
+                                                conversion = result.Children[0].Constant.valueNumber.ToString();
+                                                break;
+                                            case ExpressionConstant.Kind.Int64:
+                                                conversion = result.Children[0].Constant.valueInt64.ToString();
+                                                break;
+                                            case ExpressionConstant.Kind.String:
+                                                conversion = result.Children[0].Constant.valueString;
+                                                break;
+                                            default:
+                                                return result; // This shouldn't happen
+                                        }
+                                        result = new Statement(Statement.StatementKind.ExprConstant);
+                                        result.Constant = new ExpressionConstant(conversion);
                                     }
-                                    result = new Statement(Statement.StatementKind.ExprConstant);
-                                    result.Constant = new ExpressionConstant(conversion);
                                 }
                                 break;
                             case "real":
