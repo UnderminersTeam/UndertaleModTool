@@ -35,6 +35,7 @@ Please report any bugs or issues with the experimental scripts to the Underminer
     * `ExportASM.csx`: Exports assembly data to an `Export_Assembly` folder in your game files folder.
     * `ImportASM.csx`: Imports assembly data from a folder into your game.
 - `ReloadDeltaruneJSON.csx`: This script adds a F12 hotkey for Deltarune, to reload the JSON language file located externally from the game, while it's running
+- `CheckDecompiler.csx`: This script checks the decompiler accuracy of a game and returns the inaccurately decompiled scripts in the game directory.
 
 ## Credits
 
@@ -58,3 +59,4 @@ Please report any bugs or issues with the experimental scripts to the Underminer
 - `ExportASM.csx`: By mono21400
 - `ImportASM.csx`: By samuelroy21 of the DSG team, mono21400
 - `ReloadDeltaruneJSON.csx`: By Grossley
+- `CheckDecompiler.csx`: By Grossley
