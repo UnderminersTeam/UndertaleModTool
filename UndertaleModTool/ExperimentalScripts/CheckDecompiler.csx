@@ -7,6 +7,10 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
+//Made by Grossley ( Grossley#2869 on Discord )
+//Changes:
+//Version 01 (November 13th, 2020): Initial release
+
 ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
 if (Data?.GeneralInfo.BytecodeVersion < 15)
 {
