@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -661,8 +661,10 @@ namespace UndertaleModTool
         {
             CompositeCollection collection = new CompositeCollection();
             IList<UndertaleRoom.Layer> layers = value as IList<UndertaleRoom.Layer>;
-            foreach (var layer in layers.OrderByDescending((x) => x.LayerDepth))
+            foreach (var layer in layers.OrderByDescending((x) => x?.LayerDepth ?? 0))
             {
+                if (layer == null)
+                    continue;
                 switch (layer.LayerType)
                 {
                     case UndertaleRoom.LayerType.Background:
