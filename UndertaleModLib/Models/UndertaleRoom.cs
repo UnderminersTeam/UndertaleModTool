@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -197,8 +197,10 @@ namespace UndertaleModLib.Models
         public void SetupRoom()
         {
             foreach (UndertaleRoom.Layer layer in Layers)
-                layer.ParentRoom = this;
-
+            {
+                if (layer != null)
+                    layer.ParentRoom = this;
+            }
             foreach (UndertaleRoom.Background bgnd in Backgrounds)
                 bgnd.ParentRoom = this;
         }
