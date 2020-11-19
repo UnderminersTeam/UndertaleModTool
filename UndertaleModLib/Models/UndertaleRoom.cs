@@ -80,9 +80,13 @@ namespace UndertaleModLib.Models
         {
             if (writer.undertaleData.GeneralInfo.Major >= 2)
             {
-                foreach (var layer in Layers)
+                foreach (var layer in Layers.ToList())
                 {
-                    if (layer.InstancesData != null)
+                    if (layer == null)
+                    {
+                        Layers.Remove(layer);
+                    }
+                    else if (layer.InstancesData != null)
                     {
                         foreach (var inst in layer.InstancesData.Instances)
                         {
