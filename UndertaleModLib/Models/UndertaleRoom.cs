@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -80,13 +80,9 @@ namespace UndertaleModLib.Models
         {
             if (writer.undertaleData.GeneralInfo.Major >= 2)
             {
-                foreach (var layer in Layers.ToList())
+                foreach (var layer in Layers)
                 {
-                    if (layer == null)
-                    {
-                        Layers.Remove(layer);
-                    }
-                    else if (layer.InstancesData != null)
+                    if (layer.InstancesData != null)
                     {
                         foreach (var inst in layer.InstancesData.Instances)
                         {
@@ -204,10 +200,7 @@ namespace UndertaleModLib.Models
             {
                 if (layer != null)
                     layer.ParentRoom = this;
-                else
-                    Layers.Remove(layer);
             }
-
             foreach (UndertaleRoom.Background bgnd in Backgrounds)
                 bgnd.ParentRoom = this;
         }
