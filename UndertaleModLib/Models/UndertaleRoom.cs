@@ -196,8 +196,13 @@ namespace UndertaleModLib.Models
 
         public void SetupRoom()
         {
-            foreach (UndertaleRoom.Layer layer in Layers)
-                layer.ParentRoom = this;
+            foreach (UndertaleRoom.Layer layer in Layers.ToList())
+            {
+                if (layer != null)
+                    layer.ParentRoom = this;
+                else
+                    Layers.Remove(layer);
+            }
 
             foreach (UndertaleRoom.Background bgnd in Backgrounds)
                 bgnd.ParentRoom = this;
