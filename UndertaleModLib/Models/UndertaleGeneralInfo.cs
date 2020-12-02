@@ -194,7 +194,9 @@ namespace UndertaleModLib.Models
                 Random random = new Random((int)(Timestamp & 4294967295L));
                 long firstRandom = (long)random.Next() << 32 | (long)random.Next();
                 if (reader.ReadInt64() != firstRandom)
-                    throw new IOException("Unexpected random UID");
+                {
+                    //throw new IOException("Unexpected random UID");
+                }
                 long infoNumber = (long)(Timestamp - 1000);
                 ulong temp = (ulong)infoNumber;
                 temp = ((temp << 56 & 18374686479671623680UL) | (temp >> 8 & 71776119061217280UL) |
@@ -215,18 +217,15 @@ namespace UndertaleModLib.Models
                     if (i == infoLocation)
                     {
                         long curr = reader.ReadInt64();
+                        curr = infoNumber;
                         GMS2RandomUID.Add(curr);
-                        if (curr != infoNumber)
-                            throw new IOException("Unexpected random UID info");
                     }
                     else
                     {
                         int first = reader.ReadInt32();
                         int second = reader.ReadInt32();
-                        if (first != random.Next())
-                            throw new IOException("Unexpected random UID");
-                        if (second != random.Next())
-                            throw new IOException("Unexpected random UID");
+                        first = random.Next();
+                        second = random.Next();
                         GMS2RandomUID.Add(((long)first << 32) | (long)second);
                     }
                 }
