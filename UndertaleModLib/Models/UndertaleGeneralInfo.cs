@@ -143,7 +143,7 @@ namespace UndertaleModLib.Models
                         int second = random.Next();
                         writer.Write(first);
                         writer.Write(second);
-                        GMS2RandomUID.Add((first << 32) | second);
+                        GMS2RandomUID.Add(((long)first << 32) | (long)second);
                     }
                 }
                 writer.Write(GMS2FPS);
@@ -227,7 +227,7 @@ namespace UndertaleModLib.Models
                             throw new IOException("Unexpected random UID");
                         if (second != random.Next())
                             throw new IOException("Unexpected random UID");
-                        GMS2RandomUID.Add((first << 32) | second);
+                        GMS2RandomUID.Add(((long)first << 32) | (long)second);
                     }
                 }
                 GMS2FPS = reader.ReadSingle();
