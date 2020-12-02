@@ -66,7 +66,8 @@ namespace UndertaleModLib.Models
         public uint DebuggerPort { get; set; } = 6502;
         public UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM> RoomOrder { get; private set; } = new UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>();
 
-        public byte[] GMS2RandomUID { get; set; } = new byte[40]; // License data or encrypted something? Has quite high entropy
+        public List<long> GMS2RandomUID { get; set; } = new List<long>(); // Some sort of checksum
+
         public float GMS2FPS { get; set; } = 30.0f;
         public bool GMS2AllowStatistics { get; set; } = true;
         public byte[] GMS2GameGUID { get; set; } = new byte[16]; // more high entropy data
@@ -108,9 +109,43 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObject(RoomOrder);
             if (Major >= 2)
             {
-                if (GMS2RandomUID.Length != 40)
-                    throw new IOException("GMS2RandomUID has invalid length");
-                writer.Write(GMS2RandomUID);
+                // Write random UID
+                Random random = new Random((int)(Timestamp & 4294967295L));
+                long firstRandom = (long)random.Next() << 32 | (long)random.Next();
+                long infoNumber = (long)(Timestamp - 1000);
+                ulong temp = (ulong)infoNumber;
+                temp = ((temp << 56 & 18374686479671623680UL) | (temp >> 8 & 71776119061217280UL) |
+                        (temp << 32 & 280375465082880UL) | (temp >> 16 & 1095216660480UL) | (temp << 8 & 4278190080UL) |
+                        (temp >> 24 & 16711680UL) | (temp >> 16 & 65280UL) | (temp >> 32 & 255UL));
+                infoNumber = (long)temp;
+                infoNumber ^= firstRandom;
+                infoNumber = ~infoNumber;
+                infoNumber ^= ((long)GameID << 32 | (long)GameID);
+                infoNumber ^= ((long)(DefaultWindowWidth + (int)Info) << 48 |
+                               (long)(DefaultWindowHeight + (int)Info) << 32 |
+                               (long)(DefaultWindowHeight + (int)Info) << 16 |
+                               (long)(DefaultWindowWidth + (int)Info));
+                infoNumber ^= BytecodeVersion;
+                int infoLocation = (int)(Math.Abs((int)(Timestamp & 65535L) / 7 + (GameID - DefaultWindowWidth) + RoomOrder.Count) % 4);
+                GMS2RandomUID.Clear();
+                writer.Write(firstRandom);
+                GMS2RandomUID.Add(firstRandom);
+                for (int i = 0; i < 4; i++)
+                {
+                    if (i == infoLocation)
+                    {
+                        writer.Write(infoNumber);
+                        GMS2RandomUID.Add(infoNumber);
+                    }
+                    else
+                    {
+                        int first = random.Next();
+                        int second = random.Next();
+                        writer.Write(first);
+                        writer.Write(second);
+                        GMS2RandomUID.Add((first << 32) | second);
+                    }
+                }
                 writer.Write(GMS2FPS);
                 if (GMS2GameGUID.Length != 16)
                     throw new IOException("GMS2GameGUID has invalid length");
@@ -154,7 +189,47 @@ namespace UndertaleModLib.Models
             RoomOrder = reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>>();
             if (Major >= 2)
             {
-                GMS2RandomUID = reader.ReadBytes(40);
+                // Begin parsing random UID, and verify it based on original algorithm
+                GMS2RandomUID = new List<long>();
+                Random random = new Random((int)(Timestamp & 4294967295L));
+                long firstRandom = (long)random.Next() << 32 | (long)random.Next();
+                if (reader.ReadInt64() != firstRandom)
+                    throw new IOException("Unexpected random UID");
+                long infoNumber = (long)(Timestamp - 1000);
+                ulong temp = (ulong)infoNumber;
+                temp = ((temp << 56 & 18374686479671623680UL) | (temp >> 8 & 71776119061217280UL) |
+                        (temp << 32 & 280375465082880UL) | (temp >> 16 & 1095216660480UL) | (temp << 8 & 4278190080UL) |
+                        (temp >> 24 & 16711680UL) | (temp >> 16 & 65280UL) | (temp >> 32 & 255UL));
+                infoNumber = (long)temp;
+                infoNumber ^= firstRandom;
+                infoNumber = ~infoNumber;
+                infoNumber ^= ((long)GameID << 32 | (long)GameID);
+                infoNumber ^= ((long)(DefaultWindowWidth + (int)Info) << 48 |
+                               (long)(DefaultWindowHeight + (int)Info) << 32 |
+                               (long)(DefaultWindowHeight + (int)Info) << 16 |
+                               (long)(DefaultWindowWidth + (int)Info));
+                infoNumber ^= BytecodeVersion;
+                int infoLocation = (int)(Math.Abs((int)(Timestamp & 65535L) / 7 + (GameID - DefaultWindowWidth) + RoomOrder.Count) % 4);
+                for (int i = 0; i < 4; i++)
+                {
+                    if (i == infoLocation)
+                    {
+                        long curr = reader.ReadInt64();
+                        GMS2RandomUID.Add(curr);
+                        if (curr != infoNumber)
+                            throw new IOException("Unexpected random UID info");
+                    }
+                    else
+                    {
+                        int first = reader.ReadInt32();
+                        int second = reader.ReadInt32();
+                        if (first != random.Next())
+                            throw new IOException("Unexpected random UID");
+                        if (second != random.Next())
+                            throw new IOException("Unexpected random UID");
+                        GMS2RandomUID.Add((first << 32) | second);
+                    }
+                }
                 GMS2FPS = reader.ReadSingle();
                 GMS2AllowStatistics = reader.ReadBoolean();
                 GMS2GameGUID = reader.ReadBytes(16);
