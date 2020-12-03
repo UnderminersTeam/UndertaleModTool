@@ -36,6 +36,7 @@ Please report any bugs or issues with the experimental scripts to the Underminer
     * `ImportASM.csx`: Imports assembly data from a folder into your game.
 - `ReloadDeltaruneJSON.csx`: This script adds a F12 hotkey for Deltarune, to reload the JSON language file located externally from the game, while it's running
 - `CheckDecompiler.csx`: This script checks the decompiler accuracy of a game and returns the inaccurately decompiled scripts in the game directory.
+- `UndertaleWithJSONs.csx`: This script JSONifies all Undertale versions with Japanese support, 1.05+. Switch languages using F11. Reload text for curent language from JSON on command using F12. Reloading from JSON may take about 10 seconds.
 
 ## Credits
 
@@ -60,3 +61,4 @@ Please report any bugs or issues with the experimental scripts to the Underminer
 - `ImportASM.csx`: By samuelroy21 of the DSG team, mono21400
 - `ReloadDeltaruneJSON.csx`: By Grossley
 - `CheckDecompiler.csx`: By Grossley
+- `UndertaleWithJSONs.csx`: By Grossley and Colinator
