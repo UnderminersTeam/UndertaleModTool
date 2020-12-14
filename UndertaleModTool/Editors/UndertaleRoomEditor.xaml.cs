@@ -451,6 +451,16 @@ namespace UndertaleModTool
             layer.Data = new T();
             room.Layers.Add(layer);
 
+            if (layer.LayerType == UndertaleRoom.LayerType.Assets)
+            {
+                // create a new pointer list
+                if (layer.AssetsData.LegacyTiles == null)
+                    layer.AssetsData.LegacyTiles = new UndertalePointerList<UndertaleRoom.Tile>();
+                // create new sprite pointer list
+                if (layer.AssetsData.Sprites == null)
+                    layer.AssetsData.Sprites = new UndertalePointerList<UndertaleRoom.SpriteInstance>();
+            }
+
             SelectObject(layer);
             (this.DataContext as UndertaleRoom)?.SetupRoom();
         }
