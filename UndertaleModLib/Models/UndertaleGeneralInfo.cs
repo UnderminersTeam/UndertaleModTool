@@ -126,7 +126,7 @@ namespace UndertaleModLib.Models
                                (long)(DefaultWindowHeight + (int)Info) << 16 |
                                (long)(DefaultWindowWidth + (int)Info));
                 infoNumber ^= BytecodeVersion;
-                int infoLocation = (int)(Math.Abs((int)(Timestamp & 65535L) / 7 + (GameID - DefaultWindowWidth) + RoomOrder.Count) % 4);
+                int infoLocation = Math.Abs((int)((int)(Timestamp & 65535L) / 7 + (GameID - DefaultWindowWidth) + RoomOrder.Count)) % 4;
                 GMS2RandomUID.Clear();
                 writer.Write(firstRandom);
                 GMS2RandomUID.Add(firstRandom);
