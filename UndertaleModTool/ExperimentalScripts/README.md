@@ -39,6 +39,7 @@ Please report any bugs or issues with the experimental scripts to the Underminer
 - `UndertaleWithJSONs.csx`: This script JSONifies all Undertale versions with Japanese support, 1.05+. Switch languages using F11. Reload text for curent language from JSON on command using F12. Reloading from JSON may take about 10 seconds.
 - `ExportMasks.csx`: Exports all sprite masks to "Export_Masks" in the game directory.
 - `ImportMasks.csx`: Imports sprite masks in bulk from a directory. 
+- `TextInputTestScript.csx`: Text input text script.
 
 ## Credits
 
@@ -66,3 +67,4 @@ Please report any bugs or issues with the experimental scripts to the Underminer
 - `UndertaleWithJSONs.csx`: By Grossley and Colinator
 - `ExportMasks.csx`: By Grossley
 - `ImportMasks.csx`: By Grossley
+- `TextInputTestScript.csx`: By Grossley
