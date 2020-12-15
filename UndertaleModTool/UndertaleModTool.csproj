@@ -714,13 +714,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\spr_tobdogl\0.png" />
-    <Resource Include="Resources\spr_tobdogl\1.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\mus_dance_of_dog.wav" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="ExperimentalScripts\README.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
