@@ -35,6 +35,7 @@ using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
+using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
 {
@@ -924,6 +925,18 @@ namespace UndertaleModTool
         public bool ScriptQuestion(string message)
         {
             return MessageBox.Show(message, "Script message", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+        }
+
+        public string ScriptTextInput(string message, string title, string defaultValue, bool allowMultiline)
+        {
+            using (TextInput input = new TextInput(message, title, defaultValue, allowMultiline))
+            {
+                var result = input.ShowDialog();
+                if (result == System.Windows.Forms.DialogResult.OK)
+                    return input.ReturnString;            //values preserved after close
+                else
+                    return null;
+            }
         }
 
         public void ScriptOpenURL(string url)
