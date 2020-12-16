@@ -21,6 +21,7 @@ namespace UndertaleModLib.Scripting
         bool ScriptQuestion(string message);
         void ScriptError(string error, string title);
         void ScriptOpenURL(string url);
+        string ScriptTextInput(string message, string title, string defaultValue, bool allowMultiline);
         void UpdateProgressBar(string message, string status, double progressValue, double maxValue);
         void HideProgressBar();
 
