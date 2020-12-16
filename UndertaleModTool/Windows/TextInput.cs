@@ -31,6 +31,7 @@ namespace UndertaleModTool.Windows
             label1.Text = message;
             richTextBox1.Text = DefaultValue;
             richTextBox1.Multiline = AllowMultiline;
+            label1.AutoSize = false;
         }
 
         private void TextInput_Load(object sender, EventArgs e)
