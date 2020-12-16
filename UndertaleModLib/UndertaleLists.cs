@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UndertaleModLib.Models;
 
 namespace UndertaleModLib
 {
@@ -41,6 +42,42 @@ namespace UndertaleModLib
                 catch (UndertaleSerializationException e)
                 {
                     throw new UndertaleSerializationException(e.Message + "\nwhile reading item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
+                }
+            }
+        }
+    }
+
+    public class UndertaleSimpleListString : ObservableCollection<UndertaleString>, UndertaleObject
+    {
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write((uint)Count);
+            for (int i = 0; i < Count; i++)
+            {
+                try
+                {
+                    writer.WriteUndertaleString(this[i]);
+                }
+                catch (UndertaleSerializationException e)
+                {
+                    throw new UndertaleSerializationException(e.Message + "\nwhile writing item " + (i + 1) + " of " + Count + " in a string-list", e);
+                }
+            }
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            uint count = reader.ReadUInt32();
+            Clear();
+            for (uint i = 0; i < count; i++)
+            {
+                try
+                {
+                    Add(reader.ReadUndertaleString());
+                }
+                catch (UndertaleSerializationException e)
+                {
+                    throw new UndertaleSerializationException(e.Message + "\nwhile reading item " + (i + 1) + " of " + count + " in a string-list", e);
                 }
             }
         }
@@ -120,7 +157,7 @@ namespace UndertaleModLib
                     writer.WriteUndertaleObject<T>(this[i]);
 
                     // The last object does NOT get padding (TODO: at least in AUDO)
-                    if (IndexOf(this[i]) != Count - 1)
+                    if (i != Count - 1)
                         (this[i] as PaddedObject)?.SerializePadding(writer);
                 }
                 catch (UndertaleSerializationException e)

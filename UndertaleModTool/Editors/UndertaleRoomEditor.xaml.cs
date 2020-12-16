@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -431,17 +431,99 @@ namespace UndertaleModTool
         {
             UndertaleRoom room = this.DataContext as UndertaleRoom;
 
+            // get last layer id
+            var data = (Application.Current.MainWindow as MainWindow).Data;
+            uint lastlayer_id = 0;
+            for (var i = data.Rooms.Count - 1; i >= 0; i--)
+            {
+                var lastroom_layers = data.Rooms[i].Layers;
+                if (lastroom_layers.Count != 0)
+                {
+                    lastlayer_id = lastroom_layers[lastroom_layers.Count - 1].LayerId;
+                    break;
+                }
+            }
+
             UndertaleRoom.Layer layer = new UndertaleRoom.Layer();
             layer.LayerName = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString(name);
-            layer.LayerId = 0; // TODO: find next ID
+            layer.LayerId = lastlayer_id + 1;
             layer.LayerType = type;
             layer.Data = new T();
             room.Layers.Add(layer);
 
+            if (layer.LayerType == UndertaleRoom.LayerType.Assets)
+            {
+                // create a new pointer list
+                if (layer.AssetsData.LegacyTiles == null)
+                    layer.AssetsData.LegacyTiles = new UndertalePointerList<UndertaleRoom.Tile>();
+                // create new sprite pointer list
+                if (layer.AssetsData.Sprites == null)
+                    layer.AssetsData.Sprites = new UndertalePointerList<UndertaleRoom.SpriteInstance>();
+            }
+
             SelectObject(layer);
             (this.DataContext as UndertaleRoom)?.SetupRoom();
         }
-        
+
+        private void AddObjectInstance(UndertaleRoom room)
+        {
+            var newobject = new UndertaleRoom.GameObject { InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj++ };
+            room.GameObjects.Add(newobject);
+            SelectObject(newobject);
+        }
+
+        private void AddGMS2ObjectInstance(UndertaleRoom.Layer layer)
+        {
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+            AddObjectInstance(room);
+
+            var gameobject = room.GameObjects.Last();
+            layer.InstancesData.Instances.Add(gameobject);
+            if (layer != null)
+                SelectObject(gameobject);
+        }
+
+        private void AddLegacyTile(UndertaleRoom.Layer layer)
+        {
+            // add pointer list if one doesn't already exist
+            if (layer.AssetsData.LegacyTiles == null)
+                layer.AssetsData.LegacyTiles = new UndertalePointerList<UndertaleRoom.Tile>();
+
+            // add sprite pointer list if one doesn't already exist
+            if (layer.AssetsData.Sprites == null)
+                layer.AssetsData.Sprites = new UndertalePointerList<UndertaleRoom.SpriteInstance>();
+
+            // add tile to list
+            var tile = new UndertaleRoom.Tile { InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastTile++ };
+            tile._SpriteMode = true;
+            layer.AssetsData.LegacyTiles.Add(tile);
+
+            if (layer != null)
+                SelectObject(tile);
+        }
+
+        private void AddSprite(UndertaleRoom.Layer layer)
+        {
+            // add pointer list if one doesn't already exist
+            if (layer.AssetsData.Sprites == null)
+                layer.AssetsData.Sprites = new UndertalePointerList<UndertaleRoom.SpriteInstance>();
+
+            // add tile to list
+            var spriteinstance = new UndertaleRoom.SpriteInstance();
+            layer.AssetsData.Sprites.Add(spriteinstance);
+
+            if (layer != null)
+                SelectObject(spriteinstance);
+        }
+
+        private void AddGMS1Tile(UndertaleRoom room)
+        {
+            // add tile to list
+            var tile = new UndertaleRoom.Tile { InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastTile++ };
+            room.Tiles.Add(tile);
+            SelectObject(tile);
+        }
+
         private void MenuItem_NewLayerInstances_Click(object sender, RoutedEventArgs e)
         {
             AddLayer<UndertaleRoom.Layer.LayerInstancesData>(UndertaleRoom.LayerType.Instances, "NewInstancesLayer");
@@ -460,6 +542,39 @@ namespace UndertaleModTool
         private void MenuItem_NewLayerAssets_Click(object sender, RoutedEventArgs e)
         {
             AddLayer<UndertaleRoom.Layer.LayerAssetsData>(UndertaleRoom.LayerType.Assets, "NewAssetsLayer");
+        }
+
+        private void MenuItem_NewGMS2ObjectInstance_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuitem = sender as MenuItem;
+            UndertaleRoom.Layer layer = menuitem.DataContext as UndertaleRoom.Layer;
+            AddGMS2ObjectInstance(layer);
+        }
+
+        private void MenuItem_NewLegacyTile_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuitem = sender as MenuItem;
+            UndertaleRoom.Layer layer = menuitem.DataContext as UndertaleRoom.Layer;
+            AddLegacyTile(layer);
+        }
+
+        private void MenuItem_NewSprite_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuitem = sender as MenuItem;
+            UndertaleRoom.Layer layer = menuitem.DataContext as UndertaleRoom.Layer;
+            AddSprite(layer);
+        }
+
+        private void MenuItem_NewGMS1Tile_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+            AddGMS1Tile(room);
+        }
+
+        private void MenuItem_NewObjectInstance_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+            AddObjectInstance(room);
         }
     }
 
@@ -556,8 +671,10 @@ namespace UndertaleModTool
         {
             CompositeCollection collection = new CompositeCollection();
             IList<UndertaleRoom.Layer> layers = value as IList<UndertaleRoom.Layer>;
-            foreach (var layer in layers.OrderByDescending((x) => x.LayerDepth))
+            foreach (var layer in layers.OrderByDescending((x) => x?.LayerDepth ?? 0))
             {
+                if (layer == null)
+                    continue;
                 switch (layer.LayerType)
                 {
                     case UndertaleRoom.LayerType.Background:

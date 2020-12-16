@@ -35,6 +35,7 @@ using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
+using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
 {
@@ -45,6 +46,7 @@ namespace UndertaleModTool
     {
         public UndertaleData Data { get; set; }
         public string FilePath { get; set; }
+        public string ScriptPath { get; set; } // For the scripting interface specifically
 
         public string TitleMain { get; set; }
 
@@ -208,6 +210,12 @@ namespace UndertaleModTool
 
         private void Command_New(object sender, ExecutedRoutedEventArgs e)
         {
+            if (Data != null)
+            {
+                if (MessageBox.Show("Warning: you currently have a project open.\nAre you sure you want to make a new project?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                    return;
+            }
+
             FilePath = null;
             Data = UndertaleData.CreateNew();
             CloseChildFiles();
@@ -266,8 +274,11 @@ namespace UndertaleModTool
             }
         }
 
-        private void Command_Close(object sender, ExecutedRoutedEventArgs e)
+        private async void Command_Close(object sender, ExecutedRoutedEventArgs e)
         {
+            if (Data != null)
+                if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    await DoSaveDialog();
             Close();
         }
 
@@ -316,9 +327,13 @@ namespace UndertaleModTool
                             CanSave = true;
                             CanSafelySave = true;
                         }
+                        if (data.GMS2_3)
+                        {
+                            MessageBox.Show("This game was built using GameMaker Studio 2.3 (or above). Support for this version is a work in progress, and you will likely run into issues decompiling code or in other places.", "GMS 2.3", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
                         if (data.IsYYC())
                         {
-                            MessageBox.Show("This game uses YYC (YoYo Compiler), which means the code is embedded into the game .exe. This configuration is currently not fully supported, continue at your own risk", "YYC", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            MessageBox.Show("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
                         if (System.IO.Path.GetDirectoryName(FilePath) != System.IO.Path.GetDirectoryName(filename))
                             CloseChildFiles();
@@ -343,6 +358,7 @@ namespace UndertaleModTool
                 return;
 
             LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
+            dialog.PreventClose = true;
             IProgress<Tuple<int, string>> progress = new Progress<Tuple<int, string>>(i => { dialog.ReportProgress(i.Item2, i.Item1); });
             IProgress<double?> setMax = new Progress<double?>(i => { dialog.Maximum = i; });
             dialog.Owner = this;
@@ -442,6 +458,7 @@ namespace UndertaleModTool
                         {
                             debugData.FORM.Serialize(writer);
                             writer.ThrowIfUnwrittenObjects();
+                            writer.Flush();
                         }
                     }
                 }
@@ -685,6 +702,8 @@ namespace UndertaleModTool
                             .AddReferences(Program.GetAssemblyMetadata(typeof(JsonConvert).GetTypeInfo().Assembly))
                             .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                             typeof(IScriptInterface), loader);
+                            
+                        ScriptPath = null;
 
                         result = (await script.RunAsync(this)).ReturnValue;
                     }
@@ -782,6 +801,32 @@ namespace UndertaleModTool
             }
         }
 
+        private void MenuItem_RunExperimentalScript_SubmenuOpened(object sender, RoutedEventArgs e)
+        {
+            MenuItem item = sender as MenuItem;
+            item.Items.Clear();
+            try
+            {
+                var appDir = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                foreach (var path in Directory.EnumerateFiles(System.IO.Path.Combine(appDir, "ExperimentalScripts")))
+                {
+                    var filename = System.IO.Path.GetFileName(path);
+                    if (!filename.EndsWith(".csx"))
+                        continue;
+                    MenuItem subitem = new MenuItem() { Header = filename.Replace("_", "__") };
+                    subitem.Click += MenuItem_RunBuiltinScript_Item_Click;
+                    subitem.CommandParameter = path;
+                    item.Items.Add(subitem);
+                }
+                if (item.Items.Count == 0)
+                    item.Items.Add(new MenuItem() { Header = "(whoops, no scripts found?)", IsEnabled = false });
+            }
+            catch (Exception err)
+            {
+                item.Items.Add(new MenuItem() { Header = err.ToString(), IsEnabled = false });
+            }
+        }
+
         public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
         {
             scriptDialog.Update(message, status, progressValue, maxValue);
@@ -826,6 +871,8 @@ namespace UndertaleModTool
                         .AddReferences(Program.GetAssemblyMetadata(typeof(JsonConvert).GetTypeInfo().Assembly))
                         .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                         typeof(IScriptInterface), loader);
+                        
+                    ScriptPath = path;
 
                     object result = (await script.RunAsync(this)).ReturnValue;
                     Dispatcher.Invoke(() => CommandBox.Text = result != null ? result.ToString() : System.IO.Path.GetFileName(path) + " finished!");
@@ -880,6 +927,18 @@ namespace UndertaleModTool
             return MessageBox.Show(message, "Script message", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
         }
 
+        public string ScriptTextInput(string message, string title, string defaultValue, bool allowMultiline)
+        {
+            using (TextInput input = new TextInput(message, title, defaultValue, allowMultiline))
+            {
+                var result = input.ShowDialog();
+                if (result == System.Windows.Forms.DialogResult.OK)
+                    return input.ReturnString;            //values preserved after close
+                else
+                    return null;
+            }
+        }
+
         public void ScriptOpenURL(string url)
         {
             Process.Start(url);
@@ -926,7 +985,8 @@ namespace UndertaleModTool
             if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 saveOk = await DoSaveDialog();
 
-            if (FilePath == null) {
+            if (FilePath == null) 
+            {
                 MessageBox.Show("The file must be saved in order to be run.", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             } else if (saveOk)
             {

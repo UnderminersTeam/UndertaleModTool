@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -62,6 +62,7 @@ namespace UndertaleModLib.Models
         public UndertalePointerListLenCheck<GameObject> GameObjects { get; private set; } = new UndertalePointerListLenCheck<GameObject>();
         public UndertalePointerList<Tile> Tiles { get; private set; } = new UndertalePointerList<Tile>();
         public UndertalePointerList<Layer> Layers { get; private set; } = new UndertalePointerList<Layer>();
+        public UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>> Sequences { get; private set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -113,14 +114,25 @@ namespace UndertaleModLib.Models
             writer.Write(GravityX);
             writer.Write(GravityY);
             writer.Write(MetersPerPixel);
+            bool sequences = false;
             if (writer.undertaleData.GeneralInfo.Major >= 2)
+            {
                 writer.WriteUndertaleObjectPointer(Layers);
+                sequences = writer.undertaleData.FORM.Chunks.ContainsKey("SEQN");
+                if (sequences)
+                    writer.WriteUndertaleObjectPointer(Sequences);
+            }
             writer.WriteUndertaleObject(Backgrounds);
             writer.WriteUndertaleObject(Views);
             writer.WriteUndertaleObject(GameObjects);
             writer.WriteUndertaleObject(Tiles);
             if (writer.undertaleData.GeneralInfo.Major >= 2)
+            {
                 writer.WriteUndertaleObject(Layers);
+                
+                if (sequences)
+                    writer.WriteUndertaleObject(Sequences);
+            }
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -148,8 +160,14 @@ namespace UndertaleModLib.Models
             GravityX = reader.ReadSingle();
             GravityY = reader.ReadSingle();
             MetersPerPixel = reader.ReadSingle();
+            bool sequences = false;
             if (reader.undertaleData.GeneralInfo.Major >= 2)
+            {
                 Layers = reader.ReadUndertaleObjectPointer<UndertalePointerList<Layer>>();
+                sequences = reader.GMS2_3;
+                if (sequences)
+                    Sequences = reader.ReadUndertaleObjectPointer<UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>>();
+            }
             reader.ReadUndertaleObject(Backgrounds);
             reader.ReadUndertaleObject(Views);
             reader.ReadUndertaleObject(GameObjects, tilePtr);
@@ -170,14 +188,19 @@ namespace UndertaleModLib.Models
                         }
                     }
                 }
+                
+                if (sequences)
+                    reader.ReadUndertaleObject(Sequences);
             }
         }
 
         public void SetupRoom()
         {
             foreach (UndertaleRoom.Layer layer in Layers)
-                layer.ParentRoom = this;
-
+            {
+                if (layer != null)
+                    layer.ParentRoom = this;
+            }
             foreach (UndertaleRoom.Background bgnd in Backgrounds)
                 bgnd.ParentRoom = this;
         }
@@ -356,7 +379,6 @@ namespace UndertaleModLib.Models
             private uint _Color = 0xFFFFFFFF;
             private float _Rotation = 0;
             private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _PreCreateCode = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
-            private bool _GMS2_2_2 = false;
             private float _ImageSpeed = 0;
             private int _ImageIndex = 0;
 
@@ -370,7 +392,6 @@ namespace UndertaleModLib.Models
             public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
             public float Rotation { get => _Rotation; set { _Rotation = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Rotation")); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OppositeRotation")); } }
             public UndertaleCode PreCreateCode { get => _PreCreateCode.Resource; set { _PreCreateCode.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PreCreateCode")); } }
-            public bool GMS2_2_2 { get => _GMS2_2_2; set { _GMS2_2_2 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2_2_2")); } }
             public float ImageSpeed { get => _ImageSpeed; set { _ImageSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ImageSpeed")); } }
             public int ImageIndex { get => _ImageIndex; set { _ImageIndex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ImageIndex")); } }
 
@@ -386,7 +407,7 @@ namespace UndertaleModLib.Models
                 writer.WriteUndertaleObject(_CreationCode);
                 writer.Write(ScaleX);
                 writer.Write(ScaleY);
-                if (GMS2_2_2)
+                if (writer.undertaleData.GMS2_2_2_302)
                 {
                     writer.Write(ImageSpeed);
                     writer.Write(ImageIndex);
@@ -413,7 +434,7 @@ namespace UndertaleModLib.Models
                 ScaleY = reader.ReadSingle();
                 if (length == 48)
                 {
-                    GMS2_2_2 = true;
+                    reader.undertaleData.GMS2_2_2_302 = true;
                     ImageSpeed = reader.ReadSingle();
                     ImageIndex = reader.ReadInt32();
                 }
@@ -597,7 +618,7 @@ namespace UndertaleModLib.Models
                     throw new Exception("Unsupported layer type " + LayerType);
                 }
             }
-
+            
             public void Unserialize(UndertaleReader reader)
             {
                 LayerName = reader.ReadUndertaleString();
@@ -807,9 +828,15 @@ namespace UndertaleModLib.Models
             {
                 private UndertalePointerList<Tile> _LegacyTiles;
                 private UndertalePointerList<SpriteInstance> _Sprites;
+                private bool _GMS2_3;
+                private UndertalePointerList<SequenceInstance> _Sequences;
+                private UndertalePointerList<SpriteInstance> _NineSlices;  // TODO!! Nine slices don't exist yet
 
                 public UndertalePointerList<Tile> LegacyTiles { get => _LegacyTiles; set { _LegacyTiles = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LegacyTiles")); } }
                 public UndertalePointerList<SpriteInstance> Sprites { get => _Sprites; set { _Sprites = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sprites")); } }
+                public bool GMS2_3 { get => _GMS2_3; set { _GMS2_3 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2_3")); } }
+                public UndertalePointerList<SequenceInstance> Sequences { get => _Sequences; set { _Sequences = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sequences")); } }
+                public UndertalePointerList<SpriteInstance> NineSlices { get => _NineSlices; set { _NineSlices = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("NineSlices")); } }  // TODO!! Nine slices don't exist yet
 
                 public event PropertyChangedEventHandler PropertyChanged;
 
@@ -817,16 +844,37 @@ namespace UndertaleModLib.Models
                 {
                     writer.WriteUndertaleObjectPointer(LegacyTiles);
                     writer.WriteUndertaleObjectPointer(Sprites);
+                    if (GMS2_3)
+                    {
+                        writer.WriteUndertaleObjectPointer(Sequences);
+                        writer.WriteUndertaleObjectPointer(NineSlices);
+                    }
                     writer.WriteUndertaleObject(LegacyTiles);
                     writer.WriteUndertaleObject(Sprites);
+                    if (GMS2_3)
+                    {
+                        writer.WriteUndertaleObject(Sequences);
+                        writer.WriteUndertaleObject(NineSlices);
+                    }
                 }
 
                 public void Unserialize(UndertaleReader reader)
                 {
                     LegacyTiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<Tile>>();
                     Sprites = reader.ReadUndertaleObjectPointer<UndertalePointerList<SpriteInstance>>();
+                    GMS2_3 = reader.GMS2_3;
+                    if (GMS2_3)
+                    {
+                        Sequences = reader.ReadUndertaleObjectPointer<UndertalePointerList<SequenceInstance>>();
+                        NineSlices = reader.ReadUndertaleObjectPointer<UndertalePointerList<SpriteInstance>>(); // TODO!! Nine slices don't exist yet
+                    }
                     reader.ReadUndertaleObject(LegacyTiles);
                     reader.ReadUndertaleObject(Sprites);
+                    if (GMS2_3)
+                    {
+                        reader.ReadUndertaleObject(Sequences);
+                        reader.ReadUndertaleObject(NineSlices);
+                    }
                 }
             }
         }
@@ -892,6 +940,70 @@ namespace UndertaleModLib.Models
             public override string ToString()
             {
                 return "Sprite " + Name?.Content + " of " + (Sprite?.Name?.Content ?? "?") + " (UndertaleRoom+SpriteInstance)";
+            }
+        }
+
+        public class SequenceInstance : UndertaleObject, INotifyPropertyChanged
+        {
+            private UndertaleString _Name;
+            private UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN> _Sequence = new UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>();
+            private int _X;
+            private int _Y;
+            private float _ScaleX;
+            private float _ScaleY;
+            private uint _Color;
+            private float _AnimationSpeed;
+            private AnimationSpeedType _AnimationSpeedType;
+            private float _FrameIndex;
+            private float _Rotation;
+
+            public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+            public UndertaleSequence Sequence { get => _Sequence.Resource; set { _Sequence.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sequence")); } }
+            public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
+            public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
+            public float ScaleX { get => _ScaleX; set { _ScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleX")); } }
+            public float ScaleY { get => _ScaleY; set { _ScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleY")); } }
+            public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
+            public float AnimationSpeed { get => _AnimationSpeed; set { _AnimationSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AnimationSpeed")); } }
+            public AnimationSpeedType AnimationSpeedType { get => _AnimationSpeedType; set { _AnimationSpeedType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AnimationSpeedType")); } }
+            public float FrameIndex { get => _FrameIndex; set { _FrameIndex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FrameIndex")); } }
+            public float Rotation { get => _Rotation; set { _Rotation = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Rotation")); } }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            public void Serialize(UndertaleWriter writer)
+            {
+                writer.WriteUndertaleString(Name);
+                writer.WriteUndertaleObject(_Sequence);
+                writer.Write(X);
+                writer.Write(Y);
+                writer.Write(ScaleX);
+                writer.Write(ScaleY);
+                writer.Write(Color);
+                writer.Write(AnimationSpeed);
+                writer.Write((uint)AnimationSpeedType);
+                writer.Write(FrameIndex);
+                writer.Write(Rotation);
+            }
+
+            public void Unserialize(UndertaleReader reader)
+            {
+                Name = reader.ReadUndertaleString();
+                _Sequence = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
+                X = reader.ReadInt32();
+                Y = reader.ReadInt32();
+                ScaleX = reader.ReadSingle();
+                ScaleY = reader.ReadSingle();
+                Color = reader.ReadUInt32();
+                AnimationSpeed = reader.ReadSingle();
+                AnimationSpeedType = (AnimationSpeedType)reader.ReadUInt32();
+                FrameIndex = reader.ReadSingle();
+                Rotation = reader.ReadSingle();
+            }
+
+            public override string ToString()
+            {
+                return "Sequence " + Name?.Content + " of " + (Sequence?.Name?.Content ?? "?") + " (UndertaleRoom+SequenceInstance)";
             }
         }
     }

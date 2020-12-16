@@ -82,6 +82,9 @@
                     <MenuItem Header="_Run builtin script" SubmenuOpened="MenuItem_RunBuiltinScript_SubmenuOpened">
                         <MenuItem Header="(...loading...)" IsEnabled="False"/>
                     </MenuItem>
+                    <MenuItem Header="_Run experimental script" SubmenuOpened="MenuItem_RunExperimentalScript_SubmenuOpened">
+                        <MenuItem Header="(...loading...)" IsEnabled="False"/>
+                    </MenuItem>
                     <MenuItem Header="Run _other script..." Click="MenuItem_RunOtherScript_Click"/>
                 </MenuItem>
                 <MenuItem Header="_Help">

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -98,6 +99,7 @@ namespace UndertaleModTool
 
         private void MaskImport_Click(object sender, RoutedEventArgs e)
         {
+            UndertaleSprite sprite = this.DataContext as UndertaleSprite;
             UndertaleSprite.MaskEntry target = (sender as Button).DataContext as UndertaleSprite.MaskEntry;
 
             OpenFileDialog dlg = new OpenFileDialog();
@@ -108,6 +110,9 @@ namespace UndertaleModTool
             {
                 try
                 {
+                    System.Drawing.Image img = System.Drawing.Image.FromFile(dlg.FileName);
+                    if ((sprite.Width != (uint)img.Width) || (sprite.Height != (uint)img.Height))
+                        throw new System.Exception(dlg.FileName + " is not the proper size to be imported! Please correct this before importing! The proper dimensions are width: " + sprite.Width.ToString() + " px, height: " + sprite.Height.ToString() + " px.");
                     target.Data = TextureWorker.ReadMaskData(dlg.FileName);
                 }
                 catch (Exception ex)

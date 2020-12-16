@@ -104,7 +104,7 @@ if (room == room_ruins1)
     room_goto(room_of_determination);", Data);
 
 // A floor would be nice
-for(int x = 0; x <= 940; x += 20)
+for (int x = 0; x <= 940; x += 20)
 {
     for (int y = 0; y <= 160; y += 20)
     {

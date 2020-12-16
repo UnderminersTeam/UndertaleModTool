@@ -98,7 +98,8 @@ namespace UndertaleModTool
             });
         }
 
-        public void Update(string message, string status, double progressValue, double maxValue) {
+        public void Update(string message, string status, double progressValue, double maxValue) 
+        {
             if (!IsVisible)
                 Dispatcher.Invoke(Show);
 

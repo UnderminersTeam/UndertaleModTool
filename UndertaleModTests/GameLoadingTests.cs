@@ -91,7 +91,7 @@ namespace UndertaleModTests
                     Assert.AreEqual(code.Instructions[i].Type1, reasm[i].Type1, errMsg);
                     Assert.AreEqual(code.Instructions[i].Type2, reasm[i].Type2, errMsg);
                     Assert.AreEqual(code.Instructions[i].TypeInst, reasm[i].TypeInst, errMsg);
-                    Assert.AreEqual(code.Instructions[i].DupExtra, reasm[i].DupExtra, errMsg);
+                    Assert.AreEqual(code.Instructions[i].Extra, reasm[i].Extra, errMsg);
                     Assert.AreEqual(code.Instructions[i].SwapExtra, reasm[i].SwapExtra, errMsg);
                     Assert.AreEqual(code.Instructions[i].ArgumentsCount, reasm[i].ArgumentsCount, errMsg);
                     Assert.AreEqual(code.Instructions[i].JumpOffsetPopenvExitMagic, reasm[i].JumpOffsetPopenvExitMagic, errMsg);

@@ -2,12 +2,14 @@ EnsureDataLoaded();
 
 /* TODO: Respect loop/no loop setting properly */
 
-var browserext = new UndertaleExtension() {
+var browserext = new UndertaleExtension()
+{
 	Name = Data.Strings.MakeString("GMWebBrowser"),
 	ClassName = Data.Strings.MakeString(""),
 	EmptyString = Data.Strings.MakeString("")
 };
-browserext.Files.Add(new UndertaleExtension.ExtensionFile() {
+browserext.Files.Add(new UndertaleExtension.ExtensionFile() 
+{
 	Filename = Data.Strings.MakeString("GMWebExtension.dll"),
 	Kind = UndertaleExtension.ExtensionKind.DLL,
 	InitScript = Data.Strings.MakeString("__webextension_native_init"),

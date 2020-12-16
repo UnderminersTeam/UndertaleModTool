@@ -29,19 +29,12 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
-            byte[] chars = Encoding.UTF8.GetBytes(Content);
-            writer.Write((uint)chars.Length);
-            writer.Write(chars);
-            writer.Write((byte)0);
+            writer.WriteGMString(_Content);
         }
 
         public void Unserialize(UndertaleReader reader)
         {
-            uint length = reader.ReadUInt32();
-            byte[] chars = reader.ReadBytes((int)length);
-            Content = Encoding.UTF8.GetString(chars);
-            if (reader.ReadByte() != 0)
-                throw new IOException("The string was not null terminated!");
+            Content = reader.ReadGMString();
         }
 
         public override string ToString()
@@ -62,7 +55,7 @@ namespace UndertaleModLib.Models
             if (isGMS2)
                 return "\"" + Content.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"") + "\"";
 
-            return "\"" + Content.Replace("\r\n", "\n").Replace("\n", "#").Replace("\"", "\" + chr(34) + \"") + "\""; // Do chr(34) instead of chr(ord('"')), because single-quoted strings aren't supported by the syntax highlighter currently.
+            return "\"" + Content.Replace("\r\n", "\n").Replace("\"", "\" + chr(34) + \"") + "\""; // Do chr(34) instead of chr(ord('"')), because single-quoted strings aren't supported by the syntax highlighter currently.
         }
 
         public bool SearchMatches(string filter)
@@ -74,11 +67,8 @@ namespace UndertaleModLib.Models
         {
             if (isGMS2)
                 return text.Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\"", "\"").Replace("\\\\", "\\");
-            else {
-                text = text.Replace("\" + chr(34) + \"", "\"");
-                text = Regex.Replace(text, "([^\\\\])#", "$1\r\n");
-                return text;
-            }
+            else 
+                return text.Replace("\" + chr(34) + \"", "\"");
         }
     }
 }

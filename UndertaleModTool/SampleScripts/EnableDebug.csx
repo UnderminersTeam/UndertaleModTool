@@ -11,8 +11,10 @@ if (SCR_GAMESTART == null)
     throw new System.Exception("Could not find SCR_GAMESTART.");
 
 bool patch = false;
-for(int i = 0; i < SCR_GAMESTART.Instructions.Count; i++) {
-	if (SCR_GAMESTART.Instructions[i].Kind == UndertaleInstruction.Opcode.Pop && SCR_GAMESTART.Instructions[i].Destination.Target.Name.Content == "debug") {
+for(int i = 0; i < SCR_GAMESTART.Instructions.Count; i++) 
+{
+	if (SCR_GAMESTART.Instructions[i].Kind == UndertaleInstruction.Opcode.Pop && SCR_GAMESTART.Instructions[i].Destination.Target.Name.Content == "debug") 
+    {
 		SCR_GAMESTART.Instructions[i-1].Value = (short)(enable ? 1 : 0);
         patch = true;
     }

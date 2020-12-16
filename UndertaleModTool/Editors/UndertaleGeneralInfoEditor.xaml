@@ -240,54 +240,6 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Random UID</TextBlock>
-                    <TextBox Grid.Row="0" Grid.Column="1" Margin="3">
-                        <TextBox.Text>
-                            <MultiBinding StringFormat="{}{0:X2} {1:X2} {2:X2} {3:X2} {4:X2} {5:X2} {6:X2} {7:X2} {8:X2} {9:X2} {10:X2} {11:X2} {12:X2} {13:X2} {14:X2} {15:X2} {16:X2} {17:X2} {18:X2} {19:X2} {20:X2} {21:X2} {22:X2} {23:X2} {24:X2} {25:X2} {26:X2} {27:X2} {28:X2} {29:X2} {30:X2} {31:X2} {32:X2} {33:X2} {34:X2} {35:X2} {36:X2} {37:X2} {38:X2} {39:X2}">
-                                <Binding Path="GeneralInfo.GMS2RandomUID[0]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[1]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[2]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[3]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[4]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[5]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[6]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[7]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[8]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[9]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[10]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[11]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[12]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[13]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[14]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[15]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[16]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[17]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[18]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[19]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[20]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[21]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[22]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[23]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[24]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[25]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[26]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[27]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[28]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[29]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[30]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[31]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[32]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[33]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[34]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[35]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[36]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[37]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[38]" />
-                                <Binding Path="GeneralInfo.GMS2RandomUID[39]" />
-                            </MultiBinding>
-                        </TextBox.Text>
-                    </TextBox>
-
                     <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">FPS</TextBlock>
                     <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.GMS2FPS}"/>
 

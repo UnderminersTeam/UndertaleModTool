@@ -56,9 +56,9 @@ namespace UndertaleModLib.Decompiler
             switch (UndertaleInstruction.GetInstructionType(instr.Kind))
             {
                 case UndertaleInstruction.InstructionType.SingleTypeInstruction:
-                    if (instr.Kind == UndertaleInstruction.Opcode.Dup)
+                    if (instr.Kind == UndertaleInstruction.Opcode.Dup || instr.Kind == UndertaleInstruction.Opcode.CallV)
                     {
-                        instr.DupExtra = Byte.Parse(line);
+                        instr.Extra = Byte.Parse(line);
                         line = "";
                     }
                     break;
@@ -277,7 +277,7 @@ namespace UndertaleModLib.Decompiler
                             if (i.Kind == UndertaleInstruction.Opcode.PushI)
                                 return (UndertaleInstruction.InstanceType?)(short)i.Value;
                             else if (i.Kind == UndertaleInstruction.Opcode.Dup)
-                                stackCounter += 1 + i.DupExtra; // Keep looking for the value that was duplicated
+                                stackCounter += 1 + i.Extra; // Keep looking for the value that was duplicated
                             else
                                 throw new Exception("My workaround still sucks");
                         }

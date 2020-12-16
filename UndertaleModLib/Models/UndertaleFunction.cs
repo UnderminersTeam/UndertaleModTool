@@ -18,12 +18,20 @@ namespace UndertaleModLib.Models
         public uint Occurrences { get; set; }
         public UndertaleInstruction FirstAddress { get; set; }
 
+        public bool GMS2_3 { get; set; } = false;
+
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
             writer.Write(Occurrences);
             if (Occurrences > 0)
-                writer.Write(writer.GetAddressForUndertaleObject(FirstAddress));
+            {
+                uint addr = writer.GetAddressForUndertaleObject(FirstAddress);
+                if (GMS2_3)
+                    writer.Write((addr == 0) ? 0 : (addr + 4)); // in GMS 2.3, it points to the actual reference rather than the instruction
+                else
+                    writer.Write(addr);
+            }
             else
                 writer.Write((int)-1);
         }
@@ -34,7 +42,13 @@ namespace UndertaleModLib.Models
             Occurrences = reader.ReadUInt32();
             if (Occurrences > 0)
             {
-                FirstAddress = reader.ReadUndertaleObjectPointer<UndertaleInstruction>();
+                if (reader.GMS2_3)
+                {
+                    GMS2_3 = true;
+                    FirstAddress = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(reader.ReadUInt32() - 4);
+                }
+                else
+                    FirstAddress = reader.ReadUndertaleObjectPointer<UndertaleInstruction>();
                 UndertaleInstruction.Reference<UndertaleFunction>.ParseReferenceChain(reader, this);
             }
             else

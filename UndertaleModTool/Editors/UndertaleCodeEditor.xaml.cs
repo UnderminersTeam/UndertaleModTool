@@ -127,10 +127,10 @@ namespace UndertaleModTool
                         case UndertaleInstruction.InstructionType.SingleTypeInstruction:
                             par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
 
-                            if (instr.Kind == UndertaleInstruction.Opcode.Dup)
+                            if (instr.Kind == UndertaleInstruction.Opcode.Dup || instr.Kind == UndertaleInstruction.Opcode.CallV)
                             {
                                 par.Inlines.Add(new Run(" "));
-                                par.Inlines.Add(new Run(instr.DupExtra.ToString()) { Foreground = argBrush });
+                                par.Inlines.Add(new Run(instr.Extra.ToString()) { Foreground = argBrush });
                             }
                             break;
 
@@ -258,9 +258,17 @@ namespace UndertaleModTool
         }
 
         private static Dictionary<string, string> gettextJSON = null;
-        private void UpdateGettextJSON(string json)
+        private string UpdateGettextJSON(string json)
         {
-            gettextJSON = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            try
+            {
+                gettextJSON = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            } catch (Exception e)
+            {
+                gettextJSON = new Dictionary<string, string>();
+                return "Failed to parse language file: " + e.Message;
+            }
+            return null;
         }
 
         private async void DecompileCode(UndertaleCode code)
@@ -304,7 +312,11 @@ namespace UndertaleModTool
                     UpdateGettext(gettextCode);
 
                 if (gettextJSON == null && gettextJsonPath != null && File.Exists(gettextJsonPath))
-                    UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
+                {
+                    string err = UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
+                    if (err != null)
+                        e = new Exception(err);
+                }
 
                 Dispatcher.Invoke(() =>
                 {
@@ -349,13 +361,16 @@ namespace UndertaleModTool
                             foreach (var x in (Application.Current.MainWindow as MainWindow).Data.Functions)
                                 funcs.Add(x.Name.Content, x);
 
+                            string storedStrTok = "";
+
                             foreach (var line in lines)
                             {
                                 char[] special = { '.', ',', ')', '(', '[', ']', '>', '<', ':', ';', '=', '"', '!' };
                                 Func<char, bool> IsSpecial = (c) => Char.IsWhiteSpace(c) || special.Contains(c);
                                 List<string> split = new List<string>();
-                                string tok = "";
-                                bool readingString = false;
+                                string tok = storedStrTok;
+                                storedStrTok = "";
+                                bool readingString = (tok != "");
                                 bool escaped = false;
                                 for (int i = 0; i < line.Length; i++)
                                 {
@@ -404,7 +419,12 @@ namespace UndertaleModTool
                                     }
                                 }
                                 if (tok != "")
-                                    split.Add(tok);
+                                {
+                                    if (readingString)
+                                        storedStrTok = tok + "\n";
+                                    else
+                                        split.Add(tok);
+                                }
 
                                 Dictionary<string, object> usedObjects = new Dictionary<string, object>();
                                 for (int i = 0; i < split.Count; i++)
@@ -460,53 +480,59 @@ namespace UndertaleModTool
                                         par.Inlines.Add(new Run(token) { Foreground = funcBrush, Cursor = Cursors.Hand });
                                         par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(funcs[token]);
                                     }
-                                    else if (Char.IsDigit(token[0]))
+                                    else if (char.IsDigit(token[0]))
                                     {
                                         par.Inlines.Add(new Run(token) { Cursor = Cursors.Hand });
                                         par.Inlines.LastInline.MouseDown += (sender, ev) =>
                                         {
                                             if (token.Length > 2 && token[0] == '0' && token[1] == 'x')
+                                            {
+                                                ev.Handled = true;
                                                 return; // Hex numbers aren't objects.
+                                            }
 
                                             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
-                                            int id = Int32.Parse(token);
-                                            List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
-                                            if (id < data.Sprites.Count)
-                                                possibleObjects.Add(data.Sprites[id]);
-                                            if (id < data.Rooms.Count)
-                                                possibleObjects.Add(data.Rooms[id]);
-                                            if (id < data.GameObjects.Count)
-                                                possibleObjects.Add(data.GameObjects[id]);
-                                            if (id < data.Backgrounds.Count)
-                                                possibleObjects.Add(data.Backgrounds[id]);
-                                            if (id < data.Scripts.Count)
-                                                possibleObjects.Add(data.Scripts[id]);
-                                            if (id < data.Paths.Count)
-                                                possibleObjects.Add(data.Paths[id]);
-                                            if (id < data.Fonts.Count)
-                                                possibleObjects.Add(data.Fonts[id]);
-                                            if (id < data.Sounds.Count)
-                                                possibleObjects.Add(data.Sounds[id]);
-                                            if (id < data.Shaders.Count)
-                                                possibleObjects.Add(data.Shaders[id]);
-                                            if (id < data.Timelines.Count)
-                                                possibleObjects.Add(data.Timelines[id]);
+                                            int id;
+                                            if (int.TryParse(token, out id))
+                                            {
+                                                List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
+                                                if (id < data.Sprites.Count)
+                                                    possibleObjects.Add(data.Sprites[id]);
+                                                if (id < data.Rooms.Count)
+                                                    possibleObjects.Add(data.Rooms[id]);
+                                                if (id < data.GameObjects.Count)
+                                                    possibleObjects.Add(data.GameObjects[id]);
+                                                if (id < data.Backgrounds.Count)
+                                                    possibleObjects.Add(data.Backgrounds[id]);
+                                                if (id < data.Scripts.Count)
+                                                    possibleObjects.Add(data.Scripts[id]);
+                                                if (id < data.Paths.Count)
+                                                    possibleObjects.Add(data.Paths[id]);
+                                                if (id < data.Fonts.Count)
+                                                    possibleObjects.Add(data.Fonts[id]);
+                                                if (id < data.Sounds.Count)
+                                                    possibleObjects.Add(data.Sounds[id]);
+                                                if (id < data.Shaders.Count)
+                                                    possibleObjects.Add(data.Shaders[id]);
+                                                if (id < data.Timelines.Count)
+                                                    possibleObjects.Add(data.Timelines[id]);
 
-                                            ContextMenu contextMenu = new ContextMenu();
-                                            foreach (UndertaleObject obj in possibleObjects)
-                                            {
-                                                MenuItem item = new MenuItem();
-                                                item.Header = obj.ToString().Replace("_", "__");
-                                                item.Click += (sender2, ev2) => (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
-                                                contextMenu.Items.Add(item);
+                                                ContextMenu contextMenu = new ContextMenu();
+                                                foreach (UndertaleObject obj in possibleObjects)
+                                                {
+                                                    MenuItem item = new MenuItem();
+                                                    item.Header = obj.ToString().Replace("_", "__");
+                                                    item.Click += (sender2, ev2) => (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
+                                                    contextMenu.Items.Add(item);
+                                                }
+                                                if (id > 0x00050000)
+                                                {
+                                                    contextMenu.Items.Add(new MenuItem() { Header = "#" + id.ToString("X6") + " (color)", IsEnabled = false });
+                                                }
+                                                contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
+                                                (sender as Run).ContextMenu = contextMenu;
+                                                contextMenu.IsOpen = true;
                                             }
-                                            if (id > 0x00050000)
-                                            {
-                                                contextMenu.Items.Add(new MenuItem() { Header = "#" + id.ToString("X6") + " (color)", IsEnabled = false });
-                                            }
-                                            contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
-                                            (sender as Run).ContextMenu = contextMenu;
-                                            contextMenu.IsOpen = true;
                                             ev.Handled = true;
                                         };
                                     }
@@ -539,7 +565,7 @@ namespace UndertaleModTool
                                     document.Blocks.Add(par);
                                     par = new Paragraph();
                                     par.Margin = new Thickness(0);
-                                } else
+                                } else if (!readingString)
                                 {
                                     par.Inlines.Add(new Run("\n"));
                                 }
@@ -578,7 +604,7 @@ namespace UndertaleModTool
                         var wrapper = new GraphGeneration(getStartProcessQuery, getProcessStartInfoQuery, registerLayoutPluginCommand);
                         
                         byte[] output = wrapper.GenerateGraph(dot, Enums.GraphReturnType.Png); // TODO: Use SVG instead
-
+                        
                         image = new ImageSourceConverter().ConvertFrom(output) as ImageSource;
                     }
                     catch(Exception e)

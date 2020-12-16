@@ -111,7 +111,7 @@ for(int i = 0; i < gml_Object_obj_time_Step_1.Instructions.Count; i++)
 		gml_Object_obj_time_Step_1.Instructions[i-3].Kind == UndertaleInstruction.Opcode.PushI   && (short)gml_Object_obj_time_Step_1.Instructions[i-3].Value == 4 &&
 		gml_Object_obj_time_Step_1.Instructions[i-4].Kind == UndertaleInstruction.Opcode.PushGlb && (gml_Object_obj_time_Step_1.Instructions[i-4].Value as UndertaleInstruction.Reference<UndertaleVariable>).Target.Name.Content == "osflavor")
     {
-        gml_Object_obj_time_Step_1.Instructions[i-2] = Assembler.AssembleOne("pushi.e 1", Data);
+      gml_Object_obj_time_Step_1.Instructions[i-2] = Assembler.AssembleOne("pushi.e 1", Data);
 		// TODO: junk on stack again
 	}
 
@@ -120,12 +120,17 @@ Data.Functions.EnsureDefined("window_set_size", Data.Strings);
 gml_Object_obj_time_Create_0.AppendGML("window_set_size(960, 540);", Data);
 
 // Load border textures
+string bordersPath = new Uri(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase) + "\\SampleScripts\\Borders\\").LocalPath;
+
 Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, UndertaleEmbeddedTexture>();
-if (!Directory.Exists("SampleScripts/Borders/"))
+if (!Directory.Exists(bordersPath))
 {
 	throw new Exception("Border textures not found??");
 }
-foreach(var path in Directory.EnumerateFiles("SampleScripts/Borders/"))
+
+// throw new Exception(bordersPath);
+
+foreach(var path in Directory.EnumerateFiles(bordersPath))
 {
 	UndertaleEmbeddedTexture newtex = new UndertaleEmbeddedTexture();
 	newtex.TextureData.TextureBlob = File.ReadAllBytes(path);

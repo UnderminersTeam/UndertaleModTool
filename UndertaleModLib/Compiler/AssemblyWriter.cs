@@ -876,8 +876,13 @@ namespace UndertaleModLib.Compiler
             {
                 // Variable to operate on, duplicated second-to-last variable if necessary
                 bool isSingle;
-                AssembleVariablePush(cw, s.Children[0], out isSingle, true);
-                cw.typeStack.Pop();
+                AssembleVariablePush(cw, s.Children[0], out isSingle, true, false, true /* seems like a GMAC bug */);
+                if (cw.typeStack.Count == 0)
+                {
+                    AssemblyWriterError(cw, "Type stack empty (invalid syntax)", null);
+                }
+                else
+                    cw.typeStack.Pop();
 
                 // Right
                 AssembleExpression(cw, s.Children[2]);
@@ -901,8 +906,13 @@ namespace UndertaleModLib.Compiler
                 // Variable to operate on, duplicated second-to-last variable if necessary
                 bool isSingle;
                 bool isArray;
-                AssembleVariablePush(cw, s.Children[0], out isSingle, out isArray, true, true);
-                cw.typeStack.Pop();
+                AssembleVariablePush(cw, s.Children[0], out isSingle, out isArray, true, true, true /* seems like a GMAC bug */);
+                if (cw.typeStack.Count == 0)
+                {
+                    AssemblyWriterError(cw, "Type stack empty (invalid syntax)", null);
+                }
+                else
+                    cw.typeStack.Pop();
 
                 // Do the operation... somewhat strangely for expressions...
                 if (isExpression && isPost)
@@ -1399,18 +1409,18 @@ namespace UndertaleModLib.Compiler
             }
 
             // Workaround for out parameters
-            private static void AssembleVariablePush(CodeWriter cw, Parser.Statement e, bool duplicate = false, bool useLongDupForArray = false)
+            private static void AssembleVariablePush(CodeWriter cw, Parser.Statement e, bool duplicate = false, bool useLongDupForArray = false, bool useNoSpecificType = false)
             {
-                AssembleVariablePush(cw, e, out _, out _, duplicate, useLongDupForArray);
+                AssembleVariablePush(cw, e, out _, out _, duplicate, useLongDupForArray, useNoSpecificType);
             }
 
             // Workaround for out parameters #2
-            private static void AssembleVariablePush(CodeWriter cw, Parser.Statement e, out bool isSingle, bool duplicate = false, bool useLongDupForArray = false)
+            private static void AssembleVariablePush(CodeWriter cw, Parser.Statement e, out bool isSingle, bool duplicate = false, bool useLongDupForArray = false, bool useNoSpecificType = false)
             {
-                AssembleVariablePush(cw, e, out isSingle, out _, duplicate, useLongDupForArray);
+                AssembleVariablePush(cw, e, out isSingle, out _, duplicate, useLongDupForArray, useNoSpecificType);
             }
 
-            private static void AssembleVariablePush(CodeWriter cw, Parser.Statement e, out bool isSingle, out bool isArray, bool duplicate = false, bool useLongDupForArray = false)
+            private static void AssembleVariablePush(CodeWriter cw, Parser.Statement e, out bool isSingle, out bool isArray, bool duplicate = false, bool useLongDupForArray = false, bool useNoSpecificType = false)
             {
                 isSingle = false;
                 isArray = false;
@@ -1455,7 +1465,7 @@ namespace UndertaleModLib.Compiler
                                 if (cw.compileContext.BuiltInList.GlobalArray.ContainsKey(name) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(name))
                                 {
                                     // Builtin global
-                                    cw.Write("pushbltn.v self." + name);
+                                    cw.Write((useNoSpecificType ? "push.v self." : "pushbltn.v self.") + name);
                                     if (cw.compileContext.ensureVariablesDefined)
                                     {
                                         cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Self, true, cw.compileContext.Data.Strings, cw.compileContext.Data);
@@ -1476,10 +1486,10 @@ namespace UndertaleModLib.Compiler
                                 {
                                     cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Global, false, cw.compileContext.Data.Strings, cw.compileContext.Data);
                                 }
-                                cw.Write("pushglb.v global." + name);
+                                cw.Write((useNoSpecificType ? "push.v global." : "pushglb.v global.") + name);
                                 break;
                             case -7:
-                                cw.Write("pushloc.v local." + name);
+                                cw.Write((useNoSpecificType ? "push.v local." : "pushloc.v local.") + name);
                                 break;
                             default:
                                 if (cw.compileContext.ensureVariablesDefined)
@@ -1558,7 +1568,7 @@ namespace UndertaleModLib.Compiler
                         }
                     }
                     fix.Children.Add(fix2);
-                    AssembleVariablePush(cw, fix, out isSingle, out isArray, duplicate, useLongDupForArray);
+                    AssembleVariablePush(cw, fix, out isSingle, out isArray, duplicate, useLongDupForArray, useNoSpecificType);
                 } else
                 {
                     AssemblyWriterError(cw, "Malformed variable push.", e.Token);

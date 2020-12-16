@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -391,7 +391,7 @@ namespace UndertaleModLib.Compiler
                     {
                         // Convert identifiers into their proper references, at least sort of.
                         ExpressionConstant constant;
-                        if (!ResolveIdentifier(context, tokens[i].Content, out constant))
+                        if ((i != 0 && tokens[i - 1].Kind == TokenKind.Dot) || !ResolveIdentifier(context, tokens[i].Content, out constant))
                         {
                             bool isGlobalBuiltin;
                             int ID = GetVariableID(context, tokens[i].Content, out isGlobalBuiltin);
@@ -1001,10 +1001,10 @@ namespace UndertaleModLib.Compiler
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp,
                                                      EnsureTokenKind(TokenKind.LogicalOr).Token);
                     result.Children.Add(left);
-                    result.Children.Add(ParseExpression(context));
+                    result.Children.Add(ParseAndOp(context));
                     while (remainingStageOne.Count > 0 && IsNextTokenDiscard(TokenKind.LogicalOr))
                     {
-                        result.Children.Add(ParseExpression(context));
+                        result.Children.Add(ParseAndOp(context));
                     }
                     
                     return result;
@@ -1023,10 +1023,10 @@ namespace UndertaleModLib.Compiler
                     Statement result = new Statement(Statement.StatementKind.ExprBinaryOp,
                                                      EnsureTokenKind(TokenKind.LogicalAnd).Token);
                     result.Children.Add(left);
-                    result.Children.Add(ParseExpression(context));
+                    result.Children.Add(ParseXorOp(context));
                     while (remainingStageOne.Count > 0 && IsNextTokenDiscard(TokenKind.LogicalAnd))
                     {
-                        result.Children.Add(ParseExpression(context));
+                        result.Children.Add(ParseXorOp(context));
                     }
 
                     return result;
@@ -1249,7 +1249,8 @@ namespace UndertaleModLib.Compiler
                         {
                             if (left.Constant.kind != ExpressionConstant.Kind.Number)
                                 ReportCodeError("Expected constant to be number in variable reference.", left.Token, false);
-                            next.ID = (int)left.Constant.valueNumber;
+                            if (next != null)
+                                next.ID = (int)left.Constant.valueNumber;
                             combine = false;
                         }
                         result.Children.Add(next);
@@ -1546,8 +1547,11 @@ namespace UndertaleModLib.Compiler
                               result.Children[2].Children.Count == 0 && result.Children[2].Kind == Statement.StatementKind.ExprSingleVariable &&
                               result.Children[0].Text == result.Children[2].Text && result.Children[0].ID == result.Children[2].ID)
                             {
-                                // Remove redundant assignments, like "a = a"
-                                result = new Statement(Statement.StatementKind.Discard);
+                                // Remove redundant assignments, like "a = a", except for bytecode 14 and below.
+                                if (context.Data?.GeneralInfo.BytecodeVersion > 14)
+                                {
+                                    result = new Statement(Statement.StatementKind.Discard);
+                                }
                             }
                         }
                         break;
@@ -1590,47 +1594,55 @@ namespace UndertaleModLib.Compiler
                         {
                             case "string":
                                 {
-                                    string conversion = "";
-                                    switch (result.Children[0].Constant.kind)
+                                    // Ignore the optimization for GMS build versions less than 1763 and not equal to 1539.
+                                    if ((context.Data?.GeneralInfo.Build >= 1763) || (context.Data?.GeneralInfo.Major >= 2) || (context.Data?.GeneralInfo.Build == 1539))
                                     {
-                                        case ExpressionConstant.Kind.Number:
-                                            conversion = result.Children[0].Constant.valueNumber.ToString();
-                                            break;
-                                        case ExpressionConstant.Kind.Int64:
-                                            conversion = result.Children[0].Constant.valueInt64.ToString();
-                                            break;
-                                        case ExpressionConstant.Kind.String:
-                                            conversion = result.Children[0].Constant.valueString;
-                                            break;
-                                        default:
-                                            return result; // This shouldn't happen
+                                        string conversion = "";
+                                        switch (result.Children[0].Constant.kind)
+                                        {
+                                            case ExpressionConstant.Kind.Number:
+                                                conversion = result.Children[0].Constant.valueNumber.ToString();
+                                                break;
+                                            case ExpressionConstant.Kind.Int64:
+                                                conversion = result.Children[0].Constant.valueInt64.ToString();
+                                                break;
+                                            case ExpressionConstant.Kind.String:
+                                                conversion = result.Children[0].Constant.valueString;
+                                                break;
+                                            default:
+                                                return result; // This shouldn't happen
+                                        }
+                                        result = new Statement(Statement.StatementKind.ExprConstant);
+                                        result.Constant = new ExpressionConstant(conversion);
                                     }
-                                    result = new Statement(Statement.StatementKind.ExprConstant);
-                                    result.Constant = new ExpressionConstant(conversion);
                                 }
                                 break;
                             case "real":
                                 {
-                                    double conversion = 0d;
-                                    switch (result.Children[0].Constant.kind)
+                                    // Ignore the optimization for GMS build versions less than 1763 and not equal to 1539.
+                                    if ((context.Data?.GeneralInfo.Build >= 1763) || (context.Data?.GeneralInfo.Major >= 2) || (context.Data?.GeneralInfo.Build == 1539))
                                     {
-                                        case ExpressionConstant.Kind.Number:
-                                            conversion = result.Children[0].Constant.valueNumber;
-                                            break;
-                                        case ExpressionConstant.Kind.Int64:
-                                            conversion = result.Children[0].Constant.valueInt64;
-                                            break;
-                                        case ExpressionConstant.Kind.String:
-                                            if (!double.TryParse(result.Children[0].Constant.valueString, out conversion))
-                                            {
-                                                ReportCodeError("Cannot convert non-number string to a number.", result.Children[0].Token, false);
-                                            }
-                                            break;
-                                        default:
-                                            return result; // This shouldn't happen
+                                        double conversion = 0d;
+                                        switch (result.Children[0].Constant.kind)
+                                        {
+                                            case ExpressionConstant.Kind.Number:
+                                                conversion = result.Children[0].Constant.valueNumber;
+                                                break;
+                                            case ExpressionConstant.Kind.Int64:
+                                                conversion = result.Children[0].Constant.valueInt64;
+                                                break;
+                                            case ExpressionConstant.Kind.String:
+                                                if (!double.TryParse(result.Children[0].Constant.valueString, out conversion))
+                                                {
+                                                    ReportCodeError("Cannot convert non-number string to a number.", result.Children[0].Token, false);
+                                                }
+                                                break;
+                                            default:
+                                                return result; // This shouldn't happen
+                                        }
+                                        result = new Statement(Statement.StatementKind.ExprConstant);
+                                        result.Constant = new ExpressionConstant(conversion);
                                     }
-                                    result = new Statement(Statement.StatementKind.ExprConstant);
-                                    result.Constant = new ExpressionConstant(conversion);
                                 }
                                 break;
                             case "int64":
