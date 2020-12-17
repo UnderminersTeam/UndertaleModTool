@@ -40,6 +40,7 @@ Please report any bugs or issues with the experimental scripts to the Underminer
 - `ExportMasks.csx`: Exports all sprite masks to "Export_Masks" in the game directory.
 - `ImportMasks.csx`: Imports sprite masks in bulk from a directory. 
 - `TextInputTestScript.csx`: Text input text script.
+- `AutoBackup.csx`: An automatic backup script of the data.win file which runs in the background while you work, with a GUI.
 
 ## Credits
 
@@ -68,3 +69,4 @@ Please report any bugs or issues with the experimental scripts to the Underminer
 - `ExportMasks.csx`: By Grossley
 - `ImportMasks.csx`: By Grossley
 - `TextInputTestScript.csx`: By Grossley
+- `AutoBackup.csx`: By Grossley
