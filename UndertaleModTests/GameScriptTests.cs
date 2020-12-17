@@ -52,12 +52,27 @@ namespace UndertaleModTests
             Console.WriteLine("Update Progress: " + progressValue + " / " + maxValue + ", Message: " + message + ", Status: " + status);
         }
 
-        public string ScriptInputDialog(bool multiline = false, bool prevclose = false, string title = "Input Dialog", string label = "Input:", string button = "Submit", string cancelButton = "Cancel", string def = "")
+        public string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
         {
-            Console.Write(label + " ");
+            Console.Write(labelText + " ");
             string ret = Console.ReadLine();
 
             return ret;
+        }
+
+        public string ScriptTextInput(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
+        {
+            return ScriptInputDialog(titleText, labelText, defaultInputBoxText, cancelButtonText, submitButtonText, isMultiline, preventClose);
+        }
+
+        public void SetUMTConsoleText(string message)
+        {
+            Console.Write("SetUMTConsoleText(): " + message);
+        }
+
+        public void SetFinishedMessage(bool isFinishedMessageEnabled)
+        {
+            Console.Write("SetFinishedMessage(): " + isFinishedMessageEnabled.ToString());
         }
 
         public void HideProgressBar()

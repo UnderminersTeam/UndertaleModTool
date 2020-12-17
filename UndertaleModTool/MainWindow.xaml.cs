@@ -965,9 +965,9 @@ namespace UndertaleModTool
             return MessageBox.Show(message, "Script message", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
         }
 
-        public string ScriptTextInput(string message, string title, string defaultValue, bool allowMultiline)
+        public string ScriptTextInput(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
         {
-            using (TextInput input = new TextInput(message, title, defaultValue, allowMultiline))
+            using (TextInput input = new TextInput(labelText, titleText, defaultInputBoxText, isMultiline))
             {
                 var result = input.ShowDialog();
                 if (result == System.Windows.Forms.DialogResult.OK)
@@ -982,9 +982,9 @@ namespace UndertaleModTool
             Process.Start(url);
         }
 
-        public string ScriptInputDialog(bool isMultiline = false, bool preventClose = false, string title = "Input Dialog", string label = "Input:", string button = "Submit", string cancelButton = "Cancel", string def = "")
+        public string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
         {
-            TextInputDialog dlg = new TextInputDialog(isMultiline, preventClose, title, label, button, cancelButton, def);
+            TextInputDialog dlg = new TextInputDialog(titleText, labelText, defaultInputBoxText, cancelButtonText, submitButtonText, isMultiline, preventClose);
             bool? dlgResult = dlg.ShowDialog();
 
             if (!dlgResult.HasValue || dlgResult == false)

@@ -41,15 +41,15 @@ namespace UndertaleModTool
         public bool PreventClose { get => _PreventClose; set { _PreventClose = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PreventClose")); } }
         public bool IsMultiline { get => _IsMultiline; set { _IsMultiline = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsMultiline")); } }
         
-        public TextInputDialog(bool isMultiline, bool preventClose, string title, string label, string button, string cancelButton, string def)
+        public TextInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
         {
             IsMultiline = isMultiline;
             PreventClose = preventClose;
-            MessageTitle = title;
-            Message = label;
-            ButtonTitle = button;
-            CancelButtonTitle = cancelButton;
-            InputText = def;
+            MessageTitle = titleText;
+            Message = labelText;
+            ButtonTitle = submitButtonText;
+            CancelButtonTitle = cancelButtonText;
+            InputText = defaultInputBoxText;
 
             InitializeComponent();
             this.DataContext = this;

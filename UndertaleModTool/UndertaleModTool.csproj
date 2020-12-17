@@ -345,10 +345,10 @@
     <None Include="ExperimentalScripts\CheckDecompiler.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="ExperimentalScripts\TextInputTest.csx">
+    <None Include="ExperimentalScripts\TextInputTestWPF.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="ExperimentalScripts\TextInputTestScript.csx">
+    <None Include="ExperimentalScripts\TextInputTestWinForms.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="ExperimentalScripts\UndertaleWithJSONs.csx">
