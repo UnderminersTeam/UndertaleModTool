@@ -14,6 +14,8 @@ If you are editing Deltarune from its default installation location this script 
 Please make sure UndertaleModTool can write to the game directory.
 If it cannot, or you are not sure, please select 'no' to cancel the script."))
 {
+    SetUMTConsoleText("Setup has been cancelled.");
+    SetFinishedMessage(false);
     return;
 }
 
@@ -109,7 +111,8 @@ void OnTimedEvent(Object source, ElapsedEventArgs e)
             aTimer.Dispose();
             ScriptError("Cannot save due to null data file or unsupported bytecode version.", "Save error");
             ScriptMessage("Automatic backups are off. Run the script again to turn back on automatic backups.");
-            //Figure out a way to set the message box directly.
+            SetUMTConsoleText("Automatic backups are off. Run the script again to turn back on automatic backups.");
+            SetFinishedMessage(false);
             return;
         }
         filename = "data_backup" + current_date_and_time + ".win";
@@ -128,7 +131,8 @@ void OnTimedEvent(Object source, ElapsedEventArgs e)
             ScriptMessage("Automatic backups are off. Run the script again to turn back on automatic backups.");
             aTimer.Stop();
             aTimer.Dispose();
-            //Figure out a way to set the message box directly.
+            SetUMTConsoleText("Automatic backups are off. Run the script again to turn back on automatic backups.");
+            SetFinishedMessage(false);
             return;
         }
         if (times_ran > 1)
@@ -145,7 +149,8 @@ void OnTimedEvent(Object source, ElapsedEventArgs e)
                 aTimer.Stop();
                 aTimer.Dispose();
                 ScriptMessage("Automatic backups are off. Run the script again to turn back on automatic backups.");
-                //Figure out a way to set the message box directly.
+                SetUMTConsoleText("Automatic backups are off. Run the script again to turn back on automatic backups.");
+                SetFinishedMessage(false);
                 return;
             }
         }
@@ -155,7 +160,8 @@ void OnTimedEvent(Object source, ElapsedEventArgs e)
         aTimer.Stop();
         aTimer.Dispose();
         ScriptMessage(backups_count.ToString() + " unique backups have been reached. (" + (backups_count*minutes_per_backup).ToString() + " minutes). Automatic backups are now off. Run the script again to turn back on automatic backups.");
-        //Figure out a way to set the message box directly.
+        SetUMTConsoleText(backups_count.ToString() + " unique backups have been reached. (" + (backups_count*minutes_per_backup).ToString() + " minutes). Automatic backups are now off. Run the script again to turn back on automatic backups.");
+        SetFinishedMessage(false);
         return;
     }
 }
@@ -249,6 +255,5 @@ if (maximum_number_of_runs != 0)
     isLimited = " Automatic backups will end after " + maximum_number_of_runs.ToString() + " unique backups. (" + (minutes_per_backup * maximum_number_of_runs).ToString() + " minutes).";
 }
 
-string endMessage = "Automatic backup activated. The game will be checked for changes every " + minutes_per_backup_string + " minutes and, if so, a backup will be made to your computer." + isLimited;
-
-endMessage
+SetUMTConsoleText("Automatic backup activated. The game will be checked for changes every " + minutes_per_backup_string + " minutes and, if so, a backup will be made to your computer." + isLimited);
+SetFinishedMessage(false);

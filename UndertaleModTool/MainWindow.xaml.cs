@@ -61,6 +61,7 @@ namespace UndertaleModTool
         private bool _CanSave = false;
         public bool CanSave { get { return _CanSave; } private set { _CanSave = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CanSave")); } }
         public bool CanSafelySave = false;
+        public bool FinishedMessageEnabled = true;
 
         public event PropertyChangedEventHandler PropertyChanged;
         private LoaderDialog scriptDialog;
@@ -717,7 +718,14 @@ namespace UndertaleModTool
                 {
                     result = exc;
                 }
-                CommandBox.Text = result != null ? result.ToString() : "";
+                if (FinishedMessageEnabled)
+                {
+                    Dispatcher.Invoke(() => CommandBox.Text = result != null ? result.ToString() : "");
+                }
+                else
+                {
+                    FinishedMessageEnabled = true;
+                }
                 CommandBox.IsEnabled = true;
             }
         }
@@ -875,7 +883,14 @@ namespace UndertaleModTool
                     ScriptPath = path;
 
                     object result = (await script.RunAsync(this)).ReturnValue;
-                    Dispatcher.Invoke(() => CommandBox.Text = result != null ? result.ToString() : System.IO.Path.GetFileName(path) + " finished!");
+                    if (FinishedMessageEnabled)
+                    {
+                        Dispatcher.Invoke(() => CommandBox.Text = result != null ? result.ToString() : System.IO.Path.GetFileName(path) + " finished!");
+                    }
+                    else
+                    {
+                        FinishedMessageEnabled = true;
+                    }
                 }
             }
             catch (CompilationErrorException exc)
@@ -916,10 +931,25 @@ namespace UndertaleModTool
         {
             MessageBox.Show(message, "Script message", MessageBoxButton.OK, MessageBoxImage.Information);
         }
+        public void SetUMTConsoleText(string message)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                CommandBox.Text = message;
+            });
+        }
 
         public void ScriptError(string error, string title)
         {
             MessageBox.Show(error, title, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        public void SetFinishedMessage(bool isFinishedMessageEnabled)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                FinishedMessageEnabled = isFinishedMessageEnabled;
+            });
         }
 
         public bool ScriptQuestion(string message)
