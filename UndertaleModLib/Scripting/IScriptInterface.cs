@@ -18,10 +18,13 @@ namespace UndertaleModLib.Scripting
         void EnsureDataLoaded();
 
         void ScriptMessage(string message);
+        void SetUMTConsoleText(string message);
         bool ScriptQuestion(string message);
         void ScriptError(string error, string title);
         void ScriptOpenURL(string url);
         string ScriptInputDialog(bool isMultiline, bool preventClose, string title, string label, string button, string cancelButton, string def);
+        string ScriptTextInput(string message, string title, string defaultValue, bool allowMultiline);
+        void SetFinishedMessage(bool isFinishedMessageEnabled);
         void UpdateProgressBar(string message, string status, double progressValue, double maxValue);
         void HideProgressBar();
 
