@@ -273,6 +273,9 @@
     <Compile Include="Editors\UndertaleVariableEditor.xaml.cs">
       <DependentUpon>UndertaleVariableEditor.xaml</DependentUpon>
     </Compile>
+    <None Include="ExperimentalScripts\AutoBackup.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="ExperimentalScripts\BetterVaporiserForUT.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
