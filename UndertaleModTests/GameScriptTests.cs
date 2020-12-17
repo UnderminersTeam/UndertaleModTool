@@ -22,6 +22,7 @@ namespace UndertaleModTests
         public object Highlighted => throw new NotImplementedException();
         public object Selected => throw new NotImplementedException();
         public bool CanSave => throw new NotImplementedException();
+        public string ScriptPath { get; set; }
 
         public void ChangeSelection(object newsel)
         {
@@ -50,6 +51,15 @@ namespace UndertaleModTests
         {
             Console.WriteLine("Update Progress: " + progressValue + " / " + maxValue + ", Message: " + message + ", Status: " + status);
         }
+
+        public string ScriptInputDialog(bool multiline = false, bool prevclose = false, string title = "Input Dialog", string label = "Input:", string button = "Submit", string cancelButton = "Cancel", string def = "")
+        {
+            Console.Write(label + " ");
+            string ret = Console.ReadLine();
+
+            return ret;
+        }
+
         public void HideProgressBar()
         {
             Console.WriteLine("Hiding Progress Bar.");

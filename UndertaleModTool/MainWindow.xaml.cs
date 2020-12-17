@@ -931,6 +931,21 @@ namespace UndertaleModTool
             Process.Start(url);
         }
 
+        public string ScriptInputDialog(bool isMultiline = false, bool preventClose = false, string title = "Input Dialog", string label = "Input:", string button = "Submit", string cancelButton = "Cancel", string def = "")
+        {
+            TextInputDialog dlg = new TextInputDialog(isMultiline, preventClose, title, label, button, cancelButton, def);
+            bool? dlgResult = dlg.ShowDialog();
+
+            if (!dlgResult.HasValue || dlgResult == false)
+            {
+                // returns null (not an empty!!!) string if the dialog has been closed, or an error has occured.
+                return null;
+            }
+
+            // otherwise just return the input (it may be empty aka .Length == 0).
+            return dlg.InputText;
+        }
+
         private async void MenuItem_RunBuiltinScript_Item_Click(object sender, RoutedEventArgs e)
         {
             string path = (string)(sender as MenuItem).CommandParameter;
