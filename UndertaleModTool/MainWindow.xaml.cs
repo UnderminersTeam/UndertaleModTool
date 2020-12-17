@@ -525,6 +525,14 @@ namespace UndertaleModTool
             ChangeSelection(Highlighted);
         }
 
+        private void MainTree_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                ChangeSelection(Highlighted);
+            }
+        }
+
         private void TreeView_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
