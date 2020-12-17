@@ -1,0 +1,31 @@
+﻿<Window x:Class="UndertaleModTool.TextInputDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UndertaleModTool"
+        mc:Ignorable="d"
+        Title="{Binding MessageTitle}" Height="150" Width="400" MinHeight="150" MinWidth="400" WindowStartupLocation="CenterOwner">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="{Binding Message}"/>
+        <TextBox Grid.Row="1" VerticalAlignment="Center" AcceptsReturn="{Binding IsMultiline}" Text="{Binding InputText}"></TextBox>
+
+        <Grid Grid.Row="2" Name="Buttons">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Button Grid.Row="2" Grid.Column="0" Margin="3,3" VerticalAlignment="Center" Visibility="{Binding CancelButtonVisibility}" Content="{Binding CancelButtonTitle}" Click="CancelButton_Click"></Button>
+            <Button Grid.Row="2" Grid.Column="1" Margin="3,3" VerticalAlignment="Center" Content="{Binding ButtonTitle}" Click="Button_Click"></Button>
+        </Grid>
+        
+    </Grid>
+</Window>

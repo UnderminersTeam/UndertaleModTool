@@ -22,7 +22,8 @@ namespace UndertaleModLib.Scripting
         bool ScriptQuestion(string message);
         void ScriptError(string error, string title);
         void ScriptOpenURL(string url);
-        string ScriptTextInput(string message, string title, string defaultValue, bool allowMultiline);
+        string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose);
+        string ScriptTextInput(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose);
         void SetFinishedMessage(bool isFinishedMessageEnabled);
         void UpdateProgressBar(string message, string status, double progressValue, double maxValue);
         void HideProgressBar();
