@@ -1,20 +1,11 @@
 // WPF Text Input Dialog Box test script.
 
-string input(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose) {
-	return ScriptInputDialog(titleText, labelText, defaultInputBoxText, cancelButtonText, submitButtonText, isMultiline, preventClose);
-}
-
-void show(string msg) {
-	ScriptMessage(msg ?? "<dialog was cancelled or closed>");
-}
-
-// options.
-string titleText = "A title",
-       labelText = "A Label:",
-       defaultInputBoxText = "default input here.",
-       cancelButtonText = "A Cancel Button",
-       submitButtonText = "A Submit Button";
-bool   isMultiline = false,
-       preventClose = false;
-
-show(input(titleText, labelText, defaultInputBoxText, cancelButtonText, submitButtonText, isMultiline, preventClose));
+//	return ScriptInputDialog(titleText, labelText, defaultInputBoxText, cancelButtonText, submitButtonText, isMultiline, preventClose);
+String Text = ScriptInputDialog("Title: Text Input Test 01", "Label: Multiline off, Prevent close off", "Default input here.", "Cancel Button", "Submit Button", false, false);
+ScriptMessage(Text ?? "<dialog was cancelled or closed>");
+Text = ScriptInputDialog("Title: Text Input Test 02", "Label: Multiline on, Prevent close off", "Default input here.\r\nDefault input here.\r\nDefault input here.", "Cancel Button", "Submit Button", true, false);
+ScriptMessage(Text ?? "<dialog was cancelled or closed>");
+Text = ScriptInputDialog("Title: Text Input Test 03", "Label: Multiline off, Prevent close on", "Default input here.", "Cancel Button", "Submit Button", false, true);
+ScriptMessage(Text ?? "<dialog was cancelled or closed>");
+Text = ScriptInputDialog("Title: Text Input Test 04", "Label: Multiline on, Prevent close on", "Default input here.\r\nDefault input here.\r\nDefault input here.", "Cancel Button", "Submit Button", true, true);
+ScriptMessage(Text ?? "<dialog was cancelled or closed>");
