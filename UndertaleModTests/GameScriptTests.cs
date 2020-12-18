@@ -59,10 +59,9 @@ namespace UndertaleModTests
 
             return ret;
         }
-
-        public string ScriptTextInput(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
+        public string ScriptTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline)
         {
-            return ScriptInputDialog(titleText, labelText, defaultInputBoxText, cancelButtonText, submitButtonText, isMultiline, preventClose);
+            return ScriptInputDialog(titleText, labelText, defaultInputBoxText, "Cancel", "Submit", isMultiline, false);
         }
 
         public void SetUMTConsoleText(string message)
