@@ -39,8 +39,8 @@ while (true)
 {
     try
     {
-        //                               ScriptTextInput(string titleText,                                                                      string labelText, string defaultInputBoxText, bool isMultiline)
-        double result = Convert.ToDouble(ScriptTextInput("Automatic backup script.", "Please enter the backup interval in minutes (minimum interval 5 minutes).", "30", false));
+        //                               SimpleTextInput(string titleText,                                                                      string labelText, string defaultInputBoxText, bool isMultiline)
+        double result = Convert.ToDouble(SimpleTextInput("Automatic backup script.", "Please enter the backup interval in minutes (minimum interval 5 minutes).", "30", false));
         if ((result < 5) && (!debug_override))
         {
             continue;
@@ -62,8 +62,8 @@ while (true)
 {
     try
     {
-        //                            ScriptTextInput(string titleText,                                                                      string labelText, string defaultInputBoxText, bool isMultiline)
-        int result2 = Convert.ToInt32(ScriptTextInput("Automatic backup script.", "Please enter the maximum number of unique backups this session (0 for unlimited).", "200", false));
+        //                            SimpleTextInput(string titleText,                                                                      string labelText, string defaultInputBoxText, bool isMultiline)
+        int result2 = Convert.ToInt32(SimpleTextInput("Automatic backup script.", "Please enter the maximum number of unique backups this session (0 for unlimited).", "200", false));
         if (result2 < 0)
         {
             continue;

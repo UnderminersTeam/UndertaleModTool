@@ -965,7 +965,7 @@ namespace UndertaleModTool
             return MessageBox.Show(message, "Script message", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
         }
 
-        public string ScriptTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline)
+        public string SimpleTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline)
         {
             using (TextInput input = new TextInput(labelText, titleText, defaultInputBoxText, isMultiline))
             {
