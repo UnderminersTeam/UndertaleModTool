@@ -784,6 +784,34 @@ namespace UndertaleModTool
                 (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newname);
                 if (obj is UndertaleRoom)
                     (obj as UndertaleRoom).Caption = Data.Strings.MakeString("");
+                if (obj is UndertaleScript)
+                {
+                    UndertaleCode code = new UndertaleCode();
+                    code.Name = Data.Strings.MakeString("gml_Script_" + newname);
+                    Data.Code.Add(code);
+                    UndertaleCodeLocals locals = new UndertaleCodeLocals();
+                    locals.Name = code.Name;
+                    UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+                    argsLocal.Name = Data.Strings.MakeString("arguments");
+                    argsLocal.Index = 0;
+                    locals.Locals.Add(argsLocal);
+                    code.LocalsCount = 1;
+                    code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals);
+                    Data.CodeLocals.Add(locals);
+                    (obj as UndertaleScript).Code = code;
+                }
+                if (obj is UndertaleCode)
+                {
+                    UndertaleCodeLocals locals = new UndertaleCodeLocals();
+                    locals.Name = (obj as UndertaleCode).Name;
+                    UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+                    argsLocal.Name = Data.Strings.MakeString("arguments");
+                    argsLocal.Index = 0;
+                    locals.Locals.Add(argsLocal);
+                    (obj as UndertaleCode).LocalsCount = 1;
+                    (obj as UndertaleCode).GenerateLocalVarDefinitions((obj as UndertaleCode).FindReferencedLocalVars(), locals);
+                    Data.CodeLocals.Add(locals);
+                }
             }
             list.Add(obj);
             // TODO: change highlighted too
