@@ -54,18 +54,21 @@ foreach (string file in dirFiles)
 		code.Name = Data.Strings.MakeString(codeName);
 		Data.Code.Add(code);
 
-		UndertaleCodeLocals locals = new UndertaleCodeLocals();
-		locals.Name = code.Name;
+		if (Data?.GeneralInfo.BytecodeVersion > 14)
+		{
+			UndertaleCodeLocals locals = new UndertaleCodeLocals();
+			locals.Name = code.Name;
 
-		UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-		argsLocal.Name = Data.Strings.MakeString("arguments");
-		argsLocal.Index = 0;
+			UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+			argsLocal.Name = Data.Strings.MakeString("arguments");
+			argsLocal.Index = 0;
 
-		locals.Locals.Add(argsLocal);
+			locals.Locals.Add(argsLocal);
 
-		code.LocalsCount = 1;
-		code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
-		Data.CodeLocals.Add(locals);
+			code.LocalsCount = 1;
+			code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
+			Data.CodeLocals.Add(locals);
+		}
 
 		if (doParse)
 		{

@@ -789,18 +789,21 @@ namespace UndertaleModTool
                     UndertaleCode code = new UndertaleCode();
                     code.Name = Data.Strings.MakeString("gml_Script_" + newname);
                     Data.Code.Add(code);
-                    UndertaleCodeLocals locals = new UndertaleCodeLocals();
-                    locals.Name = code.Name;
-                    UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-                    argsLocal.Name = Data.Strings.MakeString("arguments");
-                    argsLocal.Index = 0;
-                    locals.Locals.Add(argsLocal);
-                    code.LocalsCount = 1;
-                    code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals);
-                    Data.CodeLocals.Add(locals);
+                    if (Data?.GeneralInfo.BytecodeVersion > 14)
+                    {
+                        UndertaleCodeLocals locals = new UndertaleCodeLocals();
+                        locals.Name = code.Name;
+                        UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+                        argsLocal.Name = Data.Strings.MakeString("arguments");
+                        argsLocal.Index = 0;
+                        locals.Locals.Add(argsLocal);
+                        code.LocalsCount = 1;
+                        code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals);
+                        Data.CodeLocals.Add(locals);
+                    }
                     (obj as UndertaleScript).Code = code;
                 }
-                if (obj is UndertaleCode)
+                if ((obj is UndertaleCode) && (Data?.GeneralInfo.BytecodeVersion > 14))
                 {
                     UndertaleCodeLocals locals = new UndertaleCodeLocals();
                     locals.Name = (obj as UndertaleCode).Name;
