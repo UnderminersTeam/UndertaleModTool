@@ -244,7 +244,7 @@ namespace UndertaleModLib
                 var expectedAddress = GetAddressForUndertaleObject(obj);
                 if (expectedAddress != Position)
                 {
-                    SubmitWarning("Reading misaligned at " + Position.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
+                    //SubmitWarning("Reading misaligned at " + Position.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
                     Position = expectedAddress;
                 }
                 unreadObjects.Remove(Position);
@@ -263,7 +263,7 @@ namespace UndertaleModLib
                 var expectedAddress = GetAddressForUndertaleObject(obj);
                 if (expectedAddress != Position)
                 {
-                    SubmitWarning("Reading misaligned at " + Position.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
+                    //SubmitWarning("Reading misaligned at " + Position.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
                     Position = expectedAddress;
                 }
                 unreadObjects.Remove(Position);
@@ -282,7 +282,7 @@ namespace UndertaleModLib
                 var expectedAddress = GetAddressForUndertaleObject(obj);
                 if (expectedAddress != Position)
                 {
-                    SubmitWarning("Reading misaligned at " + Position.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
+                    //SubmitWarning("Reading misaligned at " + Position.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
                     Position = expectedAddress;
                 }
                 unreadObjects.Remove(Position);
@@ -370,7 +370,6 @@ namespace UndertaleModLib
         public UndertaleWriter(Stream output) : base(output)
         {
         }
-
         public void Write(UndertaleChunk obj)
         {
             obj.Serialize(this);

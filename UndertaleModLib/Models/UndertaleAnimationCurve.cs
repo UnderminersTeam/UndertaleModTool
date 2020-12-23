@@ -84,7 +84,9 @@ namespace UndertaleModLib.Models
                     X = reader.ReadSingle();
                     Value = reader.ReadSingle();
                     if (reader.ReadInt32() != 0)
-                        throw new Exception("Expected 0 in animation curve point"); // TODO? They might add some "control points" here later it seems
+                    {
+                        //throw new Exception("Expected 0 in animation curve point"); // TODO? They might add some "control points" here later it seems
+                    }
                 }
             }
         }

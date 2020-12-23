@@ -590,31 +590,31 @@ namespace UndertaleModLib
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
-            if (writer.undertaleData.GeneralInfo.Major < 2)
-                throw new InvalidOperationException();
+            //if (writer.undertaleData.GeneralInfo.Major < 2)
+              //  throw new InvalidOperationException();
 
-            while (writer.Position % 4 != 0)
-                writer.Write((byte)0);
+            //while (writer.Position % 4 != 0)
+              //  writer.Write((byte)0);
 
-            writer.Write((uint)1); // Version
+            //writer.Write((uint)1); // Version
 
-            base.SerializeChunk(writer);
+            //base.SerializeChunk(writer);
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
-            if (reader.undertaleData.GeneralInfo.Major < 2)
-                throw new InvalidOperationException();
+            //if (reader.undertaleData.GeneralInfo.Major < 2)
+              //  throw new InvalidOperationException();
 
             // Padding
-            while (reader.Position % 4 != 0)
-                if (reader.ReadByte() != 0)
-                    throw new IOException("Padding error!");
+            //while (reader.Position % 4 != 0)
+              //  if (reader.ReadByte() != 0)
+                //    throw new IOException("Padding error!");
 
-            if (reader.ReadUInt32() != 1)
-                throw new IOException("Expected SEQN version 1");
+            //if (reader.ReadUInt32() != 1)
+              //  throw new IOException("Expected SEQN version 1");
 
-            base.UnserializeChunk(reader);
+            //base.UnserializeChunk(reader);
         }
     }
 
