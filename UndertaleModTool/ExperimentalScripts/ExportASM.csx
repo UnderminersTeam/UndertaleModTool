@@ -40,6 +40,10 @@ async Task DumpCode()
 void DumpCode(UndertaleCode code) 
 {
     string path = Path.Combine(codeFolder, code.Name.Content + ".asm");
+    if (path.Length > 200)
+    {
+        path = path.Substring(0, 200) + ".gml";
+    }
     try 
     {
         File.WriteAllText(path, (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : ""));

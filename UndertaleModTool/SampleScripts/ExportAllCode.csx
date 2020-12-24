@@ -17,9 +17,10 @@ if (Directory.Exists(codeFolder))
 Directory.CreateDirectory(codeFolder);
 
 UpdateProgress();
+int failed = 0;
 await DumpCode();
 HideProgressBar();
-ScriptMessage("Export Complete.\n\nLocation: " + codeFolder);
+ScriptMessage("Export Complete.\n\nLocation: " + codeFolder + " " + failed.ToString() + " failed");
 
 void UpdateProgress()
 {
@@ -40,12 +41,26 @@ async Task DumpCode()
 void DumpCode(UndertaleCode code)
 {
     string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
+    if (path.Length > 150)
+	{
+        path = path.Substring(0, 150) + ".gml";
+	}
     try 
     {
         File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
     } catch (Exception e) 
     {
+        if (!(Directory.Exists(codeFolder + "/Failed/")))
+        {
+            Directory.CreateDirectory(codeFolder + "/Failed/");
+        }
+		if (path.Length > 150)
+		{
+			path = path.Substring(0, 150) + ".gml";
+		}
+        path = Path.Combine(codeFolder + "/Failed/", code.Name.Content + ".gml");
         File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
+        failed += 1;
     }
 
     UpdateProgress();
