@@ -431,22 +431,12 @@ namespace UndertaleModTool
         {
             UndertaleRoom room = this.DataContext as UndertaleRoom;
 
-            // get last layer id
             var data = (Application.Current.MainWindow as MainWindow).Data;
-            uint lastlayer_id = 0;
-            for (var i = data.Rooms.Count - 1; i >= 0; i--)
-            {
-                var lastroom_layers = data.Rooms[i].Layers;
-                if (lastroom_layers.Count != 0)
-                {
-                    lastlayer_id = lastroom_layers[lastroom_layers.Count - 1].LayerId;
-                    break;
-                }
-            }
+            var room_chunk = data.FORM.ROOM as UndertaleChunkROOM;
 
             UndertaleRoom.Layer layer = new UndertaleRoom.Layer();
-            layer.LayerName = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString(name);
-            layer.LayerId = lastlayer_id + 1;
+            layer.LayerName = data.Strings.MakeString(name);
+            layer.LayerId = ++room_chunk.LastLayerId;
             layer.LayerType = type;
             layer.Data = new T();
             room.Layers.Add(layer);

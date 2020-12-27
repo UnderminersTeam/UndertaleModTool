@@ -260,6 +260,24 @@ namespace UndertaleModLib
     public class UndertaleChunkROOM : UndertaleListChunk<UndertaleRoom>
     {
         public override string Name => "ROOM";
+
+        public uint LastLayerId { get; set; }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            base.UnserializeChunk(reader);
+
+            // Find the largest layer id
+            // See #355
+            foreach (UndertaleRoom Room in List) 
+            {
+                foreach (UndertaleRoom.Layer Layer in Room.Layers) 
+                {
+                    if (Layer.LayerId > LastLayerId) 
+                        LastLayerId = Layer.LayerId;
+                }
+            }
+        }
     }
 
     public class UndertaleChunkDAFL : UndertaleEmptyChunk // DataFiles
