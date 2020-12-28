@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleCode}" DataContextChanged="UserControl_DataContextChanged">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleCode}" DataContextChanged="UserControl_DataContextChanged" FontFamily="Comic Sans MS">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -32,7 +32,7 @@
             <TabItem Header="Disassembly" Name="DisassemblyTab">
                 <Grid>
                     <RichTextBox HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsReadOnly="True" IsDocumentEnabled="True" Name="DisassemblyView" Padding="-5,0,-5,0" MouseDoubleClick="DisassemblyView_MouseDoubleClick"/>
-                    <TextBox TextWrapping="NoWrap" Name="DisassemblyEditor" LostFocus="DisassemblyEditor_LostFocus" Visibility="Collapsed" FontFamily="Lucida Console" Padding="-2,0,-2,0" AcceptsReturn="True"/>
+                    <TextBox TextWrapping="NoWrap" Name="DisassemblyEditor" LostFocus="DisassemblyEditor_LostFocus" Visibility="Collapsed" FontFamily="Comic Sans MS" Padding="-2,0,-2,0" AcceptsReturn="True"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Graph view" Name="GraphTab">
@@ -43,7 +43,7 @@
             <TabItem Header="Decompiled" Name="DecompiledTab">
               <Grid>
                     <RichTextBox IsReadOnly="True" IsDocumentEnabled="True" Name="DecompiledView" Padding="-5,0,-5,0" MouseDoubleClick="DecompiledView_MouseDoubleClick" SpellCheck.IsEnabled="False"/>
-                <TextBox Name="DecompiledEditor" LostFocus="DecompiledEditor_LostFocus" Visibility="Collapsed" FontFamily="Lucida Console" Padding="-2,0,-2,0" AcceptsReturn="True"/>
+                    <TextBox Name="DecompiledEditor" LostFocus="DecompiledEditor_LostFocus" Visibility="Collapsed" FontFamily="Comic Sans MS" Padding="-2,0,-2,0" AcceptsReturn="True"/>
               </Grid>
             </TabItem>
         </TabControl>

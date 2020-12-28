@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertalePath}">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertalePath}" FontFamily="Comic Sans MS">
     <UserControl.Resources>
         <local:PointsDisplayConverter x:Key="PointsDisplayConverter" />
         <local:PointListConverter x:Key="PointListConverter" />

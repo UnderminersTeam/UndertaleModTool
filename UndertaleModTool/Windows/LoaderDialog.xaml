@@ -5,15 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
-        Title="{Binding MessageTitle}" Height="150" Width="400" WindowStartupLocation="CenterOwner" Unloaded="Window_Unloaded">
+        Title="{Binding MessageTitle}" Height="150" Width="400" WindowStartupLocation="CenterOwner" Unloaded="Window_Unloaded" FontFamily="Comic Sans MS">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="{Binding Message}"/>
-        <ProgressBar Grid.Row="1" IsIndeterminate="True" Name="ProgressBar"></ProgressBar>
+        <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="{Binding Message}" FontFamily="Comic Sans MS"/>
+        <ProgressBar Grid.Row="1" IsIndeterminate="True" Name="ProgressBar" FontFamily="Comic Sans MS"></ProgressBar>
         <TextBlock Grid.Row="2" VerticalAlignment="Center" Text="{Binding StatusText}"/>
     </Grid>
 </Window>
