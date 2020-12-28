@@ -9,7 +9,7 @@
         xmlns:scol="clr-namespace:System.Collections;assembly=mscorlib" 
         xmlns:cmod="clr-namespace:System.ComponentModel;assembly=WindowsBase" 
         mc:Ignorable="d"
-        Height="450" Width="800" Loaded="Window_Loaded" FontFamily="Comic Sans MS">
+        Height="450" Width="800" Loaded="Window_Loaded" FontFamily="Comic Sans MS" Background="#FFF104A6">
     <Window.Title>
         <MultiBinding StringFormat="{}{0} - {1} [{2}]" >
             <Binding Path="TitleMain"/>
@@ -45,7 +45,7 @@
     </Window.InputBindings>
     <Grid>
         <DockPanel>
-            <Menu DockPanel.Dock="Top" FontFamily="Comic Sans MS">
+            <Menu DockPanel.Dock="Top" FontFamily="Comic Sans MS"  Background="#FFF104A6">
                 <MenuItem Header="_File">
                     <MenuItem Header="_New" Command="New" InputGestureText="Ctrl+N"/>
                     <MenuItem Header="_Open" Command="Open" InputGestureText="Ctrl+O"/>
@@ -93,7 +93,7 @@
                 </MenuItem>
             </Menu>
             <Grid DockPanel.Dock="Bottom">
-                <TextBox x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,35,0"/>
+                <TextBox x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,35,0"  Background="#FFF104A6"/>
                 <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" VerticalContentAlignment="Top" Name="ObjectLabel"/>
             </Grid>
             <Grid>
@@ -139,11 +139,11 @@
                             </Image.Style>
                         </Image>
                     </Button>
-                    <TextBox Grid.Column="1" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"/>
+                    <TextBox Grid.Column="1" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged" Background="#FFF104A6"/>
                 </Grid>
                 <TreeView Grid.Column="0" Grid.Row="1" Margin="5" DataContext="{Binding Data}" SelectedItemChanged="TreeView_SelectedItemChanged" MouseDoubleClick="MainTree_MouseDoubleClick" KeyUp="MainTree_KeyUp" AllowDrop="True" Name="MainTree" KeyDown="MainTree_KeyDown" PreviewMouseRightButtonDown="MainTree_PreviewMouseRightButtonDown"
                     VirtualizingStackPanel.IsVirtualizing="True"
-                    VirtualizingStackPanel.VirtualizationMode="Recycling">
+                    VirtualizingStackPanel.VirtualizationMode="Recycling" Background="#FFF104A6">
                     <TreeView.Resources>
                         <ContextMenu x:Key="AddMenu">
                             <MenuItem Header="Add" Click="MenuItem_Add_Click"/>
@@ -329,7 +329,7 @@
                     </TreeViewItem>
                 </TreeView>
 
-                <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
+                <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"  Background="#FFF104A6"/>
 
                 <ScrollViewer Grid.Column="2" Grid.RowSpan="2" VerticalScrollBarVisibility="Auto">
                     <ContentControl Margin="10" Content="{Binding Selected}" Name="DataEditor">
