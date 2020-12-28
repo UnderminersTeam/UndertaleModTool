@@ -6,24 +6,24 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:x1="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="20" d:DesignWidth="300" FontFamily="Comic Sans MS">
+             d:DesignHeight="20" d:DesignWidth="300" FontFamily="Comic Sans MS" Background="#FFF104A6">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <TextBox Grid.Column="0" ToolTip="This is an string reference. Change the value here to edit this just this value of all referenced values, or drag and drop another string instance from the tree on the left to change the reference" AllowDrop="True" PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" Text="{Binding ObjectReference.Content, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=Explicit}" LostFocus="TextBox_LostFocus" FontFamily="Comic Sans MS">
+        <TextBox Grid.Column="0" ToolTip="This is an string reference. Change the value here to edit this just this value of all referenced values, or drag and drop another string instance from the tree on the left to change the reference" AllowDrop="True" PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" Text="{Binding ObjectReference.Content, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=Explicit}" LostFocus="TextBox_LostFocus" FontFamily="Comic Sans MS" Background="#FFF104A6">
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}">
                     <Style.Resources>
                         <VisualBrush x:Key="EmptyBrush" AlignmentX="Left" AlignmentY="Top" Stretch="None">
                             <VisualBrush.Visual>
-                                <Label Padding="2, 0" Content="(empty)" Foreground="DarkGray" FontFamily="Comic Sans MS"/>
+                                <Label Padding="2, 0" Content="(empty)" Foreground="DarkGray" FontFamily="Comic Sans MS" Background="#FFF104A6"/>
                             </VisualBrush.Visual>
                         </VisualBrush>
                         <VisualBrush x:Key="NullBrush" AlignmentX="Left" AlignmentY="Top" Stretch="None">
                             <VisualBrush.Visual>
-                                <Label Padding="2, 0" Content="(null)" Foreground="DarkGray" FontFamily="Comic Sans MS"/>
+                                <Label Padding="2, 0" Content="(null)" Foreground="DarkGray" FontFamily="Comic Sans MS" Background="#FFF104A6"/>
                             </VisualBrush.Visual>
                         </VisualBrush>
                     </Style.Resources>

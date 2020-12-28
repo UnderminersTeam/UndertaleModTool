@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
-        Title="Runtime picker" Height="300" Width="700" WindowStartupLocation="CenterOwner" FontFamily="Comic Sans MS">
+        Title="Runtime picker" Height="300" Width="700" WindowStartupLocation="CenterOwner" FontFamily="Comic Sans MS" Background="#FFF104A6">
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -19,9 +19,9 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" Text="Select the runtime you want to use" FontFamily="Comic Sans MS"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" Text="Select the runtime you want to use" FontFamily="Comic Sans MS" Background="#FFF104A6"/>
 
-        <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" ItemsSource="{Binding Runtimes}" SelectionMode="Single" Name="Picker" SelectedIndex="0" FontFamily="Comic Sans MS">
+        <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" ItemsSource="{Binding Runtimes}" SelectionMode="Single" Name="Picker" SelectedIndex="0" FontFamily="Comic Sans MS" Background="#FFF104A6">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Version" Width="Auto" DisplayMemberBinding="{Binding Version}" />
@@ -30,6 +30,6 @@
             </ListView.View>
         </ListView>
 
-        <Button Grid.Row="2" Grid.Column="3" Margin="3" Content="Continue" Click="Button_Click" FontFamily="Comic Sans MS"/>
+        <Button Grid.Row="2" Grid.Column="3" Margin="3" Content="Continue" Click="Button_Click" FontFamily="Comic Sans MS" Background="#FFF104A6"/>
     </Grid>
 </Window>

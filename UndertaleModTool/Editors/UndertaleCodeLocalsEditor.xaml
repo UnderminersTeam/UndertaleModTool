@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleCodeLocals}" FontFamily="Comic Sans MS">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleCodeLocals}" FontFamily="Comic Sans MS" Background="#FFF104A6">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -51,7 +51,7 @@
                 <DataGridTemplateColumn Header="Index" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding Index, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0"/>
+                            <TextBox Background="#FFF104A6" Text="{Binding Index, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

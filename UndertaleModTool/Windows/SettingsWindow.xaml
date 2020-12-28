@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
-        Title="Settings" Height="Auto" Width="800" SizeToContent="Height" WindowStartupLocation="CenterOwner" FontFamily="Comic Sans MS">
+        Title="Settings" Height="Auto" Width="800" SizeToContent="Height" WindowStartupLocation="CenterOwner" FontFamily="Comic Sans MS" Background="#FFF104A6">
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
@@ -17,13 +17,13 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="GraphViz path" ToolTip="Required if you want code decompile graphs" FontFamily="Comic Sans MS"/>
-        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GraphVizPath}" FontFamily="Comic Sans MS"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="GraphViz path" ToolTip="Required if you want code decompile graphs" FontFamily="Comic Sans MS" Background="#FFF104A6"/>
+        <TextBox Background="#FFF104A6" Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GraphVizPath}" FontFamily="Comic Sans MS"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="Game Maker: Studio 1.4 path" ToolTip="Required only if you want to use the Studio runner rather than the .exe or run the game under debugger." FontFamily="Comic Sans MS"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GameMakerStudioPath}" FontFamily="Comic Sans MS"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="Game Maker: Studio 1.4 path" ToolTip="Required only if you want to use the Studio runner rather than the .exe or run the game under debugger." FontFamily="Comic Sans MS" Background="#FFF104A6"/>
+        <TextBox Background="#FFF104A6" Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GameMakerStudioPath}" FontFamily="Comic Sans MS"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="Game Maker: Studio 2 runtimes path" ToolTip="Required only if you want to run GMS2 games using the Studio runner rather than the .exe" FontFamily="Comic Sans MS"/>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GameMakerStudio2RuntimesPath}" FontFamily="Comic Sans MS"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="Game Maker: Studio 2 runtimes path" ToolTip="Required only if you want to run GMS2 games using the Studio runner rather than the .exe" FontFamily="Comic Sans MS" Background="#FFF104A6"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GameMakerStudio2RuntimesPath}" FontFamily="Comic Sans MS" Background="#FFF104A6"/>
     </Grid>
 </Window>

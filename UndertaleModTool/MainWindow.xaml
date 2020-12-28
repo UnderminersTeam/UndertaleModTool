@@ -45,7 +45,7 @@
     </Window.InputBindings>
     <Grid>
         <DockPanel>
-            <Menu DockPanel.Dock="Top" FontFamily="Comic Sans MS"  Background="#FFF104A6">
+            <Menu DockPanel.Dock="Top" FontFamily="Comic Sans MS" Background="#FFF104A6">
                 <MenuItem Header="_File">
                     <MenuItem Header="_New" Command="New" InputGestureText="Ctrl+N"/>
                     <MenuItem Header="_Open" Command="Open" InputGestureText="Ctrl+O"/>
@@ -169,7 +169,7 @@
                             </Style.Triggers>
                         </Style>
                     </TreeView.Resources>
-                    <TreeViewItem Header="Data" IsExpanded="True" FontFamily="Comic Sans MS">
+                    <TreeViewItem Header="Data" IsExpanded="True" FontFamily="Comic Sans MS" Background="#FFF104A6">
                         <TreeViewItem Header="General info" Visibility="{Binding GeneralInfo, Converter={StaticResource VisibleIfNotNull}}"/>
                         <TreeViewItem Header="Global init" Visibility="{Binding GlobalInitScripts, Converter={StaticResource VisibleIfNotNull}}"/>
                         <TreeViewItem Header="Audio groups" ItemsSource="{Binding AudioGroups, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding AudioGroups, Converter={StaticResource VisibleIfNotNull}}">

@@ -7,7 +7,7 @@
 		     xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleChunkVARI}" FontFamily="Comic Sans MS">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleChunkVARI}" FontFamily="Comic Sans MS" Background="#FFF104A6">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -25,12 +25,12 @@
         <Separator Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Instance/global variable count</TextBlock>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding InstanceVarCount}"/>
+        <TextBox Background="#FFF104A6" Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding InstanceVarCount}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Instance/global variable count (again)</TextBlock>
-        <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding InstanceVarCountAgain}"/>
+        <TextBox Background="#FFF104A6" Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding InstanceVarCountAgain}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Max local variable count</TextBlock>
-        <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding MaxLocalVarCount}"/>
+        <TextBox Background="#FFF104A6" Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding MaxLocalVarCount}"/>
     </Grid>
 </UserControl>

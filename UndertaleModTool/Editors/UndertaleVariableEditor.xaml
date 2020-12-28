@@ -7,7 +7,7 @@
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleVariable}" FontFamily="Comic Sans MS">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleVariable}" FontFamily="Comic Sans MS" Background="#FFF104A6">
     <UserControl.Resources>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="InstanceType">
             <ObjectDataProvider.MethodParameters>
@@ -35,9 +35,9 @@
         <ComboBox Grid.Row="1" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource InstanceType}}" SelectedItem="{Binding InstanceType}" />
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">VarID</TextBlock>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding VarID}"/>
+        <TextBox Background="#FFF104A6" Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding VarID}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Unknown end-of-chain value</TextBlock>
-        <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding UnknownChainEndingValue}"/>
+        <TextBox Background="#FFF104A6" Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding UnknownChainEndingValue}"/>
     </Grid>
 </UserControl>

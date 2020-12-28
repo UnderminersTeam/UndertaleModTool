@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleFunction}" FontFamily="Comic Sans MS">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleFunction}" FontFamily="Comic Sans MS" Background="#FFF104A6">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -21,6 +21,6 @@
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Unknown end-of-chain value</TextBlock>
-        <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding UnknownChainEndingValue}"/>
+        <TextBox Background="#FFF104A6" Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding UnknownChainEndingValue}"/>
     </Grid>
 </UserControl>

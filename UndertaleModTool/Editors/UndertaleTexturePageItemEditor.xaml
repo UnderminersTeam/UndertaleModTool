@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleTexturePageItem}" FontFamily="Comic Sans MS">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleTexturePageItem}" FontFamily="Comic Sans MS" Background="#FFF104A6">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -30,10 +30,10 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Margin="3" Text="{Binding SourceX}"/>
-            <TextBox Grid.Column="1" Margin="3" Text="{Binding SourceY}"/>
-            <TextBox Grid.Column="2" Margin="3" Text="{Binding SourceWidth}"/>
-            <TextBox Grid.Column="3" Margin="3" Text="{Binding SourceHeight}"/>
+            <TextBox Background="#FFF104A6" Grid.Column="0" Margin="3" Text="{Binding SourceX}"/>
+            <TextBox Background="#FFF104A6" Grid.Column="1" Margin="3" Text="{Binding SourceY}"/>
+            <TextBox Background="#FFF104A6" Grid.Column="2" Margin="3" Text="{Binding SourceWidth}"/>
+            <TextBox Background="#FFF104A6" Grid.Column="3" Margin="3" Text="{Binding SourceHeight}"/>
         </Grid>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Target position/size</TextBlock>
@@ -44,10 +44,10 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Margin="3" Text="{Binding TargetX}"/>
-            <TextBox Grid.Column="1" Margin="3" Text="{Binding TargetY}"/>
-            <TextBox Grid.Column="2" Margin="3" Text="{Binding TargetWidth}"/>
-            <TextBox Grid.Column="3" Margin="3" Text="{Binding TargetHeight}"/>
+            <TextBox Background="#FFF104A6" Grid.Column="0" Margin="3" Text="{Binding TargetX}"/>
+            <TextBox Background="#FFF104A6" Grid.Column="1" Margin="3" Text="{Binding TargetY}"/>
+            <TextBox Background="#FFF104A6" Grid.Column="2" Margin="3" Text="{Binding TargetWidth}"/>
+            <TextBox Background="#FFF104A6" Grid.Column="3" Margin="3" Text="{Binding TargetHeight}"/>
         </Grid>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Bounding size</TextBlock>
@@ -56,8 +56,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Margin="3" Text="{Binding BoundingWidth}"/>
-            <TextBox Grid.Column="1" Margin="3" Text="{Binding BoundingHeight}"/>
+            <TextBox Background="#FFF104A6" Grid.Column="0" Margin="3" Text="{Binding BoundingWidth}"/>
+            <TextBox Background="#FFF104A6" Grid.Column="1" Margin="3" Text="{Binding BoundingHeight}"/>
         </Grid>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Texture</TextBlock>

@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleEmbeddedTexture}" FontFamily="Comic Sans MS">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleEmbeddedTexture}" FontFamily="Comic Sans MS" Background="#FFF104A6">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -19,10 +19,10 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Scaled</TextBlock>
-        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Scaled}"/>
+        <TextBox Background="#FFF104A6" Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Scaled}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Generated mips</TextBlock>
-        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneratedMips}" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
+        <TextBox Background="#FFF104A6" Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneratedMips}" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
 
         <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="3">
             <Grid.ColumnDefinitions>
