@@ -431,22 +431,23 @@ namespace UndertaleModTool
         {
             UndertaleRoom room = this.DataContext as UndertaleRoom;
 
-            // get last layer id
             var data = (Application.Current.MainWindow as MainWindow).Data;
-            uint lastlayer_id = 0;
-            for (var i = data.Rooms.Count - 1; i >= 0; i--)
+            uint largest_layerid = 0;
+
+            // Find the largest layer id
+            // See #355
+            foreach (UndertaleRoom Room in data.Rooms) 
             {
-                var lastroom_layers = data.Rooms[i].Layers;
-                if (lastroom_layers.Count != 0)
+                foreach (UndertaleRoom.Layer Layer in Room.Layers) 
                 {
-                    lastlayer_id = lastroom_layers[lastroom_layers.Count - 1].LayerId;
-                    break;
+                    if (Layer.LayerId > largest_layerid) 
+                        largest_layerid = Layer.LayerId;
                 }
             }
 
             UndertaleRoom.Layer layer = new UndertaleRoom.Layer();
-            layer.LayerName = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString(name);
-            layer.LayerId = lastlayer_id + 1;
+            layer.LayerName = data.Strings.MakeString(name);
+            layer.LayerId = largest_layerid + 1;
             layer.LayerType = type;
             layer.Data = new T();
             room.Layers.Add(layer);
