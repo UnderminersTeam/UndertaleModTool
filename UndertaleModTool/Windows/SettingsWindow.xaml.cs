@@ -57,6 +57,18 @@ namespace UndertaleModTool
             }
         }
 
+        public static string AssetOrderSwappingEnabled
+        {
+            get => ConfigurationManager.AppSettings["AssetOrderSwappingEnabled"] as String;
+            set
+            {
+                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                config.AppSettings.Settings["AssetOrderSwappingEnabled"].Value = value;
+                config.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+            }
+        }
+
         public SettingsWindow()
         {
             InitializeComponent();
