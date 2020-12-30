@@ -580,7 +580,7 @@ namespace UndertaleModTool
             TreeViewItem targetTreeItem = VisualUpwardSearch<TreeViewItem>(e.OriginalSource as UIElement);
             UndertaleObject targetItem = targetTreeItem.DataContext as UndertaleObject;
 
-            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Move) && sourceItem != null && targetItem != null && sourceItem != targetItem && sourceItem.GetType() == targetItem.GetType() ? DragDropEffects.Move : DragDropEffects.None;
+            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Move) && sourceItem != null && targetItem != null && sourceItem != targetItem && sourceItem.GetType() == targetItem.GetType() && SettingsWindow.AssetOrderSwappingEnabled == "True" ? DragDropEffects.Move : DragDropEffects.None;
             if (e.Effects == DragDropEffects.Move)
             {
                 object source = GetNearestParent<TreeViewItem>(targetTreeItem).ItemsSource;
