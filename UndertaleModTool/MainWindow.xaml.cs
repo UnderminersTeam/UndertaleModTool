@@ -781,22 +781,20 @@ namespace UndertaleModTool
             if (obj is UndertaleNamedResource)
             {
                 bool doMakeString = true;
+                string notDataNewName = null;
                 if (obj is UndertaleTexturePageItem)
                 {
-                    string notDataNewName = "PageItem " + Data.TexturePageItems.Count;
-                    (obj as UndertaleNamedResource).Name = new UndertaleString(notDataNewName); // not Data.MakeString!
+                    notDataNewName = "PageItem " + Data.TexturePageItems.Count;
                     doMakeString = false;
                 }
                 if (obj is UndertaleEmbeddedAudio)
                 {
-                    string notDataNewName = "EmbeddedSound " + Data.EmbeddedAudio.Count;
-                    (obj as UndertaleNamedResource).Name = new UndertaleString(notDataNewName); // not Data.MakeString!
+                    notDataNewName = "EmbeddedSound " + Data.EmbeddedAudio.Count;
                     doMakeString = false;
                 }
                 if (obj is UndertaleEmbeddedTexture)
                 {
-                    string notDataNewName = "Texture " + Data.EmbeddedTextures.Count;
-                    (obj as UndertaleNamedResource).Name = new UndertaleString(notDataNewName); // not Data.MakeString!
+                    notDataNewName = "Texture " + Data.EmbeddedTextures.Count;
                     doMakeString = false;
                 }
 
@@ -837,6 +835,10 @@ namespace UndertaleModTool
                         (obj as UndertaleCode).GenerateLocalVarDefinitions((obj as UndertaleCode).FindReferencedLocalVars(), locals);
                         Data.CodeLocals.Add(locals);
                     }
+                }
+                else
+                {
+                    (obj as UndertaleNamedResource).Name = new UndertaleString(notDataNewName); // not Data.MakeString!
                 }
             }
             list.Add(obj);

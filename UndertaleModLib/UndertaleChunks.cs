@@ -453,7 +453,6 @@ namespace UndertaleModLib
             // texture blobs
             foreach (UndertaleEmbeddedTexture obj in List)
                 obj.SerializeBlob(writer);
-                
 
             // padding
             // TODO: Maybe the padding is more global and every chunk is padded to 4 byte boundaries?
