@@ -99,6 +99,12 @@ namespace UndertaleModLib
                 return AnimationCurves.IndexOf(obj as UndertaleAnimationCurve);
             if (obj is UndertaleSequence)
                 return Sequences.IndexOf(obj as UndertaleSequence);
+            if (obj is UndertaleEmbeddedAudio)
+                return EmbeddedAudio.IndexOf(obj as UndertaleEmbeddedAudio);
+            if (obj is UndertaleEmbeddedTexture)
+                return EmbeddedTextures.IndexOf(obj as UndertaleEmbeddedTexture);
+            if (obj is UndertaleTexturePageItem)
+                return TexturePageItems.IndexOf(obj as UndertaleTexturePageItem);
 
             if (panicIfInvalid)
                 throw new InvalidOperationException();

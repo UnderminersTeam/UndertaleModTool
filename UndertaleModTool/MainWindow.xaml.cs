@@ -780,40 +780,63 @@ namespace UndertaleModTool
             UndertaleResource obj = Activator.CreateInstance(t) as UndertaleResource;
             if (obj is UndertaleNamedResource)
             {
-                string newname = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
-                (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newname);
-                if (obj is UndertaleRoom)
-                    (obj as UndertaleRoom).Caption = Data.Strings.MakeString("");
-                if (obj is UndertaleScript)
+                bool doMakeString = true;
+                if (obj is UndertaleTexturePageItem)
                 {
-                    UndertaleCode code = new UndertaleCode();
-                    code.Name = Data.Strings.MakeString("gml_Script_" + newname);
-                    Data.Code.Add(code);
-                    if (Data?.GeneralInfo.BytecodeVersion > 14)
+                    string notDataNewName = "PageItem " + Data.TexturePageItems.Count;
+                    (obj as UndertaleNamedResource).Name = new UndertaleString(notDataNewName); // not Data.MakeString!
+                    doMakeString = false;
+                }
+                if (obj is UndertaleEmbeddedAudio)
+                {
+                    string notDataNewName = "EmbeddedSound " + Data.EmbeddedAudio.Count;
+                    (obj as UndertaleNamedResource).Name = new UndertaleString(notDataNewName); // not Data.MakeString!
+                    doMakeString = false;
+                }
+                if (obj is UndertaleEmbeddedTexture)
+                {
+                    string notDataNewName = "Texture " + Data.EmbeddedTextures.Count;
+                    (obj as UndertaleNamedResource).Name = new UndertaleString(notDataNewName); // not Data.MakeString!
+                    doMakeString = false;
+                }
+
+                if (doMakeString)
+                {
+                    string newname = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
+                    (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newname);
+                    if (obj is UndertaleRoom)
+                        (obj as UndertaleRoom).Caption = Data.Strings.MakeString("");
+                    if (obj is UndertaleScript)
+                    {
+                        UndertaleCode code = new UndertaleCode();
+                        code.Name = Data.Strings.MakeString("gml_Script_" + newname);
+                        Data.Code.Add(code);
+                        if (Data?.GeneralInfo.BytecodeVersion > 14)
+                        {
+                            UndertaleCodeLocals locals = new UndertaleCodeLocals();
+                            locals.Name = code.Name;
+                            UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+                            argsLocal.Name = Data.Strings.MakeString("arguments");
+                            argsLocal.Index = 0;
+                            locals.Locals.Add(argsLocal);
+                            code.LocalsCount = 1;
+                            code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals);
+                            Data.CodeLocals.Add(locals);
+                        }
+                        (obj as UndertaleScript).Code = code;
+                    }
+                    if ((obj is UndertaleCode) && (Data?.GeneralInfo.BytecodeVersion > 14))
                     {
                         UndertaleCodeLocals locals = new UndertaleCodeLocals();
-                        locals.Name = code.Name;
+                        locals.Name = (obj as UndertaleCode).Name;
                         UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
                         argsLocal.Name = Data.Strings.MakeString("arguments");
                         argsLocal.Index = 0;
                         locals.Locals.Add(argsLocal);
-                        code.LocalsCount = 1;
-                        code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals);
+                        (obj as UndertaleCode).LocalsCount = 1;
+                        (obj as UndertaleCode).GenerateLocalVarDefinitions((obj as UndertaleCode).FindReferencedLocalVars(), locals);
                         Data.CodeLocals.Add(locals);
                     }
-                    (obj as UndertaleScript).Code = code;
-                }
-                if ((obj is UndertaleCode) && (Data?.GeneralInfo.BytecodeVersion > 14))
-                {
-                    UndertaleCodeLocals locals = new UndertaleCodeLocals();
-                    locals.Name = (obj as UndertaleCode).Name;
-                    UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-                    argsLocal.Name = Data.Strings.MakeString("arguments");
-                    argsLocal.Index = 0;
-                    locals.Locals.Add(argsLocal);
-                    (obj as UndertaleCode).LocalsCount = 1;
-                    (obj as UndertaleCode).GenerateLocalVarDefinitions((obj as UndertaleCode).FindReferencedLocalVars(), locals);
-                    Data.CodeLocals.Add(locals);
                 }
             }
             list.Add(obj);

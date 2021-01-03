@@ -11,8 +11,9 @@ namespace UndertaleModLib.Models
      * TargetX/Y/W/H is relative to the bounding box, anything outside of that is just transparent.
      * SourceX/Y/W/H is part of TexturePage that is drawn over TargetX/Y/W/H
      */
-    public class UndertaleTexturePageItem : UndertaleResource, INotifyPropertyChanged
+    public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyChanged
     {
+        private UndertaleString _Name;
         private ushort _SourceX; // The position in the texture sheet.
         private ushort _SourceY;
         private ushort _SourceWidth; // The dimensions of the image in the texture sheet.
@@ -25,6 +26,7 @@ namespace UndertaleModLib.Models
         private ushort _BoundingHeight;
         private UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR> _TexturePage = new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();
 
+        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public ushort SourceX { get => _SourceX; set { _SourceX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceX")); } }
         public ushort SourceY { get => _SourceY; set { _SourceY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceY")); } }
         public ushort SourceWidth { get => _SourceWidth; set { _SourceWidth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceWidth")); } }
@@ -72,7 +74,7 @@ namespace UndertaleModLib.Models
 
         public override string ToString()
         {
-            return "(" + GetType().Name + ")";
+            return Name.Content + " (" + GetType().Name + ")";
         }
 
         public void ReplaceTexture(Image replaceImage, bool disposeImage = true)

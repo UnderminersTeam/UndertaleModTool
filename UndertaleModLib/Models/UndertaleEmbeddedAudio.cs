@@ -9,10 +9,12 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleEmbeddedAudio : UndertaleResource, PaddedObject, INotifyPropertyChanged
+    public class UndertaleEmbeddedAudio : UndertaleNamedResource, PaddedObject, INotifyPropertyChanged
     {
+        private UndertaleString _Name;
         private byte[] _Data = new byte[0];
 
+        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public byte[] Data { get => _Data; set { _Data = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data")); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -45,7 +47,7 @@ namespace UndertaleModLib.Models
 
         public override string ToString()
         {
-            return "(" + GetType().Name + ")";
+            return Name.Content + " (" + GetType().Name + ")";
         }
     }
 }

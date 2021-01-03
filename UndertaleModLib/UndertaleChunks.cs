@@ -275,6 +275,16 @@ namespace UndertaleModLib
         {
             base.SerializeChunk(writer);
         }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            base.UnserializeChunk(reader);
+
+            for (int index = 0; index < List.Count; index++)
+            {
+                List[index].Name = new UndertaleString("PageItem " + index.ToString()); // not Data.MakeString
+            }
+        }
     }
 
     public class UndertaleChunkCODE : UndertaleListChunk<UndertaleCode>
@@ -443,6 +453,7 @@ namespace UndertaleModLib
             // texture blobs
             foreach (UndertaleEmbeddedTexture obj in List)
                 obj.SerializeBlob(writer);
+                
 
             // padding
             // TODO: Maybe the padding is more global and every chunk is padded to 4 byte boundaries?
@@ -456,7 +467,10 @@ namespace UndertaleModLib
 
             // texture blobs
             foreach (UndertaleEmbeddedTexture obj in List)
+            {
                 obj.UnserializeBlob(reader);
+                obj.Name = new UndertaleString("Texture " + List.IndexOf(obj).ToString());
+            }
             
             // padding
             while (reader.Position % 4 != 0)
@@ -468,6 +482,21 @@ namespace UndertaleModLib
     public class UndertaleChunkAUDO : UndertaleListChunk<UndertaleEmbeddedAudio>
     {
         public override string Name => "AUDO";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            base.SerializeChunk(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            base.UnserializeChunk(reader);
+
+            for (int index = 0; index < List.Count; index++)
+            {
+                List[index].Name = new UndertaleString("EmbeddedSound " + index.ToString());
+            }
+        }
     }
 
     // GMS2 only
