@@ -780,22 +780,19 @@ namespace UndertaleModTool
             UndertaleResource obj = Activator.CreateInstance(t) as UndertaleResource;
             if (obj is UndertaleNamedResource)
             {
-                bool doMakeString = true;
+                bool doMakeString = !((obj is UndertaleTexturePageItem) || (obj is UndertaleEmbeddedAudio) || (obj is UndertaleEmbeddedTexture));
                 string notDataNewName = null;
                 if (obj is UndertaleTexturePageItem)
                 {
-                    notDataNewName = "PageItem " + Data.TexturePageItems.Count;
-                    doMakeString = false;
+                    notDataNewName = "PageItem " + list.Count;
                 }
                 if (obj is UndertaleEmbeddedAudio)
                 {
-                    notDataNewName = "EmbeddedSound " + Data.EmbeddedAudio.Count;
-                    doMakeString = false;
+                    notDataNewName = "EmbeddedSound " + list.Count;
                 }
                 if (obj is UndertaleEmbeddedTexture)
                 {
-                    notDataNewName = "Texture " + Data.EmbeddedTextures.Count;
-                    doMakeString = false;
+                    notDataNewName = "Texture " + list.Count;
                 }
 
                 if (doMakeString)
