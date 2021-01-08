@@ -1,6 +1,7 @@
-﻿<Window x:Class="UndertaleModTool.SettingsWindow"
+﻿<Fluent:RibbonWindow x:Class="UndertaleModTool.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Fluent="urn:fluent-ribbon"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
@@ -30,4 +31,4 @@
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="Enable asset order swapping" ToolTip="Toggles dragging &amp; dropping assets in the asset tabs to different positions in the list. Disabled by default."/>
         <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding AssetOrderSwappingEnabled}"/>
     </Grid>
-</Window>
+</Fluent:RibbonWindow>

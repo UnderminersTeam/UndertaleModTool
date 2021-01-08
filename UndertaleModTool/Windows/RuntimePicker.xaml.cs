@@ -22,7 +22,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy RuntimePicker.xaml
     /// </summary>
-    public partial class RuntimePicker : Window
+    public partial class RuntimePicker
     {
         public class Runtime
         {

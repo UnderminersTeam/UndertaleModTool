@@ -20,7 +20,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Interaction logic for TextInputDialog.xaml
     /// </summary>
-    public partial class TextInputDialog : Window, INotifyPropertyChanged
+    public partial class TextInputDialog : INotifyPropertyChanged
     {
         private string _Message; // text in the label
         private string _MessageTitle; // label of the window

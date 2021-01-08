@@ -1,6 +1,7 @@
-﻿<Window x:Class="UndertaleModTool.StringUpdateWindow"
+﻿<Fluent:RibbonWindow x:Class="UndertaleModTool.StringUpdateWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Fluent="urn:fluent-ribbon"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
@@ -18,4 +19,4 @@
         <Button Grid.Row="2" Margin="3" Click="Button2_Click">Change all occurrences of this value</Button>
         <Button Grid.Row="3" Margin="3" Click="Button3_Click">Abort the change</Button>
     </Grid>
-</Window>
+</Fluent:RibbonWindow>

@@ -17,7 +17,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy StringUpdateWindow.xaml
     /// </summary>
-    public partial class StringUpdateWindow : Window
+    public partial class StringUpdateWindow
     {
         public enum ResultType
         {

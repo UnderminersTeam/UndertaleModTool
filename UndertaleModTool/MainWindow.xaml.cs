@@ -42,7 +42,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
+    public partial class MainWindow : INotifyPropertyChanged, IScriptInterface
     {
         public UndertaleData Data { get; set; }
         public string FilePath { get; set; }

@@ -20,7 +20,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy LoaderDialog.xaml
     /// </summary>
-    public partial class LoaderDialog : Window, INotifyPropertyChanged
+    public partial class LoaderDialog : INotifyPropertyChanged
     {
 
         private string _Message;

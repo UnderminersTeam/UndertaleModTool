@@ -19,7 +19,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy SettingsWindow.xaml
     /// </summary>
-    public partial class SettingsWindow : Window
+    public partial class SettingsWindow
     {
         public static string GraphVizPath
         {

@@ -1,6 +1,7 @@
-﻿<Window x:Class="UndertaleModTool.LoaderDialog"
+﻿<Fluent:RibbonWindow x:Class="UndertaleModTool.LoaderDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:Fluent="urn:fluent-ribbon"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
@@ -16,4 +17,4 @@
         <ProgressBar Grid.Row="1" IsIndeterminate="True" Name="ProgressBar"></ProgressBar>
         <TextBlock Grid.Row="2" VerticalAlignment="Center" Text="{Binding StatusText}"/>
     </Grid>
-</Window>
+</Fluent:RibbonWindow >
