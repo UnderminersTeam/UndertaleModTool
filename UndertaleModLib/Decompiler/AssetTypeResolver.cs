@@ -328,23 +328,50 @@ namespace UndertaleModLib.Decompiler
 
         public static Dictionary<string, AssetIDType> builtin_vars;
 
-        internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, Dictionary<string, AssetIDType[]> scriptArgs)
+        internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, DecompileContext context) 
         {
+            return AnnotateTypesForFunctionCall(function_name, arguments, context, null);
+        }
+
+        internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, DecompileContext context, Decompiler.FunctionCall function)
+        {
+            Dictionary<string, AssetIDType[]> scriptArgs = context.scriptArgs;
+
+            bool overloaded = false;
             // Scripts overload builtins because in GMS2 some functions are just backwards-compatibility scripts
             if (scriptArgs.ContainsKey(function_name) && scriptArgs[function_name] != null)
             {
+                overloaded = true;
                 for (int i = 0; i < arguments.Length && i < scriptArgs[function_name].Length; i++)
                     arguments[i] = scriptArgs[function_name][i];
-                return true;
             }
 
             function_name = function_name.Replace("color", "colour"); // Just GameMaker things... both are valid :o
 
             if (builtin_funcs.ContainsKey(function_name))
             {
-                var func_types = builtin_funcs[function_name];
+                AssetIDType[] func_types = builtin_funcs[function_name];
                 if (arguments.Length > func_types.Length)
                     throw new Exception("Bad call to " + function_name + " with " + arguments.Length + " arguments (instead of " + func_types.Length + ")");
+                
+                if (overloaded) {
+                    // Copy the array to make sure we don't overwrite existing known types
+                    func_types = (AssetIDType[]) func_types.Clone();
+                    AssetIDType scriptArgType = AssetIDType.Other;
+
+                    for (int i = 0; i < arguments.Length && i < scriptArgs[function_name].Length; i++) 
+                    {
+                        scriptArgType = scriptArgs[function_name][i];
+
+                        // Merge types together
+                        if (func_types[i] == AssetIDType.Other && scriptArgType != AssetIDType.Other) 
+                            func_types[i] = scriptArgType;
+                        // Conflicting types - do not resolve
+                        else if (func_types[i] != AssetIDType.Other && scriptArgType != AssetIDType.Other && func_types[i] != scriptArgType) 
+                            func_types[i] = AssetIDType.Other;
+                        // func_types[i] is correct, do not replace
+                    }
+                }
                 for (int i = 0; i < arguments.Length; i++)
                     arguments[i] = func_types[i];
                 return true;
@@ -355,6 +382,31 @@ namespace UndertaleModLib.Decompiler
                 if (arguments.Length < 1)
                     throw new Exception("Bad call to " + function_name + " with " + arguments.Length + " arguments (instead of at least 1)");
                 arguments[0] = AssetIDType.Script;
+
+                // Attempt to resolve the arguments of the script being called.
+                // This is done by reading the literal values passed to the function and resolving
+                // the first argument as a function, then recursively calling the asset resolver on it.
+                // There's probably a better way to do this.
+                
+                if (function != null) 
+                {
+                    if (function.Arguments[0] is Decompiler.ExpressionCast) 
+                    {
+                        var firstArg = (function.Arguments[0] as Decompiler.ExpressionCast).Argument;
+                        if ((firstArg is Decompiler.ExpressionConstant) && firstArg.Type == UndertaleInstruction.DataType.Int16) 
+                        {
+                            short script_id = (short) (firstArg as Decompiler.ExpressionConstant).Value;
+                            if (script_id >= 0 && script_id < context.Data.Scripts.Count)
+                            {
+                                var script = context.Data.Scripts[script_id];
+                                AssetIDType[] args = new AssetIDType[arguments.Length-1];
+                                AnnotateTypesForFunctionCall(script.Name.Content, args, context);
+                                Array.Copy(args, 0, arguments, 1, args.Length);
+                                return true;
+                            }
+                        }
+                    }
+                }
                 if (scriptArgs.ContainsKey(function_name) && scriptArgs[function_name] != null)
                 {
                     for (int i = 0; i < arguments.Length && i < scriptArgs[function_name].Length; i++)
@@ -362,7 +414,7 @@ namespace UndertaleModLib.Decompiler
                 }
                 return true;
             }
-            return false;
+            return overloaded;
         }
 
         internal static AssetIDType AnnotateTypeForVariable(string variable_name)
