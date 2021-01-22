@@ -41,12 +41,12 @@ string input = ScriptInputDialog("Specify value", "Room name: (Leave empty if yo
 string roomname = input;
 string roomindex;
 string layerindex;
+bool roomindexfail = false;
 int trueindex;
 if (roomname != null)
 {
 	if (Data.Rooms.ByName(roomname) != null || roomname == "")
 	{
-	bool roomindexfail = false;
 	if (roomname == "")
 	{
 		input = ScriptInputDialog("Specify value", "Room index:", "", "Cancel", "Ok", true, false);
@@ -56,9 +56,47 @@ if (roomname != null)
 			roomindexfail = true;
 		}
 	}
-	if (!roomindexfail && roomindex != null)
+	if (!roomindexfail && roomindex != null || roomname != "")
 	{
-		if (int.Parse(roomindex) <= Data.Rooms.Count - 1 && int.Parse(roomindex) >= 0)
+		if (roomname != "")
+		{
+			input = ScriptInputDialog("Specify value", "Layer index:", "", "Cancel", "Ok", true, false);
+			layerindex = input;
+			if (layerindex != null)
+			{
+				if (int.TryParse(layerindex,out trueindex))
+				{
+					trueindex = int.Parse(layerindex);
+					if (roomname == "")
+					{
+					if (trueindex <= Data.Rooms[int.Parse(roomindex)].Layers.Count - 1 && trueindex >= 0)
+					{
+						if (Data.Rooms[int.Parse(roomindex)].Layers[trueindex].Data.GetType() == typeof(UndertaleModLib.Models.UndertaleRoom.Layer.LayerTilesData))
+						{
+							GetTileData(roomindex);
+						}
+						else {ScriptError("Selected layer is not a tile layer", "Error"); finaloutput = "Incorrect layer type: " + Data.Rooms[int.Parse(roomindex)].Layers[trueindex].Data.GetType();}
+					}
+					else {ScriptError("Layer does not exist", "Error"); finaloutput = "Specified layer index was out of bounds.";}
+					}
+					else
+					{
+					if (trueindex <= Data.Rooms.ByName(roomname).Layers.Count - 1 && trueindex >= 0)
+					{
+						if (Data.Rooms.ByName(roomname).Layers[trueindex].Data.GetType() == typeof(UndertaleModLib.Models.UndertaleRoom.Layer.LayerTilesData))
+						{
+							GetTileData(roomindex);
+						}
+						else {ScriptError("Selected layer is not a tile layer", "Error"); finaloutput = "Incorrect layer type: " + Data.Rooms.ByName(roomname).Layers[trueindex].Data.GetType();}
+					}
+					else {ScriptError("Layer does not exist", "Error"); finaloutput = "Specified layer index was out of bounds.";}
+					}
+				}
+				else {ScriptError("Index must be a number", "Error"); finaloutput = "Layer index value was given in the incorrent format.";}
+			}
+			else Cancel();
+		}
+		else if (int.Parse(roomindex) <= Data.Rooms.Count - 1 && int.Parse(roomindex) >= 0)
 		{
 			input = ScriptInputDialog("Specify value", "Layer index:", "", "Cancel", "Ok", true, false);
 			layerindex = input;
