@@ -950,8 +950,15 @@ namespace UndertaleModLib.Decompiler
             {
                 string varName = Destination.ToString(context);
 
-                if (context.isGameMaker2 && !HasVarKeyword && (context.Data != null && context.Data.CodeLocals.For(context.TargetCode).HasLocal(varName)) && context.LocalVarDefines.Add(varName))
-                    HasVarKeyword = true;
+                if (context.isGameMaker2 && !HasVarKeyword) {
+                    var data = context.Data;
+                    if (data != null) {
+                        var locals = data.CodeLocals.For(context.TargetCode);
+                        // Stop decompiler from erroring on missing CodeLocals
+                        if (locals != null && locals.HasLocal(varName) && context.LocalVarDefines.Add(varName))
+                            HasVarKeyword = true;
+                    }
+                }
 
                 string varPrefix = (HasVarKeyword ? "var " : "");
 
@@ -1066,7 +1073,7 @@ namespace UndertaleModLib.Decompiler
         {
             private UndertaleFunction Function;
             private UndertaleInstruction.DataType ReturnType;
-            private List<Expression> Arguments;
+            internal List<Expression> Arguments;
 
             public FunctionCall(UndertaleFunction function, UndertaleInstruction.DataType returnType, List<Expression> args)
             {
@@ -1119,7 +1126,7 @@ namespace UndertaleModLib.Decompiler
                 }
 
                 AssetIDType[] args = new AssetIDType[Arguments.Count];
-                AssetTypeResolver.AnnotateTypesForFunctionCall(Function.Name.Content, args, context.scriptArgs);
+                AssetTypeResolver.AnnotateTypesForFunctionCall(Function.Name.Content, args, context, this);
                 for (var i = 0; i < Arguments.Count; i++)
                 {
                     Arguments[i].DoTypePropagation(context, args[i]);
