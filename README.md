@@ -25,7 +25,7 @@ heya. i heard you like digging deep into Undertale data so i made a tool just fo
 Included are some test scripts. They are:
 * Universal:
   * EnableDebug: does just that, makes the global variable 'debug' be enabled at game start. If you don't know about Undertale's debug mode, check out https://tcrf.net/Undertale/Debug_Mode
-  * DebugToggler: similar to the above, but instead toggles the debug mode on and off with F12
+  * DebugToggler: similar to the above, but instead toggles the debug mode on and off with F1
   * GoToRoom: Replaces the debug mode functionality of the F3 button with a dialog that lets you jump to any room by ID
   * ShowRoomName: Displays the current room name and ID on screen in debug mode
 * Undertale only:
