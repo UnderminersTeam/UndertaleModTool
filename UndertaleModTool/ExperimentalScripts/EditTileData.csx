@@ -1,5 +1,5 @@
 //
-// Temporary script for tile layer editing before a proper editor will be introduced. Script by Lassebq with the help of JocKe.
+// Temporary script to edit GMS2 tile layer data before a proper editor will be introduced. Script by Lassebq with the help of JocKe.
 //
 private void Cancel()
 {
