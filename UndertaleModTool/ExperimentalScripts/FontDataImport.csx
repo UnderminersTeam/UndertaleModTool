@@ -236,7 +236,12 @@ public class Packer
             string atlasName = String.Format(prefix + "{0:000}" + ".png", atlasCount);
             //1: Save images
             Image img = CreateAtlasImage(atlas);
-            img.Save(atlasName, System.Drawing.Imaging.ImageFormat.Png);
+            //DPI fix start
+            Bitmap ResolutionFix = new Bitmap(img);
+            ResolutionFix.SetResolution(96.0F, 96.0F);
+            Image img2 = ResolutionFix;
+            //DPI fix end
+            img2.Save(atlasName, System.Drawing.Imaging.ImageFormat.Png);
             //2: save description in file
             foreach (Node n in atlas.Nodes)
             {
