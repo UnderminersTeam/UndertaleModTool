@@ -33,8 +33,7 @@ namespace UndertaleModTool
             UndertaleExtension.ExtensionFile obj = new UndertaleExtension.ExtensionFile()
             {
                 Kind = UndertaleExtension.ExtensionKind.DLL,
-                Filename = new UndertaleString($"NewExtensionFile{lastItem}.dll")
-                // TODO: no way to call Data.Strings.MakeString?
+                Filename = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString($"NewExtensionFile{lastItem}.dll");
             };
 
             e.NewItem = obj;
