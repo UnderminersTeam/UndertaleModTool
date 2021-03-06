@@ -1,6 +1,14 @@
 //
 // Temporary script to edit GMS2 tile layer data before a proper editor will be introduced. Script by Lassebq with the help of JocKe.
 //
+EnsureDataLoaded();
+
+if (Data.GeneralInfo.Major < 2)
+{
+	ScriptMessage("This script is for GMS2 games only.");
+	return;
+}
+
 private void Cancel()
 {
 	//ScriptMessage("Canceling script...");
