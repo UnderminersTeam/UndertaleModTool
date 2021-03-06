@@ -274,6 +274,9 @@ namespace UndertaleModLib
         internal override void SerializeChunk(UndertaleWriter writer)
         {
             base.SerializeChunk(writer);
+            // padding needed in ARM platforms apparently
+            while (writer.Position % 0x4 != 0)
+                writer.Write((byte)0);
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
