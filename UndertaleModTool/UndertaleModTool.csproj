@@ -243,6 +243,9 @@
     <Compile Include="Editors\UndertaleEmbeddedImageEditor.xaml.cs">
       <DependentUpon>UndertaleEmbeddedImageEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Editors\UndertaleExtension+ExtensionFileEditor.xaml.cs">
+      <DependentUpon>UndertaleExtension+ExtensionFileEditor.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Editors\UndertaleExtensionEditor.xaml.cs">
       <DependentUpon>UndertaleExtensionEditor.xaml</DependentUpon>
     </Compile>
@@ -502,6 +505,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Editors\UndertaleEmbeddedImageEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editors\UndertaleExtension+ExtensionFileEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

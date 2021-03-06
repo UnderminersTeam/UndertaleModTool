@@ -94,6 +94,11 @@ namespace UndertaleModLib.Models
                 Kind = (ExtensionKind)reader.ReadUInt32();
                 Functions = reader.ReadUndertaleObject<UndertalePointerList<ExtensionFunction>>();
             }
+
+            public override string ToString()
+            {
+                return Filename.Content + " (" + GetType().Name + ")";
+            }
         }
 
         public class ExtensionFunction : UndertaleObject, INotifyPropertyChanged

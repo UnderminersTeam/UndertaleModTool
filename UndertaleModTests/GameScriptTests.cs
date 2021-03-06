@@ -24,6 +24,8 @@ namespace UndertaleModTests
         public bool CanSave => throw new NotImplementedException();
         public string ScriptPath { get; set; }
 
+        public string ScriptPath => throw new NotImplementedException();
+
         public void ChangeSelection(object newsel)
         {
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UndertaleModLib;
+using UndertaleModLib.Models;
 
 namespace UndertaleModTool
 {
@@ -23,6 +25,19 @@ namespace UndertaleModTool
         public UndertaleExtensionEditor()
         {
             InitializeComponent();
+        }
+
+        private void DataGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
+        {
+            int lastItem = ((sender as DataGrid).ItemsSource as IList<UndertaleExtension.ExtensionFile>).Count;
+
+            UndertaleExtension.ExtensionFile obj = new UndertaleExtension.ExtensionFile()
+            {
+                Kind = UndertaleExtension.ExtensionKind.DLL,
+                Filename = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString($"NewExtensionFile{lastItem}.dll")
+            };
+
+            e.NewItem = obj;
         }
     }
 }
