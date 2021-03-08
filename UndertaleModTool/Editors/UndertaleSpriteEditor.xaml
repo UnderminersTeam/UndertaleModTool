@@ -158,7 +158,7 @@
             </Border>
         </Viewbox>
 
-        <Button Grid.Row="12" Grid.Column="1" Content="Export all frames" Click="ExportAll_Click"/>
+        <Button Grid.Row="12" Grid.Column="1" Content="Export all frames (or Spine data if this is a Spine sprite)" Click="ExportAll_Click"/>
 
         <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Collision masks</TextBlock>
         <DataGrid Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks}" Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">

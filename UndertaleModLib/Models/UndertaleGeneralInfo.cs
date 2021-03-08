@@ -165,12 +165,10 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleString(DisplayName);
 
             // Should always be zero.
-            writer.Write((uint)(ActiveTargets & uint.MaxValue));
-            writer.Write((uint)((ActiveTargets >> 32) & uint.MaxValue));
+            writer.Write(ActiveTargets);
 
             // Very weird value. Decides if Runner should initialize certain subsystems.
-            writer.Write((uint)((ulong)FunctionClassifications & uint.MaxValue));
-            writer.Write((uint)(((ulong)FunctionClassifications >> 32) & uint.MaxValue));
+            writer.Write((ulong)FunctionClassifications);
 
             writer.Write(SteamAppID);
             writer.Write(DebuggerPort);
@@ -246,8 +244,8 @@ namespace UndertaleModLib.Models
             LicenseCRC32 = reader.ReadUInt32();
             Timestamp = reader.ReadUInt64();
             DisplayName = reader.ReadUndertaleString();
-            ActiveTargets = (reader.ReadUInt32() & uint.MaxValue) | ((reader.ReadUInt32() & uint.MaxValue) << 32);
-            FunctionClassifications = (FunctionClassification)((reader.ReadUInt32() & uint.MaxValue) | ((reader.ReadUInt32() & uint.MaxValue) << 32));
+            ActiveTargets = reader.ReadUInt64();
+            FunctionClassifications = (FunctionClassification)reader.ReadUInt64();
             SteamAppID = reader.ReadInt32();
             DebuggerPort = reader.ReadUInt32();
             RoomOrder = reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>>();
