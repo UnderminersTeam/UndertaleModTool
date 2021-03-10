@@ -22,6 +22,9 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleExtensionEditor : UserControl
     {
+        public int MyIndex { get => (Application.Current.MainWindow as MainWindow).Data.Extensions.IndexOf((UndertaleExtension)this.DataContext); }
+        public byte[] ProductIdData { get => (Application.Current.MainWindow as MainWindow).Data.FORM.EXTN.productIdData[MyIndex]; set => (Application.Current.MainWindow as MainWindow).Data.FORM.EXTN.productIdData[MyIndex] = value; }
+
         public UndertaleExtensionEditor()
         {
             InitializeComponent();
@@ -34,7 +37,8 @@ namespace UndertaleModTool
             UndertaleExtensionFile obj = new UndertaleExtensionFile()
             {
                 Kind = UndertaleExtensionKind.DLL,
-                Filename = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString($"NewExtensionFile{lastItem}.dll")
+                Filename = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString($"NewExtensionFile{lastItem}.dll"),
+                Functions = new UndertalePointerList<UndertaleExtensionFunction>()
             };
 
             e.NewItem = obj;

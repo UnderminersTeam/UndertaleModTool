@@ -18,6 +18,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Empty Folder Name</TextBlock>
@@ -67,7 +68,31 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Product ID</TextBlock>
+        <TextBox Grid.Row="4" Grid.Column="1" Margin="3">
+            <TextBox.Text>
+                <MultiBinding StringFormat="{}{0:X2} {1:X2} {2:X2} {3:X2} {4:X2} {5:X2} {6:X2} {7:X2} {8:X2} {9:X2} {10:X2} {11:X2} {12:X2} {13:X2} {14:X2} {15:X2}">
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[0]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[1]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[2]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[3]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[4]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[5]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[6]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[7]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[8]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[9]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[10]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[11]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[12]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[13]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[14]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[15]"/>
+                </MultiBinding>
+            </TextBox.Text>
+        </TextBox>
+
+        <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2">
             <TextBlock Foreground="Red" FontStyle="Italic">
                 THINGS TO NOTE:
                 <LineBreak/>

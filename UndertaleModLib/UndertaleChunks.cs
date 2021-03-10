@@ -135,6 +135,12 @@ namespace UndertaleModLib
             // (read above comment)
             foreach (byte[] data in productIdData)
             {
+                int Len = data.Length;
+                if (Len != 16)
+                {
+                    throw new IOException("Can't write EXTN product id data of invalid length, expected 16, got " + Len);
+                }
+
                 writer.Write(data);
             }
         }
