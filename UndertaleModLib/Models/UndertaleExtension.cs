@@ -140,12 +140,12 @@ namespace UndertaleModLib.Models
 
     public class UndertaleExtension : UndertaleNamedResource, INotifyPropertyChanged
     {
-        private UndertaleString _EmptyString;
+        private UndertaleString _FolderName;
         private UndertaleString _Name;
         private UndertaleString _ClassName;
         private UndertalePointerList<UndertaleExtensionFile> _Files = new UndertalePointerList<UndertaleExtensionFile>();
 
-        public UndertaleString EmptyString { get => _EmptyString; set { _EmptyString = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("EmptyString")); } }
+        public UndertaleString FolderName { get => _FolderName; set { _FolderName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FolderName")); } }
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public UndertaleString ClassName { get => _ClassName; set { _ClassName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ClassName")); } }
 
@@ -160,7 +160,7 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
-            writer.WriteUndertaleString(EmptyString);
+            writer.WriteUndertaleString(FolderName);
             writer.WriteUndertaleString(Name);
             writer.WriteUndertaleString(ClassName);
             writer.WriteUndertaleObject(Files);
@@ -168,7 +168,7 @@ namespace UndertaleModLib.Models
 
         public void Unserialize(UndertaleReader reader)
         {
-            EmptyString = reader.ReadUndertaleString();
+            FolderName = reader.ReadUndertaleString();
             Name = reader.ReadUndertaleString();
             ClassName = reader.ReadUndertaleString();
             Files = reader.ReadUndertaleObject<UndertalePointerList<UndertaleExtensionFile>>();

@@ -39,7 +39,7 @@ namespace UndertaleModTool
                 RetType = UndertaleExtensionVarType.Double,
                 Arguments = new UndertaleSimpleList<UndertaleExtensionFunctionArg>(),
                 Kind = 11, // ???
-                ID = lastItem == 0 ? 1 : (itemList.Last().ID + 1)
+                ID = (Application.Current.MainWindow as MainWindow).Data.ExtensionFindLastId()
             };
 
             e.NewItem = obj;

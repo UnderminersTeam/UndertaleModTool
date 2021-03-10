@@ -161,6 +161,32 @@ namespace UndertaleModLib
             return GeneralInfo != null && Code == null;
         }
 
+        public uint ExtensionFindLastId()
+        {
+            // The reason:
+            // Extension function id is literally the index of it in the Runner internal lists
+            // It must never overlap
+            // So, a good helper is needed.
+
+            uint id = 1; // first Id is always one, I checked.
+            foreach (var extn in this.Extensions)
+            {
+                foreach (var file in extn.Files)
+                {
+                    foreach (var func in file.Functions)
+                    {
+                        if (func.ID > id)
+                        {
+                            id = func.ID;
+                        }
+                    }
+                }
+            }
+
+            id++; // last id that *we* can use, so increment by one.
+            return id;
+        }
+
         public static UndertaleData CreateNew()
         {
             UndertaleData data = new UndertaleData();

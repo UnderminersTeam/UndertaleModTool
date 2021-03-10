@@ -20,14 +20,14 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Empty Folder Name</TextBlock>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding FolderName}"/>
+        
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Name</TextBlock>
+        <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Class Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding ClassName}"/>
-
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Always Empty String (???)</TextBlock>
-        <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding EmptyString}"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Class Name</TextBlock>
+        <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding ClassName}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Files</TextBlock>
         <DataGrid Grid.Row="3" Grid.Column="1" Margin="3" ItemsSource="{Binding Files}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" AddingNewItem="DataGrid_AddingNewItem">
@@ -68,8 +68,19 @@
         </DataGrid>
 
         <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
-            <TextBlock Foreground="Red" FontStyle="Italic">Keep in mind that .gml files are either not present, or will be empty.</TextBlock>
-            <TextBlock Foreground="Red" FontStyle="Italic">Because they are prebaked into GML scripts. That is completely normal.</TextBlock>
+            <TextBlock Foreground="Red" FontStyle="Italic">
+                THINGS TO NOTE:
+                <LineBreak/>
+                - Keep in mind that .gml files are either not present, or will be empty. (e.g. no functions)
+                  <LineBreak/>
+                  Because they are prebaked into GML scripts. That is completely normal.
+                  <LineBreak/>
+                - Folder Name thing is a remnant from the legacy
+                  <LineBreak/>
+                  GM7-8.1 extension editor (aka ExtMaker), Runner reads the name but ignores it.
+                  <LineBreak/>
+                  (although I advise that you don't change it...)
+            </TextBlock>
             <!-- Meaning, it is useless to add your own .gml files :p -->
         </StackPanel>
     </Grid>

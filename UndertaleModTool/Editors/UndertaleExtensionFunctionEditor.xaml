@@ -27,6 +27,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
@@ -82,5 +83,13 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+
+        <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
+            <TextBlock Foreground="Red" FontStyle="Italic">
+                Runner literally doesn't care about the 'Kind' value.
+                <LineBreak/>
+                The 'ID' does matter though, so make sure you don't have any overlaps.
+            </TextBlock>
+        </StackPanel>
     </Grid>
 </UserControl>
