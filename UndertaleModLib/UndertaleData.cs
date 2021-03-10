@@ -327,9 +327,9 @@ namespace UndertaleModLib
             return vari;
         }
 
-        public static UndertaleExtension.ExtensionFunction DefineExtensionFunction(this IList<UndertaleExtension.ExtensionFunction> extfuncs, IList<UndertaleFunction> funcs, IList<UndertaleString> strg, uint id, uint kind, string name, UndertaleExtension.ExtensionVarType rettype, string extname, params UndertaleExtension.ExtensionVarType[] args)
+        public static UndertaleExtensionFunction DefineExtensionFunction(this IList<UndertaleExtensionFunction> extfuncs, IList<UndertaleFunction> funcs, IList<UndertaleString> strg, uint id, uint kind, string name, UndertaleExtensionVarType rettype, string extname, params UndertaleExtensionVarType[] args)
         {
-            var func = new UndertaleExtension.ExtensionFunction()
+            var func = new UndertaleExtensionFunction()
             {
                 ID = id,
                 Name = strg.MakeString(name),
@@ -338,7 +338,7 @@ namespace UndertaleModLib
                 RetType = rettype
             };
 	        foreach(var a in args)
-                func.Arguments.Add(new UndertaleExtension.ExtensionFunctionArg() { Type = a });
+                func.Arguments.Add(new UndertaleExtensionFunctionArg() { Type = a });
             extfuncs.Add(func);
             funcs.EnsureDefined(name, strg);
             return func;

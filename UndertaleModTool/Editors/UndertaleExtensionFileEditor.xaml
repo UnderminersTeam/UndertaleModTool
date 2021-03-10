@@ -1,12 +1,20 @@
-﻿<UserControl x:Class="UndertaleModTool.UndertaleExtensionEditor"
+﻿<UserControl x:Class="UndertaleModTool.UndertaleExtensionFileEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleExtension}">
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleExtensionFile}">
+    <UserControl.Resources>
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="ExtensionKind">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="undertale:UndertaleExtensionKind"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -20,17 +28,22 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Filename</TextBlock>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Filename}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Class Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding ClassName}"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Cleanup function name</TextBlock>
+        <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding CleanupScript}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Always Empty String (???)</TextBlock>
-        <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding EmptyString}"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Init function name</TextBlock>
+        <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding InitScript}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Files</TextBlock>
-        <DataGrid Grid.Row="3" Grid.Column="1" Margin="3" ItemsSource="{Binding Files}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" AddingNewItem="DataGrid_AddingNewItem">
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Kind</TextBlock>
+
+        <ComboBox ItemsSource="{Binding Source={StaticResource ExtensionKind}}" SelectedItem="{Binding Kind}"
+                  Grid.Row="3" Grid.Column="1" Margin="3"/>
+
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Functions</TextBlock>
+        <DataGrid Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Functions}" Name="FunctionsList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" AddingNewItem="DataGrid_AddingNewItem" IsSynchronizedWithCurrentItem="True">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -57,20 +70,14 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Files" Width="*">
+                <DataGridTemplateColumn Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <local:UndertaleObjectReference Margin="23,3,3,3" ObjectReference="{Binding Path=., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleExtensionFile}"/>
+                            <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Path=., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleExtensionFunction}" CanRemove="False"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-
-        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
-            <TextBlock Foreground="Red" FontStyle="Italic">Keep in mind that .gml files are either not present, or will be empty.</TextBlock>
-            <TextBlock Foreground="Red" FontStyle="Italic">Because they are prebaked into GML scripts. That is completely normal.</TextBlock>
-            <!-- Meaning, it is useless to add your own .gml files :p -->
-        </StackPanel>
     </Grid>
 </UserControl>

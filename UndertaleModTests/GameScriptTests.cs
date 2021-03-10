@@ -22,8 +22,6 @@ namespace UndertaleModTests
         public object Highlighted => throw new NotImplementedException();
         public object Selected => throw new NotImplementedException();
         public bool CanSave => throw new NotImplementedException();
-        public string ScriptPath { get; set; }
-
         public string ScriptPath => throw new NotImplementedException();
 
         public void ChangeSelection(object newsel)

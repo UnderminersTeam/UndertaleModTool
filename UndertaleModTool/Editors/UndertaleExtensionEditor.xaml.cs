@@ -29,11 +29,11 @@ namespace UndertaleModTool
 
         private void DataGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
         {
-            int lastItem = ((sender as DataGrid).ItemsSource as IList<UndertaleExtension.ExtensionFile>).Count;
+            int lastItem = ((sender as DataGrid).ItemsSource as IList<UndertaleExtensionFile>).Count;
 
-            UndertaleExtension.ExtensionFile obj = new UndertaleExtension.ExtensionFile()
+            UndertaleExtensionFile obj = new UndertaleExtensionFile()
             {
-                Kind = UndertaleExtension.ExtensionKind.DLL,
+                Kind = UndertaleExtensionKind.DLL,
                 Filename = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString($"NewExtensionFile{lastItem}.dll")
             };
 
