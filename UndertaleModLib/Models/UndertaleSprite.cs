@@ -16,7 +16,7 @@ namespace UndertaleModLib.Models
         FramesPerGameFrame = 1
     }
 
-    public class UndertaleSpineTextureEntry : INotifyPropertyChanged
+    public class UndertaleSpineTextureEntry : UndertaleObject, INotifyPropertyChanged
     {
         private int _PageWidth;
         private int _PageHeight;
@@ -28,19 +28,19 @@ namespace UndertaleModLib.Models
         public int PageHeight { get => _PageHeight; set { _PageHeight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PageHeight")); } }
         public byte[] PNGBlob { get => _PNGBlob; set { _PNGBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PNGBlob")); } }
 
-        public void Serialize(UndertaleWriter w)
+        public void Serialize(UndertaleWriter writer)
         {
-            w.Write(PageWidth);
-            w.Write(PageHeight);
-            w.Write(PNGBlob.Length);
-            w.Write(PNGBlob);
+            writer.Write(PageWidth);
+            writer.Write(PageHeight);
+            writer.Write(PNGBlob.Length);
+            writer.Write(PNGBlob);
         }
 
-        public void Deserialize(UndertaleReader r)
+        public void Unserialize(UndertaleReader reader)
         {
-            PageWidth = r.ReadInt32();
-            PageHeight = r.ReadInt32();
-            PNGBlob = r.ReadBytes(r.ReadInt32());
+            PageWidth = reader.ReadInt32();
+            PageHeight = reader.ReadInt32();
+            PNGBlob = reader.ReadBytes(reader.ReadInt32());
         }
 
         public override string ToString()
@@ -70,9 +70,10 @@ namespace UndertaleModLib.Models
         private float _GMS2PlaybackSpeed = 15.0f;
         private AnimSpeedType _GMS2PlaybackSpeedType = 0;
         private bool _IsSpecialType = false;
+        private int _SpineVersion;
         private string _SpineJSON;
         private string _SpineAtlas;
-        private ObservableCollection<UndertaleSpineTextureEntry> _SpineTextures; // a list of embedded PNGs really.
+        private UndertaleSimpleList<UndertaleSpineTextureEntry> _SpineTextures; // a list of embedded PNGs really.
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public uint Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
@@ -98,9 +99,10 @@ namespace UndertaleModLib.Models
         public AnimSpeedType GMS2PlaybackSpeedType { get => _GMS2PlaybackSpeedType; set { _GMS2PlaybackSpeedType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2PlaybackSpeedType")); } }
         public bool IsSpecialType { get => _IsSpecialType; set { _IsSpecialType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsSpecialType")); } }
 
+        public int SpineVersion { get => _SpineVersion; set { _SpineVersion = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpineVersion")); } }
         public string SpineJSON { get => _SpineJSON; set { _SpineJSON = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpineJSON")); } }
         public string SpineAtlas { get => _SpineAtlas; set { _SpineAtlas = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpineAtlas")); } }
-        public ObservableCollection<UndertaleSpineTextureEntry> SpineTextures { get => _SpineTextures; set { _SpineTextures = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpineTextures")); } }
+        public UndertaleSimpleList<UndertaleSpineTextureEntry> SpineTextures { get => _SpineTextures; set { _SpineTextures = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpineTextures")); } }
 
         public bool IsSpineSprite { get => SpineJSON != null && SpineAtlas != null && SpineTextures != null; }
 
@@ -225,7 +227,7 @@ namespace UndertaleModLib.Models
                         byte[] encodedAtlas = EncodeSpineBlob(Encoding.UTF8.GetBytes(SpineAtlas));
 
                         // the header.
-                        writer.Write(2); // Spine version.
+                        writer.Write(SpineVersion);
                         writer.Write(encodedJson.Length);
                         writer.Write(encodedAtlas.Length);
                         writer.Write(SpineTextures.Count);
@@ -233,9 +235,11 @@ namespace UndertaleModLib.Models
                         // the data.
                         writer.Write(encodedJson);
                         writer.Write(encodedAtlas);
-                        for (int t = 0; t < SpineTextures.Count; t++)
+
+                        // the length is stored in the header, so we can't use the list's method.
+                        foreach (var tex in SpineTextures)
                         {
-                            SpineTextures[t].Serialize(writer);
+                            writer.WriteUndertaleObject(tex);
                         }
 
                         break;
@@ -395,8 +399,8 @@ namespace UndertaleModLib.Models
                         {
                             Align3(reader);
 
-                            int versionNumber = reader.ReadInt32();
-                            Debug.Assert(versionNumber == 2, "Invalid Spine format version number, expected 2, got " + versionNumber);
+                            SpineVersion = reader.ReadInt32();
+                            Debug.Assert(SpineVersion == 2, "Invalid Spine format version number, expected 2, got " + SpineVersion);
                             int jsonLength = reader.ReadInt32();
                             int atlasLength = reader.ReadInt32();
                             int textures = reader.ReadInt32();
@@ -404,12 +408,12 @@ namespace UndertaleModLib.Models
                             SpineJSON = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(jsonLength)));
                             SpineAtlas = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(atlasLength)));
 
-                            SpineTextures = new ObservableCollection<UndertaleSpineTextureEntry>();
+                            // the length is stored before json and atlases so we can't use ReadUndertaleObjectList
+                            // same goes for serialization.
+                            SpineTextures = new UndertaleSimpleList<UndertaleSpineTextureEntry>();
                             for (int t = 0; t < textures; t++)
                             {
-                                UndertaleSpineTextureEntry uste = new UndertaleSpineTextureEntry();
-                                uste.Deserialize(reader);
-                                SpineTextures.Add(uste);
+                                SpineTextures.Add(reader.ReadUndertaleObject<UndertaleSpineTextureEntry>());
                             }
                         }
                         break;
