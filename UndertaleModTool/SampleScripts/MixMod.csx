@@ -8,26 +8,26 @@ var browserext = new UndertaleExtension()
 	ClassName = Data.Strings.MakeString(""),
 	EmptyString = Data.Strings.MakeString("")
 };
-browserext.Files.Add(new UndertaleExtension.ExtensionFile() 
+browserext.Files.Add(new UndertaleExtensionFile() 
 {
 	Filename = Data.Strings.MakeString("GMWebExtension.dll"),
-	Kind = UndertaleExtension.ExtensionKind.DLL,
+	Kind = UndertaleExtensionKind.DLL,
 	InitScript = Data.Strings.MakeString("__webextension_native_init"),
 	CleanupScript = Data.Strings.MakeString("__webextension_native_exit"),
 });
 // 0xc = cdecl?
-browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 1, 0xc, "RegisterCallbacks", UndertaleExtension.ExtensionVarType.Double, "RegisterCallbacks", UndertaleExtension.ExtensionVarType.String, UndertaleExtension.ExtensionVarType.String, UndertaleExtension.ExtensionVarType.String, UndertaleExtension.ExtensionVarType.String);
-browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 2, 0xc, "__webextension_native_init", UndertaleExtension.ExtensionVarType.Double, "__webextension_native_init");
-browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 3, 0xc, "__webextension_native_exit", UndertaleExtension.ExtensionVarType.Double, "__webextension_native_exit");
-browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 4, 0xc, "__webextension_set_device", UndertaleExtension.ExtensionVarType.Double, "__webextension_set_device", UndertaleExtension.ExtensionVarType.String);
-browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 5, 0xc, "browser_create", UndertaleExtension.ExtensionVarType.Double, "browser_create", UndertaleExtension.ExtensionVarType.String);
-browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 6, 0xc, "browser_destroy", UndertaleExtension.ExtensionVarType.Double, "browser_destroy", UndertaleExtension.ExtensionVarType.Double);
-browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 7, 0xc, "browser_load", UndertaleExtension.ExtensionVarType.Double, "browser_load", UndertaleExtension.ExtensionVarType.Double, UndertaleExtension.ExtensionVarType.String);
-browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 8, 0xc, "browser_load_html", UndertaleExtension.ExtensionVarType.Double, "browser_load_html", UndertaleExtension.ExtensionVarType.Double, UndertaleExtension.ExtensionVarType.String);
-browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 9, 0xc, "browser_resize", UndertaleExtension.ExtensionVarType.Double, "browser_resize", UndertaleExtension.ExtensionVarType.Double, UndertaleExtension.ExtensionVarType.Double, UndertaleExtension.ExtensionVarType.Double);
-browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 10, 0xc, "browser_draw", UndertaleExtension.ExtensionVarType.Double, "browser_draw", UndertaleExtension.ExtensionVarType.Double, UndertaleExtension.ExtensionVarType.Double, UndertaleExtension.ExtensionVarType.Double);
-browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 11, 0xc, "browser_is_initialized", UndertaleExtension.ExtensionVarType.Double, "browser_is_initialized", UndertaleExtension.ExtensionVarType.Double);
-browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 12, 0xc, "browser_js", UndertaleExtension.ExtensionVarType.Double, "browser_js", UndertaleExtension.ExtensionVarType.Double, UndertaleExtension.ExtensionVarType.String);
+browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 1, 0xc, "RegisterCallbacks", UndertaleExtensionVarType.Double, "RegisterCallbacks", UndertaleExtensionVarType.String, UndertaleExtensionVarType.String, UndertaleExtensionVarType.String, UndertaleExtensionVarType.String);
+browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 2, 0xc, "__webextension_native_init", UndertaleExtensionVarType.Double, "__webextension_native_init");
+browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 3, 0xc, "__webextension_native_exit", UndertaleExtensionVarType.Double, "__webextension_native_exit");
+browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 4, 0xc, "__webextension_set_device", UndertaleExtensionVarType.Double, "__webextension_set_device", UndertaleExtensionVarType.String);
+browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 5, 0xc, "browser_create", UndertaleExtensionVarType.Double, "browser_create", UndertaleExtensionVarType.String);
+browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 6, 0xc, "browser_destroy", UndertaleExtensionVarType.Double, "browser_destroy", UndertaleExtensionVarType.Double);
+browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 7, 0xc, "browser_load", UndertaleExtensionVarType.Double, "browser_load", UndertaleExtensionVarType.Double, UndertaleExtensionVarType.String);
+browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 8, 0xc, "browser_load_html", UndertaleExtensionVarType.Double, "browser_load_html", UndertaleExtensionVarType.Double, UndertaleExtensionVarType.String);
+browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 9, 0xc, "browser_resize", UndertaleExtensionVarType.Double, "browser_resize", UndertaleExtensionVarType.Double, UndertaleExtensionVarType.Double, UndertaleExtensionVarType.Double);
+browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 10, 0xc, "browser_draw", UndertaleExtensionVarType.Double, "browser_draw", UndertaleExtensionVarType.Double, UndertaleExtensionVarType.Double, UndertaleExtensionVarType.Double);
+browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 11, 0xc, "browser_is_initialized", UndertaleExtensionVarType.Double, "browser_is_initialized", UndertaleExtensionVarType.Double);
+browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 12, 0xc, "browser_js", UndertaleExtensionVarType.Double, "browser_js", UndertaleExtensionVarType.Double, UndertaleExtensionVarType.String);
 Data.Extensions.Add(browserext);
 
 Data.Functions.EnsureDefined("window_device", Data.Strings);
