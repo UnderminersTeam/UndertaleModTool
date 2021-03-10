@@ -8,8 +8,105 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleExtension}">
     <Grid>
-        <Border Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3">
-            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">TODO: Make this Extension editor</TextBlock>
-        </Border>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Empty Folder Name</TextBlock>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding FolderName}"/>
+        
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Name</TextBlock>
+        <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Class Name</TextBlock>
+        <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding ClassName}"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Files</TextBlock>
+        <DataGrid Grid.Row="3" Grid.Column="1" Margin="3" ItemsSource="{Binding Files}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" AddingNewItem="DataGrid_AddingNewItem">
+            <DataGrid.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                <Style TargetType="{x:Type DataGridCell}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                <Grid Background="{TemplateBinding Background}">
+                                    <ContentPresenter VerticalAlignment="Center" />
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Files" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <local:UndertaleObjectReference Margin="23,3,3,3" ObjectReference="{Binding Path=., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleExtensionFile}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Product ID</TextBlock>
+        <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+            <TextBox.Text>
+                <MultiBinding StringFormat="{}{0:X2} {1:X2} {2:X2} {3:X2} {4:X2} {5:X2} {6:X2} {7:X2} {8:X2} {9:X2} {10:X2} {11:X2} {12:X2} {13:X2} {14:X2} {15:X2}">
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[0]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[1]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[2]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[3]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[4]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[5]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[6]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[7]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[8]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[9]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[10]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[11]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[12]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[13]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[14]"/>
+                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[15]"/>
+                </MultiBinding>
+            </TextBox.Text>
+        </TextBox>
+
+        <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2">
+            <TextBlock Foreground="Red" FontStyle="Italic">
+                THINGS TO NOTE:
+                <LineBreak/>
+                - Keep in mind that .gml files are either not present, or will be empty. (e.g. no functions)
+                  <LineBreak/>
+                  Because they are prebaked into GML scripts. That is completely normal.
+                  <LineBreak/>
+                - Folder Name thing is a remnant from the legacy
+                  <LineBreak/>
+                  GM7-8.1 extension editor (aka ExtMaker), Runner reads the name but ignores it.
+                  <LineBreak/>
+                  (although I advise that you don't change it...)
+            </TextBlock>
+            <!-- Meaning, it is useless to add your own .gml files :p -->
+        </StackPanel>
     </Grid>
 </UserControl>

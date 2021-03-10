@@ -119,7 +119,8 @@ namespace UndertaleModLib
             // Strange data for each extension, some kind of unique identifier based on
             // the product ID for each of them
             productIdData = new List<byte[]>();
-            if (reader.undertaleData.GeneralInfo?.Major >= 2 || (reader.undertaleData.GeneralInfo?.Major == 1 && reader.undertaleData.GeneralInfo?.Build >= 9999))
+            //NOTE: I do not know if 1773 is the youngest version which contains product IDs.
+            if (reader.undertaleData.GeneralInfo?.Major >= 2 || (reader.undertaleData.GeneralInfo?.Major == 1 && reader.undertaleData.GeneralInfo?.Build >= 1773))
             {
                 for (int i = 0; i < List.Count; i++)
                 {
@@ -135,6 +136,12 @@ namespace UndertaleModLib
             // (read above comment)
             foreach (byte[] data in productIdData)
             {
+                int Len = data.Length;
+                if (Len != 16)
+                {
+                    throw new IOException("Can't write EXTN product id data of invalid length, expected 16, got " + Len);
+                }
+
                 writer.Write(data);
             }
         }

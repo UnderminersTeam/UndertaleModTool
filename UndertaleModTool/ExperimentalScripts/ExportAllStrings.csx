@@ -4,28 +4,19 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using UndertaleModLib.Util;
 
-// Setup root export folder.
-string winFolder = GetFolder(FilePath); // The folder data.win is located in.
-
-string GetFolder(string path) 
-{
-	return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
-}
-
-void MakeFolder(String folderName) 
-{
-	if (!Directory.Exists(winFolder + folderName + "/"))
-		Directory.CreateDirectory(winFolder + folderName + "/");
-}
+string exportFolder = PromptChooseDirectory("Export to where");
+if (exportFolder == null)
+	throw new System.Exception("The export folder was not set.");
 
 //Overwrite Check One
-if (File.Exists(winFolder + "strings.txt"))
+if (File.Exists(exportFolder + "strings.txt"))
 {
 	bool overwriteCheckOne = ScriptQuestion(@"A 'strings.txt' file already exists. 
 Would you like to overwrite it?");
 	if (overwriteCheckOne)
-		File.Delete(winFolder + "strings.txt");
+		File.Delete(exportFolder + "strings.txt");
 	if (!overwriteCheckOne)
 	{
 		ScriptError("A 'strings.txt' file already exists. Please remove it and try again.", "Error: Export already exists.");
@@ -33,7 +24,7 @@ Would you like to overwrite it?");
 	}
 }
 
-using (StreamWriter writer = new StreamWriter(winFolder + "strings.txt"))
+using (StreamWriter writer = new StreamWriter(exportFolder + "strings.txt"))
 {
 	foreach (var str in Data.Strings)
 	{

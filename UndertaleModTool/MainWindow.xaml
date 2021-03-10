@@ -418,6 +418,14 @@
                                 <local:UndertaleExtensionEditor/>
                             </DataTemplate>
 
+                            <DataTemplate DataType="{x:Type undertale:UndertaleExtensionFile}">
+                                <local:UndertaleExtensionFileEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleExtensionFunction}">
+                                <local:UndertaleExtensionFunctionEditor/>
+                            </DataTemplate>
+
                             <DataTemplate DataType="{x:Type undertale:UndertaleCode}">
                                 <local:UndertaleCodeEditor/>
                             </DataTemplate>

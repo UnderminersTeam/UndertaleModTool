@@ -31,6 +31,49 @@ namespace UndertaleModTool
             InitializeComponent();
         }
 
+        private void ExportAllSpine(SaveFileDialog dlg, UndertaleSprite sprite)
+        {
+            MessageBox.Show("This seems to be a Spine sprite, .json and .atlas files will be exported together with the frames. " +
+                "PLEASE EDIT THEM CAREFULLY! SOME MANUAL EDITING OF THE JSON MAY BE REQUIRED! THE DATA IS EXPORTED AS-IS.", "Spine warning", MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
+
+            if (dlg.ShowDialog() == true)
+            {
+                try
+                {
+                    string dir = System.IO.Path.GetDirectoryName(dlg.FileName);
+                    string name = System.IO.Path.GetFileNameWithoutExtension(dlg.FileName);
+                    string path = System.IO.Path.Combine(dir, name);
+                    string ext = System.IO.Path.GetExtension(dlg.FileName);
+
+                    if (sprite.SpineTextures.Count > 0)
+                    {
+                        Directory.CreateDirectory(path);
+
+                        // textures
+                        foreach (var tex in sprite.SpineTextures.Select((tex, id) => new { id,tex }))
+                        {
+                            try
+                            {
+                                File.WriteAllBytes(System.IO.Path.Combine(path, tex.id + ext), tex.tex.PNGBlob);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                        }
+
+                        // json and atlas
+                        File.WriteAllText(System.IO.Path.Combine(path, "spine.json"), sprite.SpineJSON);
+                        File.WriteAllText(System.IO.Path.Combine(path, "spine.atlas"), sprite.SpineAtlas);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to export: " + ex.Message, "Failed to export sprite", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
         private void ExportAll_Click(object sender, RoutedEventArgs e)
         {
             UndertaleSprite sprite = this.DataContext as UndertaleSprite;
@@ -40,6 +83,12 @@ namespace UndertaleModTool
             dlg.FileName = sprite.Name.Content + ".png";
             dlg.DefaultExt = ".png";
             dlg.Filter = "PNG files (.png)|*.png|All files|*";
+
+            if (sprite.IsSpineSprite)
+            {
+                ExportAllSpine(dlg, sprite);
+                return;
+            }
 
             TextureWorker worker = new TextureWorker();
 

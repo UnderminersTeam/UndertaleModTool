@@ -161,6 +161,32 @@ namespace UndertaleModLib
             return GeneralInfo != null && Code == null;
         }
 
+        public uint ExtensionFindLastId()
+        {
+            // The reason:
+            // Extension function id is literally the index of it in the Runner internal lists
+            // It must never overlap
+            // So, a good helper is needed.
+
+            uint id = 1; // first Id is always one, I checked.
+            foreach (var extn in this.Extensions)
+            {
+                foreach (var file in extn.Files)
+                {
+                    foreach (var func in file.Functions)
+                    {
+                        if (func.ID > id)
+                        {
+                            id = func.ID;
+                        }
+                    }
+                }
+            }
+
+            id++; // last id that *we* can use, so increment by one.
+            return id;
+        }
+
         public static UndertaleData CreateNew()
         {
             UndertaleData data = new UndertaleData();
@@ -327,9 +353,9 @@ namespace UndertaleModLib
             return vari;
         }
 
-        public static UndertaleExtension.ExtensionFunction DefineExtensionFunction(this IList<UndertaleExtension.ExtensionFunction> extfuncs, IList<UndertaleFunction> funcs, IList<UndertaleString> strg, uint id, uint kind, string name, UndertaleExtension.ExtensionVarType rettype, string extname, params UndertaleExtension.ExtensionVarType[] args)
+        public static UndertaleExtensionFunction DefineExtensionFunction(this IList<UndertaleExtensionFunction> extfuncs, IList<UndertaleFunction> funcs, IList<UndertaleString> strg, uint id, uint kind, string name, UndertaleExtensionVarType rettype, string extname, params UndertaleExtensionVarType[] args)
         {
-            var func = new UndertaleExtension.ExtensionFunction()
+            var func = new UndertaleExtensionFunction()
             {
                 ID = id,
                 Name = strg.MakeString(name),
@@ -338,7 +364,7 @@ namespace UndertaleModLib
                 RetType = rettype
             };
 	        foreach(var a in args)
-                func.Arguments.Add(new UndertaleExtension.ExtensionFunctionArg() { Type = a });
+                func.Arguments.Add(new UndertaleExtensionFunctionArg() { Type = a });
             extfuncs.Add(func);
             funcs.EnsureDefined(name, strg);
             return func;
