@@ -23,7 +23,7 @@ namespace UndertaleModTool
     public partial class UndertaleExtensionEditor : UserControl
     {
         public int MyIndex { get => (Application.Current.MainWindow as MainWindow).Data.Extensions.IndexOf((UndertaleExtension)this.DataContext); }
-        public byte[] ProductIdData { get => (Application.Current.MainWindow as MainWindow).Data.FORM.EXTN.productIdData[MyIndex]; set => (Application.Current.MainWindow as MainWindow).Data.FORM.EXTN.productIdData[MyIndex] = value; }
+        public byte[] ProductIdData { get => (((Application.Current.MainWindow as MainWindow).Data.GeneralInfo.Major >= 2) ? (Application.Current.MainWindow as MainWindow).Data.FORM.EXTN.productIdData[MyIndex] : null); set => (Application.Current.MainWindow as MainWindow).Data.FORM.EXTN.productIdData[MyIndex] = value; }
 
         public UndertaleExtensionEditor()
         {

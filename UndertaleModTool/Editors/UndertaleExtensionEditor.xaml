@@ -68,8 +68,8 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Product ID</TextBlock>
-        <TextBox Grid.Row="4" Grid.Column="1" Margin="3">
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Product ID</TextBlock>
+        <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
             <TextBox.Text>
                 <MultiBinding StringFormat="{}{0:X2} {1:X2} {2:X2} {3:X2} {4:X2} {5:X2} {6:X2} {7:X2} {8:X2} {9:X2} {10:X2} {11:X2} {12:X2} {13:X2} {14:X2} {15:X2}">
                     <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[0]"/>
