@@ -345,6 +345,9 @@
     <None Include="ExperimentalScripts\CheckDecompiler.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="ExperimentalScripts\TestExportAllCode.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="ExperimentalScripts\TextInputTestWPF.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
