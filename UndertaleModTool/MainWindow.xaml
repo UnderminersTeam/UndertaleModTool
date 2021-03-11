@@ -351,6 +351,10 @@
                                 <local:UndertaleGlobalInitEditor/>
                             </DataTemplate>
 
+                            <DataTemplate DataType="{x:Type local:AtGameEndEditor}">
+                                <local:UndertaleAtGameEndEditor/>
+                            </DataTemplate>
+
                             <DataTemplate DataType="{x:Type undertale:UndertaleAudioGroup}">
                                 <local:UndertaleAudioGroupEditor/>
                             </DataTemplate>
