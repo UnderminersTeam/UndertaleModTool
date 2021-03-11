@@ -788,6 +788,11 @@ namespace UndertaleModTool
                 {
                     notDataNewName = "PageItem " + list.Count;
                 }
+                if ((obj is UndertaleExtension) && (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && (((Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((Data?.GeneralInfo?.Build ?? 0) == 1539)))))
+                {
+                    var newProductID = new byte[] { 0xBA, 0x5E, 0xBA, 0x11, 0xBA, 0xDD, 0x06, 0x60, 0xBE, 0xEF, 0xED, 0xBA, 0x0B, 0xAB, 0xBA, 0xBE };
+                    Data.FORM.EXTN.productIdData.Add(newProductID);
+                }
                 if (obj is UndertaleEmbeddedAudio)
                 {
                     notDataNewName = "EmbeddedSound " + list.Count;
