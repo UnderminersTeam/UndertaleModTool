@@ -55,6 +55,8 @@ namespace UndertaleModTool
         private object _Selected;
         public object Selected { get { return _Selected; } private set { _Selected = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Selected")); } }
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
+        //God this is so ugly, if there's a better way, please, put in a pull request
+        public Visibility IsExtProductIDEligible => (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && ((Data?.GeneralInfo?.Build ?? 0) >= 1773))) ? Visibility.Visible : Visibility.Collapsed;
 
         public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
 
