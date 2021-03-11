@@ -172,6 +172,7 @@
                     <TreeViewItem Header="Data" IsExpanded="True">
                         <TreeViewItem Header="General info" Visibility="{Binding GeneralInfo, Converter={StaticResource VisibleIfNotNull}}"/>
                         <TreeViewItem Header="Global init" Visibility="{Binding GlobalInitScripts, Converter={StaticResource VisibleIfNotNull}}"/>
+                        <TreeViewItem Header="At Game End scripts" Visibility="{Binding AtGameEndScripts, Converter={StaticResource VisibleIfNotNull}}"/>
                         <TreeViewItem Header="Audio groups" ItemsSource="{Binding AudioGroups, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding AudioGroups, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleAudioGroup}">

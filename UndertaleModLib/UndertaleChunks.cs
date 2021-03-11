@@ -28,6 +28,7 @@ namespace UndertaleModLib
         public UndertaleChunkPATH PATH => Chunks.GetValueOrDefault("PATH") as UndertaleChunkPATH;
         public UndertaleChunkSCPT SCPT => Chunks.GetValueOrDefault("SCPT") as UndertaleChunkSCPT;
         public UndertaleChunkGLOB GLOB => Chunks.GetValueOrDefault("GLOB") as UndertaleChunkGLOB;
+        public UndertaleChunkGMEN GMEN => Chunks.GetValueOrDefault("GMEN") as UndertaleChunkGMEN;
         public UndertaleChunkSHDR SHDR => Chunks.GetValueOrDefault("SHDR") as UndertaleChunkSHDR;
         public UndertaleChunkFONT FONT => Chunks.GetValueOrDefault("FONT") as UndertaleChunkFONT;
         public UndertaleChunkTMLN TMLN => Chunks.GetValueOrDefault("TMLN") as UndertaleChunkTMLN;
@@ -180,6 +181,11 @@ namespace UndertaleModLib
     public class UndertaleChunkGLOB : UndertaleSimpleListChunk<UndertaleGlobalInit>
     {
         public override string Name => "GLOB";
+    }
+
+    public class UndertaleChunkGMEN : UndertaleSimpleListChunk<UndertaleGlobalInit>
+    {
+        public override string Name => "GMEN";
     }
 
     public class UndertaleChunkSHDR : UndertaleListChunk<UndertaleShader>
@@ -567,22 +573,6 @@ namespace UndertaleModLib
     public class UndertaleChunkNINE : UndertaleChunk
     {
         public override string Name => "NINE";
-
-        internal override void SerializeChunk(UndertaleWriter writer)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void UnserializeChunk(UndertaleReader reader)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    // Unknown if possible yet, GMS2.3+ only
-    public class UndertaleChunkGMEN : UndertaleChunk
-    {
-        public override string Name => "GMEN";
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
