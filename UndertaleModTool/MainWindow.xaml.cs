@@ -505,8 +505,8 @@ namespace UndertaleModTool
                     case "Global init":
                         Highlighted = new GlobalInitEditor(Data?.GlobalInitScripts);
                         break;
-                    case "At Game End scripts":
-                        Highlighted = new AtGameEndEditor(Data?.AtGameEndScripts);
+                    case "Game End scripts":
+                        Highlighted = new GameEndEditor(Data?.GameEndScripts);
                         break;
                     case "Code locals (unused?)":
                         Highlighted = new DescriptionView(item, "This seems to be unused as far as I can tell - you can remove the whole list and nothing happens");
@@ -1285,13 +1285,13 @@ namespace UndertaleModTool
         }
     }
 
-    public class AtGameEndEditor
+    public class GameEndEditor
     {
-        public IList<UndertaleGlobalInit> AtGameEnds { get; private set; }
+        public IList<UndertaleGlobalInit> GameEnds { get; private set; }
 
-        public AtGameEndEditor(IList<UndertaleGlobalInit> atGameEnds)
+        public GameEndEditor(IList<UndertaleGlobalInit> GameEnds)
         {
-            this.AtGameEnds = atGameEnds;
+            this.GameEnds = GameEnds;
         }
     }
 
