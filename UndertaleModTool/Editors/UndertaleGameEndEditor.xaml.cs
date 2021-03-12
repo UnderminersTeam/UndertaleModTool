@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace UndertaleModTool
 {
     /// <summary>
-    /// Логика взаимодействия для UndertaleAtGameEndEditor.xaml
+    /// Логика взаимодействия для UndertaleGameEndEditor.xaml
     /// </summary>
-    public partial class UndertaleAtGameEndEditor : UserControl
+    public partial class UndertaleGameEndEditor : UserControl
     {
-        public UndertaleAtGameEndEditor()
+        public UndertaleGameEndEditor()
         {
             InitializeComponent();
         }
