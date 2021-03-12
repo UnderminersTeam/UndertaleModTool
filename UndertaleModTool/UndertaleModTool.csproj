@@ -237,6 +237,9 @@
     <Compile Include="Converters\MaskImageConverter.cs" />
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Converters\RectConverter.cs" />
+    <Compile Include="Editors\UndertaleGameEndEditor.xaml.cs">
+      <DependentUpon>UndertaleGameEndEditor.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Editors\UndertaleAudioGroupEditor.xaml.cs">
       <DependentUpon>UndertaleAudioGroupEditor.xaml</DependentUpon>
     </Compile>
@@ -509,6 +512,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ColorPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editors\UndertaleGameEndEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
