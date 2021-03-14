@@ -226,6 +226,11 @@ namespace UndertaleModLib.Models
             ItemType = (UndertaleYYSWFItemType)reader.ReadInt32();
             ID = reader.ReadInt32();
         }
+
+        public override string ToString()
+        {
+            return $"UndertaleYYSWFItem ({ItemType}, {ID})";
+        }
     }
 
     public class UndertaleYYSWFTimeline : UndertaleObject, INotifyPropertyChanged
@@ -256,7 +261,26 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
-            throw new NotImplementedException();
+            writer.WriteUndertaleObject(UsedItems);
+            writer.Write(Framerate);
+            writer.Write(Frames.Count);
+            writer.Write(MinX);
+            writer.Write(MaxX);
+            writer.Write(MinY);
+            writer.Write(MaxY);
+            writer.Write(CollisionMasks.Count);
+            writer.Write(MaskWidth);
+            writer.Write(MaskHeight);
+
+            foreach (var yyswfFrame in Frames)
+            {
+                writer.WriteUndertaleObject(yyswfFrame);
+            }
+
+            foreach (var yyswfMask in CollisionMasks)
+            {
+                writer.WriteUndertaleObject(yyswfMask);
+            }
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -335,6 +359,11 @@ namespace UndertaleModLib.Models
             reader.Align(4);
             Timeline = reader.ReadUndertaleObject<UndertaleYYSWFTimeline>();
         }
+
+        public override string ToString()
+        {
+            return $"UndertaleYYSWF ({Version})";
+        }
     }
 
     public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyPropertyChanged
@@ -395,8 +424,10 @@ namespace UndertaleModLib.Models
         public bool IsSpineSprite { get => SpineJSON != null && SpineAtlas != null && SpineTextures != null; }
         public bool IsYYSWFSprite { get => YYSWF != null; }
 
+        private int _SWFVersion;
         private UndertaleYYSWF _YYSWF;
 
+        public int SWFVersion { get => _SWFVersion; set { _SWFVersion = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SWFVersion")); } }
         public UndertaleYYSWF YYSWF { get => _YYSWF; set { _YYSWF = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("YYSWF")); } }
 
         public UndertaleSequence V2Sequence;
@@ -506,7 +537,9 @@ namespace UndertaleModLib.Models
                         WriteMaskData(writer);
                         break;
                     case SpriteType.SWF:
-                        
+                        writer.Write(SWFVersion);
+                        writer.WriteUndertaleObject(Textures);
+                        writer.WriteUndertaleObject(YYSWF);
                         break;
                     case SpriteType.Spine:
                         writer.Align(4);
@@ -634,7 +667,8 @@ namespace UndertaleModLib.Models
                         {
                             //// ATTENTION: This code does not work all the time for some reason. ////
 
-                            Debug.Assert(reader.ReadUInt32() == 8, "Invalid SWF sprite format");
+                            SWFVersion = reader.ReadInt32();
+                            Debug.Assert(SWFVersion == 8, "Invalid SWF sprite format");
                             Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
                             YYSWF = reader.ReadUndertaleObject<UndertaleYYSWF>();
 
