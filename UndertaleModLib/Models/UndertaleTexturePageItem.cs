@@ -74,6 +74,14 @@ namespace UndertaleModLib.Models
 
         public override string ToString()
         {
+            try
+            {
+                return Name.Content + " (" + GetType().Name + ")";
+            }
+            catch
+            {
+                Name = new UndertaleString("PageItem Unknown Index");
+            }
             return Name.Content + " (" + GetType().Name + ")";
         }
 
