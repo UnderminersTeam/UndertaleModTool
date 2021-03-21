@@ -192,6 +192,14 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
+            /*
+             * uhhh, it'd make sense if it wrote zero if the RLE table is empty?????
+             * but I guess padding bytes work as zeroes too?!?!?
+             * even though it is unreliable??
+             * but like, how can you even make a sprite with RLEData==null? so it makes sense??
+             * argh.
+             */
+
             if (RLEData != null)
             {
                 writer.Write(RLEData.Length);
@@ -203,8 +211,13 @@ namespace UndertaleModLib.Models
 
         public void Unserialize(UndertaleReader reader)
         {
-            RLEData = reader.ReadBytes(reader.ReadInt32());
+            int rlelen = reader.ReadInt32();
+            if (rlelen > 0)
+            {
+                RLEData = reader.ReadBytes(rlelen);
+            }
 
+            // why it's not aligned before the data is beyond my brain.
             reader.Align(4);
         }
     }
@@ -858,7 +871,7 @@ namespace UndertaleModLib.Models
         public void Serialize(UndertaleWriter writer)
         {
             writer.Align(4);
-            int len = (JPEGTable == null ? 0 : JPEGTable.Length) | int.MinValue;
+            int len = (JPEGTable is null ? 0 : JPEGTable.Length) | int.MinValue;
 
             writer.Write(len);
             writer.Write(Version);
