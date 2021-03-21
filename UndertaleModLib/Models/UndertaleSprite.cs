@@ -49,6 +49,25 @@ namespace UndertaleModLib.Models
         }
     }
 
+    /// <summary>
+    /// Some dirty hacks to make SWF work, they'll be removed later.
+    /// </summary>
+    public static class UndertaleYYSWFUtils
+    {
+        /// <summary>
+        /// Reads an object ignoring the Reader's object pool.
+        /// </summary>
+        /// <typeparam name="T">UndertaleObject's child</typeparam>
+        /// <param name="reader">An instance of UndertaleReader</param>
+        /// <returns>The object</returns>
+        public static T ReadUndertaleObjectNoPool<T>(this UndertaleReader reader) where T : UndertaleObject, new()
+        {
+            T o = new T();
+            o.Unserialize(reader);
+            return o;
+        }
+    }
+
     public class UndertaleYYSWFTimelineObject : UndertaleObject, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -157,7 +176,7 @@ namespace UndertaleModLib.Models
             FrameObjects = new UndertaleSimpleList<UndertaleYYSWFTimelineObject>();
             for (int i = 0; i < ii; i++)
             {
-                var frameObject = reader.ReadUndertaleObject<UndertaleYYSWFTimelineObject>();
+                var frameObject = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFTimelineObject>();
                 FrameObjects.Add(frameObject);
             }
         }
@@ -200,6 +219,466 @@ namespace UndertaleModLib.Models
         ItemSprite
     }
 
+    public enum UndertaleYYSWFFillType : int
+    {
+        FillInvalid,
+        FillSolid,
+        FillGradient,
+        FillBitmap
+    }
+
+    public class UndertaleYYSWFFillData : UndertaleObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private UndertaleYYSWFFillType _Type;
+        public UndertaleYYSWFFillType Type { get => _Type; set { _Type = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Type")); } }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write((int)Type);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            Type = (UndertaleYYSWFFillType)reader.ReadInt32();
+        }
+    }
+
+    public class UndertaleYYSWFLineStyleData : UndertaleObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private byte _Red;
+        private byte _Green;
+        private byte _Blue;
+        private byte _Alpha;
+
+        public byte Red { get => _Red; set { _Red = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Red")); } }
+        public byte Green { get => _Green; set { _Green = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Green")); } }
+        public byte Blue { get => _Blue; set { _Blue = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Blue")); } }
+        public byte Alpha { get => _Alpha; set { _Alpha = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Alpha")); } }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write(Red);
+            writer.Write(Green);
+            writer.Write(Blue);
+            writer.Write(Alpha);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            Red = reader.ReadByte();
+            Green = reader.ReadByte();
+            Blue = reader.ReadByte();
+            Alpha = reader.ReadByte();
+        }
+    }
+
+    public class UndertaleYYSWFVector2 : UndertaleObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private int _X;
+        private int _Y;
+
+        public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
+        public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write(X);
+            writer.Write(Y);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            X = reader.ReadInt32();
+            Y = reader.ReadInt32();
+        }
+
+        public override string ToString()
+        {
+            return $"UndertaleYYSWFVector2 ({X};{Y})";
+        }
+    }
+
+    public class UndertaleYYSWFVector2F : UndertaleObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private float _X;
+        private float _Y;
+
+        public float X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
+        public float Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write(X);
+            writer.Write(Y);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            X = reader.ReadSingle();
+            Y = reader.ReadSingle();
+        }
+
+        public override string ToString()
+        {
+            return $"UndertaleYYSWFVector2F ({X};{Y})";
+        }
+    }
+
+    public class UndertaleYYSWFSubshapeData : UndertaleObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private int _FillStyleOne;
+        private int _FillStyleTwo;
+        private int _LineStyle;
+
+        private UndertaleSimpleList<UndertaleYYSWFVector2F> _Points;
+        private UndertaleSimpleList<UndertaleYYSWFVector2> _Lines;
+        private ObservableCollection<int> _Triangles;
+
+        private UndertaleSimpleList<UndertaleYYSWFVector2F> _LinePoints;
+        private ObservableCollection<int> _LineTriangles;
+
+        private UndertaleSimpleList<UndertaleYYSWFVector2> _AALines;
+        private UndertaleSimpleList<UndertaleYYSWFVector2F> _AAVectors;
+
+        private UndertaleSimpleList<UndertaleYYSWFVector2> _LineAALines;
+        private UndertaleSimpleList<UndertaleYYSWFVector2F> _LineAAVectors;
+
+        public int FillStyleOne { get => _FillStyleOne; set { _FillStyleOne = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FillStyleOne")); } }
+        public int FillStyleTwo { get => _FillStyleTwo; set { _FillStyleTwo = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FillStyleTwo")); } }
+        public int LineStyle { get => _LineStyle; set { _LineStyle = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LineStyle")); } }
+
+        public UndertaleSimpleList<UndertaleYYSWFVector2F> Points { get => _Points; set { _Points = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Points")); } }
+        public UndertaleSimpleList<UndertaleYYSWFVector2> Lines { get => _Lines; set { _Lines = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Lines")); } }
+        public ObservableCollection<int> Triangles { get => _Triangles; set { _Triangles = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Triangles")); } }
+
+        public UndertaleSimpleList<UndertaleYYSWFVector2F> LinePoints { get => _LinePoints; set { _LinePoints = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LinePoints")); } }
+        public ObservableCollection<int> LineTriangles { get => _LineTriangles; set { _LineTriangles = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LineTriangles")); } }
+
+        public UndertaleSimpleList<UndertaleYYSWFVector2> AALines { get => _AALines; set { _AALines = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AALines")); } }
+        public UndertaleSimpleList<UndertaleYYSWFVector2F> AAVectors { get => _AAVectors; set { _AAVectors = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AAVectors")); } }
+
+        public UndertaleSimpleList<UndertaleYYSWFVector2> LineAALines { get => _LineAALines; set { _LineAALines = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LineAALines")); } }
+        public UndertaleSimpleList<UndertaleYYSWFVector2F> LineAAVectors { get => _LineAAVectors; set { _LineAAVectors = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LineAAVectors")); } }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write(FillStyleOne);
+            writer.Write(FillStyleTwo);
+            writer.Write(LineStyle);
+            writer.Write(Points.Count);
+            writer.Write(Lines.Count);
+            writer.Write(Triangles.Count / 3);
+            writer.Write(LinePoints.Count);
+            writer.Write(LineTriangles.Count / 3);
+            writer.Write(AALines.Count);
+            writer.Write(AAVectors.Count);
+            writer.Write(LineAALines.Count);
+            writer.Write(LineAAVectors.Count);
+
+            foreach (var vec in Points)
+            {
+                writer.WriteUndertaleObject(vec);
+            }
+
+            foreach (var vec in Lines)
+            {
+                writer.WriteUndertaleObject(vec);
+            }
+
+            foreach (var tri in Triangles)
+            {
+                writer.Write(tri);
+            }
+
+            foreach (var vec in LinePoints)
+            {
+                writer.WriteUndertaleObject(vec);
+            }
+
+            foreach (var tri in LineTriangles)
+            {
+                writer.Write(tri);
+            }
+
+            foreach (var vec in AALines)
+            {
+                writer.WriteUndertaleObject(vec);
+            }
+
+            foreach (var vec in AAVectors)
+            {
+                writer.WriteUndertaleObject(vec);
+            }
+
+            foreach (var vec in LineAALines)
+            {
+                writer.WriteUndertaleObject(vec);
+            }
+
+            foreach (var vec in LineAAVectors)
+            {
+                writer.WriteUndertaleObject(vec);
+            }
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            FillStyleOne = reader.ReadInt32();
+            FillStyleTwo = reader.ReadInt32();
+            LineStyle = reader.ReadInt32();
+            Points = new UndertaleSimpleList<UndertaleYYSWFVector2F>();
+            Lines = new UndertaleSimpleList<UndertaleYYSWFVector2>();
+            Triangles = new ObservableCollection<int>();
+            LinePoints = new UndertaleSimpleList<UndertaleYYSWFVector2F>();
+            LineTriangles = new ObservableCollection<int>();
+            AALines = new UndertaleSimpleList<UndertaleYYSWFVector2>();
+            AAVectors = new UndertaleSimpleList<UndertaleYYSWFVector2F>();
+            LineAALines = new UndertaleSimpleList<UndertaleYYSWFVector2>();
+            LineAAVectors = new UndertaleSimpleList<UndertaleYYSWFVector2F>();
+
+            int points = reader.ReadInt32();
+            int lines = reader.ReadInt32();
+            int triangles = reader.ReadInt32() * 3;
+            int linepoints = reader.ReadInt32();
+            int linetriangles = reader.ReadInt32() * 3;
+            int aalines = reader.ReadInt32();
+            int aavectors = reader.ReadInt32();
+            int lineaalines = reader.ReadInt32();
+            int lineaavectors = reader.ReadInt32();
+
+            for (int i = 0; i < points; i++)
+            {
+                Points.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFVector2F>());
+            }
+
+            for (int i = 0; i < lines; i++)
+            {
+                Lines.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFVector2>());
+            }
+
+            for (int i = 0; i < triangles; i++)
+            {
+                Triangles.Add(reader.ReadInt32());
+            }
+
+            for (int i = 0; i < linepoints; i++)
+            {
+                LinePoints.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFVector2F>());
+            }
+
+            for (int i = 0; i < linetriangles; i++)
+            {
+                LineTriangles.Add(reader.ReadInt32());
+            }
+
+            for (int i = 0; i < aalines; i++)
+            {
+                AALines.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFVector2>());
+            }
+
+            for (int i = 0; i < aavectors; i++)
+            {
+                AAVectors.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFVector2F>());
+            }
+
+            for (int i = 0; i < lineaalines; i++)
+            {
+                LineAALines.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFVector2>());
+            }
+
+            for (int i = 0; i < lineaavectors; i++)
+            {
+                LineAAVectors.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFVector2F>());
+            }
+        }
+    }
+
+    public class UndertaleYYSWFShapeData : UndertaleObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private float _MinX;
+        private float _MaxX;
+        private float _MinY;
+        private float _MaxY;
+        private UndertaleSimpleList<UndertaleYYSWFStyleGroup> _StyleGroups;
+
+        public float MinX { get => _MinX; set { _MinX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MinX")); } }
+        public float MaxX { get => _MaxX; set { _MaxX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MaxX")); } }
+        public float MinY { get => _MinY; set { _MinY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MinY")); } }
+        public float MaxY { get => _MaxY; set { _MaxY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MaxY")); } }
+        public UndertaleSimpleList<UndertaleYYSWFStyleGroup> StyleGroups { get => _StyleGroups; set { _StyleGroups = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("StyleGroups")); } }
+
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write(MinX);
+            writer.Write(MaxX);
+            writer.Write(MinY);
+            writer.Write(MaxY);
+            writer.WriteUndertaleObject(StyleGroups);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            MinX = reader.ReadSingle();
+            MaxX = reader.ReadSingle();
+            MinY = reader.ReadSingle();
+            MaxY = reader.ReadSingle();
+            StyleGroups = new UndertaleSimpleList<UndertaleYYSWFStyleGroup>();
+            int s = reader.ReadInt32();
+            for (int i = 0; i < s; i++)
+            {
+                StyleGroups.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFStyleGroup>());
+            }
+        }
+    }
+
+    public class UndertaleYYSWFStyleGroup : UndertaleObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private UndertaleSimpleList<UndertaleYYSWFFillData> _FillStyles;
+        private UndertaleSimpleList<UndertaleYYSWFLineStyleData> _LineStyles;
+        private UndertaleSimpleList<UndertaleYYSWFSubshapeData> _Subshapes;
+
+        public UndertaleSimpleList<UndertaleYYSWFFillData> FillStyles { get => _FillStyles; set { _FillStyles = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FillStyles")); } }
+        public UndertaleSimpleList<UndertaleYYSWFLineStyleData> LineStyles { get => _LineStyles; set { _LineStyles = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LineStyles")); } }
+        public UndertaleSimpleList<UndertaleYYSWFSubshapeData> Subshapes { get => _Subshapes; set { _Subshapes = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Subshapes")); } }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write(FillStyles.Count);
+            writer.Write(LineStyles.Count);
+            writer.Write(Subshapes.Count);
+
+            foreach (var fill in FillStyles)
+            {
+                writer.WriteUndertaleObject(fill);
+            }
+
+            foreach (var line in LineStyles)
+            {
+                writer.WriteUndertaleObject(line);
+            }
+
+            foreach (var shape in Subshapes)
+            {
+                writer.WriteUndertaleObject(shape);
+            }
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            int f = reader.ReadInt32();
+            int l = reader.ReadInt32();
+            int s = reader.ReadInt32();
+
+            FillStyles = new UndertaleSimpleList<UndertaleYYSWFFillData>();
+            LineStyles = new UndertaleSimpleList<UndertaleYYSWFLineStyleData>();
+            Subshapes = new UndertaleSimpleList<UndertaleYYSWFSubshapeData>();
+
+            for (int i = 0; i < f; i++)
+            {
+                FillStyles.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFFillData>());
+            }
+
+            for (int i = 0; i < l; i++)
+            {
+                LineStyles.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFLineStyleData>());
+            }
+
+            for (int i = 0; i < s; i++)
+            {
+                Subshapes.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFSubshapeData>());
+            }
+        }
+    }
+
+    public enum UndertaleYYSWFBitmapType : int
+    {
+        TypeJPEGNoHeader,
+        TypeJPEG,
+        TypeJPEGWithAlpha,
+        TypePNG,
+        TypeGIF,
+        TypeLossless8bit,
+        TypeLossless15bit,
+        TypeLossless24bit,
+        TypeLossless8bitA,
+        TypeLossless32bit
+    }
+
+    public class UndertaleYYSWFBitmapData : UndertaleObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private UndertaleYYSWFBitmapType _Type;
+        private int _Width;
+        private int _Height;
+        private byte[] _ImageData;
+        private byte[] _AlphaData;
+        private byte[] _ColorPaletteData;
+
+        public UndertaleYYSWFBitmapType Type { get => _Type; set { _Type = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Type")); } }
+        public int Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
+        public int Height { get => _Height; set { _Height = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Height")); } }
+        public byte[] ImageData { get => _ImageData; set { _ImageData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ImageData")); } }
+        public byte[] AlphaData { get => _AlphaData; set { _AlphaData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AlphaData")); } }
+        public byte[] ColorPaletteData { get => _ColorPaletteData; set { _ColorPaletteData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ColorPaletteData")); } }
+
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write((int)Type);
+            writer.Write(Width);
+            writer.Write(Height);
+
+            writer.Write(ImageData is null ? 0 : ImageData.Length);
+            writer.Write(AlphaData is null ? 0 : AlphaData.Length);
+            writer.Write(ColorPaletteData is null ? 0 : ColorPaletteData.Length);
+
+            if (ImageData != null)
+                writer.Write(ImageData);
+            if (AlphaData != null)
+                writer.Write(AlphaData);
+            if (ColorPaletteData != null)
+                writer.Write(ColorPaletteData);
+
+            writer.Align(4);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            Type = (UndertaleYYSWFBitmapType)reader.ReadInt32();
+            Width = reader.ReadInt32();
+            Height = reader.ReadInt32();
+
+            int iL = reader.ReadInt32();
+            int aL = reader.ReadInt32();
+            int cL = reader.ReadInt32();
+
+            if (iL > 0)
+                ImageData = reader.ReadBytes(iL);
+            if (aL > 0)
+                AlphaData = reader.ReadBytes(aL);
+            if (cL > 0)
+                ColorPaletteData = reader.ReadBytes(cL);
+
+            reader.Align(4);
+        }
+    }
+
     public class UndertaleYYSWFItem : UndertaleObject, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -210,21 +689,66 @@ namespace UndertaleModLib.Models
         private UndertaleYYSWFItemType _ItemType;
         public UndertaleYYSWFItemType ItemType { get => _ItemType; set { _ItemType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ItemType")); } }
 
+        public UndertaleYYSWFShapeData _ShapeData;
+        public UndertaleYYSWFShapeData ShapeData { get => _ShapeData; set { _ShapeData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ShapeData")); } }
+
+        private UndertaleYYSWFBitmapData _BitmapData;
+        public UndertaleYYSWFBitmapData BitmapData { get => _BitmapData; set { _BitmapData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BitmapData")); } }
+
         public UndertaleYYSWFItem()
         {
             ItemType = UndertaleYYSWFItemType.ItemInvalid;
+            ID = -1;
         }
 
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((int)ItemType);
             writer.Write(ID);
+
+            switch (ItemType)
+            {
+                case UndertaleYYSWFItemType.ItemShape:
+                {
+                    writer.WriteUndertaleObject(ShapeData);
+                    break;
+                }
+
+                case UndertaleYYSWFItemType.ItemBitmap:
+                {
+                    writer.WriteUndertaleObject(BitmapData);
+                    break;
+                }
+            }
         }
 
         public void Unserialize(UndertaleReader reader)
         {
             ItemType = (UndertaleYYSWFItemType)reader.ReadInt32();
             ID = reader.ReadInt32();
+
+            // I know, right?
+            switch (ItemType)
+            {
+                case UndertaleYYSWFItemType.ItemShape:
+                {
+                    ShapeData = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFShapeData>();
+                    break;
+                }
+
+                case UndertaleYYSWFItemType.ItemBitmap:
+                {
+                    BitmapData = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFBitmapData>();
+                    break;
+                }
+
+                default:
+                {
+                    reader.SubmitWarning("Trying to read unknown YYSWFItem, " + ItemType.ToString());
+                        throw new Exception("Invalid YYSWFItem type " + ItemType.ToString());
+                    break;
+                }
+            }
         }
 
         public override string ToString()
@@ -285,7 +809,14 @@ namespace UndertaleModLib.Models
 
         public void Unserialize(UndertaleReader reader)
         {
-            UsedItems = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleYYSWFItem>>();
+            //UsedItems = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleYYSWFItem>>();
+            UsedItems = new UndertaleSimpleList<UndertaleYYSWFItem>();
+            int uc = reader.ReadInt32();
+            for (int i = 0; i < uc; i++)
+            {
+                UsedItems.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFItem>());
+            }
+
             Framerate = reader.ReadInt32();
             int fc = reader.ReadInt32();
             MinX = reader.ReadSingle();
@@ -299,14 +830,14 @@ namespace UndertaleModLib.Models
             Frames = new UndertaleSimpleList<UndertaleYYSWFTimelineFrame>();
             for (int f = 0; f < fc; f++)
             {
-                var yyswfFrame = reader.ReadUndertaleObject<UndertaleYYSWFTimelineFrame>();
+                var yyswfFrame = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFTimelineFrame>();
                 Frames.Add(yyswfFrame);
             }
 
             CollisionMasks = new UndertaleSimpleList<UndertaleYYSWFCollisionMask>();
             for (int m = 0; m < mc; m++)
             {
-                var yyswfMask = reader.ReadUndertaleObject<UndertaleYYSWFCollisionMask>();
+                var yyswfMask = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFCollisionMask>();
                 CollisionMasks.Add(yyswfMask);
             }
         }
@@ -327,11 +858,7 @@ namespace UndertaleModLib.Models
         public void Serialize(UndertaleWriter writer)
         {
             writer.Align(4);
-            int len = int.MinValue;
-            if (JPEGTable != null)
-            {
-                len |= JPEGTable.Length;
-            }
+            int len = (JPEGTable == null ? 0 : JPEGTable.Length) | int.MinValue;
 
             writer.Write(len);
             writer.Write(Version);
@@ -349,7 +876,7 @@ namespace UndertaleModLib.Models
             reader.Align(4);
             int jpeglen = reader.ReadInt32() & (~int.MinValue); // the length is ORed with int.MinValue.
             Version = reader.ReadInt32();
-            Debug.Assert(Version == 8, "Invalid YYSWF version data!");
+            Debug.Assert(Version == 8 || Version == 7, "Invalid YYSWF version data! Expected 7 or 8, got " + Version);
 
             if (jpeglen > 0)
             {
@@ -357,7 +884,7 @@ namespace UndertaleModLib.Models
             }
 
             reader.Align(4);
-            Timeline = reader.ReadUndertaleObject<UndertaleYYSWFTimeline>();
+            Timeline = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFTimeline>();
         }
 
         public override string ToString()
@@ -538,7 +1065,7 @@ namespace UndertaleModLib.Models
                         break;
                     case SpriteType.SWF:
                         writer.Write(SWFVersion);
-                        writer.WriteUndertaleObject(Textures);
+                        if (SWFVersion == 8) writer.WriteUndertaleObject(Textures);
                         writer.WriteUndertaleObject(YYSWF);
                         break;
                     case SpriteType.Spine:
@@ -551,16 +1078,41 @@ namespace UndertaleModLib.Models
                         writer.Write(SpineVersion);
                         writer.Write(encodedJson.Length);
                         writer.Write(encodedAtlas.Length);
-                        writer.Write(SpineTextures.Count);
 
-                        // the data.
-                        writer.Write(encodedJson);
-                        writer.Write(encodedAtlas);
-
-                        // the length is stored in the header, so we can't use the list's method.
-                        foreach (var tex in SpineTextures)
+                        switch (SpineVersion)
                         {
-                            writer.WriteUndertaleObject(tex);
+                            case 1:
+                                {
+                                    UndertaleSpineTextureEntry atlas = SpineTextures.First(); // will throw an exception if the list is null, what I want!
+                                    writer.Write(atlas.PNGBlob.Length);
+                                    writer.Write(atlas.PageWidth);
+                                    writer.Write(atlas.PageHeight);
+
+                                    // the data.
+                                    writer.Write(encodedJson);
+                                    writer.Write(encodedAtlas);
+
+                                    // the one and only atlas.
+                                    writer.Write(atlas.PNGBlob);
+
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    writer.Write(SpineTextures.Count);
+
+                                    // the data.
+                                    writer.Write(encodedJson);
+                                    writer.Write(encodedAtlas);
+
+                                    // the length is stored in the header, so we can't use the list's method.
+                                    foreach (var tex in SpineTextures)
+                                    {
+                                        writer.WriteUndertaleObject(tex);
+                                    }
+
+                                    break;
+                                }
                         }
 
                         break;
@@ -668,11 +1220,14 @@ namespace UndertaleModLib.Models
                             //// ATTENTION: This code does not work all the time for some reason. ////
 
                             SWFVersion = reader.ReadInt32();
-                            Debug.Assert(SWFVersion == 8, "Invalid SWF sprite format");
-                            Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
-                            YYSWF = reader.ReadUndertaleObject<UndertaleYYSWF>();
+                            Debug.Assert(SWFVersion == 8 || SWFVersion == 7, "Invalid SWF sprite format, expected 7 or 8, got " + SWFVersion);
 
-                            Console.WriteLine("Attempt to read YYSWF data...");
+                            if (SWFVersion == 8)
+                            {
+                                Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
+                            }
+
+                            YYSWF = reader.ReadUndertaleObjectNoPool<UndertaleYYSWF>();
                         }
                         break;
                     case SpriteType.Spine:
@@ -680,20 +1235,44 @@ namespace UndertaleModLib.Models
                             reader.Align(4);
 
                             SpineVersion = reader.ReadInt32();
-                            Debug.Assert(SpineVersion == 2, "Invalid Spine format version number, expected 2, got " + SpineVersion);
+                            Debug.Assert(SpineVersion == 2 || SpineVersion == 1, "Invalid Spine format version number, expected 2 or 1, got " + SpineVersion);
                             int jsonLength = reader.ReadInt32();
                             int atlasLength = reader.ReadInt32();
-                            int textures = reader.ReadInt32();
-
-                            SpineJSON = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(jsonLength)));
-                            SpineAtlas = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(atlasLength)));
-
-                            // the length is stored before json and atlases so we can't use ReadUndertaleObjectList
-                            // same goes for serialization.
+                            int textures = reader.ReadInt32(); // count in v2 and size in bytes in v1.
                             SpineTextures = new UndertaleSimpleList<UndertaleSpineTextureEntry>();
-                            for (int t = 0; t < textures; t++)
+
+                            switch (SpineVersion)
                             {
-                                SpineTextures.Add(reader.ReadUndertaleObject<UndertaleSpineTextureEntry>());
+                                // Version 1 - only one single PNG atlas.
+                                // Version 2 - can be multiple atlases.
+                                case 1:
+                                    {
+                                        UndertaleSpineTextureEntry atlas = new UndertaleSpineTextureEntry();
+                                        int atlasWidth = reader.ReadInt32();
+                                        int atlasHeight = reader.ReadInt32();
+                                        SpineJSON = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(jsonLength)));
+                                        SpineAtlas = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(atlasLength)));
+
+                                        atlas.PageWidth = atlasWidth;
+                                        atlas.PageHeight = atlasHeight;
+                                        atlas.PNGBlob = reader.ReadBytes(textures);
+                                        SpineTextures.Add(atlas);
+                                        break;
+                                    }
+                                case 2:
+                                    {
+                                        SpineJSON = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(jsonLength)));
+                                        SpineAtlas = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(atlasLength)));
+
+                                        // the length is stored before json and atlases so we can't use ReadUndertaleObjectList
+                                        // same goes for serialization.
+                                        for (int t = 0; t < textures; t++)
+                                        {
+                                            SpineTextures.Add(reader.ReadUndertaleObject<UndertaleSpineTextureEntry>());
+                                        }
+
+                                        break;
+                                    }
                             }
                         }
                         break;
