@@ -61,7 +61,7 @@
                 <DataGridTemplateColumn Header="Files" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <local:UndertaleObjectReference Margin="23,3,3,3" ObjectReference="{Binding Path=., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleExtensionFile}"/>
+                            <local:UndertaleObjectReference Margin="23,3,3,3" ObjectReference="{Binding Path=., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleExtensionFile}" CanRemove="False"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
