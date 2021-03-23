@@ -9,6 +9,7 @@ EnsureDataLoaded();
 
 // Setup root export folder.
 string winFolder = GetFolder(FilePath); // The folder data.win is located in.
+bool usesAGRP               = (Data.AudioGroups.Count > 0);
 
 //Overwrite Folder Check One
 if (Directory.Exists(winFolder + "Exported_Sounds\\"))
@@ -59,13 +60,16 @@ Note: If an error window stating that 'the directory is not empty' appears, plea
 }
 
 // Group by audio group check
-var groupedExport = 1;
-bool groupedCheck = ScriptQuestion(@"Group sounds by audio group?
-");
-if (groupedCheck)
-	groupedExport = 1;
-if (!groupedCheck)
-	groupedExport = 0;
+var groupedExport = 0;
+if (usesAGRP)
+{
+    bool groupedCheck = ScriptQuestion(@"Group sounds by audio group?
+    ");
+    if (groupedCheck)
+        groupedExport = 1;
+    if (!groupedCheck)
+        groupedExport = 0;
+}
 
 byte[] EMPTY_WAV_FILE_BYTES = System.Convert.FromBase64String("UklGRiQAAABXQVZFZm10IBAAAAABAAIAQB8AAAB9AAAEABAAZGF0YQAAAAA=");
 string DEFAULT_AUDIOGROUP_NAME = "audiogroup_default";
