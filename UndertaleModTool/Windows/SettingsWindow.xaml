@@ -15,6 +15,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="GraphViz path" ToolTip="Required if you want code decompile graphs" FontFamily="Comic Sans MS" Background="#FFF104A6"/>
@@ -24,6 +25,9 @@
         <TextBox Background="#FFF104A6" Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GameMakerStudioPath}" FontFamily="Comic Sans MS"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="Game Maker: Studio 2 runtimes path" ToolTip="Required only if you want to run GMS2 games using the Studio runner rather than the .exe" FontFamily="Comic Sans MS" Background="#FFF104A6"/>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GameMakerStudio2RuntimesPath}" FontFamily="Comic Sans MS" Background="#FFF104A6"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GameMakerStudio2RuntimesPath}" Background="#FFF104A6"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="Enable asset order swapping" ToolTip="Toggles dragging &amp; dropping assets in the asset tabs to different positions in the list. Disabled by default." FontFamily="Comic Sans MS" Background="#FFF104A6"/>
+        <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding AssetOrderSwappingEnabled}"/>
     </Grid>
 </Window>

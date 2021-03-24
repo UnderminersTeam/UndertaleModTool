@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UndertaleModLib.Models;
+using static UndertaleModLib.Models.UndertaleGeneralInfo;
 
 /// <summary>
 /// HUGE file containing definitions for most GameMaker builtin variables, functions, etc.
@@ -57,11 +59,18 @@ namespace UndertaleModLib.Compiler
         public bool IsFirstParamInstance = false;
         public bool IsFirstParamOther = false;
         public int ID;
+        public FunctionClassification Classification = FunctionClassification.None;
 
         public FunctionInfo(BuiltinList list, int argumentCount)
         {
             ArgumentCount = argumentCount;
             ID = list.CurrentID++;
+        }
+
+        public FunctionInfo(BuiltinList list, int argumentCount, FunctionClassification classification) : this(list, argumentCount)
+        {
+            Classification = classification;
+            // Maybe handle this differently? (look UndertaleFunction.cs)
         }
 
         public FunctionInfo(BuiltinList list, int argumentCount, bool isFirstParamInstance)
@@ -1001,20 +1010,20 @@ namespace UndertaleModLib.Compiler
             }
             if (data?.GeneralInfo?.Major < 2)
             {
-                Functions["joystick_exists"] = new FunctionInfo(this, 1);
-                Functions["joystick_direction"] = new FunctionInfo(this, 1);
-                Functions["joystick_name"] = new FunctionInfo(this, 1);
-                Functions["joystick_axes"] = new FunctionInfo(this, 1);
-                Functions["joystick_buttons"] = new FunctionInfo(this, 1);
-                Functions["joystick_has_pov"] = new FunctionInfo(this, 1);
-                Functions["joystick_check_button"] = new FunctionInfo(this, 2);
-                Functions["joystick_xpos"] = new FunctionInfo(this, 1);
-                Functions["joystick_ypos"] = new FunctionInfo(this, 1);
-                Functions["joystick_zpos"] = new FunctionInfo(this, 1);
-                Functions["joystick_rpos"] = new FunctionInfo(this, 1);
-                Functions["joystick_upos"] = new FunctionInfo(this, 1);
-                Functions["joystick_vpos"] = new FunctionInfo(this, 1);
-                Functions["joystick_pov"] = new FunctionInfo(this, 1);
+                Functions["joystick_exists"] = new FunctionInfo(this, 1, FunctionClassification.Joystick);
+                Functions["joystick_direction"] = new FunctionInfo(this, 1, FunctionClassification.Joystick);
+                Functions["joystick_name"] = new FunctionInfo(this, 1, FunctionClassification.Joystick);
+                Functions["joystick_axes"] = new FunctionInfo(this, 1, FunctionClassification.Joystick);
+                Functions["joystick_buttons"] = new FunctionInfo(this, 1, FunctionClassification.Joystick);
+                Functions["joystick_has_pov"] = new FunctionInfo(this, 1, FunctionClassification.Joystick);
+                Functions["joystick_check_button"] = new FunctionInfo(this, 2, FunctionClassification.Joystick);
+                Functions["joystick_xpos"] = new FunctionInfo(this, 1, FunctionClassification.Joystick);
+                Functions["joystick_ypos"] = new FunctionInfo(this, 1, FunctionClassification.Joystick);
+                Functions["joystick_zpos"] = new FunctionInfo(this, 1, FunctionClassification.Joystick);
+                Functions["joystick_rpos"] = new FunctionInfo(this, 1, FunctionClassification.Joystick);
+                Functions["joystick_upos"] = new FunctionInfo(this, 1, FunctionClassification.Joystick);
+                Functions["joystick_vpos"] = new FunctionInfo(this, 1, FunctionClassification.Joystick);
+                Functions["joystick_pov"] = new FunctionInfo(this, 1, FunctionClassification.Joystick);
             }
             Functions["keyboard_clear"] = new FunctionInfo(this, 1);
             Functions["mouse_clear"] = new FunctionInfo(this, 1);
@@ -1834,27 +1843,27 @@ namespace UndertaleModLib.Compiler
             Functions["facebook_check_permission"] = new FunctionInfo(this, 1);
             Functions["facebook_request_read_permissions"] = new FunctionInfo(this, 1);
             Functions["facebook_request_publish_permissions"] = new FunctionInfo(this, 1);
-            Functions["gamepad_is_supported"] = new FunctionInfo(this, 0);
-            Functions["gamepad_get_device_count"] = new FunctionInfo(this, 0);
-            Functions["gamepad_is_connected"] = new FunctionInfo(this, 1);
-            Functions["gamepad_get_description"] = new FunctionInfo(this, 1);
-            Functions["gamepad_get_button_threshold"] = new FunctionInfo(this, 1);
-            Functions["gamepad_set_button_threshold"] = new FunctionInfo(this, 2);
-            Functions["gamepad_get_axis_deadzone"] = new FunctionInfo(this, 1);
-            Functions["gamepad_set_axis_deadzone"] = new FunctionInfo(this, 2);
-            Functions["gamepad_button_count"] = new FunctionInfo(this, 1);
-            Functions["gamepad_button_check"] = new FunctionInfo(this, 2);
-            Functions["gamepad_button_check_pressed"] = new FunctionInfo(this, 2);
-            Functions["gamepad_button_check_released"] = new FunctionInfo(this, 2);
-            Functions["gamepad_button_value"] = new FunctionInfo(this, 2);
-            Functions["gamepad_axis_count"] = new FunctionInfo(this, 1);
-            Functions["gamepad_axis_value"] = new FunctionInfo(this, 2);
-            Functions["gamepad_set_vibration"] = new FunctionInfo(this, 3);
-            Functions["gamepad_set_colour"] = new FunctionInfo(this, 2);
-            Functions["gamepad_set_color"] = new FunctionInfo(this, 2);
-            Functions["gamepad_add_mapping_from_string"] = new FunctionInfo(this, 1);
-            Functions["gamepad_add_mapping_from_file"] = new FunctionInfo(this, 1);
-            Functions["gamepad_get_database"] = new FunctionInfo(this, 0);
+            Functions["gamepad_is_supported"] = new FunctionInfo(this, 0, FunctionClassification.Gamepad);
+            Functions["gamepad_get_device_count"] = new FunctionInfo(this, 0, FunctionClassification.Gamepad);
+            Functions["gamepad_is_connected"] = new FunctionInfo(this, 1, FunctionClassification.Gamepad);
+            Functions["gamepad_get_description"] = new FunctionInfo(this, 1, FunctionClassification.Gamepad);
+            Functions["gamepad_get_button_threshold"] = new FunctionInfo(this, 1, FunctionClassification.Gamepad);
+            Functions["gamepad_set_button_threshold"] = new FunctionInfo(this, 2, FunctionClassification.Gamepad);
+            Functions["gamepad_get_axis_deadzone"] = new FunctionInfo(this, 1, FunctionClassification.Gamepad);
+            Functions["gamepad_set_axis_deadzone"] = new FunctionInfo(this, 2, FunctionClassification.Gamepad);
+            Functions["gamepad_button_count"] = new FunctionInfo(this, 1, FunctionClassification.Gamepad);
+            Functions["gamepad_button_check"] = new FunctionInfo(this, 2, FunctionClassification.Gamepad);
+            Functions["gamepad_button_check_pressed"] = new FunctionInfo(this, 2, FunctionClassification.Gamepad);
+            Functions["gamepad_button_check_released"] = new FunctionInfo(this, 2, FunctionClassification.Gamepad);
+            Functions["gamepad_button_value"] = new FunctionInfo(this, 2, FunctionClassification.Gamepad);
+            Functions["gamepad_axis_count"] = new FunctionInfo(this, 1, FunctionClassification.Gamepad);
+            Functions["gamepad_axis_value"] = new FunctionInfo(this, 2, FunctionClassification.Gamepad);
+            Functions["gamepad_set_vibration"] = new FunctionInfo(this, 3, FunctionClassification.Gamepad);
+            Functions["gamepad_set_colour"] = new FunctionInfo(this, 2, FunctionClassification.Gamepad);
+            Functions["gamepad_set_color"] = new FunctionInfo(this, 2, FunctionClassification.Gamepad);
+            Functions["gamepad_add_mapping_from_string"] = new FunctionInfo(this, 1, FunctionClassification.Gamepad);
+            Functions["gamepad_add_mapping_from_file"] = new FunctionInfo(this, 1, FunctionClassification.Gamepad);
+            Functions["gamepad_get_database"] = new FunctionInfo(this, 0, FunctionClassification.Gamepad);
             Functions["YoYo_OSPauseEvent"] = new FunctionInfo(this, 0);
             Functions["os_is_paused"] = new FunctionInfo(this, 0);
             Functions["window_has_focus"] = new FunctionInfo(this, 0);
@@ -2753,6 +2762,11 @@ namespace UndertaleModLib.Compiler
             Functions["switch_bnvib_get_loop_start_position"] = new FunctionInfo(this, 1);
             Functions["switch_bnvib_get_length"] = new FunctionInfo(this, 1);
             Functions["switch_bnvib_get_sampling_rate"] = new FunctionInfo(this, 1);
+            if (data?.GeneralInfo?.Major == 1 && data?.GeneralInfo?.Build <= 1763)
+            {
+                Functions["immersion_play_effect"] = new FunctionInfo(this, 1, FunctionClassification.Immersion);
+                Functions["immersion_stop"] = new FunctionInfo(this, 0, FunctionClassification.Immersion);
+            }
 
             // Moving on to constants
             Constants = new Dictionary<string, double>();

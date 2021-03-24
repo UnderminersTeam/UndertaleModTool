@@ -28,6 +28,7 @@ namespace UndertaleModLib
         public UndertaleChunkPATH PATH => Chunks.GetValueOrDefault("PATH") as UndertaleChunkPATH;
         public UndertaleChunkSCPT SCPT => Chunks.GetValueOrDefault("SCPT") as UndertaleChunkSCPT;
         public UndertaleChunkGLOB GLOB => Chunks.GetValueOrDefault("GLOB") as UndertaleChunkGLOB;
+        public UndertaleChunkGMEN GMEN => Chunks.GetValueOrDefault("GMEN") as UndertaleChunkGMEN;
         public UndertaleChunkSHDR SHDR => Chunks.GetValueOrDefault("SHDR") as UndertaleChunkSHDR;
         public UndertaleChunkFONT FONT => Chunks.GetValueOrDefault("FONT") as UndertaleChunkFONT;
         public UndertaleChunkTMLN TMLN => Chunks.GetValueOrDefault("TMLN") as UndertaleChunkTMLN;
@@ -119,7 +120,8 @@ namespace UndertaleModLib
             // Strange data for each extension, some kind of unique identifier based on
             // the product ID for each of them
             productIdData = new List<byte[]>();
-            if (reader.undertaleData.GeneralInfo?.Major >= 2 || (reader.undertaleData.GeneralInfo?.Major == 1 && reader.undertaleData.GeneralInfo?.Build >= 9999))
+            //NOTE: I do not know if 1773 is the youngest version which contains product IDs.
+            if (reader.undertaleData.GeneralInfo?.Major >= 2 || (reader.undertaleData.GeneralInfo?.Major == 1 && reader.undertaleData.GeneralInfo?.Build >= 1773) || (reader.undertaleData.GeneralInfo?.Major == 1 && reader.undertaleData.GeneralInfo?.Build == 1539))
             {
                 for (int i = 0; i < List.Count; i++)
                 {
@@ -135,6 +137,12 @@ namespace UndertaleModLib
             // (read above comment)
             foreach (byte[] data in productIdData)
             {
+                int Len = data.Length;
+                if (Len != 16)
+                {
+                    throw new IOException("Can't write EXTN product id data of invalid length, expected 16, got " + Len);
+                }
+
                 writer.Write(data);
             }
         }
@@ -173,6 +181,11 @@ namespace UndertaleModLib
     public class UndertaleChunkGLOB : UndertaleSimpleListChunk<UndertaleGlobalInit>
     {
         public override string Name => "GLOB";
+    }
+
+    public class UndertaleChunkGMEN : UndertaleSimpleListChunk<UndertaleGlobalInit>
+    {
+        public override string Name => "GMEN";
     }
 
     public class UndertaleChunkSHDR : UndertaleListChunk<UndertaleShader>
@@ -274,6 +287,28 @@ namespace UndertaleModLib
         internal override void SerializeChunk(UndertaleWriter writer)
         {
             base.SerializeChunk(writer);
+
+            if (writer.undertaleData.IsTPAG4ByteAligned)
+            {
+                // padding present in ARM platforms apparently
+                while (writer.Position % 0x4 != 0)
+                    writer.Write((byte)0);
+            }
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            if (Length % 0x4 == 0)
+            {
+                reader.undertaleData.IsTPAG4ByteAligned = true;
+            }
+
+            base.UnserializeChunk(reader);
+
+            for (int index = 0; index < List.Count; index++)
+            {
+                List[index].Name = new UndertaleString("PageItem " + index.ToString()); // not Data.MakeString
+            }
         }
     }
 
@@ -456,7 +491,10 @@ namespace UndertaleModLib
 
             // texture blobs
             foreach (UndertaleEmbeddedTexture obj in List)
+            {
                 obj.UnserializeBlob(reader);
+                obj.Name = new UndertaleString("Texture " + List.IndexOf(obj).ToString());
+            }
             
             // padding
             while (reader.Position % 4 != 0)
@@ -468,6 +506,21 @@ namespace UndertaleModLib
     public class UndertaleChunkAUDO : UndertaleListChunk<UndertaleEmbeddedAudio>
     {
         public override string Name => "AUDO";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            base.SerializeChunk(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            base.UnserializeChunk(reader);
+
+            for (int index = 0; index < List.Count; index++)
+            {
+                List[index].Name = new UndertaleString("EmbeddedSound " + index.ToString());
+            }
+        }
     }
 
     // GMS2 only
@@ -520,22 +573,6 @@ namespace UndertaleModLib
     public class UndertaleChunkNINE : UndertaleChunk
     {
         public override string Name => "NINE";
-
-        internal override void SerializeChunk(UndertaleWriter writer)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void UnserializeChunk(UndertaleReader reader)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    // Unknown if possible yet, GMS2.3+ only
-    public class UndertaleChunkGMEN : UndertaleChunk
-    {
-        public override string Name => "GMEN";
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {

@@ -6,12 +6,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static UndertaleModLib.Models.UndertaleGeneralInfo;
 
 namespace UndertaleModLib.Models
 {
     // TODO: INotifyPropertyChanged
     public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject
     {
+        public FunctionClassification Classification { get; set; }
         public UndertaleString Name { get; set; }
         public int UnknownChainEndingValue { get; set; }
 

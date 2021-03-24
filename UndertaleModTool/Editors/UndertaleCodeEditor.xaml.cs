@@ -253,7 +253,20 @@ namespace UndertaleModTool
             {
                 Match m = Regex.Match(line, "^ds_map_add\\(global.text_data_en, \"(.*)\"@([0-9]+), \"(.*)\"@([0-9]+)\\)");
                 if (m.Success)
-                    gettext.Add(m.Groups[1].Value, Int32.Parse(m.Groups[4].Value));
+                {
+                    try
+                    {
+                        gettext.Add(m.Groups[1].Value, Int32.Parse(m.Groups[4].Value));
+                    }
+                    catch (ArgumentException)
+                    {
+                        MessageBox.Show("There is a duplicate key in textdata_en. This may cause errors in the comment display of text.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Unknown error in textdata_en. This may cause errors in the comment display of text.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
             }
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
 
 namespace UndertaleModLib
@@ -22,6 +23,7 @@ namespace UndertaleModLib
         public IList<UndertalePath> Paths => FORM.PATH?.List;
         public IList<UndertaleScript> Scripts => FORM.SCPT?.List;
         public IList<UndertaleGlobalInit> GlobalInitScripts => FORM.GLOB?.List;
+        public IList<UndertaleGlobalInit> GameEndScripts => FORM.GMEN?.List;
         public IList<UndertaleShader> Shaders => FORM.SHDR?.List;
         public IList<UndertaleFont> Fonts => FORM.FONT?.List;
         public IList<UndertaleTimeline> Timelines => FORM.TMLN?.List;
@@ -48,6 +50,7 @@ namespace UndertaleModLib
         public IList<UndertaleSequence> Sequences => FORM.SEQN?.List;
 
         public bool UnsupportedBytecodeVersion = false;
+        public bool IsTPAG4ByteAligned = false;
         public bool GMS2_2_2_302 = false;
         public bool GMS2_3 = false;
         public int PaddingAlignException = -1;
@@ -99,6 +102,12 @@ namespace UndertaleModLib
                 return AnimationCurves.IndexOf(obj as UndertaleAnimationCurve);
             if (obj is UndertaleSequence)
                 return Sequences.IndexOf(obj as UndertaleSequence);
+            if (obj is UndertaleEmbeddedAudio)
+                return EmbeddedAudio.IndexOf(obj as UndertaleEmbeddedAudio);
+            if (obj is UndertaleEmbeddedTexture)
+                return EmbeddedTextures.IndexOf(obj as UndertaleEmbeddedTexture);
+            if (obj is UndertaleTexturePageItem)
+                return TexturePageItems.IndexOf(obj as UndertaleTexturePageItem);
 
             if (panicIfInvalid)
                 throw new InvalidOperationException();
@@ -152,6 +161,32 @@ namespace UndertaleModLib
         public bool IsYYC()
         {
             return GeneralInfo != null && Code == null;
+        }
+
+        public uint ExtensionFindLastId()
+        {
+            // The reason:
+            // Extension function id is literally the index of it in the Runner internal lists
+            // It must never overlap
+            // So, a good helper is needed.
+
+            uint id = 1; // first Id is always one, I checked.
+            foreach (var extn in this.Extensions)
+            {
+                foreach (var file in extn.Files)
+                {
+                    foreach (var func in file.Functions)
+                    {
+                        if (func.ID > id)
+                        {
+                            id = func.ID;
+                        }
+                    }
+                }
+            }
+
+            id++; // last id that *we* can use, so increment by one.
+            return id;
         }
 
         public static UndertaleData CreateNew()
@@ -320,9 +355,9 @@ namespace UndertaleModLib
             return vari;
         }
 
-        public static UndertaleExtension.ExtensionFunction DefineExtensionFunction(this IList<UndertaleExtension.ExtensionFunction> extfuncs, IList<UndertaleFunction> funcs, IList<UndertaleString> strg, uint id, uint kind, string name, UndertaleExtension.ExtensionVarType rettype, string extname, params UndertaleExtension.ExtensionVarType[] args)
+        public static UndertaleExtensionFunction DefineExtensionFunction(this IList<UndertaleExtensionFunction> extfuncs, IList<UndertaleFunction> funcs, IList<UndertaleString> strg, uint id, uint kind, string name, UndertaleExtensionVarType rettype, string extname, params UndertaleExtensionVarType[] args)
         {
-            var func = new UndertaleExtension.ExtensionFunction()
+            var func = new UndertaleExtensionFunction()
             {
                 ID = id,
                 Name = strg.MakeString(name),
@@ -331,7 +366,7 @@ namespace UndertaleModLib
                 RetType = rettype
             };
 	        foreach(var a in args)
-                func.Arguments.Add(new UndertaleExtension.ExtensionFunctionArg() { Type = a });
+                func.Arguments.Add(new UndertaleExtensionFunctionArg() { Type = a });
             extfuncs.Add(func);
             funcs.EnsureDefined(name, strg);
             return func;

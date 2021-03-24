@@ -52,7 +52,7 @@ namespace UndertaleModTool
         {
             var target = new RenderTargetBitmap((int)RoomGraphics.RenderSize.Width, (int)RoomGraphics.RenderSize.Height, 96, 96, PixelFormats.Pbgra32);
             target.Render(RoomGraphics);
-            var encoder = new PngBitmapEncoder();
+            var encoder = new PngBitmapEncoder() { Interlace = PngInterlaceOption.Off };
             encoder.Frames.Add(BitmapFrame.Create(target));
             encoder.Save(outfile);
         }

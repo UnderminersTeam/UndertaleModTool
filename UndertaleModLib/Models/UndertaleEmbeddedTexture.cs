@@ -8,12 +8,14 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleEmbeddedTexture : UndertaleResource, INotifyPropertyChanged
+    public class UndertaleEmbeddedTexture : UndertaleNamedResource, INotifyPropertyChanged
     {
+        private UndertaleString _Name;
         private uint _GeneratedMips;
         private uint _Scaled = 0;
         private TexData _TextureData = new TexData();
 
+        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public uint Scaled { get => _Scaled; set { _Scaled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Scaled")); } }
         public uint GeneratedMips { get => _GeneratedMips; set { _GeneratedMips = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GeneratedMips")); } }
         public TexData TextureData { get => _TextureData; set { _TextureData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureData")); } }
@@ -54,6 +56,19 @@ namespace UndertaleModLib.Models
             reader.ReadUndertaleObject(TextureData);
         }
 
+        public override string ToString()
+        {
+            try
+            {
+                return Name.Content + " (" + GetType().Name + ")";
+            }
+            catch
+            {
+                Name = new UndertaleString("Texture Unknown Index");
+            }
+            return Name.Content + " (" + GetType().Name + ")";
+        }
+
         public class TexData : UndertaleObject, INotifyPropertyChanged
         {
             private byte[] _TextureBlob;
@@ -90,11 +105,6 @@ namespace UndertaleModLib.Models
                 reader.Position = startAddress;
                 TextureBlob = reader.ReadBytes((int)length);
             }
-        }
-
-        public override string ToString()
-        {
-            return " (" + GetType().Name + ")";
         }
     }
 }

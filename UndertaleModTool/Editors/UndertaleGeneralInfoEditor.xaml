@@ -75,19 +75,8 @@
                 <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Game ID</TextBlock>
                 <TextBox Background="#FFF104A6" Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.GameID}"/>
 
-                <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Unknown</TextBlock>
-                <Grid Grid.Row="8" Grid.Column="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox Background="#FFF104A6" Grid.Column="0" Margin="3" Text="{Binding GeneralInfo.Unknown1}"/>
-                    <TextBox Background="#FFF104A6" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.Unknown2}"/>
-                    <TextBox Background="#FFF104A6" Grid.Column="2" Margin="3" Text="{Binding GeneralInfo.Unknown3}"/>
-                    <TextBox Background="#FFF104A6" Grid.Column="3" Margin="3" Text="{Binding GeneralInfo.Unknown4}"/>
-                </Grid>
+                <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">DirectPlay GUID</TextBlock>
+                <TextBox Background="#FFF104A6" Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.DirectPlayGuid}"/>
 
                 <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Name</TextBlock>
                 <local:UndertaleStringReference Grid.Row="9" Grid.Column="1" Margin="3" ObjectReference="{Binding GeneralInfo.Name}"/>
@@ -161,24 +150,10 @@
                 <local:UndertaleStringReference Grid.Row="16" Grid.Column="1" Margin="3" ObjectReference="{Binding GeneralInfo.DisplayName}"/>
 
                 <TextBlock Grid.Row="17" Grid.Column="0" Margin="3">Active targets</TextBlock>
-                <Grid Grid.Row="17" Grid.Column="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox Background="#FFF104A6" Grid.Column="0" Margin="3" Text="{Binding GeneralInfo.ActiveTargets1}"/>
-                    <TextBox Background="#FFF104A6" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.ActiveTargets2}"/>
-                </Grid>
+                <TextBox Background="#FFF104A6" Grid.Row="17" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.ActiveTargets}"/>
 
                 <TextBlock Grid.Row="18" Grid.Column="0" Margin="3">Function classifications</TextBlock>
-                <Grid Grid.Row="18" Grid.Column="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox Background="#FFF104A6" Grid.Column="0" Margin="3" Text="{Binding GeneralInfo.FunctionClassifications1}"/>
-                    <TextBox Background="#FFF104A6" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.FunctionClassifications2}"/>
-                </Grid>
+                <TextBox Background="#FFF104A6" Grid.Row="18" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.FunctionClassifications}"/>
 
                 <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Steam AppID</TextBlock>
                 <TextBox Background="#FFF104A6" Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.SteamAppID}"/>

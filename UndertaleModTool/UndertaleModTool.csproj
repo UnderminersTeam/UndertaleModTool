@@ -237,14 +237,23 @@
     <Compile Include="Converters\MaskImageConverter.cs" />
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Converters\RectConverter.cs" />
+    <Compile Include="Editors\UndertaleGameEndEditor.xaml.cs">
+      <DependentUpon>UndertaleGameEndEditor.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Editors\UndertaleAudioGroupEditor.xaml.cs">
       <DependentUpon>UndertaleAudioGroupEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="Editors\UndertaleEmbeddedImageEditor.xaml.cs">
       <DependentUpon>UndertaleEmbeddedImageEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Editors\UndertaleExtensionFileEditor.xaml.cs">
+      <DependentUpon>UndertaleExtensionFileEditor.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Editors\UndertaleExtensionEditor.xaml.cs">
       <DependentUpon>UndertaleExtensionEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editors\UndertaleExtensionFunctionEditor.xaml.cs">
+      <DependentUpon>UndertaleExtensionFunctionEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="Editors\UndertaleGlobalInitEditor.xaml.cs">
       <DependentUpon>UndertaleGlobalInitEditor.xaml</DependentUpon>
@@ -282,7 +291,13 @@
     <None Include="ExperimentalScripts\BetterVaporiserForUT.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="ExperimentalScripts\ConvertFrom17to16.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="ExperimentalScripts\DisableDogcheck.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\ToggleAlignment.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="ExperimentalScripts\ExportAllEmbeddedTextures.csx">
@@ -345,6 +360,9 @@
     <None Include="ExperimentalScripts\CheckDecompiler.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="ExperimentalScripts\TestExportAllCode.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="ExperimentalScripts\TextInputTestWPF.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -403,6 +421,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SampleScripts\RoomOfDetermination.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="SampleScripts\Search.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SampleScripts\ShowRoomName.csx">
@@ -494,6 +515,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Editors\UndertaleGameEndEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Editors\UndertaleAudioGroupEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -502,7 +527,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Editors\UndertaleExtensionFileEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Editors\UndertaleExtensionEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editors\UndertaleExtensionFunctionEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

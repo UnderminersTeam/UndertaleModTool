@@ -172,6 +172,7 @@
                     <TreeViewItem Header="Data" IsExpanded="True" FontFamily="Comic Sans MS" Background="#FFF104A6">
                         <TreeViewItem Header="General info" Visibility="{Binding GeneralInfo, Converter={StaticResource VisibleIfNotNull}}"/>
                         <TreeViewItem Header="Global init" Visibility="{Binding GlobalInitScripts, Converter={StaticResource VisibleIfNotNull}}"/>
+                        <TreeViewItem Header="Game End scripts" Visibility="{Binding GameEndScripts, Converter={StaticResource VisibleIfNotNull}}"/>
                         <TreeViewItem Header="Audio groups" ItemsSource="{Binding AudioGroups, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding AudioGroups, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleAudioGroup}">
@@ -350,6 +351,10 @@
                                 <local:UndertaleGlobalInitEditor/>
                             </DataTemplate>
 
+                            <DataTemplate DataType="{x:Type local:GameEndEditor}">
+                                <local:UndertaleGameEndEditor/>
+                            </DataTemplate>
+
                             <DataTemplate DataType="{x:Type undertale:UndertaleAudioGroup}">
                                 <local:UndertaleAudioGroupEditor/>
                             </DataTemplate>
@@ -416,6 +421,14 @@
 
                             <DataTemplate DataType="{x:Type undertale:UndertaleExtension}">
                                 <local:UndertaleExtensionEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleExtensionFile}">
+                                <local:UndertaleExtensionFileEditor/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type undertale:UndertaleExtensionFunction}">
+                                <local:UndertaleExtensionFunctionEditor/>
                             </DataTemplate>
 
                             <DataTemplate DataType="{x:Type undertale:UndertaleCode}">

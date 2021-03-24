@@ -100,9 +100,9 @@ namespace UndertaleModLib.Compiler
             {
                 foreach (UndertaleExtension e in Data.Extensions)
                 {
-                    foreach (UndertaleExtension.ExtensionFile file in e.Files)
+                    foreach (UndertaleExtensionFile file in e.Files)
                     {
-                        foreach (UndertaleExtension.ExtensionFunction func in file.Functions)
+                        foreach (UndertaleExtensionFunction func in file.Functions)
                         {
                             scripts.Add(func.Name.Content);
                         }

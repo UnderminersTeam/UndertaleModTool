@@ -55,6 +55,8 @@ namespace UndertaleModTool
         private object _Selected;
         public object Selected { get { return _Selected; } private set { _Selected = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Selected")); } }
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
+        //God this is so ugly, if there's a better way, please, put in a pull request
+        public Visibility IsExtProductIDEligible => (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && (((Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? Visibility.Visible : Visibility.Collapsed;
 
         public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
 
@@ -503,6 +505,9 @@ namespace UndertaleModTool
                     case "Global init":
                         Highlighted = new GlobalInitEditor(Data?.GlobalInitScripts);
                         break;
+                    case "Game End scripts":
+                        Highlighted = new GameEndEditor(Data?.GameEndScripts);
+                        break;
                     case "Code locals (unused?)":
                         Highlighted = new DescriptionView(item, "This seems to be unused as far as I can tell - you can remove the whole list and nothing happens");
                         break;
@@ -580,7 +585,7 @@ namespace UndertaleModTool
             TreeViewItem targetTreeItem = VisualUpwardSearch<TreeViewItem>(e.OriginalSource as UIElement);
             UndertaleObject targetItem = targetTreeItem.DataContext as UndertaleObject;
 
-            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Move) && sourceItem != null && targetItem != null && sourceItem != targetItem && sourceItem.GetType() == targetItem.GetType() ? DragDropEffects.Move : DragDropEffects.None;
+            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Move) && sourceItem != null && targetItem != null && sourceItem != targetItem && sourceItem.GetType() == targetItem.GetType() && SettingsWindow.AssetOrderSwappingEnabled == "True" ? DragDropEffects.Move : DragDropEffects.None;
             if (e.Effects == DragDropEffects.Move)
             {
                 object source = GetNearestParent<TreeViewItem>(targetTreeItem).ItemsSource;
@@ -780,40 +785,67 @@ namespace UndertaleModTool
             UndertaleResource obj = Activator.CreateInstance(t) as UndertaleResource;
             if (obj is UndertaleNamedResource)
             {
-                string newname = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
-                (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newname);
-                if (obj is UndertaleRoom)
-                    (obj as UndertaleRoom).Caption = Data.Strings.MakeString("");
-                if (obj is UndertaleScript)
+                bool doMakeString = !((obj is UndertaleTexturePageItem) || (obj is UndertaleEmbeddedAudio) || (obj is UndertaleEmbeddedTexture));
+                string notDataNewName = null;
+                if (obj is UndertaleTexturePageItem)
                 {
-                    UndertaleCode code = new UndertaleCode();
-                    code.Name = Data.Strings.MakeString("gml_Script_" + newname);
-                    Data.Code.Add(code);
-                    if (Data?.GeneralInfo.BytecodeVersion > 14)
+                    notDataNewName = "PageItem " + list.Count;
+                }
+                if ((obj is UndertaleExtension) && (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && (((Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((Data?.GeneralInfo?.Build ?? 0) == 1539)))))
+                {
+                    var newProductID = new byte[] { 0xBA, 0x5E, 0xBA, 0x11, 0xBA, 0xDD, 0x06, 0x60, 0xBE, 0xEF, 0xED, 0xBA, 0x0B, 0xAB, 0xBA, 0xBE };
+                    Data.FORM.EXTN.productIdData.Add(newProductID);
+                }
+                if (obj is UndertaleEmbeddedAudio)
+                {
+                    notDataNewName = "EmbeddedSound " + list.Count;
+                }
+                if (obj is UndertaleEmbeddedTexture)
+                {
+                    notDataNewName = "Texture " + list.Count;
+                }
+
+                if (doMakeString)
+                {
+                    string newname = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
+                    (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newname);
+                    if (obj is UndertaleRoom)
+                        (obj as UndertaleRoom).Caption = Data.Strings.MakeString("");
+                    if (obj is UndertaleScript)
+                    {
+                        UndertaleCode code = new UndertaleCode();
+                        code.Name = Data.Strings.MakeString("gml_Script_" + newname);
+                        Data.Code.Add(code);
+                        if (Data?.GeneralInfo.BytecodeVersion > 14)
+                        {
+                            UndertaleCodeLocals locals = new UndertaleCodeLocals();
+                            locals.Name = code.Name;
+                            UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+                            argsLocal.Name = Data.Strings.MakeString("arguments");
+                            argsLocal.Index = 0;
+                            locals.Locals.Add(argsLocal);
+                            code.LocalsCount = 1;
+                            code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals);
+                            Data.CodeLocals.Add(locals);
+                        }
+                        (obj as UndertaleScript).Code = code;
+                    }
+                    if ((obj is UndertaleCode) && (Data?.GeneralInfo.BytecodeVersion > 14))
                     {
                         UndertaleCodeLocals locals = new UndertaleCodeLocals();
-                        locals.Name = code.Name;
+                        locals.Name = (obj as UndertaleCode).Name;
                         UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
                         argsLocal.Name = Data.Strings.MakeString("arguments");
                         argsLocal.Index = 0;
                         locals.Locals.Add(argsLocal);
-                        code.LocalsCount = 1;
-                        code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals);
+                        (obj as UndertaleCode).LocalsCount = 1;
+                        (obj as UndertaleCode).GenerateLocalVarDefinitions((obj as UndertaleCode).FindReferencedLocalVars(), locals);
                         Data.CodeLocals.Add(locals);
                     }
-                    (obj as UndertaleScript).Code = code;
                 }
-                if ((obj is UndertaleCode) && (Data?.GeneralInfo.BytecodeVersion > 14))
+                else
                 {
-                    UndertaleCodeLocals locals = new UndertaleCodeLocals();
-                    locals.Name = (obj as UndertaleCode).Name;
-                    UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-                    argsLocal.Name = Data.Strings.MakeString("arguments");
-                    argsLocal.Index = 0;
-                    locals.Locals.Add(argsLocal);
-                    (obj as UndertaleCode).LocalsCount = 1;
-                    (obj as UndertaleCode).GenerateLocalVarDefinitions((obj as UndertaleCode).FindReferencedLocalVars(), locals);
-                    Data.CodeLocals.Add(locals);
+                    (obj as UndertaleNamedResource).Name = new UndertaleString(notDataNewName); // not Data.MakeString!
                 }
             }
             list.Add(obj);
@@ -1250,6 +1282,16 @@ namespace UndertaleModTool
         public GlobalInitEditor(IList<UndertaleGlobalInit> globalInits)
         {
             this.GlobalInits = globalInits;
+        }
+    }
+
+    public class GameEndEditor
+    {
+        public IList<UndertaleGlobalInit> GameEnds { get; private set; }
+
+        public GameEndEditor(IList<UndertaleGlobalInit> GameEnds)
+        {
+            this.GameEnds = GameEnds;
         }
     }
 

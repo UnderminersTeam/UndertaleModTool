@@ -34,6 +34,77 @@ namespace UndertaleModLib.Models
             LicenseExclusions = 0x10000,
         }
 
+        [Flags]
+        public enum FunctionClassification : ulong
+        {
+            None = 0x0UL,
+            Internet = 0x1UL,
+            Joystick = 0x2UL,
+            Gamepad = 0x4UL,
+            Immersion = 0x8UL,
+            Screengrab = 0x10UL,
+            Math = 0x20UL,
+            Action = 0x40UL,
+            MatrixD3D = 0x80UL,
+            D3DModel = 0x100UL,
+            DataStructures = 0x200UL,
+            File = 0x400UL,
+            INI = 0x800UL,
+            Filename = 0x1000UL,
+            Directory = 0x2000UL,
+            Environment = 0x4000UL,
+            UNUSED1 = 0x8000UL,
+            HTTP = 0x10000UL,
+            Encoding = 0x20000UL,
+            UIDialog = 0x40000UL,
+            MotionPlanning = 0x80000UL,
+            ShapeCollision = 0x100000UL,
+            Instance = 0x200000UL,
+            Room = 0x400000UL,
+            Game = 0x800000UL,
+            Display = 0x1000000UL,
+            Device = 0x2000000UL,
+            Window = 0x4000000UL,
+            DrawColor = 0x8000000UL,
+            Texture = 0x10000000UL,
+            Layer = 0x20000000UL,
+            String = 0x40000000UL,
+            Tiles = 0x80000000UL,
+            Surface = 0x100000000UL,
+            Skeleton = 0x200000000UL,
+            IO = 0x400000000UL,
+            Variables = 0x800000000UL,
+            Array = 0x1000000000UL,
+            ExternalCall = 0x2000000000UL,
+            Notification = 0x4000000000UL,
+            Date = 0x8000000000UL,
+            Particle = 0x10000000000UL,
+            Sprite = 0x20000000000UL,
+            Clickable = 0x40000000000UL,
+            LegacySound = 0x80000000000UL,
+            Audio = 0x100000000000UL,
+            Event = 0x200000000000UL,
+            UNUSED2 = 0x400000000000UL,
+            FreeType = 0x800000000000UL,
+            Analytics = 0x1000000000000UL,
+            UNUSED3 = 0x2000000000000UL,
+            UNUSED4 = 0x4000000000000UL,
+            Achievement = 0x8000000000000UL,
+            CloudSaving = 0x10000000000000UL,
+            Ads = 0x20000000000000UL,
+            OS = 0x40000000000000UL,
+            IAP = 0x80000000000000UL,
+            Facebook = 0x100000000000000UL,
+            Physics = 0x200000000000000UL,
+            FlashAA = 0x400000000000000UL,
+            Console = 0x800000000000000UL,
+            Buffer = 0x1000000000000000UL,
+            Steam = 0x2000000000000000UL,
+            UNUSED5 = 2310346608841064448UL,
+            Shaders = 0x4000000000000000UL,
+            VertexBuffers = 9223372036854775808UL
+        }
+
         public bool DisableDebugger { get; set; } = true;
         public byte BytecodeVersion { get; set; } = 0x10;
         public ushort Unknown { get; set; } = 0;
@@ -42,10 +113,7 @@ namespace UndertaleModLib.Models
         public uint LastObj { get; set; } = 100000;
         public uint LastTile { get; set; } = 10000000;
         public uint GameID { get; set; } = 13371337;
-        public uint Unknown1 { get; set; } = 0;
-        public uint Unknown2 { get; set; } = 0;
-        public uint Unknown3 { get; set; } = 0;
-        public uint Unknown4 { get; set; } = 0;
+        public Guid DirectPlayGuid { get; set; } = Guid.Empty; // in Studio it's always empty.
         public UndertaleString Name { get; set; }
         public uint Major { get; set; } = 1;
         public uint Minor { get; set; } = 0;
@@ -58,10 +126,8 @@ namespace UndertaleModLib.Models
         public uint LicenseCRC32 { get; set; }
         public ulong Timestamp { get; set; } = 0;
         public UndertaleString DisplayName { get; set; }
-        public uint ActiveTargets1 { get; set; } = 0;
-        public uint ActiveTargets2 { get; set; } = 0;
-        public uint FunctionClassifications1 { get; set; } = 0;
-        public uint FunctionClassifications2 { get; set; } = 0;
+        public ulong ActiveTargets { get; set; } = 0;
+        public FunctionClassification FunctionClassifications { get; set; } = FunctionClassification.None; // Initializing it with None is a very bad idea.
         public int SteamAppID { get; set; } = 0;
         public uint DebuggerPort { get; set; } = 6502;
         public UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM> RoomOrder { get; private set; } = new UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>();
@@ -82,10 +148,7 @@ namespace UndertaleModLib.Models
             writer.Write(LastObj);
             writer.Write(LastTile);
             writer.Write(GameID);
-            writer.Write(Unknown1);
-            writer.Write(Unknown2);
-            writer.Write(Unknown3);
-            writer.Write(Unknown4);
+            writer.Write(DirectPlayGuid.ToByteArray());
             writer.WriteUndertaleString(Name);
             writer.Write(Major);
             writer.Write(Minor);
@@ -100,10 +163,13 @@ namespace UndertaleModLib.Models
             writer.Write(LicenseCRC32);
             writer.Write(Timestamp);
             writer.WriteUndertaleString(DisplayName);
-            writer.Write(ActiveTargets1);
-            writer.Write(ActiveTargets2);
-            writer.Write(FunctionClassifications1);
-            writer.Write(FunctionClassifications2);
+
+            // Should always be zero.
+            writer.Write(ActiveTargets);
+
+            // Very weird value. Decides if Runner should initialize certain subsystems.
+            writer.Write((ulong)FunctionClassifications);
+
             writer.Write(SteamAppID);
             writer.Write(DebuggerPort);
             writer.WriteUndertaleObject(RoomOrder);
@@ -164,10 +230,8 @@ namespace UndertaleModLib.Models
             LastObj = reader.ReadUInt32();
             LastTile = reader.ReadUInt32();
             GameID = reader.ReadUInt32();
-            Unknown1 = reader.ReadUInt32();
-            Unknown2 = reader.ReadUInt32();
-            Unknown3 = reader.ReadUInt32();
-            Unknown4 = reader.ReadUInt32();
+            byte[] GuidData = reader.ReadBytes(16);
+            DirectPlayGuid = new Guid(GuidData);
             Name = reader.ReadUndertaleString();
             Major = reader.ReadUInt32();
             Minor = reader.ReadUInt32();
@@ -180,10 +244,8 @@ namespace UndertaleModLib.Models
             LicenseCRC32 = reader.ReadUInt32();
             Timestamp = reader.ReadUInt64();
             DisplayName = reader.ReadUndertaleString();
-            ActiveTargets1 = reader.ReadUInt32();
-            ActiveTargets2 = reader.ReadUInt32();
-            FunctionClassifications1 = reader.ReadUInt32();
-            FunctionClassifications2 = reader.ReadUInt32();
+            ActiveTargets = reader.ReadUInt64();
+            FunctionClassifications = (FunctionClassification)reader.ReadUInt64();
             SteamAppID = reader.ReadInt32();
             DebuggerPort = reader.ReadUInt32();
             RoomOrder = reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>>();
