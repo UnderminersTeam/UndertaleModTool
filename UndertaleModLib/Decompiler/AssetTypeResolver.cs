@@ -1087,8 +1087,6 @@ namespace UndertaleModLib.Decompiler
             //Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
-                builtin_funcs["keyboard_multicheck"] = new AssetIDType[] { AssetIDType.KeyboardKey };
-                builtin_funcs["keyboard_multicheck_pressed"] = new AssetIDType[] { AssetIDType.KeyboardKey };
                 //gml_Object_obj_vulkinbody_UNDERTALE_Create_0
                 //Seems to be used a lot as a regular value between the values of around 0-20. 
                 builtin_vars.Add("face", AssetIDType.Sprite);
