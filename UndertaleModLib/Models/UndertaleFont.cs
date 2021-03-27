@@ -141,9 +141,10 @@ namespace UndertaleModLib.Models
             DisplayName = reader.ReadUndertaleString();
             EmSize = reader.ReadUInt32();
             EmSizeIsFloat = false;
-            if (EmSize > 100)
+
+            // since the float is always written negated, it has the first bit set.
+            if ((EmSize & (1 << 31)) != 0)
             {
-                // absurd! GM:S 1.4's IDE doesn't even let you set the size >100! not sure about GMS 2, but still weird and wrong.
                 float fsize = -BitConverter.ToSingle(BitConverter.GetBytes(EmSize), 0);
                 EmSize = (uint)fsize;
                 EmSizeIsFloat = true;
