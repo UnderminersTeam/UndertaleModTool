@@ -11,6 +11,7 @@ namespace UndertaleModLib.Models
     {
         private UndertaleString _Name;
         private UndertaleString _DisplayName;
+        private bool _EmSizeIsFloat;
         private uint _EmSize;
         private bool _Bold;
         private bool _Italic;
@@ -25,6 +26,7 @@ namespace UndertaleModLib.Models
 
         public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public UndertaleString DisplayName { get => _DisplayName; set { _DisplayName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("DisplayName")); } }
+        public bool EmSizeIsFloat { get => _EmSizeIsFloat; set { _EmSizeIsFloat = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("EmSizeIsFloat")); } }
         public uint EmSize { get => _EmSize; set { _EmSize = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("EmSize")); } }
         public bool Bold { get => _Bold; set { _Bold = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Bold")); } }
         public bool Italic { get => _Italic; set { _Italic = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Italic")); } }
@@ -108,7 +110,17 @@ namespace UndertaleModLib.Models
         {
             writer.WriteUndertaleString(Name);
             writer.WriteUndertaleString(DisplayName);
-            writer.Write(EmSize);
+            if (EmSizeIsFloat)
+            {
+                // cast to a float and negate.
+                writer.Write(0.0f - EmSize);
+            }
+            else
+            {
+                // pre-GMS2.3
+                writer.Write(EmSize);
+            }
+
             writer.Write(Bold);
             writer.Write(Italic);
             writer.Write(RangeStart);
@@ -128,6 +140,15 @@ namespace UndertaleModLib.Models
             Name = reader.ReadUndertaleString();
             DisplayName = reader.ReadUndertaleString();
             EmSize = reader.ReadUInt32();
+            EmSizeIsFloat = false;
+            if (EmSize > 100)
+            {
+                // absurd! GM:S 1.4's IDE doesn't even let you set the size >100! not sure about GMS 2, but still weird and wrong.
+                float fsize = -BitConverter.ToSingle(BitConverter.GetBytes(EmSize), 0);
+                EmSize = (uint)fsize;
+                EmSizeIsFloat = true;
+            }
+
             Bold = reader.ReadBoolean();
             Italic = reader.ReadBoolean();
             RangeStart = reader.ReadUInt16();
