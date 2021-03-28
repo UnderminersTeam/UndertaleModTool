@@ -489,6 +489,7 @@ namespace UndertaleModLib.Models
                 }
 
                 case UndertaleYYSWFFillType.FillInvalid:
+                default:
                 {
                     reader.SubmitWarning("Tried to read invalid fill data.");
                     break;
@@ -525,6 +526,11 @@ namespace UndertaleModLib.Models
             Green = reader.ReadByte();
             Blue = reader.ReadByte();
             Alpha = reader.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            return $"UndertaleYYSWFLineStyleData ({Red};{Green};{Blue};{Alpha})";
         }
     }
 
@@ -994,10 +1000,13 @@ namespace UndertaleModLib.Models
                     break;
                 }
 
+                case UndertaleYYSWFItemType.ItemFont:
+                case UndertaleYYSWFItemType.ItemInvalid:
+                case UndertaleYYSWFItemType.ItemTextField:
+                case UndertaleYYSWFItemType.ItemSprite:
                 default:
                 {
-                    reader.SubmitWarning("Trying to read unknown YYSWFItem, " + ItemType.ToString());
-                        throw new Exception("Invalid YYSWFItem type " + ItemType.ToString());
+                    reader.SubmitWarning("Tried to read unknown YYSWFItem, " + ItemType.ToString());
                     break;
                 }
             }
