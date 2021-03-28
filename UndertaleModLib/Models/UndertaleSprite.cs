@@ -68,6 +68,58 @@ namespace UndertaleModLib.Models
         }
     }
 
+    public class UndertaleYYSWFMatrixColor : UndertaleObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private const int MATRIX_SIZE = 4;
+        private int[] _Additive;
+        private int[] _Multiply;
+
+        public int[] Additive { get => _Additive; set { _Additive = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Additive")); } }
+        public int[] Multiply { get => _Multiply; set { _Multiply = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Multiply")); } }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            foreach (int v in Additive)
+                writer.Write(v);
+            foreach (int v in Multiply)
+                writer.Write(v);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            Additive = new int[MATRIX_SIZE];
+            Multiply = new int[MATRIX_SIZE];
+            for (int i = 0; i < Additive.Length; i++)
+                Additive[i] = reader.ReadInt32();
+            for (int i = 0; i < Multiply.Length; i++)
+                Multiply[i] = reader.ReadInt32();
+        }
+    }
+
+    public class UndertaleYYSWFMatrix33 : UndertaleObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private const int MATRIX_SIZE = 9;
+        private float[] _Values;
+        public float[] Values { get => _Values; set { _Values = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Values")); } }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            foreach (float v in Values)
+                writer.Write(v);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            Values = new float[MATRIX_SIZE];
+            for (int i = 0; i < Values.Length; i++)
+                Values[i] = reader.ReadSingle();
+        }
+    }
+
     public class UndertaleYYSWFTimelineObject : UndertaleObject, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -76,9 +128,8 @@ namespace UndertaleModLib.Models
         private int _CharIndex;
         private int _Depth;
         private int _ClippingDepth;
-        private float[] _TransformationMatrix; // matrix33
-        private int[] _ColorMultiplyMatrix; // vec4 rgba
-        private int[] _ColorAdditiveMatrix; // vec4 rgba
+        private UndertaleYYSWFMatrix33 _TransformationMatrix;
+        private UndertaleYYSWFMatrixColor _ColorMatrix;
 
         private float _MinX;
         private float _MaxX;
@@ -89,9 +140,8 @@ namespace UndertaleModLib.Models
         public int CharIndex { get => _CharIndex; set { _CharIndex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CharIndex")); } }
         public int Depth { get => _Depth; set { _Depth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Depth")); } }
         public int ClippingDepth { get => _ClippingDepth; set { _ClippingDepth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ClippingDepth")); } }
-        public float[] TransformationMatrix { get => _TransformationMatrix; set { _TransformationMatrix = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TransformationMatrix")); } }
-        public int[] ColorMultiplyMatrix { get => _ColorMultiplyMatrix; set { _ColorMultiplyMatrix = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ColorMultiplyMatrix")); } }
-        public int[] ColorAdditiveMatrix { get => _ColorAdditiveMatrix; set { _ColorAdditiveMatrix = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ColorAdditiveMatrix")); } }
+        public UndertaleYYSWFMatrix33 TransformationMatrix { get => _TransformationMatrix; set { _TransformationMatrix = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TransformationMatrix")); } }
+        public UndertaleYYSWFMatrixColor ColorMatrix { get => _ColorMatrix; set { _ColorMatrix = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ColorMatrix")); } }
         public float MinX { get => _MinX; set { _MinX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MinX")); } }
         public float MaxX { get => _MaxX; set { _MaxX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MaxX")); } }
         public float MinY { get => _MinY; set { _MinY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MinY")); } }
@@ -103,16 +153,12 @@ namespace UndertaleModLib.Models
             writer.Write(CharIndex);
             writer.Write(Depth);
             writer.Write(ClippingDepth);
-            for (int i = 0; i < 4; i++)
-                writer.Write(ColorMultiplyMatrix[i]);
-            for (int i = 0; i < 4; i++)
-                writer.Write(ColorAdditiveMatrix[i]);
+            writer.WriteUndertaleObject(ColorMatrix);
             writer.Write(MinX);
             writer.Write(MaxX);
             writer.Write(MinY);
             writer.Write(MaxY);
-            for (int i = 0; i < 9; i++)
-                writer.Write(TransformationMatrix[i]);
+            writer.WriteUndertaleObject(TransformationMatrix);
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -121,19 +167,12 @@ namespace UndertaleModLib.Models
             CharIndex = reader.ReadInt32();
             Depth = reader.ReadInt32();
             ClippingDepth = reader.ReadInt32();
-            ColorMultiplyMatrix = new int[4]; // rgba
-            for (int i = 0; i < 4; i++)
-                ColorMultiplyMatrix[i] = reader.ReadInt32();
-            ColorAdditiveMatrix = new int[4];
-            for (int i = 0; i < 4; i++)
-                ColorAdditiveMatrix[i] = reader.ReadInt32();
+            ColorMatrix = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFMatrixColor>();
             MinX = reader.ReadSingle();
             MaxX = reader.ReadSingle();
             MinY = reader.ReadSingle();
             MaxY = reader.ReadSingle();
-            TransformationMatrix = new float[9];
-            for (int i = 0; i < 9; i++)
-                TransformationMatrix[i] = reader.ReadSingle();
+            TransformationMatrix = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFMatrix33>();
         }
     }
 
@@ -240,6 +279,145 @@ namespace UndertaleModLib.Models
         FillBitmap
     }
 
+    public enum UndertaleYYSWFBitmapFillType : int
+    {
+        FillRepeat,
+        FillClamp,
+        FillRepeatPoint,
+        FillClampPoint
+    }
+
+    public enum UndertaleYYSWFGradientFillType : int
+    {
+        FillLinear,
+        FillRadial
+    }
+
+    public class UndertaleYYSWFSolidFillData : UndertaleObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private byte _Red;
+        private byte _Green;
+        private byte _Blue;
+        private byte _Alpha;
+
+        public byte Red { get => _Red; set { _Red = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Red")); } }
+        public byte Green { get => _Green; set { _Green = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Green")); } }
+        public byte Blue { get => _Blue; set { _Blue = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Blue")); } }
+        public byte Alpha { get => _Alpha; set { _Alpha = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Alpha")); } }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write(Red);
+            writer.Write(Green);
+            writer.Write(Blue);
+            writer.Write(Alpha);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            Red = reader.ReadByte();
+            Green = reader.ReadByte();
+            Blue = reader.ReadByte();
+            Alpha = reader.ReadByte();
+        }
+    }
+
+    public class UndertaleYYSWFGradientRecord : UndertaleObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private int _Ratio;
+        private byte _Red;
+        private byte _Green;
+        private byte _Blue;
+        private byte _Alpha;
+
+        public int Ratio { get => _Ratio; set { _Ratio = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Ratio")); } }
+        public byte Red { get => _Red; set { _Red = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Red")); } }
+        public byte Green { get => _Green; set { _Green = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Green")); } }
+        public byte Blue { get => _Blue; set { _Blue = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Blue")); } }
+        public byte Alpha { get => _Alpha; set { _Alpha = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Alpha")); } }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write(Ratio);
+            writer.Write(Red);
+            writer.Write(Green);
+            writer.Write(Blue);
+            writer.Write(Alpha);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            Ratio = reader.ReadInt32();
+            Red = reader.ReadByte();
+            Green = reader.ReadByte();
+            Blue = reader.ReadByte();
+            Alpha = reader.ReadByte();
+        }
+    }
+
+    public class UndertaleYYSWFGradientFillData : UndertaleObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private UndertaleYYSWFGradientFillType _GradientFillType;
+        private UndertaleYYSWFMatrix33 _TransformationMatrix;
+        private UndertaleSimpleList<UndertaleYYSWFGradientRecord> _Records;
+
+        public UndertaleYYSWFGradientFillType GradientFillType { get => _GradientFillType; set { _GradientFillType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GradientFillType")); } }
+        public UndertaleYYSWFMatrix33 TransformationMatrix { get => _TransformationMatrix; set { _TransformationMatrix = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TransformationMatrix")); } }
+        public UndertaleSimpleList<UndertaleYYSWFGradientRecord> Records { get => _Records; set { _Records = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Records")); } }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write((int)GradientFillType);
+            writer.WriteUndertaleObject(TransformationMatrix);
+            writer.WriteUndertaleObject(Records);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            GradientFillType = (UndertaleYYSWFGradientFillType)reader.ReadInt32();
+            TransformationMatrix = reader.ReadUndertaleObject<UndertaleYYSWFMatrix33>();
+            Records = new UndertaleSimpleList<UndertaleYYSWFGradientRecord>();
+            int count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                Records.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFGradientRecord>());
+            }
+        }
+    }
+
+    public class UndertaleYYSWFBitmapFillData : UndertaleObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private UndertaleYYSWFBitmapFillType _BitmapFillType;
+        private int _CharID;
+        private UndertaleYYSWFMatrix33 _TransformationMatrix;
+
+        public UndertaleYYSWFBitmapFillType BitmapFillType { get => _BitmapFillType; set { _BitmapFillType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BitmapFillType")); } }
+        public int CharID { get => _CharID; set { _CharID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CharID")); } }
+        public UndertaleYYSWFMatrix33 TransformationMatrix { get => _TransformationMatrix; set { _TransformationMatrix = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TransformationMatrix")); } }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write((int)BitmapFillType);
+            writer.Write(CharID);
+            writer.WriteUndertaleObject(TransformationMatrix);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            BitmapFillType = (UndertaleYYSWFBitmapFillType)reader.ReadInt32();
+            CharID = reader.ReadInt32();
+            TransformationMatrix = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFMatrix33>();
+        }
+    }
+
     public class UndertaleYYSWFFillData : UndertaleObject, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -247,14 +425,75 @@ namespace UndertaleModLib.Models
         private UndertaleYYSWFFillType _Type;
         public UndertaleYYSWFFillType Type { get => _Type; set { _Type = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Type")); } }
 
+        private UndertaleYYSWFBitmapFillData _BitmapFillData;
+        public UndertaleYYSWFBitmapFillData BitmapFillData { get => _BitmapFillData; set { _BitmapFillData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BitmapFillData")); } }
+
+        private UndertaleYYSWFGradientFillData _GradientFillData;
+        public UndertaleYYSWFGradientFillData GradientFillData { get => _GradientFillData; set { _GradientFillData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GradientFillData")); } }
+
+        private UndertaleYYSWFSolidFillData _SolidFillData;
+        public UndertaleYYSWFSolidFillData SolidFillData { get => _SolidFillData; set { _SolidFillData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SolidFillData")); } }
+
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((int)Type);
+            switch (Type)
+            {
+                case UndertaleYYSWFFillType.FillBitmap:
+                {
+                    writer.WriteUndertaleObject(BitmapFillData);
+                    break;
+                }
+
+                case UndertaleYYSWFFillType.FillGradient:
+                {
+                    writer.WriteUndertaleObject(GradientFillData);
+                    break;
+                }
+
+                case UndertaleYYSWFFillType.FillSolid:
+                {
+                    writer.WriteUndertaleObject(SolidFillData);
+                    break;
+                }
+
+                case UndertaleYYSWFFillType.FillInvalid:
+                {
+                    // throw an exception maybe?
+                    break;
+                }
+            }
         }
 
         public void Unserialize(UndertaleReader reader)
         {
             Type = (UndertaleYYSWFFillType)reader.ReadInt32();
+            switch (Type)
+            {
+                case UndertaleYYSWFFillType.FillBitmap:
+                {
+                    BitmapFillData = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFBitmapFillData>();
+                    break;
+                }
+
+                case UndertaleYYSWFFillType.FillGradient:
+                {
+                    GradientFillData = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFGradientFillData>();
+                    break;
+                }
+
+                case UndertaleYYSWFFillType.FillSolid:
+                {
+                    SolidFillData = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFSolidFillData>();
+                    break;
+                }
+
+                case UndertaleYYSWFFillType.FillInvalid:
+                {
+                    reader.SubmitWarning("Tried to read invalid fill data.");
+                    break;
+                }
+            }
         }
     }
 
