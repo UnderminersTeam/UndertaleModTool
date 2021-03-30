@@ -297,6 +297,9 @@
     <None Include="ExperimentalScripts\DisableDogcheck.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="ExperimentalScripts\FancyRoomSelect.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="ExperimentalScripts\ToggleAlignment.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
