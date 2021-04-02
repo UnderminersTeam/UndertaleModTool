@@ -1,5 +1,5 @@
 //
-// Temporary script to edit GMS2 tile layer data before a proper editor will be introduced. Script by Lassebq with the help of JocKe.
+// Temporary script to edit GMS2 tile layer data before a proper editor will be introduced. Script by Lassebq with the help of Yokim.
 //
 EnsureDataLoaded();
 
@@ -31,7 +31,7 @@ private void GetTileData(string roomindex)
 	{
 	output += "arr2[" + row.ToString() + "] = new uint[" + arr[row].Length.ToString() + "]{ ";
 		for (int col = 0; col < arr[row].Length; col++)
-	output += String.Format("{0}{1} ", arr[row][col], col == arr[row].Length - 1 ? "" : ",");
+	output += String.Format("{0}{1} ", arr[row][col].ToString("000"), col == arr[row].Length - 1 ? "" : ",");
 		output += "};\n";
 	}
 	if (roomindex == null)
