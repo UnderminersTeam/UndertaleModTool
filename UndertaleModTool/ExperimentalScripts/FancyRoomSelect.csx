@@ -6,83 +6,82 @@ EnsureDataLoaded();
 var obj = Data.GameObjects.ByName("obj_roomselector");
 
 if(obj == null) {
-	obj = new UndertaleGameObject() { Name = Data.Strings.MakeString("obj_roomselector") };
+	obj = new UndertaleGameObject() { Name = Data.Strings.MakeString("obj_roomselector"), Persistent = true };
 	Data.GameObjects.Add(obj);
 }
 
-foreach (UndertaleRoom room in Data.Rooms)
-{
-    room.GameObjects.Add(new UndertaleRoom.GameObject()
-    {
-        InstanceID = Data.GeneralInfo.LastObj++,
-        ObjectDefinition = obj,
-        X = 0, Y = 0
-    });
+if(Data.GeneralInfo.Name.Content == "UNDERTALE") {
+	// Remove existing F3 handler to avoid accidentally 
+	// creating system_information_962
+	Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);
+}
+
+var object_list = Data.GeneralInfo.RoomOrder[0].Resource.GameObjects;
+
+bool add_to_room = true;
+foreach(var room_obj in object_list) {
+	if(room_obj.ObjectDefinition == obj) {
+		add_to_room = false;
+		break;
+	}
+}
+
+if(add_to_room) {
+	object_list.Add(new UndertaleRoom.GameObject() {
+		InstanceID = Data.GeneralInfo.LastObj++,
+		ObjectDefinition = obj,
+		X = 0, Y = 0
+	});
 }
 
 bool gms2 = Data.IsVersionAtLeast(2,0,0,0);
 
 obj.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
-selector_active = false;
-selector_initialized = false;
-sel_ever_activated = false;
+if (instance_number(object_index) > 1)
+{
+    instance_destroy(id, false)
+    exit
+}
+selector_active = 0
+selector_initialized = 0
 suggestions = ds_list_create()
-ss = sprite_create_from_surface(application_surface, 0, 0, 0, 0, false, false, 0, 0)
+valid_chars = ""abcdefghijklmnopqrstuvwxyz_0123456789""
+dest_room = room_get_name(room)
+num_suggestions = 0
+case_sensitive = 1
+max_selection = 0
+update_cursor = 1
+cursor_timer = 30
+show_cursor = 1
+image_alpha = 0
+selection = 0
+update = 1
+scale = 1
+fnt = -4
+len = 0
+ss = -4
+for (i = room_first; i <= room_last; i++)
+{
+    if room_exists(i)
+        room_names[i] = (((room_get_name(i) + "" ("") + string(i)) + "")"")
+    else
+        room_names[i] = -4
+}
+ww = -1
+hh = -1
+xx = 0
+yy = 0
 ", Data);
 
 obj.EventHandlerFor(EventType.Step, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
-if (selector_active == true)
+if selector_active
 {
-	if (selector_initialized == false)
-	{
-		if (!variable_global_exists(""room_search_font""))
-		    global.room_search_font = font_add('8bitoperator_jve.ttf', 24, false, false, 32, 127);
-		valid_chars = ""abcdefghijklmnopqrstuvwxyz_0123456789""
-		dest_room = room_get_name(room)
-		num_suggestions = 0
-		case_sensitive = 1
-		max_selection = 0
-		update_cursor = 1
-		cursor_timer = 30
-		show_cursor = 1
-		selection = 0
-		update = 1
-		len = 0
-		for (i = room_first; i <= room_last; i++)
-		{
-		    if room_exists(i)
-		        room_names[i] = (((room_get_name(i) + "" ("") + string(i)) + "")"")
-		    else
-		        room_names[i] = -4
-		}
-		ss_width = surface_get_width(application_surface)
-		ss_height = surface_get_height(application_surface)
-        sprite_delete(ss)
-		ss = sprite_create_from_surface(application_surface, 0, 0, ss_width, ss_height, false, false, 0, 0)
-		scale = min((window_get_width() / ss_width), (window_get_height() / ss_height))
-		instance_deactivate_all(true)
-		hh = (ss_height * scale)
-		ww = (ss_width * scale)
-		keyboard_lastchar = """"
-		display_set_gui_size(ww, hh)
-		keyboard_clear(vk_escape)
-		keyboard_clear(vk_f3)
-		global.interact = 1
-		image_alpha = 0
-		exiting = 0
-		xx = 0
-		yy = 0
-		selector_initialized = true;
-	}
 	global.interact = 1
 	if exiting
 	{
 	    image_alpha -= 0.1
 	    if (image_alpha <= 0)
-	    {
-	        global.interact = 0
-	        instance_destroy()
-	    }
+			event_user(1)
 	}
 	else
 	{
@@ -222,15 +221,13 @@ if (selector_active == true)
 }
 ", Data);
 
-obj.EventHandlerFor(EventType.Draw, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);
-
 obj.EventHandlerFor(EventType.Draw, (uint)64, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
-if (selector_active)
+if selector_active
 {
 	if sprite_exists(ss)
 	    draw_sprite_ext(ss, 0, xx, yy, scale, scale, 0, c_white, 1)
 	draw_set_alpha((image_alpha / 2))
-	draw_set_font(global.room_search_font)
+	draw_set_font(fnt)
 	draw_set_color(c_black)
 	draw_rectangle(xx, yy, (xx + ww), (yy + hh), 0)
 	draw_set_alpha(image_alpha)
@@ -297,25 +294,54 @@ if (selector_active)
 ", Data);
 
 obj.EventHandlerFor(EventType.Destroy, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
-display_set_gui_size(-1, -1)
 ds_list_destroy(suggestions)
 sprite_delete(ss)
-if (sel_ever_activated)
-{
-    instance_activate_all()
-    sel_ever_activated = false;
-}
+font_delete(fnt)
 ", Data);
 
 obj.EventHandlerFor(EventType.Other, (uint)5, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
-instance_destroy()
+if selector_active
+    event_user(1)
 ", Data);
-
 
 obj.EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
-with (obj_roomselector)
-	selector_active = true;
+if (!selector_active)
+    event_user(0)
 ", Data);
+
+obj.EventHandlerFor(EventType.Other, (uint)10, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+selector_active = 1
+if (!selector_initialized)
+    fnt = font_add(""8bitoperator_jve.ttf"", 24, 0, 0, 32, 127)
+dest_room = room_get_name(room)
+ss_width = surface_get_width(application_surface)
+ss_height = surface_get_height(application_surface)
+ss = sprite_create_from_surface(application_surface, 0, 0, ss_width, ss_height, false, false, 0, 0)
+scale = min((window_get_width() / ss_width), (window_get_height() / ss_height))
+instance_deactivate_all(true)
+selector_initialized = 1
+hh = (ss_height * scale)
+ww = (ss_width * scale)
+keyboard_lastchar = """"
+display_set_gui_size(ww, hh)
+ds_list_clear(suggestions)
+keyboard_clear(vk_f3)
+global.interact = 1
+image_alpha = 0
+exiting = 0
+update = 1
+", Data);
+
+obj.EventHandlerFor(EventType.Other, (uint)11, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+display_set_gui_size(-1, -1)
+instance_activate_all()
+keyboard_clear(vk_f3)
+sprite_delete(ss)
+global.interact = 0
+selector_active = 0
+exiting = 0
+", Data);
+
 
 ScriptMessage("Successfully applied for Gamemaker " + (gms2 ? 2 : 1).ToString() + @"
 Controls:
