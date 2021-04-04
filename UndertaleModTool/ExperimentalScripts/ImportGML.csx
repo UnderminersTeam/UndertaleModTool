@@ -125,7 +125,18 @@ foreach (string file in dirFiles)
 						Data.GameObjects.Add(gameObj);
 					} else 
 					{
-						Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
+                        try
+                        {
+                            Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
+                        }
+                        catch (Exception ex)
+                        {
+                            string errorMSG = "Error in " +  codeName + ":\r\n" + ex.ToString() + "\r\nAborted";
+                            ScriptMessage(errorMSG);
+                            SetUMTConsoleText(errorMSG);
+                            SetFinishedMessage(false);
+                            return;
+                        }
 						continue;
 					}
 				}
@@ -146,7 +157,18 @@ foreach (string file in dirFiles)
 			// Code which does not match these criteria cannot link, but are still added to the code section.
 		}
 	}
-	Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
+    try
+    {
+        Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
+    }
+    catch (Exception ex)
+    {
+        string errorMSG = "Error in " +  codeName + ":\r\n" + ex.ToString() + "\r\nAborted";
+        ScriptMessage(errorMSG);
+        SetUMTConsoleText(errorMSG);
+        SetFinishedMessage(false);
+        return;
+    }	
 }
 
 HideProgressBar();
