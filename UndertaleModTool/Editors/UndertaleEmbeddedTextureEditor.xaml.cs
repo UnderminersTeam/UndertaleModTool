@@ -49,6 +49,15 @@ namespace UndertaleModTool
                         bmp = new Bitmap(ms);
                     }
 					bmp.SetResolution(96.0F, 96.0F);
+
+                    var width = (uint)bmp.Width;
+                    var height = (uint)bmp.Height;
+                    
+                    if ((width & (width - 1)) != 0 || (height & (height - 1)) != 0)
+                    {
+                        MessageBox.Show("WARNING: texture page dimensions are not powers of 2. Sprite blurring is very likely in game.", "Unexpected texture dimensions", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+
                     using (var stream = new MemoryStream())
                     {
                         bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
