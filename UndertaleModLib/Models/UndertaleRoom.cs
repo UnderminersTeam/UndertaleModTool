@@ -830,13 +830,13 @@ namespace UndertaleModLib.Models
                 private UndertalePointerList<SpriteInstance> _Sprites;
                 private bool _GMS2_3;
                 private UndertalePointerList<SequenceInstance> _Sequences;
-                private UndertalePointerList<SpriteInstance> _NineSlices;  // TODO!! Nine slices don't exist yet
+                private UndertalePointerList<SpriteInstance> _NineSlices;  // Removed in 2.3.2, before ever used
 
                 public UndertalePointerList<Tile> LegacyTiles { get => _LegacyTiles; set { _LegacyTiles = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LegacyTiles")); } }
                 public UndertalePointerList<SpriteInstance> Sprites { get => _Sprites; set { _Sprites = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sprites")); } }
                 public bool GMS2_3 { get => _GMS2_3; set { _GMS2_3 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2_3")); } }
                 public UndertalePointerList<SequenceInstance> Sequences { get => _Sequences; set { _Sequences = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sequences")); } }
-                public UndertalePointerList<SpriteInstance> NineSlices { get => _NineSlices; set { _NineSlices = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("NineSlices")); } }  // TODO!! Nine slices don't exist yet
+                public UndertalePointerList<SpriteInstance> NineSlices { get => _NineSlices; set { _NineSlices = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("NineSlices")); } }  // Read above comment
 
                 public event PropertyChangedEventHandler PropertyChanged;
 
@@ -847,14 +847,16 @@ namespace UndertaleModLib.Models
                     if (GMS2_3)
                     {
                         writer.WriteUndertaleObjectPointer(Sequences);
-                        writer.WriteUndertaleObjectPointer(NineSlices);
+                        if (!writer.undertaleData.GMS2_3_2)
+                            writer.WriteUndertaleObjectPointer(NineSlices);
                     }
                     writer.WriteUndertaleObject(LegacyTiles);
                     writer.WriteUndertaleObject(Sprites);
                     if (GMS2_3)
                     {
                         writer.WriteUndertaleObject(Sequences);
-                        writer.WriteUndertaleObject(NineSlices);
+                        if (!writer.undertaleData.GMS2_3_2)
+                            writer.WriteUndertaleObject(NineSlices);
                     }
                 }
 
@@ -866,14 +868,16 @@ namespace UndertaleModLib.Models
                     if (GMS2_3)
                     {
                         Sequences = reader.ReadUndertaleObjectPointer<UndertalePointerList<SequenceInstance>>();
-                        NineSlices = reader.ReadUndertaleObjectPointer<UndertalePointerList<SpriteInstance>>(); // TODO!! Nine slices don't exist yet
+                        if (!reader.undertaleData.GMS2_3_2)
+                            NineSlices = reader.ReadUndertaleObjectPointer<UndertalePointerList<SpriteInstance>>();
                     }
                     reader.ReadUndertaleObject(LegacyTiles);
                     reader.ReadUndertaleObject(Sprites);
                     if (GMS2_3)
                     {
                         reader.ReadUndertaleObject(Sequences);
-                        reader.ReadUndertaleObject(NineSlices);
+                        if (!reader.undertaleData.GMS2_3_2)
+                            reader.ReadUndertaleObject(NineSlices);
                     }
                 }
             }

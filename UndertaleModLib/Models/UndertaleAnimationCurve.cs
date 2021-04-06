@@ -21,14 +21,26 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
-            writer.WriteUndertaleString(Name);
+            Serialize(writer, true);
+        }
+
+        public void Serialize(UndertaleWriter writer, bool includeName)
+        {
+            if (includeName)
+                writer.WriteUndertaleString(Name);
             writer.Write((uint)GraphType);
             Channels.Serialize(writer);
         }
 
         public void Unserialize(UndertaleReader reader)
         {
-            Name = reader.ReadUndertaleString();
+            Unserialize(reader, true);
+        }
+
+        public void Unserialize(UndertaleReader reader, bool includeName)
+        {
+            if (includeName)
+                Name = reader.ReadUndertaleString();
             GraphType = (GraphTypeEnum)reader.ReadUInt32();
             Channels = reader.ReadUndertaleObject<UndertaleSimpleList<Channel>>();
         }
@@ -69,22 +81,56 @@ namespace UndertaleModLib.Models
 
             public class Point : UndertaleObject
             {
-                public float X { get; set; }
-                public float Value { get; set; }
+                public float X;
+                public float Value;
+
+                public float BezierX0; // Bezier only
+                public float BezierY0;
+                public float BezierX1;
+                public float BezierY1;
 
                 public void Serialize(UndertaleWriter writer)
                 {
                     writer.Write(X);
                     writer.Write(Value);
-                    writer.Write((int)0);
+
+                    if (writer.undertaleData.GMS2_3_1)
+                    {
+                        writer.Write(BezierX0);
+                        writer.Write(BezierY0);
+                        writer.Write(BezierX1);
+                        writer.Write(BezierY1);
+                    }
+                    else
+                        writer.Write(0);
                 }
 
                 public void Unserialize(UndertaleReader reader)
                 {
                     X = reader.ReadSingle();
                     Value = reader.ReadSingle();
-                    if (reader.ReadInt32() != 0)
-                        throw new Exception("Expected 0 in animation curve point"); // TODO? They might add some "control points" here later it seems
+
+                    if (reader.ReadUInt32() != 0) // in 2.3 a int with the value of 0 would be set here,
+                    {                             // it cannot be version 2.3 if this value isn't 0
+                        reader.undertaleData.GMS2_3_1 = true;
+                        reader.Position -= 4;
+                    }
+                    else
+                    {
+                        if (reader.ReadUInt32() == 0)              // At all points (besides the first one)
+                            reader.undertaleData.GMS2_3_1 = true; // if BezierX0 equals to 0 (the above check)
+                        reader.Position -= 8;                        // then BezierY0 equals to 0 as well (the current check)
+                    }
+
+                    if (reader.undertaleData.GMS2_3_1)
+                    {
+                        BezierX0 = reader.ReadSingle();
+                        BezierY0 = reader.ReadSingle();
+                        BezierX1 = reader.ReadSingle();
+                        BezierY1 = reader.ReadSingle();
+                    }
+                    else
+                        reader.Position += 4;
                 }
             }
         }

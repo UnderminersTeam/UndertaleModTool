@@ -1220,6 +1220,8 @@ namespace UndertaleModLib.Models
 
         public UndertaleSequence V2Sequence;
 
+        public NineSlice V3NineSlice;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public override string ToString()
@@ -1302,7 +1304,8 @@ namespace UndertaleModLib.Models
             writer.Write(OriginY);
             if (IsSpecialType)
             {
-                uint patchPos = 0;
+                uint sequencePatchPos = 0;
+                uint nineSlicePatchPos = 0;
 
                 writer.Write(-1);
                 writer.Write(SVersion);
@@ -1313,8 +1316,13 @@ namespace UndertaleModLib.Models
                     writer.Write((uint)GMS2PlaybackSpeedType);
                     if (SVersion >= 2)
                     {
-                        patchPos = writer.Position;
+                        sequencePatchPos = writer.Position;
                         writer.Write((int)0);
+                        if (SVersion >= 3)
+                        {
+                            nineSlicePatchPos = writer.Position;
+                            writer.Write((int)0);
+                        }
                     }
                 }
 
@@ -1379,15 +1387,23 @@ namespace UndertaleModLib.Models
                         break;
                 }
 
-                // Sequence
-                if (patchPos != 0 && V2Sequence != null) // Normal compiler also checks for sprite type to be normal, but whatever!
+                // Sequence + nine slice
+                if (sequencePatchPos != 0 && V2Sequence != null) // Normal compiler also checks for sprite type to be normal, but whatever!
                 {
                     uint returnTo = writer.Position;
-                    writer.Position = patchPos;
+                    writer.Position = sequencePatchPos;
                     writer.Write(returnTo);
                     writer.Position = returnTo;
                     writer.Write((int)1);
                     writer.WriteUndertaleObject(V2Sequence);
+                }
+                if (nineSlicePatchPos != 0 && V3NineSlice != null)
+                {
+                    uint returnTo = writer.Position;
+                    writer.Position = nineSlicePatchPos;
+                    writer.Write(returnTo);
+                    writer.Position = returnTo;
+                    writer.WriteUndertaleObject(V3NineSlice);
                 }
             }
             else
@@ -1458,6 +1474,7 @@ namespace UndertaleModLib.Models
             if (reader.ReadInt32() == -1) // technically this seems to be able to occur on older versions, for special sprite types
             {
                 int sequenceOffset = 0;
+                int nineSliceOffset = 0;
 
                 IsSpecialType = true;
                 SVersion = reader.ReadUInt32();
@@ -1467,7 +1484,15 @@ namespace UndertaleModLib.Models
                     GMS2PlaybackSpeed = reader.ReadSingle();
                     GMS2PlaybackSpeedType = (AnimSpeedType)reader.ReadUInt32();
                     if (SVersion >= 2)
+                    {
                         sequenceOffset = reader.ReadInt32();
+                        if (SVersion >= 3)
+                        {
+                            reader.undertaleData.GMS2_3_1 = true;
+                            reader.undertaleData.GMS2_3_2 = true;
+                            nineSliceOffset = reader.ReadInt32();
+                        }
+                    }
                 }
 
                 switch (SSpriteType)
@@ -1545,6 +1570,11 @@ namespace UndertaleModLib.Models
                         throw new IOException("Expected 1");
                     V2Sequence = reader.ReadUndertaleObject<UndertaleSequence>();
                 }
+
+                if (nineSliceOffset != 0)
+                {
+                    V3NineSlice = reader.ReadUndertaleObject<NineSlice>();
+                }
             }
             else
             {
@@ -1591,6 +1621,44 @@ namespace UndertaleModLib.Models
         public void UnserializePrePadding(UndertaleReader reader)
         {
             reader.Align(4);
+        }
+
+        public class NineSlice : UndertaleObject
+        {
+            public int Left, Top, Right, Bottom;
+            public bool Enabled;
+            public TileMode[] TileModes = new TileMode[5];
+
+            public enum TileMode : int
+            {
+                Stretch = 0,
+                Repeat = 1,
+                Mirror = 2,
+                BlankRepeat = 3,
+                Hide = 4
+            }
+
+            public void Serialize(UndertaleWriter writer)
+            {
+                writer.Write(Left);
+                writer.Write(Top);
+                writer.Write(Right);
+                writer.Write(Bottom);
+                writer.Write(Enabled);
+                for (int i = 0; i < 5; i++)
+                    writer.Write((int)TileModes[i]);
+            }
+
+            public void Unserialize(UndertaleReader reader)
+            {
+                Left = reader.ReadInt32();
+                Top = reader.ReadInt32();
+                Right = reader.ReadInt32();
+                Bottom = reader.ReadInt32();
+                Enabled = reader.ReadBoolean();
+                for (int i = 0; i < 5; i++)
+                    TileModes[i] = (TileMode)reader.ReadInt32();
+            }
         }
     }
 }

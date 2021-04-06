@@ -160,6 +160,50 @@ namespace UndertaleModLib
         }
     }
 
+    public abstract class UndertaleAlignUpdatedListChunk<T> : UndertaleListChunk<T> where T : UndertaleObject, new()
+    {
+        public bool Align = true;
+        protected static int Alignment = 4;
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            writer.Write(List.Count);
+            uint baseAddr = writer.Position;
+            for (int i = 0; i < List.Count; i++)
+                writer.Write(0);
+            for (int i = 0; i < List.Count; i++)
+            {
+                if (Align)
+                {
+                    while (writer.Position % Alignment != 0)
+                        writer.Write((byte)0);
+                }
+                uint returnTo = writer.Position;
+                writer.Position = baseAddr + ((uint)i * 4);
+                writer.Write(returnTo);
+                writer.Position = returnTo;
+                writer.WriteUndertaleObject(List[i]);
+            }
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            uint count = reader.ReadUInt32();
+            for (int i = 0; i < count; i++)
+                Align &= (reader.ReadUInt32() % Alignment == 0);
+            for (int i = 0; i < count; i++)
+            {
+                if (Align)
+                {
+                    while (reader.Position % Alignment != 0)
+                        if (reader.ReadByte() != 0)
+                            throw new IOException("AlignUpdatedListChunk padding error");
+                }
+                List.Add(reader.ReadUndertaleObject<T>());
+            }
+        }
+    }
+
     public abstract class UndertaleSimpleListChunk<T> : UndertaleChunk where T : UndertaleObject, new()
     {
         public UndertaleSimpleList<T> List = new UndertaleSimpleList<T>();
