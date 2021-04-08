@@ -2,7 +2,14 @@
 
 using System;
 using System.IO;
+using System.Drawing;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using UndertaleModLib.Util;
+
+EnsureDataLoaded();
 
 // At this point, this just imports the sprites.
 string importFolder = PromptChooseDirectory("Import From Where");
@@ -33,7 +40,7 @@ foreach (string file in dirFiles)
         return;
     }
     
-    if (frame < sprite.Textures[frame].Length)
+    if (frame < sprite.Textures.Count)
     {
         try
         {
@@ -45,8 +52,8 @@ foreach (string file in dirFiles)
             bmp.SetResolution(96.0F, 96.0F);
             var width = (uint)bmp.Width;
             var height = (uint)bmp.Height;
-            CheckWidth = (uint)(sprite.Textures[frame].Texture.TargetWidth);
-            CheckHeight = (uint)(sprite.Textures[frame].Texture.TargetHeight);
+            var CheckWidth = (uint)(sprite.Textures[frame].Texture.TargetWidth);
+            var CheckHeight = (uint)(sprite.Textures[frame].Texture.TargetHeight);
             if ((width != CheckWidth) || (height != CheckHeight))
             {
                 string error = "Incorrect dimensions of " + stripped + ". Sprite blurring is very likely in game. Aborting!";
@@ -55,7 +62,7 @@ foreach (string file in dirFiles)
                 SetFinishedMessage(false);
                 return;
             }
-            sprite.Textures[frame].Texture.ReplaceTexture(TextureWorker.ReadImageFromFile(file));
+            sprite.Textures[frame].Texture.ReplaceTexture(bmp);
         }
         catch
         {
@@ -68,7 +75,7 @@ foreach (string file in dirFiles)
     }
     else
     {
-        string error = fileName + ": Index out of range. Index " + frame.ToString() + " exceeds maximum index (" + ((sprite.Textures[frame].Length) - 1).ToString() + ") of " + spriteName + ". Aborting!";
+        string error = fileName + ": Index out of range. Index " + frame.ToString() + " exceeds maximum index (" + ((sprite.Textures.Count) - 1).ToString() + ") of " + spriteName + ". Aborting!";
         ScriptError(error, "Sprite Error");
         SetUMTConsoleText(error);
         SetFinishedMessage(false);
