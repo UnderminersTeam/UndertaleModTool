@@ -12,6 +12,7 @@ if (Data?.GeneralInfo.BytecodeVersion >= 17)
     Data.GeneralInfo.BytecodeVersion = 16;
     if (Data.FORM.Chunks.ContainsKey("TGIN"))
         Data.FORM.Chunks.Remove("TGIN");
+    Data.GMS2_2_2_302 = false;
     ScriptMessage("Downgraded from 17 to 16 successfully. Save the game to apply the changes.");
 }
 else

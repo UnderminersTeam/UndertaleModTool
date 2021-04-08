@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System;
 using System.IO;
 using System.Threading;
@@ -20,13 +20,14 @@ ArrayList errored_code_arr = new ArrayList();
 bool errors_recorded = false;
 bool errored = false;
 bool skip = false;
-bool write = false;
+bool write = true;
+bool isErrorCodeEntry = false;
 ScriptMessage("If UndertaleModTool crashes during code export, or another serious error of that nature occurs, this script will record it. Please reload the game into the tool in the event the tool crashes and re-run this script until it completes successfully without crashing. A full record of code entries with fatal decompilation problems (if they exist) will be recorded by the end in \"Errored_Code_Entries.txt\".");
 
-if (File.Exists(path_error)) 
+if (File.Exists(path_error))
 {
     System.IO.StreamReader file = new System.IO.StreamReader(path_error);
-    while((line = file.ReadLine()) != null)
+    while ((line = file.ReadLine()) != null)
     {
         if (line == "No errors.")
         {
@@ -43,8 +44,9 @@ if (File.Exists(path_error))
             }
             break;
         }
-            
+
     }
+    file.Close();
 }
 else
 {
@@ -56,10 +58,10 @@ if (errored)
     using (StreamWriter sw = File.AppendText(path_error2))
     {
         sw.WriteLine(errored_code);
-    }    
+    }
 }
 
-if (File.Exists(path_error2)) 
+if (File.Exists(path_error2))
 {
     errors_recorded = true;
     if (!errored)
@@ -70,22 +72,23 @@ if (File.Exists(path_error2))
         }
     }
     System.IO.StreamReader file = new System.IO.StreamReader(path_error2);
-    for(int i = 0; ((line = file.ReadLine()) != null); i++)
+    for (int i = 0; ((line = file.ReadLine()) != null); i++)
     {
+        //ScriptMessage(line);
         errored_code_arr.Add(line);
     }
-
+    file.Close();
 }
 
-foreach(UndertaleCode code in Data.Code)
+foreach (UndertaleCode code in Data.Code)
 {
     if (write)
     {
-        try 
+        try
         {
             File.WriteAllText(path_error, "An error in decompilation occurred in: \n" + code.Name.Content);
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             File.WriteAllText(path_error, "Unknown.");
         }
@@ -94,28 +97,33 @@ foreach(UndertaleCode code in Data.Code)
     {
         for (int i = 0; i < errored_code_arr.Count; i++)
         {
-            if (!(skip == true && (errored_code_arr[i].ToString() == code.Name.Content)))
+            if (errored_code_arr[i].ToString() == code.Name.Content)
             {
-                string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
-                try 
-                {
-                    File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
-                }
-                catch (Exception e) 
-                {
-                    File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
-                }
+                isErrorCodeEntry = true;
             }
         }
+        if ((!isErrorCodeEntry) || (!skip))
+        {
+            string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
+            try
+            {
+                File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+            }
+            catch (Exception e)
+            {
+                File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
+            }
+        }
+        isErrorCodeEntry = false;
     }
     else
     {
         string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
-        try 
+        try
         {
             File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
         }
@@ -124,11 +132,11 @@ foreach(UndertaleCode code in Data.Code)
 }
 if (write)
 {
-    try 
+    try
     {
         File.WriteAllText(path_error, "No errors.");
     }
-    catch (Exception e) 
+    catch (Exception e)
     {
         File.WriteAllText(path_error, "Unknown.");
     }
@@ -136,7 +144,7 @@ if (write)
 
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder);
-if (File.Exists(path_error2)) 
+if (File.Exists(path_error2))
 {
     string asmFolder = GetFolder(FilePath) + "Error_Assembly" + Path.DirectorySeparatorChar;
     Directory.CreateDirectory(asmFolder);
@@ -147,11 +155,11 @@ if (File.Exists(path_error2))
             string codename = errored_code_arr[i].ToString();
             UndertaleCode code = Data.Code.ByName(codename);
             string asmPath = Path.Combine(asmFolder, code.Name.Content + ".asm");
-            try 
+            try
             {
                 File.WriteAllText(asmPath, (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : ""));
-            } 
-            catch (Exception e) 
+            }
+            catch (Exception e)
             {
                 File.WriteAllText(asmPath, "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"); // Please don't
             }
@@ -169,5 +177,4 @@ string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
-
 

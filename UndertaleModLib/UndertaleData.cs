@@ -53,6 +53,8 @@ namespace UndertaleModLib
         public bool IsTPAG4ByteAligned = false;
         public bool GMS2_2_2_302 = false;
         public bool GMS2_3 = false;
+        public bool GMS2_3_1 = false;
+        public bool GMS2_3_2 = false;
         public int PaddingAlignException = -1;
 
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)

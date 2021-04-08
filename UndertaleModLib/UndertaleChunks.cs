@@ -163,9 +163,21 @@ namespace UndertaleModLib
         public override string Name => "SPRT";
     }
 
-    public class UndertaleChunkBGND : UndertaleListChunk<UndertaleBackground>
+    public class UndertaleChunkBGND : UndertaleAlignUpdatedListChunk<UndertaleBackground>
     {
         public override string Name => "BGND";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            Alignment = 8;
+            base.SerializeChunk(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            Alignment = 8;
+            base.UnserializeChunk(reader);
+        }
     }
 
     public class UndertaleChunkPATH : UndertaleListChunk<UndertalePath>
@@ -443,7 +455,7 @@ namespace UndertaleModLib
         }
     }
 
-    public class UndertaleChunkSTRG : UndertaleListChunk<UndertaleString>
+    public class UndertaleChunkSTRG : UndertaleAlignUpdatedListChunk<UndertaleString>
     {
         public override string Name => "STRG";
 
@@ -566,22 +578,6 @@ namespace UndertaleModLib
             if (reader.ReadUInt32() != 1)
                 throw new IOException("Expected TGIN version 1");
             base.UnserializeChunk(reader);
-        }
-    }
-
-    // Unknown if possible yet, GMS2.3+ only
-    public class UndertaleChunkNINE : UndertaleChunk
-    {
-        public override string Name => "NINE";
-
-        internal override void SerializeChunk(UndertaleWriter writer)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void UnserializeChunk(UndertaleReader reader)
-        {
-            throw new NotImplementedException();
         }
     }
 

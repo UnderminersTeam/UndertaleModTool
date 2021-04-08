@@ -18,7 +18,7 @@ if (Data?.GeneralInfo.BytecodeVersion < 15)
     return;
 }
 
-if (Directory.Exists(GetFolder(FilePath) + "Export_Code_Orig" + Path.DirectorySeparatorChar)) 
+if (Directory.Exists(GetFolder(FilePath) + "Export_Code_Orig" + Path.DirectorySeparatorChar))
 {
     ScriptError("A code export already exists. Please remove it.", "Error");
     return;
@@ -27,7 +27,7 @@ else
 {
     Directory.CreateDirectory(GetFolder(FilePath) + "Export_Code_Orig" + Path.DirectorySeparatorChar);
 }
-if (Directory.Exists(GetFolder(FilePath) + "Export_Assembly_Orig" + Path.DirectorySeparatorChar)) 
+if (Directory.Exists(GetFolder(FilePath) + "Export_Assembly_Orig" + Path.DirectorySeparatorChar))
 {
     ScriptError("A code export already exists. Please remove it.", "Error");
     return;
@@ -36,7 +36,7 @@ else
 {
     Directory.CreateDirectory(GetFolder(FilePath) + "Export_Assembly_Orig" + Path.DirectorySeparatorChar);
 }
-if (Directory.Exists(GetFolder(FilePath) + "Export_Assembly_Recompiled" + Path.DirectorySeparatorChar)) 
+if (Directory.Exists(GetFolder(FilePath) + "Export_Assembly_Recompiled" + Path.DirectorySeparatorChar))
 {
     ScriptError("A code export already exists. Please remove it.", "Error");
     return;
@@ -55,7 +55,7 @@ UpdateProgress();
 string codeFolder = GetFolder(FilePath) + "Export_Assembly_Orig" + Path.DirectorySeparatorChar;
 await DumpCode();
 progress = 0;
-enum EventTypes 
+enum EventTypes
 {
     Create,
     Destroy,
@@ -75,7 +75,7 @@ enum EventTypes
 string importFolder = GetFolder(FilePath) + "Export_Code_Orig" + Path.DirectorySeparatorChar;
 bool doParse = true;
 string[] dirFiles = Directory.GetFiles(importFolder);
-foreach (string file in dirFiles) 
+foreach (string file in dirFiles)
 {
     UpdateProgressBar(null, "Import Files", progress++, dirFiles.Length);
 
@@ -109,7 +109,7 @@ foreach (string file in dirFiles)
         if (doParse)
         {
             // This portion links code.
-            if (codeName.Substring(0, 10).Equals("gml_Script")) 
+            if (codeName.Substring(0, 10).Equals("gml_Script"))
             {
                 // Add code to scripts section.
                 if (Data.Scripts.ByName(codeName.Substring(11)) == null)
@@ -132,15 +132,16 @@ foreach (string file in dirFiles)
                 // Dumb substring stuff, don't mess with this.
                 int underCount = 0;
                 string methodNumberStr = "", methodName = "", objName = "";
-                for (int i = afterPrefix.Length - 1; i >= 0; i--) 
+                for (int i = afterPrefix.Length - 1; i >= 0; i--)
                 {
-                    if (afterPrefix[i] == '_') 
+                    if (afterPrefix[i] == '_')
                     {
                         underCount++;
-                        if (underCount == 1) 
+                        if (underCount == 1)
                         {
                             methodNumberStr = afterPrefix.Substring(i + 1);
-                        } else if (underCount == 2)
+                        }
+                        else if (underCount == 2)
                         {
                             objName = afterPrefix.Substring(0, i);
                             methodName = afterPrefix.Substring(i + 1, afterPrefix.Length - objName.Length - methodNumberStr.Length - 2);
@@ -151,18 +152,25 @@ foreach (string file in dirFiles)
 
                 int methodNumber = Int32.Parse(methodNumberStr);
                 UndertaleGameObject obj = Data.GameObjects.ByName(objName);
-                if (obj == null) 
+                if (obj == null)
                 {
                     bool doNewObj = ScriptQuestion("Object " + objName + " was not found.\nAdd new object called " + objName + "?");
-                    if (doNewObj) 
+                    if (doNewObj)
                     {
                         UndertaleGameObject gameObj = new UndertaleGameObject();
                         gameObj.Name = Data.Strings.MakeString(objName);
                         Data.GameObjects.Add(gameObj);
                     }
-                    else 
+                    else
                     {
-                        Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
+                        try
+                        {
+                            Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
+                        }
+                        catch
+                        {
+                            Data.Code.ByName(codeName).ReplaceGML("", Data);
+                        }
                         continue;
                     }
                 }
@@ -183,7 +191,14 @@ foreach (string file in dirFiles)
             // Code which does not match these criteria cannot link, but are still added to the code section.
         }
     }
-    Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
+    try
+    {
+        Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
+    }
+    catch
+    {
+        Data.Code.ByName(codeName).ReplaceGML("", Data);
+    }
 }
 progress = 0;
 UpdateProgress();
@@ -197,7 +212,7 @@ importFolder = GetFolder(FilePath) + "Export_Assembly_Orig" + Path.DirectorySepa
 doParse = true;
 progress = 0;
 dirFiles = Directory.GetFiles(importFolder);
-foreach (string file in dirFiles) 
+foreach (string file in dirFiles)
 {
     UpdateProgressBar(null, "Reapply original ASM files", progress++, dirFiles.Length);
     string fileName = Path.GetFileName(file);
@@ -224,7 +239,7 @@ foreach (string file in dirFiles)
         if (doParse)
         {
             // This portion links code.
-            if (codeName.Substring(0, 10).Equals("gml_Script")) 
+            if (codeName.Substring(0, 10).Equals("gml_Script"))
             {
                 // Add code to scripts section.
                 if (Data.Scripts.ByName(codeName.Substring(11)) == null)
@@ -247,15 +262,16 @@ foreach (string file in dirFiles)
                 // Dumb substring stuff, don't mess with this.
                 int underCount = 0;
                 string methodNumberStr = "", methodName = "", objName = "";
-                for (int i = afterPrefix.Length - 1; i >= 0; i--) 
+                for (int i = afterPrefix.Length - 1; i >= 0; i--)
                 {
-                    if (afterPrefix[i] == '_') 
+                    if (afterPrefix[i] == '_')
                     {
                         underCount++;
-                        if (underCount == 1) 
+                        if (underCount == 1)
                         {
                             methodNumberStr = afterPrefix.Substring(i + 1);
-                        } else if (underCount == 2) 
+                        }
+                        else if (underCount == 2)
                         {
                             objName = afterPrefix.Substring(0, i);
                             methodName = afterPrefix.Substring(i + 1, afterPrefix.Length - objName.Length - methodNumberStr.Length - 2);
@@ -265,25 +281,26 @@ foreach (string file in dirFiles)
                 }
                 int methodNumber = Int32.Parse(methodNumberStr);
                 UndertaleGameObject obj = Data.GameObjects.ByName(objName);
-                if (obj == null) 
+                if (obj == null)
                 {
                     bool doNewObj = ScriptQuestion("Object " + objName + " was not found.\nAdd new object called " + objName + "?");
-                    if (doNewObj) 
+                    if (doNewObj)
                     {
                         UndertaleGameObject gameObj = new UndertaleGameObject();
                         gameObj.Name = Data.Strings.MakeString(objName);
                         Data.GameObjects.Add(gameObj);
-                    } else 
+                    }
+                    else
                     {
                         try
                         {
                             var instructions = Assembler.Assemble(asmCode, Data);
                             Data.Code.ByName(codeName).Replace(instructions);
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
-                            ScriptMessage("Assembler error at file: " + codeName);
-                            return;
+                            //ScriptMessage("Assembler error at file: " + codeName);
+                            //return;
                         }
                         continue;
                     }
@@ -307,18 +324,18 @@ foreach (string file in dirFiles)
         var instructions = Assembler.Assemble(asmCode, Data);
         Data.Code.ByName(codeName).Replace(instructions);
     }
-    catch(Exception ex)
+    catch (Exception ex)
     {
-        ScriptMessage("Assembler error at code: " + codeName);
-        return;
+        //ScriptMessage("Assembler error at code: " + codeName);
+        //return;
     }
 }
 HideProgressBar();
-double percentage = ((double)identical_count/(double)Data.Code.Count)*100;
+double percentage = ((double)identical_count / (double)Data.Code.Count) * 100;
 int non_matching = Data.Code.Count - identical_count;
 ScriptMessage("Non-matching Data Generated. Decompiler/Compiler Accuracy: " + percentage.ToString() + "% (" + identical_count.ToString() + "/" + Data.Code.Count.ToString() + "). Number of differences: " + non_matching.ToString() + ". To review these, the differing files are in the game directory.");
 
-async Task DumpCodeOrig() 
+async Task DumpCodeOrig()
 {
     await Task.Run(() => Parallel.ForEach(Data.Code, DumpCodeOrig));
 }
@@ -326,11 +343,11 @@ async Task DumpCodeOrig()
 void DumpCodeOrig(UndertaleCode code)
 {
     string path = Path.Combine(GetFolder(FilePath) + "Export_Code_Orig" + Path.DirectorySeparatorChar, code.Name.Content + ".gml");
-    try 
+    try
     {
         File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
     }
-    catch (Exception e) 
+    catch (Exception e)
     {
         File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
     }
@@ -342,7 +359,7 @@ void UpdateProgress()
     UpdateProgressBar(null, "Code Entries", progress++, Data.Code.Count);
 }
 
-string GetFolder(string path) 
+string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
@@ -352,14 +369,14 @@ async Task DumpCode()
     await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
 }
 
-void DumpCode(UndertaleCode code) 
+void DumpCode(UndertaleCode code)
 {
     string path = Path.Combine(codeFolder, code.Name.Content + ".asm");
-    try 
+    try
     {
         File.WriteAllText(path, (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : ""));
     }
-    catch (Exception e) 
+    catch (Exception e)
     {
         File.WriteAllText(path, "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"); // Please don't
     }
