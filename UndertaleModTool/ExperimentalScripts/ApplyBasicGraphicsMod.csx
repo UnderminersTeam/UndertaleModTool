@@ -37,6 +37,24 @@ foreach (string file in dirFiles)
     {
         try
         {
+            Bitmap bmp;
+            using (var ms = new MemoryStream(TextureWorker.ReadTextureBlob(file)))
+            {
+                bmp = new Bitmap(ms);
+            }
+            bmp.SetResolution(96.0F, 96.0F);
+            var width = (uint)bmp.Width;
+            var height = (uint)bmp.Height;
+            CheckWidth = (uint)(sprite.Textures[frame].Texture.TargetWidth);
+            CheckHeight = (uint)(sprite.Textures[frame].Texture.TargetHeight);
+            if ((width != CheckWidth) || (height != CheckHeight))
+            {
+                string error = "Incorrect dimensions of " + stripped + ". Sprite blurring is very likely in game. Aborting!";
+                ScriptError(error, "Unexpected texture dimensions");
+                SetUMTConsoleText(error);
+                SetFinishedMessage(false);
+                return;
+            }
             sprite.Textures[frame].Texture.ReplaceTexture(TextureWorker.ReadImageFromFile(file));
         }
         catch
