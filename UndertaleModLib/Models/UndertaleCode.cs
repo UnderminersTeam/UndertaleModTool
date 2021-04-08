@@ -321,7 +321,9 @@ namespace UndertaleModLib.Models
             public override string ToString()
             {
                 if (typeof(T) == typeof(UndertaleVariable) && Type != VariableType.Normal)
-                    return String.Format("[{0}]{1}", Type.ToString().ToLower(), Target?.ToString() ?? "(null)");
+                {
+                    return String.Format("[{0}]{1}{2}", Type.ToString().ToLower(), ((Target as UndertaleVariable)?.InstanceType.ToString().ToLower() ?? "null") + ".", Target?.ToString() ?? "(null)");
+                }
                 else
                     return String.Format("{0}", Target?.ToString() ?? "(null)");
             }

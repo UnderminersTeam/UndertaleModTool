@@ -141,6 +141,14 @@ namespace UndertaleModTool
                             {
                                 par.Inlines.Add(new Run(" "));
                                 par.Inlines.Add(new Run(instr.Extra.ToString()) { Foreground = argBrush });
+                                if (instr.Kind == UndertaleInstruction.Opcode.Dup)
+                                {
+                                    if ((byte)instr.ComparisonKind == 0x88)
+                                    {
+                                        // No idea what this is right now (seems to be used at least with @@GetInstance@@), this is the "temporary" solution
+                                        par.Inlines.Add(new Run(" spec"));
+                                    }
+                                }
                             }
                             break;
 
@@ -184,11 +192,10 @@ namespace UndertaleModTool
                                     par.Inlines.Add(new Run(instr.TypeInst.ToString().ToLower()) { Foreground = typeBrush });
                                     par.Inlines.Add(new Run("."));
                                 }
-
                                 Run runDest = new Run(instr.Destination.ToString()) { Foreground = argBrush, Cursor = Cursors.Hand };
                                 runDest.MouseDown += (sender, e) =>
                                 {
-                                    (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Destination);
+                                    (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Destination.Target);
                                 };
                                 par.Inlines.Add(runDest);
                             }

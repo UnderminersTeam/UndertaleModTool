@@ -35,18 +35,18 @@ namespace UndertaleModLib.Decompiler
 
         // TODO: Improve the error messages
 
-        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars = null, UndertaleData data = null)
+        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars = null, UndertaleData data = null, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null)
         {
             string label;
-            UndertaleInstruction instr = AssembleOne(source, funcs, vars, strg, localvars, out label, data, null);
+            UndertaleInstruction instr = AssembleOne(source, funcs, vars, strg, localvars, out label, data, lookOnStack);
             if (label != null)
                 throw new Exception("Cannot use labels in this context");
             return instr;
         }
 
-        public static UndertaleInstruction AssembleOne(string source, UndertaleData data, Dictionary<string, UndertaleVariable> localvars = null)
+        public static UndertaleInstruction AssembleOne(string source, UndertaleData data, Dictionary<string, UndertaleVariable> localvars = null, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null)
         {
-            return AssembleOne(source, data.Functions, data.Variables, data.Strings, localvars, data);
+            return AssembleOne(source, data.Functions, data.Variables, data.Strings, localvars, data, lookOnStack);
         }
 
         public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars, out string label, UndertaleData data = null, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null)
@@ -84,6 +84,16 @@ namespace UndertaleModLib.Decompiler
                 case UndertaleInstruction.InstructionType.SingleTypeInstruction:
                     if (instr.Kind == UndertaleInstruction.Opcode.Dup || instr.Kind == UndertaleInstruction.Opcode.CallV)
                     {
+                        if (instr.Kind == UndertaleInstruction.Opcode.Dup)
+                        {
+                            space = line.IndexOf(' ');
+                            if (space >= 0)
+                            {
+                                if (line.Substring(space + 1).Trim().ToLower() == "spec")
+                                    instr.ComparisonKind = (UndertaleInstruction.ComparisonType)0x88; // "Temporary" fix, unknown (see disassembler, used with @@GetInstance@@ seemingly)
+                                line = line.Substring(0, space);
+                            }
+                        }
                         instr.Extra = Byte.Parse(line);
                         line = "";
                     }
@@ -126,7 +136,7 @@ namespace UndertaleModLib.Decompiler
                     else
                     {
                         UndertaleInstruction.InstanceType inst = instr.TypeInst;
-                        instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, instr, lookOnStack, data);
+                        instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, instr, data, lookOnStack);
                         instr.TypeInst = inst;
                     }
                     line = "";
@@ -166,7 +176,7 @@ namespace UndertaleModLib.Decompiler
                             break;
                         case UndertaleInstruction.DataType.Variable:
                             UndertaleInstruction.InstanceType inst2 = instr.TypeInst;
-                            instr.Value = ParseVariableReference(line, vars, localvars, ref inst2, instr, lookOnStack, data);
+                            instr.Value = ParseVariableReference(line, vars, localvars, ref inst2, instr, data, lookOnStack);
                             instr.TypeInst = inst2;
                             break;
                         case UndertaleInstruction.DataType.String:
@@ -288,7 +298,7 @@ namespace UndertaleModLib.Decompiler
                     continue;
                 }
 
-                // Really ugly hack for compiling array variable references
+                // BACKWARDS COMPATIBILITY: Really ugly hack for compiling array variable references
                 // See https://github.com/krzys-h/UndertaleModTool/issues/27#issuecomment-426637438
                 Func<int, UndertaleInstruction.InstanceType?> lookOnStack = (int amt) => {
                     int stackCounter = amt;
@@ -379,36 +389,52 @@ namespace UndertaleModLib.Decompiler
             return new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>() { Resource = strobj, CachedId = (int)id.Value };
         }
 
-        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance, UndertaleInstruction instr, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null, UndertaleData data = null)
+        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance, UndertaleInstruction instr, UndertaleData data = null, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null)
         {
             string str = line;
-            string inst = null;
-            int instdot = str.IndexOf('.');
-            if (instdot >= 0)
+            UndertaleInstruction.VariableType type = UndertaleInstruction.VariableType.Normal;
+            UndertaleInstruction.InstanceType realinstance = instance;
+            if (str[0] != '[')
             {
-                inst = str.Substring(0, instdot);
-                str = str.Substring(instdot + 1);
-                if (inst == "")
-                    throw new Exception("Whoops?");
-            }
-            if (inst != null)
-            {
-                short instnum;
-                if (Int16.TryParse(inst, out instnum))
+                string inst = null;
+                int instdot = str.IndexOf('.');
+                if (instdot >= 0)
                 {
-                    instance = (UndertaleInstruction.InstanceType)instnum;
+                    inst = str.Substring(0, instdot);
+                    str = str.Substring(instdot + 1);
+                    if (inst == "")
+                        throw new Exception("Whoops?");
+                }
+                if (inst != null)
+                {
+                    short instnum;
+                    if (Int16.TryParse(inst, out instnum))
+                    {
+                        instance = (UndertaleInstruction.InstanceType)instnum;
+                    }
+                    else
+                    {
+                        instance = (UndertaleInstruction.InstanceType)Enum.Parse(typeof(UndertaleInstruction.InstanceType), inst, true);
+                    }
                 }
                 else
                 {
-                    instance = (UndertaleInstruction.InstanceType)Enum.Parse(typeof(UndertaleInstruction.InstanceType), inst, true);
+                    instance = UndertaleInstruction.InstanceType.Undefined;
                 }
+
+                realinstance = instance;
+                if (realinstance >= 0)
+                    realinstance = UndertaleInstruction.InstanceType.Self;
+                else if (realinstance == UndertaleInstruction.InstanceType.Other)
+                    realinstance = UndertaleInstruction.InstanceType.Self;
+                else if (realinstance == UndertaleInstruction.InstanceType.Arg)
+                    realinstance = UndertaleInstruction.InstanceType.Builtin;
+                else if (realinstance == UndertaleInstruction.InstanceType.Builtin)
+                    realinstance = UndertaleInstruction.InstanceType.Self; // used with @@This@@
+                else if (realinstance == UndertaleInstruction.InstanceType.Stacktop)
+                    realinstance = UndertaleInstruction.InstanceType.Self; // used with @@GetInstance@@
             }
             else
-            {
-                instance = UndertaleInstruction.InstanceType.Undefined;
-            }
-            UndertaleInstruction.VariableType type = UndertaleInstruction.VariableType.Normal;
-            if (str[0] == '[')
             {
                 int typeend = str.IndexOf(']');
                 if (typeend >= 0)
@@ -416,29 +442,36 @@ namespace UndertaleModLib.Decompiler
                     string typestr = str.Substring(1, typeend - 1);
                     str = str.Substring(typeend + 1);
                     type = (UndertaleInstruction.VariableType)Enum.Parse(typeof(UndertaleInstruction.VariableType), typestr, true);
-                }
-            }
 
-            UndertaleInstruction.InstanceType realinstance = instance;
-            // for arrays, the type is on the stack which totally breaks things
-            // This is an ugly hack to handle that
-            // see https://github.com/krzys-h/UndertaleModTool/issues/27#issuecomment-426637438
-            if (type == UndertaleInstruction.VariableType.Array && lookOnStack != null)
-            {
-                var instTypeOnStack = lookOnStack(instr.Kind == UndertaleInstruction.Opcode.Pop && instr.Type1 == UndertaleInstruction.DataType.Int32 ? 3 : 2);
-                if (instTypeOnStack.HasValue)
-                    realinstance = instTypeOnStack.Value;
+                    int instanceEnd = str.IndexOf('.');
+                    if (instanceEnd >= 0)
+                    {
+                        string instancestr = str.Substring(0, instanceEnd);
+                        str = str.Substring(instanceEnd + 1);
+                        realinstance = (UndertaleInstruction.InstanceType)Enum.Parse(typeof(UndertaleInstruction.InstanceType), instancestr, true);
+                    } else
+                    {
+                        // BACKWARDS COMPATIBILITY
+
+                        // for arrays, the type is on the stack which totally breaks things
+                        // This is an ugly hack to handle that
+                        // see https://github.com/krzys-h/UndertaleModTool/issues/27#issuecomment-426637438
+                        if (type == UndertaleInstruction.VariableType.Array && lookOnStack != null)
+                        {
+                            var instTypeOnStack = lookOnStack(instr.Kind == UndertaleInstruction.Opcode.Pop && instr.Type1 == UndertaleInstruction.DataType.Int32 ? 3 : 2);
+                            if (instTypeOnStack.HasValue)
+                                realinstance = instTypeOnStack.Value;
+                        }
+
+                        if (realinstance >= 0)
+                            realinstance = UndertaleInstruction.InstanceType.Self;
+                        else if (realinstance == UndertaleInstruction.InstanceType.Other)
+                            realinstance = UndertaleInstruction.InstanceType.Self;
+                    }
+                }
+                else
+                    throw new Exception("Missing ']' character in variable reference");
             }
-            if (realinstance >= 0)
-                realinstance = UndertaleInstruction.InstanceType.Self;
-            else if (realinstance == UndertaleInstruction.InstanceType.Other)
-                realinstance = UndertaleInstruction.InstanceType.Self;
-            else if (realinstance == UndertaleInstruction.InstanceType.Arg)
-                realinstance = UndertaleInstruction.InstanceType.Builtin;
-            else if (realinstance == UndertaleInstruction.InstanceType.Builtin)
-                realinstance = UndertaleInstruction.InstanceType.Self; // used with @@This@@
-            else if (realinstance == UndertaleInstruction.InstanceType.Stacktop)
-                realinstance = UndertaleInstruction.InstanceType.Self; // used with @@GetInstance@@
 
             if (data?.GeneralInfo?.BytecodeVersion <= 14)
                 realinstance = UndertaleInstruction.InstanceType.Undefined;
