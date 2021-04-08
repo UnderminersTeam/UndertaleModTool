@@ -12,6 +12,27 @@ namespace UndertaleModLib.Decompiler
 {
     public static class Assembler
     {
+        public static Dictionary<short, string> BreakIDToName = new Dictionary<short, string>()
+        {
+            { -1, "chkindex" },
+            { -2, "pushaf" },
+            { -3, "popaf" },
+            { -4, "pushac" },
+            { -5, "setowner" },
+            { -6, "isstaticok" },
+            { -7, "setstatic" }
+        };
+        public static Dictionary<string, short> NameToBreakID = new Dictionary<string, short>()
+        {
+            { "chkindex", -1 },
+            { "pushaf", -2 },
+            { "popaf", -3 },
+            { "pushac", -4 },
+            { "setowner", -5 },
+            { "isstaticok", -6 },
+            { "setstatic", -7 }
+        };
+
         // TODO: Improve the error messages
 
         public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars = null, UndertaleData data = null)
@@ -47,7 +68,12 @@ namespace UndertaleModLib.Decompiler
             if (types.Length > 3)
                 throw new Exception("Too many type parameters");
 
-            instr.Kind = (UndertaleInstruction.Opcode)Enum.Parse(typeof(UndertaleInstruction.Opcode), types[0], true);
+            string kind = types[0];
+            short breakId = 0;
+            if (NameToBreakID.TryGetValue(kind.ToLower(), out breakId))
+                instr.Kind = UndertaleInstruction.Opcode.Break;
+            else
+                instr.Kind = (UndertaleInstruction.Opcode)Enum.Parse(typeof(UndertaleInstruction.Opcode), kind, true);
             if (types.Length >= 2)
                 instr.Type1 = UndertaleInstructionUtil.FromOpcodeParam(types[1]);
             if (types.Length >= 3)
@@ -120,7 +146,13 @@ namespace UndertaleModLib.Decompiler
                             if (Int32.TryParse(line, out ival))
                                 instr.Value = ival;
                             else
-                                instr.Value = (int)ParseResourceName(line, data);
+                            {
+                                var f = data.Functions.ByName(line);
+                                if (f == null)
+                                    instr.Value = (int)ParseResourceName(line, data);
+                                else
+                                    instr.Value = new UndertaleInstruction.Reference<UndertaleFunction>(f);
+                            }
                             break;
                         case UndertaleInstruction.DataType.Int64:
                             long lval;
@@ -165,7 +197,7 @@ namespace UndertaleModLib.Decompiler
                     break;
 
                 case UndertaleInstruction.InstructionType.BreakInstruction:
-                    instr.Value = Int16.Parse(line);
+                    instr.Value = breakId;
                     line = "";
                     break;
             }
@@ -401,6 +433,12 @@ namespace UndertaleModLib.Decompiler
                 realinstance = UndertaleInstruction.InstanceType.Self;
             else if (realinstance == UndertaleInstruction.InstanceType.Other)
                 realinstance = UndertaleInstruction.InstanceType.Self;
+            else if (realinstance == UndertaleInstruction.InstanceType.Arg)
+                realinstance = UndertaleInstruction.InstanceType.Builtin;
+            else if (realinstance == UndertaleInstruction.InstanceType.Builtin)
+                realinstance = UndertaleInstruction.InstanceType.Self; // used with @@This@@
+            else if (realinstance == UndertaleInstruction.InstanceType.Stacktop)
+                realinstance = UndertaleInstruction.InstanceType.Self; // used with @@GetInstance@@
 
             if (data?.GeneralInfo?.BytecodeVersion <= 14)
                 realinstance = UndertaleInstruction.InstanceType.Undefined;

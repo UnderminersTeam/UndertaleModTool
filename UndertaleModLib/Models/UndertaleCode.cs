@@ -231,6 +231,8 @@ namespace UndertaleModLib.Models
             Global = -5,
             Builtin = -6, // Note: Used only in UndertaleVariable.VarID (which is not really even InstanceType)
             Local = -7,
+            Stacktop = -9,
+            Arg = -15,
             Static = -16
 
             // anything > 0 => GameObjectIndex
@@ -1088,6 +1090,7 @@ namespace UndertaleModLib.Models
         public uint Offset { get => _Offset; set { _Offset = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Offset")); } }
         public List<UndertaleInstruction> Instructions { get; } = new List<UndertaleInstruction>();
         public bool NoLocals { get => _NoLocals; }
+        public bool DuplicateEntry { get; set; } = false;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -1095,7 +1098,7 @@ namespace UndertaleModLib.Models
         {
             if (writer.undertaleData.UnsupportedBytecodeVersion || writer.Bytecode14OrLower)
                 return;
-            if (Instructions.Count != 0 && writer.GetObjectPool().ContainsKey(Instructions.First()))
+            if (DuplicateEntry)
             {
                 // In GMS 2.3, code entries repeat often
                 _BytecodeAbsoluteAddress = writer.LastBytecodeAddress;
@@ -1176,6 +1179,8 @@ namespace UndertaleModLib.Models
                 _BytecodeAbsoluteAddress = (uint)((int)reader.Position - 4 + BytecodeRelativeAddress);
                 uint here = reader.Position;
                 reader.Position = _BytecodeAbsoluteAddress;
+                if (Length > 0 && reader.GMS2_3 && reader.GetOffsetMap().ContainsKey(_BytecodeAbsoluteAddress))
+                    DuplicateEntry = true;
                 Instructions.Clear();
                 while (reader.Position < _BytecodeAbsoluteAddress + Length)
                 {
