@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
 int progress = 0;
-string texFolder = GetFolder(FilePath) + "Export_Textures" + Path.DirectorySeparatorChar;
+string texFolder = GetFolder(FilePath) + "Export_Sprites" + Path.DirectorySeparatorChar;
 TextureWorker worker = new TextureWorker();
 
 if (Directory.Exists(texFolder))
 {
-    ScriptError("A texture export already exists. Please remove it.", "Error");
+    ScriptError("A sprites export already exists. Please remove it.", "Error");
     return;
 }
 
