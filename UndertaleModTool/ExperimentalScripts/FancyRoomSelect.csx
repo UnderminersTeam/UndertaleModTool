@@ -16,25 +16,81 @@ if(Data.GeneralInfo.Name.Content == "UNDERTALE") {
 	Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);
 }
 
-var object_list = Data.GeneralInfo.RoomOrder[0].Resource.GameObjects;
+bool gms2 = Data.IsVersionAtLeast(2,0,0,0);
 
+var entry_room = Data.GeneralInfo.RoomOrder[0].Resource;
+var object_list = entry_room.GameObjects;
 bool add_to_room = true;
-foreach(var room_obj in object_list) {
-	if(room_obj.ObjectDefinition == obj) {
-		add_to_room = false;
-		break;
+
+if(gms2) {
+	UndertaleRoom.Layer target_layer = null;
+	foreach(var layer in entry_room.Layers) {
+		if(layer.LayerType == UndertaleRoom.LayerType.Instances) {
+			foreach(var layer_obj in layer.InstancesData.Instances) {
+				if(layer_obj.ObjectDefinition == obj) {
+					add_to_room = false;
+					break;
+				}
+			}
+			if(!add_to_room) {
+				break;
+			}
+			if(target_layer == null || target_layer.LayerDepth > layer.LayerDepth) {
+				target_layer = layer;
+			}
+		}
+	}
+	
+	if(add_to_room) {
+		if(target_layer == null) {
+			uint layer_id = 0;
+			foreach(var room in Data.Rooms) {
+				foreach(var layer in room.Layers) {
+					if(layer.LayerId > layer_id) {
+						layer_id = (uint)layer.LayerId;
+					}
+				}
+			}
+			
+			target_layer = new UndertaleRoom.Layer() {
+				LayerName = Data.Strings.MakeString("Room_Selector_Layer"),
+				Data = new UndertaleRoom.Layer.LayerInstancesData(),
+				LayerType = UndertaleRoom.LayerType.Instances,
+				LayerDepth = -1000,
+				LayerId = layer_id,
+				IsVisible = true
+			};
+			
+			entry_room.Layers.Add(target_layer);
+		}
+		var obj_to_add = new UndertaleRoom.GameObject() {
+			InstanceID = Data.GeneralInfo.LastObj++,
+			ObjectDefinition = obj,
+			X = 0, Y = 0
+		};
+		target_layer.InstancesData.Instances.Add(obj_to_add);
+		object_list.Add(obj_to_add);
+	}
+}
+else {
+
+	foreach(var room_obj in object_list) {
+		if(room_obj.ObjectDefinition == obj) {
+			add_to_room = false;
+			break;
+		}
+	}
+
+	if(add_to_room) {
+		object_list.Add(new UndertaleRoom.GameObject() {
+			InstanceID = Data.GeneralInfo.LastObj++,
+			ObjectDefinition = obj,
+			X = 0, Y = 0
+		});
 	}
 }
 
-if(add_to_room) {
-	object_list.Add(new UndertaleRoom.GameObject() {
-		InstanceID = Data.GeneralInfo.LastObj++,
-		ObjectDefinition = obj,
-		X = 0, Y = 0
-	});
-}
 
-bool gms2 = Data.IsVersionAtLeast(2,0,0,0);
 
 obj.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
 if (instance_number(object_index) > 1)

@@ -14,7 +14,8 @@ namespace UndertaleModLib.Models
         {
             IsEmbedded = 0x1,
             IsCompressed = 0x2,
-            Regular = 0x64,
+            IsDecompressedOnLoad = 0x3,
+            Regular = 0x64, // also means "Use New Audio System?" Set by default on GMS 2.
         }
 
         private UndertaleString _Name;
@@ -24,6 +25,7 @@ namespace UndertaleModLib.Models
         private uint _Effects = 0;
         private float _Volume = 1;
         private float _Pitch = 0;
+        private bool _Preload = true;
         private UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP> _AudioGroup = new UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP>();
         private UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO> _AudioFile = new UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO>();
 
@@ -33,6 +35,7 @@ namespace UndertaleModLib.Models
         public UndertaleString File { get => _File; set { _File = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("File")); } }
         public uint Effects { get => _Effects; set { _Effects = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Effects")); } }
         public float Volume { get => _Volume; set { _Volume = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Volume")); } }
+        public bool Preload { get => _Preload; set { _Preload = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Preload")); } }
         public float Pitch { get => _Pitch; set { _Pitch = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Pitch")); } }
         public UndertaleAudioGroup AudioGroup { get => _AudioGroup.Resource; set { _AudioGroup.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AudioGroup")); } }
         public UndertaleEmbeddedAudio AudioFile { get => _AudioFile.Resource; set { _AudioFile.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AudioFile")); } }
@@ -50,7 +53,11 @@ namespace UndertaleModLib.Models
             writer.Write(Effects);
             writer.Write(Volume);
             writer.Write(Pitch);
-            writer.WriteUndertaleObject(_AudioGroup);
+            if (Flags.HasFlag(AudioEntryFlags.Regular))
+                writer.WriteUndertaleObject(_AudioGroup);
+            else
+                writer.Write(Preload);
+
             if (GroupID == 0)
                 writer.WriteUndertaleObject(_AudioFile);
             else
@@ -66,7 +73,18 @@ namespace UndertaleModLib.Models
             Effects = reader.ReadUInt32();
             Volume = reader.ReadSingle();
             Pitch = reader.ReadSingle();
-            _AudioGroup = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP>>();
+
+            if (Flags.HasFlag(AudioEntryFlags.Regular))
+            {
+                _AudioGroup = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP>>();
+                Preload = true;
+            }
+            else
+            {
+                GroupID = reader.undertaleData.GetBuiltinSoundGroupID(); // legacy audio system doesn't have groups
+                // instead, the preload flag is stored (always true? remnant from GM8?)
+                Preload = reader.ReadBoolean();
+            }
 
             if (GroupID == reader.undertaleData.GetBuiltinSoundGroupID()) 
             {
