@@ -123,6 +123,15 @@ namespace UndertaleModLib.Compiler
         public int ArgumentID = 0;
         public int Argument0ID = 0;
         public int Argument15ID = 0;
+
+        public BuiltinList() {
+            Initialize(null);
+        }
+
+        public BuiltinList(UndertaleData data)
+        {
+            Initialize(data);
+        }
         
         public void Initialize(UndertaleData data)
         {
