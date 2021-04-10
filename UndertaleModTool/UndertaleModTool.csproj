@@ -285,6 +285,9 @@
     <Compile Include="Windows\TextInputDialog.xaml.cs">
       <DependentUpon>TextInputDialog.xaml</DependentUpon>
     </Compile>
+    <None Include="ExperimentalScripts\ApplyBasicGraphicsMod.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="ExperimentalScripts\AutoBackup.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -295,6 +298,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="ExperimentalScripts\DisableDogcheck.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ExperimentalScripts\ImportGraphics.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="ExperimentalScripts\ToggleAlignment.csx">
@@ -343,12 +349,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="ExperimentalScripts\ImportGML.csx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="ExperimentalScripts\ImportGraphics_v1.csx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="ExperimentalScripts\ImportGraphics_v2.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="ExperimentalScripts\ImportSoundsBulk.csx">
@@ -405,7 +405,7 @@
     <None Include="SampleScripts\ExportAllSounds.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="SampleScripts\ExportAllTextures.csx">
+    <None Include="SampleScripts\ExportAllSprites.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SampleScripts\GoToRoom.csx">
@@ -777,6 +777,11 @@
     <None Include="ExperimentalScripts\README.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="ExperimentalScripts\ImportGraphics_Full_Repack.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterResolveReferences">

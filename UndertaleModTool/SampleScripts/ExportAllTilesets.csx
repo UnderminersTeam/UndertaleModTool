@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
 int progress = 0;
-string texFolder = GetFolder(FilePath) + "Export_Textures" + Path.DirectorySeparatorChar;
+string texFolder = GetFolder(FilePath) + "Export_Tilesets" + Path.DirectorySeparatorChar;
 TextureWorker worker = new TextureWorker();
 
 if (Directory.Exists(texFolder))
@@ -18,14 +18,14 @@ if (Directory.Exists(texFolder))
 Directory.CreateDirectory(texFolder);
 
 UpdateProgress();
-await DumpSprites();
+await DumpTilesets();
 worker.Cleanup();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 
 void UpdateProgress()
 {
-    UpdateProgressBar(null, "Sprites", progress++, Data.Sprites.Count);
+    UpdateProgressBar(null, "Tilesets", progress++, Data.Backgrounds.Count);
 }
 
 string GetFolder(string path) 
@@ -34,16 +34,13 @@ string GetFolder(string path)
 }
 
 
-async Task DumpSprites()
+async Task DumpTilesets()
 {
-    await Task.Run(() => Parallel.ForEach(Data.Sprites, DumpSprite));
+    await Task.Run(() => Parallel.ForEach(Data.Backgrounds, DumpTileset));
 }
 
-void DumpSprite(UndertaleSprite sprite) 
+void DumpTileset(UndertaleBackground tileset) 
 {
-    for (int i = 0; i < sprite.Textures.Count; i++)
-        if (sprite.Textures[i]?.Texture != null)
-            worker.ExportAsPNG(sprite.Textures[i].Texture, texFolder + sprite.Name.Content + "_" + i + ".png");
-
+	worker.ExportAsPNG(tileset.Texture, texFolder + tileset.Name.Content + ".png");
     UpdateProgress();
 }

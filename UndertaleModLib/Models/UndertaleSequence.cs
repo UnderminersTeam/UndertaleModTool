@@ -146,7 +146,7 @@ namespace UndertaleModLib.Models
             {
                 writer.Write(InternalCount);
                 if (InternalCount > 0)
-                    Event.Serialize(writer);
+                    writer.WriteUndertaleString(Event);
             }
 
             public void Unserialize(UndertaleReader reader)
@@ -231,6 +231,7 @@ namespace UndertaleModLib.Models
                     //  writer.WriteUndertaleObject(Keyframes as IntKeyframes);
                     //  break;
                     case "GMRealTrack":
+                    case "GMColourTrack":
                         writer.WriteUndertaleObject(Keyframes as RealKeyframes);
                         break;
                 }
@@ -309,6 +310,7 @@ namespace UndertaleModLib.Models
                     //  Keyframes = reader.ReadUndertaleObject<IntKeyframes>();
                     //  break;
                     case "GMRealTrack":
+                    case "GMColourTrack":
                         Keyframes = reader.ReadUndertaleObject<RealKeyframes>();
                         break;
                 }
@@ -555,7 +557,7 @@ namespace UndertaleModLib.Models
                 if (IsCurveEmbedded)
                 {
                     writer.Write(-1);
-                    writer.WriteUndertaleObject(EmbeddedAnimCurve);
+                    EmbeddedAnimCurve.Serialize(writer, false);
                 }
                 else
                 {
@@ -571,7 +573,8 @@ namespace UndertaleModLib.Models
                     IsCurveEmbedded = true;
                     if (reader.ReadInt32() != -1)
                         throw new IOException("Expected -1");
-                    EmbeddedAnimCurve = reader.ReadUndertaleObject<UndertaleAnimationCurve>();
+                    EmbeddedAnimCurve = new UndertaleAnimationCurve();
+                    EmbeddedAnimCurve.Unserialize(reader, false);
                 }
                 else
                 {

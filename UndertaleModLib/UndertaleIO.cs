@@ -353,6 +353,14 @@ namespace UndertaleModLib
             }
         }
 
+        public void Align(int alignment, byte paddingbyte = 0x00)
+        {
+            while ((Position & (alignment - 1)) != paddingbyte)
+            {
+                Debug.Assert(ReadByte() == paddingbyte, "Invalid alignment padding");
+            }
+        }
+
         public EnsureLengthOperation EnsureLengthFromHere(uint expectedLength)
         {
             return new EnsureLengthOperation(this, expectedLength);
@@ -518,6 +526,14 @@ namespace UndertaleModLib
             {
                 var unwrittenObjects = pendingWrites.Concat(pendingStringWrites);
                 throw new IOException("Found pointer targets that were never written:\n" + String.Join("\n", unwrittenObjects.Take(10).Select((x) => x.Key + " at " + String.Join(", ", x.Value.Select((y) => "0x" + y.ToString("X8"))))) + (unwrittenObjects.Count() > 10 ? "\n(and more, " + unwrittenObjects.Count() + " total)" : ""));
+            }
+        }
+
+        public void Align(int alignment, byte paddingbyte = 0x00)
+        {
+            while ((Position & (alignment - 1)) != paddingbyte)
+            {
+                Write(paddingbyte);
             }
         }
 

@@ -90,7 +90,11 @@ namespace UndertaleModTool
             Paragraph par = new Paragraph();
             par.Margin = new Thickness(0);
 
-            if (code.Instructions.Count > 5000)
+            if (code.DuplicateEntry)
+            {
+                par.Inlines.Add(new Run("Duplicate code entry; cannot edit here."));
+            } 
+            else if (code.Instructions.Count > 5000)
             {
                 // Disable syntax highlighting. Loading it can take a few MINUTES on large scripts.
                 var data = (Application.Current.MainWindow as MainWindow).Data;
@@ -120,9 +124,15 @@ namespace UndertaleModTool
                 foreach (var instr in code.Instructions)
                 {
                     par.Inlines.Add(new Run(instr.Address.ToString("D5") + ": ") { Foreground = addressBrush });
-                    par.Inlines.Add(new Run(instr.Kind.ToString().ToLower()) { Foreground = opcodeBrush, FontWeight = FontWeights.Bold });
+                    string kind = instr.Kind.ToString();
+                    var type = UndertaleInstruction.GetInstructionType(instr.Kind);
+                    if (type == UndertaleInstruction.InstructionType.BreakInstruction)
+                        kind = Assembler.BreakIDToName[(short)instr.Value];
+                    else
+                        kind = kind.ToLower();
+                    par.Inlines.Add(new Run(kind) { Foreground = opcodeBrush, FontWeight = FontWeights.Bold });
 
-                    switch (UndertaleInstruction.GetInstructionType(instr.Kind))
+                    switch (type)
                     {
                         case UndertaleInstruction.InstructionType.SingleTypeInstruction:
                             par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
@@ -131,6 +141,14 @@ namespace UndertaleModTool
                             {
                                 par.Inlines.Add(new Run(" "));
                                 par.Inlines.Add(new Run(instr.Extra.ToString()) { Foreground = argBrush });
+                                if (instr.Kind == UndertaleInstruction.Opcode.Dup)
+                                {
+                                    if ((byte)instr.ComparisonKind == 0x88)
+                                    {
+                                        // No idea what this is right now (seems to be used at least with @@GetInstance@@), this is the "temporary" solution
+                                        par.Inlines.Add(new Run(" spec"));
+                                    }
+                                }
                             }
                             break;
 
@@ -174,11 +192,10 @@ namespace UndertaleModTool
                                     par.Inlines.Add(new Run(instr.TypeInst.ToString().ToLower()) { Foreground = typeBrush });
                                     par.Inlines.Add(new Run("."));
                                 }
-
                                 Run runDest = new Run(instr.Destination.ToString()) { Foreground = argBrush, Cursor = Cursors.Hand };
                                 runDest.MouseDown += (sender, e) =>
                                 {
-                                    (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Destination);
+                                    (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Destination.Target);
                                 };
                                 par.Inlines.Add(runDest);
                             }
@@ -221,8 +238,8 @@ namespace UndertaleModTool
 
                         case UndertaleInstruction.InstructionType.BreakInstruction:
                             par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run(" "));
-                            par.Inlines.Add(new Run(instr.Value.ToString()) { Foreground = argBrush });
+                            //par.Inlines.Add(new Run(" "));
+                            //par.Inlines.Add(new Run(instr.Value.ToString()) { Foreground = argBrush });
                             break;
                     }
 
@@ -286,9 +303,6 @@ namespace UndertaleModTool
 
         private async void DecompileCode(UndertaleCode code)
         {
-            LoaderDialog dialog = new LoaderDialog("Decompiling", "Decompiling, please wait... This can take a while on complex scripts");
-            dialog.Owner = Window.GetWindow(this);
-
             FlowDocument document = new FlowDocument();
             document.PagePadding = new Thickness(0);
             document.PageWidth = 2048; // Speed-up.
@@ -296,308 +310,329 @@ namespace UndertaleModTool
             Paragraph par = new Paragraph();
             par.Margin = new Thickness(0);
 
-            UndertaleCode gettextCode = null;
-            if (gettext == null)
-                gettextCode = (Application.Current.MainWindow as MainWindow).Data.Code.ByName("gml_Script_textdata_en");
-
-            string dataPath = System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
-            string gettextJsonPath = (dataPath != null) ? System.IO.Path.Combine(dataPath, "lang/lang_en.json") : null;
-
-            var dataa = (Application.Current.MainWindow as MainWindow).Data;
-            Task t = Task.Run(() =>
+            if (code.DuplicateEntry)
             {
-                int estimatedLineCount = (int)Math.Round(code.Length * .056D);
-                bool skipFormatting = (estimatedLineCount > 5000);
+                par.Inlines.Add(new Run("Duplicate code entry; cannot edit here."));
+                document.Blocks.Add(par);
+                DecompiledView.Document = document;
+                CurrentDecompiled = code;
+            }
+            else
+            {
+                LoaderDialog dialog = new LoaderDialog("Decompiling", "Decompiling, please wait... This can take a while on complex scripts");
+                dialog.Owner = Window.GetWindow(this);
 
-                DecompileContext context = new DecompileContext(dataa, !skipFormatting);
-                string decompiled = null;
-                Exception e = null;
-                try
-                {
-                    decompiled = Decompiler.Decompile(code, context).Replace("\r\n", "\n");
-                }
-                catch (Exception ex)
-                {
-                    e = ex;
-                }
+                UndertaleCode gettextCode = null;
+                if (gettext == null)
+                    gettextCode = (Application.Current.MainWindow as MainWindow).Data.Code.ByName("gml_Script_textdata_en");
 
-                if (gettextCode != null)
-                    UpdateGettext(gettextCode);
+                string dataPath = System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
+                string gettextJsonPath = (dataPath != null) ? System.IO.Path.Combine(dataPath, "lang/lang_en.json") : null;
 
-                if (gettextJSON == null && gettextJsonPath != null && File.Exists(gettextJsonPath))
+                var dataa = (Application.Current.MainWindow as MainWindow).Data;
+                Task t = Task.Run(() =>
                 {
-                    string err = UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
-                    if (err != null)
-                        e = new Exception(err);
-                }
+                    int estimatedLineCount = (int)Math.Round(code.Length * .056D);
+                    bool skipFormatting = (estimatedLineCount > 5000);
 
-                Dispatcher.Invoke(() =>
-                {
-                    if (e != null)
+                    DecompileContext context = new DecompileContext(dataa, !skipFormatting);
+                    string decompiled = null;
+                    Exception e = null;
+                    try
                     {
-                        Brush exceptionBrush = new SolidColorBrush(Color.FromRgb(255, 0, 0));
-                        par.Inlines.Add(new Run("EXCEPTION!\n") { Foreground = exceptionBrush, FontWeight = FontWeights.Bold });
-                        par.Inlines.Add(new Run(e.ToString()) { Foreground = exceptionBrush });
+                        decompiled = Decompiler.Decompile(code, context).Replace("\r\n", "\n");
                     }
-                    else if (decompiled != null)
+                    catch (Exception ex)
                     {
-                        string[] lines = decompiled.Split('\n');
-                        if (skipFormatting)
+                        e = ex;
+                    }
+
+                    if (gettextCode != null)
+                        UpdateGettext(gettextCode);
+
+                    if (gettextJSON == null && gettextJsonPath != null && File.Exists(gettextJsonPath))
+                    {
+                        string err = UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
+                        if (err != null)
+                            e = new Exception(err);
+                    }
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        if (e != null)
                         {
-                            for (var i = 0; i < lines.Length; i++)
+                            Brush exceptionBrush = new SolidColorBrush(Color.FromRgb(255, 0, 0));
+                            par.Inlines.Add(new Run("EXCEPTION!\n") { Foreground = exceptionBrush, FontWeight = FontWeights.Bold });
+                            par.Inlines.Add(new Run(e.ToString()) { Foreground = exceptionBrush });
+                        }
+                        else if (decompiled != null)
+                        {
+                            string[] lines = decompiled.Split('\n');
+                            if (skipFormatting)
                             {
-                                string toWrite = lines[i];
-                                if (((i + 1) % 100) != 0 && lines.Length > i + 1)
-                                    toWrite += "\n"; // Write a new-line if we're not making a new paragraph.
+                                for (var i = 0; i < lines.Length; i++)
+                                {
+                                    string toWrite = lines[i];
+                                    if (((i + 1) % 100) != 0 && lines.Length > i + 1)
+                                        toWrite += "\n"; // Write a new-line if we're not making a new paragraph.
 
                                 if (i > 0 && i % 100 == 0)
-                                { // Splitting into different paragraphs significantly increases selection performance.
+                                    { // Splitting into different paragraphs significantly increases selection performance.
                                     document.Blocks.Add(par);
-                                    par = new Paragraph();
-                                    par.Margin = new Thickness(0);
+                                        par = new Paragraph();
+                                        par.Margin = new Thickness(0);
+                                    }
+
+                                    par.Inlines.Add(toWrite);
                                 }
-
-                                par.Inlines.Add(toWrite); 
                             }
-                        }
-                        else
-                        {
-                            Brush keywordBrush = new SolidColorBrush(Color.FromRgb(0, 0, 150));
-                            Brush constBrush = new SolidColorBrush(Color.FromRgb(0, 100, 150));
-                            Brush stringBrush = new SolidColorBrush(Color.FromRgb(0, 0, 200));
-                            Brush commentBrush = new SolidColorBrush(Color.FromRgb(0, 150, 0));
-                            Brush funcBrush = new SolidColorBrush(Color.FromRgb(100, 100, 0));
-                            Brush assetBrush = new SolidColorBrush(Color.FromRgb(0, 150, 100));
-                            Brush argumentBrush = new SolidColorBrush(Color.FromRgb(80, 131, 80));
-
-                            Dictionary<string, UndertaleFunction> funcs = new Dictionary<string, UndertaleFunction>();
-                            foreach (var x in (Application.Current.MainWindow as MainWindow).Data.Functions)
-                                funcs.Add(x.Name.Content, x);
-
-                            string storedStrTok = "";
-
-                            foreach (var line in lines)
+                            else
                             {
-                                char[] special = { '.', ',', ')', '(', '[', ']', '>', '<', ':', ';', '=', '"', '!' };
-                                Func<char, bool> IsSpecial = (c) => Char.IsWhiteSpace(c) || special.Contains(c);
-                                List<string> split = new List<string>();
-                                string tok = storedStrTok;
-                                storedStrTok = "";
-                                bool readingString = (tok != "");
-                                bool escaped = false;
-                                for (int i = 0; i < line.Length; i++)
+                                Brush keywordBrush = new SolidColorBrush(Color.FromRgb(0, 0, 150));
+                                Brush constBrush = new SolidColorBrush(Color.FromRgb(0, 100, 150));
+                                Brush stringBrush = new SolidColorBrush(Color.FromRgb(0, 0, 200));
+                                Brush commentBrush = new SolidColorBrush(Color.FromRgb(0, 150, 0));
+                                Brush funcBrush = new SolidColorBrush(Color.FromRgb(100, 100, 0));
+                                Brush assetBrush = new SolidColorBrush(Color.FromRgb(0, 150, 100));
+                                Brush argumentBrush = new SolidColorBrush(Color.FromRgb(80, 131, 80));
+
+                                Dictionary<string, UndertaleFunction> funcs = new Dictionary<string, UndertaleFunction>();
+                                foreach (var x in (Application.Current.MainWindow as MainWindow).Data.Functions)
+                                    funcs.Add(x.Name.Content, x);
+
+                                string storedStrTok = "";
+
+                                foreach (var line in lines)
                                 {
-                                    if (tok == "//")
+                                    char[] special = { '.', ',', ')', '(', '[', ']', '>', '<', ':', ';', '=', '"', '!' };
+                                    Func<char, bool> IsSpecial = (c) => Char.IsWhiteSpace(c) || special.Contains(c);
+                                    List<string> split = new List<string>();
+                                    string tok = storedStrTok;
+                                    storedStrTok = "";
+                                    bool readingString = (tok != "");
+                                    bool escaped = false;
+                                    for (int i = 0; i < line.Length; i++)
                                     {
-                                        tok += line.Substring(i);
-                                        break;
-                                    }
-                                    if (!readingString && tok.Length > 0 && (
-                                        (Char.IsWhiteSpace(line[i]) != Char.IsWhiteSpace(tok[tok.Length - 1])) ||
-                                        (special.Contains(line[i]) != special.Contains(tok[tok.Length - 1])) ||
-                                        (special.Contains(line[i]) && special.Contains(tok[tok.Length - 1])) ||
-                                        line[i] == '"'
-                                        ))
-                                    {
-                                        split.Add(tok);
-                                        tok = "";
-                                    }
-
-                                    if (readingString && context.isGameMaker2)
-                                    {
-                                        if (escaped)
+                                        if (tok == "//")
                                         {
-                                            escaped = false;
-                                            if (line[i] == '"')
-                                            {
-                                                tok += line[i];
-                                                continue;
-                                            }
+                                            tok += line.Substring(i);
+                                            break;
                                         }
-                                        else if (line[i] == '\\')
-                                        {
-                                            escaped = true;
-                                        }
-                                    }
-
-                                    tok += line[i];
-                                    if (line[i] == '"')
-                                    {
-                                        if (readingString)
+                                        if (!readingString && tok.Length > 0 && (
+                                            (Char.IsWhiteSpace(line[i]) != Char.IsWhiteSpace(tok[tok.Length - 1])) ||
+                                            (special.Contains(line[i]) != special.Contains(tok[tok.Length - 1])) ||
+                                            (special.Contains(line[i]) && special.Contains(tok[tok.Length - 1])) ||
+                                            line[i] == '"'
+                                            ))
                                         {
                                             split.Add(tok);
                                             tok = "";
                                         }
-                                        readingString = !readingString;
-                                    }
-                                }
-                                if (tok != "")
-                                {
-                                    if (readingString)
-                                        storedStrTok = tok + "\n";
-                                    else
-                                        split.Add(tok);
-                                }
 
-                                Dictionary<string, object> usedObjects = new Dictionary<string, object>();
-                                for (int i = 0; i < split.Count; i++)
-                                {
-                                    int? val = null;
-                                    string token = split[i];
-                                    if (token == "if" || token == "else" || token == "return" || token == "break" || token == "continue" || token == "while" || token == "for" || token == "repeat" || token == "with" || token == "switch" || token == "case" || token == "default" || token == "exit" || token == "var" || token == "do" || token == "until")
-                                        par.Inlines.Add(new Run(token) { Foreground = keywordBrush, FontWeight = FontWeights.Bold });
-                                    else if (token == "self" || token == "global" || token == "local" || token == "other" || token == "noone" || token == "true" || token == "false" || token == "undefined" || token == "all")
-                                        par.Inlines.Add(new Run(token) { Foreground = keywordBrush });
-                                    else if (token.StartsWith("argument"))
-                                        par.Inlines.Add(new Run(token) { Foreground = argumentBrush });
-                                    else if ((val = AssetTypeResolver.FindConstValue(token)) != null)
-                                        par.Inlines.Add(new Run(token) { Foreground = constBrush, FontStyle = FontStyles.Italic, ToolTip = val.ToString() });
-                                    else if (token.StartsWith("\""))
-                                        par.Inlines.Add(new Run(token) { Foreground = stringBrush });
-                                    else if (token.StartsWith("//"))
-                                        par.Inlines.Add(new Run(token) { Foreground = commentBrush });
-                                    else if (token.StartsWith("@") && split[i - 1][0] == '"' && split[i - 1][split[i - 1].Length - 1] == '"')
-                                    {
-                                        par.Inlines.LastInline.Cursor = Cursors.Hand;
-                                        par.Inlines.LastInline.MouseDown += (sender, ev) =>
+                                        if (readingString && context.isGameMaker2)
                                         {
-                                            MainWindow mw = Application.Current.MainWindow as MainWindow;
-                                            mw.ChangeSelection(mw.Data.Strings[Int32.Parse(token.Substring(1))]);
-                                        };
-                                    }
-                                    else if (dataa.ByName(token) != null)
-                                    {
-                                        par.Inlines.Add(new Run(token) { Foreground = assetBrush, Cursor = Cursors.Hand });
-                                        par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(dataa.ByName(token));
-                                        if (token == "scr_gettext" && gettext != null)
-                                        {
-                                            if (split[i + 1] == "(" && split[i + 2].StartsWith("\"") && split[i + 3].StartsWith("@") && split[i + 4] == ")")
+                                            if (escaped)
                                             {
-                                                string id = split[i + 2].Substring(1, split[i + 2].Length - 2);
-                                                if (!usedObjects.ContainsKey(id) && gettext.ContainsKey(id))
-                                                    usedObjects.Add(id, (Application.Current.MainWindow as MainWindow).Data.Strings[gettext[id]]);
+                                                escaped = false;
+                                                if (line[i] == '"')
+                                                {
+                                                    tok += line[i];
+                                                    continue;
+                                                }
+                                            }
+                                            else if (line[i] == '\\')
+                                            {
+                                                escaped = true;
                                             }
                                         }
-                                        if (token == "scr_84_get_lang_string" && gettextJSON != null)
+
+                                        tok += line[i];
+                                        if (line[i] == '"')
                                         {
-                                            if (split[i + 1] == "(" && split[i + 2].StartsWith("\"") && split[i + 3].StartsWith("@") && split[i + 4] == ")")
+                                            if (readingString)
                                             {
-                                                string id = split[i + 2].Substring(1, split[i + 2].Length - 2);
-                                                if (!usedObjects.ContainsKey(id) && gettextJSON.ContainsKey(id))
-                                                    usedObjects.Add(id, gettextJSON[id]);
+                                                split.Add(tok);
+                                                tok = "";
                                             }
+                                            readingString = !readingString;
                                         }
                                     }
-                                    else if (funcs.ContainsKey(token))
+                                    if (tok != "")
                                     {
-                                        par.Inlines.Add(new Run(token) { Foreground = funcBrush, Cursor = Cursors.Hand });
-                                        par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(funcs[token]);
+                                        if (readingString)
+                                            storedStrTok = tok + "\n";
+                                        else
+                                            split.Add(tok);
                                     }
-                                    else if (char.IsDigit(token[0]))
+
+                                    Dictionary<string, object> usedObjects = new Dictionary<string, object>();
+                                    for (int i = 0; i < split.Count; i++)
                                     {
-                                        par.Inlines.Add(new Run(token) { Cursor = Cursors.Hand });
-                                        par.Inlines.LastInline.MouseDown += (sender, ev) =>
+                                        int? val = null;
+                                        string token = split[i];
+                                        if (token == "if" || token == "else" || token == "return" || token == "break" || token == "continue" || token == "while" || token == "for" || token == "repeat" || token == "with" || token == "switch" || token == "case" || token == "default" || token == "exit" || token == "var" || token == "do" || token == "until")
+                                            par.Inlines.Add(new Run(token) { Foreground = keywordBrush, FontWeight = FontWeights.Bold });
+                                        else if (token == "self" || token == "global" || token == "local" || token == "other" || token == "noone" || token == "true" || token == "false" || token == "undefined" || token == "all")
+                                            par.Inlines.Add(new Run(token) { Foreground = keywordBrush });
+                                        else if (token.StartsWith("argument"))
+                                            par.Inlines.Add(new Run(token) { Foreground = argumentBrush });
+                                        else if ((val = AssetTypeResolver.FindConstValue(token)) != null)
+                                            par.Inlines.Add(new Run(token) { Foreground = constBrush, FontStyle = FontStyles.Italic, ToolTip = val.ToString() });
+                                        else if (token.StartsWith("\""))
+                                            par.Inlines.Add(new Run(token) { Foreground = stringBrush });
+                                        else if (token.StartsWith("//"))
+                                            par.Inlines.Add(new Run(token) { Foreground = commentBrush });
+                                        else if (token.StartsWith("@") && split[i - 1][0] == '"' && split[i - 1][split[i - 1].Length - 1] == '"')
                                         {
-                                            if (token.Length > 2 && token[0] == '0' && token[1] == 'x')
+                                            par.Inlines.LastInline.Cursor = Cursors.Hand;
+                                            par.Inlines.LastInline.MouseDown += (sender, ev) =>
                                             {
+                                                MainWindow mw = Application.Current.MainWindow as MainWindow;
+                                                mw.ChangeSelection(mw.Data.Strings[Int32.Parse(token.Substring(1))]);
+                                            };
+                                        }
+                                        else if (dataa.ByName(token) != null)
+                                        {
+                                            par.Inlines.Add(new Run(token) { Foreground = assetBrush, Cursor = Cursors.Hand });
+                                            par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(dataa.ByName(token));
+                                            if (token == "scr_gettext" && gettext != null)
+                                            {
+                                                if (split[i + 1] == "(" && split[i + 2].StartsWith("\"") && split[i + 3].StartsWith("@") && split[i + 4] == ")")
+                                                {
+                                                    string id = split[i + 2].Substring(1, split[i + 2].Length - 2);
+                                                    if (!usedObjects.ContainsKey(id) && gettext.ContainsKey(id))
+                                                        usedObjects.Add(id, (Application.Current.MainWindow as MainWindow).Data.Strings[gettext[id]]);
+                                                }
+                                            }
+                                            if (token == "scr_84_get_lang_string" && gettextJSON != null)
+                                            {
+                                                if (split[i + 1] == "(" && split[i + 2].StartsWith("\"") && split[i + 3].StartsWith("@") && split[i + 4] == ")")
+                                                {
+                                                    string id = split[i + 2].Substring(1, split[i + 2].Length - 2);
+                                                    if (!usedObjects.ContainsKey(id) && gettextJSON.ContainsKey(id))
+                                                        usedObjects.Add(id, gettextJSON[id]);
+                                                }
+                                            }
+                                        }
+                                        else if (funcs.ContainsKey(token))
+                                        {
+                                            par.Inlines.Add(new Run(token) { Foreground = funcBrush, Cursor = Cursors.Hand });
+                                            par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(funcs[token]);
+                                        }
+                                        else if (char.IsDigit(token[0]))
+                                        {
+                                            par.Inlines.Add(new Run(token) { Cursor = Cursors.Hand });
+                                            par.Inlines.LastInline.MouseDown += (sender, ev) =>
+                                            {
+                                                if (token.Length > 2 && token[0] == '0' && token[1] == 'x')
+                                                {
+                                                    ev.Handled = true;
+                                                    return; // Hex numbers aren't objects.
+                                            }
+
+                                                UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
+                                                int id;
+                                                if (int.TryParse(token, out id))
+                                                {
+                                                    List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
+                                                    if (id < data.Sprites.Count)
+                                                        possibleObjects.Add(data.Sprites[id]);
+                                                    if (id < data.Rooms.Count)
+                                                        possibleObjects.Add(data.Rooms[id]);
+                                                    if (id < data.GameObjects.Count)
+                                                        possibleObjects.Add(data.GameObjects[id]);
+                                                    if (id < data.Backgrounds.Count)
+                                                        possibleObjects.Add(data.Backgrounds[id]);
+                                                    if (id < data.Scripts.Count)
+                                                        possibleObjects.Add(data.Scripts[id]);
+                                                    if (id < data.Paths.Count)
+                                                        possibleObjects.Add(data.Paths[id]);
+                                                    if (id < data.Fonts.Count)
+                                                        possibleObjects.Add(data.Fonts[id]);
+                                                    if (id < data.Sounds.Count)
+                                                        possibleObjects.Add(data.Sounds[id]);
+                                                    if (id < data.Shaders.Count)
+                                                        possibleObjects.Add(data.Shaders[id]);
+                                                    if (id < data.Timelines.Count)
+                                                        possibleObjects.Add(data.Timelines[id]);
+
+                                                    ContextMenu contextMenu = new ContextMenu();
+                                                    foreach (UndertaleObject obj in possibleObjects)
+                                                    {
+                                                        MenuItem item = new MenuItem();
+                                                        item.Header = obj.ToString().Replace("_", "__");
+                                                        item.Click += (sender2, ev2) => (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
+                                                        contextMenu.Items.Add(item);
+                                                    }
+                                                    if (id > 0x00050000)
+                                                    {
+                                                        contextMenu.Items.Add(new MenuItem() { Header = "#" + id.ToString("X6") + " (color)", IsEnabled = false });
+                                                    }
+                                                    contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
+                                                    (sender as Run).ContextMenu = contextMenu;
+                                                    contextMenu.IsOpen = true;
+                                                }
                                                 ev.Handled = true;
-                                                return; // Hex numbers aren't objects.
-                                            }
+                                            };
+                                        }
+                                        else
+                                            par.Inlines.Add(token);
 
-                                            UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
-                                            int id;
-                                            if (int.TryParse(token, out id))
-                                            {
-                                                List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
-                                                if (id < data.Sprites.Count)
-                                                    possibleObjects.Add(data.Sprites[id]);
-                                                if (id < data.Rooms.Count)
-                                                    possibleObjects.Add(data.Rooms[id]);
-                                                if (id < data.GameObjects.Count)
-                                                    possibleObjects.Add(data.GameObjects[id]);
-                                                if (id < data.Backgrounds.Count)
-                                                    possibleObjects.Add(data.Backgrounds[id]);
-                                                if (id < data.Scripts.Count)
-                                                    possibleObjects.Add(data.Scripts[id]);
-                                                if (id < data.Paths.Count)
-                                                    possibleObjects.Add(data.Paths[id]);
-                                                if (id < data.Fonts.Count)
-                                                    possibleObjects.Add(data.Fonts[id]);
-                                                if (id < data.Sounds.Count)
-                                                    possibleObjects.Add(data.Sounds[id]);
-                                                if (id < data.Shaders.Count)
-                                                    possibleObjects.Add(data.Shaders[id]);
-                                                if (id < data.Timelines.Count)
-                                                    possibleObjects.Add(data.Timelines[id]);
-
-                                                ContextMenu contextMenu = new ContextMenu();
-                                                foreach (UndertaleObject obj in possibleObjects)
-                                                {
-                                                    MenuItem item = new MenuItem();
-                                                    item.Header = obj.ToString().Replace("_", "__");
-                                                    item.Click += (sender2, ev2) => (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
-                                                    contextMenu.Items.Add(item);
-                                                }
-                                                if (id > 0x00050000)
-                                                {
-                                                    contextMenu.Items.Add(new MenuItem() { Header = "#" + id.ToString("X6") + " (color)", IsEnabled = false });
-                                                }
-                                                contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
-                                                (sender as Run).ContextMenu = contextMenu;
-                                                contextMenu.IsOpen = true;
-                                            }
-                                            ev.Handled = true;
-                                        };
-                                    }
-                                    else
-                                        par.Inlines.Add(token);
-
-                                    if (token == "." && (Char.IsLetter(split[i + 1][0]) || split[i + 1][0] == '_'))
-                                    {
-                                        int id;
-                                        if (Int32.TryParse(split[i - 1], out id))
+                                        if (token == "." && (Char.IsLetter(split[i + 1][0]) || split[i + 1][0] == '_'))
                                         {
-                                            var gos = (Application.Current.MainWindow as MainWindow).Data.GameObjects;
-                                            if (!usedObjects.ContainsKey(split[i - 1]) && id >= 0 && id < gos.Count)
-                                                usedObjects.Add(split[i - 1], gos[id]);
+                                            int id;
+                                            if (Int32.TryParse(split[i - 1], out id))
+                                            {
+                                                var gos = (Application.Current.MainWindow as MainWindow).Data.GameObjects;
+                                                if (!usedObjects.ContainsKey(split[i - 1]) && id >= 0 && id < gos.Count)
+                                                    usedObjects.Add(split[i - 1], gos[id]);
+                                            }
                                         }
                                     }
-                                }
 
                                 // Add used object comments.
                                 foreach (var gt in usedObjects)
-                                {
-                                    par.Inlines.Add(new Run(" // " + gt.Key + " = ") { Foreground = commentBrush });
-                                    par.Inlines.Add(new Run(gt.Value is string ? "\"" + (string)gt.Value + "\"" : gt.Value.ToString()) { Foreground = commentBrush, Cursor = Cursors.Hand });
-                                    if (gt.Value is UndertaleObject)
-                                        par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(gt.Value);
-                                }
+                                    {
+                                        par.Inlines.Add(new Run(" // " + gt.Key + " = ") { Foreground = commentBrush });
+                                        par.Inlines.Add(new Run(gt.Value is string ? "\"" + (string)gt.Value + "\"" : gt.Value.ToString()) { Foreground = commentBrush, Cursor = Cursors.Hand });
+                                        if (gt.Value is UndertaleObject)
+                                            par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(gt.Value);
+                                    }
 
-                                if (par.Inlines.Count >= 250)
-                                { // Splitting into different paragraphs significantly increases selection performance.
+                                    if (par.Inlines.Count >= 250)
+                                    { // Splitting into different paragraphs significantly increases selection performance.
                                     document.Blocks.Add(par);
-                                    par = new Paragraph();
-                                    par.Margin = new Thickness(0);
-                                } else if (!readingString)
-                                {
-                                    par.Inlines.Add(new Run("\n"));
+                                        par = new Paragraph();
+                                        par.Margin = new Thickness(0);
+                                    }
+                                    else if (!readingString)
+                                    {
+                                        par.Inlines.Add(new Run("\n"));
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    document.Blocks.Add(par);
-                    DecompiledView.Document = document;
-                    CurrentDecompiled = code;
-                    dialog.Hide();
+                        document.Blocks.Add(par);
+                        DecompiledView.Document = document;
+                        CurrentDecompiled = code;
+                        dialog.Hide();
+                    });
                 });
-            });
-            dialog.ShowDialog();
-            await t;
+                dialog.ShowDialog();
+                await t;
+            }
         }
 
         private async void GraphCode(UndertaleCode code)
         {
+            if (code.DuplicateEntry)
+            {
+                GraphView.Source = null;
+                CurrentGraphed = code;
+                return;
+            }
+
             LoaderDialog dialog = new LoaderDialog("Generating graph", "Generating graph, please wait...");
             dialog.Owner = Window.GetWindow(this);
             Task t = Task.Run(() =>
@@ -646,6 +681,8 @@ namespace UndertaleModTool
 
         private void DecompiledView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            if ((this.DataContext as UndertaleCode)?.DuplicateEntry == true)
+                return;
             DecompiledView.Visibility = Visibility.Collapsed;
             DecompiledEditor.Visibility = Visibility.Visible;
             DecompiledEditor.Text = new TextRange(DecompiledView.Document.ContentStart, DecompiledView.Document.ContentEnd).Text;
@@ -660,6 +697,8 @@ namespace UndertaleModTool
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return; // Probably loaded another data.win or something.
+            if (code.DuplicateEntry)
+                return;
 
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
 
@@ -700,6 +739,8 @@ namespace UndertaleModTool
 
         private void DisassemblyView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            if ((this.DataContext as UndertaleCode)?.DuplicateEntry == true)
+                return;
             DisassemblyView.Visibility = Visibility.Collapsed;
             DisassemblyEditor.Visibility = Visibility.Visible;
             DisassemblyEditor.Text = new TextRange(DisassemblyView.Document.ContentStart, DisassemblyView.Document.ContentEnd).Text;
@@ -714,6 +755,8 @@ namespace UndertaleModTool
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return; // Probably loaded another data.win or something.
+            if (code.DuplicateEntry)
+                return;
 
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
             try
