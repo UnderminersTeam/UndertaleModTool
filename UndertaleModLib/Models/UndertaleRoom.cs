@@ -828,13 +828,11 @@ namespace UndertaleModLib.Models
             {
                 private UndertalePointerList<Tile> _LegacyTiles;
                 private UndertalePointerList<SpriteInstance> _Sprites;
-                private bool _GMS2_3;
                 private UndertalePointerList<SequenceInstance> _Sequences;
                 private UndertalePointerList<SpriteInstance> _NineSlices;  // Removed in 2.3.2, before ever used
 
                 public UndertalePointerList<Tile> LegacyTiles { get => _LegacyTiles; set { _LegacyTiles = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LegacyTiles")); } }
                 public UndertalePointerList<SpriteInstance> Sprites { get => _Sprites; set { _Sprites = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sprites")); } }
-                public bool GMS2_3 { get => _GMS2_3; set { _GMS2_3 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2_3")); } }
                 public UndertalePointerList<SequenceInstance> Sequences { get => _Sequences; set { _Sequences = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sequences")); } }
                 public UndertalePointerList<SpriteInstance> NineSlices { get => _NineSlices; set { _NineSlices = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("NineSlices")); } }  // Read above comment
 
@@ -844,7 +842,7 @@ namespace UndertaleModLib.Models
                 {
                     writer.WriteUndertaleObjectPointer(LegacyTiles);
                     writer.WriteUndertaleObjectPointer(Sprites);
-                    if (GMS2_3)
+                    if (writer.undertaleData.GMS2_3)
                     {
                         writer.WriteUndertaleObjectPointer(Sequences);
                         if (!writer.undertaleData.GMS2_3_2)
@@ -852,7 +850,7 @@ namespace UndertaleModLib.Models
                     }
                     writer.WriteUndertaleObject(LegacyTiles);
                     writer.WriteUndertaleObject(Sprites);
-                    if (GMS2_3)
+                    if (writer.undertaleData.GMS2_3)
                     {
                         writer.WriteUndertaleObject(Sequences);
                         if (!writer.undertaleData.GMS2_3_2)
@@ -864,8 +862,7 @@ namespace UndertaleModLib.Models
                 {
                     LegacyTiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<Tile>>();
                     Sprites = reader.ReadUndertaleObjectPointer<UndertalePointerList<SpriteInstance>>();
-                    GMS2_3 = reader.GMS2_3;
-                    if (GMS2_3)
+                    if (reader.GMS2_3)
                     {
                         Sequences = reader.ReadUndertaleObjectPointer<UndertalePointerList<SequenceInstance>>();
                         if (!reader.undertaleData.GMS2_3_2)
@@ -873,7 +870,7 @@ namespace UndertaleModLib.Models
                     }
                     reader.ReadUndertaleObject(LegacyTiles);
                     reader.ReadUndertaleObject(Sprites);
-                    if (GMS2_3)
+                    if (reader.GMS2_3)
                     {
                         reader.ReadUndertaleObject(Sequences);
                         if (!reader.undertaleData.GMS2_3_2)
