@@ -1616,6 +1616,20 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.Break:
+                        // GMS 2.3 sub-opcode.
+                        // Stop 'setowner' values from leaking into the decompiled output
+                        // as tempvars. Should be replaced with something better in the future.
+                        if (context.Data.GMS2_3 && (short)instr.Value == -5)
+                        {
+                            if (stack.Count > 0)
+                            {
+                                stack.Pop();
+                            }
+                            else
+                            {
+                                statements.Add(new CommentStatement("WARNING: attempted to setowner without an owner on the stack."));
+                            }
+                        }
                         // This is used for checking bounds in 2D arrays
                         // I'm not sure of the specifics but I guess it causes a debug breakpoint if the top of the stack is >= 32000
                         // anyway, that's not important when decompiling to high-level code so just ignore it

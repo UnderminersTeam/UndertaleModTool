@@ -360,10 +360,8 @@ namespace UndertaleModLib.Compiler
             {
                 // Basic initialization
                 if (context.BuiltInList == null)
-                {
-                    context.BuiltInList = new BuiltinList();
-                    context.BuiltInList.Initialize(context.Data);
-                }
+                    context.BuiltInList = new BuiltinList(context.Data);
+
                 remainingStageOne.Clear();
                 ErrorMessages.Clear();
                 context.LocalVars.Clear();
