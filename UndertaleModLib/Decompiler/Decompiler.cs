@@ -275,53 +275,57 @@ namespace UndertaleModLib.Decompiler
                         return ((UndertaleInstruction.InstanceType)Value).ToString().ToLower();
                 }
                 // Need to put else because otherwise it gets terribly unoptimized with GameObject type
-                else if (AssetType == AssetIDType.e__VW)
-                    return "e__VW." + ConvertToEnumStr<e__VW>(Value);
-                else if (AssetType == AssetIDType.e__BG)
-                    return "e__BG." + ConvertToEnumStr<e__BG>(Value);
 
-                else if (AssetType == AssetIDType.Enum_HAlign)
-                    return ConvertToEnumStr<HAlign>(Value);
-                else if (AssetType == AssetIDType.Enum_VAlign)
-                    return ConvertToEnumStr<VAlign>(Value);
-                else if (AssetType == AssetIDType.Enum_GameSpeed)
-                    return ConvertToEnumStr<GameSpeed>(Value);
-                else if (AssetType == AssetIDType.Enum_OSType)
-                    return ConvertToEnumStr<OSType>(Value);
-                else if (AssetType == AssetIDType.Enum_GamepadButton)
-                    return ConvertToEnumStr<GamepadButton>(Value);
-                else if (AssetType == AssetIDType.MouseButton)
-                    return ConvertToEnumStr<MouseButton>(Value);
-                else if (AssetType == AssetIDType.Enum_MouseCursor)
-                    return ConvertToEnumStr<MouseCursor>(Value);
-                else if (AssetType == AssetIDType.Enum_PathEndAction)
-                    return ConvertToEnumStr<PathEndAction>(Value);
-                else if (AssetType == AssetIDType.Enum_BufferKind)
-                    return ConvertToEnumStr<BufferKind>(Value);
-                else if (AssetType == AssetIDType.Enum_BufferType)
-                    return ConvertToEnumStr<BufferType>(Value);
-                else if (AssetType == AssetIDType.Enum_BufferSeek)
-                    return ConvertToEnumStr<BufferSeek>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_UGC_FileType)
-                    return ConvertToEnumStr<Steam_UGC_FileType>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_UGC_List)
-                    return ConvertToEnumStr<Steam_UGC_List>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_UGC_MatchType)
-                    return ConvertToEnumStr<Steam_UGC_MatchType>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_UGC_QueryType)
-                    return ConvertToEnumStr<Steam_UGC_QueryType>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_UGC_SortOrder)
-                    return ConvertToEnumStr<Steam_UGC_SortOrder>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_Overlay)
-                    return ConvertToEnumStr<Steam_Overlay>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_LeaderBoard_Display)
-                    return ConvertToEnumStr<Steam_LeaderBoard_Display>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_LeaderBoard_Sort)
-                    return ConvertToEnumStr<Steam_LeaderBoard_Sort>(Value);
-                else if (AssetType == AssetIDType.Boolean)
-                    return ConvertToEnumStr<Boolean>(Value);
+                //Archie: If statements are inefficient! Use a switch jump table!
+                switch (AssetType)
+                {
+                    case AssetIDType.e__VW:
+                        return "e__VW." + ConvertToEnumStr<e__VW>(Value);
+                    case AssetIDType.e__BG:
+                        return "e__BG." + ConvertToEnumStr<e__BG>(Value);
+                    case AssetIDType.Enum_BufferKind:
+                        return ConvertToEnumStr<BufferKind>(Value);
+                    case AssetIDType.Enum_BufferSeek:
+                        return ConvertToEnumStr<BufferSeek>(Value);
+                    case AssetIDType.Enum_BufferType:
+                        return ConvertToEnumStr<BufferType>(Value);
+                    case AssetIDType.Enum_GamepadButton:
+                        return ConvertToEnumStr<GamepadButton>(Value);
+                    case AssetIDType.Enum_GameSpeed:
+                        return ConvertToEnumStr<GameSpeed>(Value);
+                    case AssetIDType.Enum_HAlign:
+                        return ConvertToEnumStr<HAlign>(Value);
+                    case AssetIDType.Enum_MouseCursor:
+                        return ConvertToEnumStr<MouseCursor>(Value);
+                    case AssetIDType.MouseButton:
+                        return ConvertToEnumStr<MouseButton>(Value);
+                    case AssetIDType.Enum_OSType:
+                        return ConvertToEnumStr<OSType>(Value);
+                    case AssetIDType.Enum_PathEndAction:
+                        return ConvertToEnumStr<PathEndAction>(Value);
+                    case AssetIDType.Enum_Steam_LeaderBoard_Display:
+                        return ConvertToEnumStr<Steam_LeaderBoard_Display>(Value);
+                    case AssetIDType.Enum_Steam_LeaderBoard_Sort:
+                        return ConvertToEnumStr<Steam_LeaderBoard_Sort>(Value);
+                    case AssetIDType.Enum_Steam_Overlay:
+                        return ConvertToEnumStr<Steam_Overlay>(Value);
+                    case AssetIDType.Enum_Steam_UGC_FileType:
+                        return ConvertToEnumStr<Steam_UGC_FileType>(Value);
+                    case AssetIDType.Enum_Steam_UGC_List:
+                        return ConvertToEnumStr<Steam_UGC_List>(Value);
+                    case AssetIDType.Enum_Steam_UGC_MatchType:
+                        return ConvertToEnumStr<Steam_UGC_MatchType>(Value);
+                    case AssetIDType.Enum_Steam_UGC_QueryType:
+                        return ConvertToEnumStr<Steam_UGC_QueryType>(Value);
+                    case AssetIDType.Enum_Steam_UGC_SortOrder:
+                        return ConvertToEnumStr<Steam_UGC_SortOrder>(Value);
+                    case AssetIDType.Enum_VAlign:
+                        return ConvertToEnumStr<VAlign>(Value);
+                    case AssetIDType.Boolean:
+                        return ConvertToEnumStr<Boolean>(Value);
+                };
 
-                else if (AssetType == AssetIDType.Color && Value is IFormattable && !(Value is float) && !(Value is double) && !(Value is decimal))
+                if (AssetType == AssetIDType.Color && Value is IFormattable && !(Value is float) && !(Value is double) && !(Value is decimal))
                 {
                     int vint = Convert.ToInt32(Value);
                     if (vint < 0) // negative value.
@@ -350,10 +354,12 @@ namespace UndertaleModLib.Decompiler
                         if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
                             return ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
 
-                        if (!Char.IsControl((char)val) && !Char.IsLower((char)val) && val > 0) // The special keys overlay with the uppercase letters (ugh)
-                            return "ord(" + (((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
-                                : (((char)val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
-                                : "\"" + (char)val + "\"")) + ")";
+                        string OR1 = context.isGameMaker2 ? "\"\\\"\"" : "'\"'";
+                        string OR2 = context.isGameMaker2 ? "\"\\\\\"\"" : "\"\\\"";
+                        string OR3 = (char)val == '\\' ? OR2 : "\"" + (char)val + "\"";
+                        string OR4 = (char)val == '\'' ? OR1 : OR3;
+
+                        return "ord(" + OR4 + ")";
                     }
                 }
 
