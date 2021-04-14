@@ -17,7 +17,9 @@ namespace UndertaleModLib.Models
         {
             EnableViews = 1,
             ShowColor = 2,
-            ClearDisplayBuffer = 4
+            ClearDisplayBuffer = 4,
+            IsGMS2 = 131072,
+            IsGMS2_3 = 65536
         }
 
         private UndertaleString _Name;
