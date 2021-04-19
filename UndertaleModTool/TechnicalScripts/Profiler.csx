@@ -257,7 +257,7 @@ void SetUpCustomGML()
     delay = 60;
     maxwidth = 0;
     ");
-    string str;
+    string str = "";
     if (Data.Fonts.ByName("fnt_maintext") != null)
         str = "draw_set_font(fnt_maintext);";
     else if (Data.Fonts.ByName("fnt_main") != null)
