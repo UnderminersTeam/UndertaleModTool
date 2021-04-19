@@ -36,6 +36,13 @@ for (var j = 0; j < splitStringsList.Count; j++)
             gameObjectCandidates.Add(obj.Name.Content);
         }
     }
+    foreach (UndertaleCode code in Data.Code)
+    {
+        if (splitStringsList[j].ToLower() == code.Name.Content.ToLower())
+        {
+            gameObjectCandidates.Add(code.Name.Content);
+        }
+    }
 }
 foreach (UndertaleCode code in Data.Code)
 {

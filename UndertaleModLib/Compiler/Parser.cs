@@ -1575,6 +1575,12 @@ namespace UndertaleModLib.Compiler
                                     result = new Statement(Statement.StatementKind.Discard);
                                 }
                             }
+                            // Optimize if statements like "if(true)" or "if(1)"
+                            else if (result.Children[0].Constant.kind == ExpressionConstant.Kind.Number &&
+                                result.Children[0].Constant.valueNumber > 0.5d)
+                            {
+                                result = result.Children[1];
+                            }
                         }
                         break;
                     case Statement.StatementKind.FunctionCall:
