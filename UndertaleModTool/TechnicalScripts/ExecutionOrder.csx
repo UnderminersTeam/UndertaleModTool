@@ -30,10 +30,21 @@ if (func == null)
     endFunc = DefineFunc("__scr_eventend__");
     getInteractFunc = DefineFunc("__scr_getinteract__");
     setInteractFunc = DefineFunc("__scr_setinteract__");
-} else
+}
+else
 {
-    ScriptError("Don't run this script twice, please", "Error");
-    return;
+    if (ScriptQuestion(@"It cannot be removed, but it can be made invisible.
+Select 'YES' to make it invisible.
+If it is already invisible, select 'NO' to toggle the profiler back on."))
+    {
+        ClearCustomGML();
+        return;
+    }
+    else
+    {
+        SetUpCustomGML();
+        return;
+    }
 }
 
 // Process bytecode, patching in script calls where needed
@@ -170,174 +181,190 @@ foreach (UndertaleCode c in Data.Code)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // GML implementations
 
-// __obj_executionorder__
-ImportGML("gml_Object___obj_executionorder___Destroy_0", @"
-ds_stack_destroy(stack);
-");
 
-ImportGML("gml_Object___obj_executionorder___Create_0", @"
-global.interact = 0; // prevents error on obj_time create from missing globals
-events[1024, 4] = 0;
-stack = ds_stack_create();
-i = 0;
-depth = -99999999;
-delay = 60;
-maxwidth = 0;
-");
-string str;
-if (Data.Fonts.ByName("fnt_maintext") != null)
-    str = "draw_set_font(fnt_maintext);";
-else if (Data.Fonts.ByName("fnt_main") != null)
-    str = "draw_set_font(fnt_main);";
-else if (Data.Fonts.Count != 0)
-    str = "draw_set_font(" + Data.Fonts[0].Name.Content + ");";
-
-str += @"
-// Find duplicates and remove them by making them undefined
-var dupcount = 0;
-for (var j = 1; j <= i; j++)
+void ClearCustomGML()
 {
-    if (j != i &&
-        events[j, 0] == events[j - 1, 0] &&
-        events[j, 1] == events[j - 1, 1] &&
-        events[j, 2] == events[j - 1, 2] &&
-        events[j, 3] == events[j - 1, 3] &&
-        events[j, 4] == events[j - 1, 4])
-    {
-        dupcount++;
-    } else if (dupcount > 0)
-    {
-        // Remove those duplicates now
-        for (var k = j - dupcount; k < j; k++)
-            events[k, 0] = undefined;
-        events[j - dupcount - 1, 0] += "" (x"" + string(dupcount + 1) + "")"";
-        dupcount = 0;
-    }
-}
-";
-
-if (Data.Sprites.ByName("spr_pixwht") != null)
-{
-    str += @"
-var mw = 0;
-for (var j = 0; j < i; j++)
-{
-    if (!is_undefined(events[j, 0]))
-        mw = max(mw, string_width(events[j, 0]));
-}
-if (mw > maxwidth || delay++ >= 60)
-{
-    maxwidth = mw + (string_width(""AAA""));
-    delay = 0;
-}
-draw_sprite_ext(spr_pixwht, 0, 0, 0, maxwidth * 0.5, display_get_gui_height() * 0.5, 0, c_ltgray, 0.1);
-";
+    ImportGML("gml_Object___obj_executionorder___Destroy_0", @"");
+    ImportGML("gml_Object___obj_executionorder___Create_0", @"");
+    ImportGML("gml_Object___obj_executionorder___Draw_64", @"");
+    ImportGML("gml_Script___scr_eventrun__", @"");
+    ImportGML("gml_Script___scr_eventend__", @"");
+    ImportGML("gml_Script___scr_setinteract__", @"");
+    ImportGML("gml_Script___scr_getinteract__", @"");
 }
 
-str += @"
-// Actually draw events now
+SetUpCustomGML();
 
-var h = floor(string_height(""A""));
-draw_set_color(c_black);
-var k = 0;
-for (var j = 0; j < i; j++)
+void SetUpCustomGML()
 {
-    var curr = events[j, 0];
-    if (!is_undefined(curr))
-    {
-        draw_text(6, 31 + (k * h), curr);
-        draw_text(6, 29 + (k * h), curr);
-        draw_text(4, 29 + (k * h), curr);
-        draw_text(4, 31 + (k * h), curr);
-        k++;
-    }
-}
-k = 0;
-for (var j = 0; j < i; j++)
-{
-    var curr = events[j, 0];
-    if (!is_undefined(curr))
-    {
-        if (events[j, 1]) // setinteract
-        {
-            if (events[j, 2]) // getinteract
-                draw_set_color(merge_color(c_green, c_lime, 0.5));
-            else
-                draw_set_color(c_lime);
-        } else
-        {
-            if (events[j, 2]) // getinteract
-                draw_set_color(c_teal);
-            else
-                draw_set_color(c_yellow);
-        }
-        draw_text(5, 30 + (k * h), curr);
-        k++;
-    }
-}
+    // __obj_executionorder__
+    ImportGML("gml_Object___obj_executionorder___Destroy_0", @"
+    ds_stack_destroy(stack);
+    ");
 
-// Reset for next frame
-i = 0;
-ds_stack_clear(stack);
-";
-ImportGML("gml_Object___obj_executionorder___Draw_64" /* draw gui */, str);
-var objt = Data.GameObjects.ByName("__obj_executionorder__");
-objt.Persistent = true;
-Data.GeneralInfo.RoomOrder.First().Resource.GameObjects.Insert(0, new UndertaleRoom.GameObject()
-{
-    InstanceID = Data.GeneralInfo.LastObj++,
-    ObjectDefinition = objt
-});
-
-// Script implementations
-ImportGML("gml_Script___scr_eventrun__", @"
-with (__obj_executionorder__) 
-{
-    var recursion = """";
-    for (var j = ds_stack_size(stack); j > 0; j--)
-        recursion += ""> "";
-    events[i, 0] = recursion + argument0;
-    events[i, 1] = false; // set interact
-    events[i, 2] = false; // get interact
-    events[i, 3] = global.interact; // first interact value
-    events[i, 4] = global.interact; // second interact value
-    ds_stack_push(stack, i);
-    i++;
-}
-");
-
-ImportGML("gml_Script___scr_eventend__", @"
-with (__obj_executionorder__) 
-{
-    var _i = ds_stack_pop(stack);
+    ImportGML("gml_Object___obj_executionorder___Create_0", @"
+    global.interact = 0; // prevents error on obj_time create from missing globals
+    events[1024, 4] = 0;
+    stack = ds_stack_create();
+    i = 0;
+    depth = -99999999;
+    delay = 60;
+    maxwidth = 0;
+    ");
+    string str;
+    if (Data.Fonts.ByName("fnt_maintext") != null)
+        str = "draw_set_font(fnt_maintext);";
+    else if (Data.Fonts.ByName("fnt_main") != null)
+        str = "draw_set_font(fnt_main);";
+    else if (Data.Fonts.Count != 0)
+        str = "draw_set_font(" + Data.Fonts[0].Name.Content + ");";
     
-    // Set interact
-    if (events[_i, 1])
-        events[_i, 0] += ("" ("" + string(events[_i, 3]) + "" -> "" + string(events[_i, 4]) + "")"");
-}
-");
-
-ImportGML("gml_Script___scr_setinteract__", @"
-with (__obj_executionorder__)
-{
-    if (ds_stack_size(stack) > 0)
+    str += @"
+    // Find duplicates and remove them by making them undefined
+    var dupcount = 0;
+    for (var j = 1; j <= i; j++)
     {
-        events[ds_stack_top(stack), 1] = true;
-        events[ds_stack_top(stack), 4] = argument0;
+        if (j != i &&
+            events[j, 0] == events[j - 1, 0] &&
+            events[j, 1] == events[j - 1, 1] &&
+            events[j, 2] == events[j - 1, 2] &&
+            events[j, 3] == events[j - 1, 3] &&
+            events[j, 4] == events[j - 1, 4])
+        {
+            dupcount++;
+        } else if (dupcount > 0)
+        {
+            // Remove those duplicates now
+            for (var k = j - dupcount; k < j; k++)
+                events[k, 0] = undefined;
+            events[j - dupcount - 1, 0] += "" (x"" + string(dupcount + 1) + "")"";
+            dupcount = 0;
+        }
     }
+    ";
+    
+    if (Data.Sprites.ByName("spr_pixwht") != null)
+    {
+        str += @"
+    var mw = 0;
+    for (var j = 0; j < i; j++)
+    {
+        if (!is_undefined(events[j, 0]))
+            mw = max(mw, string_width(events[j, 0]));
+    }
+    if (mw > maxwidth || delay++ >= 60)
+    {
+        maxwidth = mw + (string_width(""AAA""));
+        delay = 0;
+    }
+    draw_sprite_ext(spr_pixwht, 0, 0, 0, maxwidth * 0.5, display_get_gui_height() * 0.5, 0, c_ltgray, 0.1);
+    ";
+    }
+    
+    str += @"
+    // Actually draw events now
+    
+    var h = floor(string_height(""A""));
+    draw_set_color(c_black);
+    var k = 0;
+    for (var j = 0; j < i; j++)
+    {
+        var curr = events[j, 0];
+        if (!is_undefined(curr))
+        {
+            draw_text(6, 31 + (k * h), curr);
+            draw_text(6, 29 + (k * h), curr);
+            draw_text(4, 29 + (k * h), curr);
+            draw_text(4, 31 + (k * h), curr);
+            k++;
+        }
+    }
+    k = 0;
+    for (var j = 0; j < i; j++)
+    {
+        var curr = events[j, 0];
+        if (!is_undefined(curr))
+        {
+            if (events[j, 1]) // setinteract
+            {
+                if (events[j, 2]) // getinteract
+                    draw_set_color(merge_color(c_green, c_lime, 0.5));
+                else
+                    draw_set_color(c_lime);
+            } else
+            {
+                if (events[j, 2]) // getinteract
+                    draw_set_color(c_teal);
+                else
+                    draw_set_color(c_yellow);
+            }
+            draw_text(5, 30 + (k * h), curr);
+            k++;
+        }
+    }
+    
+    // Reset for next frame
+    i = 0;
+    ds_stack_clear(stack);
+    ";
+    ImportGML("gml_Object___obj_executionorder___Draw_64" /* draw gui */, str);
+    var objt = Data.GameObjects.ByName("__obj_executionorder__");
+    objt.Persistent = true;
+    Data.GeneralInfo.RoomOrder.First().Resource.GameObjects.Insert(0, new UndertaleRoom.GameObject()
+    {
+        InstanceID = Data.GeneralInfo.LastObj++,
+        ObjectDefinition = objt
+    });
+    
+    // Script implementations
+    ImportGML("gml_Script___scr_eventrun__", @"
+    with (__obj_executionorder__) 
+    {
+        var recursion = """";
+        for (var j = ds_stack_size(stack); j > 0; j--)
+            recursion += ""> "";
+        events[i, 0] = recursion + argument0;
+        events[i, 1] = false; // set interact
+        events[i, 2] = false; // get interact
+        events[i, 3] = global.interact; // first interact value
+        events[i, 4] = global.interact; // second interact value
+        ds_stack_push(stack, i);
+        i++;
+    }
+    ");
+    
+    ImportGML("gml_Script___scr_eventend__", @"
+    with (__obj_executionorder__) 
+    {
+        var _i = ds_stack_pop(stack);
+        
+        // Set interact
+        if (events[_i, 1])
+            events[_i, 0] += ("" ("" + string(events[_i, 3]) + "" -> "" + string(events[_i, 4]) + "")"");
+    }
+    ");
+    
+    ImportGML("gml_Script___scr_setinteract__", @"
+    with (__obj_executionorder__)
+    {
+        if (ds_stack_size(stack) > 0)
+        {
+            events[ds_stack_top(stack), 1] = true;
+            events[ds_stack_top(stack), 4] = argument0;
+        }
+    }
+    global.interact = argument0;
+    ");
+    
+    ImportGML("gml_Script___scr_getinteract__", @"
+    with (__obj_executionorder__)
+    {
+        if (ds_stack_size(stack) > 0)
+            events[ds_stack_top(stack), 2] = true;
+    }
+    return global.interact;
+    ");
 }
-global.interact = argument0;
-");
-
-ImportGML("gml_Script___scr_getinteract__", @"
-with (__obj_executionorder__)
-{
-    if (ds_stack_size(stack) > 0)
-        events[ds_stack_top(stack), 2] = true;
-}
-return global.interact;
-");
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Import the GML
