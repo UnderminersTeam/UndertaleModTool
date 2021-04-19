@@ -1,5 +1,5 @@
 // By colinator27 and BenjaminUrquhart, ImportGML at end from UndertaleModTool sample scripts
-// Reworked to be a profiler and stack tracer (to identify freeze locations)
+// Reworked to be a profiler and stack tracer (to identify freeze locations) by Grossley
 
 using System;
 using System.IO;
