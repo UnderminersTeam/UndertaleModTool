@@ -240,7 +240,7 @@ namespace UndertaleModTool
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.DefaultExt = "win";
-            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, audiogroup*.dat)|*.win;*.unx;*.ios;audiogroup*.dat|All files|*";
+            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
 
             if (dlg.ShowDialog() == true)
             {
@@ -254,7 +254,7 @@ namespace UndertaleModTool
             SaveFileDialog dlg = new SaveFileDialog();
 
             dlg.DefaultExt = "win";
-            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, audiogroup*.dat)|*.win;*.unx;*.ios;audiogroup*.dat|All files|*";
+            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
             dlg.FileName = FilePath;
 
             if (dlg.ShowDialog() == true)
@@ -1011,7 +1011,7 @@ namespace UndertaleModTool
         {
             OpenFileDialog dlg = new OpenFileDialog();
             dlg.DefaultExt = defaultExt != null ? defaultExt : "win";
-            dlg.Filter = filter != null ? filter : "Game Maker Studio data files (.win, .unx, .ios, audiogroup*.dat)|*.win;*.unx;*.ios;audiogroup*.dat|All files|*";
+            dlg.Filter = filter != null ? filter : "Game Maker Studio data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
             return dlg.ShowDialog() == true ? dlg.FileName : null;
         }
 
@@ -1242,7 +1242,7 @@ namespace UndertaleModTool
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.DefaultExt = "win";
-            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios)|*.win;*.unx;*.ios|All files|*";
+            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, .droid)|*.win;*.unx;*.ios;*.droid|All files|*";
 
             if (dlg.ShowDialog() == true)
             {
