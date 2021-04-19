@@ -1,4 +1,5 @@
 // Script by Jockeholm based off of a script by Kneesnap.
+
 // Major help and edited by Samuel Roy
 
 using System;
@@ -39,36 +40,27 @@ string[] dirFiles = Directory.GetFiles(importFolder);
 foreach (string file in dirFiles) 
 {
     UpdateProgressBar(null, "Files", progress++, dirFiles.Length);
-
     string fileName = Path.GetFileName(file);
-    if (!fileName.EndsWith(".gml") || !fileName.Contains("_")) // Perhaps drop the underscore check?
+    if (!fileName.EndsWith(".asm") || !fileName.Contains("_")) // Perhaps drop the underscore check?
         continue; // Restarts loop if file is not a valid code asset.
-    if (fileName.EndsWith("PreCreate_0.gml") && (Data.GeneralInfo.Major < 2))
+    if (fileName.EndsWith("PreCreate_0.asm") && (Data.GeneralInfo.Major < 2))
         continue; // Restarts loop if file is not a valid code asset.
-
-    string gmlCode = File.ReadAllText(file);
+    string asmCode = File.ReadAllText(file);
     string codeName = Path.GetFileNameWithoutExtension(file);
     if (Data.Code.ByName(codeName) == null) // Should keep from adding duplicate scripts; haven't tested
     {
         UndertaleCode code = new UndertaleCode();
         code.Name = Data.Strings.MakeString(codeName);
         Data.Code.Add(code);
-
-        if (Data?.GeneralInfo.BytecodeVersion > 14)
-        {
-            UndertaleCodeLocals locals = new UndertaleCodeLocals();
-            locals.Name = code.Name;
-
-            UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-            argsLocal.Name = Data.Strings.MakeString("arguments");
-            argsLocal.Index = 0;
-
-            locals.Locals.Add(argsLocal);
-
-            code.LocalsCount = 1;
-            code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
-            Data.CodeLocals.Add(locals);
-        }
+        UndertaleCodeLocals locals = new UndertaleCodeLocals();
+        locals.Name = code.Name;
+        UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+        argsLocal.Name = Data.Strings.MakeString("arguments");
+        argsLocal.Index = 0;
+        locals.Locals.Add(argsLocal);
+        code.LocalsCount = 1;
+        code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
+        Data.CodeLocals.Add(locals);
 
         if (doParse)
         {
@@ -104,7 +96,7 @@ foreach (string file in dirFiles)
                         if (underCount == 1) 
                         {
                             methodNumberStr = afterPrefix.Substring(i + 1);
-                        } else if (underCount == 2)
+                        } else if (underCount == 2) 
                         {
                             objName = afterPrefix.Substring(0, i);
                             methodName = afterPrefix.Substring(i + 1, afterPrefix.Length - objName.Length - methodNumberStr.Length - 2);
@@ -112,7 +104,6 @@ foreach (string file in dirFiles)
                         }
                     }
                 }
-
                 int methodNumber = Int32.Parse(methodNumberStr);
                 UndertaleGameObject obj = Data.GameObjects.ByName(objName);
                 if (obj == null) 
@@ -127,46 +118,39 @@ foreach (string file in dirFiles)
                     {
                         try
                         {
-                            Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
+                            var instructions = Assembler.Assemble(asmCode, Data);
+                            Data.Code.ByName(codeName).Replace(instructions);
                         }
-                        catch (Exception ex)
+                        catch(Exception ex)
                         {
-                            string errorMSG = "Error in " +  codeName + ":\r\n" + ex.ToString() + "\r\nAborted";
-                            ScriptMessage(errorMSG);
-                            SetUMTConsoleText(errorMSG);
-                            SetFinishedMessage(false);
+                            ScriptMessage("Assembler error at file: " + codeName);
                             return;
                         }
                         continue;
                     }
                 }
-
                 obj = Data.GameObjects.ByName(objName);
                 int eventIdx = (int)Enum.Parse(typeof(EventTypes), methodName);
-
                 UndertalePointerList<UndertaleGameObject.Event> eventList = obj.Events[eventIdx];
                 UndertaleGameObject.EventAction action = new UndertaleGameObject.EventAction();
                 UndertaleGameObject.Event evnt = new UndertaleGameObject.Event();
-
                 action.ActionName = code.Name;
                 action.CodeId = code;
                 evnt.EventSubtype = (uint)methodNumber;
                 evnt.Actions.Add(action);
                 eventList.Add(evnt);
             }
-            // Code which does not match these criteria cannot link, but are still added to the code section.
+            // Code which does not match these criteria cannot linked, but are still added to the code section.
         }
     }
     try
     {
-        Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
+        var instructions = Assembler.Assemble(asmCode, Data);
+        Data.Code.ByName(codeName).Replace(instructions);
     }
-    catch (Exception ex)
+    catch(Exception ex)
     {
-        string errorMSG = "Error in " +  codeName + ":\r\n" + ex.ToString() + "\r\nAborted";
-        ScriptMessage(errorMSG);
-        SetUMTConsoleText(errorMSG);
-        SetFinishedMessage(false);
+        ScriptMessage("Assembler error at code: " + codeName);
         return;
     }
 }

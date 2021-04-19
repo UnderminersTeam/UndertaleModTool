@@ -4,16 +4,16 @@ EnsureDataLoaded();
 
 var browserext = new UndertaleExtension()
 {
-	Name = Data.Strings.MakeString("GMWebBrowser"),
-	ClassName = Data.Strings.MakeString(""),
-	EmptyString = Data.Strings.MakeString("")
+    Name = Data.Strings.MakeString("GMWebBrowser"),
+    ClassName = Data.Strings.MakeString(""),
+    EmptyString = Data.Strings.MakeString("")
 };
 browserext.Files.Add(new UndertaleExtensionFile() 
 {
-	Filename = Data.Strings.MakeString("GMWebExtension.dll"),
-	Kind = UndertaleExtensionKind.DLL,
-	InitScript = Data.Strings.MakeString("__webextension_native_init"),
-	CleanupScript = Data.Strings.MakeString("__webextension_native_exit"),
+    Filename = Data.Strings.MakeString("GMWebExtension.dll"),
+    Kind = UndertaleExtensionKind.DLL,
+    InitScript = Data.Strings.MakeString("__webextension_native_init"),
+    CleanupScript = Data.Strings.MakeString("__webextension_native_exit"),
 });
 // 0xc = cdecl?
 browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 1, 0xc, "RegisterCallbacks", UndertaleExtensionVarType.Double, "RegisterCallbacks", UndertaleExtensionVarType.String, UndertaleExtensionVarType.String, UndertaleExtensionVarType.String, UndertaleExtensionVarType.String);

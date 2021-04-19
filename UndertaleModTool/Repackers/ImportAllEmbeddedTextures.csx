@@ -11,14 +11,14 @@ string winFolder = GetFolder(FilePath); // The folder data.win is located in.
 
 string GetFolder(string path)
 {
-	return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
+    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
 
 // Folder Check One
 if (!Directory.Exists(winFolder + "EmbeddedTextures\\"))
 {
-	ScriptError("There is no 'EmbeddedTextures' folder to import.", "Error: Nothing to import.");
-	return;
+    ScriptError("There is no 'EmbeddedTextures' folder to import.", "Error: Nothing to import.");
+    return;
 }
 
 string subPath = winFolder + "EmbeddedTextures";
@@ -28,12 +28,12 @@ foreach (var txtr in Data.EmbeddedTextures)
     UndertaleEmbeddedTexture target = txtr as UndertaleEmbeddedTexture;
     try 
     {
-	    byte[] data = File.ReadAllBytes(subPath + "\\" + i + ".png");
-	    target.TextureData.TextureBlob = data;
+        byte[] data = File.ReadAllBytes(subPath + "\\" + i + ".png");
+        target.TextureData.TextureBlob = data;
     }
     catch (Exception ex) 
     {
-	    ScriptMessage("Failed to import file number " + i + " due to: " + ex.Message);
+        ScriptMessage("Failed to import file number " + i + " due to: " + ex.Message);
     }
     i++;
 }

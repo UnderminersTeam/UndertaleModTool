@@ -16,7 +16,8 @@ String keyword = SimpleTextInput("Enter your search", "Search box below", "", fa
 
 await DumpCode();
 HideProgressBar();
-SimpleTextInput("Search results.", result_count.ToString() + " results in " + code_count.ToString() + " code entries.", results, true);
+string results_message = result_count.ToString() + " results in " + code_count.ToString() + " code entries.";
+SimpleTextInput("Search results.", results_message, results_message + "\n\n" + results, true);
 
 void UpdateProgress()
 {

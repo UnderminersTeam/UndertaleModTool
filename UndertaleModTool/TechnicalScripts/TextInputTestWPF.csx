@@ -1,6 +1,6 @@
 // WPF Text Input Dialog Box test script.
 
-//	return ScriptInputDialog(titleText, labelText, defaultInputBoxText, cancelButtonText, submitButtonText, isMultiline, preventClose);
+//    return ScriptInputDialog(titleText, labelText, defaultInputBoxText, cancelButtonText, submitButtonText, isMultiline, preventClose);
 String Text = ScriptInputDialog("Title: Text Input Test 01", "Label: Multiline off, Prevent close off", "Default input here.", "Cancel Button", "Submit Button", false, false);
 ScriptMessage(Text ?? "<dialog was cancelled or closed>");
 Text = ScriptInputDialog("Title: Text Input Test 02", "Label: Multiline on, Prevent close off", "Default input here.\r\nDefault input here.\r\nDefault input here.", "Cancel Button", "Submit Button", true, false);

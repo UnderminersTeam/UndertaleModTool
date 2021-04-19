@@ -6,14 +6,14 @@ EnsureDataLoaded();
 var obj = Data.GameObjects.ByName("obj_roomselector");
 
 if(obj == null) {
-	obj = new UndertaleGameObject() { Name = Data.Strings.MakeString("obj_roomselector"), Persistent = true };
-	Data.GameObjects.Add(obj);
+    obj = new UndertaleGameObject() { Name = Data.Strings.MakeString("obj_roomselector"), Persistent = true };
+    Data.GameObjects.Add(obj);
 }
 
 if(Data.GeneralInfo.Name.Content == "UNDERTALE") {
-	// Remove existing F3 handler to avoid accidentally 
-	// creating system_information_962
-	Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);
+    // Remove existing F3 handler to avoid accidentally 
+    // creating system_information_962
+    Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);
 }
 
 bool gms2 = Data.IsVersionAtLeast(2,0,0,0);
@@ -23,71 +23,71 @@ var object_list = entry_room.GameObjects;
 bool add_to_room = true;
 
 if(gms2) {
-	UndertaleRoom.Layer target_layer = null;
-	foreach(var layer in entry_room.Layers) {
-		if(layer.LayerType == UndertaleRoom.LayerType.Instances) {
-			foreach(var layer_obj in layer.InstancesData.Instances) {
-				if(layer_obj.ObjectDefinition == obj) {
-					add_to_room = false;
-					break;
-				}
-			}
-			if(!add_to_room) {
-				break;
-			}
-			if(target_layer == null || target_layer.LayerDepth > layer.LayerDepth) {
-				target_layer = layer;
-			}
-		}
-	}
-	
-	if(add_to_room) {
-		if(target_layer == null) {
-			uint layer_id = 0;
-			foreach(var room in Data.Rooms) {
-				foreach(var layer in room.Layers) {
-					if(layer.LayerId > layer_id) {
-						layer_id = (uint)layer.LayerId;
-					}
-				}
-			}
-			
-			target_layer = new UndertaleRoom.Layer() {
-				LayerName = Data.Strings.MakeString("Room_Selector_Layer"),
-				Data = new UndertaleRoom.Layer.LayerInstancesData(),
-				LayerType = UndertaleRoom.LayerType.Instances,
-				LayerDepth = -1000,
-				LayerId = layer_id,
-				IsVisible = true
-			};
-			
-			entry_room.Layers.Add(target_layer);
-		}
-		var obj_to_add = new UndertaleRoom.GameObject() {
-			InstanceID = Data.GeneralInfo.LastObj++,
-			ObjectDefinition = obj,
-			X = 0, Y = 0
-		};
-		target_layer.InstancesData.Instances.Add(obj_to_add);
-		object_list.Add(obj_to_add);
-	}
+    UndertaleRoom.Layer target_layer = null;
+    foreach(var layer in entry_room.Layers) {
+        if(layer.LayerType == UndertaleRoom.LayerType.Instances) {
+            foreach(var layer_obj in layer.InstancesData.Instances) {
+                if(layer_obj.ObjectDefinition == obj) {
+                    add_to_room = false;
+                    break;
+                }
+            }
+            if(!add_to_room) {
+                break;
+            }
+            if(target_layer == null || target_layer.LayerDepth > layer.LayerDepth) {
+                target_layer = layer;
+            }
+        }
+    }
+    
+    if(add_to_room) {
+        if(target_layer == null) {
+            uint layer_id = 0;
+            foreach(var room in Data.Rooms) {
+                foreach(var layer in room.Layers) {
+                    if(layer.LayerId > layer_id) {
+                        layer_id = (uint)layer.LayerId;
+                    }
+                }
+            }
+            
+            target_layer = new UndertaleRoom.Layer() {
+                LayerName = Data.Strings.MakeString("Room_Selector_Layer"),
+                Data = new UndertaleRoom.Layer.LayerInstancesData(),
+                LayerType = UndertaleRoom.LayerType.Instances,
+                LayerDepth = -1000,
+                LayerId = layer_id,
+                IsVisible = true
+            };
+            
+            entry_room.Layers.Add(target_layer);
+        }
+        var obj_to_add = new UndertaleRoom.GameObject() {
+            InstanceID = Data.GeneralInfo.LastObj++,
+            ObjectDefinition = obj,
+            X = 0, Y = 0
+        };
+        target_layer.InstancesData.Instances.Add(obj_to_add);
+        object_list.Add(obj_to_add);
+    }
 }
 else {
 
-	foreach(var room_obj in object_list) {
-		if(room_obj.ObjectDefinition == obj) {
-			add_to_room = false;
-			break;
-		}
-	}
+    foreach(var room_obj in object_list) {
+        if(room_obj.ObjectDefinition == obj) {
+            add_to_room = false;
+            break;
+        }
+    }
 
-	if(add_to_room) {
-		object_list.Add(new UndertaleRoom.GameObject() {
-			InstanceID = Data.GeneralInfo.LastObj++,
-			ObjectDefinition = obj,
-			X = 0, Y = 0
-		});
-	}
+    if(add_to_room) {
+        object_list.Add(new UndertaleRoom.GameObject() {
+            InstanceID = Data.GeneralInfo.LastObj++,
+            ObjectDefinition = obj,
+            X = 0, Y = 0
+        });
+    }
 }
 
 
@@ -132,220 +132,220 @@ yy = 0
 obj.EventHandlerFor(EventType.Step, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
 if selector_active
 {
-	global.interact = 1
-	if exiting
-	{
-	    image_alpha -= 0.1
-	    if (image_alpha <= 0)
-			event_user(1)
-	}
-	else
-	{
-	    if (image_alpha < 1)
-	        image_alpha += 0.1
-	
-	    if update
-	    {
-	        ds_list_clear(suggestions)
-	        tmp_suggestions[0] = -4
-	        num_suggestions = 0
-	        positions[0] = -1
-	        roomid = -1
-	        if (dest_room != """" && dest_room == string_digits(dest_room))
-	            roomid = real(dest_room)
-	        for (i = room_first; i <= room_last; i++)
-	        {
-	            if is_string(room_names[i])
-	            {
-	                if case_sensitive
-	                    pos = string_pos(dest_room, room_names[i])
-	                else
-	                    pos = string_pos(string_lower(dest_room), string_lower(room_names[i]))
-	                if (roomid != i && pos > 0)
-	                {
-	                    tmp_suggestions[num_suggestions] = i
-	                    positions[num_suggestions] = pos
-	                    num_suggestions++
-	                }
-	            }
-	        }
-	        for (k = 0; k < num_suggestions; k++)
-	        {
-	            for (j = k; j < num_suggestions; j++)
-	            {
-	                if (positions[k] > positions[j] || (positions[k] == positions[j] && room_names[tmp_suggestions[k]] > room_names[tmp_suggestions[j]]))
-	                {
-	                    tmp = positions[k]
-	                    positions[k] = positions[j]
-	                    positions[j] = tmp
-	                    tmp = tmp_suggestions[k]
-	                    tmp_suggestions[k] = tmp_suggestions[j]
-	                    tmp_suggestions[j] = tmp
-	                }
-	            }
-	        }
-	        if (roomid >= room_first && roomid <= room_last)
-	            ds_list_add(suggestions, room_names[roomid])
-	        for (i = 0; i < num_suggestions; i++)
-	            ds_list_add(suggestions, room_names[tmp_suggestions[i]])
-	        if update_cursor
-	        {
-	            cursor_timer = 30
-	            show_cursor = 1
-	        }
-	        update_cursor = 1
-	        update = 0
-	    }
-	    num_suggestions = ds_list_size(suggestions)
-	    len = string_length(dest_room)
-	    dir = (keyboard_check(vk_down) - keyboard_check(vk_up))
-	    if (dir != 0)
-	    {
-	        keyboard_clear(vk_down)
-	        keyboard_clear(vk_up)
-	        selection += dir
-	    }
-	    if (keyboard_lastchar != """")
-	    {
-	        if (string_pos(string_lower(keyboard_lastchar), valid_chars) > 0)
-	        {
-	            dest_room += keyboard_lastchar
-	            update = 1
-	        }
-	        keyboard_lastchar = """"
-	    }
-	    if keyboard_check(vk_backspace)
-	    {
-	        if (len > 0)
-	        {
-	            if (len == 1)
-	                dest_room = """"
-	            else
-	                dest_room = string_copy(dest_room, 1, (len - 1))
-	            update = 1
-	        }
-	        keyboard_clear(vk_backspace)
-	    }
-	    if (selection >= max_selection)
-	        selection = (max_selection - 1)
-	    if (selection < 0)
-	        selection = 0
-	    if keyboard_check(vk_return)
-	    {
-	        keyboard_clear(vk_return)
-	        if (num_suggestions > 0)
-	        {
-	            name = ds_list_find_value(suggestions, selection)
-	            name = string_copy(name, 1, (string_pos("" "", name) - 1))
-	            roomid = asset_get_index(name)
-	            if room_exists(roomid)
-	            {
-	                instance_activate_all()
-	                global.interact = 0
-	                if (room == roomid)
-	                {
-						selector_active = false
+    global.interact = 1
+    if exiting
+    {
+        image_alpha -= 0.1
+        if (image_alpha <= 0)
+            event_user(1)
+    }
+    else
+    {
+        if (image_alpha < 1)
+            image_alpha += 0.1
+    
+        if update
+        {
+            ds_list_clear(suggestions)
+            tmp_suggestions[0] = -4
+            num_suggestions = 0
+            positions[0] = -1
+            roomid = -1
+            if (dest_room != """" && dest_room == string_digits(dest_room))
+                roomid = real(dest_room)
+            for (i = room_first; i <= room_last; i++)
+            {
+                if is_string(room_names[i])
+                {
+                    if case_sensitive
+                        pos = string_pos(dest_room, room_names[i])
+                    else
+                        pos = string_pos(string_lower(dest_room), string_lower(room_names[i]))
+                    if (roomid != i && pos > 0)
+                    {
+                        tmp_suggestions[num_suggestions] = i
+                        positions[num_suggestions] = pos
+                        num_suggestions++
+                    }
+                }
+            }
+            for (k = 0; k < num_suggestions; k++)
+            {
+                for (j = k; j < num_suggestions; j++)
+                {
+                    if (positions[k] > positions[j] || (positions[k] == positions[j] && room_names[tmp_suggestions[k]] > room_names[tmp_suggestions[j]]))
+                    {
+                        tmp = positions[k]
+                        positions[k] = positions[j]
+                        positions[j] = tmp
+                        tmp = tmp_suggestions[k]
+                        tmp_suggestions[k] = tmp_suggestions[j]
+                        tmp_suggestions[j] = tmp
+                    }
+                }
+            }
+            if (roomid >= room_first && roomid <= room_last)
+                ds_list_add(suggestions, room_names[roomid])
+            for (i = 0; i < num_suggestions; i++)
+                ds_list_add(suggestions, room_names[tmp_suggestions[i]])
+            if update_cursor
+            {
+                cursor_timer = 30
+                show_cursor = 1
+            }
+            update_cursor = 1
+            update = 0
+        }
+        num_suggestions = ds_list_size(suggestions)
+        len = string_length(dest_room)
+        dir = (keyboard_check(vk_down) - keyboard_check(vk_up))
+        if (dir != 0)
+        {
+            keyboard_clear(vk_down)
+            keyboard_clear(vk_up)
+            selection += dir
+        }
+        if (keyboard_lastchar != """")
+        {
+            if (string_pos(string_lower(keyboard_lastchar), valid_chars) > 0)
+            {
+                dest_room += keyboard_lastchar
+                update = 1
+            }
+            keyboard_lastchar = """"
+        }
+        if keyboard_check(vk_backspace)
+        {
+            if (len > 0)
+            {
+                if (len == 1)
+                    dest_room = """"
+                else
+                    dest_room = string_copy(dest_room, 1, (len - 1))
+                update = 1
+            }
+            keyboard_clear(vk_backspace)
+        }
+        if (selection >= max_selection)
+            selection = (max_selection - 1)
+        if (selection < 0)
+            selection = 0
+        if keyboard_check(vk_return)
+        {
+            keyboard_clear(vk_return)
+            if (num_suggestions > 0)
+            {
+                name = ds_list_find_value(suggestions, selection)
+                name = string_copy(name, 1, (string_pos("" "", name) - 1))
+                roomid = asset_get_index(name)
+                if room_exists(roomid)
+                {
+                    instance_activate_all()
+                    global.interact = 0
+                    if (room == roomid)
+                    {
+                        selector_active = false
                         selector_initialized = false;
                         sel_ever_activated = true;
-	                    room_restart()
-	                }
-	                else
-	                {
-	                    audio_stop_all()
-						selector_active = false
+                        room_restart()
+                    }
+                    else
+                    {
+                        audio_stop_all()
+                        selector_active = false
                         selector_initialized = false;
                         sel_ever_activated = true;
-	                    room_goto(roomid)
-	                }
-	            }
-	        }
-	    }
-	    if (keyboard_check(vk_escape) || keyboard_check(vk_f3))
-	    {
-	        keyboard_clear(vk_escape)
-			keyboard_clear(vk_f3)
-	        exiting = 1
-	    }
-	    if keyboard_check(vk_tab)
-	    {
-	        keyboard_clear(vk_tab)
-	        case_sensitive ^= 1
-	        update_cursor = 0
-	        update = 1
-	    }
-	}
+                        room_goto(roomid)
+                    }
+                }
+            }
+        }
+        if (keyboard_check(vk_escape) || keyboard_check(vk_f3))
+        {
+            keyboard_clear(vk_escape)
+            keyboard_clear(vk_f3)
+            exiting = 1
+        }
+        if keyboard_check(vk_tab)
+        {
+            keyboard_clear(vk_tab)
+            case_sensitive ^= 1
+            update_cursor = 0
+            update = 1
+        }
+    }
 }
 ", Data);
 
 obj.EventHandlerFor(EventType.Draw, (uint)64, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
 if selector_active
 {
-	if sprite_exists(ss)
-	    draw_sprite_ext(ss, 0, xx, yy, scale, scale, 0, c_white, 1)
-	draw_set_alpha((image_alpha / 2))
-	draw_set_font(fnt)
-	draw_set_color(c_black)
-	draw_rectangle(xx, yy, (xx + ww), (yy + hh), 0)
-	draw_set_alpha(image_alpha)
-	draw_set_halign(fa_center)
-	if (num_suggestions < 1)
-	    draw_set_color(c_red)
-	else
-	    draw_set_color(c_white)
-	textx = (xx + (ww / 2))
-	texty = (yy + (hh / 3))
-	draw_text(textx, texty, dest_room)
-	draw_set_color(c_white)
-	if show_cursor
-	    draw_text(((textx + (string_width(dest_room) / 2)) + 2), texty, ""|"")
-	texty += (string_height((dest_room + ""|"")) + 3)
-	draw_set_color(c_white)
-	draw_rectangle((textx - (ww / 4)), texty, (textx + (ww / 4)), (texty + 3), 0)
-	texty += 6
-	for (i = 0; i < num_suggestions; i++)
-	{
-	    max_selection = (i + 1)
-	    name = ds_list_find_value(suggestions, i)
-	    if ((texty + string_height(name)) > (yy + hh))
-	    {
-	        max_selection--
-	        i = num_suggestions
-	    }
-	    else
-	    {
-	        if (i == selection)
-	            draw_set_color(c_yellow)
-	        else
-	            draw_set_color(c_white)
-	        draw_text(textx, texty, name)
-	        texty += (string_height(name) + 3)
-	    }
-	}
-	if (max_selection > num_suggestions)
-	    max_selection = num_suggestions
-	if (cursor_timer-- < 1)
-	{
-	    cursor_timer = 30
-	    show_cursor ^= 1
-	}
-	draw_set_halign(fa_left)
-	draw_set_color(c_white)
-	results_str = ""???""
-	if (num_suggestions > 0)
-	    results_str = string(num_suggestions)
-	else
-	    results_str = ""No ""
-	results_str += "" result""
-	if (num_suggestions != 1)
-	    results_str += ""s""
-	if (max_selection != num_suggestions)
-	    results_str += (("" ("" + string(max_selection)) + "" shown)"")
-	draw_text((xx + 10), (yy + 10), results_str)
-	casing = ""sensitive""
-	if (!case_sensitive)
-	    casing = (""in"" + casing)
-	draw_text((xx + 10), ((yy + 13) + string_height(results_str)), ((""Case-"" + casing) + "" (toggle with Tab)""))
-	draw_set_alpha(1)
+    if sprite_exists(ss)
+        draw_sprite_ext(ss, 0, xx, yy, scale, scale, 0, c_white, 1)
+    draw_set_alpha((image_alpha / 2))
+    draw_set_font(fnt)
+    draw_set_color(c_black)
+    draw_rectangle(xx, yy, (xx + ww), (yy + hh), 0)
+    draw_set_alpha(image_alpha)
+    draw_set_halign(fa_center)
+    if (num_suggestions < 1)
+        draw_set_color(c_red)
+    else
+        draw_set_color(c_white)
+    textx = (xx + (ww / 2))
+    texty = (yy + (hh / 3))
+    draw_text(textx, texty, dest_room)
+    draw_set_color(c_white)
+    if show_cursor
+        draw_text(((textx + (string_width(dest_room) / 2)) + 2), texty, ""|"")
+    texty += (string_height((dest_room + ""|"")) + 3)
+    draw_set_color(c_white)
+    draw_rectangle((textx - (ww / 4)), texty, (textx + (ww / 4)), (texty + 3), 0)
+    texty += 6
+    for (i = 0; i < num_suggestions; i++)
+    {
+        max_selection = (i + 1)
+        name = ds_list_find_value(suggestions, i)
+        if ((texty + string_height(name)) > (yy + hh))
+        {
+            max_selection--
+            i = num_suggestions
+        }
+        else
+        {
+            if (i == selection)
+                draw_set_color(c_yellow)
+            else
+                draw_set_color(c_white)
+            draw_text(textx, texty, name)
+            texty += (string_height(name) + 3)
+        }
+    }
+    if (max_selection > num_suggestions)
+        max_selection = num_suggestions
+    if (cursor_timer-- < 1)
+    {
+        cursor_timer = 30
+        show_cursor ^= 1
+    }
+    draw_set_halign(fa_left)
+    draw_set_color(c_white)
+    results_str = ""???""
+    if (num_suggestions > 0)
+        results_str = string(num_suggestions)
+    else
+        results_str = ""No ""
+    results_str += "" result""
+    if (num_suggestions != 1)
+        results_str += ""s""
+    if (max_selection != num_suggestions)
+        results_str += (("" ("" + string(max_selection)) + "" shown)"")
+    draw_text((xx + 10), (yy + 10), results_str)
+    casing = ""sensitive""
+    if (!case_sensitive)
+        casing = (""in"" + casing)
+    draw_text((xx + 10), ((yy + 13) + string_height(results_str)), ((""Case-"" + casing) + "" (toggle with Tab)""))
+    draw_set_alpha(1)
 }
 ", Data);
 

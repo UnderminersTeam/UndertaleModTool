@@ -856,38 +856,32 @@ namespace UndertaleModTool
 
         private void MenuItem_RunBuiltinScript_SubmenuOpened(object sender, RoutedEventArgs e)
         {
-            MenuItem item = sender as MenuItem;
-            item.Items.Clear();
-            try
-            {
-                var appDir = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                foreach (var path in Directory.EnumerateFiles(System.IO.Path.Combine(appDir, "SampleScripts")))
-                {
-                    var filename = System.IO.Path.GetFileName(path);
-                    if (!filename.EndsWith(".csx"))
-                        continue;
-                    MenuItem subitem = new MenuItem() { Header = filename.Replace("_", "__") };
-                    subitem.Click += MenuItem_RunBuiltinScript_Item_Click;
-                    subitem.CommandParameter = path;
-                    item.Items.Add(subitem);
-                }
-                if (item.Items.Count == 0)
-                    item.Items.Add(new MenuItem() { Header = "(whoops, no scripts found?)", IsEnabled = false });
-            }
-            catch (Exception err)
-            {
-                item.Items.Add(new MenuItem() { Header = err.ToString(), IsEnabled = false });
-            }
+            MenuItem_RunScript_SubmenuOpened(sender, e, "SampleScripts");
         }
-
-        private void MenuItem_RunExperimentalScript_SubmenuOpened(object sender, RoutedEventArgs e)
+        private void MenuItem_RunCommunityScript_SubmenuOpened(object sender, RoutedEventArgs e)
+        {
+            MenuItem_RunScript_SubmenuOpened(sender, e, "CommunityScripts");
+        }
+        private void MenuItem_RunTechnicalScript_SubmenuOpened(object sender, RoutedEventArgs e)
+        {
+            MenuItem_RunScript_SubmenuOpened(sender, e, "TechnicalScripts");
+        }
+        private void MenuItem_RunUnpackScript_SubmenuOpened(object sender, RoutedEventArgs e)
+        {
+            MenuItem_RunScript_SubmenuOpened(sender, e, "Unpackers");
+        }
+        private void MenuItem_RunRepackScript_SubmenuOpened(object sender, RoutedEventArgs e)
+        {
+            MenuItem_RunScript_SubmenuOpened(sender, e, "Repackers");
+        }
+        private void MenuItem_RunScript_SubmenuOpened(object sender, RoutedEventArgs e, string folderName)
         {
             MenuItem item = sender as MenuItem;
             item.Items.Clear();
             try
             {
                 var appDir = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                foreach (var path in Directory.EnumerateFiles(System.IO.Path.Combine(appDir, "ExperimentalScripts")))
+                foreach (var path in Directory.EnumerateFiles(System.IO.Path.Combine(appDir, folderName)))
                 {
                     var filename = System.IO.Path.GetFileName(path);
                     if (!filename.EndsWith(".csx"))

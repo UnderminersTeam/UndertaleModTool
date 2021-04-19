@@ -11,7 +11,7 @@ ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileConte
 if (Directory.Exists(codeFolder)) 
 {
     ScriptError("A code export already exists. Please remove it.", "Error");
-	return;
+    return;
 }
 
 Directory.CreateDirectory(codeFolder);

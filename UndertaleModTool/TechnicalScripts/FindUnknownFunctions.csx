@@ -8,22 +8,22 @@ using UndertaleModLib.Util;
 
 string exportFolder = PromptChooseDirectory("Export to where");
 if (exportFolder == null)
-	throw new System.Exception("The export folder was not set.");
+    throw new System.Exception("The export folder was not set.");
 
 //Overwrite Check One
 if (File.Exists(exportFolder + "unknown_functions.txt"))
 {
-	bool overwriteCheckOne = ScriptQuestion(@"A 'unknown_functions.txt' file already exists. 
+    bool overwriteCheckOne = ScriptQuestion(@"A 'unknown_functions.txt' file already exists. 
 Would you like to overwrite it?");
-	if (overwriteCheckOne)
+    if (overwriteCheckOne)
     {
-		File.Delete(exportFolder + "unknown_functions.txt");
+        File.Delete(exportFolder + "unknown_functions.txt");
     }
-	else
-	{
-		ScriptError("A 'unknown_functions.txt' file already exists. Please remove it and try again.", "Error: Export already exists.");
-		return;
-	}
+    else
+    {
+        ScriptError("A 'unknown_functions.txt' file already exists. Please remove it and try again.", "Error: Export already exists.");
+        return;
+    }
 }
 
 BuiltinList list = new BuiltinList();
@@ -45,11 +45,11 @@ foreach (UndertaleExtension extension in Data.Extensions)
 
 using (StreamWriter writer = new StreamWriter(exportFolder + "unknown_functions.txt"))
 {
-	foreach (var func in Data.Functions)
-	{
-		if (func.Name.Content.Contains("\n") || func.Name.Content.Contains("\r"))
+    foreach (var func in Data.Functions)
+    {
+        if (func.Name.Content.Contains("\n") || func.Name.Content.Contains("\r"))
         {
-			continue;
+            continue;
         }
         if ((Data.Scripts.ByName(func.Name.Content) != null) || (Data.Code.ByName(func.Name.Content) != null))
         {
@@ -72,8 +72,8 @@ using (StreamWriter writer = new StreamWriter(exportFolder + "unknown_functions.
             continue;
         }
         unknownFunctions.Add(func.Name.Content);
-		writer.WriteLine(func.Name.Content);
-	}
+        writer.WriteLine(func.Name.Content);
+    }
 }
 
 if (unknownFunctions.Count > 0)

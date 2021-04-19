@@ -13,15 +13,15 @@ if (SCR_GAMESTART == null)
 bool patch = false;
 for(int i = 0; i < SCR_GAMESTART.Instructions.Count; i++) 
 {
-	if (SCR_GAMESTART.Instructions[i].Kind == UndertaleInstruction.Opcode.Pop && SCR_GAMESTART.Instructions[i].Destination.Target.Name.Content == "debug") 
+    if (SCR_GAMESTART.Instructions[i].Kind == UndertaleInstruction.Opcode.Pop && SCR_GAMESTART.Instructions[i].Destination.Target.Name.Content == "debug") 
     {
-		SCR_GAMESTART.Instructions[i-1].Value = (short)(enable ? 1 : 0);
+        SCR_GAMESTART.Instructions[i-1].Value = (short)(enable ? 1 : 0);
         patch = true;
     }
 }
 
 if (!patch) // Failed to patch.
-	throw new System.Exception("Patch point not found?");
+    throw new System.Exception("Patch point not found?");
 
 ChangeSelection(SCR_GAMESTART); // Show.
 ScriptMessage("Debug Mode " + (enable ? "enabled" : "disabled") + ".");

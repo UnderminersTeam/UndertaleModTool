@@ -16,14 +16,14 @@ int i = 0;
 
 string GetFolder(string path)
 {
-	return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
+    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
 
 // Folder Check One
 if (!Directory.Exists(winFolder + "Export_Tilesets\\"))
 {
-	ScriptError("There is no 'Export_Tilesets' folder to import.", "Error: Nothing to import.");
-	return;
+    ScriptError("There is no 'Export_Tilesets' folder to import.", "Error: Nothing to import.");
+    return;
 }
 
 
