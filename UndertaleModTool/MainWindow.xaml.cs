@@ -280,13 +280,40 @@ namespace UndertaleModTool
                 DoSaveDialog();
             }
         }
-
+        void DataWindow_Closing(object sender, CancelEventArgs e)
+        {
+            if (Data != null)
+            {
+                if (MessageBox.Show("Are you sure you want to quit?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+                    if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    {
+                        DoSaveDialog();
+                    }
+                }
+                else
+                {
+                    e.Cancel = true;
+                }
+            }
+        }
         private async void Command_Close(object sender, ExecutedRoutedEventArgs e)
         {
             if (Data != null)
-                if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-                    await DoSaveDialog();
-            Close();
+            {
+                if (MessageBox.Show("Are you sure you want to quit?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+                    if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    {
+                        await DoSaveDialog();
+                    }
+                    Close();
+                }
+            }
+            else
+            {
+                Close();
+            }
         }
 
         private async Task LoadFile(string filename)
