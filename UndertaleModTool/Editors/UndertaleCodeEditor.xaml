@@ -29,6 +29,12 @@
         <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding Offset}"/>
         
         <TabControl Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
+            <TabItem Header="Decompiled" Name="DecompiledTab">
+              <Grid>
+                    <RichTextBox IsReadOnly="True" IsDocumentEnabled="True" Name="DecompiledView" Padding="-5,0,-5,0" MouseDoubleClick="DecompiledView_MouseDoubleClick" SpellCheck.IsEnabled="False"/>
+                <TextBox Name="DecompiledEditor" LostFocus="DecompiledEditor_LostFocus" Visibility="Collapsed" FontFamily="Lucida Console" Padding="-2,0,-2,0" AcceptsReturn="True"/>
+              </Grid>
+            </TabItem>
             <TabItem Header="Disassembly" Name="DisassemblyTab">
                 <Grid>
                     <RichTextBox HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsReadOnly="True" IsDocumentEnabled="True" Name="DisassemblyView" Padding="-5,0,-5,0" MouseDoubleClick="DisassemblyView_MouseDoubleClick"/>
@@ -39,12 +45,6 @@
                 <Viewbox Stretch="UniformToFill" StretchDirection="DownOnly">
                     <Image Name="GraphView"/>
                 </Viewbox>
-            </TabItem>
-            <TabItem Header="Decompiled" Name="DecompiledTab">
-              <Grid>
-                    <RichTextBox IsReadOnly="True" IsDocumentEnabled="True" Name="DecompiledView" Padding="-5,0,-5,0" MouseDoubleClick="DecompiledView_MouseDoubleClick" SpellCheck.IsEnabled="False"/>
-                <TextBox Name="DecompiledEditor" LostFocus="DecompiledEditor_LostFocus" Visibility="Collapsed" FontFamily="Lucida Console" Padding="-2,0,-2,0" AcceptsReturn="True"/>
-              </Grid>
             </TabItem>
         </TabControl>
     </Grid>
