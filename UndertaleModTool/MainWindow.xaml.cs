@@ -218,6 +218,10 @@ namespace UndertaleModTool
                 if (MessageBox.Show("Warning: you currently have a project open.\nAre you sure you want to make a new project?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
                     return;
             }
+            this.Dispatcher.Invoke(() =>
+            {
+                CommandBox.Text = "";
+            });
 
             FilePath = null;
             Data = UndertaleData.CreateNew();
@@ -288,6 +292,10 @@ namespace UndertaleModTool
         private async Task LoadFile(string filename)
         {
             LoaderDialog dialog = new LoaderDialog("Loading", "Loading, please wait...");
+            this.Dispatcher.Invoke(() =>
+            {
+                CommandBox.Text = "";
+            });
             dialog.Owner = this;
             Task t = Task.Run(() =>
             {
