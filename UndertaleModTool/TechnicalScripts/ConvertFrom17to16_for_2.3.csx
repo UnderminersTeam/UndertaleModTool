@@ -41,7 +41,7 @@ Do you wish to proceed anyways?
 Select 'Yes' to continue
 Select 'No' to abort (cancel) the script without
 applying any changes to the game.";
-//This isn't nearly stable enough to skip the warning for any game, even for FOER and WOGR
+//Now that I think about it, this isn't nearly stable enough to skip the warning for any game, even for FOER and WOGR
 /*
     if ((game_name == "FOER") || (game_name == "WOGR"))
     {

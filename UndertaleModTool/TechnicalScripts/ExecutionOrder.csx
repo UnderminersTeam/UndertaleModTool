@@ -1,5 +1,4 @@
 // By colinator27 and BenjaminUrquhart, ImportGML at end from UndertaleModTool sample scripts
-// Reworked to be a profiler and stack tracer (to identify freeze locations)
 
 using System;
 using System.IO;
@@ -7,46 +6,6 @@ using UndertaleModLib.Util;
 using System.Linq;
 
 EnsureDataLoaded();
-
-if (!(ScriptQuestion(@"This script is irreversible
-and cannot be removed. 
-Press ""NO"" to cancel now without changes applied.
-Otherwise, press ""YES"" to continue")))
-{
-    ScriptMessage("Cancelled!");
-    return;
-}
-
-if (!(ScriptQuestion(@"THIS SCRIPT IS FOR DEBUGGING USE ONLY
-THIS SCRIPT IS ALSO IRREVERSIBLE, AND CANNOT BE REMOVED.
-
-As such, a SEPARATE CLEAN COPY of the game should
-be kept, and use this copy as reference and for 
-DEBUGGING ONLY. If you do not have a separate clean
-copy of the game build, or are not willing to
-manually transfer any fixes or changes over to the
-clean version, then: 
-
-SELECT ""NO"" NOW to cancel the script without changes applied.")))
-{
-    ScriptMessage("Cancelled!");
-    return;
-}
-    
-if (!(ScriptQuestion(@"Profiler data will be located in the save directory of your game.
-A stacktrace is also available in the event your game freezes or 
-crashes without warning.
-
-WARNING: profiler may cause lag due to large amounts of file i/o.
-This is normal. To fix this, please send a more competent
-programmer to redesign this script.
-
-YES to apply
-NO to cancel script without changes")))
-{
-    ScriptMessage("Cancelled!");
-    return;
-}
 
 // Helper function for defining functions
 UndertaleFunction DefineFunc(string name)
@@ -76,8 +35,6 @@ if (func == null)
     ScriptError("Don't run this script twice, please", "Error");
     return;
 }
-
-//PersistentObjectSetup("__obj_executionorder__");
 
 // Process bytecode, patching in script calls where needed
 foreach (UndertaleCode c in Data.Code)
@@ -333,127 +290,7 @@ Data.GeneralInfo.RoomOrder.First().Resource.GameObjects.Insert(0, new UndertaleR
 });
 
 // Script implementations
-PersistentObjectSetup("obj_grossley_persist");
-ImportGML("gml_Object_obj_grossley_persist_Create_0", @"
-");
-ImportGML("gml_Object_obj_grossley_persist_Step_0", @"
-global.grossley_timer = get_timer();
-");
-ImportGML("gml_Object_obj_grossley_persist_Draw_64", @"
-var i, file;
-var time_spent_total = 0;
-var times_called_total = 0;
-var avg_spent_total = 0;
-//Time spent
-file = file_text_open_write(working_directory + ""/Profiler_Time_Spent.txt"");
-file_text_write_string(file, ""Time spent:"");
-file_text_writeln(file);
-for (i = 0; i < array_length_1d(time_spent_array); i++)
-{
-    time_spent_total += time_spent_array[i];
-}
-for (i = 0; i < array_length_1d(time_spent_array); i++)
-{
-    if (time_spent_array[i] != 0)
-    {
-        percentage = string((time_spent_array[i]/time_spent_total)*100) + ""%""
-        file_text_write_string(file, object_get_name(i) + "" ("" + percentage + "" of total instantaneous time)"" + "": "" + "" "" + string(time_spent_array[i]) + "" microseconds"" + "", "" + string(time_spent_array[i]/1000000) + "" seconds"");
-        file_text_writeln(file);
-    }
-}
-file_text_close(file);
-//Times called
-file = file_text_open_write(working_directory + ""/Profiler_Times_Called.txt"");
-file_text_write_string(file, ""Times called:"");
-file_text_writeln(file);
-for (i = 0; i < array_length_1d(times_called_array); i++)
-{
-    times_called_total += times_called_array[i];
-}
-for (i = 0; i < array_length_1d(times_called_array); i++)
-{
-    if (times_called_array[i] != 0)
-    {
-        percentage = string((times_called_array[i]/times_called_total)*100)+ ""%""
-        file_text_write_string(file, object_get_name(i) + "" ("" + percentage + "" of total calls)"" + "": "" + "" "" + string(times_called_array[i]) + "" calls"");
-        file_text_writeln(file);
-    }
-}
-file_text_close(file);
-//Times on average
-file = file_text_open_write(working_directory + ""/Profiler_Averages.txt"");
-file_text_write_string(file, ""Averages:"");
-file_text_writeln(file);
-for (i = 0; i < array_length_1d(averages_array); i++)
-{
-    avg_spent_total += averages_array[i];
-}
-for (i = 0; i < array_length_1d(averages_array); i++)
-{
-    if (averages_array[i] != 0)
-    {
-        percentage = string((averages_array[i]/avg_spent_total)*100) + ""%""
-        file_text_write_string(file, object_get_name(i) + "" ("" + percentage + "" of total average time)"" + "": "" + "" "" + string(averages_array[i]) + "" microseconds"" + "", "" + string(averages_array[i]/1000000) + "" seconds"");
-        file_text_writeln(file);
-    }
-}
-file_text_close(file);
-//Times on average
-file = file_text_open_write(working_directory + ""/Profiler_Averages.txt"");
-file_text_write_string(file, ""Averages:"");
-file_text_writeln(file);
-for (i = 0; i < array_length_1d(averages_array); i++)
-{
-    avg_spent_total += averages_array[i];
-}
-for (i = 0; i < array_length_1d(averages_array); i++)
-{
-    if (averages_array[i] != 0)
-    {
-        percentage = string((averages_array[i]/avg_spent_total)*100) + ""%""
-        file_text_write_string(file, object_get_name(i) + "" ("" + percentage + "" of total average time)"" + "": "" + "" "" + string(averages_array[i]) + "" microseconds"" + "", "" + string(averages_array[i]/1000000) + "" seconds"");
-        file_text_writeln(file);
-    }
-}
-file_text_close(file);
-b = 0
-if (b)
-{
-    draw_text(0, 0, ""Time spent:"" + string(time_spent_array));
-    draw_text(0, 16, ""Times called:"" +  string(times_called_array));
-    draw_text(0, 32, ""Averages:"" + string(averages_array));
-}
-");
-
 ImportGML("gml_Script___scr_eventrun__", @"
-if (!instance_exists(__obj_executionorder__))
-    instance_activate_object(__obj_executionorder__);
-if (!instance_exists(obj_grossley_persist))
-    instance_activate_object(obj_grossley_persist);
-stacktrace = file_text_open_append(working_directory + ""/Stacktrace.txt"");
-file_text_write_string(stacktrace, argument0);
-file_text_writeln(stacktrace);
-file_text_close(stacktrace);
-stacktrace = file_text_open_read((working_directory + ""/Stacktrace.txt""))
-line_count = 0
-while (!file_text_eof(stacktrace))
-{
-    file_text_readln(stacktrace)
-    line_count++
-}
-file_text_close(stacktrace)
-if (line_count > 100)
-{
-    stacktrace = file_text_open_write((working_directory + ""/Stacktrace.txt""))
-    file_text_write_string(stacktrace, argument0)
-    file_text_writeln(stacktrace)
-    file_text_close(stacktrace)
-}
-stacktrace = file_text_open_write(working_directory + ""/Stacktrace_Last.txt"");
-file_text_write_string(stacktrace, argument0);
-file_text_writeln(stacktrace);
-file_text_close(stacktrace);
-global.grossley_obj_ind = object_index;
 with (__obj_executionorder__) 
 {
     var recursion = """";
@@ -467,39 +304,9 @@ with (__obj_executionorder__)
     ds_stack_push(stack, i);
     i++;
 }
-if (!(instance_exists(obj_grossley_persist)))
-{
-    instance_create(0, 0, obj_grossley_persist)
-    with (obj_grossley_persist)
-    {
-        depth = -99999999;
-        global.grossley_timer = 0
-        global.grossley_obj_ind = 0
-        array_lower_bound = 0;
-        array_upper_bound = 0;
-        for (i = 0; object_exists(i); i++)
-        {
-            array_upper_bound = i;
-        }
-        for (i = 0; i <= array_upper_bound; i++)
-        {
-            timer_last_array[i] = 0;// array_create(array_upper_bound + 1);
-            timer_current_array[i] = 0;// array_create(array_upper_bound + 1);
-            time_difference_array[i] = 0;// array_create(array_upper_bound + 1);
-            time_spent_array[i] = 0;// array_create(array_upper_bound + 1);
-            times_called_array[i] = 0;// array_create(array_upper_bound + 1);
-            averages_array[i] = 0;// array_create(array_upper_bound + 1);
-        }
-    }
-}
-with(obj_grossley_persist)
-{
-    timer_last_array[global.grossley_obj_ind] = get_timer();
-}
-".Replace("instance_create(0, 0, obj_grossley_persist)", ((Data.GeneralInfo.Major < 2) ? "instance_create(0, 0, obj_grossley_persist)" : "instance_create_depth(0, 0, -99999999, obj_grossley_persist)")));
+");
 
 ImportGML("gml_Script___scr_eventend__", @"
-global.grossley_obj_ind = object_index;
 with (__obj_executionorder__) 
 {
     var _i = ds_stack_pop(stack);
@@ -507,14 +314,6 @@ with (__obj_executionorder__)
     // Set interact
     if (events[_i, 1])
         events[_i, 0] += ("" ("" + string(events[_i, 3]) + "" -> "" + string(events[_i, 4]) + "")"");
-}
-with(obj_grossley_persist)
-{
-    timer_current_array[global.grossley_obj_ind] = get_timer();
-    time_difference_array[global.grossley_obj_ind] = (timer_current_array[global.grossley_obj_ind] - timer_last_array[global.grossley_obj_ind]);
-    time_spent_array[global.grossley_obj_ind] += time_difference_array[global.grossley_obj_ind];
-    times_called_array[global.grossley_obj_ind] += 1;
-    averages_array[global.grossley_obj_ind] = ((time_spent_array[global.grossley_obj_ind])/(times_called_array[global.grossley_obj_ind]));
 }
 ");
 
@@ -631,103 +430,5 @@ void ImportGML(string codeName, string gmlCode) {
         SetUMTConsoleText(errorMSG);
         SetFinishedMessage(false);
         return;
-    }
-}
-
-void PersistentObjectSetup(string objectName)
-{
-    var obj = Data.GameObjects.ByName(objectName);
-    if(obj == null)
-    {
-        obj = new UndertaleGameObject() { Name = Data.Strings.MakeString(objectName), Persistent = true };
-        Data.GameObjects.Add(obj);
-    }
-    if(Data.GeneralInfo.Name.Content == "UNDERTALE")
-    {
-        Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);
-    }
-    bool gms2 = Data.IsVersionAtLeast(2,0,0,0);
-    var entry_room = Data.GeneralInfo.RoomOrder[0].Resource;
-    var object_list = entry_room.GameObjects;
-    //Intentionally set to false, we're just setting up the object
-    //Remind me to make adding to the room automatically an option later
-    bool add_to_room = false;
-    if(gms2)
-    {
-        UndertaleRoom.Layer target_layer = null;
-        foreach(var layer in entry_room.Layers)
-        {
-            if(layer.LayerType == UndertaleRoom.LayerType.Instances)
-            {
-                foreach(var layer_obj in layer.InstancesData.Instances)
-                {
-                    if(layer_obj.ObjectDefinition == obj)
-                    {
-                        add_to_room = false;
-                        break;
-                    }
-                }
-                if(!add_to_room)
-                {
-                    break;
-                }
-                if(target_layer == null || target_layer.LayerDepth > layer.LayerDepth)
-                {
-                    target_layer = layer;
-                }
-            }
-        }
-        if(add_to_room)
-        {
-            if(target_layer == null)
-            {
-                uint layer_id = 0;
-                foreach(var room in Data.Rooms)
-                {
-                    foreach(var layer in room.Layers)
-                    {
-                        if(layer.LayerId > layer_id)
-                        {
-                            layer_id = (uint)layer.LayerId;
-                        }
-                    }
-                }
-                target_layer = new UndertaleRoom.Layer();
-                target_layer.LayerName = Data.Strings.MakeString("Persistent_Object_Layer");
-                target_layer.Data = new UndertaleRoom.Layer.LayerInstancesData();
-                target_layer.LayerType = UndertaleRoom.LayerType.Instances;
-                target_layer.LayerDepth = -1000;
-                target_layer.LayerId = layer_id;
-                target_layer.IsVisible = true;
-                entry_room.Layers.Add(target_layer);
-            }
-            var obj_to_add = new UndertaleRoom.GameObject();
-            obj_to_add.InstanceID = Data.GeneralInfo.LastObj++;
-            obj_to_add.ObjectDefinition = obj;
-            obj_to_add.X = 0;
-            obj_to_add.Y = 0;
-            target_layer.InstancesData.Instances.Add(obj_to_add);
-            object_list.Add(obj_to_add);
-        }
-    }
-    else
-    {
-        foreach(var room_obj in object_list)
-        {
-            if(room_obj.ObjectDefinition == obj)
-            {
-                add_to_room = false;
-                break;
-            }
-        }
-        if(add_to_room)
-        {
-            var obj_to_add = new UndertaleRoom.GameObject();
-            obj_to_add.InstanceID = Data.GeneralInfo.LastObj++;
-            obj_to_add.ObjectDefinition = obj;
-            obj_to_add.X = 0;
-            obj_to_add.Y = 0;
-            object_list.Add(obj_to_add);
-        }
     }
 }

@@ -453,6 +453,9 @@
     <None Include="TechnicalScripts\ConvertFrom17to16_for_2.3.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="TechnicalScripts\ExecutionOrder.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="TechnicalScripts\ExportAllCodeSync.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
