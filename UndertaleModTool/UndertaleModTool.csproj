@@ -366,6 +366,9 @@
     <None Include="CommunityScripts\UndertaleWithJSONs.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="TechnicalScripts\ExtractEmbeddedDataFile.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Unpackers\DumpSpecificCode.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
