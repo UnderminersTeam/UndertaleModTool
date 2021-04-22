@@ -1039,9 +1039,14 @@ namespace UndertaleModTool
             });
         }
 
-        public void ScriptError(string error, string title)
+        public void ScriptError(string error, string title = "Error", bool SetConsoleText = true)
         {
             MessageBox.Show(error, title, MessageBoxButton.OK, MessageBoxImage.Error);
+            if (SetConsoleText)
+            {
+                SetUMTConsoleText(error);
+                SetFinishedMessage(false);
+            }
         }
 
         public void SetFinishedMessage(bool isFinishedMessageEnabled)

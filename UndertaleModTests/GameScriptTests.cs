@@ -95,7 +95,7 @@ namespace UndertaleModTests
             }
         }
 
-        public void ScriptError(string error, string title)
+        public void ScriptError(string error, string title = "Error", bool SetConsoleText = true)
         {
             throw new NotImplementedException();
         }

@@ -20,7 +20,7 @@ namespace UndertaleModLib.Scripting
         void ScriptMessage(string message);
         void SetUMTConsoleText(string message);
         bool ScriptQuestion(string message);
-        void ScriptError(string error, string title);
+        void ScriptError(string error, string title = "Error", bool SetConsoleText = true);
         void ScriptOpenURL(string url);
         string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose);
         string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline);

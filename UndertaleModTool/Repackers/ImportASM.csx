@@ -1,5 +1,4 @@
 // Script by Jockeholm based off of a script by Kneesnap.
-
 // Major help and edited by Samuel Roy
 
 using System;
@@ -96,7 +95,8 @@ foreach (string file in dirFiles)
                         if (underCount == 1) 
                         {
                             methodNumberStr = afterPrefix.Substring(i + 1);
-                        } else if (underCount == 2) 
+                        }
+                        else if (underCount == 2)
                         {
                             objName = afterPrefix.Substring(0, i);
                             methodName = afterPrefix.Substring(i + 1, afterPrefix.Length - objName.Length - methodNumberStr.Length - 2);
@@ -114,14 +114,15 @@ foreach (string file in dirFiles)
                         UndertaleGameObject gameObj = new UndertaleGameObject();
                         gameObj.Name = Data.Strings.MakeString(objName);
                         Data.GameObjects.Add(gameObj);
-                    } else 
+                    }
+                    else 
                     {
                         try
                         {
                             var instructions = Assembler.Assemble(asmCode, Data);
                             Data.Code.ByName(codeName).Replace(instructions);
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             ScriptMessage("Assembler error at file: " + codeName);
                             return;
@@ -148,9 +149,9 @@ foreach (string file in dirFiles)
         var instructions = Assembler.Assemble(asmCode, Data);
         Data.Code.ByName(codeName).Replace(instructions);
     }
-    catch(Exception ex)
+    catch (Exception ex)
     {
-        ScriptMessage("Assembler error at code: " + codeName);
+        ScriptMessage("Assembler error at file: " + codeName);
         return;
     }
 }
