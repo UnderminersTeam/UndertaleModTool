@@ -29,5 +29,8 @@
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="Enable asset order swapping" ToolTip="Toggles dragging &amp; dropping assets in the asset tabs to different positions in the list. Disabled by default."/>
         <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding AssetOrderSwappingEnabled}"/>
+
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="Enable decompile once compile many mode" ToolTip="Toggles the decompile&amp; once and compile many code editing mode. Disabled by default."/>
+        <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding DecompileOnceCompileManyEnabled}"/>
     </Grid>
 </Window>

@@ -69,6 +69,18 @@ namespace UndertaleModTool
             }
         }
 
+        public static string DecompileOnceCompileManyEnabled
+        {
+            get => ConfigurationManager.AppSettings["DecompileOnceCompileManyEnabled"] as String;
+            set
+            {
+                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                config.AppSettings.Settings["DecompileOnceCompileManyEnabled"].Value = value;
+                config.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+            }
+        }
+
         public SettingsWindow()
         {
             InitializeComponent();

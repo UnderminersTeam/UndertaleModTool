@@ -36,6 +36,7 @@ using UndertaleModLib.Models;
 using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
 using UndertaleModTool.Windows;
+using System.Security.Cryptography;
 
 namespace UndertaleModTool
 {
@@ -67,6 +68,10 @@ namespace UndertaleModTool
 
         public event PropertyChangedEventHandler PropertyChanged;
         private LoaderDialog scriptDialog;
+        public byte[] MD5PreviouslyLoaded;
+        public byte[] MD5CurrentlyLoaded;
+        public string ProfilesFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar;
+        public string ProfileHash = "Unknown";
 
         // TODO: extract the scripting interface into a separate class
 
@@ -364,6 +369,7 @@ namespace UndertaleModTool
                         {
                             CanSave = true;
                             CanSafelySave = true;
+                            UpdateProfile(data, filename);
                         }
                         if (data.GMS2_3)
                         {
@@ -390,6 +396,167 @@ namespace UndertaleModTool
             await t;
         }
 
+        public void UpdateProfile(UndertaleData data, string filename)
+        {
+            if (SettingsWindow.DecompileOnceCompileManyEnabled == "True" && data.GMS2_3)
+            {
+                MessageBox.Show("The profile feature is not currently supported for GameMaker 2.3 games.");
+                return;
+            }
+            else if (SettingsWindow.DecompileOnceCompileManyEnabled == "True" && (!(data.IsYYC())))
+            {
+                Directory.CreateDirectory(ProfilesFolder);
+                string ProfDir;
+                bool FirstGeneration = false;
+                using (var md5Instance = MD5.Create())
+                {
+                    using (var stream = File.OpenRead(filename))
+                    {
+                        MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                        MD5PreviouslyLoaded = MD5CurrentlyLoaded;
+                        ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                        ProfDir = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar;
+                        if (Directory.Exists(ProfDir))
+                        {
+                            if ((!(Directory.Exists(ProfDir + "Temp"))) && (Directory.Exists(ProfDir + "Main")))
+                            {
+                                // Get the subdirectories for the specified directory.
+                                DirectoryInfo dir = new DirectoryInfo(ProfDir + "Main");
+                                Directory.CreateDirectory(ProfDir + "Temp");
+                                // Get the files in the directory and copy them to the new location.
+                                FileInfo[] files = dir.GetFiles();
+                                foreach (FileInfo file in files)
+                                {
+                                    string tempPath = System.IO.Path.Combine(ProfDir + "Temp", file.Name);
+                                    file.CopyTo(tempPath, false);
+                                }
+                            }
+                            else if ((!(Directory.Exists(ProfDir + "Main"))) && (Directory.Exists(ProfDir + "Temp")))
+                            {
+                                // Get the subdirectories for the specified directory.
+                                DirectoryInfo dir = new DirectoryInfo(ProfDir + "Temp");
+                                Directory.CreateDirectory(ProfDir + "Main");
+                                // Get the files in the directory and copy them to the new location.
+                                FileInfo[] files = dir.GetFiles();
+                                foreach (FileInfo file in files)
+                                {
+                                    string tempPath = System.IO.Path.Combine(ProfDir + "Main", file.Name);
+                                    file.CopyTo(tempPath, false);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            FirstGeneration = true;
+                        }
+                        Directory.CreateDirectory(ProfDir);
+                        Directory.CreateDirectory(ProfDir + "Main");
+                        Directory.CreateDirectory(ProfDir + "Temp");
+                    }
+                }
+                if (Directory.Exists(ProfDir))
+                {
+                    ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(data, false));
+                    foreach (UndertaleCode code in data.Code)
+                    {
+                        string path = System.IO.Path.Combine(ProfDir + "Main" + System.IO.Path.DirectorySeparatorChar, code.Name.Content + ".gml");
+                        if (!File.Exists(path))
+                        {
+                            try
+                            {
+                                File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+                            }
+                            catch (Exception e)
+                            {
+                                try
+                                {
+                                    File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show("Unable to complete writing of files for profile!\n" + ex.ToString());
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    foreach (UndertaleCode code in data.Code)
+                    {
+                        string path = System.IO.Path.Combine(ProfDir + "Temp" + System.IO.Path.DirectorySeparatorChar, code.Name.Content + ".gml");
+                        if (!File.Exists(path))
+                        {
+                            try
+                            {
+                                File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+                            }
+                            catch (Exception e)
+                            {
+                                try
+                                {
+                                    File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show("Unable to complete writing of files for profile!\n" + ex.ToString());
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Profile should exist, but does not.");
+                }
+                MessageBox.Show("Profile loaded successfully!");
+                if (FirstGeneration)
+                {
+                    if (CheckHashForCorrections())
+                    {
+                        MessageBox.Show(@"Code corrections are available for this game!
+Install the code corrections into the ""Profile""
+folder in UndertaleModTool for this game and
+for the hash """ + ProfileHash + @""" and
+the code editor will use 100% accurate
+decompilations for editing.");
+                    }
+                }
+            }
+            else if ((SettingsWindow.DecompileOnceCompileManyEnabled == "False") && (!(data.IsYYC())))
+            {
+                return;
+            }
+            else if (SettingsWindow.DecompileOnceCompileManyEnabled == "True" && data.IsYYC())
+            {
+                MessageBox.Show("Profiles are not available for YYC games!");
+                return;
+            }
+        }
+        public bool CheckHashForCorrections()
+        {
+            List<String> CorrectionsAvailableMD5List = new List<String>();
+            CorrectionsAvailableMD5List.Add("d0822e279464db858682ca99ec4cbbff");
+            CorrectionsAvailableMD5List.Add("cd48b89b6ac6b2d3977f2f82726e5f12");
+            CorrectionsAvailableMD5List.Add("88ae093aa1ae0c90da0d3ff1e15aa724");
+            CorrectionsAvailableMD5List.Add("856219e69dd39e76deca0586a7f44307");
+            CorrectionsAvailableMD5List.Add("0bf582aa180983a9ffa721aa2be2f273");
+            CorrectionsAvailableMD5List.Add("582795ad2037d06cdc8db0c72d9360d5");
+            CorrectionsAvailableMD5List.Add("5903fc5cb042a728d4ad8ee9e949c6eb");
+            CorrectionsAvailableMD5List.Add("427520a97db28c87da4220abb3a334c1");
+            CorrectionsAvailableMD5List.Add("cf8f7e3858bfbc46478cc155b78fb170");
+            CorrectionsAvailableMD5List.Add("113ef42e8cb91e5faf780c426679ec3a");
+            CorrectionsAvailableMD5List.Add("a88a2db3a68c714ca2b1ff57ac08a032");
+            CorrectionsAvailableMD5List.Add("56305194391ad7c548ee55a8891179cc");
+            CorrectionsAvailableMD5List.Add("741ad8ab49a08226af7e1b13b64d4e55");
+            CorrectionsAvailableMD5List.Add("6e1abb8e627c7a36cd8e6db11a829889");
+            CorrectionsAvailableMD5List.Add("b6825187ca2e32c618e4899e6d0c4c50");
+            CorrectionsAvailableMD5List.Add("cf6517bfa3b7b7e96c21b6c1a41f8415");
+            CorrectionsAvailableMD5List.Add("5c8f4533f6e0629d45766830f5f5ca72");
+            if (CorrectionsAvailableMD5List.Contains(ProfileHash))
+                return true;
+            else
+                return false;
+        }
         private async Task SaveFile(string filename)
         {
             if (Data == null || Data.UnsupportedBytecodeVersion)
