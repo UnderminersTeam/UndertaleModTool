@@ -639,13 +639,18 @@ namespace UndertaleModLib
             if (reader.undertaleData.GeneralInfo.Major < 2)
                 throw new InvalidOperationException();
 
+            // Apparently SEQN can be empty
+            if (Length == 0)
+                return;
+
             // Padding
             while (reader.Position % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
-            if (reader.ReadUInt32() != 1)
-                throw new IOException("Expected SEQN version 1");
+            uint version = reader.ReadUInt32();
+            if (version != 1)
+                throw new IOException("Expected SEQN version 1, got " + version.ToString());
 
             base.UnserializeChunk(reader);
         }
