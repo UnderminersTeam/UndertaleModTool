@@ -372,6 +372,9 @@
     <None Include="CommunityScripts\UndertaleWithJSONs.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="TechnicalScripts\13_To_14.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="TechnicalScripts\CheckDecompiler_2_3.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
