@@ -99,7 +99,10 @@ namespace UndertaleModTool
             if (code.DuplicateEntry)
             {
                 par.Inlines.Add(new Run("Duplicate code entry; cannot edit here."));
-            } 
+            }
+            //Maybe if I'm feeling wild, I'll try again one day, but for now, have this commented out code
+            //And yes, it really DOES take that long to load
+            //else if ((SettingsWindow.FormattingOnLongCodeEnabled == "False") ? (code.Instructions.Count > 5000) : false)
             else if (code.Instructions.Count > 5000)
             {
                 // Disable syntax highlighting. Loading it can take a few MINUTES on large scripts.
@@ -119,6 +122,7 @@ namespace UndertaleModTool
                 }
 
             }
+
             else
             {
                 Brush addressBrush = new SolidColorBrush(Color.FromRgb(50, 50, 50));
@@ -343,7 +347,7 @@ namespace UndertaleModTool
                 Task t = Task.Run(() =>
                 {
                     int estimatedLineCount = (int)Math.Round(code.Length * .056D);
-                    bool skipFormatting = (estimatedLineCount > 5000);
+                    bool skipFormatting = ((SettingsWindow.FormattingOnLongCodeEnabled == "False") ? (estimatedLineCount > 5000) : false);
 
                     DecompileContext context = new DecompileContext(dataa, !skipFormatting);
                     string decompiled = null;

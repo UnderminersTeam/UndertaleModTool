@@ -407,6 +407,8 @@ namespace UndertaleModTool
                     ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                 }
             }
+            Directory.CreateDirectory(System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar);
+            Directory.CreateDirectory(System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar);
             if (SettingsWindow.DecompileOnceCompileManyEnabled == "True" && data.GMS2_3)
             {
                 MessageBox.Show("The profile feature is not currently supported for GameMaker 2.3 games.");
@@ -447,7 +449,7 @@ namespace UndertaleModTool
                         }
                     }
                 }
-                else
+                else if (Directory.GetFiles(ProfDir).Length < 1 || (!Directory.Exists(ProfDir)))
                 {
                     FirstGeneration = true;
                 }
@@ -571,6 +573,8 @@ decompilations for editing.");
                     }
                 }
             }
+            Directory.CreateDirectory(System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar);
+            Directory.CreateDirectory(System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar);
             if (SettingsWindow.DecompileOnceCompileManyEnabled == "False" || data.GMS2_3 || data.IsYYC())
             {
                 MD5PreviouslyLoaded = MD5CurrentlyLoaded;

@@ -81,6 +81,18 @@ namespace UndertaleModTool
             }
         }
 
+        public static string FormattingOnLongCodeEnabled
+        {
+            get => ConfigurationManager.AppSettings["FormattingOnLongCodeEnabled"] as String;
+            set
+            {
+                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                config.AppSettings.Settings["FormattingOnLongCodeEnabled"].Value = value;
+                config.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+            }
+        }
+
         public SettingsWindow()
         {
             InitializeComponent();
