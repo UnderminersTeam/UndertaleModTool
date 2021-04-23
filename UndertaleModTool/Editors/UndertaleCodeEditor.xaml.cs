@@ -35,6 +35,10 @@ namespace UndertaleModTool
         public UndertaleCode CurrentDisassembled = null;
         public UndertaleCode CurrentDecompiled = null;
         public UndertaleCode CurrentGraphed = null;
+        public string ProfilesFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar;
+        public string ProfileHash = (Application.Current.MainWindow as MainWindow).ProfileHash;
+        public string MainPath = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + (Application.Current.MainWindow as MainWindow).ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar;
+        public string TempPath = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + (Application.Current.MainWindow as MainWindow).ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
 
         public UndertaleCodeEditor()
         {
@@ -44,6 +48,8 @@ namespace UndertaleModTool
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UndertaleCode code = this.DataContext as UndertaleCode;
+            Directory.CreateDirectory(MainPath);
+            Directory.CreateDirectory(TempPath);
             if (code == null)
                 return;
             if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
@@ -266,7 +272,12 @@ namespace UndertaleModTool
         private void UpdateGettext(UndertaleCode gettextCode)
         {
             gettext = new Dictionary<string, int>();
-            foreach (var line in Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n'))
+            string[] DecompilationOutput;
+            if (SettingsWindow.DecompileOnceCompileManyEnabled == "False")
+                DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
+            else
+                DecompilationOutput = File.ReadAllText(TempPath + gettextCode.Name.Content + ".gml").Replace("\r\n", "\n").Split('\n');
+            foreach (var line in DecompilationOutput)
             {
                 Match m = Regex.Match(line, "^ds_map_add\\(global.text_data_en, \"(.*)\"@([0-9]+), \"(.*)\"@([0-9]+)\\)");
                 if (m.Success)
@@ -300,7 +311,6 @@ namespace UndertaleModTool
             }
             return null;
         }
-
         private async void DecompileCode(UndertaleCode code)
         {
             FlowDocument document = new FlowDocument();
@@ -340,7 +350,7 @@ namespace UndertaleModTool
                     Exception e = null;
                     try
                     {
-                        decompiled = Decompiler.Decompile(code, context).Replace("\r\n", "\n");
+                        decompiled = (SettingsWindow.DecompileOnceCompileManyEnabled == "False" ? Decompiler.Decompile(code, context).Replace("\r\n", "\n") : File.ReadAllText(TempPath + code.Name.Content + ".gml").Replace("\r\n", "\n"));
                     }
                     catch (Exception ex)
                     {
@@ -729,6 +739,11 @@ namespace UndertaleModTool
             {
                 MessageBox.Show(compileContext.ResultAssembly, "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
+            }
+
+            if (SettingsWindow.DecompileOnceCompileManyEnabled == "True")
+            {
+                File.WriteAllText(TempPath + code.Name.Content + ".gml", DecompiledEditor.Text);
             }
 
             try

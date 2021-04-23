@@ -398,6 +398,15 @@ namespace UndertaleModTool
 
         public void UpdateProfile(UndertaleData data, string filename)
         {
+            using (var md5Instance = MD5.Create())
+            {
+                using (var stream = File.OpenRead(filename))
+                {
+                    MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                    MD5PreviouslyLoaded = MD5CurrentlyLoaded;
+                    ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                }
+            }
             if (SettingsWindow.DecompileOnceCompileManyEnabled == "True" && data.GMS2_3)
             {
                 MessageBox.Show("The profile feature is not currently supported for GameMaker 2.3 games.");
@@ -408,52 +417,43 @@ namespace UndertaleModTool
                 Directory.CreateDirectory(ProfilesFolder);
                 string ProfDir;
                 bool FirstGeneration = false;
-                using (var md5Instance = MD5.Create())
+                ProfDir = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar;
+                if (Directory.Exists(ProfDir))
                 {
-                    using (var stream = File.OpenRead(filename))
+                    if ((!(Directory.Exists(ProfDir + "Temp"))) && (Directory.Exists(ProfDir + "Main")))
                     {
-                        MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
-                        MD5PreviouslyLoaded = MD5CurrentlyLoaded;
-                        ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                        ProfDir = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar;
-                        if (Directory.Exists(ProfDir))
-                        {
-                            if ((!(Directory.Exists(ProfDir + "Temp"))) && (Directory.Exists(ProfDir + "Main")))
-                            {
-                                // Get the subdirectories for the specified directory.
-                                DirectoryInfo dir = new DirectoryInfo(ProfDir + "Main");
-                                Directory.CreateDirectory(ProfDir + "Temp");
-                                // Get the files in the directory and copy them to the new location.
-                                FileInfo[] files = dir.GetFiles();
-                                foreach (FileInfo file in files)
-                                {
-                                    string tempPath = System.IO.Path.Combine(ProfDir + "Temp", file.Name);
-                                    file.CopyTo(tempPath, false);
-                                }
-                            }
-                            else if ((!(Directory.Exists(ProfDir + "Main"))) && (Directory.Exists(ProfDir + "Temp")))
-                            {
-                                // Get the subdirectories for the specified directory.
-                                DirectoryInfo dir = new DirectoryInfo(ProfDir + "Temp");
-                                Directory.CreateDirectory(ProfDir + "Main");
-                                // Get the files in the directory and copy them to the new location.
-                                FileInfo[] files = dir.GetFiles();
-                                foreach (FileInfo file in files)
-                                {
-                                    string tempPath = System.IO.Path.Combine(ProfDir + "Main", file.Name);
-                                    file.CopyTo(tempPath, false);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            FirstGeneration = true;
-                        }
-                        Directory.CreateDirectory(ProfDir);
-                        Directory.CreateDirectory(ProfDir + "Main");
+                        // Get the subdirectories for the specified directory.
+                        DirectoryInfo dir = new DirectoryInfo(ProfDir + "Main");
                         Directory.CreateDirectory(ProfDir + "Temp");
+                        // Get the files in the directory and copy them to the new location.
+                        FileInfo[] files = dir.GetFiles();
+                        foreach (FileInfo file in files)
+                        {
+                            string tempPath = System.IO.Path.Combine(ProfDir + "Temp", file.Name);
+                            file.CopyTo(tempPath, false);
+                        }
+                    }
+                    else if ((!(Directory.Exists(ProfDir + "Main"))) && (Directory.Exists(ProfDir + "Temp")))
+                    {
+                        // Get the subdirectories for the specified directory.
+                        DirectoryInfo dir = new DirectoryInfo(ProfDir + "Temp");
+                        Directory.CreateDirectory(ProfDir + "Main");
+                        // Get the files in the directory and copy them to the new location.
+                        FileInfo[] files = dir.GetFiles();
+                        foreach (FileInfo file in files)
+                        {
+                            string tempPath = System.IO.Path.Combine(ProfDir + "Main", file.Name);
+                            file.CopyTo(tempPath, false);
+                        }
                     }
                 }
+                else
+                {
+                    FirstGeneration = true;
+                }
+                Directory.CreateDirectory(ProfDir);
+                Directory.CreateDirectory(ProfDir + "Main");
+                Directory.CreateDirectory(ProfDir + "Temp");
                 if (Directory.Exists(ProfDir))
                 {
                     ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(data, false));
@@ -556,6 +556,103 @@ decompilations for editing.");
                 return true;
             else
                 return false;
+        }
+        public void ProfileSaveEvent(UndertaleData data, string filename)
+        {
+            bool CopyProfile = false;
+            using (var md5Instance = MD5.Create())
+            {
+                using (var stream = File.OpenRead(filename))
+                {
+                    MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                    if (MD5PreviouslyLoaded != MD5CurrentlyLoaded)
+                    {
+                        CopyProfile = true;
+                    }
+                }
+            }
+            if (SettingsWindow.DecompileOnceCompileManyEnabled == "False" || data.GMS2_3 || data.IsYYC())
+            {
+                MD5PreviouslyLoaded = MD5CurrentlyLoaded;
+                ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                return;
+            }
+            else if (SettingsWindow.DecompileOnceCompileManyEnabled == "True")
+            {
+                Directory.CreateDirectory(ProfilesFolder);
+                string ProfDir;
+                string MD5DirNameOld;
+                string MD5DirPathOld;
+                string MD5DirNameNew;
+                string MD5DirPathNew;
+                if (CopyProfile)
+                {
+                    MD5DirNameOld = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                    MD5DirPathOld = ProfilesFolder + MD5DirNameOld + System.IO.Path.DirectorySeparatorChar;
+                    MD5DirNameNew = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                    MD5DirPathNew = ProfilesFolder + MD5DirNameNew + System.IO.Path.DirectorySeparatorChar;
+                    DirectoryCopy(MD5DirPathOld, MD5DirPathNew, true);
+                    if (Directory.Exists(MD5DirPathOld + "Main") && Directory.Exists(MD5DirPathOld + "Temp"))
+                    {
+                        Directory.Delete(MD5DirPathOld + "Temp", true);
+                    }
+                    DirectoryCopy(MD5DirPathOld + "Main", MD5DirPathOld + "Temp", true);
+                }
+                MD5PreviouslyLoaded = MD5CurrentlyLoaded;
+                // Get the subdirectories for the specified directory.
+                MD5DirNameOld = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                MD5DirPathOld = ProfilesFolder + MD5DirNameOld + System.IO.Path.DirectorySeparatorChar;
+                string MD5DirPathOldMain = MD5DirPathOld + "Main";
+                string MD5DirPathOldTemp = MD5DirPathOld + "Temp";
+                if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)))
+                {
+                    Directory.Delete(MD5DirPathOldMain, true);
+                }
+                DirectoryCopy(MD5DirPathOldTemp, MD5DirPathOldMain, true);
+
+                CopyProfile = false;
+                ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                ProfDir = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar;
+                Directory.CreateDirectory(ProfDir);
+                Directory.CreateDirectory(ProfDir + "Main");
+                Directory.CreateDirectory(ProfDir + "Temp");
+                MessageBox.Show("Profile saved successfully to" + ProfileHash);
+            }
+        }
+        public void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
+        {
+            // Get the subdirectories for the specified directory.
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirName);
+            }
+
+            DirectoryInfo[] dirs = dir.GetDirectories();
+
+            // If the destination directory doesn't exist, create it.       
+            Directory.CreateDirectory(destDirName);
+
+            // Get the files in the directory and copy them to the new location.
+            FileInfo[] files = dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string tempPath = System.IO.Path.Combine(destDirName, file.Name);
+                file.CopyTo(tempPath, false);
+            }
+
+            // If copying subdirectories, copy them and their contents to new location.
+            if (copySubDirs)
+            {
+                foreach (DirectoryInfo subdir in dirs)
+                {
+                    string tempPath = System.IO.Path.Combine(destDirName, subdir.Name);
+                    DirectoryCopy(subdir.FullName, tempPath, copySubDirs);
+                }
+            }
         }
         private async Task SaveFile(string filename)
         {
@@ -671,7 +768,7 @@ decompilations for editing.");
                 {
                     MessageBox.Show("An error occured while trying to save:\n" + e.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-
+                ProfileSaveEvent(Data, filename);
                 Dispatcher.Invoke(() =>
                 {
                     dialog.Hide();
@@ -1459,7 +1556,6 @@ decompilations for editing.");
                 }
             }
         }
-    // TODO: Don't ever implement this. Toby Fox did not autorize you to do this.
     }
 
     public class GeneralInfoEditor
