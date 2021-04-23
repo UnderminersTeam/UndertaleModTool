@@ -175,9 +175,24 @@ namespace UndertaleModLib.Models
             return code;
         }
 
+        public UndertaleCode EventHandlerFor(EventType type, UndertaleData data)
+        {
+            return EventHandlerFor(type, data.Strings, data.Code, data.CodeLocals);
+        }
+
+        public UndertaleCode EventHandlerFor(EventType type, uint subtype, UndertaleData data)
+        {
+            return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
+        }
+
         public UndertaleCode EventHandlerFor(EventType type, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
         {
             return EventHandlerFor(type, 0u, strg, codelist, localslist);
+        }
+
+        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, UndertaleData data)
+        {
+            return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
         }
 
         public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
@@ -187,11 +202,21 @@ namespace UndertaleModLib.Models
             return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
         }
 
+        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, UndertaleData data)
+        {
+            return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
+        }
+
         public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
         {
             if (type != EventType.Step)
                 throw new InvalidOperationException();
             return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        }
+
+        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeMouse subtype, UndertaleData data)
+        {
+            return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
         }
 
         public UndertaleCode EventHandlerFor(EventType type, EventSubtypeMouse subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
@@ -200,14 +225,24 @@ namespace UndertaleModLib.Models
                 throw new InvalidOperationException();
             return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
         }
-		
-		public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
+
+        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, UndertaleData data)
+        {
+            return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
+        }
+
+        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
         {
             if (type != EventType.Other)
                 throw new InvalidOperationException();
             return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
         }
-        
+
+        public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, UndertaleData data)
+        {
+            return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
+        }
+
         public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
         {
             if (type != EventType.Draw)
