@@ -449,8 +449,14 @@ namespace UndertaleModTool
                         }
                     }
                 }
-                else if (Directory.GetFiles(ProfDir).Length < 1 || (!Directory.Exists(ProfDir)))
+                if (Directory.GetFiles(ProfDir, "*.gml", SearchOption.AllDirectories).Length < 1 || (!Directory.Exists(ProfDir)))
                 {
+                    MessageBox.Show("Profile generation will now occur. It may take a few minutes to complete and may appear frozen during this time. This is normal. Please wait for the profile creation process to finish.");
+                    FirstGeneration = true;
+                }
+                if (((Directory.GetFiles(ProfDir, "*.gml", SearchOption.AllDirectories).Length) < 200) && (CheckHashForCorrections()))
+                {
+                    MessageBox.Show("Profile generation will now occur. It may take a few minutes to complete and may appear frozen during this time. This is normal. Please wait for the profile creation process to finish.");
                     FirstGeneration = true;
                 }
                 Directory.CreateDirectory(ProfDir);
@@ -511,7 +517,8 @@ namespace UndertaleModTool
                     MessageBox.Show("Profile should exist, but does not.");
                 }
                 MessageBox.Show("Profile loaded successfully!");
-                if (FirstGeneration)
+//If code corrections are bundled, then this isn't necessary.
+/*                if (FirstGeneration)
                 {
                     if (CheckHashForCorrections())
                     {
@@ -523,6 +530,7 @@ the code editor will use 100% accurate
 decompilations for editing.");
                     }
                 }
+*/
             }
             else if ((SettingsWindow.DecompileOnceCompileManyEnabled == "False") && (!(data.IsYYC())))
             {
