@@ -72,7 +72,7 @@ namespace UndertaleModTool
         public byte[] MD5CurrentlyLoaded;
         public string ProfilesFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar;
         public string ProfileHash = "Unknown";
-        public bool DidUMTCrashWhileEditing = (File.Exists(System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "UMT_Open_Info.txt") && (Data == null));
+        public bool DidUMTCrashWhileEditing = false;
 
         // TODO: extract the scripting interface into a separate class
 
@@ -80,7 +80,6 @@ namespace UndertaleModTool
         {
             InitializeComponent();
             this.DataContext = this;
-
             ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"));
             SelectionHistory.Clear();
 
@@ -88,6 +87,50 @@ namespace UndertaleModTool
 
             CanSave = false;
             CanSafelySave = false;
+            string ProfilesLocation = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar;
+            string LastEditedLocation = ProfilesLocation + "LastEdited.txt";
+            if ((File.Exists(LastEditedLocation) && (Data == null)))
+            {
+                DidUMTCrashWhileEditing = true;
+                string LastEditedContents = File.ReadAllText(LastEditedLocation);
+                string[] CrashRecoveryData = LastEditedContents.Split('\n');
+                string DataRecoverLocation = ProfilesLocation + CrashRecoveryData[0] + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
+                string ProfileHashOfCrashedFile;
+                string ReportedHashOfCrashedFile = CrashRecoveryData[0];
+                string PathOfCrashedFile = CrashRecoveryData[1];
+                string PathOfRecoverableCode = ProfilesLocation + ReportedHashOfCrashedFile + System.IO.Path.DirectorySeparatorChar;
+                using (var md5Instance = MD5.Create())
+                {
+                    using (var stream = File.OpenRead(PathOfCrashedFile))
+                    {
+                        ProfileHashOfCrashedFile = BitConverter.ToString(md5Instance.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
+                    }
+                }
+                if (Directory.Exists(ProfilesLocation + ReportedHashOfCrashedFile) && (File.Exists(PathOfCrashedFile)) && (ProfileHashOfCrashedFile == ReportedHashOfCrashedFile))
+                {
+                    if (MessageBox.Show("UndertaleModTool crashed during usage last time while editing " + CrashRecoveryData[1] + ", would you like to recover your code now?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    {
+                        LoadFile(PathOfCrashedFile);
+                        string[] dirFiles = Directory.GetFiles(DataRecoverLocation);
+                        foreach (string file in dirFiles)
+                        {
+                            ImportGML(file);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Your code can be recovered from the \"Recovered\" folder at any time.");
+                        string RecoveredDir = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Recovered" + System.IO.Path.DirectorySeparatorChar + ReportedHashOfCrashedFile;
+                        Directory.CreateDirectory(RecoveredDir);
+                        Directory.Move(PathOfRecoverableCode, RecoveredDir);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
+                }
+
+            }
         }
 
         private void SetIDString(string str)
@@ -169,13 +212,13 @@ namespace UndertaleModTool
                     existingwriter.Flush();
                     return;
                 }
-                catch(IOException e)
+                catch (IOException e)
                 {
                     Debug.WriteLine(e);
                     childFiles.Remove(filename);
                 }
             }
-            
+
             string key = Guid.NewGuid().ToString();
 
             string dir = System.IO.Path.GetDirectoryName(FilePath);
@@ -192,7 +235,7 @@ namespace UndertaleModTool
 
         public void CloseChildFiles()
         {
-            foreach(var pair in childFiles)
+            foreach (var pair in childFiles)
             {
                 pair.Value.Close();
             }
@@ -204,7 +247,7 @@ namespace UndertaleModTool
             var client = new NamedPipeClientStream(key);
             client.Connect();
             StreamReader reader = new StreamReader(client);
-            
+
             while (true)
             {
                 string[] thingToOpen = (await reader.ReadLineAsync()).Split(':');
@@ -295,10 +338,12 @@ namespace UndertaleModTool
                     if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     {
                         DoSaveDialog();
+                        DestroyUMTLastEdited();
                     }
                     else
                     {
                         RevertProfile();
+                        DestroyUMTLastEdited();
                     }
                 }
                 else
@@ -316,10 +361,12 @@ namespace UndertaleModTool
                     if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     {
                         await DoSaveDialog();
+                        DestroyUMTLastEdited();
                     }
                     else
                     {
                         RevertProfile();
+                        DestroyUMTLastEdited();
                     }
                     Close();
                 }
@@ -330,6 +377,16 @@ namespace UndertaleModTool
             }
         }
 
+        public void CreateUMTLastEdited(string filename)
+        {
+            string LastEdited = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "LastEdited.txt";
+            File.WriteAllText(LastEdited, ProfileHash + "\n" + filename);
+        }
+        public void DestroyUMTLastEdited()
+        {
+            if (File.Exists(System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "LastEdited.txt"))
+                File.Delete(System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "LastEdited.txt");
+        }
         private async Task LoadFile(string filename)
         {
             LoaderDialog dialog = new LoaderDialog("Loading", "Loading, please wait...");
@@ -557,6 +614,7 @@ The profile system can be toggled on or off at any time by going
 to the ""File"" tab at the top and then opening the ""Settings""
 (the ""Enable decompile once compile many"" option toggles it
 on or off).");
+                CreateUMTLastEdited(filename);
             }
             else if ((SettingsWindow.DecompileOnceCompileManyEnabled == "False") && (!(data.IsYYC())))
             {
@@ -790,7 +848,7 @@ on or off).");
                             debugData.LocalVars.Add(Data.CodeLocals[i]);
                             if (debugData.Strings.IndexOf(Data.CodeLocals[i].Name) < 0)
                                 debugData.Strings.Add(Data.CodeLocals[i].Name);
-                            foreach(var local in Data.CodeLocals[i].Locals)
+                            foreach (var local in Data.CodeLocals[i].Locals)
                                 if (debugData.Strings.IndexOf(local.Name) < 0)
                                     debugData.Strings.Add(local.Name);
                         }
@@ -803,7 +861,7 @@ on or off).");
                         }
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     MessageBox.Show("An error occured while trying to save:\n" + e.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
                     SaveSucceeded = false;
@@ -925,7 +983,7 @@ on or off).");
 
         private void TreeView_DragOver(object sender, DragEventArgs e)
         {
-            UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[e.Data.GetFormats().Length-1]) as UndertaleObject; // TODO: make this more reliable
+            UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[e.Data.GetFormats().Length - 1]) as UndertaleObject; // TODO: make this more reliable
 
             foreach (var s in e.Data.GetFormats())
                 Debug.WriteLine(s);
@@ -957,7 +1015,7 @@ on or off).");
             }
             e.Handled = true;
         }
-        
+
         private static T VisualUpwardSearch<T>(DependencyObject element) where T : class
         {
             T container = element as T;
@@ -1026,7 +1084,7 @@ on or off).");
             TreeViewItem container = GetNearestParent<TreeViewItem>(GetTreeViewItemFor(obj));
             object source = container.ItemsSource;
             IList list = ((source as ICollectionView)?.SourceCollection as IList) ?? (source as IList);
-            bool isLast = list.IndexOf(obj) == list.Count-1;
+            bool isLast = list.IndexOf(obj) == list.Count - 1;
             if (MessageBox.Show("Delete " + obj.ToString() + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), "Confirmation", MessageBoxButton.YesNo, isLast ? MessageBoxImage.Question : MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
                 list.Remove(obj);
@@ -1050,7 +1108,7 @@ on or off).");
                 }
             }
         }
-        
+
         private async void CommandBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && !Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
@@ -1075,7 +1133,7 @@ on or off).");
                             .AddReferences(Program.GetAssemblyMetadata(typeof(JsonConvert).GetTypeInfo().Assembly))
                             .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                             typeof(IScriptInterface), loader);
-                            
+
                         ScriptPath = null;
 
                         result = (await script.RunAsync(this)).ReturnValue;
@@ -1270,7 +1328,8 @@ on or off).");
             scriptDialog.TryHide();
         }
 
-        public async Task RunScript(string path) {
+        public async Task RunScript(string path)
+        {
             scriptDialog = new LoaderDialog("Script in progress...", "Please wait...");
             scriptDialog.Owner = this;
             scriptDialog.PreventClose = true;
@@ -1303,7 +1362,7 @@ on or off).");
                         .AddReferences(Program.GetAssemblyMetadata(typeof(JsonConvert).GetTypeInfo().Assembly))
                         .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                         typeof(IScriptInterface), loader);
-                        
+
                     ScriptPath = path;
 
                     object result = (await script.RunAsync(this)).ReturnValue;
@@ -1380,6 +1439,441 @@ on or off).");
                 FinishedMessageEnabled = isFinishedMessageEnabled;
             });
         }
+
+        enum EventTypes
+        {
+            Create,
+            Destroy,
+            Alarm,
+            Step,
+            Collision,
+            Keyboard,
+            Mouse,
+            Other,
+            Draw,
+            KeyPress,
+            KeyRelease,
+            Trigger,
+            CleanUp,
+            Gesture,
+            PreCreate
+        }
+        void ImportGML(string fileName)
+        {
+            ImportCode(fileName, true);
+        }
+        void ImportASM(string fileName)
+        {
+            ImportCode(fileName, false);
+        }
+        void ImportCode(string file, bool IsGML = true, bool doParse = true)
+        {
+            bool SkipPortions = false;
+            string fileName = System.IO.Path.GetFileName(file);
+            if (!(fileName.EndsWith(IsGML ? ".gml" : ".asm")))
+                return;
+            fileName = System.IO.Path.GetFileNameWithoutExtension(file);
+            if (file.EndsWith("CleanUp_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
+                return;
+            if (file.EndsWith("PreCreate_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
+                return;
+            string codeName = fileName;
+            string gmlCode = File.ReadAllText(file);
+            UndertaleCode code = Data.Code.ByName(codeName);
+            if (Data.Code.ByName(codeName) == null)
+            {
+                code = new UndertaleCode();
+                code.Name = Data.Strings.MakeString(codeName);
+                Data.Code.Add(code);
+            }
+            if ((Data?.GeneralInfo.BytecodeVersion > 14) && (Data.CodeLocals.ByName(codeName) == null))
+            {
+                UndertaleCodeLocals locals = new UndertaleCodeLocals();
+                locals.Name = code.Name;
+
+                UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+                argsLocal.Name = Data.Strings.MakeString("arguments");
+                argsLocal.Index = 0;
+
+                locals.Locals.Add(argsLocal);
+
+                code.LocalsCount = 1;
+                code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
+                Data.CodeLocals.Add(locals);
+            }
+            if (doParse)
+            {
+                // This portion links code.
+                if (codeName.Substring(0, 10).Equals("gml_Script"))
+                {
+                    // Add code to scripts section.
+                    if (Data.Scripts.ByName(codeName.Substring(11)) == null)
+                    {
+                        UndertaleScript scr = new UndertaleScript();
+                        scr.Name = Data.Strings.MakeString(codeName.Substring(11));
+                        scr.Code = code;
+                        Data.Scripts.Add(scr);
+                    }
+                    else
+                    {
+                        UndertaleScript scr = Data.Scripts.ByName(codeName.Substring(11));
+                        scr.Code = code;
+                    }
+                }
+                else if (codeName.Substring(0, 16).Equals("gml_GlobalScript"))
+                {
+                    // Add code to global init section.
+                    UndertaleGlobalInit init_entry = null;
+                    //This doesn't work, have to do it the hard way: UndertaleGlobalInit init_entry = Data.GlobalInitScripts.ByName(scr_dup_code_name_con);
+                    foreach (UndertaleGlobalInit globalInit in Data.GlobalInitScripts)
+                    {
+                        if (globalInit.Code.Name.Content == codeName)
+                        {
+                            init_entry = globalInit;
+                            break;
+                        }
+                    }
+                    if (init_entry == null)
+                    {
+                        UndertaleGlobalInit NewInit = new UndertaleGlobalInit();
+                        NewInit.Code = code;
+                        Data.GlobalInitScripts.Add(NewInit);
+                    }
+                    else
+                    {
+                        UndertaleGlobalInit NewInit = init_entry;
+                        NewInit.Code = code;
+                    }
+                }
+                else if (codeName.Substring(0, 10).Equals("gml_Object"))
+                {
+                    string afterPrefix = codeName.Substring(11);
+                    int underCount = 0;
+                    string methodNumberStr = "", methodName = "", objName = "";
+                    for (int i = afterPrefix.Length - 1; i >= 0; i--)
+                    {
+                        if (afterPrefix[i] == '_')
+                        {
+                            underCount++;
+                            if (underCount == 1)
+                            {
+                                methodNumberStr = afterPrefix.Substring(i + 1);
+                            }
+                            else if (underCount == 2)
+                            {
+                                objName = afterPrefix.Substring(0, i);
+                                methodName = afterPrefix.Substring(i + 1, afterPrefix.Length - objName.Length - methodNumberStr.Length - 2);
+                                break;
+                            }
+                        }
+                    }
+                    int methodNumber = 0;
+                    try
+                    {
+                        methodNumber = Int32.Parse(methodNumberStr);
+                        if (methodName == "Collision" && (methodNumber >= Data.GameObjects.Count || methodNumber < 0))
+                        {
+                            bool doNewObj = ScriptQuestion("Object of ID " + methodNumber.ToString() + " was not found.\nAdd new object?");
+                            if (doNewObj)
+                            {
+                                UndertaleGameObject gameObj = new UndertaleGameObject();
+                                gameObj.Name = Data.Strings.MakeString(SimpleTextInput("Enter object name", "Enter object name", "This is a single text line input box test.", false));
+                                Data.GameObjects.Add(gameObj);
+                            }
+                            else
+                            {
+                                //It *needs* to have a valid value, make the user specify one.
+                                List<uint> possible_values = new List<uint>();
+                                possible_values.Add(999999);
+                                methodNumber = (int)ReduceCollisionValue(possible_values);
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        if (afterPrefix.LastIndexOf("_Collision_") != -1)
+                        {
+                            string s2 = "_Collision_";
+                            objName = afterPrefix.Substring(0, (afterPrefix.LastIndexOf("_Collision_")));
+                            methodNumberStr = afterPrefix.Substring(afterPrefix.LastIndexOf("_Collision_") + s2.Length, afterPrefix.Length - (afterPrefix.LastIndexOf("_Collision_") + s2.Length));
+                            methodName = "Collision";
+                            //GMS 2.3+ use the object name for the one colliding, which is rather useful.
+                            if (Data.GMS2_3)
+                            {
+                                if (Data.GameObjects.ByName(methodNumberStr) != null)
+                                {
+                                    for (var i = 0; i < Data.GameObjects.Count; i++)
+                                    {
+                                        if (Data.GameObjects[i].Name.Content == methodNumberStr)
+                                        {
+                                            methodNumber = i;
+                                            break;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    bool doNewObj = ScriptQuestion("Object " + objName + " was not found.\nAdd new object called " + objName + "?");
+                                    if (doNewObj)
+                                    {
+                                        UndertaleGameObject gameObj = new UndertaleGameObject();
+                                        gameObj.Name = Data.Strings.MakeString(objName);
+                                        Data.GameObjects.Add(gameObj);
+                                    }
+                                }
+                                if (Data.GameObjects.ByName(methodNumberStr) != null)
+                                {
+                                    //It *needs* to have a valid value, make the user specify one, silly.
+                                    List<uint> possible_values = new List<uint>();
+                                    possible_values.Add(999999);
+                                    ReassignGUIDs(methodNumberStr, ReduceCollisionValue(possible_values));
+                                }
+                            }
+                            else
+                            {
+                                //Lets try to get this going
+                                methodNumber = (int)ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName));
+                                ReassignGUIDs(methodNumberStr, ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName)));
+                            }
+                        }
+                    }
+                    UndertaleGameObject obj = Data.GameObjects.ByName(objName);
+                    if (obj == null)
+                    {
+                        bool doNewObj = ScriptQuestion("Object " + objName + " was not found.\nAdd new object called " + objName + "?");
+                        if (doNewObj)
+                        {
+                            UndertaleGameObject gameObj = new UndertaleGameObject();
+                            gameObj.Name = Data.Strings.MakeString(objName);
+                            Data.GameObjects.Add(gameObj);
+                        }
+                        else
+                        {
+                            SkipPortions = true;
+                        }
+                    }
+
+                    if (!(SkipPortions))
+                    {
+                        obj = Data.GameObjects.ByName(objName);
+                        int eventIdx = (int)Enum.Parse(typeof(EventTypes), methodName);
+                        bool duplicate = false;
+                        try
+                        {
+                            foreach (UndertaleGameObject.Event evnt in obj.Events[eventIdx])
+                            {
+                                foreach (UndertaleGameObject.EventAction action in evnt.Actions)
+                                {
+                                    if (action.CodeId.Name.Content == codeName)
+                                        duplicate = true;
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            //something went wrong, but probably because it's trying to check something non-existent
+                            //we're gonna make it so
+                            //keep going
+                        }
+                        if (duplicate == false)
+                        {
+                            UndertalePointerList<UndertaleGameObject.Event> eventList = obj.Events[eventIdx];
+                            UndertaleGameObject.EventAction action = new UndertaleGameObject.EventAction();
+                            UndertaleGameObject.Event evnt = new UndertaleGameObject.Event();
+
+                            action.ActionName = code.Name;
+                            action.CodeId = code;
+                            evnt.EventSubtype = (uint)methodNumber;
+                            evnt.Actions.Add(action);
+                            eventList.Add(evnt);
+                        }
+                    }
+                }
+            }
+            SafeImport(codeName, gmlCode, IsGML, file);
+        }
+        void SafeImport(string codeName, string gmlCode, bool IsGML, string file)
+        {
+            try
+            {
+                if (IsGML)
+                {
+                    Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
+                }
+                else
+                {
+                    var instructions = Assembler.Assemble(gmlCode, Data);
+                    Data.Code.ByName(codeName).Replace(instructions);
+                }
+            }
+            catch (Exception ex)
+            {
+                string ErrorText = "Error at " + (IsGML ? "GML file: " : "ASM file: ") + file + @"Code '" + codeName + @"': " + gmlCode + "\nError: " + ex.ToString();
+                MessageBox.Show(ErrorText, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+        public void ReassignGUIDs(string GUID, uint ObjectIndex)
+        {
+            int eventIdx = (int)Enum.Parse(typeof(EventTypes), "Collision");
+            for (var i = 0; i < Data.GameObjects.Count; i++)
+            {
+                UndertaleGameObject obj = Data.GameObjects[i];
+                try
+                {
+                    foreach (UndertaleGameObject.Event evnt in obj.Events[eventIdx])
+                    {
+                        foreach (UndertaleGameObject.EventAction action in evnt.Actions)
+                        {
+                            if (action.CodeId.Name.Content.Contains(GUID))
+                            {
+                                evnt.EventSubtype = ObjectIndex;
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                }
+            }
+        }
+        public uint ReduceCollisionValue(List<uint> possible_values)
+        {
+            if (possible_values.Count == 1 && (possible_values[0] != 999999))
+                return possible_values[0];
+            else if (possible_values.Count > 0)
+            {
+                bool NoObjectFound = true;
+                string GameObjectName = "";
+                string GameObjectListNames = "";
+                foreach (uint objID in possible_values)
+                {
+                    GameObjectListNames += Data.GameObjects[(int)objID].Name.Content;
+                    GameObjectListNames += "\n";
+                }
+                uint GameObjectIDValue = 0;
+                while (NoObjectFound)
+                {
+                    string object_index = SimpleTextInput("Multiple object were found. Select only one object below from the set, or, if none below match, some other object name:", "Object enter box.", GameObjectListNames, true);
+                    for (var i = 0; i < Data.GameObjects.Count; i++)
+                    {
+                        if (Data.GameObjects[i].Name.Content.ToLower() == object_index.ToLower())
+                        {
+                            NoObjectFound = false;
+                            GameObjectName = Data.GameObjects[i].Name.Content;
+                            GameObjectIDValue = (uint)i;
+                        }
+                    }
+                }
+                return GameObjectIDValue;
+            }
+            else if (possible_values[0] == 999999)
+            {
+                bool NoObjectFound = true;
+                string GameObjectName = "";
+                uint GameObjectIDValue = 0;
+                while (NoObjectFound)
+                {
+                    string object_index = SimpleTextInput("Object could not be found. Please enter it below:", "Object enter box.", "", false);
+                    for (var i = 0; i < Data.GameObjects.Count; i++)
+                    {
+                        if (Data.GameObjects[i].Name.Content.ToLower() == object_index.ToLower())
+                        {
+                            NoObjectFound = false;
+                            GameObjectName = Data.GameObjects[i].Name.Content;
+                            GameObjectIDValue = (uint)i;
+                        }
+                    }
+                }
+                return GameObjectIDValue;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        public String GetGUIDFromCodeName(string codeName)
+        {
+            string afterPrefix = codeName.Substring(11);
+            if (afterPrefix.LastIndexOf("_Collision_") != -1)
+            {
+                string s2 = "_Collision_";
+                return afterPrefix.Substring(afterPrefix.LastIndexOf("_Collision_") + s2.Length, afterPrefix.Length - (afterPrefix.LastIndexOf("_Collision_") + s2.Length));
+            }
+            else
+                return "Invalid";
+        }
+
+        public List<uint> GetCollisionValueFromCodeNameGUID(string codeName)
+        {
+            int eventIdx = (int)Enum.Parse(typeof(EventTypes), "Collision");
+            List<uint> possible_values = new List<uint>();
+            for (var i = 0; i < Data.GameObjects.Count; i++)
+            {
+                UndertaleGameObject obj = Data.GameObjects[i];
+                try
+                {
+                    foreach (UndertaleGameObject.Event evnt in obj.Events[eventIdx])
+                    {
+                        foreach (UndertaleGameObject.EventAction action in evnt.Actions)
+                        {
+                            if (action.CodeId.Name.Content == codeName)
+                            {
+                                if (Data.GameObjects[(int)evnt.EventSubtype] != null)
+                                {
+                                    possible_values.Add(evnt.EventSubtype);
+                                    return possible_values;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                }
+            }
+            possible_values = GetCollisionValueFromGUID(GetGUIDFromCodeName(codeName));
+            return possible_values;
+        }
+
+        public List<uint> GetCollisionValueFromGUID(string GUID)
+        {
+            int eventIdx = (int)Enum.Parse(typeof(EventTypes), "Collision");
+            List<uint> possible_values = new List<uint>();
+            for (var i = 0; i < Data.GameObjects.Count; i++)
+            {
+                UndertaleGameObject obj = Data.GameObjects[i];
+                try
+                {
+                    foreach (UndertaleGameObject.Event evnt in obj.Events[eventIdx])
+                    {
+                        foreach (UndertaleGameObject.EventAction action in evnt.Actions)
+                        {
+                            if (action.CodeId.Name.Content.Contains(GUID))
+                            {
+                                if (!(possible_values.Contains(evnt.EventSubtype)))
+                                {
+                                    possible_values.Add(evnt.EventSubtype);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                }
+            }
+            if (possible_values.Count == 0)
+            {
+                possible_values.Add(999999);
+                return possible_values;
+            }
+            else
+            {
+                return possible_values;
+            }
+        }
+
 
         public bool ScriptQuestion(string message)
         {
@@ -1459,10 +1953,11 @@ on or off).");
             if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 saveOk = await DoSaveDialog();
 
-            if (FilePath == null) 
+            if (FilePath == null)
             {
                 MessageBox.Show("The file must be saved in order to be run.", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            } else if (saveOk)
+            }
+            else if (saveOk)
             {
                 RuntimePicker picker = new RuntimePicker();
                 picker.Owner = this;
@@ -1473,7 +1968,7 @@ on or off).");
 
             Data.GeneralInfo.DisableDebugger = origDbg;
         }
-        
+
         private async void Command_RunDebug(object sender, ExecutedRoutedEventArgs e)
         {
             if (Data == null)
@@ -1594,7 +2089,7 @@ on or off).");
                                 var offsets = UndertaleIO.GenerateOffsetMap(stream);
                                 using (var writer = File.CreateText(dlgout.FileName))
                                 {
-                                    foreach(var off in offsets.OrderBy((x) => x.Key))
+                                    foreach (var off in offsets.OrderBy((x) => x.Key))
                                     {
                                         writer.WriteLine(off.Key.ToString("X8") + " " + off.Value.ToString().Replace("\n", "\\\n"));
                                     }
