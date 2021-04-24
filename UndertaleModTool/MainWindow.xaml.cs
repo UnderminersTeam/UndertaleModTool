@@ -72,6 +72,7 @@ namespace UndertaleModTool
         public byte[] MD5CurrentlyLoaded;
         public string ProfilesFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar;
         public string ProfileHash = "Unknown";
+        public bool DidUMTCrashWhileEditing = (File.Exists(System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "UMT_Open_Info.txt") && (Data == null));
 
         // TODO: extract the scripting interface into a separate class
 
@@ -295,6 +296,10 @@ namespace UndertaleModTool
                     {
                         DoSaveDialog();
                     }
+                    else
+                    {
+                        RevertProfile();
+                    }
                 }
                 else
                 {
@@ -311,6 +316,10 @@ namespace UndertaleModTool
                     if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     {
                         await DoSaveDialog();
+                    }
+                    else
+                    {
+                        RevertProfile();
                     }
                     Close();
                 }
@@ -396,6 +405,29 @@ namespace UndertaleModTool
             await t;
         }
 
+        public void RevertProfile()
+        {
+            //We need to do this regardless, as the "Temp" folder can still change in non-profile mode.
+            //If we don't, it could cause desynchronization between modes.
+            string MainFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar;
+            Directory.CreateDirectory(MainFolder);
+            string TempFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
+            Directory.Delete(TempFolder, true);
+            DirectoryCopy(MainFolder, TempFolder, true);
+        }
+        public void SaveTempToMainProfile()
+        {
+            //This extra step needs to happen for non-profile mode because the "Temp" folder can be modified in non-profile mode.
+            //If we don't, it could cause desynchronization between modes.
+            if (SettingsWindow.DecompileOnceCompileManyEnabled == "False")
+            {
+                string MainFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar;
+                string TempFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
+                Directory.CreateDirectory(TempFolder);
+                Directory.Delete(MainFolder, true);
+                DirectoryCopy(TempFolder, MainFolder, true);
+            }
+        }
         public void UpdateProfile(UndertaleData data, string filename)
         {
             using (var md5Instance = MD5.Create())
@@ -514,23 +546,17 @@ namespace UndertaleModTool
                 }
                 else
                 {
-                    MessageBox.Show("Profile should exist, but does not.");
+                    MessageBox.Show("Profile should exist, but does not. Insufficient permissions??? (Try running in Administrator mode)");
                 }
-                MessageBox.Show("Profile loaded successfully!");
-//If code corrections are bundled, then this isn't necessary.
-/*                if (FirstGeneration)
-                {
-                    if (CheckHashForCorrections())
-                    {
-                        MessageBox.Show(@"Code corrections are available for this game!
-Install the code corrections into the ""Profile""
-folder in UndertaleModTool for this game and
-for the hash """ + ProfileHash + @""" and
-the code editor will use 100% accurate
-decompilations for editing.");
-                    }
-                }
-*/
+                MessageBox.Show(@"Profile loaded successfully!
+
+The code's fully editable (you can even add comments) and will
+be preserved exactly as written.
+
+The profile system can be toggled on or off at any time by going
+to the ""File"" tab at the top and then opening the ""Settings""
+(the ""Enable decompile once compile many"" option toggles it
+on or off).");
             }
             else if ((SettingsWindow.DecompileOnceCompileManyEnabled == "False") && (!(data.IsYYC())))
             {
@@ -691,9 +717,10 @@ decompilations for editing.");
             }
             Task t = Task.Run(() =>
             {
+                bool SaveSucceeded = true;
                 try
                 {
-                    using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write))
+                    using (var stream = new FileStream(filename + "temp", FileMode.Create, FileAccess.Write))
                     {
                         UndertaleIO.Write(stream, Data);
                     }
@@ -779,8 +806,29 @@ decompilations for editing.");
                 catch(Exception e)
                 {
                     MessageBox.Show("An error occured while trying to save:\n" + e.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    SaveSucceeded = false;
                 }
-                ProfileSaveEvent(Data, filename);
+                //Don't make any changes unless the save succeeds.
+                if (SaveSucceeded)
+                {
+                    //It saved successfully!
+                    //If we're overwriting a previously existing data file, we're going to delete it now.
+                    //Then, we're renaming it back to the proper (non-temp) file name.
+                    if (System.IO.File.Exists(filename))
+                        System.IO.File.Delete(filename);
+                    System.IO.File.Move(filename + "temp", filename);
+                    //And also make the changes to the profile system.
+                    ProfileSaveEvent(Data, filename);
+                    SaveTempToMainProfile();
+                }
+                else
+                {
+                    //It failed, but since we made a temp file for saving, no data was overwritten or destroyed (hopefully)
+                    //We need to delete the temp file though (if it exists).
+                    if (System.IO.File.Exists(filename + "temp"))
+                        System.IO.File.Delete(filename + "temp");
+                    //No profile system changes, since the save failed, like a save was never attempted.
+                }
                 Dispatcher.Invoke(() =>
                 {
                     dialog.Hide();
