@@ -71,7 +71,7 @@ namespace UndertaleModTool
         public byte[] MD5PreviouslyLoaded;
         public byte[] MD5CurrentlyLoaded;
         public string ProfilesFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar;
-        public string CorrectionsFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar;
+        public string CorrectionsFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Corrections" + System.IO.Path.DirectorySeparatorChar;
         public string ProfileHash = "Unknown";
         public bool DidUMTCrashWhileEditing = false;
 
@@ -88,7 +88,6 @@ namespace UndertaleModTool
 
             CanSave = false;
             CanSafelySave = false;
-            DirectoryCopy(CorrectionsFolder, ProfilesFolder, true);
         }
 
         private void SetIDString(string str)
@@ -155,6 +154,8 @@ namespace UndertaleModTool
                     ListenChildConnection(args[2]);
                 }
             }
+            //Copy the known code corrections into the profile, if they don't already exist.
+            ApplyCorrections();
             CrashCheck();
         }
 

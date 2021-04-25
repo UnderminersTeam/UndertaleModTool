@@ -87,10 +87,11 @@ namespace UndertaleModTool
                     {
                         MessageBox.Show("Your code can be recovered from the \"Recovered\" folder at any time.");
                         string RecoveredDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Recovered" + System.IO.Path.DirectorySeparatorChar + ReportedHashOfCrashedFile;
-                        Directory.CreateDirectory(RecoveredDir);
                         if (Directory.Exists(RecoveredDir))
                             Directory.Delete(RecoveredDir, true);
+                        Directory.CreateDirectory(RecoveredDir);
                         Directory.Move(PathOfRecoverableCode, RecoveredDir);
+                        ApplyCorrections();
                     }
                 }
                 else
@@ -98,6 +99,10 @@ namespace UndertaleModTool
                     MessageBox.Show("A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
                 }
             }
+        }
+        public void ApplyCorrections()
+        {
+            DirectoryCopy(CorrectionsFolder, ProfilesFolder, true);
         }
         public void LoadFileSync(string filename)
         {
@@ -383,9 +388,7 @@ on or off).");
 
             if (!dir.Exists)
             {
-                throw new DirectoryNotFoundException(
-                    "Source directory does not exist or could not be found: "
-                    + sourceDirName);
+                throw new DirectoryNotFoundException("Source directory does not exist or could not be found: " + sourceDirName);
             }
 
             DirectoryInfo[] dirs = dir.GetDirectories();

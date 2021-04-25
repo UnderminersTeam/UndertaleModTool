@@ -360,7 +360,7 @@ namespace UndertaleModTool
                     Exception e = null;
                     try
                     {
-                        decompiled = (SettingsWindow.DecompileOnceCompileManyEnabled == "False" ? Decompiler.Decompile(code, context).Replace("\r\n", "\n") : File.ReadAllText(TempPath + code.Name.Content + ".gml").Replace("\r\n", "\n"));
+                        decompiled = ((SettingsWindow.DecompileOnceCompileManyEnabled == "False" || !File.Exists(TempPath + code.Name.Content + ".gml")) ? Decompiler.Decompile(code, context).Replace("\r\n", "\n") : File.ReadAllText(TempPath + code.Name.Content + ".gml").Replace("\r\n", "\n"));
                     }
                     catch (Exception ex)
                     {
@@ -548,7 +548,7 @@ namespace UndertaleModTool
                                                 {
                                                     ev.Handled = true;
                                                     return; // Hex numbers aren't objects.
-                                            }
+                                                }
 
                                                 UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
                                                 int id;
@@ -577,10 +577,13 @@ namespace UndertaleModTool
                                                         possibleObjects.Add(data.Timelines[id]);
 
                                                     ContextMenu contextMenu = new ContextMenu();
+                                                    String ContextPossibleObjects = "";
                                                     foreach (UndertaleObject obj in possibleObjects)
                                                     {
                                                         MenuItem item = new MenuItem();
                                                         item.Header = obj.ToString().Replace("_", "__");
+                                                        ContextPossibleObjects += (obj.ToString().Replace("_", "__"));
+                                                        ContextPossibleObjects += "\n";
                                                         item.Click += (sender2, ev2) => (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
                                                         contextMenu.Items.Add(item);
                                                     }
@@ -591,6 +594,7 @@ namespace UndertaleModTool
                                                     contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
                                                     (sender as Run).ContextMenu = contextMenu;
                                                     contextMenu.IsOpen = true;
+                                                    Clipboard.SetText(ContextPossibleObjects);
                                                 }
                                                 ev.Handled = true;
                                             };
@@ -610,8 +614,8 @@ namespace UndertaleModTool
                                         }
                                     }
 
-                                // Add used object comments.
-                                foreach (var gt in usedObjects)
+                                    // Add used object comments.
+                                    foreach (var gt in usedObjects)
                                     {
                                         par.Inlines.Add(new Run(" // " + gt.Key + " = ") { Foreground = commentBrush });
                                         par.Inlines.Add(new Run(gt.Value is string ? "\"" + (string)gt.Value + "\"" : gt.Value.ToString()) { Foreground = commentBrush, Cursor = Cursors.Hand });
@@ -751,20 +755,24 @@ namespace UndertaleModTool
                 return;
             }
 
-            //If the user is code editing outside of profile mode it will be written to disk when applied anyways, so that the code will always be ready immediately for profile mode (if they're toggling it on and off a lot for some reason)
-            File.WriteAllText(TempPath + code.Name.Content + ".gml", DecompiledEditor.Text);
-
+            //The code should only be written after being successfully edited (if it doesn't successfully assemble for some reason, don't write it).
+            bool CodeEditSuccessful = false;
             try
             {
                 var instructions = Assembler.Assemble(compileContext.ResultAssembly, data);
                 code.Replace(instructions);
+                CodeEditSuccessful = true;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-
+            if (CodeEditSuccessful)
+            {
+                //If the user is code editing outside of profile mode it will be written to disk when applied anyways, so that the code will always be ready immediately for profile mode (if they're toggling it on and off a lot for some reason)
+                File.WriteAllText(TempPath + code.Name.Content + ".gml", DecompiledEditor.Text);
+            }
             // Show new code, decompiled.
             CurrentDisassembled = null;
             CurrentDecompiled = null;
