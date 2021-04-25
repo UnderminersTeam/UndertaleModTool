@@ -153,7 +153,7 @@ if (global.interact == 0)
                     y -= g
                     py = 0
                     break
-					mvd = 1
+                    mvd = 1
                 }
                 if (press_u == 0 && mvd == 0 && (!place_meeting((x + px), (y + g), obj_solidblock)))
                 {
@@ -206,7 +206,7 @@ if (global.interact == 0)
                     x -= g
                     px = 0
                     break
-					mvd = 1
+                    mvd = 1
                 }
                 if (mvd == 0 && press_l == 0 && (!place_meeting((x + g), (y + py), obj_solidblock)))
                 {

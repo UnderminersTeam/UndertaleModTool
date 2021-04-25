@@ -117,7 +117,7 @@ for (n = 1; n < (stringpos + 1); n = n + 1)
             halt = 6
         break
     }
-	if (string_char_at(originalstring, n) == "%")
+    if (string_char_at(originalstring, n) == "%")
     {
         if (string_char_at(originalstring, (n + 1)) == "%")
         {

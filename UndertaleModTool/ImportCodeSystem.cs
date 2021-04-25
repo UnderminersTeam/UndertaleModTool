@@ -71,7 +71,6 @@ namespace UndertaleModTool
         }
         void ImportCode(string file, bool IsGML = true, bool doParse = true)
         {
-            ScriptMessage("This code has been reached with " + file);
             bool SkipPortions = false;
             string fileName = System.IO.Path.GetFileName(file);
             if (!(fileName.EndsWith(IsGML ? ".gml" : ".asm")))

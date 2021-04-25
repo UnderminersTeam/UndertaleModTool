@@ -87,52 +87,6 @@ namespace UndertaleModTool
 
             CanSave = false;
             CanSafelySave = false;
-            string ProfilesLocation = System.AppDomain.CurrentDomain.BaseDirectory + "Profiles" + System.IO.Path.DirectorySeparatorChar;
-            string LastEditedLocation = ProfilesLocation + "LastEdited.txt";
-            if ((File.Exists(LastEditedLocation) && (Data == null)))
-            {
-                DidUMTCrashWhileEditing = true;
-                string LastEditedContents = File.ReadAllText(LastEditedLocation);
-                string[] CrashRecoveryData = LastEditedContents.Split('\n');
-                string DataRecoverLocation = ProfilesLocation + CrashRecoveryData[0] + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
-                string ProfileHashOfCrashedFile;
-                string ReportedHashOfCrashedFile = CrashRecoveryData[0];
-                string PathOfCrashedFile = CrashRecoveryData[1];
-                string PathOfRecoverableCode = ProfilesLocation + ReportedHashOfCrashedFile + System.IO.Path.DirectorySeparatorChar;
-                using (var md5Instance = MD5.Create())
-                {
-                    using (var stream = File.OpenRead(PathOfCrashedFile))
-                    {
-                        ProfileHashOfCrashedFile = BitConverter.ToString(md5Instance.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
-                    }
-                }
-                if (Directory.Exists(ProfilesLocation + ReportedHashOfCrashedFile) && (File.Exists(PathOfCrashedFile)) && (ProfileHashOfCrashedFile == ReportedHashOfCrashedFile))
-                {
-                    if (MessageBox.Show("UndertaleModTool crashed during usage last time while editing " + PathOfCrashedFile + ", would you like to recover your code now?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-                    {
-                        ScriptError(@"This part doesn't work correctly, and has been commented out, at line 113 of MainWindow.xaml.cs. Please load " + PathOfCrashedFile + @" manually, and then use ImportGML to manually recover load your lost work from " + DataRecoverLocation);
-/*
-                        LoadFile(PathOfCrashedFile);
-                        string[] dirFiles = Directory.GetFiles(DataRecoverLocation);
-                        foreach (string file in dirFiles)
-                        {
-                            ImportGML(file);
-                        }
-*/
-                    }
-                    else
-                    {
-                        MessageBox.Show("Your code can be recovered from the \"Recovered\" folder at any time.");
-                        string RecoveredDir = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Recovered" + System.IO.Path.DirectorySeparatorChar + ReportedHashOfCrashedFile;
-                        Directory.CreateDirectory(RecoveredDir);
-                        Directory.Move(PathOfRecoverableCode, RecoveredDir);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
-                }
-            }
         }
 
         private void SetIDString(string str)
@@ -199,6 +153,7 @@ namespace UndertaleModTool
                     ListenChildConnection(args[2]);
                 }
             }
+            CrashCheck();
         }
 
         public Dictionary<string, NamedPipeServerStream> childFiles = new Dictionary<string, NamedPipeServerStream>();

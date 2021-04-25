@@ -14,6 +14,6 @@ while (loop == true)
         noroom = true
         break
     }
-	i += 1
+    i += 1
 }
 scr_litemname()

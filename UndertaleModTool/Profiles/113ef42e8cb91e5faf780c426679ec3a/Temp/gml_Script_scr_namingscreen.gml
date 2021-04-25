@@ -212,10 +212,10 @@ if (naming == 1)
             else if (selected_col >= cols)
             {
                 if (selected_row == (rows - 1))
-				{
+                {
                     selected_col = old_col
-					break
-				}
+                    break
+                }
                 else
                 {
                     selected_col = 0

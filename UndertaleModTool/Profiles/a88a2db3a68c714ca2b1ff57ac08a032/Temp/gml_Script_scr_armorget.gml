@@ -14,7 +14,7 @@ while (loop == true)
         noroom = true
         break
     }
-	i += 1
+    i += 1
 }
 script_execute(scr_armorinfo_all)
 

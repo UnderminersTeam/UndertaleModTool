@@ -20,35 +20,35 @@ var __isforeground = false;
 // Try and find the appropriate background in the list of layers
 for(__i = 0; __i < __layerlistlength; __i++)
 {
-	var __layername = layer_get_name(__layerlist[__i]);	
-	if (string_pos(__colstring, __layername) > 0)
-	{
-		__layerid = __layerlist[__i];		
-			
-		break;		
-	}	
+    var __layername = layer_get_name(__layerlist[__i]);    
+    if (string_pos(__colstring, __layername) > 0)
+    {
+        __layerid = __layerlist[__i];        
+            
+        break;        
+    }    
 }
 if (__layerid != -1)
 {
-	// We have a winner!
-	// Get id of background element on this layer
-	var __els = layer_get_all_elements(__layerid);
-	var __elslength = array_length_1d(__els);
-	for(__i = 0; __i < __elslength; __i++)
-	{
-		if (layer_get_element_type(__els[__i]) == layerelementtype_background)
-		{				
-			__result[0] = __els[__i];
-			__result[1] = __layerid;
-		}
-	}			
+    // We have a winner!
+    // Get id of background element on this layer
+    var __els = layer_get_all_elements(__layerid);
+    var __elslength = array_length_1d(__els);
+    for(__i = 0; __i < __elslength; __i++)
+    {
+        if (layer_get_element_type(__els[__i]) == layerelementtype_background)
+        {                
+            __result[0] = __els[__i];
+            __result[1] = __layerid;
+        }
+    }            
 }
 else
 {
-	// Need to construct a new layer with a new background
-	var __newback = __background_set_element(-1, false, false, -1, 0, 0, true, true,1,1, true, 0, 0, $0, 1);
-	__result[0] = __newback[0];
-	__result[1] = __newback[1];	
+    // Need to construct a new layer with a new background
+    var __newback = __background_set_element(-1, false, false, -1, 0, 0, true, true,1,1, true, 0, 0, $0, 1);
+    __result[0] = __newback[0];
+    __result[1] = __newback[1];    
 }
 
 return __result;

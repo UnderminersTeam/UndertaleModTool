@@ -8,7 +8,7 @@ while (loop == 1)
         global.phone[i] = argument0
         break
     }
-	if (i == 8)
+    if (i == 8)
     {
         script_execute(scr_itemnospace)
         break

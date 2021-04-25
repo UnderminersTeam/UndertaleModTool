@@ -42,7 +42,7 @@ if place_meeting((x + px), y, obj_battlesolid)
                 y -= g
                 py = 0
                 break
-				mvd = 1
+                mvd = 1
             }
             if (press_u == 0 && mvd == 0 && (!place_meeting((x + px), (y + g), obj_battlesolid)))
             {
@@ -96,7 +96,7 @@ if place_meeting(x, (y + py), obj_battlesolid)
                 x -= g
                 px = 0
                 break
-				mvd = 1
+                mvd = 1
             }
             if (mvd == 0 && press_l == 0 && (!place_meeting((x + g), (y + py), obj_battlesolid)))
             {

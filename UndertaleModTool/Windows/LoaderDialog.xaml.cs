@@ -98,7 +98,7 @@ namespace UndertaleModTool
             });
         }
 
-        public void Update(string message, string status, double progressValue, double maxValue) 
+        public void Update(string message, string status, double progressValue, double maxValue)
         {
             if (!IsVisible)
                 Dispatcher.Invoke(Show);
@@ -111,7 +111,13 @@ namespace UndertaleModTool
 
             ReportProgress(status, progressValue);
         }
+        public void Update(string status)
+        {
+            if (!IsVisible)
+                Dispatcher.Invoke(Show);
 
+            ReportProgress(status);
+        }
         private class DebugTraceListener : TraceListener
         {
             private LoaderDialog loaderDialog;

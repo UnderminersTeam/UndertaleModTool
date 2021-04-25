@@ -116,10 +116,10 @@ else if (os_type == os_switch_beta)
                     j_ch = 0
                     break
                 }
-				else
-				{
-					j_ch = (i + 1)
-				}
+                else
+                {
+                    j_ch = (i + 1)
+                }
             }
         }
         if (j_ch > 0)

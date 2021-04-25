@@ -40,60 +40,60 @@ var __isforeground;
 var __i;
 for(__i = 0; __i < 8; __i++)
 {
-	__slots[__i] = -1;
-	__isforeground[__i] = false;
+    __slots[__i] = -1;
+    __isforeground[__i] = false;
 }
 
 
 for(__i = 0; __i < __layerlistlength; __i++)
 {
-	var __layername = layer_get_name(__layerlist[__i]);	
-	if (string_pos(__fgstring, __layername) > 0)
-	{
-		var __slotchr = string_char_at(__layername, __fglen + 1);
-		if (__slotchr == "")
-			continue;
-			
-		var __slot = real( __slotchr );
-		__slots[__slot] = __layerlist[__i];
-		
-		__isforeground[__slot] = true;
-		
-		// Could check the contents of this layer to see if it has a single background element on it but that's probably overkill		
-	}
-	else if (string_pos(__bgstring, __layername) > 0)
-	{
-		var __slotchr = string_char_at(__layername, __bglen + 1);
-		if (__slotchr == "")
-			continue;
-			
-		var __slot = real( __slotchr );
-		__slots[__slot] = __layerlist[__i];
-		
-		__isforeground[__slot] = false;
-		
-		// Could check the contents of this layer to see if it has a single background element on it but that's probably overkill		
-	}
-	else if (string_pos(__colstring, __layername) > 0)
-	{
-		// Make sure colour is as deep as it can be
-		__collayer = __layerlist[__i];
-		layer_depth(__layerlist[__i], __farthestdepth);
-	}
-	else
-	{
-		var __currdepth = layer_get_depth(__layerlist[__i]);
-		
-		if (__currdepth < __nearestdepth)
-			__nearestdepth = __currdepth;
-			
-		if (__currdepth > __farthestdepth)
-			__farthestdepth = __currdepth;
-	}
+    var __layername = layer_get_name(__layerlist[__i]);    
+    if (string_pos(__fgstring, __layername) > 0)
+    {
+        var __slotchr = string_char_at(__layername, __fglen + 1);
+        if (__slotchr == "")
+            continue;
+            
+        var __slot = real( __slotchr );
+        __slots[__slot] = __layerlist[__i];
+        
+        __isforeground[__slot] = true;
+        
+        // Could check the contents of this layer to see if it has a single background element on it but that's probably overkill        
+    }
+    else if (string_pos(__bgstring, __layername) > 0)
+    {
+        var __slotchr = string_char_at(__layername, __bglen + 1);
+        if (__slotchr == "")
+            continue;
+            
+        var __slot = real( __slotchr );
+        __slots[__slot] = __layerlist[__i];
+        
+        __isforeground[__slot] = false;
+        
+        // Could check the contents of this layer to see if it has a single background element on it but that's probably overkill        
+    }
+    else if (string_pos(__colstring, __layername) > 0)
+    {
+        // Make sure colour is as deep as it can be
+        __collayer = __layerlist[__i];
+        layer_depth(__layerlist[__i], __farthestdepth);
+    }
+    else
+    {
+        var __currdepth = layer_get_depth(__layerlist[__i]);
+        
+        if (__currdepth < __nearestdepth)
+            __nearestdepth = __currdepth;
+            
+        if (__currdepth > __farthestdepth)
+            __farthestdepth = __currdepth;
+    }
 }
 
 // Reassign depths
-__farthestdepth += __depthinc + 1000;		// add some margin for the background layers
+__farthestdepth += __depthinc + 1000;        // add some margin for the background layers
 __nearestdepth -= __depthinc;
 
 //__farthestdepth = max(__farthestdepth, 15999);
@@ -103,24 +103,24 @@ __nearestdepth = min(__nearestdepth, -2147482000);
 
 for(__i = 0; __i < 8; __i++)
 {
-	if (__slots[__i] != -1)
-	{
-		var __depth = 0;
-		if (__isforeground[__i] == true)
-		{
-			__depth = __nearestdepth - (__i * __depthinc);
-		}
-		else
-		{
-			__depth = (__farthestdepth - __depthinc) - (__slot * __depthinc);
-		}
-		
-		layer_depth(__slots[__i], __depth);
-	}
+    if (__slots[__i] != -1)
+    {
+        var __depth = 0;
+        if (__isforeground[__i] == true)
+        {
+            __depth = __nearestdepth - (__i * __depthinc);
+        }
+        else
+        {
+            __depth = (__farthestdepth - __depthinc) - (__slot * __depthinc);
+        }
+        
+        layer_depth(__slots[__i], __depth);
+    }
 }
 if (__collayer != -1)
 {
-	layer_depth(__collayer, __farthestdepth);
+    layer_depth(__collayer, __farthestdepth);
 }
 
 
@@ -129,38 +129,38 @@ var __layername;
 var __layerdepth;
 if (__bind == -1)
 {
-	// This is the background colour layer
-	__layername = __colstring;
-	__layerdepth = __farthestdepth;
+    // This is the background colour layer
+    __layername = __colstring;
+    __layerdepth = __farthestdepth;
 }
 else
 {
-	if (__fore == true)
-	{
-		__layername = __fgstring + string(__bind);
-		__layerdepth = __nearestdepth - (__bind * __depthinc);
-	}
-	else
-	{
-		__layername = __bgstring + string(__bind);
-		__layerdepth = (__farthestdepth - __depthinc) - (__bind * __depthinc);	// reserve 16000 for imported colour
-	}
+    if (__fore == true)
+    {
+        __layername = __fgstring + string(__bind);
+        __layerdepth = __nearestdepth - (__bind * __depthinc);
+    }
+    else
+    {
+        __layername = __bgstring + string(__bind);
+        __layerdepth = (__farthestdepth - __depthinc) - (__bind * __depthinc);    // reserve 16000 for imported colour
+    }
 }
 
 // If we already have a background in this slot, nuke it
 var __layerid;
 if (__bind == -1)
 {
-	__layerid = __collayer;
+    __layerid = __collayer;
 }
 else
 {
-	__layerid = __slots[__bind];
+    __layerid = __slots[__bind];
 }
-	
+    
 if (__layerid != -1)
 {
-	layer_destroy(__layerid);
+    layer_destroy(__layerid);
 }
 __layerid = layer_create(__layerdepth, __layername);
 

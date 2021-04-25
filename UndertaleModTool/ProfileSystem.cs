@@ -43,6 +43,135 @@ namespace UndertaleModTool
     //Make new profile system file.
     public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
+        public void CrashCheck()
+        {
+            string ProfilesLocation = System.AppDomain.CurrentDomain.BaseDirectory + "Profiles" + System.IO.Path.DirectorySeparatorChar;
+            string LastEditedLocation = ProfilesLocation + "LastEdited.txt";
+            if ((File.Exists(LastEditedLocation) && (Data == null)))
+            {
+                DidUMTCrashWhileEditing = true;
+                string LastEditedContents = File.ReadAllText(LastEditedLocation);
+                string[] CrashRecoveryData = LastEditedContents.Split('\n');
+                string DataRecoverLocation = ProfilesLocation + CrashRecoveryData[0] + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
+                string ProfileHashOfCrashedFile;
+                string ReportedHashOfCrashedFile = CrashRecoveryData[0];
+                string PathOfCrashedFile = CrashRecoveryData[1];
+                string PathOfRecoverableCode = ProfilesLocation + ReportedHashOfCrashedFile + System.IO.Path.DirectorySeparatorChar;
+                using (var md5Instance = MD5.Create())
+                {
+                    using (var stream = File.OpenRead(PathOfCrashedFile))
+                    {
+                        ProfileHashOfCrashedFile = BitConverter.ToString(md5Instance.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
+                    }
+                }
+                if (Directory.Exists(ProfilesLocation + ReportedHashOfCrashedFile) && (File.Exists(PathOfCrashedFile)) && (ProfileHashOfCrashedFile == ReportedHashOfCrashedFile))
+                {
+                    if (MessageBox.Show("UndertaleModTool crashed during usage last time while editing " + PathOfCrashedFile + ", would you like to recover your code now?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    {
+                        LoadFileSync(PathOfCrashedFile);
+                        string[] dirFiles = Directory.GetFiles(DataRecoverLocation);
+                        int progress = 0;
+                        LoaderDialog CodeLoadDialog = new LoaderDialog("Script in progress...", "Please wait...");
+                        CodeLoadDialog.Update(null, "Code entries processed: ", progress++, dirFiles.Length);
+                        CodeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
+                        foreach (string file in dirFiles)
+                        {
+                            ImportGML(file);
+                            CodeLoadDialog.Update(null, "Code entries processed: ", progress++, dirFiles.Length);
+                            CodeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
+                        }
+                        CodeLoadDialog.TryHide();
+                        MessageBox.Show("Completed.");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Your code can be recovered from the \"Recovered\" folder at any time.");
+                        string RecoveredDir = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Recovered" + System.IO.Path.DirectorySeparatorChar + ReportedHashOfCrashedFile;
+                        Directory.CreateDirectory(RecoveredDir);
+                        if (Directory.Exists(RecoveredDir))
+                            Directory.Delete(RecoveredDir, true);
+                        Directory.Move(PathOfRecoverableCode, RecoveredDir);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
+                }
+            }
+        }
+        public void LoadFileSync(string filename)
+        {
+            LoaderDialog CodeLoadDialog = new LoaderDialog("Loading", "Loading, please wait...");
+            this.Dispatcher.Invoke(() =>
+            {
+                CommandBox.Text = "";
+            });
+            CodeLoadDialog.Update("Data file is loading");
+            CodeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
+            bool hadWarnings = false;
+            UndertaleData data = null;
+            try
+            {
+                using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read))
+                {
+                    data = UndertaleIO.Read(stream, warning =>
+                    {
+                        MessageBox.Show(warning, "Loading warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        hadWarnings = true;
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("An error occured while trying to load:\n" + e.Message, "Load error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            Dispatcher.Invoke(() =>
+            {
+                if (data != null)
+                {
+                    if (data.UnsupportedBytecodeVersion)
+                    {
+                        MessageBox.Show("Only bytecode versions 14 to 17 are supported for now, you are trying to load " + data.GeneralInfo.BytecodeVersion + ". A lot of code is disabled and will likely break something. Saving/exporting is disabled.", "Unsupported bytecode version", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        CanSave = false;
+                        CanSafelySave = false;
+                    }
+                    else if (hadWarnings)
+                    {
+                        MessageBox.Show("Warnings occurred during loading. Data loss will likely occur when trying to save!", "Loading problems", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        CanSave = true;
+                        CanSafelySave = false;
+                    }
+                    else
+                    {
+                        CanSave = true;
+                        CanSafelySave = true;
+                        if (SettingsWindow.DecompileOnceCompileManyEnabled == "True")
+                            CodeLoadDialog.TryHide();
+                        UpdateProfile(data, filename);
+                    }
+                    if (data.GMS2_3)
+                    {
+                        MessageBox.Show("This game was built using GameMaker Studio 2.3 (or above). Support for this version is a work in progress, and you will likely run into issues decompiling code or in other places.", "GMS 2.3", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                    if (data.IsYYC())
+                    {
+                        MessageBox.Show("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                    if (System.IO.Path.GetDirectoryName(FilePath) != System.IO.Path.GetDirectoryName(filename))
+                        CloseChildFiles();
+                    this.Data = data;
+                    this.FilePath = filename;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FilePath"));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsGMS2"));
+                    ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"));
+                    SelectionHistory.Clear();
+                    CodeLoadDialog.TryHide();
+                }
+            });
+        }
+
         public void CreateUMTLastEdited(string filename)
         {
             string LastEdited = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "LastEdited.txt";
@@ -145,6 +274,10 @@ namespace UndertaleModTool
                 if (Directory.Exists(ProfDir))
                 {
                     ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(data, false));
+                    uint progress = 0;
+                    LoaderDialog CodeLoadDialog = new LoaderDialog("Profile creation in progress...", "Please wait...");
+                    CodeLoadDialog.Update(null, "Code entries processed: ", progress++, data.Code.Count);
+                    CodeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
                     foreach (UndertaleCode code in data.Code)
                     {
                         string path = System.IO.Path.Combine(ProfDir + "Main" + System.IO.Path.DirectorySeparatorChar, code.Name.Content + ".gml");
@@ -167,7 +300,10 @@ namespace UndertaleModTool
                                 }
                             }
                         }
+                        CodeLoadDialog.Update(null, "Code entries processed: ", progress++, data.Code.Count);
+                        CodeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
                     }
+                    progress = 0;
                     foreach (UndertaleCode code in data.Code)
                     {
                         string path = System.IO.Path.Combine(ProfDir + "Temp" + System.IO.Path.DirectorySeparatorChar, code.Name.Content + ".gml");
@@ -190,7 +326,10 @@ namespace UndertaleModTool
                                 }
                             }
                         }
+                        CodeLoadDialog.Update(null, "Code entries processed: ", progress++, data.Code.Count);
+                        CodeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
                     }
+                    CodeLoadDialog.TryHide();
                 }
                 else
                 {

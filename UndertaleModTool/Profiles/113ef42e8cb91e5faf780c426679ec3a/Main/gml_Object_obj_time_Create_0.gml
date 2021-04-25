@@ -16,7 +16,7 @@ if (os_type == os_switch_beta && (!variable_global_exists("switchlogin")))
 {
     global.switchlogin = -1
     while (global.switchlogin < 0)
-    	global.switchlogin = switch_accounts_select_account(1, 0, 0)
+        global.switchlogin = switch_accounts_select_account(1, 0, 0)
 }
 if (os_type == os_switch_beta)
 {
