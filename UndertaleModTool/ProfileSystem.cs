@@ -83,7 +83,7 @@ namespace UndertaleModTool
                         CodeLoadDialog.TryHide();
                         MessageBox.Show("Completed.");
                     }
-                    else
+                    else if (MessageBox.Show("Would you like to move this code to the \"Recovered\" folder now? Any previous code there will be cleared!", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     {
                         MessageBox.Show("Your code can be recovered from the \"Recovered\" folder at any time.");
                         string RecoveredDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Recovered" + System.IO.Path.DirectorySeparatorChar + ReportedHashOfCrashedFile;
@@ -92,6 +92,10 @@ namespace UndertaleModTool
                         Directory.CreateDirectory(RecoveredDir);
                         Directory.Move(PathOfRecoverableCode, RecoveredDir);
                         ApplyCorrections();
+                    }
+                    else
+                    {
+                        MessageBox.Show("A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
                     }
                 }
                 else
