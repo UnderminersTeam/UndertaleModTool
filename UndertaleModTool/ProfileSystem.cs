@@ -45,7 +45,7 @@ namespace UndertaleModTool
     {
         public void CrashCheck()
         {
-            string ProfilesLocation = System.AppDomain.CurrentDomain.BaseDirectory + "Profiles" + System.IO.Path.DirectorySeparatorChar;
+            string ProfilesLocation = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar;
             string LastEditedLocation = ProfilesLocation + "LastEdited.txt";
             if ((File.Exists(LastEditedLocation) && (Data == null)))
             {
@@ -86,7 +86,7 @@ namespace UndertaleModTool
                     else
                     {
                         MessageBox.Show("Your code can be recovered from the \"Recovered\" folder at any time.");
-                        string RecoveredDir = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Recovered" + System.IO.Path.DirectorySeparatorChar + ReportedHashOfCrashedFile;
+                        string RecoveredDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Recovered" + System.IO.Path.DirectorySeparatorChar + ReportedHashOfCrashedFile;
                         Directory.CreateDirectory(RecoveredDir);
                         if (Directory.Exists(RecoveredDir))
                             Directory.Delete(RecoveredDir, true);
@@ -174,21 +174,21 @@ namespace UndertaleModTool
 
         public void CreateUMTLastEdited(string filename)
         {
-            string LastEdited = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "LastEdited.txt";
+            string LastEdited = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "LastEdited.txt";
             File.WriteAllText(LastEdited, ProfileHash + "\n" + filename);
         }
         public void DestroyUMTLastEdited()
         {
-            if (File.Exists(System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "LastEdited.txt"))
-                File.Delete(System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "LastEdited.txt");
+            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "LastEdited.txt"))
+                File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "LastEdited.txt");
         }
         public void RevertProfile()
         {
             //We need to do this regardless, as the "Temp" folder can still change in non-profile mode.
             //If we don't, it could cause desynchronization between modes.
-            string MainFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar;
+            string MainFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar;
             Directory.CreateDirectory(MainFolder);
-            string TempFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
+            string TempFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
             Directory.Delete(TempFolder, true);
             DirectoryCopy(MainFolder, TempFolder, true);
         }
@@ -198,8 +198,8 @@ namespace UndertaleModTool
             //If we don't, it could cause desynchronization between modes.
             if (SettingsWindow.DecompileOnceCompileManyEnabled == "False")
             {
-                string MainFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar;
-                string TempFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
+                string MainFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar;
+                string TempFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
                 Directory.CreateDirectory(TempFolder);
                 Directory.Delete(MainFolder, true);
                 DirectoryCopy(TempFolder, MainFolder, true);
@@ -216,8 +216,8 @@ namespace UndertaleModTool
                     ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                 }
             }
-            Directory.CreateDirectory(System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar);
-            Directory.CreateDirectory(System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar);
+            Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar);
+            Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar);
             if (SettingsWindow.DecompileOnceCompileManyEnabled == "True" && data.GMS2_3)
             {
                 MessageBox.Show("The profile feature is not currently supported for GameMaker 2.3 games.");
@@ -227,7 +227,6 @@ namespace UndertaleModTool
             {
                 Directory.CreateDirectory(ProfilesFolder);
                 string ProfDir;
-                bool FirstGeneration = false;
                 ProfDir = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar;
                 if (Directory.Exists(ProfDir))
                 {
@@ -258,82 +257,14 @@ namespace UndertaleModTool
                         }
                     }
                 }
-                if (Directory.GetFiles(ProfDir, "*.gml", SearchOption.AllDirectories).Length < 1 || (!Directory.Exists(ProfDir)))
-                {
-                    MessageBox.Show("Profile generation will now occur. It may take a few minutes to complete and may appear frozen during this time. This is normal. Please wait for the profile creation process to finish.");
-                    FirstGeneration = true;
-                }
-                if (((Directory.GetFiles(ProfDir, "*.gml", SearchOption.AllDirectories).Length) < 200) && (CheckHashForCorrections()))
-                {
-                    MessageBox.Show("Profile generation will now occur. It may take a few minutes to complete and may appear frozen during this time. This is normal. Please wait for the profile creation process to finish.");
-                    FirstGeneration = true;
-                }
+                //First generation no longer exists, it will be generated on demand while you edit.
                 Directory.CreateDirectory(ProfDir);
                 Directory.CreateDirectory(ProfDir + "Main");
                 Directory.CreateDirectory(ProfDir + "Temp");
-                if (Directory.Exists(ProfDir))
-                {
-                    ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(data, false));
-                    uint progress = 0;
-                    LoaderDialog CodeLoadDialog = new LoaderDialog("Profile creation in progress...", "Please wait...");
-                    CodeLoadDialog.Update(null, "Code entries processed: ", progress++, data.Code.Count);
-                    CodeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
-                    foreach (UndertaleCode code in data.Code)
-                    {
-                        string path = System.IO.Path.Combine(ProfDir + "Main" + System.IO.Path.DirectorySeparatorChar, code.Name.Content + ".gml");
-                        if (!File.Exists(path))
-                        {
-                            try
-                            {
-                                File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
-                            }
-                            catch (Exception e)
-                            {
-                                try
-                                {
-                                    File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
-                                }
-                                catch (Exception ex)
-                                {
-                                    MessageBox.Show("Unable to complete writing of files for profile!\n" + ex.ToString());
-                                    return;
-                                }
-                            }
-                        }
-                        CodeLoadDialog.Update(null, "Code entries processed: ", progress++, data.Code.Count);
-                        CodeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
-                    }
-                    progress = 0;
-                    foreach (UndertaleCode code in data.Code)
-                    {
-                        string path = System.IO.Path.Combine(ProfDir + "Temp" + System.IO.Path.DirectorySeparatorChar, code.Name.Content + ".gml");
-                        if (!File.Exists(path))
-                        {
-                            try
-                            {
-                                File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
-                            }
-                            catch (Exception e)
-                            {
-                                try
-                                {
-                                    File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
-                                }
-                                catch (Exception ex)
-                                {
-                                    MessageBox.Show("Unable to complete writing of files for profile!\n" + ex.ToString());
-                                    return;
-                                }
-                            }
-                        }
-                        CodeLoadDialog.Update(null, "Code entries processed: ", progress++, data.Code.Count);
-                        CodeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
-                    }
-                    CodeLoadDialog.TryHide();
-                }
-                else
+                if (!Directory.Exists(ProfDir) || !Directory.Exists(ProfDir + "Main") || !Directory.Exists(ProfDir + "Temp"))
                 {
                     MessageBox.Show("Profile should exist, but does not. Insufficient permissions??? (Try running in Administrator mode)");
+                    MessageBox.Show("Profile mode is disabled.");
                 }
                 MessageBox.Show(@"Profile loaded successfully!
 
@@ -395,8 +326,8 @@ on or off).");
                     }
                 }
             }
-            Directory.CreateDirectory(System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar);
-            Directory.CreateDirectory(System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar);
+            Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar);
+            Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar);
             if (SettingsWindow.DecompileOnceCompileManyEnabled == "False" || data.GMS2_3 || data.IsYYC())
             {
                 MD5PreviouslyLoaded = MD5CurrentlyLoaded;
@@ -467,7 +398,13 @@ on or off).");
             foreach (FileInfo file in files)
             {
                 string tempPath = System.IO.Path.Combine(destDirName, file.Name);
-                file.CopyTo(tempPath, false);
+                try
+                {
+                    file.CopyTo(tempPath, false);
+                }
+                catch
+                {
+                }
             }
 
             // If copying subdirectories, copy them and their contents to new location.
