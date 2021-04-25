@@ -282,6 +282,9 @@
     <Compile Include="Editors\UndertaleVariableEditor.xaml.cs">
       <DependentUpon>UndertaleVariableEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="HelperGUID.cs" />
+    <Compile Include="ImportCodeSystem.cs" />
+    <Compile Include="ProfileSystem.cs" />
     <Compile Include="Windows\TextInputDialog.xaml.cs">
       <DependentUpon>TextInputDialog.xaml</DependentUpon>
     </Compile>
