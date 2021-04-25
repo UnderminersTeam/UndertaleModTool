@@ -466,6 +466,7 @@ namespace UndertaleModTool
                                     }
 
                                     Dictionary<string, object> usedObjects = new Dictionary<string, object>();
+                                    List<string> viewConversions = new List<string>();
                                     for (int i = 0; i < split.Count; i++)
                                     {
                                         int? val = null;
@@ -476,8 +477,8 @@ namespace UndertaleModTool
                                             par.Inlines.Add(new Run(token) { Foreground = keywordBrush });
                                         else if (token.StartsWith("argument"))
                                             par.Inlines.Add(new Run(token) { Foreground = argumentBrush });
-                                        else if ((val = AssetTypeResolver.FindConstValue(token)) != null)
-                                            par.Inlines.Add(new Run(token) { Foreground = constBrush, FontStyle = FontStyles.Italic, ToolTip = val.ToString() });
+                                        else if ((val = AssetTypeResolver.FindConstValue(token)) != null || (ContextualAssetResolver.builtins?.Constants.ContainsKey(token) ?? false))
+                                            par.Inlines.Add(new Run(token) { Foreground = constBrush, FontStyle = FontStyles.Italic, ToolTip = val?.ToString() });
                                         else if (token.StartsWith("\""))
                                             par.Inlines.Add(new Run(token) { Foreground = stringBrush });
                                         else if (token.StartsWith("//"))
@@ -493,6 +494,7 @@ namespace UndertaleModTool
                                         }
                                         else if (dataa.ByName(token) != null)
                                         {
+                                            //Console.WriteLine(token);
                                             par.Inlines.Add(new Run(token) { Foreground = assetBrush, Cursor = Cursors.Hand });
                                             par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(dataa.ByName(token));
                                             if (token == "scr_gettext" && gettext != null)
@@ -501,7 +503,7 @@ namespace UndertaleModTool
                                                 {
                                                     string id = split[i + 2].Substring(1, split[i + 2].Length - 2);
                                                     if (!usedObjects.ContainsKey(id) && gettext.ContainsKey(id))
-                                                        usedObjects.Add(id, (Application.Current.MainWindow as MainWindow).Data.Strings[gettext[id]]);
+                                                        usedObjects.Add(id, dataa.Strings[gettext[id]]);
                                                 }
                                             }
                                             if (token == "scr_84_get_lang_string" && gettextJSON != null)
@@ -512,6 +514,58 @@ namespace UndertaleModTool
                                                     if (!usedObjects.ContainsKey(id) && gettextJSON.ContainsKey(id))
                                                         usedObjects.Add(id, gettextJSON[id]);
                                                 }
+                                            }
+
+                                            // Not sure about this one
+                                            if(dataa.IsGameMaker2() && (token == "__view_get" || token == "__view_set"))
+                                            {
+                                                // TODO: make this not a hack
+                                                int argc = token == "__view_get" ? 2 : 3;
+                                                string[] args = new string[argc];
+                                                int lastIndex = -1;
+                                                for (int j = 0; j < argc; j++)
+                                                {
+                                                    lastIndex = i + j * 3 + 2;
+                                                    if (lastIndex >= split.Count)
+                                                        break;
+                                                    args[j] = split[lastIndex];
+                                                }
+                                                if(args[argc - 1] != null && split.Count > i + argc * 3 && split[i + argc * 3] == ")")
+                                                {
+                                                    int type;
+                                                    if(int.TryParse(args[0], out type))
+                                                    {
+                                                        string gms1 = "view_";
+                                                        switch(type)
+                                                        {
+                                                            case 0: gms1 += "xview"; break;
+                                                            case 1: gms1 += "yview"; break;
+                                                            case 2: gms1 += "wview"; break;
+                                                            case 3: gms1 += "hview"; break;
+                                                            case 4: gms1 += "angle"; break;
+                                                            case 5: gms1 += "wborder"; break;
+                                                            case 6: gms1 += "hborder"; break;
+                                                            case 7: gms1 += "hspeed"; break;
+                                                            case 8: gms1 += "vspeed"; break;
+                                                            case 9: gms1 += "object"; break;
+                                                            case 10: gms1 += "visible"; break;
+                                                            case 11: gms1 += "xport"; break;
+                                                            case 12: gms1 += "yport"; break;
+                                                            case 13: gms1 += "wport"; break;
+                                                            case 14: gms1 += "hport"; break;
+                                                            case 15: gms1 += "camera"; break;
+                                                            case 16: gms1 += "surface"; break;
+                                                            default: continue; // Dud, skip to next loop iteration
+                                                        }
+
+                                                        gms1 += "[" + args[1] + "]";
+                                                        if (argc == 3)
+                                                            gms1 += " = " + args[2];
+
+                                                        viewConversions.Add(gms1);
+                                                    }
+                                                }
+                                                
                                             }
                                         }
                                         else if (funcs.ContainsKey(token))
@@ -591,6 +645,10 @@ namespace UndertaleModTool
                                     }
 
                                 // Add used object comments.
+                                foreach (var conv in viewConversions)
+                                    {
+                                        par.Inlines.Add(new Run(" // " + conv) { Foreground = commentBrush });
+                                    }
                                 foreach (var gt in usedObjects)
                                     {
                                         par.Inlines.Add(new Run(" // " + gt.Key + " = ") { Foreground = commentBrush });
