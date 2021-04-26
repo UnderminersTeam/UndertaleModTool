@@ -16,6 +16,11 @@ namespace UndertaleModLib.Scripting
         bool CanSave { get; }
 
         void EnsureDataLoaded();
+        void PullTempToMain();
+        void PullMainToTemp();
+        void PullTempToCorrections();
+        void PullCorrectionsToTemp();
+        void UpdateCorrections();
 
         void ScriptMessage(string message);
         void SetUMTConsoleText(string message);

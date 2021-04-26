@@ -31,6 +31,21 @@ namespace UndertaleModTests
         public void EnsureDataLoaded()
         {
         }
+        public void PullTempProfileToMain()
+        {
+        }
+        public void PullMainProfileToTemp()
+        {
+        }
+        public void PullTempToCorrections()
+        {
+        }
+        public void PullCorrectionsToTemp()
+        {
+        }
+        public void UpdateCorrections()
+        {
+        }
 
         public void ScriptMessage(string message)
         {
