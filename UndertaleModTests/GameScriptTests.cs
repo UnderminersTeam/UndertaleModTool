@@ -68,6 +68,22 @@ namespace UndertaleModTests
         {
             Console.Write("SetUMTConsoleText(): " + message);
         }
+        public void ImportGMLString(string codeName, string gmlCode, bool doParse = true)
+        {
+            Console.Write("ImportGMLString(): " + codeName + ", " + gmlCode + ", " + doParse.ToString());
+        }
+        public void ImportASMString(string codeName, string gmlCode, bool doParse = true)
+        {
+            Console.Write("ImportASMString(): " + codeName + ", " + gmlCode + ", " + doParse.ToString());
+        }
+        public void ImportGMLFile(string fileName, bool doParse = true)
+        {
+            Console.Write("ImportGMLFile(): " + fileName + ", " + doParse.ToString());
+        }
+        public void ImportASMFile(string fileName, bool doParse = true)
+        {
+            Console.Write("ImportASMFile(): " + fileName + ", " + doParse.ToString());
+        }
 
         public void SetFinishedMessage(bool isFinishedMessageEnabled)
         {

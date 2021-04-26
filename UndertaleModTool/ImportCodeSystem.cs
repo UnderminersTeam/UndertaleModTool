@@ -61,19 +61,19 @@ namespace UndertaleModTool
             Gesture,
             PreCreate
         }
-        void ImportGMLString(string codeName, string gmlCode, bool doParse = true)
+        public void ImportGMLString(string codeName, string gmlCode, bool doParse = true)
         {
             ImportCode(codeName, gmlCode, true, doParse);
         }
-        void ImportASMString(string codeName, string gmlCode, bool doParse = true)
+        public void ImportASMString(string codeName, string gmlCode, bool doParse = true)
         {
             ImportCode(codeName, gmlCode, false, doParse);
         }
-        void ImportGMLFile(string fileName, bool doParse = true)
+        public void ImportGMLFile(string fileName, bool doParse = true)
         {
             ImportCodeFromFile(fileName, true, doParse);
         }
-        void ImportASMFile(string fileName, bool doParse = true)
+        public void ImportASMFile(string fileName, bool doParse = true)
         {
             ImportCodeFromFile(fileName, false, doParse);
         }

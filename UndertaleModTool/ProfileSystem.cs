@@ -76,7 +76,7 @@ namespace UndertaleModTool
                         CodeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
                         foreach (string file in dirFiles)
                         {
-                            ImportGML(file);
+                            ImportGMLFile(file);
                             CodeLoadDialog.Update(null, "Code entries processed: ", progress++, dirFiles.Length);
                             CodeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
                         }

@@ -33,5 +33,9 @@ namespace UndertaleModLib.Scripting
         string PromptChooseDirectory(string prompt);
 
         string PromptLoadFile(string defaultExt, string filter);
+        void ImportGMLString(string codeName, string gmlCode, bool doParse = true);
+        void ImportASMString(string codeName, string gmlCode, bool doParse = true);
+        void ImportGMLFile(string fileName, bool doParse = true);
+        void ImportASMFile(string fileName, bool doParse = true);
     }
 }
