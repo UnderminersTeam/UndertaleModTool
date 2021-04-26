@@ -13,41 +13,41 @@ namespace UndertaleModLib.Decompiler
         // Probably
         public static Dictionary<string, Func<DecompileContext, Decompiler.FunctionCall, int, Decompiler.ExpressionConstant, string>> resolvers;
 
-        internal static Dictionary<EventType, Dictionary<int, string>> event_subtypes;
+        internal static Dictionary<Enum_EventType, Dictionary<int, string>> event_subtypes;
         internal static Dictionary<int, string> blend_modes;
 
         public static void Initialize(UndertaleData data)
         {
             // TODO: make this nicer by not hacking
             // into the builtin list
-            event_subtypes = new Dictionary<EventType, Dictionary<int, string>>();
+            event_subtypes = new Dictionary<Enum_EventType, Dictionary<int, string>>();
             blend_modes = new Dictionary<int, string>();
             builtins = new BuiltinList(data);
 
             var constants = builtins.Constants;
 
-            Func<string, EventType> GetEventTypeFromSubtype = (string subtype) =>
+            Func<string, Enum_EventType> GetEventTypeFromSubtype = (string subtype) =>
             {
                 if (subtype.Contains("gesture"))
-                    return EventType.ev_gesture;
+                    return Enum_EventType.ev_gesture;
                 if (subtype.Contains("gui") || subtype.Contains("draw")) // DrawGUI events are apparently just prefixed with ev_gui...
-                    return EventType.ev_draw;
+                    return Enum_EventType.ev_draw;
                 if (subtype.Contains("step"))
-                    return EventType.ev_step;
+                    return Enum_EventType.ev_step;
                 // End me
                 if (subtype.Contains("user") || subtype.Contains("game_") ||
                    subtype.Contains("room_") || subtype.Contains("animation_end") ||
                    subtype.Contains("lives") || subtype.Contains("end_of_path") ||
                    subtype.Contains("health") || subtype.Contains("close_button") ||
                    subtype.Contains("outside") || subtype.Contains("boundary"))
-                    return EventType.ev_other;
+                    return Enum_EventType.ev_other;
 
                 // ev_close_button is handled above and the various joystick events are 
                 // skipped in the loop
                 if (subtype.Contains("button") || subtype.Contains("mouse") ||
                     subtype.Contains("global") || subtype.Contains("press") ||
                     subtype.Contains("release"))
-                    return EventType.ev_mouse;
+                    return Enum_EventType.ev_mouse;
 
 
                 // Note: events with arbitrary subtypes (keyboard, create, precreate, destroy, etc)
@@ -58,11 +58,11 @@ namespace UndertaleModLib.Decompiler
                 throw new NotImplementedException("No event type for subtype " + subtype);
             };
 
-            Func<EventType, Dictionary<int, string>> GetDictForEventType = (EventType type) =>
+            Func<Enum_EventType, Dictionary<int, string>> GetDictForEventType = (Enum_EventType type) =>
             {
                 // These 3 resolve to the same thing
-                if (type == EventType.ev_keypress || type == EventType.ev_keyrelease)
-                    type = EventType.ev_keyboard;
+                if (type == Enum_EventType.ev_keypress || type == Enum_EventType.ev_keyrelease)
+                    type = Enum_EventType.ev_keyboard;
 
                 if (!event_subtypes.ContainsKey(type))
                     event_subtypes[type] = new Dictionary<int, string>();
@@ -73,10 +73,10 @@ namespace UndertaleModLib.Decompiler
             foreach (string constant in constants.Keys)
             {
                 if (constant.StartsWith("vk_"))
-                    GetDictForEventType(EventType.ev_keyboard)[(int)constants[constant]] = constant;
+                    GetDictForEventType(Enum_EventType.ev_keyboard)[(int)constants[constant]] = constant;
                 else if (constant.StartsWith("bm_") && !constant.Contains("colour"))
                     blend_modes[(int)constants[constant]] = constant;
-                else if (constant.StartsWith("ev_") && !Enum.IsDefined(typeof(EventType), constant) && !constant.Contains("joystick"))
+                else if (constant.StartsWith("ev_") && !Enum.IsDefined(typeof(Enum_EventType), constant) && !constant.Contains("joystick"))
                     GetDictForEventType(GetEventTypeFromSubtype(constant))[(int)constants[constant]] = constant;
             }
 
@@ -100,7 +100,7 @@ namespace UndertaleModLib.Decompiler
                 if (constExpr == null)
                     return null;
 
-                return AssetTypeResolver.FindConstValue(Decompiler.ExpressionConstant.ConvertToEnumStr<EventType>(constExpr.Value));
+                return AssetTypeResolver.FindConstValue(Decompiler.ExpressionConstant.ConvertToEnumStr<Enum_EventType>(constExpr.Value));
             };
 
             Func<DecompileContext, Decompiler.FunctionCall, int, Decompiler.ExpressionConstant, string> resolve_event_perform = (context, func, index, self) =>
@@ -109,17 +109,17 @@ namespace UndertaleModLib.Decompiler
 
                 if(typeInt != null)
                 {
-                    EventType type = (EventType)typeInt;
+                    Enum_EventType type = (Enum_EventType)typeInt;
                     int? initialVal = Decompiler.ExpressionConstant.ConvertToInt(self.Value);
                     if (initialVal == null)
                         return null;
 
-                    int val = (int)initialVal.Value;
+                    int val = initialVal.Value;
 
                     var subtypes = event_subtypes;
-                    if (type == EventType.ev_collision && val >= 0 && val < data.GameObjects.Count)
-                        return data.GameObjects[(int)val].Name.Content;
-                    else if (type == EventType.ev_keyboard || type == EventType.ev_keypress || type == EventType.ev_keyrelease)
+                    if (type == Enum_EventType.ev_collision && val >= 0 && val < data.GameObjects.Count)
+                        return data.GameObjects[val].Name.Content;
+                    else if (type == Enum_EventType.ev_keyboard || type == Enum_EventType.ev_keypress || type == Enum_EventType.ev_keyrelease)
                     {
                         string key = self.GetAsKeyboard(context);
                         if (key != null)

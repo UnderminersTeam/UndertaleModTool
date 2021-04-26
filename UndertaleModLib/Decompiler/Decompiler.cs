@@ -323,7 +323,7 @@ namespace UndertaleModLib.Decompiler
                 else if (AssetType == AssetIDType.Boolean)
                     return ConvertToEnumStr<Boolean>(Value);
                 else if (AssetType == AssetIDType.EventType)
-                    return ConvertToEnumStr<EventType>(Value);
+                    return ConvertToEnumStr<Enum_EventType>(Value);
                 else if (AssetType == AssetIDType.ContextDependent)
                 {
                     var func = context.currentFunction;

@@ -327,7 +327,7 @@ namespace UndertaleModLib.Decompiler
     // Subtypes are pulled from the builtin list case frankly I 
     // don't care enough to type them all out manually.
     // There's like a hundred subtypes.
-    public enum EventType : int
+    public enum Enum_EventType : int
     {
         ev_create,
         ev_destroy,
@@ -478,8 +478,8 @@ namespace UndertaleModLib.Decompiler
                 return (int)Enum.Parse(typeof(e__BG), const_name);
             if (Enum.IsDefined(typeof(EventSubtypeKey), const_name))
                 return Convert.ToInt32((uint)Enum.Parse(typeof(EventSubtypeKey), const_name));
-            if (Enum.IsDefined(typeof(EventType), const_name))
-                return (int)Enum.Parse(typeof(EventType), const_name);
+            if (Enum.IsDefined(typeof(Enum_EventType), const_name))
+                return (int)Enum.Parse(typeof(Enum_EventType), const_name);
 
             return null;
         }
