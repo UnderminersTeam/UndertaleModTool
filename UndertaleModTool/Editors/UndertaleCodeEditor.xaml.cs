@@ -577,14 +577,12 @@ namespace UndertaleModTool
                                                         possibleObjects.Add(data.Timelines[id]);
 
                                                     ContextMenu contextMenu = new ContextMenu();
-                                                    String ContextPossibleObjects = "";
+                                                    String ContextGetObject = "";
                                                     foreach (UndertaleObject obj in possibleObjects)
                                                     {
                                                         MenuItem item = new MenuItem();
                                                         item.Header = obj.ToString().Replace("_", "__");
-                                                        ContextPossibleObjects += (obj.ToString().Replace("_", "__"));
-                                                        ContextPossibleObjects += "\n";
-                                                        item.Click += (sender2, ev2) => (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
+                                                        item.Click += (sender2, ev2) => Clipboard.SetText(((UndertaleNamedResource)obj).Name.Content);
                                                         contextMenu.Items.Add(item);
                                                     }
                                                     if (id > 0x00050000)
@@ -594,7 +592,6 @@ namespace UndertaleModTool
                                                     contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
                                                     (sender as Run).ContextMenu = contextMenu;
                                                     contextMenu.IsOpen = true;
-                                                    Clipboard.SetText(ContextPossibleObjects);
                                                 }
                                                 ev.Handled = true;
                                             };

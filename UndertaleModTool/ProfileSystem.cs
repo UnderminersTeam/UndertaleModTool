@@ -405,12 +405,15 @@ on or off).");
             foreach (FileInfo file in files)
             {
                 string tempPath = System.IO.Path.Combine(destDirName, file.Name);
-                try
+                if (!(File.Exists(tempPath)))
                 {
-                    file.CopyTo(tempPath, false);
-                }
-                catch
-                {
+                    try
+                    {
+                        file.CopyTo(tempPath, false);
+                    }
+                    catch
+                    {
+                    }
                 }
             }
 
