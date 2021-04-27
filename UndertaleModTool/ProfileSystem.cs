@@ -68,7 +68,7 @@ namespace UndertaleModTool
                 {
                     if (MessageBox.Show("UndertaleModTool crashed during usage last time while editing " + PathOfCrashedFile + ", would you like to recover your code now?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     {
-                        LoadFileSync(PathOfCrashedFile);
+                        LoadFile(PathOfCrashedFile).ContinueWith((t) => { });
                         string[] dirFiles = Directory.GetFiles(DataRecoverLocation);
                         int progress = 0;
                         LoaderDialog CodeLoadDialog = new LoaderDialog("Script in progress...", "Please wait...");
