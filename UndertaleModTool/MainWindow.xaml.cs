@@ -3,7 +3,6 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.Win32;
-using Microsoft.WindowsAPICodePack.Dialogs;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -12,9 +11,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Pipes;
 using System.Linq;
-using System.Media;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -22,13 +19,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
@@ -36,7 +28,7 @@ using UndertaleModLib.Models;
 using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
 using UndertaleModTool.Windows;
-using System.Security.Cryptography;
+using System.IO.Pipes;
 
 namespace UndertaleModTool
 {
@@ -70,9 +62,9 @@ namespace UndertaleModTool
         private LoaderDialog scriptDialog;
         public byte[] MD5PreviouslyLoaded;
         public byte[] MD5CurrentlyLoaded;
-        public string AppDataFolder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool");
-        public string ProfilesFolder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles");
-        public string CorrectionsFolder = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Corrections");
+        public string AppDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool");
+        public string ProfilesFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles");
+        public string CorrectionsFolder = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Corrections");
         public string ProfileHash = "Unknown";
         public bool DidUMTCrashWhileEditing = false;
 
@@ -182,8 +174,8 @@ namespace UndertaleModTool
 
             string key = Guid.NewGuid().ToString();
 
-            string dir = System.IO.Path.GetDirectoryName(FilePath);
-            Process.Start(System.Reflection.Assembly.GetExecutingAssembly().Location, "\"" + System.IO.Path.Combine(dir, filename) + "\" " + key);
+            string dir = Path.GetDirectoryName(FilePath);
+            Process.Start(System.Reflection.Assembly.GetExecutingAssembly().Location, "\"" + Path.Combine(dir, filename) + "\" " + key);
 
             var server = new NamedPipeServerStream(key);
             server.WaitForConnection();
@@ -396,7 +388,7 @@ namespace UndertaleModTool
                         {
                             MessageBox.Show("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
-                        if (System.IO.Path.GetDirectoryName(FilePath) != System.IO.Path.GetDirectoryName(filename))
+                        if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
                             CloseChildFiles();
                         this.Data = data;
                         this.FilePath = filename;
@@ -425,7 +417,7 @@ namespace UndertaleModTool
             dialog.Owner = this;
             FilePath = filename;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FilePath"));
-            if (System.IO.Path.GetDirectoryName(FilePath) != System.IO.Path.GetDirectoryName(filename))
+            if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
                 CloseChildFiles();
 
             DebugDataDialog.DebugDataMode debugMode = DebugDataDialog.DebugDataMode.NoDebug;
@@ -516,7 +508,7 @@ namespace UndertaleModTool
                                     debugData.Strings.Add(local.Name);
                         }
 
-                        using (UndertaleWriter writer = new UndertaleWriter(new FileStream(System.IO.Path.ChangeExtension(FilePath, ".yydebug"), FileMode.Create, FileAccess.Write)))
+                        using (UndertaleWriter writer = new UndertaleWriter(new FileStream(Path.ChangeExtension(FilePath, ".yydebug"), FileMode.Create, FileAccess.Write)))
                         {
                             debugData.FORM.Serialize(writer);
                             writer.ThrowIfUnwrittenObjects();
@@ -530,26 +522,35 @@ namespace UndertaleModTool
                     SaveSucceeded = false;
                 }
                 //Don't make any changes unless the save succeeds.
-                if (SaveSucceeded)
+                try
                 {
-                    //It saved successfully!
-                    //If we're overwriting a previously existing data file, we're going to delete it now.
-                    //Then, we're renaming it back to the proper (non-temp) file name.
-                    if (System.IO.File.Exists(filename))
-                        System.IO.File.Delete(filename);
-                    System.IO.File.Move(filename + "temp", filename);
-                    //And also make the changes to the profile system.
-                    ProfileSaveEvent(Data, filename);
-                    SaveTempToMainProfile();
+                    if (SaveSucceeded)
+                    {
+                        //It saved successfully!
+                        //If we're overwriting a previously existing data file, we're going to delete it now.
+                        //Then, we're renaming it back to the proper (non-temp) file name.
+                        if (File.Exists(filename))
+                            File.Delete(filename);
+                        File.Move(filename + "temp", filename);
+                        //And also make the changes to the profile system.
+                        ProfileSaveEvent(Data, filename);
+                        SaveTempToMainProfile();
+                    }
+                    else
+                    {
+                        //It failed, but since we made a temp file for saving, no data was overwritten or destroyed (hopefully)
+                        //We need to delete the temp file though (if it exists).
+                        if (File.Exists(filename + "temp"))
+                            File.Delete(filename + "temp");
+                        //No profile system changes, since the save failed, like a save was never attempted.
+                    }
                 }
-                else
+                catch (Exception exc)
                 {
-                    //It failed, but since we made a temp file for saving, no data was overwritten or destroyed (hopefully)
-                    //We need to delete the temp file though (if it exists).
-                    if (System.IO.File.Exists(filename + "temp"))
-                        System.IO.File.Delete(filename + "temp");
-                    //No profile system changes, since the save failed, like a save was never attempted.
+                    MessageBox.Show("An error occured while trying to save:\n" + exc.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    SaveSucceeded = false;
                 }
+
                 Dispatcher.Invoke(() =>
                 {
                     dialog.Hide();
@@ -960,10 +961,10 @@ namespace UndertaleModTool
             item.Items.Clear();
             try
             {
-                var appDir = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                foreach (var path in Directory.EnumerateFiles(System.IO.Path.Combine(appDir, folderName)))
+                var appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                foreach (var path in Directory.EnumerateFiles(Path.Combine(appDir, folderName)))
                 {
-                    var filename = System.IO.Path.GetFileName(path);
+                    var filename = Path.GetFileName(path);
                     if (!filename.EndsWith(".csx"))
                         continue;
                     MenuItem subitem = new MenuItem() { Header = filename.Replace("_", "__") };
@@ -1008,7 +1009,7 @@ namespace UndertaleModTool
         {
             Debug.WriteLine(path);
 
-            Dispatcher.Invoke(() => CommandBox.Text = "Running " + System.IO.Path.GetFileName(path) + " ...");
+            Dispatcher.Invoke(() => CommandBox.Text = "Running " + Path.GetFileName(path) + " ...");
             try
             {
                 using (var loader = new InteractiveAssemblyLoader())
@@ -1031,7 +1032,7 @@ namespace UndertaleModTool
                     object result = (await script.RunAsync(this)).ReturnValue;
                     if (FinishedMessageEnabled)
                     {
-                        Dispatcher.Invoke(() => CommandBox.Text = result != null ? result.ToString() : System.IO.Path.GetFileName(path) + " finished!");
+                        Dispatcher.Invoke(() => CommandBox.Text = result != null ? result.ToString() : Path.GetFileName(path) + " finished!");
                     }
                     else
                     {
@@ -1070,7 +1071,7 @@ namespace UndertaleModTool
             folderBrowser.CheckFileExists = false;
             folderBrowser.CheckPathExists = true;
             folderBrowser.FileName = prompt != null ? prompt + "." : "Folder Selection."; // Adding the . at the end makes sure it will accept the folder.
-            return folderBrowser.ShowDialog() == true ? System.IO.Path.GetDirectoryName(folderBrowser.FileName) + System.IO.Path.DirectorySeparatorChar : null;
+            return folderBrowser.ShowDialog() == true ? Path.GetDirectoryName(folderBrowser.FileName) + Path.DirectorySeparatorChar : null;
         }
 
         public void ScriptMessage(string message)
@@ -1191,7 +1192,7 @@ namespace UndertaleModTool
                 picker.Owner = this;
                 var runtime = picker.Pick(FilePath, Data);
                 if (runtime != null)
-                    Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + System.IO.Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
+                    Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
             }
 
             Data.GeneralInfo.DisableDebugger = origDbg;
@@ -1224,7 +1225,7 @@ namespace UndertaleModTool
                 }
 
 
-                string tempProject = System.IO.Path.GetTempFileName().Replace(".tmp", ".gmx");
+                string tempProject = Path.GetTempFileName().Replace(".tmp", ".gmx");
                 File.WriteAllText(tempProject, @"<!-- Without this file the debugger crashes, but it doesn't actually need to contain anything! -->
 <assets>
   <Configs name=""configs"">
@@ -1245,8 +1246,8 @@ namespace UndertaleModTool
   </TutorialState>
 </assets>");
 
-                Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + System.IO.Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
-                Process.Start(runtime.DebuggerPath, "-d=\"" + System.IO.Path.ChangeExtension(FilePath, ".yydebug") + "\" -t=\"127.0.0.1\" -tp=" + Data.GeneralInfo.DebuggerPort + " -p=\"" + tempProject + "\"");
+                Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
+                Process.Start(runtime.DebuggerPath, "-d=\"" + Path.ChangeExtension(FilePath, ".yydebug") + "\" -t=\"127.0.0.1\" -tp=" + Data.GeneralInfo.DebuggerPort + " -p=\"" + tempProject + "\"");
             }
             Data.GeneralInfo.DisableDebugger = origDbg;
         }

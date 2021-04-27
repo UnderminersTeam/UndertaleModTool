@@ -282,10 +282,17 @@ namespace UndertaleModTool
                 DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
             else
             {
-                if (File.Exists(TempPath + gettextCode.Name.Content + ".gml"))
-                    DecompilationOutput = File.ReadAllText(TempPath + gettextCode.Name.Content + ".gml").Replace("\r\n", "\n").Split('\n');
-                else
+                try
+                {
+                    if (File.Exists(TempPath + gettextCode.Name.Content + ".gml"))
+                        DecompilationOutput = File.ReadAllText(TempPath + gettextCode.Name.Content + ".gml").Replace("\r\n", "\n").Split('\n');
+                    else
+                        DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
+                }
+                catch
+                {
                     DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
+                }
             }
             foreach (var line in DecompilationOutput)
             {
@@ -370,12 +377,20 @@ namespace UndertaleModTool
                     if (gettextCode != null)
                         UpdateGettext(gettextCode);
 
-                    if (gettextJSON == null && gettextJsonPath != null && File.Exists(gettextJsonPath))
+                    try
                     {
-                        string err = UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
-                        if (err != null)
-                            e = new Exception(err);
+                        if (gettextJSON == null && gettextJsonPath != null && File.Exists(gettextJsonPath))
+                        {
+                            string err = UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
+                            if (err != null)
+                                e = new Exception(err);
+                        }
                     }
+                    catch (Exception exc)
+                    {
+                        MessageBox.Show(exc.ToString());
+                    }
+
 
                     Dispatcher.Invoke(() =>
                     {
@@ -765,10 +780,17 @@ namespace UndertaleModTool
                 MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3))
+            try
             {
-                //If the user is code editing outside of profile mode it will be written to disk when applied anyways, so that the code will always be ready immediately for profile mode (if they're toggling it on and off a lot for some reason)
-                File.WriteAllText(TempPath + code.Name.Content + ".gml", DecompiledEditor.Text);
+                if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3))
+                {
+                    //If the user is code editing outside of profile mode it will be written to disk when applied anyways, so that the code will always be ready immediately for profile mode (if they're toggling it on and off a lot for some reason)
+                    File.WriteAllText(TempPath + code.Name.Content + ".gml", DecompiledEditor.Text);
+                }
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show("Error during writing of GML code to profile:\n" + exc.ToString());
             }
             // Show new code, decompiled.
             CurrentDisassembled = null;

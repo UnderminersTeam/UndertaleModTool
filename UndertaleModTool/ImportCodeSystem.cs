@@ -79,15 +79,22 @@ namespace UndertaleModTool
         }
         void ImportCodeFromFile(string file, bool IsGML = true, bool doParse = true)
         {
-            if (!(System.IO.Path.GetFileName(file).EndsWith(IsGML ? ".gml" : ".asm")))
-                return;
-            if (System.IO.Path.GetFileName(file).EndsWith("CleanUp_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
-                return;
-            if (System.IO.Path.GetFileName(file).EndsWith("PreCreate_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
-                return;
-            string codeName = System.IO.Path.GetFileNameWithoutExtension(file);
-            string gmlCode = File.ReadAllText(file);
-            ImportCode(codeName, gmlCode, IsGML, doParse);
+            try
+            {
+                if (!(System.IO.Path.GetFileName(file).EndsWith(IsGML ? ".gml" : ".asm")))
+                    return;
+                if (System.IO.Path.GetFileName(file).EndsWith("CleanUp_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
+                    return;
+                if (System.IO.Path.GetFileName(file).EndsWith("PreCreate_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
+                    return;
+                string codeName = System.IO.Path.GetFileNameWithoutExtension(file);
+                string gmlCode = File.ReadAllText(file);
+                ImportCode(codeName, gmlCode, IsGML, doParse);
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show("Import" + (IsGML ? "GML" : "ASM") + "File error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+            }
         }
         void ImportCode(string codeName, string gmlCode, bool IsGML = true, bool doParse = true)
         {
