@@ -411,8 +411,10 @@ on or off).");
                     {
                         file.CopyTo(tempPath, false);
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        MessageBox.Show("An exception occurred while processing copying " + tempPath + "\nException: \n" + ex.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
                     }
                 }
             }
