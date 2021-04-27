@@ -390,6 +390,9 @@
     <None Include="Unpackers\ExportAllEmbeddedTextures.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Unpackers\ExportAllRoomsToPng.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Unpackers\ExportAllSounds.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -591,6 +594,9 @@
     <Compile Include="Editors\UndertaleTexturePageItemEditor.xaml.cs">
       <DependentUpon>UndertaleTexturePageItemEditor.xaml</DependentUpon>
     </Compile>
+    <None Include="Unpackers\MergeImages.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Page Include="Controls\AudioFileReference.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
