@@ -223,31 +223,6 @@ on or off).");
                 return;
             }
         }
-        public bool CheckHashForCorrections()
-        {
-            List<String> CorrectionsAvailableMD5List = new List<String>();
-            CorrectionsAvailableMD5List.Add("d0822e279464db858682ca99ec4cbbff");
-            CorrectionsAvailableMD5List.Add("cd48b89b6ac6b2d3977f2f82726e5f12");
-            CorrectionsAvailableMD5List.Add("88ae093aa1ae0c90da0d3ff1e15aa724");
-            CorrectionsAvailableMD5List.Add("856219e69dd39e76deca0586a7f44307");
-            CorrectionsAvailableMD5List.Add("0bf582aa180983a9ffa721aa2be2f273");
-            CorrectionsAvailableMD5List.Add("582795ad2037d06cdc8db0c72d9360d5");
-            CorrectionsAvailableMD5List.Add("5903fc5cb042a728d4ad8ee9e949c6eb");
-            CorrectionsAvailableMD5List.Add("427520a97db28c87da4220abb3a334c1");
-            CorrectionsAvailableMD5List.Add("cf8f7e3858bfbc46478cc155b78fb170");
-            CorrectionsAvailableMD5List.Add("113ef42e8cb91e5faf780c426679ec3a");
-            CorrectionsAvailableMD5List.Add("a88a2db3a68c714ca2b1ff57ac08a032");
-            CorrectionsAvailableMD5List.Add("56305194391ad7c548ee55a8891179cc");
-            CorrectionsAvailableMD5List.Add("741ad8ab49a08226af7e1b13b64d4e55");
-            CorrectionsAvailableMD5List.Add("6e1abb8e627c7a36cd8e6db11a829889");
-            CorrectionsAvailableMD5List.Add("b6825187ca2e32c618e4899e6d0c4c50");
-            CorrectionsAvailableMD5List.Add("cf6517bfa3b7b7e96c21b6c1a41f8415");
-            CorrectionsAvailableMD5List.Add("5c8f4533f6e0629d45766830f5f5ca72");
-            if (CorrectionsAvailableMD5List.Contains(ProfileHash))
-                return true;
-            else
-                return false;
-        }
         public void ProfileSaveEvent(UndertaleData data, string filename)
         {
             bool CopyProfile = false;
