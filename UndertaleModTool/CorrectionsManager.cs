@@ -46,10 +46,10 @@ namespace UndertaleModTool
         public void ReplaceTempWithMain()
         {
             //ScriptMessage("Unimplemented, please do it manually, or unload the game without saving.");
-            if (!(ScriptQuestion("Warning: This may cause desyncs! The intended purpose is for reverting incorrect code corrections. Continue?")))
+            if (!(ScriptQuestion("Warning: This may cause desyncs! The intended purpose is for reverting incorrect code corrections.\nOnly use this if you know what you're doing! Continue?")))
                 return;
-            string MainPath = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar;
-            string TempPath = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
+            string MainPath = System.IO.Path.Combine(ProfilesFolder, ProfileHash, "Main");
+            string TempPath = System.IO.Path.Combine(ProfilesFolder, ProfileHash, "Temp");
             if (Directory.Exists(TempPath))
             {
                 Directory.Delete(TempPath, true);
@@ -58,10 +58,10 @@ namespace UndertaleModTool
         }
         public void ReplaceMainWithTemp()
         {
-            if (!(ScriptQuestion("Warning: This may cause desyncs! The intended purpose is for pushing code corrections (such as asset resolutions). Continue?")))
+            if (!(ScriptQuestion("Warning: This may cause desyncs! The intended purpose is for pushing code corrections (such as asset resolutions)\nOnly use this if you know what you're doing! Continue?")))
                 return;
-            string MainPath = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar;
-            string TempPath = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
+            string MainPath = System.IO.Path.Combine(ProfilesFolder, ProfileHash, "Main");
+            string TempPath = System.IO.Path.Combine(ProfilesFolder, ProfileHash, "Temp");
             if (Directory.Exists(MainPath))
             {
                 Directory.Delete(MainPath, true);
@@ -70,12 +70,15 @@ namespace UndertaleModTool
         }
         public void ReplaceTempWithCorrections()
         {
+            ScriptMessage("Unimplemented!");
         }
         public void ReplaceCorrectionsWithTemp()
         {
+            ScriptMessage("Unimplemented!");
         }
         public void UpdateCorrections()
         {
+            ScriptMessage("Unimplemented!");
         }
     }
 }

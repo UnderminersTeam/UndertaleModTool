@@ -70,8 +70,9 @@ namespace UndertaleModTool
         private LoaderDialog scriptDialog;
         public byte[] MD5PreviouslyLoaded;
         public byte[] MD5CurrentlyLoaded;
-        public string ProfilesFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar;
-        public string CorrectionsFolder = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.DirectorySeparatorChar + "Corrections" + System.IO.Path.DirectorySeparatorChar;
+        public string AppDataFolder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool");
+        public string ProfilesFolder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles");
+        public string CorrectionsFolder = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Corrections");
         public string ProfileHash = "Unknown";
         public bool DidUMTCrashWhileEditing = false;
 

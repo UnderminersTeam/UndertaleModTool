@@ -45,18 +45,18 @@ namespace UndertaleModTool
     {
         public void CrashCheck()
         {
-            string ProfilesLocation = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar;
+            string ProfilesLocation = ProfilesFolder;
             string LastEditedLocation = ProfilesLocation + "LastEdited.txt";
             if ((File.Exists(LastEditedLocation) && (Data == null)))
             {
                 DidUMTCrashWhileEditing = true;
                 string LastEditedContents = File.ReadAllText(LastEditedLocation);
                 string[] CrashRecoveryData = LastEditedContents.Split('\n');
-                string DataRecoverLocation = ProfilesLocation + CrashRecoveryData[0] + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
+                string DataRecoverLocation = System.IO.Path.Combine(ProfilesLocation, CrashRecoveryData[0], "Temp");
                 string ProfileHashOfCrashedFile;
                 string ReportedHashOfCrashedFile = CrashRecoveryData[0];
                 string PathOfCrashedFile = CrashRecoveryData[1];
-                string PathOfRecoverableCode = ProfilesLocation + ReportedHashOfCrashedFile + System.IO.Path.DirectorySeparatorChar;
+                string PathOfRecoverableCode = System.IO.Path.Combine(ProfilesLocation, ReportedHashOfCrashedFile);
                 using (var md5Instance = MD5.Create())
                 {
                     using (var stream = File.OpenRead(PathOfCrashedFile))
@@ -86,7 +86,7 @@ namespace UndertaleModTool
                     else if (MessageBox.Show("Would you like to move this code to the \"Recovered\" folder now? Any previous code there will be cleared!", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     {
                         MessageBox.Show("Your code can be recovered from the \"Recovered\" folder at any time.");
-                        string RecoveredDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Recovered" + System.IO.Path.DirectorySeparatorChar + ReportedHashOfCrashedFile;
+                        string RecoveredDir = System.IO.Path.Combine(AppDataFolder, "Recovered", ReportedHashOfCrashedFile);
                         if (Directory.Exists(RecoveredDir))
                             Directory.Delete(RecoveredDir, true);
                         Directory.CreateDirectory(RecoveredDir);
@@ -110,21 +110,21 @@ namespace UndertaleModTool
         }
         public void CreateUMTLastEdited(string filename)
         {
-            string LastEdited = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "LastEdited.txt";
+            string LastEdited = System.IO.Path.Combine(ProfilesFolder, "LastEdited.txt");
             File.WriteAllText(LastEdited, ProfileHash + "\n" + filename);
         }
         public void DestroyUMTLastEdited()
         {
-            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "LastEdited.txt"))
-                File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + "LastEdited.txt");
+            if (File.Exists(System.IO.Path.Combine(ProfilesFolder, "LastEdited.txt")))
+                File.Delete(System.IO.Path.Combine(ProfilesFolder, "LastEdited.txt"));
         }
         public void RevertProfile()
         {
             //We need to do this regardless, as the "Temp" folder can still change in non-profile mode.
             //If we don't, it could cause desynchronization between modes.
-            string MainFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar;
+            string MainFolder = System.IO.Path.Combine(ProfilesFolder, ProfileHash, "Main");
             Directory.CreateDirectory(MainFolder);
-            string TempFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
+            string TempFolder = System.IO.Path.Combine(ProfilesFolder, ProfileHash, "Temp");
             Directory.Delete(TempFolder, true);
             DirectoryCopy(MainFolder, TempFolder, true);
         }
@@ -134,8 +134,8 @@ namespace UndertaleModTool
             //If we don't, it could cause desynchronization between modes.
             if (SettingsWindow.DecompileOnceCompileManyEnabled == "False")
             {
-                string MainFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar;
-                string TempFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
+                string MainFolder = System.IO.Path.Combine(ProfilesFolder, ProfileHash, "Main"); 
+                string TempFolder = System.IO.Path.Combine(ProfilesFolder, ProfileHash, "Temp"); 
                 Directory.CreateDirectory(TempFolder);
                 Directory.Delete(MainFolder, true);
                 DirectoryCopy(TempFolder, MainFolder, true);
@@ -152,8 +152,8 @@ namespace UndertaleModTool
                     ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                 }
             }
-            Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar);
-            Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar);
+            Directory.CreateDirectory(System.IO.Path.Combine(ProfilesFolder, ProfileHash, "Main"));
+            Directory.CreateDirectory(System.IO.Path.Combine(ProfilesFolder, ProfileHash, "Temp"));
             if (SettingsWindow.DecompileOnceCompileManyEnabled == "True" && data.GMS2_3)
             {
                 MessageBox.Show("The profile feature is not currently supported for GameMaker 2.3 games.");
@@ -162,42 +162,43 @@ namespace UndertaleModTool
             else if (SettingsWindow.DecompileOnceCompileManyEnabled == "True" && (!(data.IsYYC())))
             {
                 Directory.CreateDirectory(ProfilesFolder);
-                string ProfDir;
-                ProfDir = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar;
+                string ProfDir = System.IO.Path.Combine(ProfilesFolder, ProfileHash);
+                string ProfDirTemp = System.IO.Path.Combine(ProfDir, "Temp");
+                string ProfDirMain = System.IO.Path.Combine(ProfDir, "Main");
                 if (Directory.Exists(ProfDir))
                 {
-                    if ((!(Directory.Exists(ProfDir + "Temp"))) && (Directory.Exists(ProfDir + "Main")))
+                    if ((!(Directory.Exists(ProfDirTemp))) && (Directory.Exists(ProfDirMain)))
                     {
                         // Get the subdirectories for the specified directory.
-                        DirectoryInfo dir = new DirectoryInfo(ProfDir + "Main");
-                        Directory.CreateDirectory(ProfDir + "Temp");
+                        DirectoryInfo dir = new DirectoryInfo(ProfDirMain);
+                        Directory.CreateDirectory(ProfDirTemp);
                         // Get the files in the directory and copy them to the new location.
                         FileInfo[] files = dir.GetFiles();
                         foreach (FileInfo file in files)
                         {
-                            string tempPath = System.IO.Path.Combine(ProfDir + "Temp", file.Name);
+                            string tempPath = System.IO.Path.Combine(ProfDirTemp, file.Name);
                             file.CopyTo(tempPath, false);
                         }
                     }
-                    else if ((!(Directory.Exists(ProfDir + "Main"))) && (Directory.Exists(ProfDir + "Temp")))
+                    else if ((!(Directory.Exists(ProfDirMain))) && (Directory.Exists(ProfDirTemp)))
                     {
                         // Get the subdirectories for the specified directory.
-                        DirectoryInfo dir = new DirectoryInfo(ProfDir + "Temp");
-                        Directory.CreateDirectory(ProfDir + "Main");
+                        DirectoryInfo dir = new DirectoryInfo(ProfDirTemp);
+                        Directory.CreateDirectory(ProfDirMain);
                         // Get the files in the directory and copy them to the new location.
                         FileInfo[] files = dir.GetFiles();
                         foreach (FileInfo file in files)
                         {
-                            string tempPath = System.IO.Path.Combine(ProfDir + "Main", file.Name);
+                            string tempPath = System.IO.Path.Combine(ProfDirMain, file.Name);
                             file.CopyTo(tempPath, false);
                         }
                     }
                 }
                 //First generation no longer exists, it will be generated on demand while you edit.
                 Directory.CreateDirectory(ProfDir);
-                Directory.CreateDirectory(ProfDir + "Main");
-                Directory.CreateDirectory(ProfDir + "Temp");
-                if (!Directory.Exists(ProfDir) || !Directory.Exists(ProfDir + "Main") || !Directory.Exists(ProfDir + "Temp"))
+                Directory.CreateDirectory(ProfDirMain);
+                Directory.CreateDirectory(ProfDirTemp);
+                if (!Directory.Exists(ProfDir) || !Directory.Exists(ProfDirMain) || !Directory.Exists(ProfDirTemp))
                 {
                     MessageBox.Show("Profile should exist, but does not. Insufficient permissions??? (Try running in Administrator mode)");
                     MessageBox.Show("Profile mode is disabled.");
@@ -237,8 +238,8 @@ on or off).");
                     }
                 }
             }
-            Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar);
-            Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar);
+            Directory.CreateDirectory(System.IO.Path.Combine(ProfilesFolder, ProfileHash, "Main"));
+            Directory.CreateDirectory(System.IO.Path.Combine(ProfilesFolder, ProfileHash, "Temp"));
             if (SettingsWindow.DecompileOnceCompileManyEnabled == "False" || data.GMS2_3 || data.IsYYC())
             {
                 MD5PreviouslyLoaded = MD5CurrentlyLoaded;
@@ -251,27 +252,31 @@ on or off).");
                 string ProfDir;
                 string MD5DirNameOld;
                 string MD5DirPathOld;
+                string MD5DirPathOldMain;
+                string MD5DirPathOldTemp;
                 string MD5DirNameNew;
                 string MD5DirPathNew;
                 if (CopyProfile)
                 {
                     MD5DirNameOld = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                    MD5DirPathOld = ProfilesFolder + MD5DirNameOld + System.IO.Path.DirectorySeparatorChar;
+                    MD5DirPathOld = System.IO.Path.Combine(ProfilesFolder, MD5DirNameOld);
+                    MD5DirPathOldMain = System.IO.Path.Combine(MD5DirPathOld, "Main");
+                    MD5DirPathOldTemp = System.IO.Path.Combine(MD5DirPathOld, "Temp");
                     MD5DirNameNew = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
-                    MD5DirPathNew = ProfilesFolder + MD5DirNameNew + System.IO.Path.DirectorySeparatorChar;
+                    MD5DirPathNew = System.IO.Path.Combine(ProfilesFolder, MD5DirNameNew);
                     DirectoryCopy(MD5DirPathOld, MD5DirPathNew, true);
-                    if (Directory.Exists(MD5DirPathOld + "Main") && Directory.Exists(MD5DirPathOld + "Temp"))
+                    if (Directory.Exists(MD5DirPathOldMain) && Directory.Exists(MD5DirPathOldTemp))
                     {
-                        Directory.Delete(MD5DirPathOld + "Temp", true);
+                        Directory.Delete(MD5DirPathOldTemp, true);
                     }
-                    DirectoryCopy(MD5DirPathOld + "Main", MD5DirPathOld + "Temp", true);
+                    DirectoryCopy(MD5DirPathOldMain, MD5DirPathOldTemp, true);
                 }
                 MD5PreviouslyLoaded = MD5CurrentlyLoaded;
                 // Get the subdirectories for the specified directory.
                 MD5DirNameOld = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
-                MD5DirPathOld = ProfilesFolder + MD5DirNameOld + System.IO.Path.DirectorySeparatorChar;
-                string MD5DirPathOldMain = MD5DirPathOld + "Main";
-                string MD5DirPathOldTemp = MD5DirPathOld + "Temp";
+                MD5DirPathOld = System.IO.Path.Combine(ProfilesFolder, MD5DirNameOld);
+                MD5DirPathOldMain = System.IO.Path.Combine(MD5DirNameOld, "Main");
+                MD5DirPathOldTemp = System.IO.Path.Combine(MD5DirNameOld, "Temp");
                 if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)))
                 {
                     Directory.Delete(MD5DirPathOldMain, true);
@@ -280,10 +285,10 @@ on or off).");
 
                 CopyProfile = false;
                 ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                ProfDir = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar;
+                ProfDir = System.IO.Path.Combine(ProfilesFolder, ProfileHash);
                 Directory.CreateDirectory(ProfDir);
-                Directory.CreateDirectory(ProfDir + "Main");
-                Directory.CreateDirectory(ProfDir + "Temp");
+                Directory.CreateDirectory(System.IO.Path.Combine(ProfDir, "Main"));
+                Directory.CreateDirectory(System.IO.Path.Combine(ProfDir, "Temp"));
                 MessageBox.Show("Profile saved successfully to" + ProfileHash);
             }
         }

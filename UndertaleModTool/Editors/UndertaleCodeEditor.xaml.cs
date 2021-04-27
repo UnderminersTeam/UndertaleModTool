@@ -35,11 +35,11 @@ namespace UndertaleModTool
         public UndertaleCode CurrentDisassembled = null;
         public UndertaleCode CurrentDecompiled = null;
         public UndertaleCode CurrentGraphed = null;
-        public string UMTAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar;
-        public string ProfilesFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar;
+        public string UMTAppDataPath = (Application.Current.MainWindow as MainWindow).AppDataFolder;
+        public string ProfilesFolder = (Application.Current.MainWindow as MainWindow).ProfilesFolder;
         public string ProfileHash = (Application.Current.MainWindow as MainWindow).ProfileHash;
-        public string MainPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + (Application.Current.MainWindow as MainWindow).ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar;
-        public string TempPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + System.IO.Path.DirectorySeparatorChar + "UndertaleModTool" + System.IO.Path.DirectorySeparatorChar + "Profiles" + System.IO.Path.DirectorySeparatorChar + (Application.Current.MainWindow as MainWindow).ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
+        public string MainPath = System.IO.Path.Combine((Application.Current.MainWindow as MainWindow).ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Main");
+        public string TempPath = System.IO.Path.Combine((Application.Current.MainWindow as MainWindow).ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Temp");
 
         public UndertaleCodeEditor()
         {
@@ -347,7 +347,7 @@ namespace UndertaleModTool
                     gettextCode = (Application.Current.MainWindow as MainWindow).Data.Code.ByName("gml_Script_textdata_en");
 
                 string dataPath = System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
-                string gettextJsonPath = (dataPath != null) ? System.IO.Path.Combine(dataPath, "lang/lang_en.json") : null;
+                string gettextJsonPath = (dataPath != null) ? System.IO.Path.Combine(dataPath, "lang", "lang_en.json") : null;
 
                 var dataa = (Application.Current.MainWindow as MainWindow).Data;
                 Task t = Task.Run(() =>
