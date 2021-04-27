@@ -43,16 +43,35 @@ namespace UndertaleModTool
     //Make new GUID helper functions
     public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
-        public void PullTempToMain()
+        public void ReplaceTempWithMain()
+        {
+            //ScriptMessage("Unimplemented, please do it manually, or unload the game without saving.");
+            if (!(ScriptQuestion("Warning: This may cause desyncs! The intended purpose is for reverting incorrect code corrections. Continue?")))
+                return;
+            string MainPath = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar;
+            string TempPath = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
+            if (Directory.Exists(TempPath))
+            {
+                Directory.Delete(TempPath, true);
+            }
+            DirectoryCopy(MainPath, TempPath, true);
+        }
+        public void ReplaceMainWithTemp()
+        {
+            if (!(ScriptQuestion("Warning: This may cause desyncs! The intended purpose is for pushing code corrections (such as asset resolutions). Continue?")))
+                return;
+            string MainPath = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Main" + System.IO.Path.DirectorySeparatorChar;
+            string TempPath = ProfilesFolder + ProfileHash + System.IO.Path.DirectorySeparatorChar + "Temp" + System.IO.Path.DirectorySeparatorChar;
+            if (Directory.Exists(MainPath))
+            {
+                Directory.Delete(MainPath, true);
+            }
+            DirectoryCopy(TempPath, MainPath, true);
+        }
+        public void ReplaceTempWithCorrections()
         {
         }
-        public void PullMainToTemp()
-        {
-        }
-        public void PullTempToCorrections()
-        {
-        }
-        public void PullCorrectionsToTemp()
+        public void ReplaceCorrectionsWithTemp()
         {
         }
         public void UpdateCorrections()
