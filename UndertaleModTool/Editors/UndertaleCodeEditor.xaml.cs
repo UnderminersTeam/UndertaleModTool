@@ -765,7 +765,7 @@ namespace UndertaleModTool
                 MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            if (CodeEditSuccessful)
+            if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3))
             {
                 //If the user is code editing outside of profile mode it will be written to disk when applied anyways, so that the code will always be ready immediately for profile mode (if they're toggling it on and off a lot for some reason)
                 File.WriteAllText(TempPath + code.Name.Content + ".gml", DecompiledEditor.Text);
