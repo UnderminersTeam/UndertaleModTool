@@ -1654,12 +1654,16 @@ namespace UndertaleModLib.Decompiler
                         {
                             if (stack.Count > 0)
                             {
-                                statements.Add(new CommentStatement("setowner: " + stack.Pop()?.ToString()));
+                                var statement = stack.Pop();
+                                object owner;
+                                if (statement is ExpressionConstant)
+                                    owner = (statement as ExpressionConstant).Value?.ToString();
+                                else
+                                    owner = statement.ToString(context);
+                                statements.Add(new CommentStatement("setowner: " +  (owner ?? "<null>")));
                             }
                             else
-                            {
                                 statements.Add(new CommentStatement("WARNING: attempted to setowner without an owner on the stack."));
-                            }
                         }
                         // This is used for checking bounds in 2D arrays
                         // I'm not sure of the specifics but I guess it causes a debug breakpoint if the top of the stack is >= 32000
