@@ -249,13 +249,14 @@ on or off).");
         {
             try
             {
+                string DeleteIfModeActive = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                 bool CopyProfile = false;
                 using (var md5Instance = MD5.Create())
                 {
                     using (var stream = File.OpenRead(filename))
                     {
                         MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
-                        if (MD5PreviouslyLoaded != MD5CurrentlyLoaded)
+                        if (BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant() != BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant())
                         {
                             CopyProfile = true;
                         }
@@ -300,13 +301,12 @@ on or off).");
                     MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
                     MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
                     MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
-                    if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)))
+                    if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)) && CopyProfile)
                     {
                         Directory.Delete(MD5DirPathOldMain, true);
                     }
                     DirectoryCopy(MD5DirPathOldTemp, MD5DirPathOldMain, true);
 
-                    CopyProfile = false;
                     ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                     ProfDir = Path.Combine(ProfilesFolder, ProfileHash);
                     Directory.CreateDirectory(ProfDir);
@@ -314,6 +314,11 @@ on or off).");
                     Directory.CreateDirectory(Path.Combine(ProfDir, "Temp"));
                     MessageBox.Show("Profile saved successfully to " + ProfileHash);
                 }
+                if (SettingsWindow.DeleteOldProfileOnSave == "True" && CopyProfile == true)
+                {
+                    Directory.Delete(Path.Combine(ProfilesFolder, DeleteIfModeActive), true);
+                }
+                CopyProfile = false;
             }
 
             catch (Exception exc)
