@@ -777,10 +777,20 @@ namespace UndertaleModTool
             }
             try
             {
-                if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3))
+                if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3) && (SettingsWindow.DecompileOnceCompileManyEnabled == "True"))
                 {
-                    //If the user is code editing outside of profile mode it will be written to disk when applied anyways, so that the code will always be ready immediately for profile mode (if they're toggling it on and off a lot for some reason)
+                    //Write text, if only in the profile mode.
                     File.WriteAllText(Path.Combine(TempPath, code.Name.Content + ".gml"), DecompiledEditor.Text);
+                }
+                else if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3) && (SettingsWindow.DecompileOnceCompileManyEnabled == "False"))
+                {
+                    //Destroy file with comments if it's been edited outside the profile mode.
+                    //We're dealing with the decompiled code only, it has to happen.
+                    //Otherwise it will cause a desync, which is more important to prevent.
+                    if (File.Exists(Path.Combine(TempPath, code.Name.Content + ".gml")))
+                    {
+                        File.Delete(Path.Combine(TempPath, code.Name.Content + ".gml"));
+                    }
                 }
             }
             catch (Exception exc)
