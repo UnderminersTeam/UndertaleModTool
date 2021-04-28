@@ -125,7 +125,8 @@ namespace UndertaleModTool
                 string MainFolder = Path.Combine(ProfilesFolder, ProfileHash, "Main");
                 Directory.CreateDirectory(MainFolder);
                 string TempFolder = Path.Combine(ProfilesFolder, ProfileHash, "Temp");
-                Directory.Delete(TempFolder, true);
+                if (Directory.Exists(TempFolder))
+                    Directory.Delete(TempFolder, true);
                 DirectoryCopy(MainFolder, TempFolder, true);
             }
             catch (Exception exc)
@@ -144,7 +145,8 @@ namespace UndertaleModTool
                     string MainFolder = Path.Combine(ProfilesFolder, ProfileHash, "Main");
                     string TempFolder = Path.Combine(ProfilesFolder, ProfileHash, "Temp");
                     Directory.CreateDirectory(TempFolder);
-                    Directory.Delete(MainFolder, true);
+                    if (Directory.Exists(MainFolder))
+                        Directory.Delete(MainFolder, true);
                     DirectoryCopy(TempFolder, MainFolder, true);
                 }
             }
@@ -296,8 +298,8 @@ on or off).");
                     // Get the subdirectories for the specified directory.
                     MD5DirNameOld = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                     MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
-                    MD5DirPathOldMain = Path.Combine(MD5DirNameOld, "Main");
-                    MD5DirPathOldTemp = Path.Combine(MD5DirNameOld, "Temp");
+                    MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
+                    MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
                     if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)))
                     {
                         Directory.Delete(MD5DirPathOldMain, true);
@@ -310,7 +312,7 @@ on or off).");
                     Directory.CreateDirectory(ProfDir);
                     Directory.CreateDirectory(Path.Combine(ProfDir, "Main"));
                     Directory.CreateDirectory(Path.Combine(ProfDir, "Temp"));
-                    MessageBox.Show("Profile saved successfully to" + ProfileHash);
+                    MessageBox.Show("Profile saved successfully to " + ProfileHash);
                 }
             }
 
@@ -365,7 +367,6 @@ on or off).");
                     }
                 }
             }
-
             catch (Exception exc)
             {
                 MessageBox.Show("DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());

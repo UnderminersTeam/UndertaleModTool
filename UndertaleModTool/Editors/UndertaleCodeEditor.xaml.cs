@@ -8,18 +8,13 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
@@ -38,8 +33,8 @@ namespace UndertaleModTool
         public string UMTAppDataPath = (Application.Current.MainWindow as MainWindow).AppDataFolder;
         public string ProfilesFolder = (Application.Current.MainWindow as MainWindow).ProfilesFolder;
         public string ProfileHash = (Application.Current.MainWindow as MainWindow).ProfileHash;
-        public string MainPath = System.IO.Path.Combine((Application.Current.MainWindow as MainWindow).ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Main");
-        public string TempPath = System.IO.Path.Combine((Application.Current.MainWindow as MainWindow).ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Temp");
+        public string MainPath = Path.Combine((Application.Current.MainWindow as MainWindow).ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Main");
+        public string TempPath = Path.Combine((Application.Current.MainWindow as MainWindow).ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Temp");
 
         public UndertaleCodeEditor()
         {
@@ -284,8 +279,8 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    if (File.Exists(TempPath + gettextCode.Name.Content + ".gml"))
-                        DecompilationOutput = File.ReadAllText(TempPath + gettextCode.Name.Content + ".gml").Replace("\r\n", "\n").Split('\n');
+                    if (File.Exists(Path.Combine(TempPath, gettextCode.Name.Content + ".gml")))
+                        DecompilationOutput = File.ReadAllText(Path.Combine(TempPath, gettextCode.Name.Content + ".gml")).Replace("\r\n", "\n").Split('\n');
                     else
                         DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
                 }
@@ -353,8 +348,8 @@ namespace UndertaleModTool
                 if (gettext == null)
                     gettextCode = (Application.Current.MainWindow as MainWindow).Data.Code.ByName("gml_Script_textdata_en");
 
-                string dataPath = System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
-                string gettextJsonPath = (dataPath != null) ? System.IO.Path.Combine(dataPath, "lang", "lang_en.json") : null;
+                string dataPath = Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
+                string gettextJsonPath = (dataPath != null) ? Path.Combine(dataPath, "lang", "lang_en.json") : null;
 
                 var dataa = (Application.Current.MainWindow as MainWindow).Data;
                 Task t = Task.Run(() =>
@@ -367,7 +362,7 @@ namespace UndertaleModTool
                     Exception e = null;
                     try
                     {
-                        decompiled = ((SettingsWindow.DecompileOnceCompileManyEnabled == "False" || !File.Exists(TempPath + code.Name.Content + ".gml")) ? Decompiler.Decompile(code, context).Replace("\r\n", "\n") : File.ReadAllText(TempPath + code.Name.Content + ".gml").Replace("\r\n", "\n"));
+                        decompiled = ((SettingsWindow.DecompileOnceCompileManyEnabled == "False" || !File.Exists(Path.Combine(TempPath, code.Name.Content + ".gml"))) ? Decompiler.Decompile(code, context).Replace("\r\n", "\n") : File.ReadAllText(Path.Combine(TempPath, code.Name.Content + ".gml")).Replace("\r\n", "\n"));
                     }
                     catch (Exception ex)
                     {
@@ -785,7 +780,7 @@ namespace UndertaleModTool
                 if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3))
                 {
                     //If the user is code editing outside of profile mode it will be written to disk when applied anyways, so that the code will always be ready immediately for profile mode (if they're toggling it on and off a lot for some reason)
-                    File.WriteAllText(TempPath + code.Name.Content + ".gml", DecompiledEditor.Text);
+                    File.WriteAllText(Path.Combine(TempPath, code.Name.Content + ".gml"), DecompiledEditor.Text);
                 }
             }
             catch (Exception exc)
