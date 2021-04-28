@@ -92,6 +92,17 @@ namespace UndertaleModTool
                 ConfigurationManager.RefreshSection("appSettings");
             }
         }
+        public static string DeleteOldProfileOnSave
+        {
+            get => ConfigurationManager.AppSettings["DeleteOldProfileOnSave"] as String;
+            set
+            {
+                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                config.AppSettings.Settings["DeleteOldProfileOnSave"].Value = value;
+                config.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+            }
+        }
 
         public SettingsWindow()
         {

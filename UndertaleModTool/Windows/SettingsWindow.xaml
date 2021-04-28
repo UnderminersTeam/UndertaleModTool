@@ -18,6 +18,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="GraphViz path" ToolTip="Required if you want code decompile graphs"/>
@@ -32,10 +33,13 @@
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="Enable asset order swapping" ToolTip="Toggles dragging &amp; dropping assets in the asset tabs to different positions in the list. Disabled by default."/>
         <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding AssetOrderSwappingEnabled}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="Enable decompile once compile many" ToolTip="Toggles the decompile&amp; once and compile many code editing mode. Disabled by default. Will take several minutes to load on first generation of code, it has not crashed."/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="Enable decompile once compile many" ToolTip="Toggles the decompile once and compile many code editing mode. Enabled by default."/>
         <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding DecompileOnceCompileManyEnabled}"/>
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="Enable formatting on long code" ToolTip="Disables the 5000 line&amp; limit on proper syntax highlighting on code. Performance may suffer!"/>
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="Enable formatting on long code" ToolTip="Disables the 5000 line limit on proper syntax highlighting on code. Performance may suffer! Disabled by default."/>
         <CheckBox Grid.Row="5" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding FormattingOnLongCodeEnabled}"/>
+
+        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
+        <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding DeleteOldProfileOnSave}"/>
     </Grid>
 </Window>
