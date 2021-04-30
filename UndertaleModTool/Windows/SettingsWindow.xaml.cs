@@ -82,9 +82,14 @@ namespace UndertaleModTool
                 {
                     (Application.Current.MainWindow as MainWindow).Data.ProfileMode = (SettingsWindow.DecompileOnceCompileManyEnabled == "True" ? true : false);
                 }
+                else if ((Application.Current.MainWindow as MainWindow).Data.GMS2_3)
+                {
+	                config.AppSettings.Settings["DecompileOnceCompileManyEnabled"].Value = "False";
+                    (Application.Current.MainWindow as MainWindow).Data.ProfileMode = false;
+                }
                 else
                 {
-	                config.AppSettings.Settings["DecompileOnceCompileManyEnabled"].Value = false;
+	                config.AppSettings.Settings["DecompileOnceCompileManyEnabled"].Value = "False";
                 }
             }
         }
