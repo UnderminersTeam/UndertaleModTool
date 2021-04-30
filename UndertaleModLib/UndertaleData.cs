@@ -55,6 +55,8 @@ namespace UndertaleModLib
         public bool GMS2_3 = false;
         public bool GMS2_3_1 = false;
         public bool GMS2_3_2 = false;
+        public bool ProfileMode = false;
+        public string CurrentMD5 = "Unknown";
         public int PaddingAlignException = -1;
 
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)

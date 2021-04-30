@@ -650,22 +650,7 @@ namespace UndertaleModTool
                         dialog.Hide();
                     });
                 });
-                try
-                {
-                    dialog.ShowDialog();
-                }
-                catch
-                {
-                    //Without this try catch block it will always crash when pulling up the decompiled code first
-                    //But with it there don't seem to be any ill effects
-                    //So I'm just going to leave it like this and hope nothing breaks
-                    //And submit an issue about it
-                    //If you, future developer, discover this hacky workaround
-                    //Please do what I couldn't, and put in a proper fix
-                    //
-                    //Thank you
-                    // - Grossley
-                }
+                _ = Application.Current.Dispatcher.BeginInvoke(new Action(() => dialog.ShowDialog()));
                 await t;
             }
         }

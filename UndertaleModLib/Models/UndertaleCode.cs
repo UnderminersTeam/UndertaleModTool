@@ -1307,8 +1307,26 @@ namespace UndertaleModLib.Models
             try
             {
                 this.Append(Assembler.Assemble(context.ResultAssembly, data));
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 throw new Exception("Assembler Error: " + ex.ToString());
+            }
+            try
+            {
+                string TempPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles", data.CurrentMD5);
+                //Attempt to write text in all modes, because this is a special case.
+                if (File.Exists(Path.Combine(TempPath, this.Name.Content + ".gml")))
+                {
+                    string ReadText = File.ReadAllText(Path.Combine(TempPath, this.Name.Content + ".gml"));
+                    ReadText += "\n";
+                    ReadText += gmlCode;
+                    File.WriteAllText(Path.Combine(TempPath, this.Name.Content + ".gml"), ReadText);
+                }
+            }
+            catch (Exception exc)
+            {
+                throw new Exception("Error during writing of GML code to profile:\n" + exc.ToString());
             }
         }
 
@@ -1320,12 +1338,24 @@ namespace UndertaleModLib.Models
                 Console.WriteLine(gmlCode);
                 throw new Exception("GML Compile Error: " + context.ResultError);
             }
-
             try
             {
                 this.Replace(Assembler.Assemble(context.ResultAssembly, data));
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 throw new Exception("Assembler Error: " + ex.ToString());
+            }
+            try
+            {
+                string TempPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles", data.CurrentMD5);
+                //Temporary
+                if (!data.GMS2_3 && (data.ProfileMode || File.Exists(Path.Combine(TempPath, this.Name.Content + ".gml"))))
+                    File.WriteAllText(Path.Combine(TempPath, this.Name.Content + ".gml"), gmlCode);
+            }
+            catch (Exception exc)
+            {
+                throw new Exception("Error during writing of GML code to profile:\n" + exc.ToString());
             }
         }
 

@@ -7,12 +7,47 @@ using System.Windows.Threading;
 using UndertaleModLib;
 using UndertaleModLib.Scripting;
 using System.Security.Cryptography;
+using UndertaleModLib.Models;
+using UndertaleModLib.Decompiler;
 
 namespace UndertaleModTool
 {
     //Make new profile system file.
     public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
+        public string GetDecompiledText(string codeName)
+        {
+            UndertaleCode code = Data.Code.ByName(codeName);
+            ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
+            try
+            {
+                return code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "";
+            }
+            catch (Exception e)
+            {
+                return "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/";
+            }
+        }
+        public string GetDisassemblyText(string codeName)
+        {
+            try
+            {
+                UndertaleCode code = Data.Code.ByName(codeName);
+                string DisassemblyText = (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "");
+                DisassemblyText = DisassemblyText.Replace("break.e -1", "chkindex.e");
+                DisassemblyText = DisassemblyText.Replace("break.e -2", "pushaf.e");
+                DisassemblyText = DisassemblyText.Replace("break.e -3", "popaf.e");
+                DisassemblyText = DisassemblyText.Replace("break.e -4", "pushac.e");
+                DisassemblyText = DisassemblyText.Replace("break.e -5", "setowner.e");
+                DisassemblyText = DisassemblyText.Replace("break.e -6", "isstaticok.e");
+                DisassemblyText = DisassemblyText.Replace("break.e -7", "setstatic.e");
+                return DisassemblyText;
+            }
+            catch (Exception e)
+            {
+                return "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"; // Please don't
+            }
+        }
         public void CrashCheck()
         {
             try
@@ -375,6 +410,57 @@ on or off).");
             catch (Exception exc)
             {
                 MessageBox.Show("DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+            }
+        }
+        public bool AreFilesIdentical(string File01, string File02)
+        {
+            int file1byte;
+            int file2byte;
+            FileStream fs1;
+            FileStream fs2;
+
+            // Open the two files.
+            fs1 = new FileStream(File01, FileMode.Open);
+            fs2 = new FileStream(File02, FileMode.Open);
+
+            // Check the file sizes. If they are not the same, the files
+            // are not the same.
+            if (fs1.Length != fs2.Length)
+            {
+                // Close the file
+                fs1.Close();
+                fs2.Close();
+                // Return false to indicate files are different
+                return false;
+            }
+            else
+            {
+                // Read and compare a byte from each file until either a
+                // non-matching set of bytes is found or until the end of
+                // file1 is reached.
+                do
+                {
+                    // Read one byte from each file.
+                    file1byte = fs1.ReadByte();
+                    file2byte = fs2.ReadByte();
+                }
+                while ((file1byte == file2byte) && (file1byte != -1));
+
+                // Close the files.
+                fs1.Close();
+                fs2.Close();
+
+                // Return the success of the comparison. "file1byte" is
+                // equal to "file2byte" at this point only if the files are
+                // the same.
+                if ((file1byte - file2byte) == 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
     }

@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UndertaleModLib;
+using UndertaleModLib.Models;
 using UndertaleModLib.Scripting;
 
 namespace UndertaleModTests
@@ -83,19 +84,23 @@ namespace UndertaleModTests
         {
             Console.Write("SetUMTConsoleText(): " + message);
         }
-        public void ImportGMLString(string codeName, string gmlCode, bool doParse = true)
+        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false)
+        {
+            Console.Write("ReplaceTextInGML(): " + codeName + ", " + keyword + ", " + replacement + ", " + case_sensitive.ToString());
+        }
+        public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false)
         {
             Console.Write("ImportGMLString(): " + codeName + ", " + gmlCode + ", " + doParse.ToString());
         }
-        public void ImportASMString(string codeName, string gmlCode, bool doParse = true)
+        public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
         {
             Console.Write("ImportASMString(): " + codeName + ", " + gmlCode + ", " + doParse.ToString());
         }
-        public void ImportGMLFile(string fileName, bool doParse = true)
+        public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false)
         {
             Console.Write("ImportGMLFile(): " + fileName + ", " + doParse.ToString());
         }
-        public void ImportASMFile(string fileName, bool doParse = true)
+        public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
         {
             Console.Write("ImportASMFile(): " + fileName + ", " + doParse.ToString());
         }
@@ -136,6 +141,24 @@ namespace UndertaleModTests
             throw new NotImplementedException();
         }
 
+        public string GetDecompiledText(string codeName)
+        {
+            string output = "GetDecompiledText(): " + codeName;
+            Console.Write(output);
+            return output;
+        }
+        public string GetDisassemblyText(string codeName)
+        {
+            string output = "GetDisassemblyText(): " + codeName;
+            Console.Write(output);
+            return output;
+        }
+        public string AreFilesIdentical(string File01, string File02)
+        {
+            string output = "AreFilesIdentical(): " + File01 + ", " + File02;
+            Console.Write(output);
+            return output;
+        }
         public string PromptLoadFile(string defaultExt, string filter)
         {
             throw new NotImplementedException();

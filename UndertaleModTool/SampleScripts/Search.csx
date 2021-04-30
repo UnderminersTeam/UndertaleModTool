@@ -11,7 +11,7 @@ int code_count = 0;
 ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
 
 UpdateProgress();
-bool case_sensitive = ScriptQuestion("Case sensitive?"); 
+bool case_sensitive = ScriptQuestion("Case sensitive?");
 String keyword = SimpleTextInput("Enter your search", "Search box below", "", false);
 
 await DumpCode();
@@ -30,20 +30,21 @@ string GetFolder(string path)
 }
 
 
-async Task DumpCode() 
+async Task DumpCode()
 {
     await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
 }
 
 void DumpCode(UndertaleCode code)
 {
-    try 
+    try
     {
         var line_number = 1;
         string decompiled_text = (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "");
         string[] splitted = decompiled_text.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
         bool name_written = false;
-        foreach (string lineInt in splitted) {
+        foreach (string lineInt in splitted)
+        {
             if (case_sensitive ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))
             {
                 if (name_written == false)
@@ -59,9 +60,9 @@ void DumpCode(UndertaleCode code)
         }
         if (name_written == true)
             results += "\n";
-        
-    } 
-    catch (Exception e) 
+
+    }
+    catch (Exception e)
     {
     }
 

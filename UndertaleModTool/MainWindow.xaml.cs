@@ -379,6 +379,11 @@ namespace UndertaleModTool
                             CanSave = true;
                             CanSafelySave = true;
                             UpdateProfile(data, filename);
+                            if (data != null)
+                            {
+                                data.ProfileMode = (SettingsWindow.DecompileOnceCompileManyEnabled == "True" ? true : false);
+                                data.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                            }
                         }
                         if (data.GMS2_3)
                         {
@@ -549,6 +554,11 @@ namespace UndertaleModTool
                 {
                     MessageBox.Show("An error occured while trying to save:\n" + exc.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
                     SaveSucceeded = false;
+                }
+                if (Data != null)
+                {
+                    Data.ProfileMode = (SettingsWindow.DecompileOnceCompileManyEnabled == "True" ? true : false);
+                    Data.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                 }
 
                 Dispatcher.Invoke(() =>

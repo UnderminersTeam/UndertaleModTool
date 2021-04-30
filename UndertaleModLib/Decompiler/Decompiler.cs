@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using UndertaleModLib.Models;
@@ -2748,6 +2749,18 @@ namespace UndertaleModLib.Decompiler
         public static string Decompile(UndertaleCode code, DecompileContext context)
         {
             context.Setup(code);
+            try
+            {
+                if (context.Data != null)
+                {
+                    string GMLPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles", context.Data.CurrentMD5, "Temp");
+                    if (context.Data.ProfileMode && File.Exists(Path.Combine(GMLPath, code.Name.Content + ".gml")))
+                        return File.ReadAllText(Path.Combine(GMLPath, code.Name.Content + ".gml"));
+                }
+            }
+            catch
+            {
+            }
 
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
             DecompileFromBlock(context, blocks[0]);
