@@ -211,7 +211,6 @@ namespace UndertaleModTool
             }
             return null;
         }
-
         private async void DecompileCode(UndertaleCode code)
         {
             DecompiledEditor.IsReadOnly = true;
@@ -231,7 +230,7 @@ namespace UndertaleModTool
                     gettextCode = (Application.Current.MainWindow as MainWindow).Data.Code.ByName("gml_Script_textdata_en");
 
                 string dataPath = Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
-                string gettextJsonPath = (dataPath != null) ? Path.Combine(dataPath, "lang/lang_en.json") : null;
+                string gettextJsonPath = (dataPath != null) ? Path.Combine(dataPath, "lang", "lang_en.json") : null;
 
                 var dataa = (Application.Current.MainWindow as MainWindow).Data;
                 Task t = Task.Run(() =>
@@ -399,8 +398,6 @@ namespace UndertaleModTool
                 MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-
-            // Get rid of old code
             CurrentDisassembled = null;
             CurrentDecompiled = null;
             CurrentGraphed = null;
