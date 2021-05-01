@@ -60,6 +60,9 @@
     <Reference Include="GraphVizWrapper, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\GraphViz.NET.1.0.0\lib\net40\GraphVizWrapper.dll</HintPath>
     </Reference>
+    <Reference Include="ICSharpCode.AvalonEdit, Version=6.1.1.20, Culture=neutral, PublicKeyToken=9cc39be672370310, processorArchitecture=MSIL">
+      <HintPath>..\packages\AvalonEdit.6.1.1\lib\net45\ICSharpCode.AvalonEdit.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CodeAnalysis, Version=2.9.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeAnalysis.Common.2.9.0\lib\netstandard1.3\Microsoft.CodeAnalysis.dll</HintPath>
     </Reference>
@@ -288,12 +291,2612 @@
     <None Include="CommunityScripts\BorderEnablerv1_11.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_backgrounder_dock_Other_10.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_base_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_heartdefeated_Other_11.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_iceflag_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_monsterkidtrigger7_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_settingsmenu_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_settingsmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_undyneencounter1_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Script_ossafe_file_text_readln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Script_ossafe_file_text_writeln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Script_scr_conshake.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Script_scr_conshakeend.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Script_scr_draw_name_curs.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Script_scr_itemdesc.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Script_scr_itemuseb.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Script_scr_loadcredits.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Script_scr_namingscreen.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_backgrounder_dock_Other_10.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_base_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_heartdefeated_Other_11.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_iceflag_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_monsterkidtrigger7_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_settingsmenu_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_settingsmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_undyneencounter1_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Script_ossafe_file_text_readln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Script_ossafe_file_text_writeln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Script_scr_conshake.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Script_scr_conshakeend.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Script_scr_draw_name_curs.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Script_scr_itemdesc.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Script_scr_itemuseb.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Script_scr_loadcredits.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Script_scr_namingscreen.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\0bf582aa180983a9ffa721aa2be2f273\Temp\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_base_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_halfbullet_gen_Other_10.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_halfbullet_gen_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_heartdefeated_Other_11.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_settingsmenu_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_settingsmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_time_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_time_Step_1.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script_joystick_pov.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script_scr_draw_name_curs.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script_scr_draw_screen_border.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script_scr_itemdesc.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script_scr_itemuseb.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script_scr_loadcredits.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script_scr_namingscreen.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Main\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_base_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_halfbullet_gen_Other_10.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_halfbullet_gen_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_heartdefeated_Other_11.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_settingsmenu_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_settingsmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_time_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_time_Step_1.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script_joystick_pov.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script_scr_draw_name_curs.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script_scr_draw_screen_border.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script_scr_itemdesc.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script_scr_itemuseb.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script_scr_loadcredits.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script_scr_namingscreen.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\113ef42e8cb91e5faf780c426679ec3a\Temp\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_base_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_halfbullet_gen_Other_10.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_halfbullet_gen_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_heartdefeated_Other_11.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_settingsmenu_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_settingsmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_time_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_time_Step_1.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script_joystick_pov.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script_scr_draw_name_curs.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script_scr_draw_screen_border.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script_scr_itemdesc.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script_scr_itemuseb.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script_scr_loadcredits.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script_scr_namingscreen.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Main\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_base_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_halfbullet_gen_Other_10.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_halfbullet_gen_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_heartdefeated_Other_11.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_settingsmenu_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_settingsmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_time_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_time_Step_1.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script_joystick_pov.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script_scr_draw_name_curs.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script_scr_draw_screen_border.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script_scr_itemdesc.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script_scr_itemuseb.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script_scr_loadcredits.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script_scr_namingscreen.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\427520a97db28c87da4220abb3a334c1\Temp\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Object_DEVICE_CHOICE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Object_obj_84_lang_helper_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Object_obj_cloverpuzzle_event_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Object_obj_darkcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Object_obj_darkcontroller_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Object_obj_heart_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Object_obj_mainchara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Script_scr_armorget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Script_scr_encountersetup.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Script_scr_keyitemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Script_scr_litemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Script_scr_phoneadd.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Script_scr_spell.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Script_scr_spelltext.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Script_scr_spell_overworld.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Script_scr_weaponget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Script_tile_get_ids_at_depth.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Main\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Object_DEVICE_CHOICE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Object_obj_84_lang_helper_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Object_obj_cloverpuzzle_event_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Object_obj_darkcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Object_obj_darkcontroller_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Object_obj_heart_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Object_obj_mainchara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Script_scr_armorget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Script_scr_encountersetup.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Script_scr_keyitemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Script_scr_litemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Script_scr_phoneadd.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Script_scr_spell.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Script_scr_spelltext.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Script_scr_spell_overworld.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Script_scr_weaponget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Script_tile_get_ids_at_depth.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\56305194391ad7c548ee55a8891179cc\Temp\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_backgrounder_dock_Other_10.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_base_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_heartdefeated_Other_11.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_iceflag_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_monsterkidtrigger7_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_settingsmenu_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_settingsmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_undyneencounter1_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Script_ossafe_file_text_readln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Script_ossafe_file_text_writeln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Script_scr_conshake.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Script_scr_conshakeend.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Script_scr_draw_name_curs.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Script_scr_itemdesc.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Script_scr_itemuseb.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Script_scr_loadcredits.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Script_scr_namingscreen.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Main\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_backgrounder_dock_Other_10.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_base_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_heartdefeated_Other_11.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_iceflag_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_monsterkidtrigger7_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_settingsmenu_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_settingsmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_undyneencounter1_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Script_ossafe_file_text_readln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Script_ossafe_file_text_writeln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Script_scr_conshake.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Script_scr_conshakeend.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Script_scr_draw_name_curs.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Script_scr_itemdesc.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Script_scr_itemuseb.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Script_scr_loadcredits.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Script_scr_namingscreen.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\582795ad2037d06cdc8db0c72d9360d5\Temp\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_backgrounder_dock_Other_10.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_base_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_heartdefeated_Other_11.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_iceflag_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_monsterkidtrigger7_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_settingsmenu_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_settingsmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_undyneencounter1_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Script_ossafe_file_text_readln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Script_ossafe_file_text_writeln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Script_scr_conshake.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Script_scr_conshakeend.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Script_scr_draw_name_curs.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Script_scr_itemdesc.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Script_scr_itemuseb.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Script_scr_loadcredits.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Script_scr_namingscreen.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Main\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_backgrounder_dock_Other_10.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_base_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_heartdefeated_Other_11.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_iceflag_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_monsterkidtrigger7_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_settingsmenu_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_settingsmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_undyneencounter1_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Script_ossafe_file_text_readln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Script_ossafe_file_text_writeln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Script_scr_conshake.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Script_scr_conshakeend.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Script_scr_draw_name_curs.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Script_scr_itemdesc.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Script_scr_itemuseb.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Script_scr_loadcredits.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Script_scr_namingscreen.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5903fc5cb042a728d4ad8ee9e949c6eb\Temp\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Object_DEVICE_CHOICE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Object_DEVICE_FAILURE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Object_obj_84_lang_helper_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Object_obj_cloverpuzzle_event_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Object_obj_darkcontroller_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Object_obj_darkcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Object_obj_darkcontroller_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Object_obj_heart_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Object_obj_mainchara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script_scr_armorget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script_scr_encountersetup.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script_scr_keyitemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script_scr_litemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script_scr_phoneadd.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script_scr_spell.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script_scr_spelltext.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script_scr_spell_overworld.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script_scr_weaponget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script_tile_get_ids_at_depth.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Main\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Object_DEVICE_CHOICE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Object_DEVICE_FAILURE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Object_obj_84_lang_helper_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Object_obj_cloverpuzzle_event_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Object_obj_darkcontroller_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Object_obj_darkcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Object_obj_darkcontroller_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Object_obj_heart_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Object_obj_mainchara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script_scr_armorget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script_scr_encountersetup.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script_scr_keyitemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script_scr_litemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script_scr_phoneadd.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script_scr_spell.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script_scr_spelltext.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script_scr_spell_overworld.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script_scr_weaponget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script_tile_get_ids_at_depth.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\5c8f4533f6e0629d45766830f5f5ca72\Temp\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Object_DEVICE_CHOICE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Object_DEVICE_FAILURE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Object_obj_84_lang_helper_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Object_obj_cloverpuzzle_event_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Object_obj_darkcontroller_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Object_obj_darkcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Object_obj_darkcontroller_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Object_obj_heart_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Object_obj_mainchara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script_scr_84_debug.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script_scr_armorget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script_scr_encountersetup.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script_scr_keyitemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script_scr_litemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script_scr_phoneadd.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script_scr_spell.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script_scr_spelltext.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script_scr_spell_overworld.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script_scr_weaponget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script_tile_get_ids_at_depth.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Main\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Object_DEVICE_CHOICE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Object_DEVICE_FAILURE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Object_obj_84_lang_helper_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Object_obj_cloverpuzzle_event_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Object_obj_darkcontroller_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Object_obj_darkcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Object_obj_darkcontroller_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Object_obj_heart_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Object_obj_mainchara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script_scr_84_debug.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script_scr_armorget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script_scr_encountersetup.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script_scr_keyitemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script_scr_litemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script_scr_phoneadd.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script_scr_spell.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script_scr_spelltext.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script_scr_spell_overworld.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script_scr_weaponget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script_tile_get_ids_at_depth.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\6e1abb8e627c7a36cd8e6db11a829889\Temp\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Object_DEVICE_CHOICE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Object_obj_84_lang_helper_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Object_obj_cloverpuzzle_event_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Object_obj_darkcontroller_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Object_obj_darkcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Object_obj_darkcontroller_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Object_obj_heart_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Object_obj_mainchara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script_scr_84_debug.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script_scr_armorget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script_scr_encountersetup.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script_scr_keyitemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script_scr_litemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script_scr_phoneadd.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script_scr_spell.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script_scr_spelltext.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script_scr_spell_overworld.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script_scr_weaponget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script_tile_get_ids_at_depth.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Main\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Object_DEVICE_CHOICE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Object_obj_84_lang_helper_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Object_obj_cloverpuzzle_event_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Object_obj_darkcontroller_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Object_obj_darkcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Object_obj_darkcontroller_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Object_obj_heart_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Object_obj_mainchara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script_scr_84_debug.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script_scr_armorget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script_scr_encountersetup.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script_scr_keyitemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script_scr_litemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script_scr_phoneadd.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script_scr_spell.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script_scr_spelltext.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script_scr_spell_overworld.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script_scr_weaponget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script_tile_get_ids_at_depth.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\741ad8ab49a08226af7e1b13b64d4e55\Temp\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_backgrounder_dock_Other_10.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_base_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_heartdefeated_Other_11.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_iceflag_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_monsterkidtrigger7_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_settingsmenu_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_settingsmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_undyneencounter1_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Script_ossafe_file_text_readln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Script_ossafe_file_text_writeln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Script_scr_conshake.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Script_scr_conshakeend.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Script_scr_draw_name_curs.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Script_scr_itemdesc.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Script_scr_itemuseb.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Script_scr_loadcredits.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Script_scr_namingscreen.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Main\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_backgrounder_dock_Other_10.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_base_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_heartdefeated_Other_11.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_iceflag_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_monsterkidtrigger7_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_settingsmenu_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_settingsmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_undyneencounter1_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Script_ossafe_file_text_readln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Script_ossafe_file_text_writeln.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Script_scr_conshake.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Script_scr_conshakeend.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Script_scr_draw_name_curs.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Script_scr_itemdesc.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Script_scr_itemuseb.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Script_scr_loadcredits.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Script_scr_namingscreen.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\856219e69dd39e76deca0586a7f44307\Temp\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Object_obj_flowey_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Object_OBJ_INSTAWRITER_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Object_obj_overworldcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Object_obj_readable_room1_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Object_obj_truechara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Object_OBJ_WRITER_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Main\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Object_obj_flowey_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Object_OBJ_INSTAWRITER_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Object_obj_overworldcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Object_obj_readable_room1_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Object_obj_truechara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Object_OBJ_WRITER_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\88ae093aa1ae0c90da0d3ff1e15aa724\Temp\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Object_DEVICE_CHOICE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Object_obj_84_lang_helper_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Object_obj_cloverpuzzle_event_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Object_obj_darkcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Object_obj_darkcontroller_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Object_obj_heart_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Object_obj_mainchara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Script_scr_armorget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Script_scr_encountersetup.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Script_scr_keyitemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Script_scr_litemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Script_scr_phoneadd.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Script_scr_spell.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Script_scr_spelltext.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Script_scr_spell_overworld.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Script_scr_weaponget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Script_tile_get_ids_at_depth.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Main\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Object_DEVICE_CHOICE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Object_obj_84_lang_helper_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Object_obj_cloverpuzzle_event_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Object_obj_darkcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Object_obj_darkcontroller_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Object_obj_heart_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Object_obj_mainchara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Script_scr_armorget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Script_scr_encountersetup.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Script_scr_keyitemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Script_scr_litemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Script_scr_phoneadd.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Script_scr_spell.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Script_scr_spelltext.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Script_scr_spell_overworld.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Script_scr_weaponget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Script_tile_get_ids_at_depth.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\a88a2db3a68c714ca2b1ff57ac08a032\Temp\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Object_DEVICE_CHOICE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Object_DEVICE_FAILURE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Object_obj_84_lang_helper_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Object_obj_cloverpuzzle_event_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Object_obj_darkcontroller_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Object_obj_darkcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Object_obj_darkcontroller_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Object_obj_heart_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Object_obj_mainchara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script_scr_84_debug.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script_scr_armorget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script_scr_encountersetup.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script_scr_keyitemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script_scr_litemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script_scr_phoneadd.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script_scr_spell.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script_scr_spelltext.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script_scr_spell_overworld.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script_scr_weaponget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script_tile_get_ids_at_depth.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Main\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Object_DEVICE_CHOICE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Object_DEVICE_FAILURE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Object_obj_84_lang_helper_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Object_obj_cloverpuzzle_event_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Object_obj_darkcontroller_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Object_obj_darkcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Object_obj_darkcontroller_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Object_obj_heart_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Object_obj_mainchara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script_scr_84_debug.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script_scr_armorget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script_scr_encountersetup.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script_scr_keyitemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script_scr_litemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script_scr_phoneadd.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script_scr_spell.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script_scr_spelltext.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script_scr_spell_overworld.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script_scr_weaponget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script_tile_get_ids_at_depth.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\b6825187ca2e32c618e4899e6d0c4c50\Temp\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Object_obj_flowey_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Object_OBJ_INSTAWRITER_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Object_obj_overworldcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Object_obj_readable_room1_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Object_obj_truechara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Object_OBJ_WRITER_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Main\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Object_obj_flowey_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Object_OBJ_INSTAWRITER_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Object_obj_overworldcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Object_obj_readable_room1_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Object_obj_truechara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Object_OBJ_WRITER_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cd48b89b6ac6b2d3977f2f82726e5f12\Temp\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Object_DEVICE_CHOICE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Object_DEVICE_FAILURE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Object_obj_84_lang_helper_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Object_obj_cloverpuzzle_event_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Object_obj_darkcontroller_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Object_obj_darkcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Object_obj_darkcontroller_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Object_obj_heart_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Object_obj_mainchara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script_scr_armorget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script_scr_encountersetup.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script_scr_keyitemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script_scr_litemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script_scr_phoneadd.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script_scr_spell.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script_scr_spelltext.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script_scr_spell_overworld.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script_scr_weaponget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script_tile_get_ids_at_depth.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Main\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Object_DEVICE_CHOICE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Object_DEVICE_FAILURE_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Object_obj_84_lang_helper_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Object_obj_cloverpuzzle_event_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Object_obj_darkcontroller_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Object_obj_darkcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Object_obj_darkcontroller_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Object_obj_heart_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Object_obj_mainchara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script_scr_armorget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script_scr_encountersetup.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script_scr_keyitemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script_scr_litemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script_scr_phoneadd.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script_scr_spell.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script_scr_spelltext.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script_scr_spell_overworld.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script_scr_weaponget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script_tile_get_ids_at_depth.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf6517bfa3b7b7e96c21b6c1a41f8415\Temp\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_base_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_halfbullet_gen_Other_10.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_halfbullet_gen_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_heartdefeated_Other_11.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_settingsmenu_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_settingsmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_time_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_time_Step_1.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script_joystick_pov.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script_scr_draw_name_curs.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script_scr_draw_screen_border.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script_scr_itemdesc.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script_scr_itemuseb.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script_scr_loadcredits.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script_scr_namingscreen.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Main\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_base_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_halfbullet_gen_Other_10.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_halfbullet_gen_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_heartdefeated_Other_11.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_settingsmenu_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_settingsmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_time_Create_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_time_Step_1.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script_joystick_pov.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script_ossafe_file_text_open_read.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script_scr_draw_name_curs.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script_scr_draw_screen_border.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script_scr_itemdesc.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script_scr_itemuseb.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script_scr_loadcredits.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script_scr_namingscreen.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script___background_get_colour_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script___background_get_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\cf8f7e3858bfbc46478cc155b78fb170\Temp\gml_Script___background_set_element.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_obj_flowey_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_obj_gyftrot_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_OBJ_INSTAWRITER_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_obj_overworldcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_obj_papyrusboss_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_obj_readable_room1_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_obj_truechara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Object_OBJ_WRITER_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Main\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_obj_boxsiner_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_obj_brightwaterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_obj_flowey_writer_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_obj_gyftrot_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_OBJ_INSTAWRITER_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_obj_joypadmenu_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_obj_mettattackgen_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_obj_movedogehead_Alarm_2.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_obj_overworldcontroller_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_obj_papyrusboss_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_obj_readable_room1_Alarm_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_obj_shop5_body_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_obj_truechara_Step_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_obj_vaporized_new_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_obj_waterfall_waterfall_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Object_OBJ_WRITER_Draw_0.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Script_scr_itemget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Script_scr_phoneget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Script_scr_storageget.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Script_SCR_TEXT.gml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Repackers\ImportASM_2_3.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Repackers\ImportGML_2_3.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <EmbeddedResource Include="Resources\GML.xshd" />
+    <EmbeddedResource Include="Resources\VMASM.xshd" />
     <None Include="SampleScripts\BorderEnabler.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -388,6 +2991,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Unpackers\ExportAllEmbeddedTextures.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Unpackers\ExportAllRoomsToPng.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Unpackers\ExportAllSounds.csx">
@@ -591,6 +3197,9 @@
     <Compile Include="Editors\UndertaleTexturePageItemEditor.xaml.cs">
       <DependentUpon>UndertaleTexturePageItemEditor.xaml</DependentUpon>
     </Compile>
+    <None Include="Unpackers\MergeImages.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Page Include="Controls\AudioFileReference.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

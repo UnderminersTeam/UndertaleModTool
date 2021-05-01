@@ -6,6 +6,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 
@@ -182,6 +183,7 @@ namespace UndertaleModLib
             resUpdate.Clear();
 
             Decompiler.AssetTypeResolver.InitializeTypes(data);
+            data.BuiltinList = new BuiltinList(data);
 
             return data;
         }

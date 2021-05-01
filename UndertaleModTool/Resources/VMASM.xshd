@@ -1,0 +1,73 @@
+﻿<SyntaxDefinition name="VMASM"
+        xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+    <Color name="Comment" foreground="#5B995B" />
+    <Color name="String" foreground="Yellow" />
+	<Color name="Identifier" foreground="#C1C1C1" />
+	<Color name="AltIdentifier" foreground="#FFF899" />
+	<Color name="Function" foreground="#FFB871" fontWeight="bold" />
+	<Color name="Number" foreground="#FF6464" />
+
+    <!-- This is the main ruleset. -->
+    <RuleSet>
+		<Rule color="Comment">
+			;.*|(^|\n)\..*
+		</Rule>
+
+        <Rule color="String">
+			\"(\\.|[^"\\])*\"@\d+
+		</Rule>
+
+		<!-- Some macros -->
+		<Keywords foreground="#FF8080">
+			<Word>self</Word>
+			<Word>other</Word>
+			<Word>all</Word>
+			<Word>noone</Word>
+			<Word>global</Word>
+			<Word>undefined</Word>
+			<Word>local</Word>
+			<Word>builtin</Word>
+			<Word>arg</Word>
+		</Keywords>
+
+		<!-- Addresses -->
+		<Rule foreground="#E0B0B0">
+			(^|\n)\d+(?=:)
+		</Rule>
+
+		<!-- Various other things -->
+		<Rule foreground="#59c259">
+			\[(?:array|stacktop)\]
+			|
+			argc\=\d+
+		</Rule>
+
+        <!-- Digits -->
+        <Rule color="Number">
+			\b0x[0-9a-fA-F]+  # hex number
+		|   \$[0-9a-fA-F]+   # alternate hex number
+		|
+			\b
+			(    \d+(\.[0-9]+)?  # digits with optional .
+			|    \.[0-9]+        # start with ., then digits
+			)
+			\b
+		</Rule>
+
+		<!-- Arguments -->
+		<Rule color="AltIdentifier">
+			\bargument[0-9]\b |
+			\bargument1[0-5]\b
+		</Rule>
+
+		<!-- Function calls -->
+		<Rule color="Function">
+			[_a-zA-Z][_a-zA-Z0-9]*(?=\()
+		</Rule>
+
+		<!-- Normal identifiers -->
+		<Rule color="Identifier">
+			[_a-zA-Z][_a-zA-Z0-9]*
+		</Rule>
+    </RuleSet>
+</SyntaxDefinition>
