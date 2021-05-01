@@ -31,6 +31,7 @@
 			<Word>repeat</Word>
 			<Word>switch</Word>
 			<Word>case</Word>
+			<Word>default</Word>
 			<Word>break</Word>
 			<Word>continue</Word>
 			<Word>with</Word>

@@ -7,6 +7,12 @@
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleCode}" DataContextChanged="UserControl_DataContextChanged">
+    <UserControl.CommandBindings>
+        <CommandBinding Command="{x:Static local:UndertaleCodeEditor.Compile}" Executed="Command_Compile" />
+    </UserControl.CommandBindings>
+    <UserControl.InputBindings>
+        <KeyBinding Modifiers="Control" Key="K" Command="{x:Static local:UndertaleCodeEditor.Compile}"/>
+    </UserControl.InputBindings>
     <Grid MaxHeight="{Binding ElementName=DataEditor, Path=ActualHeight}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
