@@ -27,10 +27,10 @@
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Offset</TextBlock>
         <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding Offset}"/>
-        
+
         <TabControl Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
             <TabItem Header="Decompiled" Name="DecompiledTab">
-              <Grid>
+                <Grid>
                     <avalonEdit:TextEditor
                         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                         FontFamily="Consolas"
@@ -44,7 +44,7 @@
                         LostFocus="DecompiledEditor_LostFocus"
                         WordWrap="True"
                         FontSize="10pt"/>
-              </Grid>
+                </Grid>
             </TabItem>
             <TabItem Header="Disassembly" Name="DisassemblyTab">
                 <Grid>
