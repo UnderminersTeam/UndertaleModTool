@@ -780,7 +780,11 @@ namespace UndertaleModTool
 
                     // Process the content of this identifier/function
                     if (func)
-                        val = data.Functions.ByName(m.Value);
+                    {
+                        val = data.Scripts.ByName(m.Value);
+                        if (val == null)
+                            val = data.Functions.ByName(m.Value);
+                    } 
                     else
                         val = data.ByName(m.Value);
                     if (val == null)
