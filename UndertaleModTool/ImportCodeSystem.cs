@@ -49,6 +49,15 @@ namespace UndertaleModTool
         {
             ImportCodeFromFile(fileName, false, doParse, destroyASM, CheckDecompiler);
         }
+        public void NukeProfileGML(string codeName)
+        {
+            string GMLPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles", Data.CurrentMD5, "Temp");
+            if (File.Exists(Path.Combine(GMLPath, codeName + ".gml")))
+            {
+                File.Delete(Path.Combine(GMLPath, codeName + ".gml"));
+                File.WriteAllText(GetDecompiledText(codeName), Path.Combine(GMLPath, codeName + ".gml"));
+            }
+        }
         public string GetPassBack(string decompiled_text, string keyword, string replacement, bool case_sensitive = false)
         {
             keyword = keyword.Replace("\r\n", "\n");
@@ -371,11 +380,8 @@ namespace UndertaleModTool
                 {
                     var instructions = Assembler.Assemble(gmlCode, Data);
                     Data.Code.ByName(codeName).Replace(instructions);
-                    if (File.Exists(Path.Combine(GMLPath, codeName + ".gml")) && destroyASM)
-                    {
-                        File.Delete(Path.Combine(GMLPath, codeName + ".gml"));
-                        File.WriteAllText(GetDecompiledText(codeName), Path.Combine(GMLPath, codeName + ".gml"));
-                    }
+                    if (destroyASM)
+                        NukeProfileGML(codeName);
                 }
             }
             catch (Exception ex)

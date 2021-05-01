@@ -320,6 +320,7 @@ void ProfileModeExempt()
                     ArgumentsCount = 0,
                     Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = getInteractFunc }
                 };
+                NukeProfileGML(c.Name.Content);
             }
             else if (inst.Kind == UndertaleInstruction.Opcode.Pop &&
               ((UndertaleInstruction.Reference<UndertaleVariable>)inst.Destination).Target.Name.Content == "interact")
@@ -365,6 +366,7 @@ void ProfileModeExempt()
                     }
                 }
             }
+            NukeProfileGML(c.Name.Content);
         }
 
         if (c.Name.Content.StartsWith("gml_Object"))
@@ -431,6 +433,7 @@ void ProfileModeExempt()
                     Type1 = UndertaleInstruction.DataType.Variable
                 }
             });
+            NukeProfileGML(c.Name.Content);
         }
     }
 }

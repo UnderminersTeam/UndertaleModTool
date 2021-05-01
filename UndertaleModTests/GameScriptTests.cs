@@ -63,6 +63,10 @@ namespace UndertaleModTests
         {
             Console.WriteLine("Open: " + url);
         }
+        public void NukeProfileGML(string codeName)
+        {
+            Console.WriteLine("NukeProfileGML(): " + codeName);
+        }
         public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
         {
             Console.WriteLine("Update Progress: " + progressValue + " / " + maxValue + ", Message: " + message + ", Status: " + status);

@@ -27,6 +27,7 @@ namespace UndertaleModLib.Scripting
         bool ScriptQuestion(string message);
         void ScriptError(string error, string title = "Error", bool SetConsoleText = true);
         void ScriptOpenURL(string url);
+        void NukeProfileGML(string codeName);
         string GetDecompiledText(string codeName);
         string GetDisassemblyText(string codeName);
         bool AreFilesIdentical(string File01, string File02);
