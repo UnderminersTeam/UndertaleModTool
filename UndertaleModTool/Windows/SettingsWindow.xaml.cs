@@ -94,13 +94,13 @@ namespace UndertaleModTool
             }
         }
 
-        public static string FormattingOnLongCodeEnabled
+        public static string ProfileMessageShown
         {
-            get => ConfigurationManager.AppSettings["FormattingOnLongCodeEnabled"] as String;
+            get => ConfigurationManager.AppSettings["ProfileMessageShown"] as String;
             set
             {
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["FormattingOnLongCodeEnabled"].Value = value;
+                config.AppSettings.Settings["ProfileMessageShown"].Value = value;
                 config.Save(ConfigurationSaveMode.Modified);
                 ConfigurationManager.RefreshSection("appSettings");
             }

@@ -36,8 +36,8 @@
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="Enable decompile once compile many" ToolTip="Toggles the decompile once and compile many code editing mode. Enabled by default."/>
         <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding DecompileOnceCompileManyEnabled}"/>
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="Enable formatting on long code" ToolTip="Disables the 5000 line limit on proper syntax highlighting on code. Performance may suffer! Disabled by default."/>
-        <CheckBox Grid.Row="5" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding FormattingOnLongCodeEnabled}"/>
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="Profile mode message shown" ToolTip="On first load, this will show you the profile mode loaded message. If this somehow breaks, you can manually toggle it here."/>
+        <CheckBox Grid.Row="5" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding ProfileMessageShown}"/>
 
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
         <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding DeleteOldProfileOnSave}"/>

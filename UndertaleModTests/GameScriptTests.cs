@@ -157,11 +157,11 @@ namespace UndertaleModTests
             Console.Write(output);
             return output;
         }
-        public string AreFilesIdentical(string File01, string File02)
+        public bool AreFilesIdentical(string File01, string File02)
         {
             string output = "AreFilesIdentical(): " + File01 + ", " + File02;
             Console.Write(output);
-            return output;
+            return true;
         }
         public string PromptLoadFile(string defaultExt, string filter)
         {

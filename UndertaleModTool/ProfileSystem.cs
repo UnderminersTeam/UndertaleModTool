@@ -254,7 +254,9 @@ namespace UndertaleModTool
                         MessageBox.Show("Profile should exist, but does not. Insufficient permissions??? (Try running in Administrator mode)");
                         MessageBox.Show("Profile mode is disabled.");
                     }
-                    MessageBox.Show(@"The profile for your game loaded successfully!
+                    if (SettingsWindow.ProfileMessageShown == "False")
+                    {
+                        MessageBox.Show(@"The profile for your game loaded successfully!
 
 UndertaleModTool now uses the ""Profile"" system by default for code.
 Using the profile system, many new features are available to you!
@@ -268,6 +270,8 @@ The profile system can be toggled on or off at any time by going
 to the ""File"" tab at the top and then opening the ""Settings""
 (the ""Enable decompile once compile many"" option toggles it
 on or off).");
+                        SettingsWindow.ProfileMessageShown = "True";
+                    }
                     CreateUMTLastEdited(filename);
                 }
                 else if ((SettingsWindow.DecompileOnceCompileManyEnabled == "False") && (!(data.IsYYC())))
