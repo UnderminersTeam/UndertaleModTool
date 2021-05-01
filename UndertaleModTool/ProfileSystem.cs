@@ -254,10 +254,15 @@ namespace UndertaleModTool
                         MessageBox.Show("Profile should exist, but does not. Insufficient permissions??? (Try running in Administrator mode)");
                         MessageBox.Show("Profile mode is disabled.");
                     }
-                    MessageBox.Show(@"Profile loaded successfully!
+                    MessageBox.Show(@"The profile for your game loaded successfully!
 
-The code's fully editable (you can even add comments) and will
-be preserved exactly as written.
+UndertaleModTool now uses the ""Profile"" system by default for code.
+Using the profile system, many new features are available to you!
+For example, the code is fully editable (you can even add comments)
+and it will be saved exactly as you wrote it. In addition, if the
+program crashes or your computer loses power during editing, your
+code edits will be recovered automatically the next time you start
+the program.
 
 The profile system can be toggled on or off at any time by going
 to the ""File"" tab at the top and then opening the ""Settings""
