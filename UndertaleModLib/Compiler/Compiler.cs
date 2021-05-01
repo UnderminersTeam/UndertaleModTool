@@ -21,7 +21,7 @@ namespace UndertaleModLib.Compiler
         public Dictionary<string, string> GlobalVars = new Dictionary<string, string>();
         public Dictionary<string, Dictionary<string, int>> Enums = new Dictionary<string, Dictionary<string, int>>();
         public UndertaleCode OriginalCode;
-        public BuiltinList BuiltInList;
+        public BuiltinList BuiltInList => Data.BuiltinList;
 
         public bool SuccessfulCompile = false;
         public bool HasError = false;

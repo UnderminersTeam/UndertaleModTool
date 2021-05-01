@@ -22,13 +22,13 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.TextFormatting;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Xml;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
@@ -288,6 +288,12 @@ namespace UndertaleModTool
                         MessageBox.Show(exc.ToString());
                     }
 
+                    if (gettextJSON == null && gettextJsonPath != null && File.Exists(gettextJsonPath))
+                    {
+                        string err = UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
+                        if (err != null)
+                            e = new Exception(err);
+                    }
 
                     Dispatcher.Invoke(() =>
                     {
@@ -426,7 +432,6 @@ namespace UndertaleModTool
             {
                 var instructions = Assembler.Assemble(compileContext.ResultAssembly, data);
                 code.Replace(instructions);
-                CodeEditSuccessful = true;
             }
             catch (Exception ex)
             {

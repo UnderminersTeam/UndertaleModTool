@@ -59,6 +59,8 @@ namespace UndertaleModLib
         public string CurrentMD5 = "Unknown";
         public int PaddingAlignException = -1;
 
+        public BuiltinList BuiltinList;
+
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {
             // TODO: Check if those are all possible types

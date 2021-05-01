@@ -44,6 +44,7 @@ namespace UndertaleModTool
                     ProgressBar.Maximum = value.Value;
             }
         }
+        public bool IsClosed { get; set; } = false;
 
         private DebugTraceListener listener;
 
@@ -69,6 +70,12 @@ namespace UndertaleModTool
         protected override void OnClosing(CancelEventArgs e)
         {
             e.Cancel = this.PreventClose;
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            IsClosed = true;
         }
 
         public void TryHide()
