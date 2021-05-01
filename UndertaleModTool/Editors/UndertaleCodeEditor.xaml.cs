@@ -157,7 +157,7 @@ namespace UndertaleModTool
             {
                 DisassemblyEditor.IsReadOnly = true;
                 text = "; Duplicate code entry; cannot edit here.";
-            } 
+            }
             else
             {
                 DisassemblyEditor.IsReadOnly = false;
@@ -203,7 +203,8 @@ namespace UndertaleModTool
             try
             {
                 gettextJSON = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 gettextJSON = new Dictionary<string, string>();
                 return "Failed to parse language file: " + e.Message;
@@ -311,19 +312,19 @@ namespace UndertaleModTool
                         var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
                         var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
                         var wrapper = new GraphGeneration(getStartProcessQuery, getProcessStartInfoQuery, registerLayoutPluginCommand);
-                        
+
                         byte[] output = wrapper.GenerateGraph(dot, Enums.GraphReturnType.Png); // TODO: Use SVG instead
-                        
+
                         image = new ImageSourceConverter().ConvertFrom(output) as ImageSource;
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         Debug.WriteLine(e.ToString());
                         if (MessageBox.Show("Unable to execute GraphViz: " + e.Message + "\nMake sure you have downloaded it and set the path in settings.\nDo you want to open the download page now?", "Graph generation failed", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.Yes)
                             Process.Start("https://graphviz.gitlab.io/_pages/Download/Download_windows.html");
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Debug.WriteLine(e.ToString());
                     MessageBox.Show(e.Message, "Graph generation failed", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -501,7 +502,7 @@ namespace UndertaleModTool
                     var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
                     var highlighter = textArea.GetService(typeof(IHighlighter)) as IHighlighter;
                     HighlightedLine highlighted = highlighter.HighlightLine(line);
-                    
+
                     foreach (var section in highlighted.Sections)
                     {
                         if (section.Color.Name == "Number" &&
@@ -574,7 +575,8 @@ namespace UndertaleModTool
                                         doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
                                                     text.Length, (obj as UndertaleNamedResource).Name.Content, null);
                                         (parent as UndertaleCodeEditor).DecompiledChanged = true;
-                                    } else
+                                    }
+                                    else
                                         (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
                                 };
                                 contextMenu.Items.Add(item);
@@ -679,7 +681,7 @@ namespace UndertaleModTool
                         val = data.Scripts.ByName(m.Value);
                         if (val == null)
                             val = data.Functions.ByName(m.Value);
-                    } 
+                    }
                     else
                         val = data.ByName(m.Value);
                     if (val == null)
@@ -706,7 +708,7 @@ namespace UndertaleModTool
                         return null;
                     }
 
-                    var line = new ClickVisualLineText(m.Value, CurrentContext.VisualLine, m.Length, 
+                    var line = new ClickVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
                                                         func ? null : new SolidColorBrush(Color.FromRgb(0xFF, 0x80, 0x80)));
                     line.Clicked += (text) =>
                     {
