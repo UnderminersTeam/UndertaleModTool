@@ -57,6 +57,7 @@ namespace UndertaleModTool
         {
             InitializeComponent();
 
+            // Decompiled editor styling and functionality
             SearchPanel.Install(DecompiledEditor.TextArea).MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
 
             using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("UndertaleModTool.Resources.GML.xshd"))
@@ -80,6 +81,28 @@ namespace UndertaleModTool
             DecompiledEditor.TextArea.SelectionForeground = null;
             DecompiledEditor.TextArea.SelectionBorder = null;
             DecompiledEditor.TextArea.SelectionCornerRadius = 0;
+
+            // Disassembly editor styling and functionality
+            SearchPanel.Install(DisassemblyEditor.TextArea).MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
+
+            using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("UndertaleModTool.Resources.VMASM.xshd"))
+            {
+                using (XmlTextReader reader = new XmlTextReader(stream))
+                {
+                    DisassemblyEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                }
+            }
+
+            DisassemblyEditor.TextArea.TextView.Options.HighlightCurrentLine = true;
+            DisassemblyEditor.TextArea.TextView.CurrentLineBackground = new SolidColorBrush(Color.FromRgb(60, 60, 60));
+            DisassemblyEditor.TextArea.TextView.CurrentLineBorder = null;
+
+            DisassemblyEditor.Document.TextChanged += (s, e) => DisassemblyChanged = true;
+
+            DisassemblyEditor.TextArea.SelectionBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+            DisassemblyEditor.TextArea.SelectionForeground = null;
+            DisassemblyEditor.TextArea.SelectionBorder = null;
+            DisassemblyEditor.TextArea.SelectionCornerRadius = 0;
         }
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -88,6 +111,7 @@ namespace UndertaleModTool
             if (code == null)
                 return;
             DecompiledEditor_LostFocus(sender, null);
+            DisassemblyEditor_LostFocus(sender, null);
             if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
             {
                 DisassembleCode(code);
@@ -107,6 +131,8 @@ namespace UndertaleModTool
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return;
+            DecompiledEditor_LostFocus(sender, null);
+            DisassemblyEditor_LostFocus(sender, null);
             if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
             {
                 DisassembleCode(code);
@@ -125,183 +151,25 @@ namespace UndertaleModTool
         {
             code.UpdateAddresses();
 
-            FlowDocument document = new FlowDocument();
-            document.PagePadding = new Thickness(0);
-            document.PageWidth = 2048; // Speed-up.
-            document.FontFamily = new FontFamily("Lucida Console");
-            Paragraph par = new Paragraph();
-            par.Margin = new Thickness(0);
+            string text;
 
             if (code.DuplicateEntry)
             {
-                par.Inlines.Add(new Run("Duplicate code entry; cannot edit here."));
+                DisassemblyEditor.IsReadOnly = true;
+                text = "; Duplicate code entry; cannot edit here.";
             } 
-            else if (code.Instructions.Count > 5000)
-            {
-                // Disable syntax highlighting. Loading it can take a few MINUTES on large scripts.
-                var data = (Application.Current.MainWindow as MainWindow).Data;
-                string[] split = code.Disassemble(data.Variables, data.CodeLocals.For(code)).Split('\n');
-
-                for (var i = 0; i < split.Length; i++)
-                { // Makes it possible to select text.
-                    if (i > 0 && (i % 100) == 0)
-                    {
-                        document.Blocks.Add(par);
-                        par = new Paragraph();
-                        par.Margin = new Thickness(0);
-                    }
-
-                    par.Inlines.Add(split[i] + (split.Length > i + 1 && ((i + 1) % 100) != 0 ? "\n" : ""));
-                }
-
-            }
             else
             {
-                Brush addressBrush = new SolidColorBrush(Color.FromRgb(50, 50, 50));
-                Brush opcodeBrush = new SolidColorBrush(Color.FromRgb(0, 100, 0));
-                Brush argBrush = new SolidColorBrush(Color.FromRgb(0, 0, 150));
-                Brush typeBrush = new SolidColorBrush(Color.FromRgb(0, 0, 50));
+                DisassemblyEditor.IsReadOnly = false;
+
                 var data = (Application.Current.MainWindow as MainWindow).Data;
-                par.Inlines.Add(new Run(code.GenerateLocalVarDefinitions(data.Variables, data.CodeLocals.For(code))) { Foreground = addressBrush });
-                foreach (var instr in code.Instructions)
-                {
-                    par.Inlines.Add(new Run(instr.Address.ToString("D5") + ": ") { Foreground = addressBrush });
-                    string kind = instr.Kind.ToString();
-                    var type = UndertaleInstruction.GetInstructionType(instr.Kind);
-                    if (type == UndertaleInstruction.InstructionType.BreakInstruction)
-                        kind = Assembler.BreakIDToName[(short)instr.Value];
-                    else
-                        kind = kind.ToLower();
-                    par.Inlines.Add(new Run(kind) { Foreground = opcodeBrush, FontWeight = FontWeights.Bold });
-
-                    switch (type)
-                    {
-                        case UndertaleInstruction.InstructionType.SingleTypeInstruction:
-                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-
-                            if (instr.Kind == UndertaleInstruction.Opcode.Dup || instr.Kind == UndertaleInstruction.Opcode.CallV)
-                            {
-                                par.Inlines.Add(new Run(" "));
-                                par.Inlines.Add(new Run(instr.Extra.ToString()) { Foreground = argBrush });
-                                if (instr.Kind == UndertaleInstruction.Opcode.Dup)
-                                {
-                                    if ((byte)instr.ComparisonKind == 0x88)
-                                    {
-                                        // No idea what this is right now (seems to be used at least with @@GetInstance@@), this is the "temporary" solution
-                                        par.Inlines.Add(new Run(" spec"));
-                                    }
-                                }
-                            }
-                            break;
-
-                        case UndertaleInstruction.InstructionType.DoubleTypeInstruction:
-                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run("." + instr.Type2.ToOpcodeParam()) { Foreground = typeBrush });
-                            break;
-
-                        case UndertaleInstruction.InstructionType.ComparisonInstruction:
-                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run("." + instr.Type2.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run(" "));
-                            par.Inlines.Add(new Run(instr.ComparisonKind.ToString()) { Foreground = opcodeBrush });
-                            break;
-
-                        case UndertaleInstruction.InstructionType.GotoInstruction:
-                            par.Inlines.Add(new Run(" "));
-                            string tgt = (instr.Address + instr.JumpOffset).ToString("D5");
-                            if (instr.Address + instr.JumpOffset == code.Length / 4)
-                                tgt = "func_end";
-                            if (instr.JumpOffsetPopenvExitMagic)
-                                tgt = "[drop]";
-                            par.Inlines.Add(new Run(tgt) { Foreground = argBrush, ToolTip = "$" + instr.JumpOffset.ToString("+#;-#;0") });
-                            break;
-
-                        case UndertaleInstruction.InstructionType.PopInstruction:
-                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run("." + instr.Type2.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run(" "));
-                            if (instr.Type1 == UndertaleInstruction.DataType.Int16)
-                            {
-                                // Special scenario - the swap instruction
-                                // TODO: Figure out the proper syntax, see #129
-                                Run runType = new Run(instr.SwapExtra.ToString().ToLower()) { Foreground = argBrush };
-                                par.Inlines.Add(runType);
-                            }
-                            else
-                            {
-                                if (instr.Type1 == UndertaleInstruction.DataType.Variable && instr.TypeInst != UndertaleInstruction.InstanceType.Undefined)
-                                {
-                                    par.Inlines.Add(new Run(instr.TypeInst.ToString().ToLower()) { Foreground = typeBrush });
-                                    par.Inlines.Add(new Run("."));
-                                }
-                                Run runDest = new Run(instr.Destination.ToString()) { Foreground = argBrush, Cursor = Cursors.Hand };
-                                runDest.MouseDown += (sender, e) =>
-                                {
-                                    (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Destination.Target);
-                                };
-                                par.Inlines.Add(runDest);
-                            }
-                            break;
-
-                        case UndertaleInstruction.InstructionType.PushInstruction:
-                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run(" "));
-                            if (instr.Type1 == UndertaleInstruction.DataType.Variable && instr.TypeInst != UndertaleInstruction.InstanceType.Undefined)
-                            {
-                                par.Inlines.Add(new Run(instr.TypeInst.ToString().ToLower()) { Foreground = typeBrush });
-                                par.Inlines.Add(new Run("."));
-                            }
-                            Run valueRun = new Run((instr.Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? instr.Value.ToString()) { Foreground = argBrush, Cursor = (instr.Value is UndertaleObject || instr.Value is UndertaleResourceRef) ? Cursors.Hand : Cursors.Arrow };
-                            if (instr.Value is UndertaleResourceRef)
-                            {
-                                valueRun.MouseDown += (sender, e) =>
-                                {
-                                    (Application.Current.MainWindow as MainWindow).ChangeSelection((instr.Value as UndertaleResourceRef).Resource);
-                                };
-                            }
-                            else if (instr.Value is UndertaleObject)
-                            {
-                                valueRun.MouseDown += (sender, e) =>
-                                {
-                                    (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Value);
-                                };
-                            }
-                            par.Inlines.Add(valueRun);
-                            break;
-
-                        case UndertaleInstruction.InstructionType.CallInstruction:
-                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run(" "));
-                            par.Inlines.Add(new Run(instr.Function.ToString()) { Foreground = argBrush });
-                            par.Inlines.Add(new Run("(argc="));
-                            par.Inlines.Add(new Run(instr.ArgumentsCount.ToString()) { Foreground = argBrush });
-                            par.Inlines.Add(new Run(")"));
-                            break;
-
-                        case UndertaleInstruction.InstructionType.BreakInstruction:
-                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-                            //par.Inlines.Add(new Run(" "));
-                            //par.Inlines.Add(new Run(instr.Value.ToString()) { Foreground = argBrush });
-                            break;
-                    }
-
-                    if (par.Inlines.Count >= 250)
-                    { // Makes selecting text possible.
-                        document.Blocks.Add(par);
-                        par = new Paragraph();
-                        par.Margin = new Thickness(0);
-                    }
-                    else
-                    {
-                        par.Inlines.Add(new Run("\n"));
-                    }
-                }
+                text = code.Disassemble(data.Variables, data.CodeLocals.For(code));
             }
-            document.Blocks.Add(par);
 
-            DisassemblyView.Document = document;
+            DisassemblyEditor.Text = text;
 
             CurrentDisassembled = code;
+            DisassemblyChanged = false;
         }
 
         private static Dictionary<string, int> gettext = null;
@@ -488,11 +356,9 @@ namespace UndertaleModTool
 
             // Check to make sure this isn't an element inside of the textbox, or another tab
             IInputElement elem = Keyboard.FocusedElement;
-            UIElement focused = null;
             if (elem is UIElement)
             {
-                focused = elem as UIElement;
-                if (e != null && focused.IsDescendantOf(DecompiledEditor))
+                if (e != null && (elem as UIElement).IsDescendantOf(DecompiledEditor))
                     return;
             }
 
@@ -536,26 +402,37 @@ namespace UndertaleModTool
             DecompileCode(code);
         }
 
-        private void DisassemblyView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void DisassemblyEditor_GotFocus(object sender, RoutedEventArgs e)
         {
-            if ((this.DataContext as UndertaleCode)?.DuplicateEntry == true)
+            if (DisassemblyEditor.IsReadOnly)
                 return;
-            DisassemblyView.Visibility = Visibility.Collapsed;
-            DisassemblyEditor.Visibility = Visibility.Visible;
-            DisassemblyEditor.Text = new TextRange(DisassemblyView.Document.ContentStart, DisassemblyView.Document.ContentEnd).Text;
-            int index = DisassemblyEditor.GetCharacterIndexFromPoint(Mouse.GetPosition(DisassemblyView), true);
-            if (index >= 0)
-                DisassemblyEditor.CaretIndex = index;
-            DisassemblyEditor.Focus();
+            DisassemblyFocused = true;
         }
 
         private void DisassemblyEditor_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!DisassemblyFocused)
+                return;
+            if (DisassemblyEditor.IsReadOnly)
+                return;
+            DisassemblyFocused = false;
+
+            if (!DisassemblyChanged)
+                return;
+
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return; // Probably loaded another data.win or something.
             if (code.DuplicateEntry)
                 return;
+
+            // Check to make sure this isn't an element inside of the textbox, or another tab
+            IInputElement elem = Keyboard.FocusedElement;
+            if (elem is UIElement)
+            {
+                if (e != null && (elem as UIElement).IsDescendantOf(DisassemblyEditor))
+                    return;
+            }
 
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
             try
@@ -563,19 +440,23 @@ namespace UndertaleModTool
                 var instructions = Assembler.Assemble(DisassemblyEditor.Text, data);
                 code.Replace(instructions);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            
+
+            // Get rid of old code
             CurrentDisassembled = null;
             CurrentDecompiled = null;
             CurrentGraphed = null;
-            DisassembleCode(code);
 
-            DisassemblyView.Visibility = Visibility.Visible;
-            DisassemblyEditor.Visibility = Visibility.Collapsed;
+            // Tab switch
+            if (e == null)
+                return;
+
+            // Disassemble new code
+            DisassembleCode(code);
         }
 
 

@@ -2896,6 +2896,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <EmbeddedResource Include="Resources\GML.xshd" />
+    <EmbeddedResource Include="Resources\VMASM.xshd" />
     <None Include="SampleScripts\BorderEnabler.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

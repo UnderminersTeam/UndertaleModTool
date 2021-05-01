@@ -1,4 +1,4 @@
-﻿<SyntaxDefinition name="GML"
+﻿<SyntaxDefinition name="VMASM"
         xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
     <Color name="Comment" foreground="#5B995B" />
     <Color name="String" foreground="Yellow" />
@@ -9,49 +9,38 @@
 
     <!-- This is the main ruleset. -->
     <RuleSet>
-        <Span color="Comment" begin="//" />
-        <Span color="Comment" multiline="true" begin="/\*" end="\*/" />
+		<Rule color="Comment">
+			;.*|(^|\n)\..*
+		</Rule>
 
-        <Span color="String">
-            <Begin>"</Begin>
-            <End>"</End>
-            <RuleSet>
-                <!-- nested span for escape sequences -->
-                <Span begin="\\" end="." />
-            </RuleSet>
-        </Span>
-
-		<!-- Important keywords -->
-		<Keywords fontWeight="bold" foreground="#F9B46F">
-			<Word>if</Word>
-			<Word>else</Word>
-			<Word>do</Word>
-			<Word>while</Word>
-			<Word>for</Word>
-			<Word>repeat</Word>
-			<Word>switch</Word>
-			<Word>case</Word>
-			<Word>break</Word>
-			<Word>continue</Word>
-			<Word>with</Word>
-			<Word>function</Word>
-			<Word>return</Word>
-			<Word>exit</Word>
-			<Word>var</Word>
-			<Word>until</Word>
-		</Keywords>
+        <Rule color="String">
+			\"(\\.|[^"\\])*\"@\d+
+		</Rule>
 
 		<!-- Some macros -->
 		<Keywords foreground="#FF8080">
-			<Word>true</Word>
-			<Word>false</Word>
 			<Word>self</Word>
 			<Word>other</Word>
 			<Word>all</Word>
 			<Word>noone</Word>
 			<Word>global</Word>
 			<Word>undefined</Word>
+			<Word>local</Word>
+			<Word>builtin</Word>
+			<Word>arg</Word>
 		</Keywords>
+
+		<!-- Addresses -->
+		<Rule foreground="#E0B0B0">
+			(^|\n)\d+(?=:)
+		</Rule>
+
+		<!-- Various other things -->
+		<Rule foreground="#59c259">
+			\[(?:array|stacktop)\]
+			|
+			argc\=\d+
+		</Rule>
 
         <!-- Digits -->
         <Rule color="Number">

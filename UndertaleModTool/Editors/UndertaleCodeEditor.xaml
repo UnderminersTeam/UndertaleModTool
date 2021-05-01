@@ -48,8 +48,18 @@
             </TabItem>
             <TabItem Header="Disassembly" Name="DisassemblyTab">
                 <Grid>
-                    <RichTextBox HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsReadOnly="True" IsDocumentEnabled="True" Name="DisassemblyView" Padding="-5,0,-5,0" MouseDoubleClick="DisassemblyView_MouseDoubleClick"/>
-                    <TextBox TextWrapping="NoWrap" Name="DisassemblyEditor" LostFocus="DisassemblyEditor_LostFocus" Visibility="Collapsed" FontFamily="Lucida Console" Padding="-2,0,-2,0" AcceptsReturn="True"/>
+                    <avalonEdit:TextEditor
+                        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+                        FontFamily="Consolas"
+                        Name="DisassemblyEditor" 
+                        IsReadOnly="True"
+                        Background="#222222"
+                        LineNumbersForeground="White"
+                        Foreground="#BEBEBE"
+                        GotFocus="DisassemblyEditor_GotFocus"
+                        LostFocus="DisassemblyEditor_LostFocus"
+                        WordWrap="True"
+                        FontSize="10pt"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Graph view" Name="GraphTab">
