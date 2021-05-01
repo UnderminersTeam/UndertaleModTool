@@ -29,7 +29,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.TextFormatting;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Xml;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
