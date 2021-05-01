@@ -363,6 +363,9 @@ namespace UndertaleModLib.Decompiler
         {
             Dictionary<string, AssetIDType[]> scriptArgs = context.scriptArgs;
 
+            if (function_name.StartsWith("gml_Script_"))
+                function_name = function_name.Substring(11);
+
             bool overloaded = false;
             // Scripts overload builtins because in GMS2 some functions are just backwards-compatibility scripts
             if (scriptArgs.ContainsKey(function_name) && scriptArgs[function_name] != null)
