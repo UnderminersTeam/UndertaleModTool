@@ -45,6 +45,7 @@ namespace UndertaleModTool
     {
         public UndertaleCode CurrentDisassembled = null;
         public UndertaleCode CurrentDecompiled = null;
+        public List<string> CurrentDecompiledLocals = null;
         public UndertaleCode CurrentGraphed = null;
 
         public bool DecompiledFocused = false;
@@ -262,7 +263,17 @@ namespace UndertaleModTool
                         if (e != null)
                             DecompiledEditor.Text = "/* EXCEPTION!\n   " + e.ToString() + "\n*/";
                         else if (decompiled != null)
+                        {
                             DecompiledEditor.Text = decompiled;
+                            CurrentDecompiledLocals = new List<string>();
+
+                            var locals = dataa.CodeLocals.ByName(code.Name.Content);
+                            if (locals != null)
+                            {
+                                foreach (var local in locals.Locals)
+                                    CurrentDecompiledLocals.Add(local.Name.Content);
+                            }
+                        }
                         DecompiledEditor.IsReadOnly = false;
                         DecompiledChanged = false;
 
@@ -631,13 +642,6 @@ namespace UndertaleModTool
                             if (section.Offset == res)
                                 return res;
                         }
-                        else if (res >= section.Offset && res + m.Length < section.Offset + section.Length)
-                        {
-                            // Optimization to skip things such as comments/string contents
-                            startOffset = section.Offset + section.Length;
-                            m = FindMatch(startOffset, regex);
-                            continue;
-                        }
                     }
 
                     startOffset += m.Length;
@@ -658,6 +662,17 @@ namespace UndertaleModTool
                     bool func = (offset + m.Length + 1 < CurrentContext.VisualLine.LastDocumentLine.EndOffset) &&
                                 (CurrentContext.Document.GetCharAt(offset + m.Length) == '(');
                     UndertaleNamedResource val = null;
+
+                    var doc = CurrentContext.Document;
+                    var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
+                    var editor = textArea.GetService(typeof(TextEditor)) as TextEditor;
+                    var parent = VisualTreeHelper.GetParent(editor);
+                    do
+                    {
+                        if ((parent as FrameworkElement) is UserControl)
+                            break;
+                        parent = VisualTreeHelper.GetParent(parent);
+                    } while (parent != null);
 
                     // Process the content of this identifier/function
                     if (func)
@@ -686,6 +701,9 @@ namespace UndertaleModTool
                             data.BuiltinList.GlobalArray.ContainsKey(m.Value))
                             return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
                                                             new SolidColorBrush(Color.FromRgb(0x58, 0xE3, 0x5A)));
+                        if ((parent as UndertaleCodeEditor).CurrentDecompiledLocals.Contains(m.Value))
+                            return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
+                                                            new SolidColorBrush(Color.FromRgb(0xFF, 0xF8, 0x99)));
                         return null;
                     }
 

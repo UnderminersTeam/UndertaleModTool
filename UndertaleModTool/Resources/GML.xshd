@@ -2,7 +2,7 @@
         xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
     <Color name="Comment" foreground="#5B995B" />
     <Color name="String" foreground="Yellow" />
-	<Color name="Identifier" foreground="#C1C1C1" />
+	<Color name="Identifier" foreground="#B2B1FF" />
 	<Color name="AltIdentifier" foreground="#FFF899" />
 	<Color name="Function" foreground="#FFB871" fontWeight="bold" />
 	<Color name="Number" foreground="#FF6464" />
@@ -12,7 +12,7 @@
         <Span color="Comment" begin="//" />
         <Span color="Comment" multiline="true" begin="/\*" end="\*/" />
 
-        <Span color="String">
+        <Span color="String" multiline="true">
             <Begin>"</Begin>
             <End>"</End>
             <RuleSet>
