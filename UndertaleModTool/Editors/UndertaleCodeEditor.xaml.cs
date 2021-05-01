@@ -1,6 +1,14 @@
 ﻿using GraphVizWrapper;
 using GraphVizWrapper.Commands;
 using GraphVizWrapper.Queries;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Editing;
+using ICSharpCode.AvalonEdit.Folding;
+using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using ICSharpCode.AvalonEdit.Rendering;
+using ICSharpCode.AvalonEdit.Search;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,6 +16,8 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,6 +25,11 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Media.TextFormatting;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using System.Xml;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
@@ -29,6 +44,7 @@ namespace UndertaleModTool
     {
         public UndertaleCode CurrentDisassembled = null;
         public UndertaleCode CurrentDecompiled = null;
+        public List<string> CurrentDecompiledLocals = null;
         public UndertaleCode CurrentGraphed = null;
         public string UMTAppDataPath = (Application.Current.MainWindow as MainWindow).AppDataFolder;
         public string ProfilesFolder = (Application.Current.MainWindow as MainWindow).ProfilesFolder;
@@ -36,9 +52,62 @@ namespace UndertaleModTool
         public string MainPath = Path.Combine((Application.Current.MainWindow as MainWindow).ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Main");
         public string TempPath = Path.Combine((Application.Current.MainWindow as MainWindow).ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Temp");
 
+        public bool DecompiledFocused = false;
+        public bool DecompiledChanged = false;
+
+        public bool DisassemblyFocused = false;
+        public bool DisassemblyChanged = false;
+
         public UndertaleCodeEditor()
         {
             InitializeComponent();
+
+            // Decompiled editor styling and functionality
+            SearchPanel.Install(DecompiledEditor.TextArea).MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
+
+            using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("UndertaleModTool.Resources.GML.xshd"))
+            {
+                using (XmlTextReader reader = new XmlTextReader(stream))
+                {
+                    DecompiledEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                }
+            }
+
+            DecompiledEditor.TextArea.TextView.ElementGenerators.Add(new NumberGenerator());
+            DecompiledEditor.TextArea.TextView.ElementGenerators.Add(new NameGenerator());
+
+            DecompiledEditor.TextArea.TextView.Options.HighlightCurrentLine = true;
+            DecompiledEditor.TextArea.TextView.CurrentLineBackground = new SolidColorBrush(Color.FromRgb(60, 60, 60));
+            DecompiledEditor.TextArea.TextView.CurrentLineBorder = null;
+
+            DecompiledEditor.Document.TextChanged += (s, e) => DecompiledChanged = true;
+
+            DecompiledEditor.TextArea.SelectionBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+            DecompiledEditor.TextArea.SelectionForeground = null;
+            DecompiledEditor.TextArea.SelectionBorder = null;
+            DecompiledEditor.TextArea.SelectionCornerRadius = 0;
+
+            // Disassembly editor styling and functionality
+            SearchPanel.Install(DisassemblyEditor.TextArea).MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
+
+            using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("UndertaleModTool.Resources.VMASM.xshd"))
+            {
+                using (XmlTextReader reader = new XmlTextReader(stream))
+                {
+                    DisassemblyEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                }
+            }
+
+            DisassemblyEditor.TextArea.TextView.Options.HighlightCurrentLine = true;
+            DisassemblyEditor.TextArea.TextView.CurrentLineBackground = new SolidColorBrush(Color.FromRgb(60, 60, 60));
+            DisassemblyEditor.TextArea.TextView.CurrentLineBorder = null;
+
+            DisassemblyEditor.Document.TextChanged += (s, e) => DisassemblyChanged = true;
+
+            DisassemblyEditor.TextArea.SelectionBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+            DisassemblyEditor.TextArea.SelectionForeground = null;
+            DisassemblyEditor.TextArea.SelectionBorder = null;
+            DisassemblyEditor.TextArea.SelectionCornerRadius = 0;
         }
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -48,6 +117,8 @@ namespace UndertaleModTool
             Directory.CreateDirectory(TempPath);
             if (code == null)
                 return;
+            DecompiledEditor_LostFocus(sender, null);
+            DisassemblyEditor_LostFocus(sender, null);
             if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
             {
                 DisassembleCode(code);
@@ -67,6 +138,8 @@ namespace UndertaleModTool
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return;
+            DecompiledEditor_LostFocus(sender, null);
+            DisassemblyEditor_LostFocus(sender, null);
             if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
             {
                 DisassembleCode(code);
@@ -85,187 +158,25 @@ namespace UndertaleModTool
         {
             code.UpdateAddresses();
 
-            FlowDocument document = new FlowDocument();
-            document.PagePadding = new Thickness(0);
-            document.PageWidth = 2048; // Speed-up.
-            document.FontFamily = new FontFamily("Lucida Console");
-            Paragraph par = new Paragraph();
-            par.Margin = new Thickness(0);
+            string text;
 
             if (code.DuplicateEntry)
             {
-                par.Inlines.Add(new Run("Duplicate code entry; cannot edit here."));
+                DisassemblyEditor.IsReadOnly = true;
+                text = "; Duplicate code entry; cannot edit here.";
             }
-            //Maybe if I'm feeling wild, I'll try again one day, but for now, have this commented out code
-            //And yes, it really DOES take that long to load
-            //else if ((SettingsWindow.FormattingOnLongCodeEnabled == "False") ? (code.Instructions.Count > 5000) : false)
-            else if (code.Instructions.Count > 5000)
-            {
-                // Disable syntax highlighting. Loading it can take a few MINUTES on large scripts.
-                var data = (Application.Current.MainWindow as MainWindow).Data;
-                string[] split = code.Disassemble(data.Variables, data.CodeLocals.For(code)).Split('\n');
-
-                for (var i = 0; i < split.Length; i++)
-                { // Makes it possible to select text.
-                    if (i > 0 && (i % 100) == 0)
-                    {
-                        document.Blocks.Add(par);
-                        par = new Paragraph();
-                        par.Margin = new Thickness(0);
-                    }
-
-                    par.Inlines.Add(split[i] + (split.Length > i + 1 && ((i + 1) % 100) != 0 ? "\n" : ""));
-                }
-
-            }
-
             else
             {
-                Brush addressBrush = new SolidColorBrush(Color.FromRgb(50, 50, 50));
-                Brush opcodeBrush = new SolidColorBrush(Color.FromRgb(0, 100, 0));
-                Brush argBrush = new SolidColorBrush(Color.FromRgb(0, 0, 150));
-                Brush typeBrush = new SolidColorBrush(Color.FromRgb(0, 0, 50));
+                DisassemblyEditor.IsReadOnly = false;
+
                 var data = (Application.Current.MainWindow as MainWindow).Data;
-                par.Inlines.Add(new Run(code.GenerateLocalVarDefinitions(data.Variables, data.CodeLocals.For(code))) { Foreground = addressBrush });
-                foreach (var instr in code.Instructions)
-                {
-                    par.Inlines.Add(new Run(instr.Address.ToString("D5") + ": ") { Foreground = addressBrush });
-                    string kind = instr.Kind.ToString();
-                    var type = UndertaleInstruction.GetInstructionType(instr.Kind);
-                    if (type == UndertaleInstruction.InstructionType.BreakInstruction)
-                        kind = Assembler.BreakIDToName[(short)instr.Value];
-                    else
-                        kind = kind.ToLower();
-                    par.Inlines.Add(new Run(kind) { Foreground = opcodeBrush, FontWeight = FontWeights.Bold });
-
-                    switch (type)
-                    {
-                        case UndertaleInstruction.InstructionType.SingleTypeInstruction:
-                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-
-                            if (instr.Kind == UndertaleInstruction.Opcode.Dup || instr.Kind == UndertaleInstruction.Opcode.CallV)
-                            {
-                                par.Inlines.Add(new Run(" "));
-                                par.Inlines.Add(new Run(instr.Extra.ToString()) { Foreground = argBrush });
-                                if (instr.Kind == UndertaleInstruction.Opcode.Dup)
-                                {
-                                    if ((byte)instr.ComparisonKind == 0x88)
-                                    {
-                                        // No idea what this is right now (seems to be used at least with @@GetInstance@@), this is the "temporary" solution
-                                        par.Inlines.Add(new Run(" spec"));
-                                    }
-                                }
-                            }
-                            break;
-
-                        case UndertaleInstruction.InstructionType.DoubleTypeInstruction:
-                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run("." + instr.Type2.ToOpcodeParam()) { Foreground = typeBrush });
-                            break;
-
-                        case UndertaleInstruction.InstructionType.ComparisonInstruction:
-                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run("." + instr.Type2.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run(" "));
-                            par.Inlines.Add(new Run(instr.ComparisonKind.ToString()) { Foreground = opcodeBrush });
-                            break;
-
-                        case UndertaleInstruction.InstructionType.GotoInstruction:
-                            par.Inlines.Add(new Run(" "));
-                            string tgt = (instr.Address + instr.JumpOffset).ToString("D5");
-                            if (instr.Address + instr.JumpOffset == code.Length / 4)
-                                tgt = "func_end";
-                            if (instr.JumpOffsetPopenvExitMagic)
-                                tgt = "[drop]";
-                            par.Inlines.Add(new Run(tgt) { Foreground = argBrush, ToolTip = "$" + instr.JumpOffset.ToString("+#;-#;0") });
-                            break;
-
-                        case UndertaleInstruction.InstructionType.PopInstruction:
-                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run("." + instr.Type2.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run(" "));
-                            if (instr.Type1 == UndertaleInstruction.DataType.Int16)
-                            {
-                                // Special scenario - the swap instruction
-                                // TODO: Figure out the proper syntax, see #129
-                                Run runType = new Run(instr.SwapExtra.ToString().ToLower()) { Foreground = argBrush };
-                                par.Inlines.Add(runType);
-                            }
-                            else
-                            {
-                                if (instr.Type1 == UndertaleInstruction.DataType.Variable && instr.TypeInst != UndertaleInstruction.InstanceType.Undefined)
-                                {
-                                    par.Inlines.Add(new Run(instr.TypeInst.ToString().ToLower()) { Foreground = typeBrush });
-                                    par.Inlines.Add(new Run("."));
-                                }
-                                Run runDest = new Run(instr.Destination.ToString()) { Foreground = argBrush, Cursor = Cursors.Hand };
-                                runDest.MouseDown += (sender, e) =>
-                                {
-                                    (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Destination.Target);
-                                };
-                                par.Inlines.Add(runDest);
-                            }
-                            break;
-
-                        case UndertaleInstruction.InstructionType.PushInstruction:
-                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run(" "));
-                            if (instr.Type1 == UndertaleInstruction.DataType.Variable && instr.TypeInst != UndertaleInstruction.InstanceType.Undefined)
-                            {
-                                par.Inlines.Add(new Run(instr.TypeInst.ToString().ToLower()) { Foreground = typeBrush });
-                                par.Inlines.Add(new Run("."));
-                            }
-                            Run valueRun = new Run((instr.Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? instr.Value.ToString()) { Foreground = argBrush, Cursor = (instr.Value is UndertaleObject || instr.Value is UndertaleResourceRef) ? Cursors.Hand : Cursors.Arrow };
-                            if (instr.Value is UndertaleResourceRef)
-                            {
-                                valueRun.MouseDown += (sender, e) =>
-                                {
-                                    (Application.Current.MainWindow as MainWindow).ChangeSelection((instr.Value as UndertaleResourceRef).Resource);
-                                };
-                            }
-                            else if (instr.Value is UndertaleObject)
-                            {
-                                valueRun.MouseDown += (sender, e) =>
-                                {
-                                    (Application.Current.MainWindow as MainWindow).ChangeSelection(instr.Value);
-                                };
-                            }
-                            par.Inlines.Add(valueRun);
-                            break;
-
-                        case UndertaleInstruction.InstructionType.CallInstruction:
-                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-                            par.Inlines.Add(new Run(" "));
-                            par.Inlines.Add(new Run(instr.Function.ToString()) { Foreground = argBrush });
-                            par.Inlines.Add(new Run("(argc="));
-                            par.Inlines.Add(new Run(instr.ArgumentsCount.ToString()) { Foreground = argBrush });
-                            par.Inlines.Add(new Run(")"));
-                            break;
-
-                        case UndertaleInstruction.InstructionType.BreakInstruction:
-                            par.Inlines.Add(new Run("." + instr.Type1.ToOpcodeParam()) { Foreground = typeBrush });
-                            //par.Inlines.Add(new Run(" "));
-                            //par.Inlines.Add(new Run(instr.Value.ToString()) { Foreground = argBrush });
-                            break;
-                    }
-
-                    if (par.Inlines.Count >= 250)
-                    { // Makes selecting text possible.
-                        document.Blocks.Add(par);
-                        par = new Paragraph();
-                        par.Margin = new Thickness(0);
-                    }
-                    else
-                    {
-                        par.Inlines.Add(new Run("\n"));
-                    }
-                }
+                text = code.Disassemble(data.Variables, data.CodeLocals.For(code));
             }
-            document.Blocks.Add(par);
 
-            DisassemblyView.Document = document;
+            DisassemblyEditor.Text = text;
 
             CurrentDisassembled = code;
+            DisassemblyChanged = false;
         }
 
         private static Dictionary<string, int> gettext = null;
@@ -316,7 +227,8 @@ namespace UndertaleModTool
             try
             {
                 gettextJSON = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 gettextJSON = new Dictionary<string, string>();
                 return "Failed to parse language file: " + e.Message;
@@ -325,24 +237,17 @@ namespace UndertaleModTool
         }
         private async void DecompileCode(UndertaleCode code)
         {
-            FlowDocument document = new FlowDocument();
-            document.PagePadding = new Thickness(0);
-            document.PageWidth = 2048; // Speed-up.
-            document.FontFamily = new FontFamily("Lucida Console");
-            Paragraph par = new Paragraph();
-            par.Margin = new Thickness(0);
-
+            DecompiledEditor.IsReadOnly = true;
             if (code.DuplicateEntry)
             {
-                par.Inlines.Add(new Run("Duplicate code entry; cannot edit here."));
-                document.Blocks.Add(par);
-                DecompiledView.Document = document;
+                DecompiledEditor.Text = "// Duplicate code entry; cannot edit here.";
                 CurrentDecompiled = code;
             }
             else
             {
                 LoaderDialog dialog = new LoaderDialog("Decompiling", "Decompiling, please wait... This can take a while on complex scripts");
                 dialog.Owner = Window.GetWindow(this);
+                _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.ShowDialog(); }));
 
                 UndertaleCode gettextCode = null;
                 if (gettext == null)
@@ -354,10 +259,7 @@ namespace UndertaleModTool
                 var dataa = (Application.Current.MainWindow as MainWindow).Data;
                 Task t = Task.Run(() =>
                 {
-                    int estimatedLineCount = (int)Math.Round(code.Length * .056D);
-                    bool skipFormatting = ((SettingsWindow.FormattingOnLongCodeEnabled == "False") ? (estimatedLineCount > 5000) : false);
-
-                    DecompileContext context = new DecompileContext(dataa, !skipFormatting);
+                    DecompileContext context = new DecompileContext(dataa, false);
                     string decompiled = null;
                     Exception e = null;
                     try
@@ -390,268 +292,28 @@ namespace UndertaleModTool
                     Dispatcher.Invoke(() =>
                     {
                         if (e != null)
-                        {
-                            Brush exceptionBrush = new SolidColorBrush(Color.FromRgb(255, 0, 0));
-                            par.Inlines.Add(new Run("EXCEPTION!\n") { Foreground = exceptionBrush, FontWeight = FontWeights.Bold });
-                            par.Inlines.Add(new Run(e.ToString()) { Foreground = exceptionBrush });
-                        }
+                            DecompiledEditor.Text = "/* EXCEPTION!\n   " + e.ToString() + "\n*/";
                         else if (decompiled != null)
                         {
-                            string[] lines = decompiled.Split('\n');
-                            if (skipFormatting)
+                            DecompiledEditor.Text = decompiled;
+                            CurrentDecompiledLocals = new List<string>();
+
+                            var locals = dataa.CodeLocals.ByName(code.Name.Content);
+                            if (locals != null)
                             {
-                                for (var i = 0; i < lines.Length; i++)
-                                {
-                                    string toWrite = lines[i];
-                                    if (((i + 1) % 100) != 0 && lines.Length > i + 1)
-                                        toWrite += "\n"; // Write a new-line if we're not making a new paragraph.
-
-                                if (i > 0 && i % 100 == 0)
-                                    { // Splitting into different paragraphs significantly increases selection performance.
-                                    document.Blocks.Add(par);
-                                        par = new Paragraph();
-                                        par.Margin = new Thickness(0);
-                                    }
-
-                                    par.Inlines.Add(toWrite);
-                                }
-                            }
-                            else
-                            {
-                                Brush keywordBrush = new SolidColorBrush(Color.FromRgb(0, 0, 150));
-                                Brush constBrush = new SolidColorBrush(Color.FromRgb(0, 100, 150));
-                                Brush stringBrush = new SolidColorBrush(Color.FromRgb(0, 0, 200));
-                                Brush commentBrush = new SolidColorBrush(Color.FromRgb(0, 150, 0));
-                                Brush funcBrush = new SolidColorBrush(Color.FromRgb(100, 100, 0));
-                                Brush assetBrush = new SolidColorBrush(Color.FromRgb(0, 150, 100));
-                                Brush argumentBrush = new SolidColorBrush(Color.FromRgb(80, 131, 80));
-
-                                Dictionary<string, UndertaleFunction> funcs = new Dictionary<string, UndertaleFunction>();
-                                foreach (var x in (Application.Current.MainWindow as MainWindow).Data.Functions)
-                                    funcs.Add(x.Name.Content, x);
-
-                                string storedStrTok = "";
-
-                                foreach (var line in lines)
-                                {
-                                    char[] special = { '.', ',', ')', '(', '[', ']', '>', '<', ':', ';', '=', '"', '!' };
-                                    Func<char, bool> IsSpecial = (c) => Char.IsWhiteSpace(c) || special.Contains(c);
-                                    List<string> split = new List<string>();
-                                    string tok = storedStrTok;
-                                    storedStrTok = "";
-                                    bool readingString = (tok != "");
-                                    bool escaped = false;
-                                    for (int i = 0; i < line.Length; i++)
-                                    {
-                                        if (tok == "//")
-                                        {
-                                            tok += line.Substring(i);
-                                            break;
-                                        }
-                                        if (!readingString && tok.Length > 0 && (
-                                            (Char.IsWhiteSpace(line[i]) != Char.IsWhiteSpace(tok[tok.Length - 1])) ||
-                                            (special.Contains(line[i]) != special.Contains(tok[tok.Length - 1])) ||
-                                            (special.Contains(line[i]) && special.Contains(tok[tok.Length - 1])) ||
-                                            line[i] == '"'
-                                            ))
-                                        {
-                                            split.Add(tok);
-                                            tok = "";
-                                        }
-
-                                        if (readingString && context.isGameMaker2)
-                                        {
-                                            if (escaped)
-                                            {
-                                                escaped = false;
-                                                if (line[i] == '"')
-                                                {
-                                                    tok += line[i];
-                                                    continue;
-                                                }
-                                            }
-                                            else if (line[i] == '\\')
-                                            {
-                                                escaped = true;
-                                            }
-                                        }
-
-                                        tok += line[i];
-                                        if (line[i] == '"')
-                                        {
-                                            if (readingString)
-                                            {
-                                                split.Add(tok);
-                                                tok = "";
-                                            }
-                                            readingString = !readingString;
-                                        }
-                                    }
-                                    if (tok != "")
-                                    {
-                                        if (readingString)
-                                            storedStrTok = tok + "\n";
-                                        else
-                                            split.Add(tok);
-                                    }
-
-                                    Dictionary<string, object> usedObjects = new Dictionary<string, object>();
-                                    for (int i = 0; i < split.Count; i++)
-                                    {
-                                        int? val = null;
-                                        string token = split[i];
-                                        if (token == "if" || token == "else" || token == "return" || token == "break" || token == "continue" || token == "while" || token == "for" || token == "repeat" || token == "with" || token == "switch" || token == "case" || token == "default" || token == "exit" || token == "var" || token == "do" || token == "until")
-                                            par.Inlines.Add(new Run(token) { Foreground = keywordBrush, FontWeight = FontWeights.Bold });
-                                        else if (token == "self" || token == "global" || token == "local" || token == "other" || token == "noone" || token == "true" || token == "false" || token == "undefined" || token == "all")
-                                            par.Inlines.Add(new Run(token) { Foreground = keywordBrush });
-                                        else if (token.StartsWith("argument"))
-                                            par.Inlines.Add(new Run(token) { Foreground = argumentBrush });
-                                        else if ((val = AssetTypeResolver.FindConstValue(token)) != null)
-                                            par.Inlines.Add(new Run(token) { Foreground = constBrush, FontStyle = FontStyles.Italic, ToolTip = val.ToString() });
-                                        else if (token.StartsWith("\""))
-                                            par.Inlines.Add(new Run(token) { Foreground = stringBrush });
-                                        else if (token.StartsWith("//"))
-                                            par.Inlines.Add(new Run(token) { Foreground = commentBrush });
-                                        else if (token.StartsWith("@") && split[i - 1][0] == '"' && split[i - 1][split[i - 1].Length - 1] == '"')
-                                        {
-                                            par.Inlines.LastInline.Cursor = Cursors.Hand;
-                                            par.Inlines.LastInline.MouseDown += (sender, ev) =>
-                                            {
-                                                MainWindow mw = Application.Current.MainWindow as MainWindow;
-                                                mw.ChangeSelection(mw.Data.Strings[Int32.Parse(token.Substring(1))]);
-                                            };
-                                        }
-                                        else if (dataa.ByName(token) != null)
-                                        {
-                                            par.Inlines.Add(new Run(token) { Foreground = assetBrush, Cursor = Cursors.Hand });
-                                            par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(dataa.ByName(token));
-                                            if (token == "scr_gettext" && gettext != null)
-                                            {
-                                                if (split[i + 1] == "(" && split[i + 2].StartsWith("\"") && split[i + 3].StartsWith("@") && split[i + 4] == ")")
-                                                {
-                                                    string id = split[i + 2].Substring(1, split[i + 2].Length - 2);
-                                                    if (!usedObjects.ContainsKey(id) && gettext.ContainsKey(id))
-                                                        usedObjects.Add(id, (Application.Current.MainWindow as MainWindow).Data.Strings[gettext[id]]);
-                                                }
-                                            }
-                                            if (token == "scr_84_get_lang_string" && gettextJSON != null)
-                                            {
-                                                if (split[i + 1] == "(" && split[i + 2].StartsWith("\"") && split[i + 3].StartsWith("@") && split[i + 4] == ")")
-                                                {
-                                                    string id = split[i + 2].Substring(1, split[i + 2].Length - 2);
-                                                    if (!usedObjects.ContainsKey(id) && gettextJSON.ContainsKey(id))
-                                                        usedObjects.Add(id, gettextJSON[id]);
-                                                }
-                                            }
-                                        }
-                                        else if (funcs.ContainsKey(token))
-                                        {
-                                            par.Inlines.Add(new Run(token) { Foreground = funcBrush, Cursor = Cursors.Hand });
-                                            par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(funcs[token]);
-                                        }
-                                        else if (char.IsDigit(token[0]))
-                                        {
-                                            par.Inlines.Add(new Run(token) { Cursor = Cursors.Hand });
-                                            par.Inlines.LastInline.MouseDown += (sender, ev) =>
-                                            {
-                                                if (token.Length > 2 && token[0] == '0' && token[1] == 'x')
-                                                {
-                                                    ev.Handled = true;
-                                                    return; // Hex numbers aren't objects.
-                                                }
-
-                                                UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
-                                                int id;
-                                                if (int.TryParse(token, out id))
-                                                {
-                                                    List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
-                                                    if (id < data.Sprites.Count)
-                                                        possibleObjects.Add(data.Sprites[id]);
-                                                    if (id < data.Rooms.Count)
-                                                        possibleObjects.Add(data.Rooms[id]);
-                                                    if (id < data.GameObjects.Count)
-                                                        possibleObjects.Add(data.GameObjects[id]);
-                                                    if (id < data.Backgrounds.Count)
-                                                        possibleObjects.Add(data.Backgrounds[id]);
-                                                    if (id < data.Scripts.Count)
-                                                        possibleObjects.Add(data.Scripts[id]);
-                                                    if (id < data.Paths.Count)
-                                                        possibleObjects.Add(data.Paths[id]);
-                                                    if (id < data.Fonts.Count)
-                                                        possibleObjects.Add(data.Fonts[id]);
-                                                    if (id < data.Sounds.Count)
-                                                        possibleObjects.Add(data.Sounds[id]);
-                                                    if (id < data.Shaders.Count)
-                                                        possibleObjects.Add(data.Shaders[id]);
-                                                    if (id < data.Timelines.Count)
-                                                        possibleObjects.Add(data.Timelines[id]);
-
-                                                    ContextMenu contextMenu = new ContextMenu();
-                                                    String ContextGetObject = "";
-                                                    foreach (UndertaleObject obj in possibleObjects)
-                                                    {
-                                                        MenuItem item = new MenuItem();
-                                                        item.Header = obj.ToString().Replace("_", "__");
-                                                        item.Click += (sender2, ev2) => Clipboard.SetText(((UndertaleNamedResource)obj).Name.Content);
-                                                        contextMenu.Items.Add(item);
-                                                    }
-                                                    if (id > 0x00050000)
-                                                    {
-                                                        contextMenu.Items.Add(new MenuItem() { Header = "#" + id.ToString("X6") + " (color)", IsEnabled = false });
-                                                    }
-                                                    contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
-                                                    (sender as Run).ContextMenu = contextMenu;
-                                                    contextMenu.IsOpen = true;
-                                                }
-                                                ev.Handled = true;
-                                            };
-                                        }
-                                        else
-                                            par.Inlines.Add(token);
-
-                                        if (token == "." && (Char.IsLetter(split[i + 1][0]) || split[i + 1][0] == '_'))
-                                        {
-                                            int id;
-                                            if (Int32.TryParse(split[i - 1], out id))
-                                            {
-                                                var gos = (Application.Current.MainWindow as MainWindow).Data.GameObjects;
-                                                if (!usedObjects.ContainsKey(split[i - 1]) && id >= 0 && id < gos.Count)
-                                                    usedObjects.Add(split[i - 1], gos[id]);
-                                            }
-                                        }
-                                    }
-
-                                    // Add used object comments.
-                                    foreach (var gt in usedObjects)
-                                    {
-                                        par.Inlines.Add(new Run(" // " + gt.Key + " = ") { Foreground = commentBrush });
-                                        par.Inlines.Add(new Run(gt.Value is string ? "\"" + (string)gt.Value + "\"" : gt.Value.ToString()) { Foreground = commentBrush, Cursor = Cursors.Hand });
-                                        if (gt.Value is UndertaleObject)
-                                            par.Inlines.LastInline.MouseDown += (sender, ev) => (Application.Current.MainWindow as MainWindow).ChangeSelection(gt.Value);
-                                    }
-
-                                    if (par.Inlines.Count >= 250)
-                                    { // Splitting into different paragraphs significantly increases selection performance.
-                                    document.Blocks.Add(par);
-                                        par = new Paragraph();
-                                        par.Margin = new Thickness(0);
-                                    }
-                                    else if (!readingString)
-                                    {
-                                        par.Inlines.Add(new Run("\n"));
-                                    }
-                                }
+                                foreach (var local in locals.Locals)
+                                    CurrentDecompiledLocals.Add(local.Name.Content);
                             }
                         }
+                        DecompiledEditor.IsReadOnly = false;
+                        DecompiledChanged = false;
 
-                        document.Blocks.Add(par);
-                        DecompiledView.Document = document;
                         CurrentDecompiled = code;
                         dialog.Hide();
                     });
                 });
-                _ = Application.Current.Dispatcher.BeginInvoke(new Action(() => dialog.ShowDialog()));
                 await t;
+                dialog.Close();
             }
         }
 
@@ -681,19 +343,19 @@ namespace UndertaleModTool
                         var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
                         var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
                         var wrapper = new GraphGeneration(getStartProcessQuery, getProcessStartInfoQuery, registerLayoutPluginCommand);
-                        
+
                         byte[] output = wrapper.GenerateGraph(dot, Enums.GraphReturnType.Png); // TODO: Use SVG instead
-                        
+
                         image = new ImageSourceConverter().ConvertFrom(output) as ImageSource;
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         Debug.WriteLine(e.ToString());
                         if (MessageBox.Show("Unable to execute GraphViz: " + e.Message + "\nMake sure you have downloaded it and set the path in settings.\nDo you want to open the download page now?", "Graph generation failed", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.Yes)
                             Process.Start("https://graphviz.gitlab.io/_pages/Download/Download_windows.html");
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Debug.WriteLine(e.ToString());
                     MessageBox.Show(e.Message, "Graph generation failed", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -710,26 +372,37 @@ namespace UndertaleModTool
             await t;
         }
 
-        private void DecompiledView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void DecompiledEditor_GotFocus(object sender, RoutedEventArgs e)
         {
-            if ((this.DataContext as UndertaleCode)?.DuplicateEntry == true)
+            if (DecompiledEditor.IsReadOnly)
                 return;
-            DecompiledView.Visibility = Visibility.Collapsed;
-            DecompiledEditor.Visibility = Visibility.Visible;
-            DecompiledEditor.Text = new TextRange(DecompiledView.Document.ContentStart, DecompiledView.Document.ContentEnd).Text;
-            int index = DisassemblyEditor.GetCharacterIndexFromPoint(Mouse.GetPosition(DecompiledView), true);
-            if (index >= 0)
-                DecompiledEditor.CaretIndex = index;
-            DecompiledEditor.Focus();
+            DecompiledFocused = true;
         }
 
         private void DecompiledEditor_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!DecompiledFocused)
+                return;
+            if (DecompiledEditor.IsReadOnly)
+                return;
+            DecompiledFocused = false;
+
+            if (!DecompiledChanged)
+                return;
+
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return; // Probably loaded another data.win or something.
             if (code.DuplicateEntry)
                 return;
+
+            // Check to make sure this isn't an element inside of the textbox, or another tab
+            IInputElement elem = Keyboard.FocusedElement;
+            if (elem is UIElement)
+            {
+                if (e != null && (elem as UIElement).IsDescendantOf(DecompiledEditor))
+                    return;
+            }
 
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
 
@@ -786,32 +459,46 @@ namespace UndertaleModTool
             CurrentDisassembled = null;
             CurrentDecompiled = null;
             CurrentGraphed = null;
-            DecompileCode(code);
 
-            DecompiledView.Visibility = Visibility.Visible;
-            DecompiledEditor.Visibility = Visibility.Collapsed;
+            // Tab switch
+            if (e == null)
+                return;
+
+            // Decompile new code
+            DecompileCode(code);
         }
 
-        private void DisassemblyView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void DisassemblyEditor_GotFocus(object sender, RoutedEventArgs e)
         {
-            if ((this.DataContext as UndertaleCode)?.DuplicateEntry == true)
+            if (DisassemblyEditor.IsReadOnly)
                 return;
-            DisassemblyView.Visibility = Visibility.Collapsed;
-            DisassemblyEditor.Visibility = Visibility.Visible;
-            DisassemblyEditor.Text = new TextRange(DisassemblyView.Document.ContentStart, DisassemblyView.Document.ContentEnd).Text;
-            int index = DisassemblyEditor.GetCharacterIndexFromPoint(Mouse.GetPosition(DisassemblyView), true);
-            if (index >= 0)
-                DisassemblyEditor.CaretIndex = index;
-            DisassemblyEditor.Focus();
+            DisassemblyFocused = true;
         }
 
         private void DisassemblyEditor_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!DisassemblyFocused)
+                return;
+            if (DisassemblyEditor.IsReadOnly)
+                return;
+            DisassemblyFocused = false;
+
+            if (!DisassemblyChanged)
+                return;
+
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return; // Probably loaded another data.win or something.
             if (code.DuplicateEntry)
                 return;
+
+            // Check to make sure this isn't an element inside of the textbox, or another tab
+            IInputElement elem = Keyboard.FocusedElement;
+            if (elem is UIElement)
+            {
+                if (e != null && (elem as UIElement).IsDescendantOf(DisassemblyEditor))
+                    return;
+            }
 
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
             try
@@ -819,19 +506,371 @@ namespace UndertaleModTool
                 var instructions = Assembler.Assemble(DisassemblyEditor.Text, data);
                 code.Replace(instructions);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            
+
+            // Get rid of old code
             CurrentDisassembled = null;
             CurrentDecompiled = null;
             CurrentGraphed = null;
-            DisassembleCode(code);
 
-            DisassemblyView.Visibility = Visibility.Visible;
-            DisassemblyEditor.Visibility = Visibility.Collapsed;
+            // Tab switch
+            if (e == null)
+                return;
+
+            // Disassemble new code
+            DisassembleCode(code);
+        }
+
+
+        // Based on https://stackoverflow.com/questions/28379206/custom-hyperlinks-using-avalonedit
+        public class NumberGenerator : VisualLineElementGenerator
+        {
+            readonly static Regex regex = new Regex(@"\b\d+\.?\b");
+
+            public NumberGenerator()
+            {
+            }
+
+            Match FindMatch(int startOffset, Regex r)
+            {
+                // fetch the end offset of the VisualLine being generated
+                int endOffset = CurrentContext.VisualLine.LastDocumentLine.EndOffset;
+                TextDocument document = CurrentContext.Document;
+                string relevantText = document.GetText(startOffset, endOffset - startOffset);
+                return r.Match(relevantText);
+            }
+
+            /// Gets the first offset >= startOffset where the generator wants to construct
+            /// an element.
+            /// Return -1 to signal no interest.
+            public override int GetFirstInterestedOffset(int startOffset)
+            {
+                Match m = FindMatch(startOffset, regex);
+                if (m.Success)
+                {
+                    int res = startOffset + m.Index;
+                    int line = CurrentContext.Document.GetLocation(res).Line;
+                    var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
+                    var highlighter = textArea.GetService(typeof(IHighlighter)) as IHighlighter;
+                    HighlightedLine highlighted = highlighter.HighlightLine(line);
+
+                    foreach (var section in highlighted.Sections)
+                    {
+                        if (section.Color.Name == "Number" &&
+                            section.Offset == res)
+                            return res;
+                    }
+                }
+                return -1;
+            }
+
+            /// Constructs an element at the specified offset.
+            /// May return null if no element should be constructed.
+            public override VisualLineElement ConstructElement(int offset)
+            {
+                Match m = FindMatch(offset, regex);
+
+                if (m.Success && m.Index == 0)
+                {
+                    var line = new ClickVisualLineText(m.Value, CurrentContext.VisualLine, m.Length);
+                    var doc = CurrentContext.Document;
+                    var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
+                    var editor = textArea.GetService(typeof(TextEditor)) as TextEditor;
+                    var parent = VisualTreeHelper.GetParent(editor);
+                    do
+                    {
+                        if ((parent as FrameworkElement) is UserControl)
+                            break;
+                        parent = VisualTreeHelper.GetParent(parent);
+                    } while (parent != null);
+                    line.Clicked += (text) =>
+                    {
+                        if (text.EndsWith("."))
+                            return;
+                        if (int.TryParse(text, out int id))
+                        {
+                            (parent as UndertaleCodeEditor).DecompiledFocused = true;
+                            UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
+
+                            List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
+                            if (id < data.Sprites.Count)
+                                possibleObjects.Add(data.Sprites[id]);
+                            if (id < data.Rooms.Count)
+                                possibleObjects.Add(data.Rooms[id]);
+                            if (id < data.GameObjects.Count)
+                                possibleObjects.Add(data.GameObjects[id]);
+                            if (id < data.Backgrounds.Count)
+                                possibleObjects.Add(data.Backgrounds[id]);
+                            if (id < data.Scripts.Count)
+                                possibleObjects.Add(data.Scripts[id]);
+                            if (id < data.Paths.Count)
+                                possibleObjects.Add(data.Paths[id]);
+                            if (id < data.Fonts.Count)
+                                possibleObjects.Add(data.Fonts[id]);
+                            if (id < data.Sounds.Count)
+                                possibleObjects.Add(data.Sounds[id]);
+                            if (id < data.Shaders.Count)
+                                possibleObjects.Add(data.Shaders[id]);
+                            if (id < data.Timelines.Count)
+                                possibleObjects.Add(data.Timelines[id]);
+
+                            ContextMenu contextMenu = new ContextMenu();
+                            foreach (UndertaleObject obj in possibleObjects)
+                            {
+                                MenuItem item = new MenuItem();
+                                item.Header = obj.ToString().Replace("_", "__");
+                                item.Click += (sender2, ev2) =>
+                                {
+                                    if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+                                    {
+                                        doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
+                                                    text.Length, (obj as UndertaleNamedResource).Name.Content, null);
+                                        (parent as UndertaleCodeEditor).DecompiledChanged = true;
+                                    }
+                                    else
+                                        (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
+                                };
+                                contextMenu.Items.Add(item);
+                            }
+                            if (id > 0x00050000)
+                            {
+                                contextMenu.Items.Add(new MenuItem() { Header = "#" + id.ToString("X6") + " (color)", IsEnabled = false });
+                            }
+                            contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
+
+                            contextMenu.IsOpen = true;
+                        }
+                    };
+                    return line;
+                }
+
+                return null;
+            }
+        }
+
+        public class NameGenerator : VisualLineElementGenerator
+        {
+            readonly static Regex regex = new Regex(@"[_a-zA-Z][_a-zA-Z0-9]*");
+
+            public NameGenerator()
+            {
+            }
+
+            Match FindMatch(int startOffset, Regex r)
+            {
+                // fetch the end offset of the VisualLine being generated
+                int endOffset = CurrentContext.VisualLine.LastDocumentLine.EndOffset;
+                TextDocument document = CurrentContext.Document;
+                string relevantText = document.GetText(startOffset, endOffset - startOffset);
+                return r.Match(relevantText);
+            }
+
+            /// Gets the first offset >= startOffset where the generator wants to construct
+            /// an element.
+            /// Return -1 to signal no interest.
+            public override int GetFirstInterestedOffset(int startOffset)
+            {
+                Match m = FindMatch(startOffset, regex);
+
+                var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
+                var highlighter = textArea.GetService(typeof(IHighlighter)) as IHighlighter;
+                int line = CurrentContext.Document.GetLocation(startOffset).Line;
+                HighlightedLine highlighted = highlighter.HighlightLine(line);
+
+                while (m.Success)
+                {
+                    int res = startOffset + m.Index;
+                    int currLine = CurrentContext.Document.GetLocation(res).Line;
+                    if (currLine != line)
+                    {
+                        line = currLine;
+                        highlighted = highlighter.HighlightLine(line);
+                    }
+
+                    foreach (var section in highlighted.Sections)
+                    {
+                        if (section.Color.Name == "Identifier" || section.Color.Name == "Function")
+                        {
+                            if (section.Offset == res)
+                                return res;
+                        }
+                    }
+
+                    startOffset += m.Length;
+                    m = FindMatch(startOffset, regex);
+                }
+                return -1;
+            }
+
+            /// Constructs an element at the specified offset.
+            /// May return null if no element should be constructed.
+            public override VisualLineElement ConstructElement(int offset)
+            {
+                Match m = FindMatch(offset, regex);
+
+                if (m.Success && m.Index == 0)
+                {
+                    UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
+                    bool func = (offset + m.Length + 1 < CurrentContext.VisualLine.LastDocumentLine.EndOffset) &&
+                                (CurrentContext.Document.GetCharAt(offset + m.Length) == '(');
+                    UndertaleNamedResource val = null;
+
+                    var doc = CurrentContext.Document;
+                    var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
+                    var editor = textArea.GetService(typeof(TextEditor)) as TextEditor;
+                    var parent = VisualTreeHelper.GetParent(editor);
+                    do
+                    {
+                        if ((parent as FrameworkElement) is UserControl)
+                            break;
+                        parent = VisualTreeHelper.GetParent(parent);
+                    } while (parent != null);
+
+                    // Process the content of this identifier/function
+                    if (func)
+                    {
+                        val = data.Scripts.ByName(m.Value);
+                        if (val == null)
+                            val = data.Functions.ByName(m.Value);
+                    }
+                    else
+                        val = data.ByName(m.Value);
+                    if (val == null)
+                    {
+                        if (offset >= 7)
+                        {
+                            if (CurrentContext.Document.GetText(offset - 7, 7) == "global.")
+                            {
+                                return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
+                                                                new SolidColorBrush(Color.FromRgb(0xF9, 0x7B, 0xF9)));
+                            }
+                        }
+                        if (data.BuiltinList.Constants.ContainsKey(m.Value))
+                            return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
+                                                            new SolidColorBrush(Color.FromRgb(0xFF, 0x80, 0x80)));
+                        if (data.BuiltinList.GlobalNotArray.ContainsKey(m.Value) ||
+                            data.BuiltinList.Instance.ContainsKey(m.Value) ||
+                            data.BuiltinList.GlobalArray.ContainsKey(m.Value))
+                            return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
+                                                            new SolidColorBrush(Color.FromRgb(0x58, 0xE3, 0x5A)));
+                        if ((parent as UndertaleCodeEditor).CurrentDecompiledLocals.Contains(m.Value))
+                            return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
+                                                            new SolidColorBrush(Color.FromRgb(0xFF, 0xF8, 0x99)));
+                        return null;
+                    }
+
+                    var line = new ClickVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
+                                                        func ? null : new SolidColorBrush(Color.FromRgb(0xFF, 0x80, 0x80)));
+                    line.Clicked += (text) =>
+                    {
+                        (Application.Current.MainWindow as MainWindow).ChangeSelection(val);
+                    };
+
+                    return line;
+                }
+
+                return null;
+            }
+        }
+        public class ColorVisualLineText : VisualLineText
+        {
+            private string Text { get; set; }
+            private Brush ForegroundBrush { get; set; }
+
+            /// <summary>
+            /// Creates a visual line text element with the specified length.
+            /// It uses the <see cref="ITextRunConstructionContext.VisualLine"/> and its
+            /// <see cref="VisualLineElement.RelativeTextOffset"/> to find the actual text string.
+            /// </summary>
+            public ColorVisualLineText(string text, VisualLine parentVisualLine, int length, Brush foregroundBrush)
+                : base(parentVisualLine, length)
+            {
+                Text = text;
+                ForegroundBrush = foregroundBrush;
+            }
+
+            public override TextRun CreateTextRun(int startVisualColumn, ITextRunConstructionContext context)
+            {
+                if (ForegroundBrush != null)
+                    TextRunProperties.SetForegroundBrush(ForegroundBrush);
+                return base.CreateTextRun(startVisualColumn, context);
+            }
+
+            protected override VisualLineText CreateInstance(int length)
+            {
+                return new ColorVisualLineText(Text, ParentVisualLine, length, null);
+            }
+        }
+
+        public class ClickVisualLineText : VisualLineText
+        {
+
+            public delegate void ClickHandler(string text);
+
+            public event ClickHandler Clicked;
+
+            private string Text { get; set; }
+            private Brush ForegroundBrush { get; set; }
+
+            /// <summary>
+            /// Creates a visual line text element with the specified length.
+            /// It uses the <see cref="ITextRunConstructionContext.VisualLine"/> and its
+            /// <see cref="VisualLineElement.RelativeTextOffset"/> to find the actual text string.
+            /// </summary>
+            public ClickVisualLineText(string text, VisualLine parentVisualLine, int length, Brush foregroundBrush = null)
+                : base(parentVisualLine, length)
+            {
+                Text = text;
+                ForegroundBrush = foregroundBrush;
+            }
+
+
+            public override TextRun CreateTextRun(int startVisualColumn, ITextRunConstructionContext context)
+            {
+                if (ForegroundBrush != null)
+                    TextRunProperties.SetForegroundBrush(ForegroundBrush);
+                return base.CreateTextRun(startVisualColumn, context);
+            }
+
+            bool LinkIsClickable()
+            {
+                if (string.IsNullOrEmpty(Text))
+                    return false;
+                return (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control;
+            }
+
+
+            protected override void OnQueryCursor(QueryCursorEventArgs e)
+            {
+                if (LinkIsClickable())
+                {
+                    e.Handled = true;
+                    e.Cursor = Cursors.Hand;
+                }
+            }
+
+            protected override void OnMouseDown(MouseButtonEventArgs e)
+            {
+                if (e.ChangedButton == System.Windows.Input.MouseButton.Left && !e.Handled && LinkIsClickable())
+                {
+                    if (Clicked != null)
+                    {
+                        Clicked(Text);
+                        e.Handled = true;
+                    }
+                }
+            }
+
+            protected override VisualLineText CreateInstance(int length)
+            {
+                var res = new ClickVisualLineText(Text, ParentVisualLine, length);
+                res.Clicked += Clicked;
+                return res;
+            }
         }
     }
 }
