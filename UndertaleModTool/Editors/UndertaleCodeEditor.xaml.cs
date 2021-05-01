@@ -29,7 +29,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.TextFormatting;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Xml;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
@@ -50,16 +49,21 @@ namespace UndertaleModTool
 
         public bool DecompiledFocused = false;
         public bool DecompiledChanged = false;
+        public SearchPanel DecompiledSearchPanel;
 
         public bool DisassemblyFocused = false;
         public bool DisassemblyChanged = false;
+        public SearchPanel DisassemblySearchPanel;
+
+        public static RoutedUICommand Compile = new RoutedUICommand("Compile code", "Compile", typeof(UndertaleCodeEditor));
 
         public UndertaleCodeEditor()
         {
             InitializeComponent();
 
             // Decompiled editor styling and functionality
-            SearchPanel.Install(DecompiledEditor.TextArea).MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
+            DecompiledSearchPanel = SearchPanel.Install(DecompiledEditor.TextArea);
+            DecompiledSearchPanel.MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
 
             using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("UndertaleModTool.Resources.GML.xshd"))
             {
@@ -76,7 +80,11 @@ namespace UndertaleModTool
             DecompiledEditor.TextArea.TextView.CurrentLineBackground = new SolidColorBrush(Color.FromRgb(60, 60, 60));
             DecompiledEditor.TextArea.TextView.CurrentLineBorder = null;
 
-            DecompiledEditor.Document.TextChanged += (s, e) => DecompiledChanged = true;
+            DecompiledEditor.Document.TextChanged += (s, e) =>
+            {
+                DecompiledFocused = true;
+                DecompiledChanged = true;
+            };
 
             DecompiledEditor.TextArea.SelectionBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100));
             DecompiledEditor.TextArea.SelectionForeground = null;
@@ -84,7 +92,8 @@ namespace UndertaleModTool
             DecompiledEditor.TextArea.SelectionCornerRadius = 0;
 
             // Disassembly editor styling and functionality
-            SearchPanel.Install(DisassemblyEditor.TextArea).MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
+            DisassemblySearchPanel = SearchPanel.Install(DisassemblyEditor.TextArea);
+            DisassemblySearchPanel.MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
 
             using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("UndertaleModTool.Resources.VMASM.xshd"))
             {
@@ -111,6 +120,8 @@ namespace UndertaleModTool
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return;
+            DecompiledSearchPanel.Close();
+            DisassemblySearchPanel.Close();
             DecompiledEditor_LostFocus(sender, null);
             DisassemblyEditor_LostFocus(sender, null);
             if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
@@ -145,6 +156,22 @@ namespace UndertaleModTool
             if (GraphTab.IsSelected && code != CurrentGraphed)
             {
                 GraphCode(code);
+            }
+        }
+
+        public static readonly RoutedEvent CtrlKEvent = EventManager.RegisterRoutedEvent(
+            "CtrlK", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(UndertaleCodeEditor));
+
+        private void Command_Compile(object sender, EventArgs e)
+        {
+            if (DecompiledFocused)
+            {
+                DecompiledEditor_LostFocus(sender, new RoutedEventArgs(CtrlKEvent));
+            }
+            else if (DisassemblyFocused)
+            {
+                DisassemblyEditor_LostFocus(sender, new RoutedEventArgs(CtrlKEvent));
+                DisassemblyEditor_GotFocus(sender, null);
             }
         }
 
@@ -212,7 +239,6 @@ namespace UndertaleModTool
             }
             return null;
         }
-
         private async void DecompileCode(UndertaleCode code)
         {
             DecompiledEditor.IsReadOnly = true;
@@ -231,8 +257,8 @@ namespace UndertaleModTool
                 if (gettext == null)
                     gettextCode = (Application.Current.MainWindow as MainWindow).Data.Code.ByName("gml_Script_textdata_en");
 
-                string dataPath = System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
-                string gettextJsonPath = (dataPath != null) ? System.IO.Path.Combine(dataPath, "lang/lang_en.json") : null;
+                string dataPath = Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
+                string gettextJsonPath = (dataPath != null) ? Path.Combine(dataPath, "lang", "lang_en.json") : null;
 
                 var dataa = (Application.Current.MainWindow as MainWindow).Data;
                 Task t = Task.Run(() =>
@@ -370,7 +396,7 @@ namespace UndertaleModTool
             IInputElement elem = Keyboard.FocusedElement;
             if (elem is UIElement)
             {
-                if (e != null && (elem as UIElement).IsDescendantOf(DecompiledEditor))
+                if (e != null && e.RoutedEvent?.Name != "CtrlK" && (elem as UIElement).IsDescendantOf(DecompiledEditor))
                     return;
             }
 
@@ -400,8 +426,6 @@ namespace UndertaleModTool
                 MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-
-            // Get rid of old code
             CurrentDisassembled = null;
             CurrentDecompiled = null;
             CurrentGraphed = null;
@@ -442,7 +466,7 @@ namespace UndertaleModTool
             IInputElement elem = Keyboard.FocusedElement;
             if (elem is UIElement)
             {
-                if (e != null && (elem as UIElement).IsDescendantOf(DisassemblyEditor))
+                if (e != null && e.RoutedEvent?.Name != "CtrlK" && (elem as UIElement).IsDescendantOf(DisassemblyEditor))
                     return;
             }
 
