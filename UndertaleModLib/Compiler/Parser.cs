@@ -359,9 +359,6 @@ namespace UndertaleModLib.Compiler
             public static Statement ParseTokens(CompileContext context, List<Lexer.Token> tokens)
             {
                 // Basic initialization
-                if (context.BuiltInList == null)
-                    context.BuiltInList = new BuiltinList(context.Data);
-
                 remainingStageOne.Clear();
                 ErrorMessages.Clear();
                 context.LocalVars.Clear();
