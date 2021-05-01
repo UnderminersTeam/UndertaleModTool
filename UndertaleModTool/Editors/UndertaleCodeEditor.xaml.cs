@@ -184,7 +184,7 @@ namespace UndertaleModTool
         {
             gettext = new Dictionary<string, int>();
             string[] DecompilationOutput;
-            if (SettingsWindow.DecompileOnceCompileManyEnabled == "False")
+            if (SettingsWindow.ProfileModeEnabled == "False")
                 DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
             else
             {
@@ -264,7 +264,7 @@ namespace UndertaleModTool
                     Exception e = null;
                     try
                     {
-                        decompiled = ((SettingsWindow.DecompileOnceCompileManyEnabled == "False" || !File.Exists(Path.Combine(TempPath, code.Name.Content + ".gml"))) ? Decompiler.Decompile(code, context).Replace("\r\n", "\n") : File.ReadAllText(Path.Combine(TempPath, code.Name.Content + ".gml")).Replace("\r\n", "\n"));
+                        decompiled = ((SettingsWindow.ProfileModeEnabled == "False" || !File.Exists(Path.Combine(TempPath, code.Name.Content + ".gml"))) ? Decompiler.Decompile(code, context).Replace("\r\n", "\n") : File.ReadAllText(Path.Combine(TempPath, code.Name.Content + ".gml")).Replace("\r\n", "\n"));
                     }
                     catch (Exception ex)
                     {
@@ -440,12 +440,12 @@ namespace UndertaleModTool
             }
             try
             {
-                if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3) && (SettingsWindow.DecompileOnceCompileManyEnabled == "True"))
+                if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3) && (SettingsWindow.ProfileModeEnabled == "True"))
                 {
                     //Write text, if only in the profile mode.
                     File.WriteAllText(Path.Combine(TempPath, code.Name.Content + ".gml"), DecompiledEditor.Text);
                 }
-                else if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3) && (SettingsWindow.DecompileOnceCompileManyEnabled == "False"))
+                else if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3) && (SettingsWindow.ProfileModeEnabled == "False"))
                 {
                     //Destroy file with comments if it's been edited outside the profile mode.
                     //We're dealing with the decompiled code only, it has to happen.

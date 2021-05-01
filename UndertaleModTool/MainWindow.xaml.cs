@@ -381,7 +381,7 @@ namespace UndertaleModTool
                             UpdateProfile(data, filename);
                             if (data != null)
                             {
-                                data.ProfileMode = (SettingsWindow.DecompileOnceCompileManyEnabled == "True" ? true : false);
+                                data.ProfileMode = (SettingsWindow.ProfileModeEnabled == "True" ? true : false);
                                 data.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                             }
                         }
@@ -557,7 +557,7 @@ namespace UndertaleModTool
                 }
                 if (Data != null)
                 {
-                    Data.ProfileMode = (SettingsWindow.DecompileOnceCompileManyEnabled == "True" ? true : false);
+                    Data.ProfileMode = (SettingsWindow.ProfileModeEnabled == "True" ? true : false);
                     Data.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                 }
 

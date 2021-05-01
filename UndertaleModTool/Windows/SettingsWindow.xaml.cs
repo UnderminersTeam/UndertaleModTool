@@ -69,27 +69,27 @@ namespace UndertaleModTool
             }
         }
 
-        public static string DecompileOnceCompileManyEnabled
+        public static string ProfileModeEnabled
         {
-            get => ConfigurationManager.AppSettings["DecompileOnceCompileManyEnabled"] as String;
+            get => ConfigurationManager.AppSettings["ProfileModeEnabled"] as String;
             set
             {
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["DecompileOnceCompileManyEnabled"].Value = value;
+                config.AppSettings.Settings["ProfileModeEnabled"].Value = value;
                 config.Save(ConfigurationSaveMode.Modified);
                 ConfigurationManager.RefreshSection("appSettings");
                 if ((Application.Current.MainWindow as MainWindow).Data != null)
                 {
-                    (Application.Current.MainWindow as MainWindow).Data.ProfileMode = (SettingsWindow.DecompileOnceCompileManyEnabled == "True" ? true : false);
+                    (Application.Current.MainWindow as MainWindow).Data.ProfileMode = (SettingsWindow.ProfileModeEnabled == "True" ? true : false);
                 }
                 else if ((Application.Current.MainWindow as MainWindow).Data.GMS2_3)
                 {
-	                config.AppSettings.Settings["DecompileOnceCompileManyEnabled"].Value = "False";
+	                config.AppSettings.Settings["ProfileModeEnabled"].Value = "False";
                     (Application.Current.MainWindow as MainWindow).Data.ProfileMode = false;
                 }
                 else
                 {
-	                config.AppSettings.Settings["DecompileOnceCompileManyEnabled"].Value = "False";
+	                config.AppSettings.Settings["ProfileModeEnabled"].Value = "False";
                 }
             }
         }

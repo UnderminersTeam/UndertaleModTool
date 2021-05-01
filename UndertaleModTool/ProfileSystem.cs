@@ -175,7 +175,7 @@ namespace UndertaleModTool
             {
                 //This extra step needs to happen for non-profile mode because the "Temp" folder can be modified in non-profile mode.
                 //If we don't, it could cause desynchronization between modes.
-                if (SettingsWindow.DecompileOnceCompileManyEnabled == "False")
+                if (SettingsWindow.ProfileModeEnabled == "False")
                 {
                     string MainFolder = Path.Combine(ProfilesFolder, ProfileHash, "Main");
                     string TempFolder = Path.Combine(ProfilesFolder, ProfileHash, "Temp");
@@ -205,12 +205,12 @@ namespace UndertaleModTool
                 }
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Main"));
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Temp"));
-                if (SettingsWindow.DecompileOnceCompileManyEnabled == "True" && data.GMS2_3)
+                if (SettingsWindow.ProfileModeEnabled == "True" && data.GMS2_3)
                 {
                     MessageBox.Show("The profile feature is not currently supported for GameMaker 2.3 games.");
                     return;
                 }
-                else if (SettingsWindow.DecompileOnceCompileManyEnabled == "True" && (!(data.IsYYC())))
+                else if (SettingsWindow.ProfileModeEnabled == "True" && (!(data.IsYYC())))
                 {
                     Directory.CreateDirectory(ProfilesFolder);
                     string ProfDir = Path.Combine(ProfilesFolder, ProfileHash);
@@ -274,11 +274,11 @@ on or off).");
                     }
                     CreateUMTLastEdited(filename);
                 }
-                else if ((SettingsWindow.DecompileOnceCompileManyEnabled == "False") && (!(data.IsYYC())))
+                else if ((SettingsWindow.ProfileModeEnabled == "False") && (!(data.IsYYC())))
                 {
                     return;
                 }
-                else if (SettingsWindow.DecompileOnceCompileManyEnabled == "True" && data.IsYYC())
+                else if (SettingsWindow.ProfileModeEnabled == "True" && data.IsYYC())
                 {
                     MessageBox.Show("Profiles are not available for YYC games!");
                     return;
@@ -308,13 +308,13 @@ on or off).");
                 }
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Main"));
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Temp"));
-                if (SettingsWindow.DecompileOnceCompileManyEnabled == "False" || data.GMS2_3 || data.IsYYC())
+                if (SettingsWindow.ProfileModeEnabled == "False" || data.GMS2_3 || data.IsYYC())
                 {
                     MD5PreviouslyLoaded = MD5CurrentlyLoaded;
                     ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                     return;
                 }
-                else if (SettingsWindow.DecompileOnceCompileManyEnabled == "True")
+                else if (SettingsWindow.ProfileModeEnabled == "True")
                 {
                     Directory.CreateDirectory(ProfilesFolder);
                     string ProfDir;
