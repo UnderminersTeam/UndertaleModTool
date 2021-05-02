@@ -46,6 +46,21 @@ namespace UndertaleModTool
         public UndertaleCode CurrentDecompiled = null;
         public List<string> CurrentDecompiledLocals = null;
         public UndertaleCode CurrentGraphed = null;
+        public string UMTAppDataPath = (Application.Current.MainWindow as MainWindow).AppDataFolder;
+        public string ProfilesFolder = (Application.Current.MainWindow as MainWindow).ProfilesFolder;
+        public string ProfileHash = (Application.Current.MainWindow as MainWindow).ProfileHash;
+        public string MainPath = Path.Combine((Application.Current.MainWindow as MainWindow).ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Main");
+        public string TempPath = Path.Combine((Application.Current.MainWindow as MainWindow).ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Temp");
+
+        public bool DecompiledFocused = false;
+        public bool DecompiledChanged = false;
+        public SearchPanel DecompiledSearchPanel;
+
+        public bool DisassemblyFocused = false;
+        public bool DisassemblyChanged = false;
+        public SearchPanel DisassemblySearchPanel;
+
+        public static RoutedUICommand Compile = new RoutedUICommand("Compile code", "Compile", typeof(UndertaleCodeEditor));
 
         public bool DecompiledFocused = false;
         public bool DecompiledChanged = false;
@@ -118,6 +133,8 @@ namespace UndertaleModTool
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UndertaleCode code = this.DataContext as UndertaleCode;
+            Directory.CreateDirectory(MainPath);
+            Directory.CreateDirectory(TempPath);
             if (code == null)
                 return;
             DecompiledSearchPanel.Close();
@@ -204,7 +221,24 @@ namespace UndertaleModTool
         private void UpdateGettext(UndertaleCode gettextCode)
         {
             gettext = new Dictionary<string, int>();
-            foreach (var line in Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n'))
+            string[] DecompilationOutput;
+            if (SettingsWindow.ProfileModeEnabled == "False")
+                DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
+            else
+            {
+                try
+                {
+                    if (File.Exists(Path.Combine(TempPath, gettextCode.Name.Content + ".gml")))
+                        DecompilationOutput = File.ReadAllText(Path.Combine(TempPath, gettextCode.Name.Content + ".gml")).Replace("\r\n", "\n").Split('\n');
+                    else
+                        DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
+                }
+                catch
+                {
+                    DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
+                }
+            }
+            foreach (var line in DecompilationOutput)
             {
                 Match m = Regex.Match(line, "^ds_map_add\\(global.text_data_en, \"(.*)\"@([0-9]+), \"(.*)\"@([0-9]+)\\)");
                 if (m.Success)
@@ -268,7 +302,7 @@ namespace UndertaleModTool
                     Exception e = null;
                     try
                     {
-                        decompiled = Decompiler.Decompile(code, context).Replace("\r\n", "\n");
+                        decompiled = ((SettingsWindow.ProfileModeEnabled == "False" || !File.Exists(Path.Combine(TempPath, code.Name.Content + ".gml"))) ? Decompiler.Decompile(code, context).Replace("\r\n", "\n") : File.ReadAllText(Path.Combine(TempPath, code.Name.Content + ".gml")).Replace("\r\n", "\n"));
                     }
                     catch (Exception ex)
                     {
@@ -277,6 +311,20 @@ namespace UndertaleModTool
 
                     if (gettextCode != null)
                         UpdateGettext(gettextCode);
+
+                    try
+                    {
+                        if (gettextJSON == null && gettextJsonPath != null && File.Exists(gettextJsonPath))
+                        {
+                            string err = UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
+                            if (err != null)
+                                e = new Exception(err);
+                        }
+                    }
+                    catch (Exception exc)
+                    {
+                        MessageBox.Show(exc.ToString());
+                    }
 
                     if (gettextJSON == null && gettextJsonPath != null && File.Exists(gettextJsonPath))
                     {
@@ -416,6 +464,8 @@ namespace UndertaleModTool
                 return;
             }
 
+            //The code should only be written after being successfully edited (if it doesn't successfully assemble for some reason, don't write it).
+            bool CodeEditSuccessful = false;
             try
             {
                 var instructions = Assembler.Assemble(compileContext.ResultAssembly, data);
@@ -426,6 +476,29 @@ namespace UndertaleModTool
                 MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+            try
+            {
+                if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3) && (SettingsWindow.ProfileModeEnabled == "True"))
+                {
+                    //Write text, if only in the profile mode.
+                    File.WriteAllText(Path.Combine(TempPath, code.Name.Content + ".gml"), DecompiledEditor.Text);
+                }
+                else if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3) && (SettingsWindow.ProfileModeEnabled == "False"))
+                {
+                    //Destroy file with comments if it's been edited outside the profile mode.
+                    //We're dealing with the decompiled code only, it has to happen.
+                    //Otherwise it will cause a desync, which is more important to prevent.
+                    if (File.Exists(Path.Combine(TempPath, code.Name.Content + ".gml")))
+                    {
+                        File.Delete(Path.Combine(TempPath, code.Name.Content + ".gml"));
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show("Error during writing of GML code to profile:\n" + exc.ToString());
+            }
+            // Show new code, decompiled.
             CurrentDisassembled = null;
             CurrentDecompiled = null;
             CurrentGraphed = null;

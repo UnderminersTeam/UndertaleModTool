@@ -4,6 +4,12 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+if (Data.ProfileMode)
+{
+    ScriptMessage("This script is incompatible with profile mode.");
+    return;
+}
+
 int progress = 0;
 string codeFolder = GetFolder(FilePath) + "Export_Assembly2" + Path.DirectorySeparatorChar;
 ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));

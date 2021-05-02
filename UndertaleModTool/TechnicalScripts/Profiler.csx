@@ -1,5 +1,7 @@
-// By colinator27 and BenjaminUrquhart, ImportGML at end from UndertaleModTool sample scripts
+// By colinator27 and BenjaminUrquhart, ImportGMLString at end from UndertaleModTool sample scripts
 // Reworked to be a profiler and stack tracer (to identify freeze locations) by Grossley
+// Removed built in ImportGML, that has been integrated into the tool itself now, replace with ImportGMLString - Grossley
+// Reworked for Profile Mode by Grossley - 04/29/2021
 
 using System;
 using System.IO;
@@ -7,6 +9,12 @@ using UndertaleModLib.Util;
 using System.Linq;
 
 EnsureDataLoaded();
+
+if (Data.ProfileMode)
+{
+    //This script IS reworked to use entirely GML edits, WOW! - Grossley
+    ScriptMessage("This script is profile mode compatible.");
+}
 
 if (!(ScriptQuestion(@"This script is irreversible
 and cannot be removed. 
@@ -32,7 +40,7 @@ SELECT ""NO"" NOW to cancel the script without changes applied.")))
     ScriptMessage("Cancelled!");
     return;
 }
-    
+
 if (!(ScriptQuestion(@"Profiler data will be located in the save directory of your game.
 A stacktrace is also available in the event your game freezes or 
 crashes without warning.
@@ -90,135 +98,21 @@ If it is already invisible, select 'NO' to toggle the profiler back on."))
 
 //PersistentObjectSetup("__obj_executionorder__");
 
-// Process bytecode, patching in script calls where needed
-foreach (UndertaleCode c in Data.Code)
+if (!Data.GMS2_3)
 {
-    // global.interact get/set patches
-    for (int i = 0; i < c.Instructions.Count; i++)
+    string nameToCompare = Data.GeneralInfo.Name.Content.ToLower();
+    if (!(nameToCompare.Contains("nxtale") || nameToCompare.Contains("undertale") || nameToCompare.Contains("survey_program") || nameToCompare.Contains("deltarune")))
     {
-        UndertaleInstruction inst = c.Instructions[i];
-        if (inst.Kind == UndertaleInstruction.Opcode.PushGlb &&
-            ((UndertaleInstruction.Reference<UndertaleVariable>)inst.Value).Target.Name.Content == "interact")
+        if (!ScriptQuestion("This will make changes across all of the code! Are you sure you'd like to continue?"))
         {
-            // global.interact getter
-            c.Instructions[i] = new UndertaleInstruction()
-            {
-                Kind = UndertaleInstruction.Opcode.Call,
-                Type1 = UndertaleInstruction.DataType.Int32,
-                ArgumentsCount = 0,
-                Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = getInteractFunc }
-            };
-        } else if (inst.Kind == UndertaleInstruction.Opcode.Pop &&
-            ((UndertaleInstruction.Reference<UndertaleVariable>)inst.Destination).Target.Name.Content == "interact")
-        {
-            // global.interact setter
-            c.Instructions[i] = new UndertaleInstruction()
-            {
-                Kind = UndertaleInstruction.Opcode.Conv,
-                Type1 = UndertaleInstruction.DataType.Int32,
-                Type2 = UndertaleInstruction.DataType.Variable
-            };
-            c.Instructions.Insert(i + 1, new UndertaleInstruction()
-            {
-                Kind = UndertaleInstruction.Opcode.Popz,
-                Type1 = UndertaleInstruction.DataType.Variable
-            });
-            c.Instructions.Insert(i + 1, new UndertaleInstruction()
-            {
-                Kind = UndertaleInstruction.Opcode.Call,
-                Type1 = UndertaleInstruction.DataType.Int32,
-                ArgumentsCount = 1,
-                Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = setInteractFunc }
-            });
-            
-            // Now that instructions were inserted, adjust jump offsets in
-            // surrounding goto instructions to properly reflect that
-            for (int j = 0; j < i; j++)
-            {
-                var currPatch = c.Instructions[j];
-                if (UndertaleInstruction.GetInstructionType(currPatch.Kind) == UndertaleInstruction.InstructionType.GotoInstruction)
-                {
-                    if (currPatch.Address + currPatch.JumpOffset > inst.Address)
-                        currPatch.JumpOffset += 2;
-                }
-            }
-            for (int j = i + 3; j < c.Instructions.Count; j++)
-            {
-                var currPatch = c.Instructions[j];
-                if (UndertaleInstruction.GetInstructionType(currPatch.Kind) == UndertaleInstruction.InstructionType.GotoInstruction)
-                {
-                    if (currPatch.Address + currPatch.JumpOffset <= inst.Address)
-                        currPatch.JumpOffset -= 2;
-                }
-            }
+            return;
         }
     }
-
-    if (c.Name.Content.StartsWith("gml_Object"))
-    {
-        // Insert function call to __scr_eventrun__ with entry name at the beginning
-        var newString = Data.Strings.MakeString(c.Name.Content.Substring(11));
-        c.Instructions.InsertRange(0, new List<UndertaleInstruction>()
-        {
-            new UndertaleInstruction()
-            {
-                Kind = UndertaleInstruction.Opcode.Push,
-                Type1 = UndertaleInstruction.DataType.String,
-                Value = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>() { Resource = newString, CachedId = Data.Strings.IndexOf(newString) }
-            },
-            new UndertaleInstruction()
-            {
-                Kind = UndertaleInstruction.Opcode.Conv,
-                Type1 = UndertaleInstruction.DataType.String,
-                Type2 = UndertaleInstruction.DataType.Variable
-            },
-            new UndertaleInstruction()
-            {
-                Kind = UndertaleInstruction.Opcode.Call,
-                Type1 = UndertaleInstruction.DataType.Int32,
-                ArgumentsCount = 1,
-                Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = func }
-            },
-            new UndertaleInstruction()
-            {
-                Kind = UndertaleInstruction.Opcode.Popz,
-                Type1 = UndertaleInstruction.DataType.Variable
-            }
-        });
-        
-        // Patch every exit instruction to instead branch to the end of the code
-        c.UpdateAddresses();
-        var last = c.Instructions.Last();
-        uint endAddr = last.Address + last.CalculateInstructionSize();
-        for (int i = 4; i < c.Instructions.Count; i++)
-        {
-            if (c.Instructions[i].Kind == UndertaleInstruction.Opcode.Exit)
-            {
-                c.Instructions[i] = new UndertaleInstruction()
-                {
-                    Kind = UndertaleInstruction.Opcode.B,
-                    JumpOffset = (int)(endAddr - c.Instructions[i].Address)
-                };
-            }
-        }
-        
-        // At the end of the code, insert function call to __scr_eventend__
-        c.Instructions.AddRange(new List<UndertaleInstruction>()
-        {
-            new UndertaleInstruction()
-            {
-                Kind = UndertaleInstruction.Opcode.Call,
-                Type1 = UndertaleInstruction.DataType.Int32,
-                ArgumentsCount = 0,
-                Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = endFunc }
-            },
-            new UndertaleInstruction()
-            {
-                Kind = UndertaleInstruction.Opcode.Popz,
-                Type1 = UndertaleInstruction.DataType.Variable
-            }
-        });
-    }
+    ProfileModeOperations();
+}
+else
+{
+    ProfileModeExempt();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -227,16 +121,16 @@ foreach (UndertaleCode c in Data.Code)
 
 void ClearCustomGML()
 {
-    ImportGML("gml_Object___obj_executionorder___Destroy_0", @"");
-    ImportGML("gml_Object___obj_executionorder___Create_0", @"");
-    ImportGML("gml_Object___obj_executionorder___Draw_64", @"");
-    ImportGML("gml_Object_obj_grossley_persist_Create_0", @"");
-    ImportGML("gml_Object_obj_grossley_persist_Step_0", @"");
-    ImportGML("gml_Object_obj_grossley_persist_Draw_64", @"");
-    ImportGML("gml_Script___scr_eventrun__", @"");
-    ImportGML("gml_Script___scr_eventend__", @"");
-    ImportGML("gml_Script___scr_setinteract__", @"");
-    ImportGML("gml_Script___scr_getinteract__", @"");
+    ImportGMLString("gml_Object___obj_executionorder___Destroy_0", @"");
+    ImportGMLString("gml_Object___obj_executionorder___Create_0", @"");
+    ImportGMLString("gml_Object___obj_executionorder___Draw_64", @"");
+    ImportGMLString("gml_Object_obj_grossley_persist_Create_0", @"");
+    ImportGMLString("gml_Object_obj_grossley_persist_Step_0", @"");
+    ImportGMLString("gml_Object_obj_grossley_persist_Draw_64", @"");
+    ImportGMLString("gml_Script___scr_eventrun__", @"");
+    ImportGMLString("gml_Script___scr_eventend__", @"");
+    ImportGMLString("gml_Script___scr_setinteract__", @"");
+    ImportGMLString("gml_Script___scr_getinteract__", @"");
 }
 
 SetUpCustomGML();
@@ -244,11 +138,11 @@ SetUpCustomGML();
 void SetUpCustomGML()
 {
     // __obj_executionorder__
-    ImportGML("gml_Object___obj_executionorder___Destroy_0", @"
+    ImportGMLString("gml_Object___obj_executionorder___Destroy_0", @"
     ds_stack_destroy(stack);
     ");
 
-    ImportGML("gml_Object___obj_executionorder___Create_0", @"
+    ImportGMLString("gml_Object___obj_executionorder___Create_0", @"
     global.interact = 0; // prevents error on obj_time create from missing globals
     events[1024, 4] = 0;
     stack = ds_stack_create();
@@ -353,7 +247,7 @@ void SetUpCustomGML()
     i = 0;
     ds_stack_clear(stack);
     ";
-    ImportGML("gml_Object___obj_executionorder___Draw_64" /* draw gui */, str);
+    ImportGMLString("gml_Object___obj_executionorder___Draw_64" /* draw gui */, str);
     var objt = Data.GameObjects.ByName("__obj_executionorder__");
     objt.Persistent = true;
     Data.GeneralInfo.RoomOrder.First().Resource.GameObjects.Insert(0, new UndertaleRoom.GameObject()
@@ -364,12 +258,12 @@ void SetUpCustomGML()
 
     // Script implementations
     PersistentObjectSetup("obj_grossley_persist");
-    ImportGML("gml_Object_obj_grossley_persist_Create_0", @"
+    ImportGMLString("gml_Object_obj_grossley_persist_Create_0", @"
     ");
-    ImportGML("gml_Object_obj_grossley_persist_Step_0", @"
+    ImportGMLString("gml_Object_obj_grossley_persist_Step_0", @"
     global.grossley_timer = get_timer();
     ");
-    ImportGML("gml_Object_obj_grossley_persist_Draw_64", @"
+    ImportGMLString("gml_Object_obj_grossley_persist_Draw_64", @"
     var i, file;
     var time_spent_total = 0;
     var times_called_total = 0;
@@ -455,7 +349,7 @@ void SetUpCustomGML()
     }
     ");
 
-    ImportGML("gml_Script___scr_eventrun__", @"
+    ImportGMLString("gml_Script___scr_eventrun__", @"
     if (!instance_exists(__obj_executionorder__))
         instance_activate_object(__obj_executionorder__);
     if (!instance_exists(obj_grossley_persist))
@@ -528,7 +422,7 @@ void SetUpCustomGML()
     }
     ".Replace("instance_create(0, 0, obj_grossley_persist)", ((Data.GeneralInfo.Major < 2) ? "instance_create(0, 0, obj_grossley_persist)" : "instance_create_depth(0, 0, -99999999, obj_grossley_persist)")));
 
-    ImportGML("gml_Script___scr_eventend__", @"
+    ImportGMLString("gml_Script___scr_eventend__", @"
     global.grossley_obj_ind = object_index;
     with (__obj_executionorder__) 
     {
@@ -548,7 +442,7 @@ void SetUpCustomGML()
     }
     ");
 
-    ImportGML("gml_Script___scr_setinteract__", @"
+    ImportGMLString("gml_Script___scr_setinteract__", @"
     with (__obj_executionorder__)
     {
         if (ds_stack_size(stack) > 0)
@@ -560,7 +454,7 @@ void SetUpCustomGML()
     global.interact = argument0;
     ");
 
-    ImportGML("gml_Script___scr_getinteract__", @"
+    ImportGMLString("gml_Script___scr_getinteract__", @"
     with (__obj_executionorder__)
     {
         if (ds_stack_size(stack) > 0)
@@ -569,154 +463,239 @@ void SetUpCustomGML()
     return global.interact;
     ");
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Import the GML
-enum EventTypes {
-    Create,
-    Destroy,
-    Alarm,
-    Step,
-    Collision,
-    Keyboard,
-    Mouse,
-    Other,
-    Draw,
-    KeyPress,
-    KeyRelease,
-    Trigger,
-    CleanUp,
-    Gestures,
-    PreCreate
+///////////////////////////////////////////////////////////////////////////
+
+void ProfileModeOperations()
+{
+    // Process GML in the following fashion:
+    // Always put a call to scr_eventrun, with the name of the code from which it was called, at line 1.
+    // At end of file, also put scr_eventend.
+    // Replace all interacts with corresponding calls.
+    // Call scr_eventend immediately before a "return" or "exit" in order to make sure it is always called at end.
+    // This avoids the hacky ASM solution of forcing the code to jump to the end of the file.
+    // It also makes sense from a GML standpoint.
+    // This will only work for games with corrections, and UT/DR, for which GML can be guaranteed safe.
+    // Otherwise, the original (hacky) solution will need to be done.
+    // But this GML solution is so simple, inserting the call to scr_eventend similarly seems more than possible.
+    // Sadly, I don't know how to do such an equivalent action myself.
+
+    //TODO: reimplement ASM solution w/o hacky asm breaking
+
+    foreach (UndertaleCode c in Data.Code)
+    {
+        if (c.Name.Content.StartsWith("gml_Object"))
+        {
+            gmlCode = GetDecompiledText(c.Name.Content);
+            gmlCode = ("__scr_eventrun__(\"" + c.Name.Content.Substring(11) + "\")\n" + gmlCode + "\n__scr_eventend__()");
+            gmlCode = gmlCode.Replace("global.interact = 0", "__scr_setinteract__(0)");
+            gmlCode = gmlCode.Replace("global.interact = 1", "__scr_setinteract__(1)");
+            gmlCode = gmlCode.Replace("global.interact = 2", "__scr_setinteract__(2)");
+            gmlCode = gmlCode.Replace("global.interact = 3", "__scr_setinteract__(3)");
+            gmlCode = gmlCode.Replace("global.interact = 4", "__scr_setinteract__(4)");
+            gmlCode = gmlCode.Replace("global.interact = 5", "__scr_setinteract__(5)");
+            gmlCode = gmlCode.Replace("global.interact = 6", "__scr_setinteract__(6)");
+            gmlCode = gmlCode.Replace("global.interact = 99", "__scr_setinteract__(99)");
+            gmlCode = gmlCode.Replace("global.interact", "__scr_getinteract__()");
+            gmlCode = gmlCode.Replace("return;\n", "{__scr_eventend__();return;}\n");
+            gmlCode = gmlCode.Replace("return;\r\n", "{__scr_eventend__();return;}\r\n");
+            gmlCode = gmlCode.Replace("exit\n", "{__scr_eventend__();exit;}\n");
+            gmlCode = gmlCode.Replace("exit\r\n", "{__scr_eventend__();exit;}\r\n");
+            c.ReplaceGML(codeName, Data);
+        }
+    }
 }
+void ProfileModeExempt()
+{
+    // Process bytecode, patching in script calls where needed
+    foreach (UndertaleCode c in Data.Code)
+    {
+        // global.interact get/set patches
+        for (int i = 0; i < c.Instructions.Count; i++)
+        {
+            UndertaleInstruction inst = c.Instructions[i];
+            if (inst.Kind == UndertaleInstruction.Opcode.PushGlb &&
+                ((UndertaleInstruction.Reference<UndertaleVariable>)inst.Value).Target.Name.Content == "interact")
+            {
+                // global.interact getter
+                c.Instructions[i] = new UndertaleInstruction()
+                {
+                    Kind = UndertaleInstruction.Opcode.Call,
+                    Type1 = UndertaleInstruction.DataType.Int32,
+                    ArgumentsCount = 0,
+                    Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = getInteractFunc }
+                };
+                NukeProfileGML(c.Name.Content);
+            }
+            else if (inst.Kind == UndertaleInstruction.Opcode.Pop &&
+                ((UndertaleInstruction.Reference<UndertaleVariable>)inst.Destination).Target.Name.Content == "interact")
+            {
+                // global.interact setter
+                c.Instructions[i] = new UndertaleInstruction()
+                {
+                    Kind = UndertaleInstruction.Opcode.Conv,
+                    Type1 = UndertaleInstruction.DataType.Int32,
+                    Type2 = UndertaleInstruction.DataType.Variable
+                };
+                c.Instructions.Insert(i + 1, new UndertaleInstruction()
+                {
+                    Kind = UndertaleInstruction.Opcode.Popz,
+                    Type1 = UndertaleInstruction.DataType.Variable
+                });
+                c.Instructions.Insert(i + 1, new UndertaleInstruction()
+                {
+                    Kind = UndertaleInstruction.Opcode.Call,
+                    Type1 = UndertaleInstruction.DataType.Int32,
+                    ArgumentsCount = 1,
+                    Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = setInteractFunc }
+                });
 
-void ImportGML(string codeName, string gmlCode) {
-    if (Data.Code.ByName(codeName) == null) { // Should keep from adding duplicate scripts; haven't tested
-        UndertaleCode code = new UndertaleCode();
-        code.Name = Data.Strings.MakeString(codeName);
-        Data.Code.Add(code);
-        UndertaleCodeLocals locals = new UndertaleCodeLocals();
-        locals.Name = code.Name;
-        UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-        argsLocal.Name = Data.Strings.MakeString("arguments");
-        argsLocal.Index = 0;
-        locals.Locals.Add(argsLocal);
-        code.LocalsCount = 1;
-        code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
-        Data.CodeLocals.Add(locals);
-        // This portion links code.
-        if (codeName.Substring(0, 10).Equals("gml_Script")) {
-            // Add code to scripts section.
-            UndertaleScript scr = new UndertaleScript();
-            scr.Name = Data.Strings.MakeString(codeName.Substring(11));
-            scr.Code = code;
-            Data.Scripts.Add(scr);
-        } 
-        else if (codeName.Substring(0, 10).Equals("gml_Object")) {
-            // Add code to object methods.
-            string afterPrefix = codeName.Substring(11);
-            // Dumb substring shite, don't mess with this.
-            int underCount = 0;
-            string methodNumberStr = "", methodName = "", objName = "";
-            for (int i = afterPrefix.Length - 1; i >= 0; i--) {
-                if (afterPrefix[i] == '_') {
-                    underCount++;
-                    if (underCount == 1) {
-                        methodNumberStr = afterPrefix.Substring(i + 1);
-                    } else if (underCount == 2) {
-                        objName = afterPrefix.Substring(0, i);
-                        methodName = afterPrefix.Substring(i + 1, afterPrefix.Length - objName.Length - methodNumberStr.Length - 2);
-                        break;
+                // Now that instructions were inserted, adjust jump offsets in
+                // surrounding goto instructions to properly reflect that
+                for (int j = 0; j < i; j++)
+                {
+                    var currPatch = c.Instructions[j];
+                    if (UndertaleInstruction.GetInstructionType(currPatch.Kind) == UndertaleInstruction.InstructionType.GotoInstruction)
+                    {
+                        if (currPatch.Address + currPatch.JumpOffset > inst.Address)
+                            currPatch.JumpOffset += 2;
                     }
                 }
+                for (int j = i + 3; j < c.Instructions.Count; j++)
+                {
+                    var currPatch = c.Instructions[j];
+                    if (UndertaleInstruction.GetInstructionType(currPatch.Kind) == UndertaleInstruction.InstructionType.GotoInstruction)
+                    {
+                        if (currPatch.Address + currPatch.JumpOffset <= inst.Address)
+                            currPatch.JumpOffset -= 2;
+                    }
+                }
+                NukeProfileGML(c.Name.Content);
             }
-            int methodNumber = Int32.Parse(methodNumberStr);
-            UndertaleGameObject obj = Data.GameObjects.ByName(objName);
-            if (obj == null) {
-                UndertaleGameObject gameObj = new UndertaleGameObject();
-                gameObj.Name = Data.Strings.MakeString(objName);
-                Data.GameObjects.Add(gameObj);
-            }
-            obj = Data.GameObjects.ByName(objName);
-            int eventIdx = (int)Enum.Parse(typeof(EventTypes), methodName);
-            UndertalePointerList<UndertaleGameObject.Event> eventList = obj.Events[eventIdx];
-            UndertaleGameObject.EventAction action = new UndertaleGameObject.EventAction();
-            UndertaleGameObject.Event evnt = new UndertaleGameObject.Event();
-            action.ActionName = code.Name;
-            action.CodeId = code;
-            evnt.EventSubtype = (uint)methodNumber;
-            evnt.Actions.Add(action);
-            eventList.Add(evnt);
         }
-        // Code which does not match these criteria cannot linked, but are still added to the code section.
-    }
-    try
-    {
-        Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
-    }
-    catch (Exception ex)
-    {
-        string errorMSG = "Error in " + codeName + ":\r\n" + ex.ToString() + "\r\nAborted";
-        ScriptMessage(errorMSG);
-        SetUMTConsoleText(errorMSG);
-        SetFinishedMessage(false);
-        return;
+
+        if (c.Name.Content.StartsWith("gml_Object"))
+        {
+            // Insert function call to __scr_eventrun__ with entry name at the beginning
+            var newString = Data.Strings.MakeString(c.Name.Content.Substring(11));
+            c.Instructions.InsertRange(0, new List<UndertaleInstruction>()
+            {
+                new UndertaleInstruction()
+                {
+                    Kind = UndertaleInstruction.Opcode.Push,
+                    Type1 = UndertaleInstruction.DataType.String,
+                    Value = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>() { Resource = newString, CachedId = Data.Strings.IndexOf(newString) }
+                },
+                new UndertaleInstruction()
+                {
+                    Kind = UndertaleInstruction.Opcode.Conv,
+                    Type1 = UndertaleInstruction.DataType.String,
+                    Type2 = UndertaleInstruction.DataType.Variable
+                },
+                new UndertaleInstruction()
+                {
+                    Kind = UndertaleInstruction.Opcode.Call,
+                    Type1 = UndertaleInstruction.DataType.Int32,
+                    ArgumentsCount = 1,
+                    Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = func }
+                },
+                new UndertaleInstruction()
+                {
+                    Kind = UndertaleInstruction.Opcode.Popz,
+                    Type1 = UndertaleInstruction.DataType.Variable
+                }
+            });
+
+            // Patch every exit instruction to instead branch to the end of the code
+            c.UpdateAddresses();
+            var last = c.Instructions.Last();
+            uint endAddr = last.Address + last.CalculateInstructionSize();
+            for (int i = 4; i < c.Instructions.Count; i++)
+            {
+                if (c.Instructions[i].Kind == UndertaleInstruction.Opcode.Exit)
+                {
+                    c.Instructions[i] = new UndertaleInstruction()
+                    {
+                        Kind = UndertaleInstruction.Opcode.B,
+                        JumpOffset = (int)(endAddr - c.Instructions[i].Address)
+                    };
+                }
+            }
+
+            // At the end of the code, insert function call to __scr_eventend__
+            c.Instructions.AddRange(new List<UndertaleInstruction>()
+            {
+                new UndertaleInstruction()
+                {
+                    Kind = UndertaleInstruction.Opcode.Call,
+                    Type1 = UndertaleInstruction.DataType.Int32,
+                    ArgumentsCount = 0,
+                    Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = endFunc }
+                },
+                new UndertaleInstruction()
+                {
+                    Kind = UndertaleInstruction.Opcode.Popz,
+                    Type1 = UndertaleInstruction.DataType.Variable
+                }
+            });
+            NukeProfileGML(c.Name.Content);
+        }
     }
 }
 
 void PersistentObjectSetup(string objectName)
 {
     var obj = Data.GameObjects.ByName(objectName);
-    if(obj == null)
+    if (obj == null)
     {
         obj = new UndertaleGameObject() { Name = Data.Strings.MakeString(objectName), Persistent = true };
         Data.GameObjects.Add(obj);
     }
-    if(Data.GeneralInfo.Name.Content == "UNDERTALE")
+    if (Data.GeneralInfo.Name.Content == "UNDERTALE")
     {
         Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);
     }
-    bool gms2 = Data.IsVersionAtLeast(2,0,0,0);
+    bool gms2 = Data.IsVersionAtLeast(2, 0, 0, 0);
     var entry_room = Data.GeneralInfo.RoomOrder[0].Resource;
     var object_list = entry_room.GameObjects;
     //Intentionally set to false, we're just setting up the object
     //Remind me to make adding to the room automatically an option later
     bool add_to_room = false;
-    if(gms2)
+    if (gms2)
     {
         UndertaleRoom.Layer target_layer = null;
-        foreach(var layer in entry_room.Layers)
+        foreach (var layer in entry_room.Layers)
         {
-            if(layer.LayerType == UndertaleRoom.LayerType.Instances)
+            if (layer.LayerType == UndertaleRoom.LayerType.Instances)
             {
-                foreach(var layer_obj in layer.InstancesData.Instances)
+                foreach (var layer_obj in layer.InstancesData.Instances)
                 {
-                    if(layer_obj.ObjectDefinition == obj)
+                    if (layer_obj.ObjectDefinition == obj)
                     {
                         add_to_room = false;
                         break;
                     }
                 }
-                if(!add_to_room)
+                if (!add_to_room)
                 {
                     break;
                 }
-                if(target_layer == null || target_layer.LayerDepth > layer.LayerDepth)
+                if (target_layer == null || target_layer.LayerDepth > layer.LayerDepth)
                 {
                     target_layer = layer;
                 }
             }
         }
-        if(add_to_room)
+        if (add_to_room)
         {
-            if(target_layer == null)
+            if (target_layer == null)
             {
                 uint layer_id = 0;
-                foreach(var room in Data.Rooms)
+                foreach (var room in Data.Rooms)
                 {
-                    foreach(var layer in room.Layers)
+                    foreach (var layer in room.Layers)
                     {
-                        if(layer.LayerId > layer_id)
+                        if (layer.LayerId > layer_id)
                         {
                             layer_id = (uint)layer.LayerId;
                         }
@@ -742,15 +721,15 @@ void PersistentObjectSetup(string objectName)
     }
     else
     {
-        foreach(var room_obj in object_list)
+        foreach (var room_obj in object_list)
         {
-            if(room_obj.ObjectDefinition == obj)
+            if (room_obj.ObjectDefinition == obj)
             {
                 add_to_room = false;
                 break;
             }
         }
-        if(add_to_room)
+        if (add_to_room)
         {
             var obj_to_add = new UndertaleRoom.GameObject();
             obj_to_add.InstanceID = Data.GeneralInfo.LastObj++;

@@ -1,4 +1,9 @@
-﻿using System.Text;
+﻿//Made by Grossley ( Grossley#2869 on Discord )
+//Changes:
+//Version 01 (November 13th, 2020): Initial release
+//Version 02 (April 29th, 2021): Reworked to be simpler + utilize the profile system
+
+using System.Text;
 using System;
 using System.IO;
 using System.Threading;
@@ -7,351 +12,37 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-//Made by Grossley ( Grossley#2869 on Discord )
-//Changes:
-//Version 01 (November 13th, 2020): Initial release
+if (!InitChecks())
+    return;
 
-ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
-if (Data?.GeneralInfo.BytecodeVersion < 15)
-{
-    ScriptError("This script will not work properly on Undertale 1.0 and other bytecode < 15 games.", "Error");
-    return;
-}
-
-if (Directory.Exists(GetFolder(FilePath) + "Export_Code_Orig" + Path.DirectorySeparatorChar))
-{
-    ScriptError("A code export already exists. Please remove it.", "Error");
-    return;
-}
-else
-{
-    Directory.CreateDirectory(GetFolder(FilePath) + "Export_Code_Orig" + Path.DirectorySeparatorChar);
-}
-if (Directory.Exists(GetFolder(FilePath) + "Export_Assembly_Orig" + Path.DirectorySeparatorChar))
-{
-    ScriptError("A code export already exists. Please remove it.", "Error");
-    return;
-}
-else
-{
-    Directory.CreateDirectory(GetFolder(FilePath) + "Export_Assembly_Orig" + Path.DirectorySeparatorChar);
-}
-if (Directory.Exists(GetFolder(FilePath) + "Export_Assembly_Recompiled" + Path.DirectorySeparatorChar))
-{
-    ScriptError("A code export already exists. Please remove it.", "Error");
-    return;
-}
-else
-{
-    Directory.CreateDirectory(GetFolder(FilePath) + "Export_Assembly_Recompiled" + Path.DirectorySeparatorChar);
-}
-
+//TODO: Remove this bool from the data file, it's not strictly necessary.
 int progress = 0;
 int identical_count = 0;
 UpdateProgress();
-await DumpCodeOrig();
-progress = 0;
-UpdateProgress();
-string codeFolder = GetFolder(FilePath) + "Export_Assembly_Orig" + Path.DirectorySeparatorChar;
-await DumpCode();
-progress = 0;
-enum EventTypes
-{
-    Create,
-    Destroy,
-    Alarm,
-    Step,
-    Collision,
-    Keyboard,
-    Mouse,
-    Other,
-    Draw,
-    KeyPress,
-    KeyRelease,
-    Gesture,
-    Asynchronous,
-    PreCreate
-}
-string importFolder = GetFolder(FilePath) + "Export_Code_Orig" + Path.DirectorySeparatorChar;
-bool doParse = true;
-string[] dirFiles = Directory.GetFiles(importFolder);
-foreach (string file in dirFiles)
-{
-    UpdateProgressBar(null, "Import Files", progress++, dirFiles.Length);
 
-    string fileName = Path.GetFileName(file);
-    if (!fileName.EndsWith(".gml") || !fileName.Contains("_")) // Perhaps drop the underscore check?
-        continue; // Restarts loop if file is not a valid code asset.
-    if (fileName.EndsWith("PreCreate_0.gml") && (Data.GeneralInfo.Major < 2))
-        continue; // Restarts loop if file is not a valid code asset.
-
-    string gmlCode = File.ReadAllText(file);
-    string codeName = Path.GetFileNameWithoutExtension(file);
-    if (Data.Code.ByName(codeName) == null) // Should keep from adding duplicate scripts; haven't tested
-    {
-        UndertaleCode code = new UndertaleCode();
-        code.Name = Data.Strings.MakeString(codeName);
-        Data.Code.Add(code);
-
-        UndertaleCodeLocals locals = new UndertaleCodeLocals();
-        locals.Name = code.Name;
-
-        UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-        argsLocal.Name = Data.Strings.MakeString("arguments");
-        argsLocal.Index = 0;
-
-        locals.Locals.Add(argsLocal);
-
-        code.LocalsCount = 1;
-        code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
-        Data.CodeLocals.Add(locals);
-
-        if (doParse)
-        {
-            // This portion links code.
-            if (codeName.Substring(0, 10).Equals("gml_Script"))
-            {
-                // Add code to scripts section.
-                if (Data.Scripts.ByName(codeName.Substring(11)) == null)
-                {
-                    UndertaleScript scr = new UndertaleScript();
-                    scr.Name = Data.Strings.MakeString(codeName.Substring(11));
-                    scr.Code = code;
-                    Data.Scripts.Add(scr);
-                }
-                else
-                {
-                    UndertaleScript scr = Data.Scripts.ByName(codeName.Substring(11));
-                    scr.Code = code;
-                }
-            }
-            else if (codeName.Substring(0, 10).Equals("gml_Object"))
-            {
-                // Add code to object methods.
-                string afterPrefix = codeName.Substring(11);
-                // Dumb substring stuff, don't mess with this.
-                int underCount = 0;
-                string methodNumberStr = "", methodName = "", objName = "";
-                for (int i = afterPrefix.Length - 1; i >= 0; i--)
-                {
-                    if (afterPrefix[i] == '_')
-                    {
-                        underCount++;
-                        if (underCount == 1)
-                        {
-                            methodNumberStr = afterPrefix.Substring(i + 1);
-                        }
-                        else if (underCount == 2)
-                        {
-                            objName = afterPrefix.Substring(0, i);
-                            methodName = afterPrefix.Substring(i + 1, afterPrefix.Length - objName.Length - methodNumberStr.Length - 2);
-                            break;
-                        }
-                    }
-                }
-
-                int methodNumber = Int32.Parse(methodNumberStr);
-                UndertaleGameObject obj = Data.GameObjects.ByName(objName);
-                if (obj == null)
-                {
-                    bool doNewObj = ScriptQuestion("Object " + objName + " was not found.\nAdd new object called " + objName + "?");
-                    if (doNewObj)
-                    {
-                        UndertaleGameObject gameObj = new UndertaleGameObject();
-                        gameObj.Name = Data.Strings.MakeString(objName);
-                        Data.GameObjects.Add(gameObj);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
-                        }
-                        catch
-                        {
-                            Data.Code.ByName(codeName).ReplaceGML("", Data);
-                        }
-                        continue;
-                    }
-                }
-
-                obj = Data.GameObjects.ByName(objName);
-                int eventIdx = (int)Enum.Parse(typeof(EventTypes), methodName);
-
-                UndertalePointerList<UndertaleGameObject.Event> eventList = obj.Events[eventIdx];
-                UndertaleGameObject.EventAction action = new UndertaleGameObject.EventAction();
-                UndertaleGameObject.Event evnt = new UndertaleGameObject.Event();
-
-                action.ActionName = code.Name;
-                action.CodeId = code;
-                evnt.EventSubtype = (uint)methodNumber;
-                evnt.Actions.Add(action);
-                eventList.Add(evnt);
-            }
-            // Code which does not match these criteria cannot link, but are still added to the code section.
-        }
-    }
-    try
-    {
-        Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
-    }
-    catch
-    {
-        Data.Code.ByName(codeName).ReplaceGML("", Data);
-    }
-}
-progress = 0;
-UpdateProgress();
-codeFolder = GetFolder(FilePath) + "Export_Assembly_Recompiled" + Path.DirectorySeparatorChar;
-await DumpCode();
-progress = 0;
-UpdateProgress();
+DumpGML(Path.Combine(GetFolder(FilePath), "Export_Code_Orig"));
+DumpASM(Path.Combine(GetFolder(FilePath), "Export_Assembly_Orig"));
+ReImportGML(Directory.GetFiles(Path.Combine(GetFolder(FilePath), "Export_Code_Orig")));
+DumpASM(Path.Combine(GetFolder(FilePath), "Export_Assembly_Recompiled"));
 await FileCompare();
-// Check code directory.
-importFolder = GetFolder(FilePath) + "Export_Assembly_Orig" + Path.DirectorySeparatorChar;
-doParse = true;
-progress = 0;
-dirFiles = Directory.GetFiles(importFolder);
-foreach (string file in dirFiles)
-{
-    UpdateProgressBar(null, "Reapply original ASM files", progress++, dirFiles.Length);
-    string fileName = Path.GetFileName(file);
-    if (!fileName.EndsWith(".asm") || !fileName.Contains("_")) // Perhaps drop the underscore check?
-        continue; // Restarts loop if file is not a valid code asset.
-    if (fileName.EndsWith("PreCreate_0.asm") && (Data.GeneralInfo.Major < 2))
-        continue; // Restarts loop if file is not a valid code asset.
-    string asmCode = File.ReadAllText(file);
-    string codeName = Path.GetFileNameWithoutExtension(file);
-    if (Data.Code.ByName(codeName) == null) // Should keep from adding duplicate scripts; haven't tested
-    {
-        UndertaleCode code = new UndertaleCode();
-        code.Name = Data.Strings.MakeString(codeName);
-        Data.Code.Add(code);
-        UndertaleCodeLocals locals = new UndertaleCodeLocals();
-        locals.Name = code.Name;
-        UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-        argsLocal.Name = Data.Strings.MakeString("arguments");
-        argsLocal.Index = 0;
-        locals.Locals.Add(argsLocal);
-        code.LocalsCount = 1;
-        code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
-        Data.CodeLocals.Add(locals);
-        if (doParse)
-        {
-            // This portion links code.
-            if (codeName.Substring(0, 10).Equals("gml_Script"))
-            {
-                // Add code to scripts section.
-                if (Data.Scripts.ByName(codeName.Substring(11)) == null)
-                {
-                    UndertaleScript scr = new UndertaleScript();
-                    scr.Name = Data.Strings.MakeString(codeName.Substring(11));
-                    scr.Code = code;
-                    Data.Scripts.Add(scr);
-                }
-                else
-                {
-                    UndertaleScript scr = Data.Scripts.ByName(codeName.Substring(11));
-                    scr.Code = code;
-                }
-            }
-            else if (codeName.Substring(0, 10).Equals("gml_Object"))
-            {
-                // Add code to object methods.
-                string afterPrefix = codeName.Substring(11);
-                // Dumb substring stuff, don't mess with this.
-                int underCount = 0;
-                string methodNumberStr = "", methodName = "", objName = "";
-                for (int i = afterPrefix.Length - 1; i >= 0; i--)
-                {
-                    if (afterPrefix[i] == '_')
-                    {
-                        underCount++;
-                        if (underCount == 1)
-                        {
-                            methodNumberStr = afterPrefix.Substring(i + 1);
-                        }
-                        else if (underCount == 2)
-                        {
-                            objName = afterPrefix.Substring(0, i);
-                            methodName = afterPrefix.Substring(i + 1, afterPrefix.Length - objName.Length - methodNumberStr.Length - 2);
-                            break;
-                        }
-                    }
-                }
-                int methodNumber = Int32.Parse(methodNumberStr);
-                UndertaleGameObject obj = Data.GameObjects.ByName(objName);
-                if (obj == null)
-                {
-                    bool doNewObj = ScriptQuestion("Object " + objName + " was not found.\nAdd new object called " + objName + "?");
-                    if (doNewObj)
-                    {
-                        UndertaleGameObject gameObj = new UndertaleGameObject();
-                        gameObj.Name = Data.Strings.MakeString(objName);
-                        Data.GameObjects.Add(gameObj);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            var instructions = Assembler.Assemble(asmCode, Data);
-                            Data.Code.ByName(codeName).Replace(instructions);
-                        }
-                        catch (Exception ex)
-                        {
-                            //ScriptMessage("Assembler error at file: " + codeName);
-                            //return;
-                        }
-                        continue;
-                    }
-                }
-                obj = Data.GameObjects.ByName(objName);
-                int eventIdx = (int)Enum.Parse(typeof(EventTypes), methodName);
-                UndertalePointerList<UndertaleGameObject.Event> eventList = obj.Events[eventIdx];
-                UndertaleGameObject.EventAction action = new UndertaleGameObject.EventAction();
-                UndertaleGameObject.Event evnt = new UndertaleGameObject.Event();
-                action.ActionName = code.Name;
-                action.CodeId = code;
-                evnt.EventSubtype = (uint)methodNumber;
-                evnt.Actions.Add(action);
-                eventList.Add(evnt);
-            }
-            // Code which does not match these criteria cannot linked, but are still added to the code section.
-        }
-    }
-    try
-    {
-        var instructions = Assembler.Assemble(asmCode, Data);
-        Data.Code.ByName(codeName).Replace(instructions);
-    }
-    catch (Exception ex)
-    {
-        //ScriptMessage("Assembler error at code: " + codeName);
-        //return;
-    }
-}
+ReImportASM(Directory.GetFiles(Path.Combine(GetFolder(FilePath), "Export_Assembly_Orig")))
+
 HideProgressBar();
 double percentage = ((double)identical_count / (double)Data.Code.Count) * 100;
 int non_matching = Data.Code.Count - identical_count;
 ScriptMessage("Non-matching Data Generated. Decompiler/Compiler Accuracy: " + percentage.ToString() + "% (" + identical_count.ToString() + "/" + Data.Code.Count.ToString() + "). Number of differences: " + non_matching.ToString() + ". To review these, the differing files are in the game directory.");
+return;
 
-async Task DumpCodeOrig()
+void DumpGML(string codeFolder)
 {
-    await Task.Run(() => Parallel.ForEach(Data.Code, DumpCodeOrig));
-}
-
-void DumpCodeOrig(UndertaleCode code)
-{
-    string path = Path.Combine(GetFolder(FilePath) + "Export_Code_Orig" + Path.DirectorySeparatorChar, code.Name.Content + ".gml");
-    try
+    foreach (UndertaleCode code in Data.Code)
     {
-        File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+        string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
+        File.WriteAllText(path, GetDecompiledText(code.Name.Content));
+        UpdateProgressBar(null, "Dumping Original Code Entries", progress++, Data.Code.Count);
     }
-    catch (Exception e)
-    {
-        File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
-    }
-    UpdateProgressBar(null, "Dumping Original Code Entries", progress++, Data.Code.Count);
+    progress = 0;
+    UpdateProgress();
 }
 
 void UpdateProgress()
@@ -364,23 +55,16 @@ string GetFolder(string path)
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
 
-async Task DumpCode()
+void DumpASM(string codeFolder)
 {
-    await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
-}
-
-void DumpCode(UndertaleCode code)
-{
-    string path = Path.Combine(codeFolder, code.Name.Content + ".asm");
-    try
+    foreach (UndertaleCode code in Data.Code)
     {
-        File.WriteAllText(path, (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : ""));
+        string path = Path.Combine(codeFolder, code.Name.Content + ".asm");
+        File.WriteAllText(path, GetDisassemblyText(code.Name.Content));
+        UpdateProgressBar(null, "Dumping Code Disassembly", progress++, Data.Code.Count);
     }
-    catch (Exception e)
-    {
-        File.WriteAllText(path, "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"); // Please don't
-    }
-    UpdateProgressBar(null, "Dumping Code Disassembly", progress++, Data.Code.Count);
+    progress = 0;
+    UpdateProgress();
 }
 
 async Task FileCompare()
@@ -391,53 +75,84 @@ async Task FileCompare()
 void FileCompare(UndertaleCode code)
 {
     UpdateProgressBar(null, "Deleting identical files", progress++, Data.Code.Count);
-    string orig_gml_path = GetFolder(FilePath) + "Export_Code_Orig" + Path.DirectorySeparatorChar + code.Name.Content + ".gml";
-    string orig_asm_path = GetFolder(FilePath) + "Export_Assembly_Orig" + Path.DirectorySeparatorChar + code.Name.Content + ".asm";
-    string new1_asm_path = GetFolder(FilePath) + "Export_Assembly_Recompiled" + Path.DirectorySeparatorChar + code.Name.Content + ".asm";
-    int file1byte;
-    int file2byte;
-    FileStream fs1;
-    FileStream fs2;
-
-    // Open the two files.
-    fs1 = new FileStream(orig_asm_path, FileMode.Open);
-    fs2 = new FileStream(new1_asm_path, FileMode.Open);
-
-    // Check the file sizes. If they are not the same, the files
-    // are not the same.
-    if (fs1.Length != fs2.Length)
+    string orig_gml_path = Path.Combine(GetFolder(FilePath), "Export_Code_Orig", code.Name.Content + ".gml");
+    string orig_asm_path = Path.Combine(GetFolder(FilePath), "Export_Assembly_Orig", code.Name.Content + ".asm");
+    string new1_asm_path = Path.Combine(GetFolder(FilePath), "Export_Assembly_Recompiled", code.Name.Content + ".asm");
+    if (AreFilesIdentical(orig_asm_path, new1_asm_path))
     {
-        // Close the file
-        fs1.Close();
-        fs2.Close();
-        // Return false to indicate files are different
+        File.Delete(orig_gml_path);
+        File.Delete(orig_asm_path);
+        File.Delete(new1_asm_path);
+        identical_count += 1;
+    }
+}
+
+bool InitChecks()
+{
+    if (Data?.GeneralInfo.BytecodeVersion < 15)
+    {
+        ScriptError("This script will not work properly on Undertale 1.0 and other bytecode < 15 games.", "Error");
+        return false;
+    }
+    if (Directory.Exists(GetFolder(FilePath) + "Export_Code_Orig" + Path.DirectorySeparatorChar))
+    {
+        ScriptError("A code export already exists. Please remove it.", "Error");
+        return false;
     }
     else
     {
-        // Read and compare a byte from each file until either a
-        // non-matching set of bytes is found or until the end of
-        // file1 is reached.
-        do
+        Directory.CreateDirectory(GetFolder(FilePath) + "Export_Code_Orig" + Path.DirectorySeparatorChar);
+    }
+    if (Directory.Exists(GetFolder(FilePath) + "Export_Assembly_Orig" + Path.DirectorySeparatorChar))
+    {
+        ScriptError("A code export already exists. Please remove it.", "Error");
+        return false;
+    }
+    else
+    {
+        Directory.CreateDirectory(GetFolder(FilePath) + "Export_Assembly_Orig" + Path.DirectorySeparatorChar);
+    }
+    if (Directory.Exists(GetFolder(FilePath) + "Export_Assembly_Recompiled" + Path.DirectorySeparatorChar))
+    {
+        ScriptError("A code export already exists. Please remove it.", "Error");
+        return false;
+    }
+    else
+    {
+        Directory.CreateDirectory(GetFolder(FilePath) + "Export_Assembly_Recompiled" + Path.DirectorySeparatorChar);
+    }
+    return true;
+}
+
+void ReImportASM(string[] dirFiles)
+{
+    foreach (string file in dirFiles)
+    {
+        UpdateProgressBar(null, "Reapply original ASM files", progress++, dirFiles.Length);
+        try
         {
-            // Read one byte from each file.
-            file1byte = fs1.ReadByte();
-            file2byte = fs2.ReadByte();
+            ImportASMFile(file, false, false, true);
         }
-        while ((file1byte == file2byte) && (file1byte != -1));
-
-        // Close the files.
-        fs1.Close();
-        fs2.Close();
-
-        // Return the success of the comparison. "file1byte" is
-        // equal to "file2byte" at this point only if the files are
-        // the same.
-        if ((file1byte - file2byte) == 0)
+        catch (Exception ex)
         {
-            File.Delete(orig_gml_path);
-            File.Delete(orig_asm_path);
-            File.Delete(new1_asm_path);
-            identical_count += 1;
         }
     }
+}
+void ReImportGML(string[] dirFiles)
+{
+    foreach (string file in dirFiles)
+    {
+        UpdateProgressBar(null, "Import Files", progress++, dirFiles.Length);
+        string codeName = Path.GetFileNameWithoutExtension(file);
+        try
+        {
+            ImportGMLFile(file, true, true);
+        }
+        catch
+        {
+            Data.Code.ByName(codeName).ReplaceGML("", Data);
+        }
+    }
+    progress = 0;
+    UpdateProgress();
 }

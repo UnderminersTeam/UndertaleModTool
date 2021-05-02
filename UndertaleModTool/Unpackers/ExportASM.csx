@@ -43,7 +43,8 @@ void DumpCode(UndertaleCode code)
     try 
     {
         File.WriteAllText(path, (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : ""));
-    } catch (Exception e) 
+    }
+    catch (Exception e) 
     {
         File.WriteAllText(path, "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"); // Please don't
     }

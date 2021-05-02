@@ -69,6 +69,54 @@ namespace UndertaleModTool
             }
         }
 
+        public static string ProfileModeEnabled
+        {
+            get => ConfigurationManager.AppSettings["ProfileModeEnabled"] as String;
+            set
+            {
+                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                config.AppSettings.Settings["ProfileModeEnabled"].Value = value;
+                config.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+                if ((Application.Current.MainWindow as MainWindow).Data != null)
+                {
+                    (Application.Current.MainWindow as MainWindow).Data.ProfileMode = (SettingsWindow.ProfileModeEnabled == "True" ? true : false);
+                }
+                else if ((Application.Current.MainWindow as MainWindow).Data.GMS2_3)
+                {
+	                config.AppSettings.Settings["ProfileModeEnabled"].Value = "False";
+                    (Application.Current.MainWindow as MainWindow).Data.ProfileMode = false;
+                }
+                else
+                {
+	                config.AppSettings.Settings["ProfileModeEnabled"].Value = "False";
+                }
+            }
+        }
+
+        public static string ProfileMessageShown
+        {
+            get => ConfigurationManager.AppSettings["ProfileMessageShown"] as String;
+            set
+            {
+                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                config.AppSettings.Settings["ProfileMessageShown"].Value = value;
+                config.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+            }
+        }
+        public static string DeleteOldProfileOnSave
+        {
+            get => ConfigurationManager.AppSettings["DeleteOldProfileOnSave"] as String;
+            set
+            {
+                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                config.AppSettings.Settings["DeleteOldProfileOnSave"].Value = value;
+                config.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+            }
+        }
+
         public SettingsWindow()
         {
             InitializeComponent();
