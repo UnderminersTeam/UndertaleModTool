@@ -179,7 +179,7 @@ namespace UndertaleModTool
             {
                 // This extra step needs to happen for non-profile mode because the "Temp" folder can be modified in non-profile mode.
                 // If we don't, it could cause desynchronization between modes.
-                if (SettingsWindow.ProfileModeEnabled == "False")
+                if (!SettingsWindow.ProfileModeEnabled)
                 {
                     string mainFolder = Path.Combine(ProfilesFolder, ProfileHash, "Main");
                     string tempFolder = Path.Combine(ProfilesFolder, ProfileHash, "Temp");
@@ -212,11 +212,11 @@ namespace UndertaleModTool
                 string profDirTemp = Path.Combine(profDir, "Temp");
                 string profDirMain = Path.Combine(profDir, "Main");
 
-                if (SettingsWindow.ProfileModeEnabled == "True")
+                if (SettingsWindow.ProfileModeEnabled)
                 {
                     if (data.GMS2_3)
                     {
-                        MessageBox.Show("The profile feature is not currently supported for GameMaker 2.3 games.");
+                        MessageBox.Show("Profile mode is not currently supported for GameMaker Studio 2.3 games.");
                         return;
                     }
 
@@ -258,11 +258,11 @@ namespace UndertaleModTool
                     if (!Directory.Exists(profDir) || !Directory.Exists(profDirMain) || !Directory.Exists(profDirTemp))
                     {
                         MessageBox.Show("Profile should exist, but does not. Insufficient permissions? Profile mode is disabled.");
-                        SettingsWindow.ProfileModeEnabled = "False";
+                        SettingsWindow.ProfileModeEnabled = false;
                         return;
                     }
 
-                    if (SettingsWindow.ProfileMessageShown == "False")
+                    if (!SettingsWindow.ProfileMessageShown)
                     {
                         MessageBox.Show(@"The profile for your game loaded successfully!
 
@@ -283,7 +283,7 @@ modding projects, or when performing technical operations.
 It should be noted that this system is somewhat experimental, so
 should you encounter any problems, please let us know or leave
 an issue on GitHub.");
-                        SettingsWindow.ProfileMessageShown = "True";
+                        SettingsWindow.ProfileMessageShown = true;
                     }
                     CreateUMTLastEdited(filename);
                 }
@@ -312,13 +312,13 @@ an issue on GitHub.");
                 }
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Main"));
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Temp"));
-                if (SettingsWindow.ProfileModeEnabled == "False" || data.GMS2_3 || data.IsYYC())
+                if (!SettingsWindow.ProfileModeEnabled || data.GMS2_3 || data.IsYYC())
                 {
                     MD5PreviouslyLoaded = MD5CurrentlyLoaded;
                     ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                     return;
                 }
-                else if (SettingsWindow.ProfileModeEnabled == "True")
+                else if (SettingsWindow.ProfileModeEnabled)
                 {
                     Directory.CreateDirectory(ProfilesFolder);
                     string profDir;
@@ -362,7 +362,7 @@ an issue on GitHub.");
                     Directory.CreateDirectory(Path.Combine(profDir, "Temp"));
                     MessageBox.Show("Profile saved successfully to " + ProfileHash);
                 }
-                if (SettingsWindow.DeleteOldProfileOnSave == "True" && copyProfile)
+                if (SettingsWindow.DeleteOldProfileOnSave && copyProfile)
                 {
                     Directory.Delete(Path.Combine(ProfilesFolder, deleteIfModeActive), true);
                 }

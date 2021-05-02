@@ -129,11 +129,15 @@ namespace UndertaleModLib
     public class UndertaleReader : Util.BufferBinaryReader
     {
         public delegate void WarningHandlerDelegate(string warning);
+        public delegate void MessageHandlerDelegate(string message);
         private WarningHandlerDelegate WarningHandler;
+        private MessageHandlerDelegate MessageHandler;
 
-        public UndertaleReader(Stream input, WarningHandlerDelegate warningHandler = null) : base(input)
+        public UndertaleReader(Stream input, 
+                               WarningHandlerDelegate warningHandler = null, MessageHandlerDelegate messageHandler = null) : base(input)
         {
-            this.WarningHandler = warningHandler;
+            WarningHandler = warningHandler;
+            MessageHandler = messageHandler;
         }
 
         // TODO: This would be more useful if it reported location like the exceptions did
@@ -143,6 +147,14 @@ namespace UndertaleModLib
                 WarningHandler.Invoke(warning);
             else
                 throw new IOException(warning);
+        }
+
+        public void SubmitMessage(string message)
+        {
+            if (MessageHandler != null)
+                MessageHandler.Invoke(message);
+            else
+                Debug.WriteLine(message);
         }
 
         public string LastChunkName;
@@ -177,7 +189,7 @@ namespace UndertaleModLib
             data.FORM.UnserializeChunk(this);
             lenReader.ToHere();
 
-            Debug.WriteLine("Resolving resource IDs...");
+            SubmitMessage("Resolving resource IDs...");
             foreach (UndertaleResourceRef res in resUpdate)
                 res.PostUnserialize(this);
             resUpdate.Clear();
@@ -377,8 +389,20 @@ namespace UndertaleModLib
         public uint LastBytecodeAddress = 0;
         public bool Bytecode14OrLower;
 
-        public UndertaleWriter(Stream output) : base(output)
+        public delegate void MessageHandlerDelegate(string message);
+        private MessageHandlerDelegate MessageHandler;
+
+        public UndertaleWriter(Stream output, MessageHandlerDelegate messageHandler = null) : base(output)
         {
+            MessageHandler = messageHandler;
+        }
+
+        public void SubmitMessage(string message)
+        {
+            if (MessageHandler != null)
+                MessageHandler.Invoke(message);
+            else
+                Debug.WriteLine(message);
         }
 
         public void Write(UndertaleChunk obj)
@@ -413,6 +437,8 @@ namespace UndertaleModLib
 
         public override void Flush()
         {
+            SubmitMessage("Writing references in parallel...");
+
             Parallel.ForEach(intsToWriteParallel, (pair) =>
             {
                 RawBuffer[pair.Item1] = (byte)(pair.Item2 & 0xFF);
@@ -576,17 +602,18 @@ namespace UndertaleModLib
 
     public static class UndertaleIO
     {
-        public static UndertaleData Read(Stream stream, UndertaleReader.WarningHandlerDelegate warningHandler = null)
+        public static UndertaleData Read(Stream stream, UndertaleReader.WarningHandlerDelegate warningHandler = null,
+                                                        UndertaleReader.MessageHandlerDelegate messageHandler = null)
         {
-            UndertaleReader reader = new UndertaleReader(stream, warningHandler);
+            UndertaleReader reader = new UndertaleReader(stream, warningHandler, messageHandler);
             var data = reader.ReadUndertaleData();
             reader.ThrowIfUnreadObjects();
             return data;
         }
 
-        public static void Write(Stream stream, UndertaleData data)
+        public static void Write(Stream stream, UndertaleData data, UndertaleWriter.MessageHandlerDelegate messageHandler = null)
         {
-            UndertaleWriter writer = new UndertaleWriter(stream);
+            UndertaleWriter writer = new UndertaleWriter(stream, messageHandler);
             writer.WriteUndertaleData(data);
             writer.ThrowIfUnwrittenObjects();
             writer.Flush();

@@ -46,11 +46,9 @@ namespace UndertaleModTool
         public UndertaleCode CurrentDecompiled = null;
         public List<string> CurrentDecompiledLocals = null;
         public UndertaleCode CurrentGraphed = null;
-        public string UMTAppDataPath = (Application.Current.MainWindow as MainWindow).AppDataFolder;
-        public string ProfilesFolder = (Application.Current.MainWindow as MainWindow).ProfilesFolder;
         public string ProfileHash = (Application.Current.MainWindow as MainWindow).ProfileHash;
-        public string MainPath = Path.Combine((Application.Current.MainWindow as MainWindow).ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Main");
-        public string TempPath = Path.Combine((Application.Current.MainWindow as MainWindow).ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Temp");
+        public string MainPath = Path.Combine(Settings.ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Main");
+        public string TempPath = Path.Combine(Settings.ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Temp");
 
         public bool DecompiledFocused = false;
         public bool DecompiledChanged = false;
@@ -212,7 +210,7 @@ namespace UndertaleModTool
         {
             gettext = new Dictionary<string, int>();
             string[] DecompilationOutput;
-            if (SettingsWindow.ProfileModeEnabled == "False")
+            if (!SettingsWindow.ProfileModeEnabled)
                 DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
             else
             {
@@ -294,7 +292,7 @@ namespace UndertaleModTool
                     try
                     {
                         string path = Path.Combine(TempPath, code.Name.Content + ".gml");
-                        if (SettingsWindow.ProfileModeEnabled == "False" || !File.Exists(path))
+                        if (!SettingsWindow.ProfileModeEnabled || !File.Exists(path))
                         {
                             decompiled = Decompiler.Decompile(code, context).Replace("\r\n", "\n");
                         } else
@@ -479,7 +477,7 @@ namespace UndertaleModTool
                 try
                 {
                     string path = Path.Combine(TempPath, code.Name.Content + ".gml");
-                    if (SettingsWindow.ProfileModeEnabled == "True")
+                    if (SettingsWindow.ProfileModeEnabled)
                     {
                         // Write text, only if in the profile mode.
                         File.WriteAllText(path, DecompiledEditor.Text);

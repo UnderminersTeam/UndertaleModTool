@@ -58,12 +58,16 @@ namespace UndertaleModTool
         public bool CanSafelySave = false;
         public bool FinishedMessageEnabled = true;
 
+        // Declare the delegate (if using non-generic pattern).
+        public delegate void FileMessageEventHandler(string message);
+        public event FileMessageEventHandler FileMessageEvent;
+
         public event PropertyChangedEventHandler PropertyChanged;
         private LoaderDialog scriptDialog;
         public byte[] MD5PreviouslyLoaded;
         public byte[] MD5CurrentlyLoaded;
-        public string AppDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool");
-        public string ProfilesFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles");
+        public string AppDataFolder => Settings.AppDataFolder;
+        public string ProfilesFolder = Path.Combine(Settings.AppDataFolder, "Profiles");
         public string CorrectionsFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Corrections");
         public string ProfileHash = "Unknown";
         public bool CrashedWhileEditing = false;
@@ -120,13 +124,15 @@ namespace UndertaleModTool
                 Debug.WriteLine(ex.ToString());
             }
 
+            Settings.Load();
+
             var args = Environment.GetCommandLineArgs();
             if (args.Length > 1)
             {
                 var fileName = args[1];
                 if (File.Exists(fileName))
                 {
-                    await LoadFile(fileName);
+                    await LoadFile(fileName, true);
                 }
             }
             if (args.Length > 2)
@@ -248,7 +254,7 @@ namespace UndertaleModTool
 
             if (dlg.ShowDialog() == true)
             {
-                await LoadFile(dlg.FileName);
+                await LoadFile(dlg.FileName, true);
                 return true;
             }
             return false;
@@ -353,6 +359,9 @@ namespace UndertaleModTool
                         {
                             MessageBox.Show(warning, "Loading warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                             hadWarnings = true;
+                        }, message =>
+                        {
+                            FileMessageEvent?.Invoke(message);
                         });
                     }
                 }
@@ -384,7 +393,7 @@ namespace UndertaleModTool
                             UpdateProfile(data, filename);
                             if (data != null)
                             {
-                                data.ToolInfo.ProfileMode = (SettingsWindow.ProfileModeEnabled == "True");
+                                data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
                                 data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                             }
                         }
@@ -444,12 +453,15 @@ namespace UndertaleModTool
                 {
                     using (var stream = new FileStream(filename + "temp", FileMode.Create, FileAccess.Write))
                     {
-                        UndertaleIO.Write(stream, Data);
+                        UndertaleIO.Write(stream, Data, message =>
+                        {
+                            FileMessageEvent?.Invoke(message);
+                        });
                     }
 
                     if (debugMode != DebugDataDialog.DebugDataMode.NoDebug)
                     {
-                        Debug.WriteLine("Generating debugger data...");
+                        FileMessageEvent?.Invoke("Generating debugger data...");
 
                         UndertaleDebugData debugData = UndertaleDebugData.CreateNew();
 
@@ -562,7 +574,7 @@ namespace UndertaleModTool
                 }
                 if (Data != null)
                 {
-                    Data.ToolInfo.ProfileMode = (SettingsWindow.ProfileModeEnabled == "True");
+                    Data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
                     Data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                 }
 
@@ -681,7 +693,9 @@ namespace UndertaleModTool
             TreeViewItem targetTreeItem = VisualUpwardSearch<TreeViewItem>(e.OriginalSource as UIElement);
             UndertaleObject targetItem = targetTreeItem.DataContext as UndertaleObject;
 
-            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Move) && sourceItem != null && targetItem != null && sourceItem != targetItem && sourceItem.GetType() == targetItem.GetType() && SettingsWindow.AssetOrderSwappingEnabled == "True" ? DragDropEffects.Move : DragDropEffects.None;
+            e.Effects = (e.AllowedEffects.HasFlag(DragDropEffects.Move) && sourceItem != null && targetItem != null && sourceItem != targetItem && 
+                         sourceItem.GetType() == targetItem.GetType() && SettingsWindow.AssetOrderSwappingEnabled)
+                            ? DragDropEffects.Move : DragDropEffects.None;
             if (e.Effects == DragDropEffects.Move)
             {
                 object source = GetNearestParent<TreeViewItem>(targetTreeItem).ItemsSource;
@@ -807,9 +821,9 @@ namespace UndertaleModTool
                         var script = CSharpScript.Create<object>(CommandBox.Text, ScriptOptions.Default
                             .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "UndertaleModLib.Compiler")
                             .AddImports("UndertaleModTool", "System", "System.IO", "System.Collections.Generic", "System.Text.RegularExpressions")
-                            .AddReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly))
+                            .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly)
                             .AddReferences(GetType().GetTypeInfo().Assembly)
-                            .AddReferences(Program.GetAssemblyMetadata(typeof(JsonConvert).GetTypeInfo().Assembly))
+                            .AddReferences(typeof(JsonConvert).GetTypeInfo().Assembly)
                             .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                             typeof(IScriptInterface), loader);
 
@@ -1036,9 +1050,9 @@ namespace UndertaleModTool
                     var script = CSharpScript.Create<object>(File.ReadAllText(path), ScriptOptions.Default
                         .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "UndertaleModLib.Compiler")
                         .AddImports("UndertaleModTool", "System", "System.IO", "System.Collections.Generic", "System.Text.RegularExpressions")
-                        .AddReferences(Program.GetAssemblyMetadata(typeof(UndertaleObject).GetTypeInfo().Assembly))
+                        .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly)
                         .AddReferences(GetType().GetTypeInfo().Assembly)
-                        .AddReferences(Program.GetAssemblyMetadata(typeof(JsonConvert).GetTypeInfo().Assembly))
+                        .AddReferences(typeof(JsonConvert).GetTypeInfo().Assembly)
                         .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
                         typeof(IScriptInterface), loader);
 

@@ -9,10 +9,11 @@ using System.Linq;
 
 EnsureDataLoaded();
 
-if (Data.ProfileMode)
+if (Data.ToolInfo.ProfileMode)
 {
     //This script IS reworked to use entirely GML edits, WOW! - Grossley
-    ScriptMessage("This script is profile mode compatible.");
+	// WOW! It takes like 5 minutes to run instead of 5 seconds now! - colinator27
+    ScriptMessage("This script is profile mode compatible, but it runs incredibly slow as it edits GML directly, so you may have to wait a while.");
 }
 
 // Helper function for defining functions
@@ -55,7 +56,7 @@ If it is already invisible, select 'NO' to toggle the profiler back on."))
     }
 }
 
-if (!Data.GMS2_3)
+if (!Data.GMS2_3 && Data.ToolInfo.ProfileMode)
 {
     string nameToCompare = Data.GeneralInfo.Name.Content.ToLower();
     if (!(nameToCompare.Contains("nxtale") || nameToCompare.Contains("undertale") || nameToCompare.Contains("survey_program") || nameToCompare.Contains("deltarune")))
@@ -281,7 +282,7 @@ void ProfileModeOperations()
     {
         if (c.Name.Content.StartsWith("gml_Object"))
         {
-            gmlCode = GetDecompiledText(c.Name.Content);
+            string gmlCode = GetDecompiledText(c.Name.Content);
             gmlCode = ("__scr_eventrun__(\"" + c.Name.Content.Substring(11) + "\")\n" + gmlCode + "\n__scr_eventend__()");
             gmlCode = gmlCode.Replace("global.interact = 0", "__scr_setinteract__(0)");
             gmlCode = gmlCode.Replace("global.interact = 1", "__scr_setinteract__(1)");
@@ -296,7 +297,7 @@ void ProfileModeOperations()
             gmlCode = gmlCode.Replace("return;\r\n", "{__scr_eventend__();return;}\r\n");
             gmlCode = gmlCode.Replace("exit\n", "{__scr_eventend__();exit;}\n");
             gmlCode = gmlCode.Replace("exit\r\n", "{__scr_eventend__();exit;}\r\n");
-            c.ReplaceGML(codeName, Data);
+            c.ReplaceGML(gmlCode, Data);
         }
     }
 }

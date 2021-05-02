@@ -46,8 +46,6 @@ namespace UndertaleModTool
         }
         public bool IsClosed { get; set; } = false;
 
-        private DebugTraceListener listener;
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         public LoaderDialog(string title, string msg)
@@ -58,13 +56,7 @@ namespace UndertaleModTool
             InitializeComponent();
             this.DataContext = this;
 
-            listener = new DebugTraceListener(this);
-            Debug.Listeners.Add(listener);
-        }
-
-        private void Window_Unloaded(object sender, RoutedEventArgs e)
-        {
-            Debug.Listeners.Remove(listener);
+            (Application.Current.MainWindow as MainWindow).FileMessageEvent += ReportProgress;
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -136,25 +128,6 @@ namespace UndertaleModTool
                 Dispatcher.Invoke(Show);
 
             ReportProgress(status);
-        }
-        private class DebugTraceListener : TraceListener
-        {
-            private LoaderDialog loaderDialog;
-
-            public DebugTraceListener(LoaderDialog loaderDialog)
-            {
-                this.loaderDialog = loaderDialog;
-            }
-
-            public override void Write(string message)
-            {
-                WriteLine(message);
-            }
-
-            public override void WriteLine(string message)
-            {
-                loaderDialog.ReportProgress(message);
-            }
         }
     }
 }

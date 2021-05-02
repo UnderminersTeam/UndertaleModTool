@@ -25,7 +25,7 @@ namespace UndertaleModLib
                 writer.Write(Name.ToCharArray());
                 var lenWriter = writer.WriteLengthHere();
 
-                Debug.WriteLine("Writing chunk " + Name);
+                writer.SubmitMessage("Writing chunk " + Name);
                 lenWriter.FromHere();
                 SerializeChunk(writer);
                 
@@ -81,7 +81,7 @@ namespace UndertaleModLib
                 Debug.Assert(chunk.Name == name);
                 chunk.Length = length;
 
-                Debug.WriteLine("Reading chunk " + chunk.Name);
+                reader.SubmitMessage("Reading chunk " + chunk.Name);
                 var lenReader = reader.EnsureLengthFromHere(chunk.Length);
                 chunk.UnserializeChunk(reader);
 

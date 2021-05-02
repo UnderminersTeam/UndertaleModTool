@@ -10,7 +10,7 @@ using System.Linq;
 
 EnsureDataLoaded();
 
-if (Data.ProfileMode)
+if (Data.ToolInfo.ProfileMode)
 {
     //This script IS reworked to use entirely GML edits, WOW! - Grossley
     ScriptMessage("This script is profile mode compatible.");

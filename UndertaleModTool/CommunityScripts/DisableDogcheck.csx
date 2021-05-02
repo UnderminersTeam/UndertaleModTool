@@ -8,7 +8,7 @@ all Undertale and Deltarune versions.");
 
 // Removes the invoking of the dog check script and the actual check itself from "gml_Script_scr_load".
 var scr_load = "gml_Script_scr_load";
-if ((Data.GeneralInfo.Name.Content == "NXTALE") || (Data.GeneralInfo.Name.Content == "UNDERTALE")) 
+if (Data.GeneralInfo.Name.Content == "NXTALE" || Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE")) 
 {
     ReplaceTextInGML(scr_load, @"scr_dogcheck()
 if (dogcheck == 1)", "");

@@ -23,98 +23,71 @@ namespace UndertaleModTool
     {
         public static string GraphVizPath
         {
-            get => ConfigurationManager.AppSettings["graphVizLocation"];
+            get => Settings.Instance.GraphVizPath;
             set
             {
-                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["graphVizLocation"].Value = value;
-                config.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection("appSettings");
+                Settings.Instance.GraphVizPath = value;
+                Settings.Save();
             }
         }
 
         public static string GameMakerStudioPath
         {
-            get => ConfigurationManager.AppSettings["GameMakerStudioPath"];
+            get => Settings.Instance.GameMakerStudioPath;
             set
             {
-                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["GameMakerStudioPath"].Value = value;
-                config.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection("appSettings");
+                Settings.Instance.GameMakerStudioPath = value;
+                Settings.Save();
             }
         }
 
         public static string GameMakerStudio2RuntimesPath
         {
-            get => ConfigurationManager.AppSettings["GameMakerStudio2RuntimesPath"];
+            get => Settings.Instance.GameMakerStudio2RuntimesPath;
             set
             {
-                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["GameMakerStudio2RuntimesPath"].Value = value;
-                config.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection("appSettings");
+                Settings.Instance.GameMakerStudio2RuntimesPath = value;
+                Settings.Save();
             }
         }
 
-        public static string AssetOrderSwappingEnabled
+        public static bool AssetOrderSwappingEnabled
         {
-            get => ConfigurationManager.AppSettings["AssetOrderSwappingEnabled"];
+            get => Settings.Instance.AssetOrderSwappingEnabled;
             set
             {
-                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["AssetOrderSwappingEnabled"].Value = value;
-                config.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection("appSettings");
+                Settings.Instance.AssetOrderSwappingEnabled = value;
+                Settings.Save();
             }
         }
 
-        public static string ProfileModeEnabled
+        public static bool ProfileModeEnabled
         {
-            get => ConfigurationManager.AppSettings["ProfileModeEnabled"];
+            get => Settings.Instance.ProfileModeEnabled;
             set
             {
-                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["ProfileModeEnabled"].Value = value;
-                config.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection("appSettings");
-                if ((Application.Current.MainWindow as MainWindow).Data != null)
-                {
-                    (Application.Current.MainWindow as MainWindow).Data.ToolInfo.ProfileMode = (ProfileModeEnabled == "True");
-                }
-                else if ((Application.Current.MainWindow as MainWindow).Data.GMS2_3)
-                {
-	                config.AppSettings.Settings["ProfileModeEnabled"].Value = "False";
-                    (Application.Current.MainWindow as MainWindow).Data.ToolInfo.ProfileMode = false;
-                }
-                else
-                {
-	                config.AppSettings.Settings["ProfileModeEnabled"].Value = "False";
-                }
+                Settings.Instance.ProfileModeEnabled = value;
+                Settings.Save();
             }
         }
 
-        public static string ProfileMessageShown
+        public static bool ProfileMessageShown
         {
-            get => ConfigurationManager.AppSettings["ProfileMessageShown"];
+            get => Settings.Instance.ProfileMessageShown;
             set
             {
-                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["ProfileMessageShown"].Value = value;
-                config.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection("appSettings");
+                Settings.Instance.ProfileMessageShown = value;
+                Settings.Save();
             }
         }
 
-        public static string DeleteOldProfileOnSave
+        public static bool DeleteOldProfileOnSave
         {
-            get => ConfigurationManager.AppSettings["DeleteOldProfileOnSave"];
+            get => Settings.Instance.DeleteOldProfileOnSave;
             set
             {
-                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["DeleteOldProfileOnSave"].Value = value;
-                config.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection("appSettings");
+                Settings.Instance.DeleteOldProfileOnSave = value;
+                Settings.Save();
             }
         }
 
@@ -122,6 +95,7 @@ namespace UndertaleModTool
         {
             InitializeComponent();
             this.DataContext = this;
+            Settings.Load();
         }
     }
 }
