@@ -9,11 +9,13 @@ using System.Linq;
 
 EnsureDataLoaded();
 
+int progress = 0;
+
 if (Data.ToolInfo.ProfileMode)
 {
-    //This script IS reworked to use entirely GML edits, WOW! - Grossley
-	// WOW! It takes like 5 minutes to run instead of 5 seconds now! - colinator27
-    ScriptMessage("This script is profile mode compatible, but it runs incredibly slow as it edits GML directly, so you may have to wait a while.");
+    // This script profile mode compatible now. - Grossley
+	// But it takes like 5 minutes to run instead of 5 seconds now. - colinator27
+    ScriptMessage("This script is profile mode compatible. It may take a few minutes to complete.");
 }
 
 // Helper function for defining functions
@@ -280,25 +282,18 @@ void ProfileModeOperations()
     //TODO: reimplement ASM solution w/o hacky asm breaking
     foreach (UndertaleCode c in Data.Code)
     {
+        UpdateProgressBar(null, "Code entries processed", progress++, Data.Code.Count);
+        string gmlCode = GetDecompiledText(c.Name.Content);
+        gmlCode = gmlCode.Replace("\r\n", "\n");
+        gmlCode = Regex.Replace(gmlCode, "global\\.interact = (\\d+)", "__scr_setinteract__\\(\\1\\)");
+        gmlCode = gmlCode.Replace("global.interact", "__scr_getinteract__()");
         if (c.Name.Content.StartsWith("gml_Object"))
         {
-            string gmlCode = GetDecompiledText(c.Name.Content);
             gmlCode = ("__scr_eventrun__(\"" + c.Name.Content.Substring(11) + "\")\n" + gmlCode + "\n__scr_eventend__()");
-            gmlCode = gmlCode.Replace("global.interact = 0", "__scr_setinteract__(0)");
-            gmlCode = gmlCode.Replace("global.interact = 1", "__scr_setinteract__(1)");
-            gmlCode = gmlCode.Replace("global.interact = 2", "__scr_setinteract__(2)");
-            gmlCode = gmlCode.Replace("global.interact = 3", "__scr_setinteract__(3)");
-            gmlCode = gmlCode.Replace("global.interact = 4", "__scr_setinteract__(4)");
-            gmlCode = gmlCode.Replace("global.interact = 5", "__scr_setinteract__(5)");
-            gmlCode = gmlCode.Replace("global.interact = 6", "__scr_setinteract__(6)");
-            gmlCode = gmlCode.Replace("global.interact = 99", "__scr_setinteract__(99)");
-            gmlCode = gmlCode.Replace("global.interact", "__scr_getinteract__()");
             gmlCode = gmlCode.Replace("return;\n", "{__scr_eventend__();return;}\n");
-            gmlCode = gmlCode.Replace("return;\r\n", "{__scr_eventend__();return;}\r\n");
             gmlCode = gmlCode.Replace("exit\n", "{__scr_eventend__();exit;}\n");
-            gmlCode = gmlCode.Replace("exit\r\n", "{__scr_eventend__();exit;}\r\n");
-            c.ReplaceGML(gmlCode, Data);
         }
+        c.ReplaceGML(gmlCode, Data);
     }
 }
 void ProfileModeExempt()
@@ -366,8 +361,8 @@ void ProfileModeExempt()
                             currPatch.JumpOffset -= 2;
                     }
                 }
+                NukeProfileGML(c.Name.Content);
             }
-            NukeProfileGML(c.Name.Content);
         }
 
         if (c.Name.Content.StartsWith("gml_Object"))
