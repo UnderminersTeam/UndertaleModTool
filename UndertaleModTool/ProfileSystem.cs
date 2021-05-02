@@ -53,7 +53,7 @@ namespace UndertaleModTool
             try
             {
                 string ProfilesLocation = ProfilesFolder;
-                string LastEditedLocation = ProfilesLocation + "LastEdited.txt";
+                string LastEditedLocation = Path.Combine(ProfilesLocation, "LastEdited.txt");
                 if ((File.Exists(LastEditedLocation) && (Data == null)))
                 {
                     DidUMTCrashWhileEditing = true;
@@ -71,7 +71,7 @@ namespace UndertaleModTool
                             ProfileHashOfCrashedFile = BitConverter.ToString(md5Instance.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
                         }
                     }
-                    if (Directory.Exists(ProfilesLocation + ReportedHashOfCrashedFile) && (File.Exists(PathOfCrashedFile)) && (ProfileHashOfCrashedFile == ReportedHashOfCrashedFile))
+                    if (Directory.Exists(Path.Combine(ProfilesLocation, ReportedHashOfCrashedFile)) && (File.Exists(PathOfCrashedFile)) && (ProfileHashOfCrashedFile == ReportedHashOfCrashedFile))
                     {
                         if (MessageBox.Show("UndertaleModTool crashed during usage last time while editing " + PathOfCrashedFile + ", would you like to recover your code now?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                         {
