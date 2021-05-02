@@ -253,6 +253,7 @@ namespace UndertaleModTool
                     {
                         MessageBox.Show("Profile should exist, but does not. Insufficient permissions??? (Try running in Administrator mode)");
                         MessageBox.Show("Profile mode is disabled.");
+                        SettingsWindow.ProfileMessageShown = "False";
                     }
                     if (SettingsWindow.ProfileMessageShown == "False")
                     {
