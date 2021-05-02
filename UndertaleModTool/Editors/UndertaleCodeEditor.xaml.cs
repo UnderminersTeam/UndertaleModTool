@@ -83,7 +83,7 @@ namespace UndertaleModTool
 
             DecompiledEditor.TextArea.TextView.Options.HighlightCurrentLine = true;
             DecompiledEditor.TextArea.TextView.CurrentLineBackground = new SolidColorBrush(Color.FromRgb(60, 60, 60));
-            DecompiledEditor.TextArea.TextView.CurrentLineBorder = null;
+            DecompiledEditor.TextArea.TextView.CurrentLineBorder = new Pen() { Thickness = 0 };
 
             DecompiledEditor.Document.TextChanged += (s, e) =>
             {
@@ -110,7 +110,7 @@ namespace UndertaleModTool
 
             DisassemblyEditor.TextArea.TextView.Options.HighlightCurrentLine = true;
             DisassemblyEditor.TextArea.TextView.CurrentLineBackground = new SolidColorBrush(Color.FromRgb(60, 60, 60));
-            DisassemblyEditor.TextArea.TextView.CurrentLineBorder = null;
+            DisassemblyEditor.TextArea.TextView.CurrentLineBorder = new Pen() { Thickness = 0 };
 
             DisassemblyEditor.Document.TextChanged += (s, e) => DisassemblyChanged = true;
 

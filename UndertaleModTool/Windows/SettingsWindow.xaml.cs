@@ -96,7 +96,7 @@ namespace UndertaleModTool
 
         public static string ProfileMessageShown
         {
-            get => ConfigurationManager.AppSettings["ProfileMessageShown"] as String;
+            get => ConfigurationManager.AppSettings["ProfileMessageShown"];
             set
             {
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -105,9 +105,10 @@ namespace UndertaleModTool
                 ConfigurationManager.RefreshSection("appSettings");
             }
         }
+
         public static string DeleteOldProfileOnSave
         {
-            get => ConfigurationManager.AppSettings["DeleteOldProfileOnSave"] as String;
+            get => ConfigurationManager.AppSettings["DeleteOldProfileOnSave"];
             set
             {
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);

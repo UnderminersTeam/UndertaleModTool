@@ -276,8 +276,13 @@ the program.
 
 The profile system can be toggled on or off at any time by going
 to the ""File"" tab at the top and then opening the ""Settings""
-(the ""Enable decompile once compile many"" option toggles it
-on or off).");
+(the ""Enable profile mode"" option toggles it on or off).
+You may wish to disable it for purposes such as collaborative
+modding projects, or when performing technical operations.
+
+It should be noted that this system is somewhat experimental, so
+should you encounter any problems, please let us know or leave
+an issue on GitHub.");
                         SettingsWindow.ProfileMessageShown = "True";
                     }
                     CreateUMTLastEdited(filename);
