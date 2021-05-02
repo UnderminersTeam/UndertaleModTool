@@ -7,8 +7,6 @@ namespace UndertaleModLib.Decompiler
 {
     public class ContextualAssetResolver
     {
-        public static BuiltinList builtins;
-
         // Is there a better way to do this?
         // Probably
         public static Dictionary<string, Func<DecompileContext, Decompiler.FunctionCall, int, Decompiler.ExpressionConstant, string>> resolvers;
@@ -22,8 +20,8 @@ namespace UndertaleModLib.Decompiler
             // into the builtin list
             event_subtypes = new Dictionary<Enum_EventType, Dictionary<int, string>>();
             blend_modes = new Dictionary<int, string>();
-            builtins = new BuiltinList(data);
 
+            var builtins = data.BuiltinList;
             var constants = builtins.Constants;
 
             Func<string, Enum_EventType> GetEventTypeFromSubtype = (string subtype) =>
