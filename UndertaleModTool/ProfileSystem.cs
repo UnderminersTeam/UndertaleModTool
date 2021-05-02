@@ -12,7 +12,8 @@ using UndertaleModLib.Decompiler;
 
 namespace UndertaleModTool
 {
-    //Make new profile system file.
+    // Handles a majority of profile-system functionality
+
     public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
         public string GetDecompiledText(string codeName)
@@ -28,76 +29,75 @@ namespace UndertaleModTool
                 return "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/";
             }
         }
+
         public string GetDisassemblyText(string codeName)
         {
             try
             {
                 UndertaleCode code = Data.Code.ByName(codeName);
-                string DisassemblyText = (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "");
-                DisassemblyText = DisassemblyText.Replace("break.e -1", "chkindex.e");
-                DisassemblyText = DisassemblyText.Replace("break.e -2", "pushaf.e");
-                DisassemblyText = DisassemblyText.Replace("break.e -3", "popaf.e");
-                DisassemblyText = DisassemblyText.Replace("break.e -4", "pushac.e");
-                DisassemblyText = DisassemblyText.Replace("break.e -5", "setowner.e");
-                DisassemblyText = DisassemblyText.Replace("break.e -6", "isstaticok.e");
-                DisassemblyText = DisassemblyText.Replace("break.e -7", "setstatic.e");
-                return DisassemblyText;
+                return (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "");
             }
             catch (Exception e)
             {
                 return "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"; // Please don't
             }
         }
+
         public void CrashCheck()
         {
             try
             {
-                string ProfilesLocation = ProfilesFolder;
-                string LastEditedLocation = ProfilesLocation + "LastEdited.txt";
-                if ((File.Exists(LastEditedLocation) && (Data == null)))
+                string lastEditedLocation = Path.Combine(ProfilesFolder, "LastEdited.txt");
+                if (Data == null && File.Exists(lastEditedLocation))
                 {
-                    DidUMTCrashWhileEditing = true;
-                    string LastEditedContents = File.ReadAllText(LastEditedLocation);
-                    string[] CrashRecoveryData = LastEditedContents.Split('\n');
-                    string DataRecoverLocation = Path.Combine(ProfilesLocation, CrashRecoveryData[0], "Temp");
-                    string ProfileHashOfCrashedFile;
-                    string ReportedHashOfCrashedFile = CrashRecoveryData[0];
-                    string PathOfCrashedFile = CrashRecoveryData[1];
-                    string PathOfRecoverableCode = Path.Combine(ProfilesLocation, ReportedHashOfCrashedFile);
+                    CrashedWhileEditing = true;
+                    string[] crashRecoveryData = File.ReadAllText(lastEditedLocation).Split('\n');
+                    string dataRecoverLocation = Path.Combine(ProfilesFolder, crashRecoveryData[0].Trim(), "Temp");
+                    string profileHashOfCrashedFile;
+                    string reportedHashOfCrashedFile = crashRecoveryData[0].Trim();
+                    string pathOfCrashedFile = crashRecoveryData[1];
+                    string pathOfRecoverableCode = Path.Combine(ProfilesFolder, reportedHashOfCrashedFile);
                     using (var md5Instance = MD5.Create())
                     {
-                        using (var stream = File.OpenRead(PathOfCrashedFile))
+                        using (var stream = File.OpenRead(pathOfCrashedFile))
                         {
-                            ProfileHashOfCrashedFile = BitConverter.ToString(md5Instance.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
+                            profileHashOfCrashedFile = BitConverter.ToString(md5Instance.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
                         }
                     }
-                    if (Directory.Exists(ProfilesLocation + ReportedHashOfCrashedFile) && (File.Exists(PathOfCrashedFile)) && (ProfileHashOfCrashedFile == ReportedHashOfCrashedFile))
+                    if (Directory.Exists(Path.Combine(ProfilesFolder, reportedHashOfCrashedFile)) && 
+                        File.Exists(pathOfCrashedFile) && 
+                        profileHashOfCrashedFile == reportedHashOfCrashedFile)
                     {
-                        if (MessageBox.Show("UndertaleModTool crashed during usage last time while editing " + PathOfCrashedFile + ", would you like to recover your code now?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                        if (MessageBox.Show("UndertaleModTool crashed during usage last time while editing " + pathOfCrashedFile + ", would you like to recover your code now?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                         {
-                            LoadFile(PathOfCrashedFile).ContinueWith((t) => { });
-                            string[] dirFiles = Directory.GetFiles(DataRecoverLocation);
+                            LoadFile(pathOfCrashedFile, true).ContinueWith((t) => { });
+                            if (Data == null)
+                            {
+                                MessageBox.Show("Failed to load data when recovering.");
+                                return;
+                            }
+                            string[] dirFiles = Directory.GetFiles(dataRecoverLocation);
                             int progress = 0;
-                            LoaderDialog CodeLoadDialog = new LoaderDialog("Script in progress...", "Please wait...");
-                            CodeLoadDialog.Update(null, "Code entries processed: ", progress++, dirFiles.Length);
-                            CodeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
+                            LoaderDialog codeLoadDialog = new LoaderDialog("Script in progress...", "Please wait...");
+                            codeLoadDialog.PreventClose = true;
+                            codeLoadDialog.Update(null, "Code entries processed: ", progress++, dirFiles.Length);
+                            codeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
                             foreach (string file in dirFiles)
                             {
                                 ImportGMLFile(file);
-                                CodeLoadDialog.Update(null, "Code entries processed: ", progress++, dirFiles.Length);
-                                CodeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
+                                codeLoadDialog.Update(null, "Code entries processed: ", progress++, dirFiles.Length);
+                                codeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
                             }
-                            CodeLoadDialog.TryHide();
+                            codeLoadDialog.TryClose();
                             MessageBox.Show("Completed.");
                         }
                         else if (MessageBox.Show("Would you like to move this code to the \"Recovered\" folder now? Any previous code there will be cleared!", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                         {
                             MessageBox.Show("Your code can be recovered from the \"Recovered\" folder at any time.");
-                            string RecoveredDir = Path.Combine(AppDataFolder, "Recovered", ReportedHashOfCrashedFile);
-                            if (Directory.Exists(RecoveredDir))
-                                Directory.Delete(RecoveredDir, true);
-                            Directory.CreateDirectory(RecoveredDir);
-                            Directory.Move(PathOfRecoverableCode, RecoveredDir);
+                            string recoveredDir = Path.Combine(AppDataFolder, "Recovered", reportedHashOfCrashedFile);
+                            if (Directory.Exists(recoveredDir))
+                                Directory.Delete(recoveredDir, true);
+                            Directory.Move(pathOfRecoverableCode, recoveredDir);
                             ApplyCorrections();
                         }
                         else
@@ -116,6 +116,7 @@ namespace UndertaleModTool
                 MessageBox.Show("CrashCheck error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
+
         public void ApplyCorrections()
         {
             try
@@ -127,42 +128,45 @@ namespace UndertaleModTool
                 MessageBox.Show("ApplyCorrections error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
+
         public void CreateUMTLastEdited(string filename)
         {
             try
             {
-                string LastEdited = Path.Combine(ProfilesFolder, "LastEdited.txt");
-                File.WriteAllText(LastEdited, ProfileHash + "\n" + filename);
+                File.WriteAllText(Path.Combine(ProfilesFolder, "LastEdited.txt"), ProfileHash + "\n" + filename);
             }
             catch (Exception exc)
             {
                 MessageBox.Show("CreateUMTLastEdited error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
+
         public void DestroyUMTLastEdited()
         {
             try
             {
-                if (File.Exists(Path.Combine(ProfilesFolder, "LastEdited.txt")))
-                    File.Delete(Path.Combine(ProfilesFolder, "LastEdited.txt"));
+                string path = Path.Combine(ProfilesFolder, "LastEdited.txt");
+                if (File.Exists(path))
+                    File.Delete(path);
             }
             catch (Exception exc)
             {
                 MessageBox.Show("DestroyUMTLastEdited error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
+
         public void RevertProfile()
         {
             try
             {
-                //We need to do this regardless, as the "Temp" folder can still change in non-profile mode.
-                //If we don't, it could cause desynchronization between modes.
-                string MainFolder = Path.Combine(ProfilesFolder, ProfileHash, "Main");
-                Directory.CreateDirectory(MainFolder);
-                string TempFolder = Path.Combine(ProfilesFolder, ProfileHash, "Temp");
-                if (Directory.Exists(TempFolder))
-                    Directory.Delete(TempFolder, true);
-                DirectoryCopy(MainFolder, TempFolder, true);
+                // We need to do this regardless, as the "Temp" folder can still change in non-profile mode.
+                // If we don't, it could cause desynchronization between modes.
+                string mainFolder = Path.Combine(ProfilesFolder, ProfileHash, "Main");
+                Directory.CreateDirectory(mainFolder);
+                string tempFolder = Path.Combine(ProfilesFolder, ProfileHash, "Temp");
+                if (Directory.Exists(tempFolder))
+                    Directory.Delete(tempFolder, true);
+                DirectoryCopy(mainFolder, tempFolder, true);
             }
             catch (Exception exc)
             {
@@ -173,16 +177,16 @@ namespace UndertaleModTool
         {
             try
             {
-                //This extra step needs to happen for non-profile mode because the "Temp" folder can be modified in non-profile mode.
-                //If we don't, it could cause desynchronization between modes.
+                // This extra step needs to happen for non-profile mode because the "Temp" folder can be modified in non-profile mode.
+                // If we don't, it could cause desynchronization between modes.
                 if (SettingsWindow.ProfileModeEnabled == "False")
                 {
-                    string MainFolder = Path.Combine(ProfilesFolder, ProfileHash, "Main");
-                    string TempFolder = Path.Combine(ProfilesFolder, ProfileHash, "Temp");
-                    Directory.CreateDirectory(TempFolder);
-                    if (Directory.Exists(MainFolder))
-                        Directory.Delete(MainFolder, true);
-                    DirectoryCopy(TempFolder, MainFolder, true);
+                    string mainFolder = Path.Combine(ProfilesFolder, ProfileHash, "Main");
+                    string tempFolder = Path.Combine(ProfilesFolder, ProfileHash, "Temp");
+                    Directory.CreateDirectory(tempFolder);
+                    if (Directory.Exists(mainFolder))
+                        Directory.Delete(mainFolder, true);
+                    DirectoryCopy(tempFolder, mainFolder, true);
                 }
             }
             catch (Exception exc)
@@ -203,57 +207,61 @@ namespace UndertaleModTool
                         ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                     }
                 }
-                Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Main"));
-                Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Temp"));
-                if (SettingsWindow.ProfileModeEnabled == "True" && data.GMS2_3)
+
+                string profDir = Path.Combine(ProfilesFolder, ProfileHash);
+                string profDirTemp = Path.Combine(profDir, "Temp");
+                string profDirMain = Path.Combine(profDir, "Main");
+
+                if (SettingsWindow.ProfileModeEnabled == "True")
                 {
-                    MessageBox.Show("The profile feature is not currently supported for GameMaker 2.3 games.");
-                    return;
-                }
-                else if (SettingsWindow.ProfileModeEnabled == "True" && (!(data.IsYYC())))
-                {
+                    if (data.GMS2_3)
+                    {
+                        MessageBox.Show("The profile feature is not currently supported for GameMaker 2.3 games.");
+                        return;
+                    }
+
                     Directory.CreateDirectory(ProfilesFolder);
-                    string ProfDir = Path.Combine(ProfilesFolder, ProfileHash);
-                    string ProfDirTemp = Path.Combine(ProfDir, "Temp");
-                    string ProfDirMain = Path.Combine(ProfDir, "Main");
-                    if (Directory.Exists(ProfDir))
+                    if (Directory.Exists(profDir))
                     {
-                        if ((!(Directory.Exists(ProfDirTemp))) && (Directory.Exists(ProfDirMain)))
+                        if (!Directory.Exists(profDirTemp) && Directory.Exists(profDirMain))
                         {
                             // Get the subdirectories for the specified directory.
-                            DirectoryInfo dir = new DirectoryInfo(ProfDirMain);
-                            Directory.CreateDirectory(ProfDirTemp);
+                            DirectoryInfo dir = new DirectoryInfo(profDirMain);
+                            Directory.CreateDirectory(profDirTemp);
                             // Get the files in the directory and copy them to the new location.
                             FileInfo[] files = dir.GetFiles();
                             foreach (FileInfo file in files)
                             {
-                                string tempPath = Path.Combine(ProfDirTemp, file.Name);
+                                string tempPath = Path.Combine(profDirTemp, file.Name);
                                 file.CopyTo(tempPath, false);
                             }
                         }
-                        else if ((!(Directory.Exists(ProfDirMain))) && (Directory.Exists(ProfDirTemp)))
+                        else if (!Directory.Exists(profDirMain) && Directory.Exists(profDirTemp))
                         {
                             // Get the subdirectories for the specified directory.
-                            DirectoryInfo dir = new DirectoryInfo(ProfDirTemp);
-                            Directory.CreateDirectory(ProfDirMain);
+                            DirectoryInfo dir = new DirectoryInfo(profDirTemp);
+                            Directory.CreateDirectory(profDirMain);
                             // Get the files in the directory and copy them to the new location.
                             FileInfo[] files = dir.GetFiles();
                             foreach (FileInfo file in files)
                             {
-                                string tempPath = Path.Combine(ProfDirMain, file.Name);
+                                string tempPath = Path.Combine(profDirMain, file.Name);
                                 file.CopyTo(tempPath, false);
                             }
                         }
                     }
-                    //First generation no longer exists, it will be generated on demand while you edit.
-                    Directory.CreateDirectory(ProfDir);
-                    Directory.CreateDirectory(ProfDirMain);
-                    Directory.CreateDirectory(ProfDirTemp);
-                    if (!Directory.Exists(ProfDir) || !Directory.Exists(ProfDirMain) || !Directory.Exists(ProfDirTemp))
+
+                    // First generation no longer exists, it will be generated on demand while you edit.
+                    Directory.CreateDirectory(profDir);
+                    Directory.CreateDirectory(profDirMain);
+                    Directory.CreateDirectory(profDirTemp);
+                    if (!Directory.Exists(profDir) || !Directory.Exists(profDirMain) || !Directory.Exists(profDirTemp))
                     {
-                        MessageBox.Show("Profile should exist, but does not. Insufficient permissions??? (Try running in Administrator mode)");
-                        MessageBox.Show("Profile mode is disabled.");
+                        MessageBox.Show("Profile should exist, but does not. Insufficient permissions? Profile mode is disabled.");
+                        SettingsWindow.ProfileModeEnabled = "False";
+                        return;
                     }
+
                     if (SettingsWindow.ProfileMessageShown == "False")
                     {
                         MessageBox.Show(@"The profile for your game loaded successfully!
@@ -274,15 +282,6 @@ on or off).");
                     }
                     CreateUMTLastEdited(filename);
                 }
-                else if ((SettingsWindow.ProfileModeEnabled == "False") && (!(data.IsYYC())))
-                {
-                    return;
-                }
-                else if (SettingsWindow.ProfileModeEnabled == "True" && data.IsYYC())
-                {
-                    MessageBox.Show("Profiles are not available for YYC games!");
-                    return;
-                }
             }
             catch (Exception exc)
             {
@@ -293,8 +292,8 @@ on or off).");
         {
             try
             {
-                string DeleteIfModeActive = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                bool CopyProfile = false;
+                string deleteIfModeActive = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                bool copyProfile = false;
                 using (var md5Instance = MD5.Create())
                 {
                     using (var stream = File.OpenRead(filename))
@@ -302,7 +301,7 @@ on or off).");
                         MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
                         if (BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant() != BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant())
                         {
-                            CopyProfile = true;
+                            copyProfile = true;
                         }
                     }
                 }
@@ -317,14 +316,14 @@ on or off).");
                 else if (SettingsWindow.ProfileModeEnabled == "True")
                 {
                     Directory.CreateDirectory(ProfilesFolder);
-                    string ProfDir;
+                    string profDir;
                     string MD5DirNameOld;
                     string MD5DirPathOld;
                     string MD5DirPathOldMain;
                     string MD5DirPathOldTemp;
                     string MD5DirNameNew;
                     string MD5DirPathNew;
-                    if (CopyProfile)
+                    if (copyProfile)
                     {
                         MD5DirNameOld = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                         MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
@@ -345,26 +344,24 @@ on or off).");
                     MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
                     MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
                     MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
-                    if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)) && CopyProfile)
+                    if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)) && copyProfile)
                     {
                         Directory.Delete(MD5DirPathOldMain, true);
                     }
                     DirectoryCopy(MD5DirPathOldTemp, MD5DirPathOldMain, true);
 
                     ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                    ProfDir = Path.Combine(ProfilesFolder, ProfileHash);
-                    Directory.CreateDirectory(ProfDir);
-                    Directory.CreateDirectory(Path.Combine(ProfDir, "Main"));
-                    Directory.CreateDirectory(Path.Combine(ProfDir, "Temp"));
+                    profDir = Path.Combine(ProfilesFolder, ProfileHash);
+                    Directory.CreateDirectory(profDir);
+                    Directory.CreateDirectory(Path.Combine(profDir, "Main"));
+                    Directory.CreateDirectory(Path.Combine(profDir, "Temp"));
                     MessageBox.Show("Profile saved successfully to " + ProfileHash);
                 }
-                if (SettingsWindow.DeleteOldProfileOnSave == "True" && CopyProfile == true)
+                if (SettingsWindow.DeleteOldProfileOnSave == "True" && copyProfile)
                 {
-                    Directory.Delete(Path.Combine(ProfilesFolder, DeleteIfModeActive), true);
+                    Directory.Delete(Path.Combine(ProfilesFolder, deleteIfModeActive), true);
                 }
-                CopyProfile = false;
             }
-
             catch (Exception exc)
             {
                 MessageBox.Show("ProfileSaveEvent error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
@@ -392,7 +389,7 @@ on or off).");
                 foreach (FileInfo file in files)
                 {
                     string tempPath = Path.Combine(destDirName, file.Name);
-                    if (!(File.Exists(tempPath)))
+                    if (!File.Exists(tempPath))
                     {
                         try
                         {
@@ -421,24 +418,24 @@ on or off).");
                 MessageBox.Show("DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
-        public bool AreFilesIdentical(string File01, string File02)
+
+        public bool AreFilesIdentical(string file1, string file2)
         {
-            int file1byte;
-            int file2byte;
-            FileStream fs1;
-            FileStream fs2;
+            int file1byte, file2byte;
+            FileStream fs1, fs2;
 
             // Open the two files.
-            fs1 = new FileStream(File01, FileMode.Open);
-            fs2 = new FileStream(File02, FileMode.Open);
+            fs1 = new FileStream(file1, FileMode.Open);
+            fs2 = new FileStream(file2, FileMode.Open);
 
             // Check the file sizes. If they are not the same, the files
             // are not the same.
             if (fs1.Length != fs2.Length)
             {
-                // Close the file
+                // Close the files
                 fs1.Close();
                 fs2.Close();
+
                 // Return false to indicate files are different
                 return false;
             }
@@ -453,7 +450,7 @@ on or off).");
                     file1byte = fs1.ReadByte();
                     file2byte = fs2.ReadByte();
                 }
-                while ((file1byte == file2byte) && (file1byte != -1));
+                while (file1byte == file2byte && file1byte != -1);
 
                 // Close the files.
                 fs1.Close();
@@ -462,14 +459,7 @@ on or off).");
                 // Return the success of the comparison. "file1byte" is
                 // equal to "file2byte" at this point only if the files are
                 // the same.
-                if ((file1byte - file2byte) == 0)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return (file1byte - file2byte) == 0;
             }
         }
     }

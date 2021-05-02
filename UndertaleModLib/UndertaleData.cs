@@ -55,8 +55,7 @@ namespace UndertaleModLib
         public bool GMS2_3 = false;
         public bool GMS2_3_1 = false;
         public bool GMS2_3_2 = false;
-        public bool ProfileMode = false;
-        public string CurrentMD5 = "Unknown";
+        public ToolInfo ToolInfo = new ToolInfo();
         public int PaddingAlignException = -1;
 
         public BuiltinList BuiltinList;
@@ -378,5 +377,13 @@ namespace UndertaleModLib
             funcs.EnsureDefined(name, strg);
             return func;
         }
+    }
+
+    public class ToolInfo
+    {
+        // Info handle for the actual editor to store data on
+        public bool ProfileMode = false;
+        public string AppDataProfiles = null;
+        public string CurrentMD5 = "Unknown";
     }
 }

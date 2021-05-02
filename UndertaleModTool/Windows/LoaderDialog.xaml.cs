@@ -90,6 +90,18 @@ namespace UndertaleModTool
             });
         }
 
+        public void TryClose()
+        {
+            PreventClose = false;
+            Dispatcher.Invoke(() =>
+            {
+                if (!IsClosed)
+                {
+                    Close();
+                }
+            });
+        }
+
         public void ReportProgress(string message)
         {
             StatusText = message;

@@ -7,7 +7,7 @@ using UndertaleModLib.Scripting;
 
 namespace UndertaleModTool
 {
-    //Make new GUID helper functions
+    // GUID helper functions for collision events
     public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
         public void ReassignGUIDs(string GUID, uint ObjectIndex)
@@ -31,66 +31,55 @@ namespace UndertaleModTool
                 }
                 catch
                 {
+                    // Silently ignore, some values can be null along the way
                 }
-            }
-        }
-        public uint ReduceCollisionValue(List<uint> possible_values)
-        {
-            if (possible_values.Count == 1 && (possible_values[0] != 999999))
-                return possible_values[0];
-            else if (possible_values.Count > 0)
-            {
-                bool NoObjectFound = true;
-                string GameObjectName = "";
-                string GameObjectListNames = "";
-                foreach (uint objID in possible_values)
-                {
-                    GameObjectListNames += Data.GameObjects[(int)objID].Name.Content;
-                    GameObjectListNames += "\n";
-                }
-                uint GameObjectIDValue = 0;
-                while (NoObjectFound)
-                {
-                    string object_index = SimpleTextInput("Multiple object were found. Select only one object below from the set, or, if none below match, some other object name:", "Object enter box.", GameObjectListNames, true);
-                    for (var i = 0; i < Data.GameObjects.Count; i++)
-                    {
-                        if (Data.GameObjects[i].Name.Content.ToLower() == object_index.ToLower())
-                        {
-                            NoObjectFound = false;
-                            GameObjectName = Data.GameObjects[i].Name.Content;
-                            GameObjectIDValue = (uint)i;
-                        }
-                    }
-                }
-                return GameObjectIDValue;
-            }
-            else if (possible_values[0] == 999999)
-            {
-                bool NoObjectFound = true;
-                string GameObjectName = "";
-                uint GameObjectIDValue = 0;
-                while (NoObjectFound)
-                {
-                    string object_index = SimpleTextInput("Object could not be found. Please enter it below:", "Object enter box.", "", false);
-                    for (var i = 0; i < Data.GameObjects.Count; i++)
-                    {
-                        if (Data.GameObjects[i].Name.Content.ToLower() == object_index.ToLower())
-                        {
-                            NoObjectFound = false;
-                            GameObjectName = Data.GameObjects[i].Name.Content;
-                            GameObjectIDValue = (uint)i;
-                        }
-                    }
-                }
-                return GameObjectIDValue;
-            }
-            else
-            {
-                return 0;
             }
         }
 
-        public String GetGUIDFromCodeName(string codeName)
+        public uint ReduceCollisionValue(List<uint> possible_values)
+        {
+            if (possible_values.Count == 1)
+            {
+                if (possible_values[0] != uint.MaxValue)
+                    return possible_values[0];
+
+                // Nothing found, pick new one
+                while (true)
+                {
+                    string object_index = SimpleTextInput("Object could not be found. Please enter it below:",
+                                                            "Object enter box.", "", false).ToLower();
+                    for (var i = 0; i < Data.GameObjects.Count; i++)
+                    {
+                        if (Data.GameObjects[i].Name.Content.ToLower() == object_index)
+                            return (uint)i;
+                    }
+                }
+            }
+            
+            if (possible_values.Count != 0)
+            {
+                // 2 or more possible values, make a list to choose from
+
+                string gameObjectNames = "";
+                foreach (uint objID in possible_values)
+                    gameObjectNames += Data.GameObjects[(int)objID].Name.Content + "\n";
+
+                while (true)
+                {
+                    string object_index = SimpleTextInput("Multiple object were found. Select only one object below from the set, or, if none below match, some other object name:",
+                                                          "Object enter box.", gameObjectNames, true).ToLower();
+                    for (var i = 0; i < Data.GameObjects.Count; i++)
+                    {
+                        if (Data.GameObjects[i].Name.Content.ToLower() == object_index)
+                            return (uint)i;
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+        public string GetGUIDFromCodeName(string codeName)
         {
             string afterPrefix = codeName.Substring(11);
             if (afterPrefix.LastIndexOf("_Collision_") != -1)
@@ -128,6 +117,7 @@ namespace UndertaleModTool
                 }
                 catch
                 {
+                    // Silently ignore, some values can be null along the way
                 }
             }
             possible_values = GetCollisionValueFromGUID(GetGUIDFromCodeName(codeName));
@@ -149,7 +139,7 @@ namespace UndertaleModTool
                         {
                             if (action.CodeId.Name.Content.Contains(GUID))
                             {
-                                if (!(possible_values.Contains(evnt.EventSubtype)))
+                                if (!possible_values.Contains(evnt.EventSubtype))
                                 {
                                     possible_values.Add(evnt.EventSubtype);
                                 }
@@ -159,11 +149,13 @@ namespace UndertaleModTool
                 }
                 catch
                 {
+                    // Silently ignore, some values can be null along the way
                 }
             }
+
             if (possible_values.Count == 0)
             {
-                possible_values.Add(999999);
+                possible_values.Add(uint.MaxValue);
                 return possible_values;
             }
             else

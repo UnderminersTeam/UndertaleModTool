@@ -48,7 +48,7 @@ namespace UndertaleModTool
         private object _Selected;
         public object Selected { get { return _Selected; } private set { _Selected = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Selected")); } }
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
-        //God this is so ugly, if there's a better way, please, put in a pull request
+        // God this is so ugly, if there's a better way, please, put in a pull request
         public Visibility IsExtProductIDEligible => (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && (((Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? Visibility.Visible : Visibility.Collapsed;
 
         public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
@@ -64,9 +64,9 @@ namespace UndertaleModTool
         public byte[] MD5CurrentlyLoaded;
         public string AppDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool");
         public string ProfilesFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles");
-        public string CorrectionsFolder = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Corrections");
+        public string CorrectionsFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Corrections");
         public string ProfileHash = "Unknown";
-        public bool DidUMTCrashWhileEditing = false;
+        public bool CrashedWhileEditing = false;
 
         // TODO: extract the scripting interface into a separate class
 
@@ -147,7 +147,8 @@ namespace UndertaleModTool
                     ListenChildConnection(args[2]);
                 }
             }
-            //Copy the known code corrections into the profile, if they don't already exist.
+
+            // Copy the known code corrections into the profile, if they don't already exist.
             ApplyCorrections();
             CrashCheck();
         }
@@ -175,7 +176,7 @@ namespace UndertaleModTool
             string key = Guid.NewGuid().ToString();
 
             string dir = Path.GetDirectoryName(FilePath);
-            Process.Start(System.Reflection.Assembly.GetExecutingAssembly().Location, "\"" + Path.Combine(dir, filename) + "\" " + key);
+            Process.Start(Assembly.GetExecutingAssembly().Location, "\"" + Path.Combine(dir, filename) + "\" " + key);
 
             var server = new NamedPipeServerStream(key);
             server.WaitForConnection();
@@ -227,6 +228,7 @@ namespace UndertaleModTool
 
             FilePath = null;
             Data = UndertaleData.CreateNew();
+            Data.ToolInfo.AppDataProfiles = ProfilesFolder;
             CloseChildFiles();
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsGMS2"));
@@ -330,9 +332,10 @@ namespace UndertaleModTool
             }
         }
 
-        private async Task LoadFile(string filename)
+        private async Task LoadFile(string filename, bool preventClose = false)
         {
             LoaderDialog dialog = new LoaderDialog("Loading", "Loading, please wait...");
+            dialog.PreventClose = preventClose;
             this.Dispatcher.Invoke(() =>
             {
                 CommandBox.Text = "";
@@ -381,8 +384,8 @@ namespace UndertaleModTool
                             UpdateProfile(data, filename);
                             if (data != null)
                             {
-                                data.ProfileMode = (SettingsWindow.ProfileModeEnabled == "True" ? true : false);
-                                data.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                                data.ToolInfo.ProfileMode = (SettingsWindow.ProfileModeEnabled == "True");
+                                data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                             }
                         }
                         if (data.GMS2_3)
@@ -395,8 +398,9 @@ namespace UndertaleModTool
                         }
                         if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
                             CloseChildFiles();
-                        this.Data = data;
-                        this.FilePath = filename;
+                        Data = data;
+                        Data.ToolInfo.AppDataProfiles = ProfilesFolder;
+                        FilePath = filename;
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data"));
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FilePath"));
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsGMS2"));
@@ -526,28 +530,29 @@ namespace UndertaleModTool
                     MessageBox.Show("An error occured while trying to save:\n" + e.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
                     SaveSucceeded = false;
                 }
-                //Don't make any changes unless the save succeeds.
+                // Don't make any changes unless the save succeeds.
                 try
                 {
                     if (SaveSucceeded)
                     {
-                        //It saved successfully!
-                        //If we're overwriting a previously existing data file, we're going to delete it now.
-                        //Then, we're renaming it back to the proper (non-temp) file name.
+                        // It saved successfully!
+                        // If we're overwriting a previously existing data file, we're going to delete it now.
+                        // Then, we're renaming it back to the proper (non-temp) file name.
                         if (File.Exists(filename))
                             File.Delete(filename);
                         File.Move(filename + "temp", filename);
-                        //And also make the changes to the profile system.
+
+                        // Also make the changes to the profile system.
                         ProfileSaveEvent(Data, filename);
                         SaveTempToMainProfile();
                     }
                     else
                     {
-                        //It failed, but since we made a temp file for saving, no data was overwritten or destroyed (hopefully)
-                        //We need to delete the temp file though (if it exists).
+                        // It failed, but since we made a temp file for saving, no data was overwritten or destroyed (hopefully)
+                        // We need to delete the temp file though (if it exists).
                         if (File.Exists(filename + "temp"))
                             File.Delete(filename + "temp");
-                        //No profile system changes, since the save failed, like a save was never attempted.
+                        // No profile system changes, since the save failed, like a save was never attempted.
                     }
                 }
                 catch (Exception exc)
@@ -557,8 +562,8 @@ namespace UndertaleModTool
                 }
                 if (Data != null)
                 {
-                    Data.ProfileMode = (SettingsWindow.ProfileModeEnabled == "True" ? true : false);
-                    Data.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                    Data.ToolInfo.ProfileMode = (SettingsWindow.ProfileModeEnabled == "True");
+                    Data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                 }
 
                 Dispatcher.Invoke(() =>

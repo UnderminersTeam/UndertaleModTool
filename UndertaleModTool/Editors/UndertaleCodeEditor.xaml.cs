@@ -218,8 +218,9 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    if (File.Exists(Path.Combine(TempPath, gettextCode.Name.Content + ".gml")))
-                        DecompilationOutput = File.ReadAllText(Path.Combine(TempPath, gettextCode.Name.Content + ".gml")).Replace("\r\n", "\n").Split('\n');
+                    string path = Path.Combine(TempPath, gettextCode.Name.Content + ".gml");
+                    if (File.Exists(path))
+                        DecompilationOutput = File.ReadAllText(path).Replace("\r\n", "\n").Split('\n');
                     else
                         DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
                 }
@@ -292,7 +293,12 @@ namespace UndertaleModTool
                     Exception e = null;
                     try
                     {
-                        decompiled = ((SettingsWindow.ProfileModeEnabled == "False" || !File.Exists(Path.Combine(TempPath, code.Name.Content + ".gml"))) ? Decompiler.Decompile(code, context).Replace("\r\n", "\n") : File.ReadAllText(Path.Combine(TempPath, code.Name.Content + ".gml")).Replace("\r\n", "\n"));
+                        string path = Path.Combine(TempPath, code.Name.Content + ".gml");
+                        if (SettingsWindow.ProfileModeEnabled == "False" || !File.Exists(path))
+                        {
+                            decompiled = Decompiler.Decompile(code, context).Replace("\r\n", "\n");
+                        } else
+                            decompiled = File.ReadAllText(path).Replace("\r\n", "\n");
                     }
                     catch (Exception ex)
                     {
@@ -466,28 +472,32 @@ namespace UndertaleModTool
                 MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            try
+
+            if (CodeEditSuccessful && !(Application.Current.MainWindow as MainWindow).Data.GMS2_3)
             {
-                if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3) && (SettingsWindow.ProfileModeEnabled == "True"))
+                try
                 {
-                    //Write text, if only in the profile mode.
-                    File.WriteAllText(Path.Combine(TempPath, code.Name.Content + ".gml"), DecompiledEditor.Text);
-                }
-                else if (CodeEditSuccessful && (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3) && (SettingsWindow.ProfileModeEnabled == "False"))
-                {
-                    //Destroy file with comments if it's been edited outside the profile mode.
-                    //We're dealing with the decompiled code only, it has to happen.
-                    //Otherwise it will cause a desync, which is more important to prevent.
-                    if (File.Exists(Path.Combine(TempPath, code.Name.Content + ".gml")))
+                    string path = Path.Combine(TempPath, code.Name.Content + ".gml");
+                    if (SettingsWindow.ProfileModeEnabled == "True")
                     {
-                        File.Delete(Path.Combine(TempPath, code.Name.Content + ".gml"));
+                        // Write text, only if in the profile mode.
+                        File.WriteAllText(path, DecompiledEditor.Text);
+                    }
+                    else
+                    {
+                        // Destroy file with comments if it's been edited outside the profile mode.
+                        // We're dealing with the decompiled code only, it has to happen.
+                        // Otherwise it will cause a desync, which is more important to prevent.
+                        if (File.Exists(path))
+                            File.Delete(path);
                     }
                 }
+                catch (Exception exc)
+                {
+                    MessageBox.Show("Error during writing of GML code to profile:\n" + exc.ToString());
+                }
             }
-            catch (Exception exc)
-            {
-                MessageBox.Show("Error during writing of GML code to profile:\n" + exc.ToString());
-            }
+
             // Show new code, decompiled.
             CurrentDisassembled = null;
             CurrentDecompiled = null;

@@ -907,33 +907,36 @@ namespace UndertaleModLib.Decompiler
 
             // TODO: make proper file/manifest for all games to use, not just UT/DR, and also not these specific names
             string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower();
-            //Just Undertale
+
+            // Just Undertale
             if (lowerName != null && (lowerName == "undertale"))
             {
-                //Sometimes used as a bool, should not matter though and be an improvement overall.
+                // Sometimes used as a bool, should not matter though and be an improvement overall.
                 builtin_vars.Add("king", AssetIDType.GameObject);
                 builtin_funcs["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
-                //I should confirm adding this causes no adverse effects later. 
+                // I should confirm adding this causes no adverse effects later. 
                 builtin_vars.Add("myroom", AssetIDType.Room);
-                //gml_Object_obj_dummytrigger_Collision_1576
+                // gml_Object_obj_dummytrigger_Collision_1576
                 builtin_vars.Add("dummy", AssetIDType.GameObject);
-                //gml_Object_obj_asriel_swordarm_Create_0
+                // gml_Object_obj_asriel_swordarm_Create_0
                 builtin_vars.Add("sm", AssetIDType.GameObject);
-                //This should do something to fix the piano room
+                // This should do something to fix the piano room
                 builtin_vars.Add("sprite_id", AssetIDType.Sprite);
                 builtin_funcs["scr_getsprite"] = new AssetIDType[] { AssetIDType.Sprite };
-                //gml_Object_obj_barabody_Create_0
+                // gml_Object_obj_barabody_Create_0
                 builtin_vars.Add("hand1pic", AssetIDType.Sprite);
                 builtin_vars.Add("hand2pic", AssetIDType.Sprite);
                 builtin_vars.Add("headpic", AssetIDType.Sprite);
-                //gml_Object_obj_asgoreb_body_Create_0
+                // gml_Object_obj_asgoreb_body_Create_0
                 builtin_vars.Add("bodypic", AssetIDType.Sprite);
-                //gml_Object_obj_castroll_Draw_0
+                // gml_Object_obj_castroll_Draw_0
                 builtin_vars.Add("do_room_goto", AssetIDType.Boolean);
                 builtin_vars.Add("do_room_goto_target", AssetIDType.Room);
             }
-            //Just deltarune
-            if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune"))) {
+
+            // Just Deltarune
+            if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
+            {
                 builtin_vars.Add("idlesprite", AssetIDType.Sprite);
                 builtin_vars.Add("actreadysprite", AssetIDType.Sprite);
                 builtin_vars.Add("actsprite", AssetIDType.Sprite);
@@ -959,7 +962,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("smsprite", AssetIDType.Sprite);
                 builtin_vars.Add("sparedsprite", AssetIDType.Sprite);
                 builtin_vars.Add("sussprite", AssetIDType.Sprite);
-                //"targetsprite" seems to be unused but just in case
+                // "targetsprite" seems to be unused but just in case
                 builtin_vars.Add("targetsprite", AssetIDType.Sprite);
                 builtin_vars.Add("thissprite", AssetIDType.Sprite);
                 builtin_vars.Add("touchsprite", AssetIDType.Sprite);
@@ -1013,7 +1016,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("battlemoder", AssetIDType.Boolean);
                 builtin_vars.Add("becamebattle", AssetIDType.Boolean);
                 builtin_vars.Add("seriousbattle", AssetIDType.Boolean);
-                //A little bit wrong, but probably fine.
+                // A little bit wrong, but probably fine.
                 builtin_vars.Add("cango", AssetIDType.Boolean);
                 builtin_vars.Add("canact", AssetIDType.Boolean);
                 builtin_vars.Add("CANCEL", AssetIDType.Boolean);
@@ -1060,7 +1063,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("bellcon", AssetIDType.Boolean);
                 builtin_vars.Add("belowzero", AssetIDType.Boolean);
                 //builtin_vars.Add("noiseskip", AssetIDType.Boolean);
-                //Colors weave into a spire of flame
+                // Colors weave into a spire of flame
                 builtin_vars.Add("mycolor", AssetIDType.Color);
                 builtin_vars.Add("colorchange", AssetIDType.Boolean);
                 builtin_vars.Add("xcolor", AssetIDType.Color);
@@ -1081,17 +1084,18 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("linecolor", AssetIDType.Color);
                 builtin_vars.Add("fadecolor", AssetIDType.Color);
                 builtin_vars.Add("color", AssetIDType.Color);
-                //Scripts
+                // Scripts
                 builtin_funcs["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
             }
-            //Both UT and DR
+
+            // Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
-                //gml_Object_obj_vulkinbody_UNDERTALE_Create_0
-                //Seems to be used a lot as a regular value between the values of around 0-20. 
+                // gml_Object_obj_vulkinbody_UNDERTALE_Create_0
+                // Seems to be used a lot as a regular value between the values of around 0-20. 
                 builtin_vars.Add("face", AssetIDType.Sprite);
                 builtin_vars.Add("myfont", AssetIDType.Font);
-                //Hope this script works!
+                // Hope this script works!
                 builtin_funcs["scr_bouncer"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
                 builtin_vars.Add("currentroom", AssetIDType.Room);
                 builtin_vars.Add("dsprite", AssetIDType.Sprite);
@@ -1105,17 +1109,17 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("normalsprite", AssetIDType.Sprite);
                 builtin_vars.Add("hurtsprite", AssetIDType.Sprite);
                 builtin_vars.Add("hurtsound", AssetIDType.Sound);
-                //New built in vars found by Grossley
+                // New built in vars found by Grossley
                 builtin_vars.Add("interact", AssetIDType.Other);
-                //Test me!
+                // Test me!
                 builtin_vars.Add("sound0", AssetIDType.Sound);
-                //From v1.11 Undertale comparison, not tested unlike v1.001!
+                // From v1.11 Undertale comparison, not tested unlike v1.001!
                 builtin_vars.Add("asprite", AssetIDType.Sprite);
                 builtin_vars.Add("bsprite", AssetIDType.Sprite);
                 builtin_vars.Add("tailobj", AssetIDType.GameObject);
                 builtin_vars.Add("heart", AssetIDType.GameObject);
                 builtin_vars.Add("draedmode", AssetIDType.Boolean);
-                //Deltarune
+                // Deltarune
                 builtin_vars.Add("haveauto", AssetIDType.Boolean);
                 builtin_vars.Add("goahead", AssetIDType.Boolean);
                 builtin_vars.Add("is_auto_susie", AssetIDType.Boolean);
@@ -1181,10 +1185,10 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("alpha_changed", AssetIDType.Boolean);
                 builtin_vars.Add("charinstance", AssetIDType.GameObject);
                 builtin_vars.Add("reset", AssetIDType.Boolean);
-                //globals pertaining to monsters in Deltarune 
+                // globals pertaining to monsters in Deltarune 
                 builtin_vars.Add("monsterstatus", AssetIDType.Boolean);
                 builtin_vars.Add("monster", AssetIDType.Boolean);
-                //Cutscene
+                // Cutscene
                 builtin_vars.Add("cutscene", AssetIDType.Boolean);
                 builtin_vars.Add("black", AssetIDType.Boolean);
                 builtin_vars.Add("monsterinstancetype", AssetIDType.GameObject);
@@ -1202,14 +1206,14 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("catty", AssetIDType.GameObject);
                 builtin_vars.Add("bratty", AssetIDType.GameObject);
                 builtin_vars.Add("creator", AssetIDType.GameObject);
-                //It's not 100% accurate to resolve this way but it seems like this variable only gets directly assigned values and is used as a bool, it should be fine.
+                // It's not 100% accurate to resolve this way but it seems like this variable only gets directly assigned values and is used as a bool, it should be fine.
                 builtin_vars.Add("parent", AssetIDType.GameObject);
-                //These are not so consistent... ;-;
-                //op is used in Muffet's stuff but is critical in Omega flowey positioning... worse to resolve than to not.
-                //builtin_vars.Add("op", AssetIDType.GameObject);
-                //Toby messed up in "gml_Object_obj_wizardorb_chaser_Alarm_0" (should be "scr_monstersum()"), "pop" is never a script.
-                //From v1.001 Undertale via comparison
-                //A TIER quality
+                // These are not so consistent... ;-;
+                // op is used in Muffet's stuff but is critical in Omega flowey positioning... worse to resolve than to not.
+                // builtin_vars.Add("op", AssetIDType.GameObject);
+                // Toby messed up in "gml_Object_obj_wizardorb_chaser_Alarm_0" (should be "scr_monstersum()"), "pop" is never a script.
+                // From v1.001 Undertale via comparison
+                // A TIER quality
                 builtin_vars.Add("onionsprite", AssetIDType.Sprite);
                 builtin_vars.Add("headsprite", AssetIDType.Sprite);
                 builtin_vars.Add("breaksprite", AssetIDType.Sprite);
@@ -1222,7 +1226,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("image", AssetIDType.Sprite);
                 builtin_vars.Add("song_index", AssetIDType.Sound);
                 builtin_vars.Add("thischara", AssetIDType.GameObject);
-                //B TIER quality
+                // B TIER quality
                 builtin_vars.Add("tspr5", AssetIDType.Sprite);
                 builtin_vars.Add("tspr3", AssetIDType.Sprite);
                 builtin_vars.Add("tspr2", AssetIDType.Sprite);
@@ -1231,7 +1235,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("snapper", AssetIDType.GameObject);
                 builtin_vars.Add("subject", AssetIDType.GameObject);
                 builtin_vars.Add("clip", AssetIDType.GameObject);
-                //C TIER quality
+                // C TIER quality
                 builtin_vars.Add("sound1", AssetIDType.Sound);
                 builtin_vars.Add("sound2", AssetIDType.Sound);
             }

@@ -2751,15 +2751,17 @@ namespace UndertaleModLib.Decompiler
             context.Setup(code);
             try
             {
-                if (context.Data != null)
+                if (context.Data != null && context.Data.ToolInfo.ProfileMode)
                 {
-                    string GMLPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles", context.Data.CurrentMD5, "Temp");
-                    if (context.Data.ProfileMode && File.Exists(Path.Combine(GMLPath, code.Name.Content + ".gml")))
-                        return File.ReadAllText(Path.Combine(GMLPath, code.Name.Content + ".gml"));
+                    string GMLPath = Path.Combine(context.Data.ToolInfo.AppDataProfiles, 
+                                                  context.Data.ToolInfo.CurrentMD5, "Temp", code.Name.Content + ".gml");
+                    if (File.Exists(GMLPath))
+                        return File.ReadAllText(GMLPath);
                 }
             }
             catch
             {
+                // Just ignore the exception and decompile normally
             }
 
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);

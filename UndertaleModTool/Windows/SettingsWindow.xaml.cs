@@ -23,7 +23,7 @@ namespace UndertaleModTool
     {
         public static string GraphVizPath
         {
-            get => ConfigurationManager.AppSettings["graphVizLocation"] as String;
+            get => ConfigurationManager.AppSettings["graphVizLocation"];
             set
             {
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -35,7 +35,7 @@ namespace UndertaleModTool
 
         public static string GameMakerStudioPath
         {
-            get => ConfigurationManager.AppSettings["GameMakerStudioPath"] as String;
+            get => ConfigurationManager.AppSettings["GameMakerStudioPath"];
             set
             {
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -47,7 +47,7 @@ namespace UndertaleModTool
 
         public static string GameMakerStudio2RuntimesPath
         {
-            get => ConfigurationManager.AppSettings["GameMakerStudio2RuntimesPath"] as String;
+            get => ConfigurationManager.AppSettings["GameMakerStudio2RuntimesPath"];
             set
             {
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -59,7 +59,7 @@ namespace UndertaleModTool
 
         public static string AssetOrderSwappingEnabled
         {
-            get => ConfigurationManager.AppSettings["AssetOrderSwappingEnabled"] as String;
+            get => ConfigurationManager.AppSettings["AssetOrderSwappingEnabled"];
             set
             {
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -71,7 +71,7 @@ namespace UndertaleModTool
 
         public static string ProfileModeEnabled
         {
-            get => ConfigurationManager.AppSettings["ProfileModeEnabled"] as String;
+            get => ConfigurationManager.AppSettings["ProfileModeEnabled"];
             set
             {
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -80,12 +80,12 @@ namespace UndertaleModTool
                 ConfigurationManager.RefreshSection("appSettings");
                 if ((Application.Current.MainWindow as MainWindow).Data != null)
                 {
-                    (Application.Current.MainWindow as MainWindow).Data.ProfileMode = (SettingsWindow.ProfileModeEnabled == "True" ? true : false);
+                    (Application.Current.MainWindow as MainWindow).Data.ToolInfo.ProfileMode = (ProfileModeEnabled == "True");
                 }
                 else if ((Application.Current.MainWindow as MainWindow).Data.GMS2_3)
                 {
 	                config.AppSettings.Settings["ProfileModeEnabled"].Value = "False";
-                    (Application.Current.MainWindow as MainWindow).Data.ProfileMode = false;
+                    (Application.Current.MainWindow as MainWindow).Data.ToolInfo.ProfileMode = false;
                 }
                 else
                 {

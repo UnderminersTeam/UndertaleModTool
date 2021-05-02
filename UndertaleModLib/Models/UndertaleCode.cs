@@ -1330,14 +1330,12 @@ namespace UndertaleModLib.Models
             }
             try
             {
-                string TempPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles", data.CurrentMD5);
-                //Attempt to write text in all modes, because this is a special case.
-                if (File.Exists(Path.Combine(TempPath, this.Name.Content + ".gml")))
+                // Attempt to write text in all modes, because this is a special case.
+                string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name.Content + ".gml");
+                if (File.Exists(tempPath))
                 {
-                    string ReadText = File.ReadAllText(Path.Combine(TempPath, this.Name.Content + ".gml"));
-                    ReadText += "\n";
-                    ReadText += gmlCode;
-                    File.WriteAllText(Path.Combine(TempPath, this.Name.Content + ".gml"), ReadText);
+                    string readText = File.ReadAllText(tempPath) + "\n" + gmlCode;
+                    File.WriteAllText(tempPath, readText);
                 }
             }
             catch (Exception exc)
@@ -1364,10 +1362,10 @@ namespace UndertaleModLib.Models
             }
             try
             {
-                string TempPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles", data.CurrentMD5);
-                //Temporary
-                if (!data.GMS2_3 && (data.ProfileMode || File.Exists(Path.Combine(TempPath, this.Name.Content + ".gml"))))
-                    File.WriteAllText(Path.Combine(TempPath, this.Name.Content + ".gml"), gmlCode);
+                // When necessary, write to profile.
+                string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name.Content + ".gml");
+                if (!data.GMS2_3 && (data.ToolInfo.ProfileMode || File.Exists(tempPath)))
+                    File.WriteAllText(tempPath, gmlCode);
             }
             catch (Exception exc)
             {

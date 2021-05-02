@@ -12,7 +12,7 @@ using UndertaleModLib.Scripting;
 
 namespace UndertaleModTool
 {
-    //Import GML file system.
+    // System for importing GML files with more ease than other functions
     public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
         enum EventTypes
@@ -33,46 +33,50 @@ namespace UndertaleModTool
             Gesture,
             PreCreate
         }
+
         public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false)
         {
             ImportCode(codeName, gmlCode, true, doParse, true, CheckDecompiler);
         }
+
         public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
         {
             ImportCode(codeName, gmlCode, false, doParse, destroyASM, CheckDecompiler);
         }
+
         public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false)
         {
             ImportCodeFromFile(fileName, true, doParse, true, CheckDecompiler);
         }
+
         public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
         {
             ImportCodeFromFile(fileName, false, doParse, destroyASM, CheckDecompiler);
         }
+
         public void NukeProfileGML(string codeName)
         {
-            string GMLPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles", Data.CurrentMD5, "Temp");
-            if (File.Exists(Path.Combine(GMLPath, codeName + ".gml")))
-            {
-                File.Delete(Path.Combine(GMLPath, codeName + ".gml"));
-                File.WriteAllText(GetDecompiledText(codeName), Path.Combine(GMLPath, codeName + ".gml"));
-            }
+            string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, "Temp", codeName + ".gml");
+            if (File.Exists(path))
+                File.WriteAllText(path, GetDecompiledText(codeName));
         }
+
         public string GetPassBack(string decompiled_text, string keyword, string replacement, bool case_sensitive = false)
         {
             keyword = keyword.Replace("\r\n", "\n");
             replacement = replacement.Replace("\r\n", "\n");
-            string PassBack;
+            string passBack;
             if (case_sensitive)
-                PassBack = decompiled_text.Replace(keyword, replacement);
+                passBack = decompiled_text.Replace(keyword, replacement);
             else
-                PassBack = Regex.Replace(decompiled_text, Regex.Escape(keyword), replacement, RegexOptions.IgnoreCase);
-            return PassBack;
+                passBack = Regex.Replace(decompiled_text, Regex.Escape(keyword), replacement, RegexOptions.IgnoreCase);
+            return passBack;
         }
+
         public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false)
         {
             UndertaleCode code;
-            string PassBack;
+            string passBack;
             EnsureDataLoaded();
             if (Data.Code.ByName(codeName) != null)
                 code = Data.Code.ByName(codeName);
@@ -81,37 +85,37 @@ namespace UndertaleModTool
                 ScriptError("No code named " + codeName + " was found!");
                 return;
             }
-            if (Data.ProfileMode == false || Data.GMS2_3)
+            if (Data.ToolInfo.ProfileMode == false || Data.GMS2_3)
             {
                 ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
                 try
                 {
-                    PassBack = GetPassBack((code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""), keyword, replacement);
-                    code.ReplaceGML(PassBack, Data);
+                    passBack = GetPassBack((code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""), keyword, replacement);
+                    code.ReplaceGML(passBack, Data);
                 }
                 catch (Exception exc)
                 {
                     throw new Exception("Error during GML code replacement:\n" + exc.ToString());
                 }
             }
-            else if ((Data.ProfileMode == true) && (!Data.GMS2_3))
+            else if (Data.ToolInfo.ProfileMode && !Data.GMS2_3)
             {
                 try
                 {
-                    string TempPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles", Data.CurrentMD5);
-                    if (File.Exists(Path.Combine(TempPath, codeName + ".gml")))
+                    string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, codeName + ".gml");
+                    if (File.Exists(path))
                     {
-                        PassBack = GetPassBack(File.ReadAllText(Path.Combine(TempPath, codeName + ".gml")), keyword, replacement, case_sensitive);
-                        File.WriteAllText(Path.Combine(TempPath, codeName + ".gml"), PassBack);
-                        code.ReplaceGML(PassBack, Data);
+                        passBack = GetPassBack(File.ReadAllText(path), keyword, replacement, case_sensitive);
+                        File.WriteAllText(path, passBack);
+                        code.ReplaceGML(passBack, Data);
                     }
                     else
                     {
                         ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
                         try
                         {
-                            PassBack = GetPassBack((code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""), keyword, replacement);
-                            code.ReplaceGML(PassBack, Data);
+                            passBack = GetPassBack((code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""), keyword, replacement);
+                            code.ReplaceGML(passBack, Data);
                         }
                         catch (Exception exc)
                         {
@@ -125,6 +129,7 @@ namespace UndertaleModTool
                 }
             }
         }
+
         void ImportCodeFromFile(string file, bool IsGML = true, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
         {
             try
@@ -144,9 +149,10 @@ namespace UndertaleModTool
                 if (!CheckDecompiler)
                     MessageBox.Show("Import" + (IsGML ? "GML" : "ASM") + "File error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
                 else
-                    throw new System.Exception("Error!");
+                    throw new Exception("Error!");
             }
         }
+
         void ImportCode(string codeName, string gmlCode, bool IsGML = true, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
         {
             bool SkipPortions = false;
@@ -157,7 +163,7 @@ namespace UndertaleModTool
                 code.Name = Data.Strings.MakeString(codeName);
                 Data.Code.Add(code);
             }
-            if ((Data?.GeneralInfo.BytecodeVersion > 14) && (Data.CodeLocals.ByName(codeName) == null))
+            if (Data?.GeneralInfo.BytecodeVersion > 14 && Data.CodeLocals.ByName(codeName) == null)
             {
                 UndertaleCodeLocals locals = new UndertaleCodeLocals();
                 locals.Name = code.Name;
@@ -195,7 +201,7 @@ namespace UndertaleModTool
                 {
                     // Add code to global init section.
                     UndertaleGlobalInit init_entry = null;
-                    //This doesn't work, have to do it the hard way: UndertaleGlobalInit init_entry = Data.GlobalInitScripts.ByName(scr_dup_code_name_con);
+                    // This doesn't work, have to do it the hard way: UndertaleGlobalInit init_entry = Data.GlobalInitScripts.ByName(scr_dup_code_name_con);
                     foreach (UndertaleGlobalInit globalInit in Data.GlobalInitScripts)
                     {
                         if (globalInit.Code.Name.Content == codeName)
@@ -241,7 +247,7 @@ namespace UndertaleModTool
                     int methodNumber = 0;
                     try
                     {
-                        methodNumber = Int32.Parse(methodNumberStr);
+                        methodNumber = int.Parse(methodNumberStr);
                         if (methodName == "Collision" && (methodNumber >= Data.GameObjects.Count || methodNumber < 0))
                         {
                             bool doNewObj = ScriptQuestion("Object of ID " + methodNumber.ToString() + " was not found.\nAdd new object?");
@@ -253,9 +259,9 @@ namespace UndertaleModTool
                             }
                             else
                             {
-                                //It *needs* to have a valid value, make the user specify one.
+                                // It *needs* to have a valid value, make the user specify one.
                                 List<uint> possible_values = new List<uint>();
-                                possible_values.Add(999999);
+                                possible_values.Add(uint.MaxValue);
                                 methodNumber = (int)ReduceCollisionValue(possible_values);
                             }
                         }
@@ -268,7 +274,7 @@ namespace UndertaleModTool
                             objName = afterPrefix.Substring(0, (afterPrefix.LastIndexOf("_Collision_")));
                             methodNumberStr = afterPrefix.Substring(afterPrefix.LastIndexOf("_Collision_") + s2.Length, afterPrefix.Length - (afterPrefix.LastIndexOf("_Collision_") + s2.Length));
                             methodName = "Collision";
-                            //GMS 2.3+ use the object name for the one colliding, which is rather useful.
+                            // GMS 2.3+ use the object name for the one colliding, which is rather useful.
                             if (Data.GMS2_3)
                             {
                                 if (Data.GameObjects.ByName(methodNumberStr) != null)
@@ -294,15 +300,15 @@ namespace UndertaleModTool
                                 }
                                 if (Data.GameObjects.ByName(methodNumberStr) != null)
                                 {
-                                    //It *needs* to have a valid value, make the user specify one, silly.
+                                    // It *needs* to have a valid value, make the user specify one, silly.
                                     List<uint> possible_values = new List<uint>();
-                                    possible_values.Add(999999);
+                                    possible_values.Add(uint.MaxValue);
                                     ReassignGUIDs(methodNumberStr, ReduceCollisionValue(possible_values));
                                 }
                             }
                             else
                             {
-                                //Lets try to get this going
+                                // Let's try to get this going
                                 methodNumber = (int)ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName));
                                 ReassignGUIDs(methodNumberStr, ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName)));
                             }
@@ -335,16 +341,15 @@ namespace UndertaleModTool
                             {
                                 foreach (UndertaleGameObject.EventAction action in evnt.Actions)
                                 {
-                                    if (action.CodeId.Name.Content == codeName)
+                                    if (action.CodeId?.Name?.Content == codeName)
                                         duplicate = true;
                                 }
                             }
                         }
                         catch
                         {
-                            //something went wrong, but probably because it's trying to check something non-existent
-                            //we're gonna make it so
-                            //keep going
+                            // Something went wrong, but probably because it's trying to check something non-existent
+                            // Just keep going
                         }
                         if (duplicate == false)
                         {
@@ -363,18 +368,19 @@ namespace UndertaleModTool
             }
             SafeImport(codeName, gmlCode, IsGML, destroyASM, CheckDecompiler);
         }
+
         void SafeImport(string codeName, string gmlCode, bool IsGML, bool destroyASM = true, bool CheckDecompiler = false)
         {
             try
             {
-                string GMLPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool", "Profiles", Data.CurrentMD5, "Temp");
                 if (IsGML)
                 {
                     Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
-                    if (File.Exists(Path.Combine(GMLPath, codeName + ".gml")))
-                    {
-                        File.WriteAllText(GetDecompiledText(codeName), Path.Combine(GMLPath, codeName + ".gml"));
-                    }
+
+                    // Write to profile if necessary.
+                    string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, "Temp", codeName + ".gml");
+                    if (File.Exists(path))
+                        File.WriteAllText(path, GetDecompiledText(codeName));
                 }
                 else
                 {
@@ -392,7 +398,7 @@ namespace UndertaleModTool
                     MessageBox.Show(ErrorText, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
                 else
-                    throw new System.Exception("Error!");
+                    throw new Exception("Error!");
             }
         }
     }
