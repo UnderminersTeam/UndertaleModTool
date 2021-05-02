@@ -240,6 +240,7 @@
     <Compile Include="Converters\MaskImageConverter.cs" />
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Converters\RectConverter.cs" />
+    <Compile Include="CorrectionsManager.cs" />
     <Compile Include="Editors\UndertaleGameEndEditor.xaml.cs">
       <DependentUpon>UndertaleGameEndEditor.xaml</DependentUpon>
     </Compile>
@@ -285,7 +286,7 @@
     <Compile Include="Editors\UndertaleVariableEditor.xaml.cs">
       <DependentUpon>UndertaleVariableEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CorrectionsManager.cs" />
+    <Compile Include="DeepCopy.cs" />
     <Compile Include="HelperGUID.cs" />
     <Compile Include="ImportCodeSystem.cs" />
     <Compile Include="ProfileSystem.cs" />
