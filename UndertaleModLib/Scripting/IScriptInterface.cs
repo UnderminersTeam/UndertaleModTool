@@ -16,11 +16,11 @@ namespace UndertaleModLib.Scripting
         bool CanSave { get; }
 
         void EnsureDataLoaded();
-        void ReplaceTempWithMain();
-        void ReplaceMainWithTemp();
-        void ReplaceTempWithCorrections();
-        void ReplaceCorrectionsWithTemp();
-        void UpdateCorrections();
+        void ReplaceTempWithMain(bool ImAnExpertBTW = false);
+        void ReplaceMainWithTemp(bool ImAnExpertBTW = false);
+        void ReplaceTempWithCorrections(bool ImAnExpertBTW = false);
+        void ReplaceCorrectionsWithTemp(bool ImAnExpertBTW = false);
+        void UpdateCorrections(bool ImAnExpertBTW = false);
 
         void ScriptMessage(string message);
         void SetUMTConsoleText(string message);

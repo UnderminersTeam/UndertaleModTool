@@ -466,6 +466,7 @@ namespace UndertaleModTool
             {
                 var instructions = Assembler.Assemble(compileContext.ResultAssembly, data);
                 code.Replace(instructions);
+                CodeEditSuccessful = true;
             }
             catch (Exception ex)
             {
@@ -669,19 +670,72 @@ namespace UndertaleModTool
                                 item.Click += (sender2, ev2) =>
                                 {
                                     if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+                                        (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
+                                    else
                                     {
                                         doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
                                                     text.Length, (obj as UndertaleNamedResource).Name.Content, null);
                                         (parent as UndertaleCodeEditor).DecompiledChanged = true;
                                     }
-                                    else
-                                        (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
                                 };
                                 contextMenu.Items.Add(item);
                             }
                             if (id > 0x00050000)
                             {
-                                contextMenu.Items.Add(new MenuItem() { Header = "#" + id.ToString("X6") + " (color)", IsEnabled = false });
+                                MenuItem item = new MenuItem();
+                                item.Header = "0x" + id.ToString("X6") + " (color)";
+                                item.Click += (sender2, ev2) =>
+                                {
+                                    if (!((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift))
+                                    {
+                                        doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
+                                                    text.Length, "0x" + id.ToString("X6"), null);
+                                        (parent as UndertaleCodeEditor).DecompiledChanged = true;
+                                    }
+                                };
+                                contextMenu.Items.Add(item);
+                            }
+                            BuiltinList list = new BuiltinList();
+                            list.Initialize((Application.Current.MainWindow as MainWindow).Data);
+                            var myKey = list.Constants.FirstOrDefault(x => x.Value == (double)id).Key;
+                            if (myKey != null)
+                            {
+                                MenuItem item = new MenuItem();
+                                item.Header = myKey + " (constant)";
+                                item.Click += (sender2, ev2) =>
+                                {
+                                    if (!((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift))
+                                    {
+                                        try
+                                        {
+                                            doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset, text.Length, list.Constants.FirstOrDefault(x => x.Value == (double)id).Key, null);
+                                        }
+                                        catch
+                                        {
+                                        }
+                                        finally
+                                        {
+                                            (parent as UndertaleCodeEditor).DecompiledChanged = true;
+                                        }
+                                    }
+                                };
+                                contextMenu.Items.Add(item);
+                            }
+                            myKey = list.Constants.FirstOrDefault(x => x.Value == -((double)id)).Key;
+                            if (myKey != null)
+                            {
+                                MenuItem item = new MenuItem();
+                                item.Header = myKey + " (constant)";
+                                item.Click += (sender2, ev2) =>
+                                {
+                                    if (!((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift))
+                                    {
+                                        doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
+                                                    text.Length, list.Constants.FirstOrDefault(x => x.Value == -((double)id)).Key, null);
+                                        (parent as UndertaleCodeEditor).DecompiledChanged = true;
+                                    }
+                                };
+                                contextMenu.Items.Add(item);
                             }
                             contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
 
