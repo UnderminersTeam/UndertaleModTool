@@ -182,8 +182,8 @@ namespace UndertaleModLib
                 res.PostUnserialize(this);
             resUpdate.Clear();
 
-            Decompiler.AssetTypeResolver.InitializeTypes(data);
             data.BuiltinList = new BuiltinList(data);
+            Decompiler.AssetTypeResolver.InitializeTypes(data);
 
             return data;
         }
