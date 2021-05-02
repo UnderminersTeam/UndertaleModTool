@@ -47,9 +47,8 @@
 			\b0x[0-9a-fA-F]+  # hex number
 		|   \$[0-9a-fA-F]+   # alternate hex number
 		|
-			\b
-			(    \d+(\.[0-9]+)?  # digits with optional .
-			|    \.[0-9]+        # start with ., then digits
+			(    -?\d+(\.[0-9]+)?  # digits with optional . and -
+			|    -?\.[0-9]+        # start with ., then digits
 			)
 			\b
 		</Rule>

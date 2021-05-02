@@ -573,7 +573,7 @@ namespace UndertaleModTool
         // Based on https://stackoverflow.com/questions/28379206/custom-hyperlinks-using-avalonedit
         public class NumberGenerator : VisualLineElementGenerator
         {
-            readonly static Regex regex = new Regex(@"\b\d+\.?\b");
+            readonly static Regex regex = new Regex(@"-?\d+\.?");
 
             public NumberGenerator()
             {
@@ -641,26 +641,29 @@ namespace UndertaleModTool
                             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
 
                             List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
-                            if (id < data.Sprites.Count)
-                                possibleObjects.Add(data.Sprites[id]);
-                            if (id < data.Rooms.Count)
-                                possibleObjects.Add(data.Rooms[id]);
-                            if (id < data.GameObjects.Count)
-                                possibleObjects.Add(data.GameObjects[id]);
-                            if (id < data.Backgrounds.Count)
-                                possibleObjects.Add(data.Backgrounds[id]);
-                            if (id < data.Scripts.Count)
-                                possibleObjects.Add(data.Scripts[id]);
-                            if (id < data.Paths.Count)
-                                possibleObjects.Add(data.Paths[id]);
-                            if (id < data.Fonts.Count)
-                                possibleObjects.Add(data.Fonts[id]);
-                            if (id < data.Sounds.Count)
-                                possibleObjects.Add(data.Sounds[id]);
-                            if (id < data.Shaders.Count)
-                                possibleObjects.Add(data.Shaders[id]);
-                            if (id < data.Timelines.Count)
-                                possibleObjects.Add(data.Timelines[id]);
+                            if (id >= 0)
+                            {
+                                if (id < data.Sprites.Count)
+                                    possibleObjects.Add(data.Sprites[id]);
+                                if (id < data.Rooms.Count)
+                                    possibleObjects.Add(data.Rooms[id]);
+                                if (id < data.GameObjects.Count)
+                                    possibleObjects.Add(data.GameObjects[id]);
+                                if (id < data.Backgrounds.Count)
+                                    possibleObjects.Add(data.Backgrounds[id]);
+                                if (id < data.Scripts.Count)
+                                    possibleObjects.Add(data.Scripts[id]);
+                                if (id < data.Paths.Count)
+                                    possibleObjects.Add(data.Paths[id]);
+                                if (id < data.Fonts.Count)
+                                    possibleObjects.Add(data.Fonts[id]);
+                                if (id < data.Sounds.Count)
+                                    possibleObjects.Add(data.Sounds[id]);
+                                if (id < data.Shaders.Count)
+                                    possibleObjects.Add(data.Shaders[id]);
+                                if (id < data.Timelines.Count)
+                                    possibleObjects.Add(data.Timelines[id]);
+                            }
 
                             ContextMenu contextMenu = new ContextMenu();
                             foreach (UndertaleObject obj in possibleObjects)
@@ -695,43 +698,18 @@ namespace UndertaleModTool
                                 };
                                 contextMenu.Items.Add(item);
                             }
-                            BuiltinList list = new BuiltinList();
-                            list.Initialize((Application.Current.MainWindow as MainWindow).Data);
+                            BuiltinList list = (Application.Current.MainWindow as MainWindow).Data.BuiltinList;
                             var myKey = list.Constants.FirstOrDefault(x => x.Value == (double)id).Key;
                             if (myKey != null)
                             {
                                 MenuItem item = new MenuItem();
-                                item.Header = myKey + " (constant)";
+                                item.Header = myKey.Replace("_", "__") + " (constant)";
                                 item.Click += (sender2, ev2) =>
                                 {
                                     if (!((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift))
                                     {
-                                        try
-                                        {
-                                            doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset, text.Length, list.Constants.FirstOrDefault(x => x.Value == (double)id).Key, null);
-                                        }
-                                        catch
-                                        {
-                                        }
-                                        finally
-                                        {
-                                            (parent as UndertaleCodeEditor).DecompiledChanged = true;
-                                        }
-                                    }
-                                };
-                                contextMenu.Items.Add(item);
-                            }
-                            myKey = list.Constants.FirstOrDefault(x => x.Value == -((double)id)).Key;
-                            if (myKey != null)
-                            {
-                                MenuItem item = new MenuItem();
-                                item.Header = myKey + " (constant)";
-                                item.Click += (sender2, ev2) =>
-                                {
-                                    if (!((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift))
-                                    {
-                                        doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
-                                                    text.Length, list.Constants.FirstOrDefault(x => x.Value == -((double)id)).Key, null);
+                                        doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset, 
+                                                    text.Length, myKey, null);
                                         (parent as UndertaleCodeEditor).DecompiledChanged = true;
                                     }
                                 };
