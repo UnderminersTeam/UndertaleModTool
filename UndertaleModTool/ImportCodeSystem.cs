@@ -58,7 +58,12 @@ namespace UndertaleModTool
         {
             string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, "Temp", codeName + ".gml");
             if (File.Exists(path))
+            {
+                //The file must be deleted to write it again properly with true decompiled output
+                //Just overwriting it isn't enough
+                File.Delete(path);
                 File.WriteAllText(path, GetDecompiledText(codeName));
+            }
         }
 
         public string GetPassBack(string decompiled_text, string keyword, string replacement, bool case_sensitive = false)
