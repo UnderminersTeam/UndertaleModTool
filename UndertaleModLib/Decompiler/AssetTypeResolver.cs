@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UndertaleModLib.Models;
+using UndertaleModLib.Compiler;
 
 namespace UndertaleModLib.Decompiler
 {
@@ -45,6 +43,10 @@ namespace UndertaleModLib.Decompiler
         GameObject, // or GameObjectInstance or InstanceType, these are all interchangable
         Script,
         Shader,
+
+        EventType, // For event_perform
+
+        ContextDependent, // Can be anything, depends on the function and/or other arguments
 
         Layer // GMS2
     };
@@ -322,6 +324,30 @@ namespace UndertaleModLib.Decompiler
         ov_achievements,
     }
 
+    // Subtypes are pulled from the builtin list case frankly I 
+    // don't care enough to type them all out manually.
+    // There's like a hundred subtypes.
+    public enum Enum_EventType : int
+    {
+        ev_create,
+        ev_destroy,
+        ev_alarm,
+        ev_step,
+        ev_collision,
+        ev_keyboard,
+        ev_mouse,
+        ev_other,
+        ev_draw,
+        ev_keypress,
+        ev_keyrelease,
+        ev_trigger,
+
+        // GMS2
+        ev_cleanup,
+        ev_gesture,
+        ev_pre_create,
+    }
+
     public class AssetTypeResolver
     {
         public static Dictionary<string, AssetIDType[]> builtin_funcs;
@@ -336,6 +362,9 @@ namespace UndertaleModLib.Decompiler
         internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, DecompileContext context, Decompiler.FunctionCall function)
         {
             Dictionary<string, AssetIDType[]> scriptArgs = context.scriptArgs;
+
+            if (function_name.StartsWith("gml_Script_"))
+                function_name = function_name.Substring(11);
 
             bool overloaded = false;
             // Scripts overload builtins because in GMS2 some functions are just backwards-compatibility scripts
@@ -452,6 +481,8 @@ namespace UndertaleModLib.Decompiler
                 return (int)Enum.Parse(typeof(e__BG), const_name);
             if (Enum.IsDefined(typeof(EventSubtypeKey), const_name))
                 return Convert.ToInt32((uint)Enum.Parse(typeof(EventSubtypeKey), const_name));
+            if (Enum.IsDefined(typeof(Enum_EventType), const_name))
+                return (int)Enum.Parse(typeof(Enum_EventType), const_name);
 
             return null;
         }
@@ -459,6 +490,9 @@ namespace UndertaleModLib.Decompiler
         // Properly initializes per-project/game
         public static void InitializeTypes(UndertaleData data)
         {
+
+            ContextualAssetResolver.Initialize(data);
+
             builtin_funcs = new Dictionary<string, AssetIDType[]>()
             {
                 { "action_create_object", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
@@ -690,6 +724,10 @@ namespace UndertaleModLib.Decompiler
                 { "room_get_camera", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } }, // GMS2 only
                 { "room_set_camera", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Other } }, // GMS2 only
 
+                // GMS2 viewport compatibility scripts
+                { "__view_get", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other } }, // Don't ask why this is here I was going somewhere with this
+                { "__view_set", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.ContextDependent } },
+
                 { "object_exists", new AssetIDType[] { AssetIDType.GameObject } },
                 { "object_get_depth", new AssetIDType[] { AssetIDType.GameObject } },
                 { "object_get_mask", new AssetIDType[] { AssetIDType.GameObject } },
@@ -708,12 +746,13 @@ namespace UndertaleModLib.Decompiler
                 { "object_set_sprite", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
                 { "object_set_visible", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
 
-                // only relevant event func
-                { "event_perform_object", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
+                // Event functions
+                { "event_perform_object", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.EventType, AssetIDType.ContextDependent } },
+                { "event_perform", new AssetIDType[] { AssetIDType.EventType, AssetIDType.ContextDependent } },
 
                 { "merge_colour", new AssetIDType[] { AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
 
-                // only relevant functions listed
+                // incomplete
                 { "draw_clear", new AssetIDType[] { AssetIDType.Color } },
                 { "draw_clear_alpha", new AssetIDType[] { AssetIDType.Color, AssetIDType.Other } },
                 { "draw_set_colour", new AssetIDType[] { AssetIDType.Color } },
@@ -727,6 +766,9 @@ namespace UndertaleModLib.Decompiler
                 { "draw_roundrect_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
                 { "draw_roundrect_colour_ext", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
                 { "draw_healthbar", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+
+                { "draw_set_blend_mode", new AssetIDType[] { AssetIDType.ContextDependent } },
+                { "draw_set_blend_mode_ext", new AssetIDType[] { AssetIDType.ContextDependent, AssetIDType.ContextDependent } },
 
                 { "draw_sprite", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
                 { "draw_sprite_ext", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
@@ -787,6 +829,7 @@ namespace UndertaleModLib.Decompiler
                 // TODO: 3D drawing, didn't bother
 
                 // TODO: surface drawing
+                { "draw_surface_ext", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
 
                 { "shader_is_compiled", new AssetIDType[] { AssetIDType.Shader } },
                 { "shader_set", new AssetIDType[] { AssetIDType.Shader } },
@@ -798,6 +841,7 @@ namespace UndertaleModLib.Decompiler
 
                 // Interpolation
                 { "texture_set_interpolation", new AssetIDType[] { AssetIDType.Boolean } },
+                { "texture_set_tiled", new AssetIDType[] { AssetIDType.Boolean } },
                 { "gpu_set_texfilter", new AssetIDType[] { AssetIDType.Boolean } }, // GMS2 equivalent of texture_set_interpolation.
 
                 // TODO: GMS2 tilemaps

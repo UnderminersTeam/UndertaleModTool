@@ -52,6 +52,7 @@ namespace UndertaleModLib.Decompiler
         public Dictionary<UndertaleVariable, AssetIDType> assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
         public int TempVarId;
         public Dictionary<string, AssetIDType[]> scriptArgs = new Dictionary<string, AssetIDType[]>();
+        public FunctionCall currentFunction;
 
         public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
 
@@ -76,6 +77,7 @@ namespace UndertaleModLib.Decompiler
             CompilerTempVar = null;
             assetTypes.Clear();
             LocalVarDefines.Clear();
+            currentFunction = null;
         }
 
         public TempVar NewTempVar()
@@ -321,6 +323,26 @@ namespace UndertaleModLib.Decompiler
                     return ConvertToEnumStr<Steam_LeaderBoard_Sort>(Value);
                 else if (AssetType == AssetIDType.Boolean)
                     return ConvertToEnumStr<Boolean>(Value);
+                else if (AssetType == AssetIDType.EventType)
+                    return ConvertToEnumStr<Enum_EventType>(Value);
+                else if (AssetType == AssetIDType.ContextDependent)
+                {
+                    var func = context.currentFunction;
+                    if (func != null && (ContextualAssetResolver.resolvers?.ContainsKey(func.Function.Name.Content) ?? false))
+                    {
+                        List<Expression> actualArguments = new List<Expression>();
+                        foreach(var arg in func.Arguments)
+                        {
+                            if (arg is ExpressionCast)
+                                actualArguments.Add((arg as ExpressionCast).Argument);
+                            else
+                                actualArguments.Add(arg);
+                        }
+                        string result = ContextualAssetResolver.resolvers[func.Function.Name.Content](context, func, actualArguments.IndexOf(this), this);
+                        if (result != null)
+                            return result;
+                    }
+                }
 
                 else if (AssetType == AssetIDType.Color && Value is IFormattable && !(Value is float) && !(Value is double) && !(Value is decimal))
                 {
@@ -339,23 +361,9 @@ namespace UndertaleModLib.Decompiler
 
                 else if (AssetType == AssetIDType.KeyboardKey)
                 {
-                    int? tryVal = ConvertToInt(Value);
-                    if (tryVal != null)
-                    {
-                        int val = tryVal ?? -1;
-
-                        bool isAlphaNumeric = val >= (int)EventSubtypeKey.Digit0 && val <= (int)EventSubtypeKey.Z;
-                        if (isAlphaNumeric)
-                            return "ord(\"" + (char)val + "\")";
-
-                        if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
-                            return ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
-
-                        if (!Char.IsControl((char)val) && !Char.IsLower((char)val) && val > 0) // The special keys overlay with the uppercase letters (ugh)
-                            return "ord(" + (((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
-                                : (((char)val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
-                                : "\"" + (char)val + "\"")) + ")";
-                    }
+                    string key = GetAsKeyboard(context);
+                    if (key != null)
+                        return key;
                 }
 
                 if (context.Data != null && AssetType != AssetIDType.Other)
@@ -418,6 +426,29 @@ namespace UndertaleModLib.Decompiler
                     return ((Statement)Value).ToString(context);
 
                 return ((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
+            }
+
+            // Helper function
+            public string GetAsKeyboard(DecompileContext context)
+            {
+                int? tryVal = ConvertToInt(Value);
+                if (tryVal != null)
+                {
+                    int val = tryVal ?? -1;
+
+                    bool isAlphaNumeric = val >= (int)EventSubtypeKey.Digit0 && val <= (int)EventSubtypeKey.Z;
+                    if (isAlphaNumeric)
+                        return "ord(\"" + (char)val + "\")";
+
+                    if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
+                        return ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
+
+                    if (!Char.IsControl((char)val) && !Char.IsLower((char)val) && val > 0) // The special keys overlay with the uppercase letters (ugh)
+                        return "ord(" + (((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
+                            : (((char)val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
+                            : "\"" + (char)val + "\"")) + ")";
+                }
+                return null;
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -1072,7 +1103,7 @@ namespace UndertaleModLib.Decompiler
         // Represents a high-level function or script call.
         public class FunctionCall : Expression
         {
-            private UndertaleFunction Function;
+            internal UndertaleFunction Function;
             private UndertaleInstruction.DataType ReturnType;
             internal List<Expression> Arguments;
 
@@ -1088,6 +1119,7 @@ namespace UndertaleModLib.Decompiler
                 StringBuilder argumentString = new StringBuilder();
                 foreach (Expression exp in Arguments)
                 {
+                    context.currentFunction = this;
                     if (argumentString.Length > 0)
                         argumentString.Append(", ");
                     argumentString.Append(exp.ToString(context));
@@ -1129,9 +1161,8 @@ namespace UndertaleModLib.Decompiler
                 AssetIDType[] args = new AssetIDType[Arguments.Count];
                 AssetTypeResolver.AnnotateTypesForFunctionCall(Function.Name.Content, args, context, this);
                 for (var i = 0; i < Arguments.Count; i++)
-                {
                     Arguments[i].DoTypePropagation(context, args[i]);
-                }
+
                 return suggestedType; // TODO: maybe we should handle returned values too?
             }
 
@@ -1624,12 +1655,16 @@ namespace UndertaleModLib.Decompiler
                         {
                             if (stack.Count > 0)
                             {
-                                stack.Pop();
+                                var statement = stack.Pop();
+                                object owner;
+                                if (statement is ExpressionConstant)
+                                    owner = (statement as ExpressionConstant).Value?.ToString();
+                                else
+                                    owner = statement.ToString(context);
+                                statements.Add(new CommentStatement("setowner: " +  (owner ?? "<null>")));
                             }
                             else
-                            {
                                 statements.Add(new CommentStatement("WARNING: attempted to setowner without an owner on the stack."));
-                            }
                         }
                         // This is used for checking bounds in 2D arrays
                         // I'm not sure of the specifics but I guess it causes a debug breakpoint if the top of the stack is >= 32000
@@ -2431,7 +2466,7 @@ namespace UndertaleModLib.Decompiler
         // Process the base decompilation: clean up, make it readable, identify structures
         private static BlockHLStatement HLDecompileBlocks(DecompileContext context, ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, List<Block> alreadyVisited, Block currentLoop = null, Block stopAt = null, Block breakTo = null, bool decompileTheLoop = false, uint depth = 0)
         {
-            if (depth > 100)
+            if (depth > 200)
                 throw new Exception("Excessive recursion while processing blocks.");
 
             BlockHLStatement output = new BlockHLStatement();

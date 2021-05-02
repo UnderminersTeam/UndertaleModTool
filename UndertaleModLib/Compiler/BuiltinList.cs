@@ -2945,11 +2945,11 @@ namespace UndertaleModLib.Compiler
             Constants["gp_axisrv"] = 32788.0;
             Constants["ev_create"] = 0.0;
             Constants["ev_destroy"] = 1.0;
-            Constants["ev_step"] = 3.0;
             Constants["ev_alarm"] = 2.0;
+            Constants["ev_step"] = 3.0;
+            Constants["ev_collision"] = 4.0;
             Constants["ev_keyboard"] = 5.0;
             Constants["ev_mouse"] = 6.0;
-            Constants["ev_collision"] = 4.0;
             Constants["ev_other"] = 7.0;
             Constants["ev_draw"] = 8.0;
             Constants["ev_keypress"] = 9.0;
