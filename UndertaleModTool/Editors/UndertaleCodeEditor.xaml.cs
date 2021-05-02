@@ -62,6 +62,16 @@ namespace UndertaleModTool
 
         public static RoutedUICommand Compile = new RoutedUICommand("Compile code", "Compile", typeof(UndertaleCodeEditor));
 
+        public bool DecompiledFocused = false;
+        public bool DecompiledChanged = false;
+        public SearchPanel DecompiledSearchPanel;
+
+        public bool DisassemblyFocused = false;
+        public bool DisassemblyChanged = false;
+        public SearchPanel DisassemblySearchPanel;
+
+        public static RoutedUICommand Compile = new RoutedUICommand("Compile code", "Compile", typeof(UndertaleCodeEditor));
+
         public UndertaleCodeEditor()
         {
             InitializeComponent();

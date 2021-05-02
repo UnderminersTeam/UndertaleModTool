@@ -923,8 +923,16 @@ namespace UndertaleModLib.Models
         public string ToString(UndertaleCode code, IList<UndertaleVariable> vars)
         {
             StringBuilder sb = new StringBuilder();
+
             sb.Append(Address.ToString("D5") + ": ");
-            sb.Append(Kind.ToString().ToLower());
+
+            string kind = Kind.ToString();
+            var type = GetInstructionType(Kind);
+            if (type == InstructionType.BreakInstruction)
+                kind = Assembler.BreakIDToName[(short)Value];
+            else
+                kind = kind.ToLower();
+            sb.Append(kind);
 
             switch (GetInstructionType(Kind))
             {
@@ -935,6 +943,14 @@ namespace UndertaleModLib.Models
                     {
                         sb.Append(" ");
                         sb.Append(Extra.ToString());
+                        if (Kind == Opcode.Dup)
+                        {
+                            if ((byte)ComparisonKind == 0x88)
+                            {
+                                // No idea what this is right now (seems to be used at least with @@GetInstance@@), this is the "temporary" solution
+                                sb.Append(" spec");
+                            }
+                        }
                     }
                     break;
 
@@ -1003,8 +1019,8 @@ namespace UndertaleModLib.Models
 
                 case InstructionType.BreakInstruction:
                     sb.Append("." + Type1.ToOpcodeParam());
-                    sb.Append(" ");
-                    sb.Append(Value.ToString());
+                    //sb.Append(" ");
+                    //sb.Append(Value.ToString());
                     break;
             }
             return sb.ToString();
