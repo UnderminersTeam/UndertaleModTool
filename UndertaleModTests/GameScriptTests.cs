@@ -32,19 +32,19 @@ namespace UndertaleModTests
         public void EnsureDataLoaded()
         {
         }
-        public void ReplaceTempWithMain()
+        public void ReplaceTempWithMain(bool ImAnExpertBTW = false)
         {
         }
-        public void ReplaceMainWithTemp()
+        public void ReplaceMainWithTemp(bool ImAnExpertBTW = false)
         {
         }
-        public void ReplaceTempWithCorrections()
+        public void ReplaceTempWithCorrections(bool ImAnExpertBTW = false)
         {
         }
-        public void ReplaceCorrectionsWithTemp()
+        public void ReplaceCorrectionsWithTemp(bool ImAnExpertBTW = false)
         {
         }
-        public void UpdateCorrections()
+        public void UpdateCorrections(bool ImAnExpertBTW = false)
         {
         }
 
