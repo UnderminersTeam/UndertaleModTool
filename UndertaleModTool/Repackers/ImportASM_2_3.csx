@@ -79,9 +79,10 @@ foreach (string file in dirFiles)
     fileName = Path.GetFileNameWithoutExtension(file);
     int number;
     bool success = Int32.TryParse(fileName, out number);
+    string codeName = "";
     if (success)
     {
-        string codeName = CodeList[number];
+        codeName = CodeList[number];
         fileName = codeName + ".asm";
     }
     else

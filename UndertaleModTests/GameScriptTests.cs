@@ -47,6 +47,9 @@ namespace UndertaleModTests
         public void UpdateCorrections(bool ImAnExpertBTW = false)
         {
         }
+        public string LintAllScripts()
+        {
+        }
 
         public void ScriptMessage(string message)
         {

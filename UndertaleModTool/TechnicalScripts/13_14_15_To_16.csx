@@ -3,6 +3,7 @@
 EnsureDataLoaded();
 
 string currentBytecodeVersion = Data?.GeneralInfo.BytecodeVersion.ToString();
+string game_name = Data.GeneralInfo.Name.Content;
 
 bool is13 = false;
 
@@ -138,7 +139,7 @@ GMS 2.3 == " + Data.GMS2_3.ToString() + @"
 GMS 2.3.1 == " + Data.GMS2_3_1.ToString() + @"
 GMS 2.3.2 == " + Data.GMS2_3_2.ToString() + @"
 GMS 2.3.1 == " + Data.GMS2_3_1.ToString() + @"
-, "Unknown game error");
+", "Unknown game error");
     ScriptMessage("Current status of game '" + game_name + "':\r\nGMS 2.3 == " + Data.GMS2_3.ToString() + "\r\n" + "GMS 2.3.1 == " + Data.GMS2_3_1.ToString() + "\r\n" + "GMS 2.3.2 == " + Data.GMS2_3_2.ToString());
     ScriptMessage("Bytecode: " + (Data?.GeneralInfo.BytecodeVersion).ToString());
     return;

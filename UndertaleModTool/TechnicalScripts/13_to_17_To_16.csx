@@ -4,6 +4,7 @@
 EnsureDataLoaded();
 
 string currentBytecodeVersion = Data?.GeneralInfo.BytecodeVersion.ToString();
+string game_name = Data.GeneralInfo.Name.Content;
 
 bool is13 = false;
 

@@ -18,7 +18,7 @@ ScriptMessage("This script is profile mode compatible. It may take a few minutes
 bool profileChoice = ScriptQuestion(@"Would you like to run this under GML editing mode or ASM mode?
 
 Warning: All comments, decompilation corrections, and other relevant changes will be deleted from your profile in ASM mode.
-ASM mode is recommended ONLY for games without code corrections or GMS 2.3 games."));
+ASM mode is recommended ONLY for games without code corrections or GMS 2.3 games.");
 
 if (!(ScriptQuestion(@"This script is irreversible
 and cannot be removed. 

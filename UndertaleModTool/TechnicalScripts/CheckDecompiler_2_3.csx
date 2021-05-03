@@ -190,7 +190,10 @@ void ImportCode(string importFolder, bool IsGML = true)
         if (fileName.EndsWith("PreCreate_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
             continue; // Restarts loop if file is not a valid code asset.
         string gmlCode = File.ReadAllText(file);
-        (IsGML ? ImportGMLString(codeName, gmlCode, true, true) : ImportASMString(codeName, gmlCode, true, true));
+        if (IsGML)
+            ImportGMLString(codeName, gmlCode, true, true);
+        else
+            ImportASMString(codeName, gmlCode, true, true);
     }
     progress = 0;
 }

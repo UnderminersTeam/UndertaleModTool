@@ -21,7 +21,7 @@ string[] dirFiles = Directory.GetFiles(importFolder);
 foreach (string file in dirFiles)
 {
     UpdateProgressBar(null, "Files", progress++, dirFiles.Length);
-    ImportGMLFile(file, doParse)
+    ImportGMLFile(file, doParse);
 }
 
 HideProgressBar();
