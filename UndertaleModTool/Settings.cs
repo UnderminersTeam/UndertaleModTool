@@ -21,7 +21,21 @@ namespace UndertaleModTool
         public bool AssetOrderSwappingEnabled { get; set; } = false;
         public bool ProfileModeEnabled { get; set; } = true;
         public bool ProfileMessageShown { get; set; } = false;
-        public bool DeleteOldProfileOnSave { get; set; } = true;
+
+        // The disk space impact will likely be small for the average user, it should be turned off by default for now.
+        // "DeleteOldProfileOnSave" as it currently functions is dangerous to be on by default.
+        // Especially if a script makes sweeping changes across the code that are hard to revert.
+        // The end user will be blindsided as it currently stands.
+        // This can be turned back on by default later if some sort of alternative backup limit is implemented,
+        // to provide a buffer, similar to how GMS 1.4 did.
+        // Example: 0 (unlimited), 1-20 backups (normal range). If a limit of 20 is set, it will start clearing
+        // old backups only after 20 is reached (in the family tree, other unrelated mod families don't count)
+        // starting with the oldest, with which one to clear determined from a parenting ledger file
+        // (whose implementation does not exist yet).
+        // 
+        // This comment should be cleared in the event that the remedies described are implemented.
+
+        public bool DeleteOldProfileOnSave { get; set; } = false;
 
         public static Settings Instance;
 

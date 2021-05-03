@@ -11,12 +11,13 @@ EnsureDataLoaded();
 
 int progress = 0;
 
-if (Data.ToolInfo.ProfileMode)
-{
-    // This script profile mode compatible now. - Grossley
-	// But it takes like 5 minutes to run instead of 5 seconds now. - colinator27
-    ScriptMessage("This script is profile mode compatible. It may take a few minutes to complete.");
-}
+// This script profile mode compatible now. - Grossley
+// But it takes like 5 minutes to run instead of 5 seconds now. - colinator27
+ScriptMessage("This script is profile mode compatible. It may take a few minutes to complete.");
+bool profileChoice = ScriptQuestion(@"Would you like to run this under GML editing mode or ASM mode?
+
+Warning: All comments, decompilation corrections, and other relevant changes will be deleted from your profile in ASM mode.
+ASM mode is recommended ONLY for games without code corrections or GMS 2.3 games."));
 
 // Helper function for defining functions
 UndertaleFunction DefineFunc(string name)
@@ -58,17 +59,15 @@ If it is already invisible, select 'NO' to toggle the profiler back on."))
     }
 }
 
-if (!Data.GMS2_3 && Data.ToolInfo.ProfileMode)
+if (profileChoice)
 {
-    string nameToCompare = Data.GeneralInfo.Name.Content.ToLower();
-    if (!(nameToCompare.Contains("nxtale") || nameToCompare.Contains("undertale") || nameToCompare.Contains("survey_program") || nameToCompare.Contains("deltarune")))
+    if (ScriptQuestion(@"This will make changes across all of the code! Are you sure you'd like to continue?
+Note: this may break GML code if code corrections aren't present."))
     {
-        if (!ScriptQuestion("This will make changes across all of the code! Are you sure you'd like to continue?"))
-        {
-            return;
-        }
+        ProfileModeOperations();
     }
-    ProfileModeOperations();
+    else
+        return;
 }
 else
 {
@@ -160,7 +159,7 @@ void SetUpCustomGML()
 
     str += @"
     // Actually draw events now
-    
+
     var h = floor(string_height(""A""));
     draw_set_color(c_black);
     var k = 0;
@@ -199,7 +198,7 @@ void SetUpCustomGML()
             k++;
         }
     }
-    
+
     // Reset for next frame
     i = 0;
     ds_stack_clear(stack);
@@ -280,6 +279,7 @@ void ProfileModeOperations()
     // Sadly, I don't know how to do such an equivalent action myself.
 
     //TODO: reimplement ASM solution w/o hacky asm breaking
+
     foreach (UndertaleCode c in Data.Code)
     {
         UpdateProgressBar(null, "Code entries processed", progress++, Data.Code.Count);
