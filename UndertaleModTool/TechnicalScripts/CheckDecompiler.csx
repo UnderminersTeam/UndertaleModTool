@@ -25,7 +25,7 @@ DumpASM(Path.Combine(GetFolder(FilePath), "Export_Assembly_Orig"));
 ReImportGML(Directory.GetFiles(Path.Combine(GetFolder(FilePath), "Export_Code_Orig")));
 DumpASM(Path.Combine(GetFolder(FilePath), "Export_Assembly_Recompiled"));
 await FileCompare();
-ReImportASM(Directory.GetFiles(Path.Combine(GetFolder(FilePath), "Export_Assembly_Orig")))
+ReImportASM(Directory.GetFiles(Path.Combine(GetFolder(FilePath), "Export_Assembly_Orig")));
 
 HideProgressBar();
 double percentage = ((double)identical_count / (double)Data.Code.Count) * 100;
