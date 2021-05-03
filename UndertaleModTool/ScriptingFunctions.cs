@@ -22,7 +22,7 @@ namespace UndertaleModTool
     {
         public string LintAllScripts()
         {
-            return "Not impplemented!";
+            return "Not implemented!";
         }
     }
 }

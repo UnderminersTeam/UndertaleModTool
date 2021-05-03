@@ -417,10 +417,10 @@ namespace UndertaleModLib.Decompiler
                 }
 
                 if (Value is float) // Prevents scientific notation by using high bit number.
-                    return ((decimal)((float)Value)).ToString(CultureInfo.InvariantCulture);
+                    return RoundTrip.ToRoundTrip((float)Value);
 
                 if (Value is double) // Prevents scientific notation by using high bit number.
-                    return ((decimal)((double)Value)).ToString(CultureInfo.InvariantCulture);
+                    return RoundTrip.ToRoundTrip((double)Value);
 
                 if (Value is Statement)
                     return ((Statement)Value).ToString(context);
