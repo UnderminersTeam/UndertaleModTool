@@ -36,7 +36,15 @@ namespace UndertaleModTool
         public static void Main()
         {
             AppDomain.CurrentDomain.AssemblyResolve += OnResolveAssembly;
-            App.Main();
+            try
+            {
+                App.Main();
+            }
+            catch (Exception e)
+            {
+                File.WriteAllText("crash.txt", e.ToString());
+                MessageBox.Show(e.ToString());
+            }
         }
     }
 }

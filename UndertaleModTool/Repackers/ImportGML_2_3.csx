@@ -80,7 +80,7 @@ foreach (string file in dirFiles)
     fileName = Path.GetFileNameWithoutExtension(file);
     int number;
     bool success = Int32.TryParse(fileName, out number);
-    string codeName = "";
+    string codeName;
     if (success)
     {
         codeName = CodeList[number];

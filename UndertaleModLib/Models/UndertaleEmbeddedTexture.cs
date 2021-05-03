@@ -10,15 +10,10 @@ namespace UndertaleModLib.Models
 {
     public class UndertaleEmbeddedTexture : UndertaleNamedResource, INotifyPropertyChanged
     {
-        private UndertaleString _Name;
-        private uint _GeneratedMips;
-        private uint _Scaled = 0;
-        private TexData _TextureData = new TexData();
-
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public uint Scaled { get => _Scaled; set { _Scaled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Scaled")); } }
-        public uint GeneratedMips { get => _GeneratedMips; set { _GeneratedMips = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GeneratedMips")); } }
-        public TexData TextureData { get => _TextureData; set { _TextureData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureData")); } }
+        public UndertaleString Name { get; set; }
+        public uint Scaled { get; set; } = 0;
+        public uint GeneratedMips { get; set; }
+        public TexData TextureData { get; set; } = new TexData();
 
         public event PropertyChangedEventHandler PropertyChanged;
 

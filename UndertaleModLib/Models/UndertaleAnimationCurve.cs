@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    // TODO: INotifyPropertyChanged
-    public class UndertaleAnimationCurve : UndertaleNamedResource
+    public class UndertaleAnimationCurve : UndertaleNamedResource, INotifyPropertyChanged
     {
         public enum GraphTypeEnum : uint
         {
@@ -18,6 +18,8 @@ namespace UndertaleModLib.Models
         public UndertaleString Name { get; set; }
         public GraphTypeEnum GraphType { get; set; }
         public UndertaleSimpleList<Channel> Channels { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -50,7 +52,7 @@ namespace UndertaleModLib.Models
             return Name.Content;
         }
 
-        public class Channel : UndertaleObject
+        public class Channel : UndertaleObject, INotifyPropertyChanged
         {
             public enum FunctionType : uint
             {
@@ -62,6 +64,8 @@ namespace UndertaleModLib.Models
             public FunctionType Function { get; set; }
             public uint Iterations { get; set; }
             public UndertaleSimpleList<Point> Points { get; set; }
+
+            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {

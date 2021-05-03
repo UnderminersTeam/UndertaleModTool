@@ -30,6 +30,8 @@ using UndertaleModLib.Scripting;
 using UndertaleModTool.Windows;
 using System.IO.Pipes;
 
+using ColorConvert = System.Windows.Media.ColorConverter;
+
 namespace UndertaleModTool
 {
     /// <summary>
@@ -42,28 +44,26 @@ namespace UndertaleModTool
         public string ScriptPath { get; set; } // For the scripting interface specifically
 
         public string TitleMain { get; set; }
-
-        private object _Highlighted;
-        public object Highlighted { get { return _Highlighted; } set { _Highlighted = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Highlighted")); } }
-        private object _Selected;
-        public object Selected { get { return _Selected; } private set { _Selected = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Selected")); } }
+        public object Highlighted { get; set; }
+        public object Selected { get; set; }
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
         // God this is so ugly, if there's a better way, please, put in a pull request
         public Visibility IsExtProductIDEligible => (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && (((Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? Visibility.Visible : Visibility.Collapsed;
 
         public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
-
-        private bool _CanSave = false;
-        public bool CanSave { get { return _CanSave; } private set { _CanSave = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CanSave")); } }
+        public bool CanSave { get; set; }
         public bool CanSafelySave = false;
         public bool FinishedMessageEnabled = true;
 
-        // Declare the delegate (if using non-generic pattern).
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        // For delivering messages to LoaderDialogs
         public delegate void FileMessageEventHandler(string message);
         public event FileMessageEventHandler FileMessageEvent;
 
-        public event PropertyChangedEventHandler PropertyChanged;
         private LoaderDialog scriptDialog;
+
+        // Related to profile system and appdata
         public byte[] MD5PreviouslyLoaded;
         public byte[] MD5CurrentlyLoaded;
         public string AppDataFolder => Settings.AppDataFolder;

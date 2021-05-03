@@ -18,45 +18,29 @@ namespace UndertaleModLib.Models
 
     public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChanged
     {
-        private UndertaleString _Name;
         private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
-        private bool _Visible = true;
-        private bool _Solid = false;
-        private int _Depth = 0;
-        private bool _Persistent = false;
         private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ParentId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
-        private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _TextureMaskId = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>(); // TODO: ?
-        private bool _UsesPhysics = false;
-        private bool _IsSensor = false;
-        private CollisionShapeFlags _CollisionShape = CollisionShapeFlags.Circle;
-        private float _Density = 0.5f;
-        private float _Restitution = 0.1f;
-        private uint _Group = 0;
-        private float _LinearDamping = 0.1f;
-        private float _AngularDamping = 0.1f;
-        private float _Friction = 0.2f;
-        private bool _Awake = false;
-        private bool _Kinematic = false;
+        private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _TextureMaskId = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
 
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+        public UndertaleString Name { get; set; }
         public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sprite")); } }
-        public bool Visible { get => _Visible; set { _Visible = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Visible")); } }
-        public bool Solid { get => _Solid; set { _Solid = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Solid")); } }
-        public int Depth { get => _Depth; set { _Depth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Depth")); } }
-        public bool Persistent { get => _Persistent; set { _Persistent = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Persistent")); } }
+        public bool Visible { get; set; } = true;
+        public bool Solid { get; set; } = false;
+        public int Depth { get; set; } = 0;
+        public bool Persistent { get; set; } = false;
         public UndertaleGameObject ParentId { get => _ParentId.Resource; set { _ParentId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ParentId")); } }
         public UndertaleSprite TextureMaskId { get => _TextureMaskId.Resource; set { _TextureMaskId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureMaskId")); } }
-        public bool UsesPhysics { get => _UsesPhysics; set { _UsesPhysics = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UsesPhysics")); } }
-        public bool IsSensor { get => _IsSensor; set { _IsSensor = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsSensor")); } }
-        public CollisionShapeFlags CollisionShape { get => _CollisionShape; set { _CollisionShape = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CollisionShape")); } }
-        public float Density { get => _Density; set { _Density = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Density")); } }
-        public float Restitution { get => _Restitution; set { _Restitution = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Restitution")); } }
-        public uint Group { get => _Group; set { _Group = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Group")); } }
-        public float LinearDamping { get => _LinearDamping; set { _LinearDamping = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LinearDamping")); } }
-        public float AngularDamping { get => _AngularDamping; set { _AngularDamping = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AngularDamping")); } }
-        public float Friction { get => _Friction; set { _Friction = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Friction")); } }
-        public bool Awake { get => _Awake; set { _Awake = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Awake")); } }
-        public bool Kinematic { get => _Kinematic; set { _Kinematic = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Kinematic")); } }
+        public bool UsesPhysics { get; set; } = false;
+        public bool IsSensor { get; set; } = false;
+        public CollisionShapeFlags CollisionShape { get; set; } = CollisionShapeFlags.Circle;
+        public float Density { get; set; } = 0.5f;
+        public float Restitution { get; set; } = 0.1f;
+        public uint Group { get; set; } = 0;
+        public float LinearDamping { get; set; } = 0.1f;
+        public float AngularDamping { get; set; } = 0.1f;
+        public float Friction { get; set; } = 0.2f;
+        public bool Awake { get; set; } = false;
+        public bool Kinematic { get; set; } = false;
         public List<UndertalePhysicsVertex> PhysicsVertices { get; private set; } = new List<UndertalePhysicsVertex>();
         public UndertalePointerList<UndertalePointerList<Event>> Events { get; private set; } = new UndertalePointerList<UndertalePointerList<Event>>();
 
@@ -257,9 +241,7 @@ namespace UndertaleModLib.Models
 
         public class Event : UndertaleObject, INotifyPropertyChanged
         {
-            private uint _EventSubtype;
-
-            public uint EventSubtype { get => _EventSubtype; set { _EventSubtype = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("EventSubtype")); } } // (the same as the ID at the end of name)
+            public uint EventSubtype { get; set; } // (the same as the ID at the end of name)
             public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>(); // seems to always have 1 entry, maybe the games using drag-and-drop code are different
 
             public EventSubtypeKey EventSubtypeKey
@@ -318,36 +300,24 @@ namespace UndertaleModLib.Models
             // All the unknown values seem to be provided for compatibility only - in older versions of GM:S they stored the drag and drop blocks,
             // but newer versions compile them down to GML bytecode anyway
             // Possible meaning of values: https://github.com/WarlockD/GMdsam/blob/26aefe3e90a7a7a1891cb83f468079546f32b4b7/GMdsam/GameMaker/ChunkTypes.cs#L466
+            
+            // Note from the future: these aren't always these values...
 
-            private uint _LibID;
-            private uint _ID;
-            private uint _Kind;
-            private bool _UseRelative;
-            private bool _IsQuestion;
-            private bool _UseApplyTo;
-            private uint _ExeType;
-            private UndertaleString _ActionName;
-            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CodeId = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
-            private uint _ArgumentCount;
-            private int _Who;
-            private bool _Relative;
-            private bool _IsNot;
-            private uint _UnknownAlwaysZero;
-
-            public uint LibID { get => _LibID; set { _LibID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LibID")); } } // always 1
-            public uint ID { get => _ID; set { _ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ID")); } } // always 603
-            public uint Kind { get => _Kind; set { _Kind = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Kind")); } } // always 7
-            public bool UseRelative { get => _UseRelative; set { _UseRelative = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UseRelative")); } } // always 0
-            public bool IsQuestion { get => _IsQuestion; set { _IsQuestion = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsQuestion")); } } // always 0
-            public bool UseApplyTo { get => _UseApplyTo; set { _UseApplyTo = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UseApplyTo")); } } // always 1
-            public uint ExeType { get => _ExeType; set { _ExeType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ExeType")); } } // always 2
-            public UndertaleString ActionName { get => _ActionName; set { _ActionName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ActionName")); } } // always ""
+            public uint LibID { get; set; } // always 1
+            public uint ID { get; set; } // always 603
+            public uint Kind { get; set; } // always 7
+            public bool UseRelative { get; set; } // always 0
+            public bool IsQuestion { get; set; } // always 0
+            public bool UseApplyTo { get; set; } // always 1
+            public uint ExeType { get; set; } // always 2
+            public UndertaleString ActionName { get; set; } // always ""
+            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CodeId = new UndertaleModLib.UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
             public UndertaleCode CodeId { get => _CodeId.Resource; set { _CodeId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CodeId")); } }
-            public uint ArgumentCount { get => _ArgumentCount; set { _ArgumentCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ArgumentCount")); } } // always 1
-            public int Who { get => _Who; set { _Who = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Who")); } } // always -1
-            public bool Relative { get => _Relative; set { _Relative = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Relative")); } } // always 0
-            public bool IsNot { get => _IsNot; set { _IsNot = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsNot")); } } // always 0
-            public uint UnknownAlwaysZero { get => _UnknownAlwaysZero; set { _UnknownAlwaysZero = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UnknownAlwaysZero")); } } // always 0
+            public uint ArgumentCount { get; set; } // always 1
+            public int Who { get; set; } // always -1
+            public bool Relative { get; set; } // always 0
+            public bool IsNot { get; set; } // always 0
+            public uint UnknownAlwaysZero { get; set; } // always 0
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -390,11 +360,8 @@ namespace UndertaleModLib.Models
 
         public class UndertalePhysicsVertex : UndertaleObject, INotifyPropertyChanged
         {
-            private float _X;
-            private float _Y;
-
-            public float X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
-            public float Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
+            public float X { get; set; }
+            public float Y { get; set; }
 
             public event PropertyChangedEventHandler PropertyChanged;
 

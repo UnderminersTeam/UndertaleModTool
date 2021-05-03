@@ -12,9 +12,7 @@ namespace UndertaleModLib.Models
 {
     public class UndertaleString : UndertaleResource, INotifyPropertyChanged, ISearchable
     {
-        private string _Content;
-
-        public string Content { get => _Content; set { _Content = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Content")); } }
+        public string Content { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -29,7 +27,7 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
-            writer.WriteGMString(_Content);
+            writer.WriteGMString(Content);
         }
 
         public void Unserialize(UndertaleReader reader)

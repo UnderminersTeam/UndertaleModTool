@@ -15,7 +15,8 @@ int progress = 0;
 // This script profile mode compatible now. - Grossley
 // But it takes like 5 minutes to run instead of 5 seconds now. - colinator27
 ScriptMessage("This script is profile mode compatible. It may take a few minutes to complete.");
-bool profileChoice = ScriptQuestion(@"Would you like to run this under GML editing mode or ASM mode?
+bool profileChoice = ScriptQuestion(@"Would you like to run this under GML editing mode?
+The alternative is ASM mode.
 
 Warning: All comments, decompilation corrections, and other relevant changes will be deleted from your profile in ASM mode.
 ASM mode is recommended ONLY for games without code corrections or GMS 2.3 games.");
