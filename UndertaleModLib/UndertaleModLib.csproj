@@ -8,7 +8,12 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Fody" Version="6.5.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="PropertyChanged.Fody" Version="3.3.3" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
   </ItemGroup>
 </Project>

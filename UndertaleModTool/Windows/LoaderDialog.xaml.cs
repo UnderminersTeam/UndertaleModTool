@@ -22,11 +22,8 @@ namespace UndertaleModTool
     /// </summary>
     public partial class LoaderDialog : Window, INotifyPropertyChanged
     {
-
-        private string _Message;
-
         public string MessageTitle { get; set; }
-        public string Message { get => _Message; set { _Message = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Message")); } }
+        public string Message { get; set; }
         public bool PreventClose { get; set; }
 
         public string StatusText { get; set; } = "Please wait...";

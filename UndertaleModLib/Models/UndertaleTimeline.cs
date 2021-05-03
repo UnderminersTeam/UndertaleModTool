@@ -12,11 +12,8 @@ namespace UndertaleModLib.Models
     {
         public class UndertaleTimelineMoment : UndertaleObject, INotifyPropertyChanged
         {
-            private uint _Step { get; set; }
-            public uint Step { get => _Step; set { _Step = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Step")); } }
-
-            private UndertalePointerList<UndertaleGameObject.EventAction> _Event { get; set; }
-            public UndertalePointerList<UndertaleGameObject.EventAction> Event { get => _Event; set { _Event = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Event")); } }
+            public uint Step { get; set; }
+            public UndertalePointerList<UndertaleGameObject.EventAction> Event { get; set; }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -45,11 +42,8 @@ namespace UndertaleModLib.Models
             }
         }
 
-        private UndertaleString _Name;
-        private ObservableCollection<UndertaleTimelineMoment> _Moments = new ObservableCollection<UndertaleTimelineMoment>();
-
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public ObservableCollection<UndertaleTimelineMoment> Moments { get => _Moments; set { _Moments = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Moments")); } }
+        public UndertaleString Name { get; set; }
+        public ObservableCollection<UndertaleTimelineMoment> Moments { get; set; } = new ObservableCollection<UndertaleTimelineMoment>();
 
         public event PropertyChangedEventHandler PropertyChanged;
 

@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleTags : UndertaleObject
+    public class UndertaleTags : UndertaleObject, INotifyPropertyChanged
     {
         public UndertaleSimpleListString Tags { get; set; }
         public Dictionary<int, UndertaleSimpleListString> AssetTags { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public int GetAssetTagID(UndertaleData data, UndertaleGameObject res)
         {

@@ -17,7 +17,10 @@ namespace UndertaleModLib.Models
 
         public uint Occurrences { get; set; }
         public UndertaleInstruction FirstAddress { get; set; }
-        public int UnknownChainEndingValue { get; set; } // looks like an identifier or counter of some kind. Increases in every variable, but I can't find the pattern
+        public int NameStringID { get; set; }
+
+        [Obsolete("This variable has been renamed to NameStringID.")]
+        public int UnknownChainEndingValue { get => NameStringID; set => NameStringID = value; }
 
         public void Serialize(UndertaleWriter writer)
         {

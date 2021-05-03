@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,8 +8,7 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    // TODO: INotifyPropertyChanged
-    public class UndertaleSequence : UndertaleNamedResource
+    public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged
     {
         public enum PlaybackType : uint
         {
@@ -29,6 +29,8 @@ namespace UndertaleModLib.Models
         public UndertaleSimpleList<Keyframe<Moment>> Moments { get; set; }
         public UndertaleSimpleList<Track> Tracks { get; set; }
         public Dictionary<int, UndertaleString> FunctionIDs { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {

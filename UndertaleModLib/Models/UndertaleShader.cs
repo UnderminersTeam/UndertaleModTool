@@ -11,9 +11,7 @@ namespace UndertaleModLib.Models
     {
         public class VertexShaderAttribute : UndertaleObject, INotifyPropertyChanged
         {
-            private UndertaleString _Name;
-
-            public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+            public UndertaleString Name { get; set; }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -30,25 +28,15 @@ namespace UndertaleModLib.Models
 
         public uint _EntryEnd;
 
-        private UndertaleString _Name;
-        private ShaderType _Type;
-        private UndertaleString _GLSL_ES_Vertex;
-        private UndertaleString _GLSL_ES_Fragment;
-        private UndertaleString _GLSL_Vertex;
-        private UndertaleString _GLSL_Fragment;
-        private UndertaleString _HLSL9_Vertex;
-        private UndertaleString _HLSL9_Fragment;
-        private UndertaleSimpleList<VertexShaderAttribute> _VertexShaderAttributes = new UndertaleSimpleList<VertexShaderAttribute>();
+        public UndertaleString Name { get; set; }
+        public ShaderType Type { get; set; }
 
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public ShaderType Type { get => _Type; set { _Type = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Type")); } }
-
-        public UndertaleString GLSL_ES_Vertex { get => _GLSL_ES_Vertex; set { _GLSL_ES_Vertex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GLSL_ES_Vertex")); } }
-        public UndertaleString GLSL_ES_Fragment { get => _GLSL_ES_Fragment; set { _GLSL_ES_Fragment = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GLSL_ES_Fragment")); } }
-        public UndertaleString GLSL_Vertex { get => _GLSL_Vertex; set { _GLSL_Vertex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GLSL_Vertex")); } }
-        public UndertaleString GLSL_Fragment { get => _GLSL_Fragment; set { _GLSL_Fragment = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GLSL_Fragment")); } }
-        public UndertaleString HLSL9_Vertex { get => _HLSL9_Vertex; set { _HLSL9_Vertex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("HLSL9_Vertex")); } }
-        public UndertaleString HLSL9_Fragment { get => _HLSL9_Fragment; set { _HLSL9_Fragment = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("HLSL9_Fragment")); } }
+        public UndertaleString GLSL_ES_Vertex { get; set; }
+        public UndertaleString GLSL_ES_Fragment { get; set; }
+        public UndertaleString GLSL_Vertex { get; set; }
+        public UndertaleString GLSL_Fragment { get; set; }
+        public UndertaleString HLSL9_Vertex { get; set; }
+        public UndertaleString HLSL9_Fragment { get; set; }
 
         public UndertaleRawShaderData HLSL11_VertexData;
         public UndertaleRawShaderData HLSL11_PixelData;
@@ -59,7 +47,7 @@ namespace UndertaleModLib.Models
         public UndertaleRawShaderData Cg_PS3_VertexData;
         public UndertaleRawShaderData Cg_PS3_PixelData;
 
-        public UndertaleSimpleList<VertexShaderAttribute> VertexShaderAttributes { get => _VertexShaderAttributes; set { _VertexShaderAttributes = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("VertexAttributes")); } }
+        public UndertaleSimpleList<VertexShaderAttribute> VertexShaderAttributes { get; set; } = new UndertaleSimpleList<VertexShaderAttribute>();
 
         public event PropertyChangedEventHandler PropertyChanged;
 

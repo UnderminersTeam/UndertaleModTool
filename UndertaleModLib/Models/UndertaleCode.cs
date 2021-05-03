@@ -275,7 +275,7 @@ namespace UndertaleModLib.Models
         {
             uint Occurrences { get; set; }
             UndertaleInstruction FirstAddress { get; set; }
-            int UnknownChainEndingValue { get; set; }
+            int NameStringID { get; set; }
         }
 
         public class Reference<T> : UndertaleObject where T : class, UndertaleObject, ReferencedObject
@@ -373,7 +373,7 @@ namespace UndertaleModLib.Models
                                 addrDiff = (int)(nextAddr - thisAddr);
                             }
                             else
-                                addrDiff = var.UnknownChainEndingValue;
+                                addrDiff = var.NameStringID;
                             writer.Position = writer.GetAddressForUndertaleObject(references[var][i].GetReference<T>());
                             writer.WriteInt24(addrDiff);
                         }
@@ -403,7 +403,7 @@ namespace UndertaleModLib.Models
                     reference.Target = obj;
                     addr += (uint)reference.NextOccurrenceOffset;
                 }
-                obj.UnknownChainEndingValue = (int)reference.NextOccurrenceOffset;
+                obj.NameStringID = (int)reference.NextOccurrenceOffset;
             }
         }
 
@@ -1094,21 +1094,16 @@ namespace UndertaleModLib.Models
 
     public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, INotifyPropertyChanged
     {
-        private UndertaleString _Name;
-        private uint _Length;
-        private uint _LocalsCount = 0; // Seems related do UndertaleCodeLocals, TODO: does it also seem unused?
-        internal uint _BytecodeAbsoluteAddress;
-        private uint _Offset = 0;
-        private byte[] _UnsupportedBuffer;
-        private bool _NoLocals = false;
-
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public uint Length { get => _Length; internal set { _Length = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Length")); } }
-        public uint LocalsCount { get => _LocalsCount; set { _LocalsCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LocalsCount")); } }
-        public uint Offset { get => _Offset; set { _Offset = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Offset")); } }
+        public UndertaleString Name { get; set; }
+        public uint Length { get; set; }
+        public uint LocalsCount { get; set; }
+        public uint Offset { get; set; }
         public List<UndertaleInstruction> Instructions { get; } = new List<UndertaleInstruction>();
-        public bool NoLocals { get => _NoLocals; }
+        public bool NoLocals { get; set; }
         public bool DuplicateEntry { get; set; } = false;
+
+        internal uint _BytecodeAbsoluteAddress;
+        internal byte[] _UnsupportedBuffer;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -1119,7 +1114,7 @@ namespace UndertaleModLib.Models
             if (DuplicateEntry)
             {
                 // In GMS 2.3, code entries repeat often
-                _BytecodeAbsoluteAddress = writer.LastBytecodeAddress;
+               _BytecodeAbsoluteAddress = writer.LastBytecodeAddress;
                 Length = writer.Position - _BytecodeAbsoluteAddress;
                 // todo? set Flags to something else?
             }
@@ -1188,7 +1183,7 @@ namespace UndertaleModLib.Models
                     instr.Address = a;
                     Instructions.Add(instr);
                 }
-                _NoLocals = true;
+                NoLocals = true;
             }
             else
             {
