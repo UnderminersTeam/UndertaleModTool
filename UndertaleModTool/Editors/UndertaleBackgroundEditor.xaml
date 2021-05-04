@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleBackground}" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleBackground}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333">
 
   <Grid>
         <Grid.ColumnDefinitions>
@@ -27,11 +27,11 @@
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
       <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Transparent</TextBlock>
-      <CheckBox Background="#FFF104A6" Grid.Row="1" Grid.Column="1" Margin="3" IsChecked="{Binding Transparent}"/>
+      <CheckBox Background="#FF333333" Grid.Row="1" Grid.Column="1" Margin="3" IsChecked="{Binding Transparent}"/>
       <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Smooth</TextBlock>
-      <CheckBox Background="#FFF104A6" Grid.Row="2" Grid.Column="1" Margin="3" IsChecked="{Binding Smooth}"/>
+      <CheckBox Background="#FF333333" Grid.Row="2" Grid.Column="1" Margin="3" IsChecked="{Binding Smooth}"/>
       <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Preload</TextBlock>
-      <CheckBox Background="#FFF104A6" Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Preload}"/>
+      <CheckBox Background="#FF333333" Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Preload}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Texture</TextBlock>
         <local:UndertaleObjectReference Grid.Row="4" Grid.Column="1" Margin="3" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
@@ -56,34 +56,34 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Unknown Always 2</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlways2}"/>
+            <TextBox Background="#FF333333" Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlways2}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Tile Width</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GMS2TileWidth}"/>
+            <TextBox Background="#FF333333" Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GMS2TileWidth}"/>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Tile Height</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GMS2TileHeight}"/>
+            <TextBox Background="#FF333333" Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GMS2TileHeight}"/>
 
             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Output Border X</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderX}"/>
+            <TextBox Background="#FF333333" Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderX}"/>
 
             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Output Border Y</TextBlock>
-            <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderY}" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6"/>
+            <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderY}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
 
             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Tile Columns</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding GMS2TileColumns}"/>
+            <TextBox Background="#FF333333" Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding GMS2TileColumns}"/>
 
             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Items/frames per tile</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding GMS2ItemsPerTileCount}"/>
+            <TextBox Background="#FF333333" Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding GMS2ItemsPerTileCount}"/>
 
             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Tile Count</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GMS2TileCount}"/>
+            <TextBox Background="#FF333333" Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GMS2TileCount}"/>
 
             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Unknown Always Zero</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlwaysZero}"/>
+            <TextBox Background="#FF333333" Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlwaysZero}"/>
 
             <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Frame Time (microseconds)</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding GMS2FrameLength}"/>
+            <TextBox Background="#FF333333" Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding GMS2FrameLength}"/>
 
             <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Tile IDs</TextBlock>
             <DataGrid Grid.Row="10" Grid.Column="1" ItemsSource="{Binding GMS2TileIds}" MaxHeight="200" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">

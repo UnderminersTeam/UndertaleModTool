@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleFont}" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleFont}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -41,15 +41,15 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox Background="#FFF104A6" Grid.Column="0" Text="{Binding EmSize}"/>
+            <TextBox Background="#FF333333" Grid.Column="0" Text="{Binding EmSize}"/>
             <TextBlock Grid.Column="1" Text=" em"/>
         </Grid>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Bold</TextBlock>
-        <CheckBox Background="#FFF104A6" Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Bold}"/>
+        <CheckBox Background="#FF333333" Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Bold}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Italic</TextBlock>
-        <CheckBox Background="#FFF104A6" Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Italic}"/>
+        <CheckBox Background="#FF333333" Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Italic}"/>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Range</TextBlock>
         <Grid Grid.Row="5" Grid.Column="1">
@@ -58,16 +58,16 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Background="#FFF104A6" Grid.Column="0" Margin="3" Text="{Binding RangeStart}"/>
+            <TextBox Background="#FF333333" Grid.Column="0" Margin="3" Text="{Binding RangeStart}"/>
             <TextBlock Grid.Column="1" Margin="3" Text=" - "/>
-            <TextBox Background="#FFF104A6" Grid.Column="2" Margin="3" Text="{Binding RangeEnd}"/>
+            <TextBox Background="#FF333333" Grid.Column="2" Margin="3" Text="{Binding RangeEnd}"/>
         </Grid>
 
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Charset</TextBlock>
-        <TextBox Background="#FFF104A6" Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Charset}"/>
+        <TextBox Background="#FF333333" Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Charset}"/>
 
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Anti Aliasing</TextBlock>
-        <TextBox Background="#FFF104A6" Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding AntiAliasing}"/>
+        <TextBox Background="#FF333333" Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding AntiAliasing}"/>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Texture</TextBlock>
         <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
@@ -78,8 +78,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Background="#FFF104A6" Grid.Column="0" Margin="3" Text="{Binding ScaleX}"/>
-            <TextBox Background="#FFF104A6" Grid.Column="1" Margin="3" Text="{Binding ScaleY}"/>
+            <TextBox Background="#FF333333" Grid.Column="0" Margin="3" Text="{Binding ScaleX}"/>
+            <TextBox Background="#FF333333" Grid.Column="1" Margin="3" Text="{Binding ScaleY}"/>
         </Grid>
 
         <Viewbox Grid.Row="10" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
@@ -122,7 +122,7 @@
                 <DataGridTemplateColumn Header="Char" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Background="#FFF104A6" Text="{Binding Character, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
+                            <TextBox Background="#FF333333" Text="{Binding Character, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -136,10 +136,10 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Background="#FFF104A6" Grid.Column="0" Text="{Binding SourceX, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                                <TextBox Background="#FFF104A6" Grid.Column="1" Text="{Binding SourceY, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                                <TextBox Background="#FFF104A6" Grid.Column="2" Text="{Binding SourceWidth, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                                <TextBox Background="#FFF104A6" Grid.Column="3" Text="{Binding SourceHeight, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <TextBox Background="#FF333333" Grid.Column="0" Text="{Binding SourceX, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <TextBox Background="#FF333333" Grid.Column="1" Text="{Binding SourceY, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <TextBox Background="#FF333333" Grid.Column="2" Text="{Binding SourceWidth, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <TextBox Background="#FF333333" Grid.Column="3" Text="{Binding SourceHeight, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                             </Grid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -147,14 +147,14 @@
                 <DataGridTemplateColumn Header="Shift" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Background="#FFF104A6" Text="{Binding Shift, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            <TextBox Background="#FF333333" Text="{Binding Shift, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Offset" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Background="#FFF104A6" Text="{Binding Offset, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            <TextBox Background="#FF333333" Text="{Binding Offset, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

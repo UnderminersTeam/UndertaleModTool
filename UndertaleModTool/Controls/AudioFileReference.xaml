@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              mc:Ignorable="d" 
-             d:DesignHeight="20" d:DesignWidth="300" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6">
+             d:DesignHeight="20" d:DesignWidth="300" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -13,7 +13,7 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <TextBox Background="#FFF104A6" Grid.Column="0" Text="{Binding AudioID}">
+        <TextBox Background="#FF333333" Grid.Column="0" Text="{Binding AudioID}">
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}">
                     <Style.Triggers>
@@ -26,7 +26,7 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-        <TextBox Background="#FFF104A6" Grid.Column="1" IsReadOnly="True" Cursor="Arrow" ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!" AllowDrop="True" PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick">
+        <TextBox Background="#FF333333" Grid.Column="1" IsReadOnly="True" Cursor="Arrow" ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!" AllowDrop="True" PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick">
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}">
                     <Setter Property="Text">

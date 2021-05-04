@@ -7,7 +7,7 @@
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleSprite}" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleSprite}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333">
     <UserControl.Resources>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="SpriteType">
             <ObjectDataProvider.MethodParameters>
@@ -60,8 +60,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Background="#FFF104A6" Grid.Column="0" Margin="3" Text="{Binding Width}"/>
-            <TextBox Background="#FFF104A6" Grid.Column="1" Margin="3" Text="{Binding Height}"/>
+            <TextBox Background="#FF333333" Grid.Column="0" Margin="3" Text="{Binding Width}"/>
+            <TextBox Background="#FF333333" Grid.Column="1" Margin="3" Text="{Binding Height}"/>
         </Grid>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Margin Left/Right/Bottom/Top</TextBlock>
@@ -72,23 +72,23 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Background="#FFF104A6" Grid.Column="0" Margin="3" Text="{Binding MarginLeft}"/>
-            <TextBox Background="#FFF104A6" Grid.Column="1" Margin="3" Text="{Binding MarginRight}"/>
-            <TextBox Background="#FFF104A6" Grid.Column="2" Margin="3" Text="{Binding MarginBottom}"/>
-            <TextBox Background="#FFF104A6" Grid.Column="3" Margin="3" Text="{Binding MarginTop}"/>
+            <TextBox Background="#FF333333" Grid.Column="0" Margin="3" Text="{Binding MarginLeft}"/>
+            <TextBox Background="#FF333333" Grid.Column="1" Margin="3" Text="{Binding MarginRight}"/>
+            <TextBox Background="#FF333333" Grid.Column="2" Margin="3" Text="{Binding MarginBottom}"/>
+            <TextBox Background="#FF333333" Grid.Column="3" Margin="3" Text="{Binding MarginTop}"/>
         </Grid>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Transparent</TextBlock>
-        <CheckBox Background="#FFF104A6" Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Transparent}"/>
+        <CheckBox Background="#FF333333" Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Transparent}"/>
         
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Smooth</TextBlock>
-        <CheckBox Background="#FFF104A6" Grid.Row="5" Grid.Column="1" Margin="3" IsChecked="{Binding Smooth}"/>
+        <CheckBox Background="#FF333333" Grid.Row="5" Grid.Column="1" Margin="3" IsChecked="{Binding Smooth}"/>
         
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Preload</TextBlock>
-        <CheckBox Background="#FFF104A6" Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Preload}"/>
+        <CheckBox Background="#FF333333" Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Preload}"/>
 
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Bounding box mode</TextBlock>
-        <TextBox Background="#FFF104A6" Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding BBoxMode}"/>
+        <TextBox Background="#FF333333" Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding BBoxMode}"/>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">SepMasks</TextBlock>
         <ComboBox ItemsSource="{Binding Source={StaticResource SepMaskType}}" SelectedItem="{Binding Path=SepMasks}"
@@ -100,8 +100,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Background="#FFF104A6" Grid.Column="0" Margin="3" Text="{Binding OriginX}"/>
-            <TextBox Background="#FFF104A6" Grid.Column="1" Margin="3" Text="{Binding OriginY}"/>
+            <TextBox Background="#FF333333" Grid.Column="0" Margin="3" Text="{Binding OriginX}"/>
+            <TextBox Background="#FF333333" Grid.Column="1" Margin="3" Text="{Binding OriginY}"/>
         </Grid>
 
         <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Textures</TextBlock>
@@ -191,7 +191,7 @@
                 <DataGridTemplateColumn Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Background="#FFF104A6" Margin="20,0,0,0" Text="(CollisionMask)"/>
+                            <TextBlock Background="#FF333333" Margin="20,0,0,0" Text="(CollisionMask)"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -259,7 +259,7 @@
         </ContentControl>
 
         <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Is special type?</TextBlock>
-        <CheckBox Background="#FFF104A6" Grid.Row="15" Grid.Column="1" Margin="3" IsChecked="{Binding IsSpecialType}"/>
+        <CheckBox Background="#FF333333" Grid.Row="15" Grid.Column="1" Margin="3" IsChecked="{Binding IsSpecialType}"/>
 
         <Grid Grid.Row="16" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding Path=IsSpecialType, Converter={StaticResource BoolToVis}}">
             <Grid.ColumnDefinitions>
@@ -273,7 +273,7 @@
             </Grid.RowDefinitions>
             
             <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Version</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding SVersion}"/>
+            <TextBox Background="#FF333333" Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding SVersion}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Type</TextBlock>
             <ComboBox ItemsSource="{Binding Source={StaticResource SpriteType}}" SelectedItem="{Binding Path=SSpriteType}"
@@ -290,7 +290,7 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Playback speed</TextBlock>
-                <TextBox Background="#FFF104A6" Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2PlaybackSpeed}"/>
+                <TextBox Background="#FF333333" Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2PlaybackSpeed}"/>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Playback speed type</TextBlock>
                 <ComboBox ItemsSource="{Binding Source={StaticResource AnimSpeedType}}" SelectedItem="{Binding Path=GMS2PlaybackSpeedType}"

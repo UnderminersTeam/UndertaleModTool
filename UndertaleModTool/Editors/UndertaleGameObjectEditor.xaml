@@ -7,7 +7,7 @@
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib" 
              mc:Ignorable="d" 
-             d:DesignHeight="800" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleGameObject}" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6">
+             d:DesignHeight="800" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleGameObject}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333">
     <UserControl.Resources>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="CollisionShapeFlags">
             <ObjectDataProvider.MethodParameters>
@@ -217,16 +217,16 @@
 
 
             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Visible</TextBlock>
-            <CheckBox Background="#FFF104A6" Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Visible}"/>
+            <CheckBox Background="#FF333333" Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Visible}"/>
 
             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Solid</TextBlock>
-            <CheckBox Background="#FFF104A6" Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Solid}"/>
+            <CheckBox Background="#FF333333" Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Solid}"/>
 
             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Depth</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding Depth}"/>
+            <TextBox Background="#FF333333" Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding Depth}"/>
 
             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Persistent</TextBlock>
-            <CheckBox Background="#FFF104A6" Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Persistent}"/>
+            <CheckBox Background="#FF333333" Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Persistent}"/>
 
             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Parent</TextBlock>
             <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding ParentId}" ObjectType="{x:Type undertale:UndertaleGameObject}"/>
@@ -235,10 +235,10 @@
             <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding TextureMaskId}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
 
             <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Uses physics</TextBlock>
-            <CheckBox Background="#FFF104A6" Grid.Row="9" Grid.Column="1" Margin="3" IsChecked="{Binding UsesPhysics}"/>
+            <CheckBox Background="#FF333333" Grid.Row="9" Grid.Column="1" Margin="3" IsChecked="{Binding UsesPhysics}"/>
 
             <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Is sensor</TextBlock>
-            <CheckBox Background="#FFF104A6" Grid.Row="10" Grid.Column="1" Margin="3" IsChecked="{Binding IsSensor}"/>
+            <CheckBox Background="#FF333333" Grid.Row="10" Grid.Column="1" Margin="3" IsChecked="{Binding IsSensor}"/>
 
             <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Collision shape</TextBlock>
             <ComboBox Grid.Row="11" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource CollisionShapeFlags}}" SelectedItem="{Binding Path=CollisionShape}" />
@@ -248,31 +248,31 @@
             <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" FontWeight="Bold">Physics</TextBlock>
 
             <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">Density</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding Density}"/>
+            <TextBox Background="#FF333333" Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding Density}"/>
 
             <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Restitution</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="15" Grid.Column="1" Margin="3" Text="{Binding Restitution}"/>
+            <TextBox Background="#FF333333" Grid.Row="15" Grid.Column="1" Margin="3" Text="{Binding Restitution}"/>
 
             <TextBlock Grid.Row="16" Grid.Column="0" Margin="3">Group</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="16" Grid.Column="1" Margin="3" Text="{Binding Group}"/>
+            <TextBox Background="#FF333333" Grid.Row="16" Grid.Column="1" Margin="3" Text="{Binding Group}"/>
 
             <TextBlock Grid.Row="17" Grid.Column="0" Margin="3">Linear damping</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="17" Grid.Column="1" Margin="3" Text="{Binding LinearDamping}"/>
+            <TextBox Background="#FF333333" Grid.Row="17" Grid.Column="1" Margin="3" Text="{Binding LinearDamping}"/>
 
             <TextBlock Grid.Row="18" Grid.Column="0" Margin="3">Angular damping</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="18" Grid.Column="1" Margin="3" Text="{Binding AngularDamping}"/>
+            <TextBox Background="#FF333333" Grid.Row="18" Grid.Column="1" Margin="3" Text="{Binding AngularDamping}"/>
 
             <!--TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Physics shape vertex count</>
-            <TextBox Background="#FFF104A6" Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding PhysicsShapeVertexCount}"/-->
+            <TextBox Background="#FF333333" Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding PhysicsShapeVertexCount}"/-->
 
             <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Friction</TextBlock>
-            <TextBox Background="#FFF104A6" Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding Friction}"/>
+            <TextBox Background="#FF333333" Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding Friction}"/>
 
             <TextBlock Grid.Row="20" Grid.Column="0" Margin="3">Is awake</TextBlock>
-            <CheckBox Background="#FFF104A6" Grid.Row="20" Grid.Column="1" Margin="3" IsChecked="{Binding Awake}"/>
+            <CheckBox Background="#FF333333" Grid.Row="20" Grid.Column="1" Margin="3" IsChecked="{Binding Awake}"/>
 
             <TextBlock Grid.Row="21" Grid.Column="0" Margin="3">Is kinematic</TextBlock>
-            <CheckBox Background="#FFF104A6" Grid.Row="21" Grid.Column="1" Margin="3" IsChecked="{Binding Kinematic}"/>
+            <CheckBox Background="#FF333333" Grid.Row="21" Grid.Column="1" Margin="3" IsChecked="{Binding Kinematic}"/>
 
             <TextBlock Grid.Row="22" Grid.Column="0" Margin="3">Physics shape vertices</TextBlock>
             <DataGrid Grid.Row="22" Grid.Column="1" Margin="3" ItemsSource="{Binding PhysicsVertices}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
@@ -305,14 +305,14 @@
                     <DataGridTemplateColumn Header="X" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBox Background="#FFF104A6" Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
+                                <TextBox Background="#FF333333" Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTemplateColumn Header="Y" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBox Background="#FFF104A6" Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <TextBox Background="#FF333333" Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -329,7 +329,7 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
-                        <TextBlock Background="#FFF104A6" Margin="3" Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource EventNameConverter}}" Name="EventTypeName"/>
+                        <TextBlock Background="#FF333333" Margin="3" Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource EventNameConverter}}" Name="EventTypeName"/>
                         <DataGrid ItemsSource="{Binding .}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" AddingNewItem="DataGrid_AddingNewItem" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
                             <DataGrid.Resources>
                                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
@@ -348,7 +348,7 @@
                                             <Setter Property="Template">
                                                 <Setter.Value>
                                                     <ControlTemplate>
-                                                        <TextBlock Background="#FFF104A6" Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                                        <TextBlock Background="#FF333333" Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
                                                     </ControlTemplate>
                                                 </Setter.Value>
                                             </Setter>
@@ -370,7 +370,7 @@
                                                                         <DataTemplate>
                                                                             <StackPanel>
                                                                                 <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                                                <TextBox Background="#FFF104A6" Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                                                                <TextBox Background="#FF333333" Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
@@ -382,7 +382,7 @@
                                                                         <DataTemplate>
                                                                             <StackPanel>
                                                                                 <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                                                <TextBox Background="#FFF104A6" Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                                                                <TextBox Background="#FF333333" Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
@@ -394,7 +394,7 @@
                                                                         <DataTemplate>
                                                                             <StackPanel>
                                                                                 <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                                                <TextBox Background="#FFF104A6" Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                                                                <TextBox Background="#FF333333" Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
@@ -404,7 +404,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <TextBlock Background="#FFF104A6" TextAlignment="Center">n/a</TextBlock>
+                                                                            <TextBlock Background="#FF333333" TextAlignment="Center">n/a</TextBlock>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -413,7 +413,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <TextBlock Background="#FFF104A6" TextAlignment="Center">n/a</TextBlock>
+                                                                            <TextBlock Background="#FF333333" TextAlignment="Center">n/a</TextBlock>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -466,7 +466,7 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </ContentControl.Style>
-                                                <TextBox Background="#FFF104A6" Text="{Binding EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                                <TextBox Background="#FF333333" Text="{Binding EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                             </ContentControl>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>

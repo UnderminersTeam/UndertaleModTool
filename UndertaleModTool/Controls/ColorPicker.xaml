@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              mc:Ignorable="d" 
-             d:DesignHeight="20" d:DesignWidth="300" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6">
+             d:DesignHeight="20" d:DesignWidth="300" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333">
     <UserControl.Resources>
         <local:ColorConverter x:Key="ColorConverter"/>
         <local:ColorTextConverter x:Key="ColorTextConverter"/>
@@ -24,6 +24,6 @@
             </Border>
         </Viewbox>
 
-        <TextBox Background="#FFF104A6" Grid.Column="1" Text="{Binding Color, Converter={StaticResource ColorTextConverter}, RelativeSource={RelativeSource AncestorType={x:Type local:ColorPicker}}, UpdateSourceTrigger=PropertyChanged}" ToolTip="A, B, G, R"/>
+        <TextBox Background="#FF333333" Grid.Column="1" Text="{Binding Color, Converter={StaticResource ColorTextConverter}, RelativeSource={RelativeSource AncestorType={x:Type local:ColorPicker}}, UpdateSourceTrigger=PropertyChanged}" ToolTip="A, B, G, R"/>
     </Grid>
 </UserControl>
