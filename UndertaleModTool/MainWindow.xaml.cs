@@ -104,24 +104,27 @@ namespace UndertaleModTool
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            try
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                var HKCU_Classes = Registry.CurrentUser.OpenSubKey(@"Software\Classes", true);
-                var UndertaleModTool_app = HKCU_Classes.CreateSubKey(@"UndertaleModTool");
-                UndertaleModTool_app.SetValue("", "UndertaleModTool");
-                UndertaleModTool_app.CreateSubKey(@"shell\open\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\"", RegistryValueKind.String);
-                UndertaleModTool_app.CreateSubKey(@"shell\launch\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\" launch", RegistryValueKind.String);
-                UndertaleModTool_app.CreateSubKey(@"shell\launch").SetValue("", "Run game", RegistryValueKind.String);
-                foreach (var extStr in new string[] { ".win", ".unx", ".ios", ".droid" })
+                try
                 {
-                    var ext = HKCU_Classes.CreateSubKey(extStr);
-                    ext.SetValue("", "UndertaleModTool", RegistryValueKind.String);
+                    var HKCU_Classes = Registry.CurrentUser.OpenSubKey(@"Software\Classes", true);
+                    var UndertaleModTool_app = HKCU_Classes.CreateSubKey(@"UndertaleModTool");
+                    UndertaleModTool_app.SetValue("", "UndertaleModTool");
+                    UndertaleModTool_app.CreateSubKey(@"shell\open\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\"", RegistryValueKind.String);
+                    UndertaleModTool_app.CreateSubKey(@"shell\launch\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\" launch", RegistryValueKind.String);
+                    UndertaleModTool_app.CreateSubKey(@"shell\launch").SetValue("", "Run game", RegistryValueKind.String);
+                    foreach (var extStr in new string[] { ".win", ".unx", ".ios", ".droid" })
+                    {
+                        var ext = HKCU_Classes.CreateSubKey(extStr);
+                        ext.SetValue("", "UndertaleModTool", RegistryValueKind.String);
+                    }
+                    SHChangeNotify(SHCNE_ASSOCCHANGED, 0, IntPtr.Zero, IntPtr.Zero);
                 }
-                SHChangeNotify(SHCNE_ASSOCCHANGED, 0, IntPtr.Zero, IntPtr.Zero);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.ToString());
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.ToString());
+                }
             }
 
             Settings.Load();
@@ -150,7 +153,7 @@ namespace UndertaleModTool
                 }
                 else
                 {
-                    ListenChildConnection(args[2]);
+                    _ = ListenChildConnection(args[2]);
                 }
             }
 
@@ -277,7 +280,7 @@ namespace UndertaleModTool
 
         private void Command_Open(object sender, ExecutedRoutedEventArgs e)
         {
-            DoOpenDialog();
+            _ = DoOpenDialog();
         }
 
         private void Command_Save(object sender, ExecutedRoutedEventArgs e)
@@ -287,7 +290,7 @@ namespace UndertaleModTool
                 if (!CanSafelySave)
                     MessageBox.Show("Errors occurred during loading. High chance of data loss! Proceed at your own risk.", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning);
 
-                DoSaveDialog();
+                _ = DoSaveDialog();
             }
         }
         void DataWindow_Closing(object sender, CancelEventArgs e)
@@ -298,7 +301,7 @@ namespace UndertaleModTool
                 {
                     if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     {
-                        DoSaveDialog();
+                        _ = DoSaveDialog();
                         DestroyUMTLastEdited();
                     }
                     else
