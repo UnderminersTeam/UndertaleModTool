@@ -1427,7 +1427,10 @@ namespace UndertaleModLib.Compiler
                     {
                         if (!IsNextToken(TokenKind.CloseArray))
                         {
-                            ReportCodeError("Expected ',' or ']' after value in inline array.", remainingStageOne.Peek().Token, true);
+                            if (remainingStageOne.Any())
+                                ReportCodeError("Expected ',' or ']' after value in inline array.", remainingStageOne.Peek().Token, true);
+                            else
+                                ReportCodeError("Malformed array literal.", false);
                             break;
                         }
                     }
