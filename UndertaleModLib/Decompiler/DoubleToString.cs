@@ -10,55 +10,44 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Decompiler
 {
-    //Implemented from https://stackoverflow.com/a/49663470
+    // Implemented from https://stackoverflow.com/a/49663470
     public static class RoundTrip
     {
-
-        private static String[] zeros = new String[1000];
+        private static string[] zeros = new string[1000];
+        public static Dictionary<double, string> PredefinedValues { get; private set; } = new Dictionary<double, string>()
+        {
+            { 3.141592653589793, "pi" },
+            { 6.283185307179586, "2 * pi" },
+            { 12.566370614359172, "4 * pi" },
+            { 31.41592653589793, "10 * pi" },
+            { 0.3333333333333333, "1/3" },
+            { 0.6666666666666666, "2/3" },
+            { 1.3333333333333333, "4/3" },
+            { 23.333333333333332, "70/3" },
+            { 73.33333333333333, "220/3" },
+            { 206.66666666666666, "620/3" },
+            { 0.06666666666666667, "1/15" },
+            { 0.03333333333333333, "1/30" },
+            { 0.008333333333333333, "1/120" },
+            { 51.42857142857143, "360/7" },
+            { 1.0909090909090908, "12/11" },
+            { 0.9523809523809523, "20/21" }
+        };
 
         static RoundTrip()
         {
             for (int i = 0; i < zeros.Length; i++)
             {
-                zeros[i] = new String('0', i);
+                zeros[i] = new string('0', i);
             }
         }
 
-        public static String ToRoundTrip(double value)
+        public static string ToRoundTrip(double value)
         {
-            if (value.Equals(3.141592653589793))
-                return "pi";
-            else if (value.Equals(6.283185307179586))
-                return "2 * pi";
-            else if (value.Equals(12.566370614359172))
-                return "4 * pi";
-            else if (value.Equals(31.41592653589793))
-                return "10 * pi";
-            else if (value.Equals(0.3333333333333333))
-                return "1/3";
-            else if (value.Equals(0.6666666666666666))
-                return "2/3";
-            else if (value.Equals(1.3333333333333333))
-                return "4/3";
-            else if (value.Equals(23.333333333333332))
-                return "70/3";
-            else if (value.Equals(73.33333333333333))
-                return "220/3";
-            else if (value.Equals(206.66666666666666))
-                return "620/3";
-            else if (value.Equals(0.06666666666666667))
-                return "1/15";
-            else if (value.Equals(0.03333333333333333))
-                return "1/30";
-            else if (value.Equals(0.008333333333333333))
-                return "1/120";
-            else if (value.Equals(51.42857142857143))
-                return "360/7";
-            else if (value.Equals(1.0909090909090908))
-                return "12/11";
-            else if (value.Equals(0.9523809523809523))
-                return "20/21";
-            String str = value.ToString("r");
+            if (PredefinedValues.TryGetValue(value, out string res))
+                return res;
+
+            string str = value.ToString("r", CultureInfo.InvariantCulture);
             int x = str.IndexOf('E');
             int x_lower = str.IndexOf('e');
             if ((x < 0) && (x_lower < 0))
@@ -68,10 +57,10 @@ namespace UndertaleModLib.Decompiler
                 x = ((x < 0) ? x_lower : x);
             }
             int x1 = x + 1;
-            String exp = str.Substring(x1, str.Length - x1);
+            string exp = str.Substring(x1, str.Length - x1);
             int e = int.Parse(exp);
 
-            String s = null;
+            string s;
             int numDecimals = 0;
             if (value < 0)
             {
@@ -113,13 +102,13 @@ namespace UndertaleModLib.Decompiler
             if (e >= 0)
             {
                 e = e - numDecimals;
-                String z = (e < zeros.Length ? zeros[e] : new String('0', e));
+                string z = (e < zeros.Length ? zeros[e] : new string('0', e));
                 s = s + z;
             }
             else
             {
                 e = (-e - 1);
-                String z = (e < zeros.Length ? zeros[e] : new String('0', e));
+                string z = (e < zeros.Length ? zeros[e] : new string('0', e));
                 if (value < 0)
                     s = "-0." + z + s;
                 else
@@ -127,33 +116,6 @@ namespace UndertaleModLib.Decompiler
             }
 
             return s;
-        }
-
-        public static void RoundTripUnitTest()
-        {
-            StringBuilder sb33 = new StringBuilder();
-            double[] values = new[] { 123450000000000000.0, 1.0 / 7, 10000000000.0/7, 100000000000000000.0/7, 0.001/7, 0.0001/7, 100000000000000000.0, 0.00000000001,
-         1.23e-2, 1.234e-5, 1.2345E-10, 1.23456E-20, 5E-20, 1.23E+2, 1.234e5, 1.2345E10, -7.576E-05, 1.23456e20, 5e+20, 9.1093822E-31, 5.9736e24, double.Epsilon };
-
-            foreach (int sign in new[] { 1, -1 })
-            {
-                foreach (double val in values)
-                {
-                    double val2 = sign * val;
-                    String s1 = val2.ToString("r");
-                    String s2 = ToRoundTrip(val2);
-
-                    double val2_ = double.Parse(s2);
-                    double diff = Math.Abs(val2 - val2_);
-                    if (diff != 0)
-                    {
-                        throw new Exception("Value " + val.ToString("r") + " did not pass ToRoundTrip.");
-                    }
-                    sb33.AppendLine(s1);
-                    sb33.AppendLine(s2);
-                    sb33.AppendLine();
-                }
-            }
         }
     }
 }

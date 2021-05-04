@@ -63,8 +63,8 @@ namespace UndertaleModTool
 
         protected override void OnClosed(EventArgs e)
         {
-            base.OnClosed(e);
             IsClosed = true;
+            base.OnClosed(e);
         }
 
         public void TryHide()
@@ -87,6 +87,17 @@ namespace UndertaleModTool
                 if (!IsClosed)
                 {
                     Close();
+                }
+            });
+        }
+
+        public void TryShowDialog()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (!IsClosed)
+                {
+                    ShowDialog();
                 }
             });
         }

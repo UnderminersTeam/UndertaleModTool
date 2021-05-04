@@ -276,7 +276,7 @@ namespace UndertaleModTool
             {
                 LoaderDialog dialog = new LoaderDialog("Decompiling", "Decompiling, please wait... This can take a while on complex scripts");
                 dialog.Owner = Window.GetWindow(this);
-                _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.ShowDialog(); }));
+                _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.TryShowDialog(); }));
 
                 UndertaleCode gettextCode = null;
                 if (gettext == null)
