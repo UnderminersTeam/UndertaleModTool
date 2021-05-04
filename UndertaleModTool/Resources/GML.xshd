@@ -4,7 +4,7 @@
     <Color name="String" foreground="Yellow" />
 	<Color name="Identifier" foreground="#B2B1FF" />
 	<Color name="AltIdentifier" foreground="#FFF899" />
-	<Color name="Function" foreground="#FFB871" fontWeight="bold" />
+	<Color name="Function" foreground="#B2B1FF" />
 	<Color name="Number" foreground="#FF6464" />
 
     <!-- This is the main ruleset. -->
