@@ -76,6 +76,8 @@ namespace UndertaleModTool
                 }
             }
 
+            DecompiledEditor.Options.ConvertTabsToSpaces = true;
+
             DecompiledEditor.TextArea.TextView.ElementGenerators.Add(new NumberGenerator());
             DecompiledEditor.TextArea.TextView.ElementGenerators.Add(new NameGenerator());
 
@@ -329,6 +331,9 @@ namespace UndertaleModTool
 
                     Dispatcher.Invoke(() =>
                     {
+                        if (DataContext != code)
+                            return; // Switched to another code entry or otherwise
+
                         if (e != null)
                             DecompiledEditor.Text = "/* EXCEPTION!\n   " + e.ToString() + "\n*/";
                         else if (decompiled != null)
@@ -592,13 +597,21 @@ namespace UndertaleModTool
             public override int GetFirstInterestedOffset(int startOffset)
             {
                 Match m = FindMatch(startOffset, regex);
-                if (m.Success)
+
+                var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
+                var highlighter = textArea.GetService(typeof(IHighlighter)) as IHighlighter;
+                int line = CurrentContext.Document.GetLocation(startOffset).Line;
+                HighlightedLine highlighted = highlighter.HighlightLine(line);
+
+                while (m.Success)
                 {
                     int res = startOffset + m.Index;
-                    int line = CurrentContext.Document.GetLocation(res).Line;
-                    var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
-                    var highlighter = textArea.GetService(typeof(IHighlighter)) as IHighlighter;
-                    HighlightedLine highlighted = highlighter.HighlightLine(line);
+                    int currLine = CurrentContext.Document.GetLocation(res).Line;
+                    if (currLine != line)
+                    {
+                        line = currLine;
+                        highlighted = highlighter.HighlightLine(line);
+                    }
 
                     foreach (var section in highlighted.Sections)
                     {
@@ -606,7 +619,11 @@ namespace UndertaleModTool
                             section.Offset == res)
                             return res;
                     }
+
+                    startOffset += m.Length;
+                    m = FindMatch(startOffset, regex);
                 }
+
                 return -1;
             }
 
@@ -809,6 +826,12 @@ namespace UndertaleModTool
                         val = data.Scripts.ByName(m.Value);
                         if (val == null)
                             val = data.Functions.ByName(m.Value);
+                        if (val == null)
+                        {
+                            if (data.BuiltinList.Functions.ContainsKey(m.Value))
+                                return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
+                                                                new SolidColorBrush(Color.FromRgb(0xFF, 0xB8, 0x71)));
+                        }
                     }
                     else
                         val = data.ByName(m.Value);
@@ -837,7 +860,10 @@ namespace UndertaleModTool
                     }
 
                     var line = new ClickVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
-                                                        func ? null : new SolidColorBrush(Color.FromRgb(0xFF, 0x80, 0x80)));
+                                                        func ? new SolidColorBrush(Color.FromRgb(0xFF, 0xB8, 0x71)) : 
+                                                               new SolidColorBrush(Color.FromRgb(0xFF, 0x80, 0x80)));
+                    if (func)
+                        line.Bold = true;
                     line.Clicked += (text) =>
                     {
                         (Application.Current.MainWindow as MainWindow).ChangeSelection(val);
@@ -889,6 +915,8 @@ namespace UndertaleModTool
             private string Text { get; set; }
             private Brush ForegroundBrush { get; set; }
 
+            public bool Bold { get; set; } = false;
+
             /// <summary>
             /// Creates a visual line text element with the specified length.
             /// It uses the <see cref="ITextRunConstructionContext.VisualLine"/> and its
@@ -906,6 +934,8 @@ namespace UndertaleModTool
             {
                 if (ForegroundBrush != null)
                     TextRunProperties.SetForegroundBrush(ForegroundBrush);
+                if (Bold)
+                    TextRunProperties.SetTypeface(new Typeface(TextRunProperties.Typeface.FontFamily, FontStyles.Normal, FontWeights.Bold, FontStretches.Normal));
                 return base.CreateTextRun(startVisualColumn, context);
             }
 
@@ -928,7 +958,10 @@ namespace UndertaleModTool
 
             protected override void OnMouseDown(MouseButtonEventArgs e)
             {
-                if (e.ChangedButton == System.Windows.Input.MouseButton.Left && !e.Handled && LinkIsClickable())
+                if (e.Handled)
+                    return;
+                if ((e.ChangedButton == System.Windows.Input.MouseButton.Left && LinkIsClickable()) ||
+                     e.ChangedButton == System.Windows.Input.MouseButton.Middle)
                 {
                     if (Clicked != null)
                     {
