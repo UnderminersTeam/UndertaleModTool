@@ -96,6 +96,8 @@ namespace UndertaleModTool
                             {
                                 MessageBox.Show("Your code can be recovered from the \"Recovered\" folder at any time.");
                                 string recoveredDir = Path.Combine(AppDataFolder, "Recovered", reportedHashOfCrashedFile);
+                                if (!Directory.Exists(Path.Combine(AppDataFolder, "Recovered")))
+                                    Directory.CreateDirectory(Path.Combine(AppDataFolder, "Recovered"));
                                 if (Directory.Exists(recoveredDir))
                                     Directory.Delete(recoveredDir, true);
                                 Directory.Move(pathOfRecoverableCode, recoveredDir);
