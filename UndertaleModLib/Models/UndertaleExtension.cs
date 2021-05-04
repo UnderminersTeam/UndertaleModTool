@@ -25,11 +25,10 @@ namespace UndertaleModLib.Models
         Double = 2
     }
 
-    public class UndertaleExtensionFunctionArg : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleExtensionFunctionArg : UndertaleObject
     {
         public UndertaleExtensionVarType Type { get; set; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public UndertaleExtensionFunctionArg()
         {
@@ -52,7 +51,8 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleExtensionFunction : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleExtensionFunction : UndertaleObject
     {
         public UndertaleString Name { get; set; }
         public uint ID { get; set; } 
@@ -60,8 +60,6 @@ namespace UndertaleModLib.Models
         public UndertaleExtensionVarType RetType { get; set; }
         public UndertaleString ExtName { get; set; }
         public UndertaleSimpleList<UndertaleExtensionFunctionArg> Arguments { get; set; } = new UndertaleSimpleList<UndertaleExtensionFunctionArg>();
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -89,15 +87,14 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleExtensionFile : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleExtensionFile : UndertaleObject
     {
         public UndertaleString Filename { get; set; }
         public UndertaleString CleanupScript { get; set; }
         public UndertaleString InitScript { get; set; }
         public UndertaleExtensionKind Kind { get; set; }
         public UndertalePointerList<UndertaleExtensionFunction> Functions { get; set; } = new UndertalePointerList<UndertaleExtensionFunction>();
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -123,15 +120,14 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleExtension : UndertaleNamedResource, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleExtension : UndertaleNamedResource
     {
         public UndertaleString FolderName { get; set; }
         public UndertaleString Name { get; set; }
         public UndertaleString ClassName { get; set; }
 
         public UndertalePointerList<UndertaleExtensionFile> Files { get; set; } = new UndertalePointerList<UndertaleExtensionFile>();
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public override string ToString()
         {

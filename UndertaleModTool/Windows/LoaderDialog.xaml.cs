@@ -20,7 +20,8 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy LoaderDialog.xaml
     /// </summary>
-    public partial class LoaderDialog : Window, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public partial class LoaderDialog : Window
     {
         public string MessageTitle { get; set; }
         public string Message { get; set; }
@@ -42,8 +43,6 @@ namespace UndertaleModTool
             }
         }
         public bool IsClosed { get; set; } = false;
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public LoaderDialog(string title, string msg)
         {
@@ -105,7 +104,6 @@ namespace UndertaleModTool
         public void ReportProgress(string message)
         {
             StatusText = message;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("StatusText"));
         }
 
         public void ReportProgress(string message, double value)

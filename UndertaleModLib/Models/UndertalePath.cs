@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertalePath : UndertaleNamedResource, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertalePath : UndertaleNamedResource
     {
         public UndertaleString Name { get; set; }
         public bool IsSmooth { get; set; } = false;
@@ -15,15 +16,12 @@ namespace UndertaleModLib.Models
         public uint Precision { get; set; } = 4;
         public UndertaleSimpleList<PathPoint> Points { get; private set; } = new UndertaleSimpleList<PathPoint>();
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public class PathPoint : UndertaleObject, INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class PathPoint : UndertaleObject
         {
             public float X { get; set; }
             public float Y { get; set; }
             public float Speed { get; set; }
-
-            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {

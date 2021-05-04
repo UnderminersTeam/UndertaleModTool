@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleTextureGroupInfo : UndertaleNamedResource, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleTextureGroupInfo : UndertaleNamedResource
     {
         public UndertaleString Name { get; set; }
         public UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR> TexturePages { get; set; }
@@ -16,8 +17,6 @@ namespace UndertaleModLib.Models
         public UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT> SpineSprites { get; set; }
         public UndertaleSimpleResourcesList<UndertaleFont, UndertaleChunkFONT> Fonts { get; set; }
         public UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND> Tilesets { get; set; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public UndertaleTextureGroupInfo()
         {

@@ -13,7 +13,7 @@ namespace UndertaleModLib.Decompiler
     // Implemented from https://stackoverflow.com/a/49663470
     public static class RoundTrip
     {
-        private static string[] zeros = new string[1000];
+        private static readonly string[] zeros = new string[1000];
         public static Dictionary<double, string> PredefinedValues { get; private set; } = new Dictionary<double, string>()
         {
             { 3.141592653589793, "pi" },
@@ -101,9 +101,9 @@ namespace UndertaleModLib.Decompiler
 
             if (e >= 0)
             {
-                e = e - numDecimals;
+                e -= numDecimals;
                 string z = (e < zeros.Length ? zeros[e] : new string('0', e));
-                s = s + z;
+                s += z;
             }
             else
             {

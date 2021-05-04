@@ -23,13 +23,13 @@ namespace UndertaleModLib.Models
         private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _TextureMaskId = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
 
         public UndertaleString Name { get; set; }
-        public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sprite")); } }
+        public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sprite))); } }
         public bool Visible { get; set; } = true;
         public bool Solid { get; set; } = false;
         public int Depth { get; set; } = 0;
         public bool Persistent { get; set; } = false;
-        public UndertaleGameObject ParentId { get => _ParentId.Resource; set { _ParentId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ParentId")); } }
-        public UndertaleSprite TextureMaskId { get => _TextureMaskId.Resource; set { _TextureMaskId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureMaskId")); } }
+        public UndertaleGameObject ParentId { get => _ParentId.Resource; set { _ParentId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ParentId))); } }
+        public UndertaleSprite TextureMaskId { get => _TextureMaskId.Resource; set { _TextureMaskId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextureMaskId))); } }
         public bool UsesPhysics { get; set; } = false;
         public bool IsSensor { get; set; } = false;
         public CollisionShapeFlags CollisionShape { get; set; } = CollisionShapeFlags.Circle;
@@ -239,7 +239,8 @@ namespace UndertaleModLib.Models
             return Name.Content + " (" + GetType().Name + ")";
         }
 
-        public class Event : UndertaleObject, INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class Event : UndertaleObject
         {
             public uint EventSubtype { get; set; } // (the same as the ID at the end of name)
             public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>(); // seems to always have 1 entry, maybe the games using drag-and-drop code are different
@@ -280,8 +281,6 @@ namespace UndertaleModLib.Models
                 set => EventSubtype = (uint)value;
             }
 
-            public event PropertyChangedEventHandler PropertyChanged;
-
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(EventSubtype);
@@ -312,7 +311,7 @@ namespace UndertaleModLib.Models
             public uint ExeType { get; set; } // always 2
             public UndertaleString ActionName { get; set; } // always ""
             private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CodeId = new UndertaleModLib.UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
-            public UndertaleCode CodeId { get => _CodeId.Resource; set { _CodeId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CodeId")); } }
+            public UndertaleCode CodeId { get => _CodeId.Resource; set { _CodeId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CodeId))); } }
             public uint ArgumentCount { get; set; } // always 1
             public int Who { get; set; } // always -1
             public bool Relative { get; set; } // always 0
@@ -358,12 +357,11 @@ namespace UndertaleModLib.Models
             }
         }
 
-        public class UndertalePhysicsVertex : UndertaleObject, INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class UndertalePhysicsVertex : UndertaleObject
         {
             public float X { get; set; }
             public float Y { get; set; }
-
-            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {

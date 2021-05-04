@@ -8,14 +8,14 @@ using System.Collections.ObjectModel;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleTimeline : UndertaleNamedResource, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleTimeline : UndertaleNamedResource
     {
-        public class UndertaleTimelineMoment : UndertaleObject, INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class UndertaleTimelineMoment : UndertaleObject
         {
             public uint Step { get; set; }
             public UndertalePointerList<UndertaleGameObject.EventAction> Event { get; set; }
-
-            public event PropertyChangedEventHandler PropertyChanged;
 
             public UndertaleTimelineMoment()
             {
@@ -44,8 +44,6 @@ namespace UndertaleModLib.Models
 
         public UndertaleString Name { get; set; }
         public ObservableCollection<UndertaleTimelineMoment> Moments { get; set; } = new ObservableCollection<UndertaleTimelineMoment>();
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public override string ToString()
         {

@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleAnimationCurve : UndertaleNamedResource, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleAnimationCurve : UndertaleNamedResource
     {
         public enum GraphTypeEnum : uint
         {
@@ -18,8 +19,6 @@ namespace UndertaleModLib.Models
         public UndertaleString Name { get; set; }
         public GraphTypeEnum GraphType { get; set; }
         public UndertaleSimpleList<Channel> Channels { get; set; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -52,7 +51,8 @@ namespace UndertaleModLib.Models
             return Name.Content;
         }
 
-        public class Channel : UndertaleObject, INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class Channel : UndertaleObject
         {
             public enum FunctionType : uint
             {
@@ -64,8 +64,6 @@ namespace UndertaleModLib.Models
             public FunctionType Function { get; set; }
             public uint Iterations { get; set; }
             public UndertaleSimpleList<Point> Points { get; set; }
-
-            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {

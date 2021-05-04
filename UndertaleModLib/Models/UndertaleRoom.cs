@@ -32,7 +32,7 @@ namespace UndertaleModLib.Models
         public bool DrawBackgroundColor { get; set; } = true;
 
         private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCodeId = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
-        public UndertaleCode CreationCodeId { get => _CreationCodeId.Resource; set { _CreationCodeId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CreationCodeId")); } }
+        public UndertaleCode CreationCodeId { get => _CreationCodeId.Resource; set { _CreationCodeId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CreationCodeId))); } }
         public RoomEntryFlags Flags { get; set; } = RoomEntryFlags.EnableViews;
         public bool World { get; set; } = false;
         public uint Top { get; set; } = 0;
@@ -205,23 +205,23 @@ namespace UndertaleModLib.Models
         public class Background : UndertaleObject, INotifyPropertyChanged
         {
             private UndertaleRoom _ParentRoom;
-            public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ParentRoom")); UpdateStretch(); } }
+            public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ParentRoom))); UpdateStretch(); } }
             public float CalcScaleX { get; set; } = 1;
             public float CalcScaleY { get; set; } = 1;
             public bool Enabled { get; set; } = false;
             public bool Foreground { get; set; } = false;
             private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>();
-            public UndertaleBackground BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BackgroundDefinition")); } }
+            public UndertaleBackground BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BackgroundDefinition))); } }
             private int _X = 0;
             private int _Y = 0; 
-            public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); UpdateStretch(); } }
-            public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); UpdateStretch(); } }
+            public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(X))); UpdateStretch(); } }
+            public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Y))); UpdateStretch(); } }
             public int TileX { get; set; } = 1;
             public int TileY { get; set; } = 1;
             public int SpeedX { get; set; } = 0;
             public int SpeedY { get; set; } = 0;
             private bool _Stretch = false;
-            public bool Stretch { get => _Stretch; set { _Stretch = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Stretch")); UpdateStretch(); } }
+            public bool Stretch { get => _Stretch; set { _Stretch = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Stretch))); UpdateStretch(); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -272,35 +272,22 @@ namespace UndertaleModLib.Models
 
         public class View : UndertaleObject, INotifyPropertyChanged
         {
-            private bool _Enabled = false;
-            private int _ViewX = 0;
-            private int _ViewY = 0;
-            private int _ViewWidth = 640;
-            private int _ViewHeight = 480;
-            private int _PortX = 0;
-            private int _PortY = 0;
-            private int _PortWidth = 640;
-            private int _PortHeight = 480;
-            private uint _BorderX = 32;
-            private uint _BorderY = 32;
-            private int _SpeedX = -1;
-            private int _SpeedY = -1;
-            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
+            public bool Enabled { get; set; } = false;
+            public int ViewX { get; set; }
+            public int ViewY { get; set; }
+            public int ViewWidth { get; set; } = 640;
+            public int ViewHeight { get; set; } = 480;
+            public int PortX { get; set; }
+            public int PortY { get; set; }
+            public int PortWidth { get; set; } = 640;
+            public int PortHeight { get; set; } = 480;
+            public uint BorderX { get; set; } = 32;
+            public uint BorderY { get; set; } = 32;
+            public int SpeedX { get; set; } = -1;
+            public int SpeedY { get; set; } = -1;
 
-            public bool Enabled { get => _Enabled; set { _Enabled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Enabled")); } }
-            public int ViewX { get => _ViewX; set { _ViewX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ViewX")); } }
-            public int ViewY { get => _ViewY; set { _ViewY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ViewY")); } }
-            public int ViewWidth { get => _ViewWidth; set { _ViewWidth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ViewWidth")); } }
-            public int ViewHeight { get => _ViewHeight; set { _ViewHeight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ViewHeight")); } }
-            public int PortX { get => _PortX; set { _PortX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PortX")); } }
-            public int PortY { get => _PortY; set { _PortY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PortY")); } }
-            public int PortWidth { get => _PortWidth; set { _PortWidth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PortWidth")); } }
-            public int PortHeight { get => _PortHeight; set { _PortHeight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PortHeight")); } }
-            public uint BorderX { get => _BorderX; set { _BorderX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BorderX")); } }
-            public uint BorderY { get => _BorderY; set { _BorderY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BorderY")); } }
-            public int SpeedX { get => _SpeedX; set { _SpeedX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpeedX")); } }
-            public int SpeedY { get => _SpeedY; set { _SpeedY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpeedY")); } }
-            public UndertaleGameObject ObjectId { get => _ObjectId.Resource; set { _ObjectId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ObjectId")); } }
+            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
+            public UndertaleGameObject ObjectId { get => _ObjectId.Resource; set { _ObjectId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ObjectId))); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -343,34 +330,25 @@ namespace UndertaleModLib.Models
 
         public class GameObject : UndertaleObjectLenCheck, RoomObject, INotifyPropertyChanged
         {
-            private int _X;
-            private int _Y;
             private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectDefinition = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
-            private uint _InstanceID;
             private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCode = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
-            private float _ScaleX = 1;
-            private float _ScaleY = 1;
-            private uint _Color = 0xFFFFFFFF;
-            private float _Rotation = 0;
             private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _PreCreateCode = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
-            private float _ImageSpeed = 0;
-            private int _ImageIndex = 0;
 
-            public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
-            public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
-            public UndertaleGameObject ObjectDefinition { get => _ObjectDefinition.Resource; set { _ObjectDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ObjectDefinition")); } }
-            public uint InstanceID { get => _InstanceID; set { _InstanceID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("InstanceID")); } }
-            public UndertaleCode CreationCode { get => _CreationCode.Resource; set { _CreationCode.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CreationCode")); } }
-            public float ScaleX { get => _ScaleX; set { _ScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleX")); } }
-            public float ScaleY { get => _ScaleY; set { _ScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleY")); } }
-            public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
-            public float Rotation { get => _Rotation; set { _Rotation = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Rotation")); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OppositeRotation")); } }
-            public UndertaleCode PreCreateCode { get => _PreCreateCode.Resource; set { _PreCreateCode.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PreCreateCode")); } }
-            public float ImageSpeed { get => _ImageSpeed; set { _ImageSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ImageSpeed")); } }
-            public int ImageIndex { get => _ImageIndex; set { _ImageIndex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ImageIndex")); } }
+            public int X { get; set; }
+            public int Y { get; set; }
+            public UndertaleGameObject ObjectDefinition { get => _ObjectDefinition.Resource; set { _ObjectDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ObjectDefinition))); } }
+            public uint InstanceID { get; set; }
+            public UndertaleCode CreationCode { get => _CreationCode.Resource; set { _CreationCode.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CreationCode))); } }
+            public float ScaleX { get; set; } = 1;
+            public float ScaleY { get; set; } = 1;
+            public uint Color { get; set; } = 0xFFFFFFFF;
+            public float Rotation { get; set; }
+            public UndertaleCode PreCreateCode { get => _PreCreateCode.Resource; set { _PreCreateCode.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PreCreateCode))); } }
+            public float ImageSpeed { get; set; }
+            public int ImageIndex { get; set; }
 
             public event PropertyChangedEventHandler PropertyChanged;
-            public float OppositeRotation { get => 360F - Rotation; }
+            public float OppositeRotation => 360F - Rotation;
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -426,35 +404,24 @@ namespace UndertaleModLib.Models
 
         public class Tile : UndertaleObject, RoomObject, INotifyPropertyChanged
         {
-            private int _X;
-            private int _Y;
             public bool _SpriteMode = false;
             private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>();
             private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _SpriteDefinition = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
-            private uint _SourceX;
-            private uint _SourceY;
-            private uint _Width;
-            private uint _Height;
-            private int _TileDepth = 0;
-            private uint _InstanceID;
-            private float _ScaleX = 1;
-            private float _ScaleY = 1;
-            private uint _Color = 0xFFFFFFFF;
 
-            public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
-            public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
-            public UndertaleBackground BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BackgroundDefinition")); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ObjectDefinition")); } }
-            public UndertaleSprite SpriteDefinition { get => _SpriteDefinition.Resource; set { _SpriteDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpriteDefinition")); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ObjectDefinition")); } }
-            public UndertaleNamedResource ObjectDefinition { get => _SpriteMode ? (UndertaleNamedResource)SpriteDefinition : (UndertaleNamedResource)BackgroundDefinition; set { if (_SpriteMode) SpriteDefinition = (UndertaleSprite)value; else BackgroundDefinition = (UndertaleBackground)value; } }
-            public uint SourceX { get => _SourceX; set { _SourceX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceX")); } }
-            public uint SourceY { get => _SourceY; set { _SourceY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceY")); } }
-            public uint Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
-            public uint Height { get => _Height; set { _Height = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Height")); } }
-            public int TileDepth { get => _TileDepth; set { _TileDepth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileDepth")); } }
-            public uint InstanceID { get => _InstanceID; set { _InstanceID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("InstanceID")); } }
-            public float ScaleX { get => _ScaleX; set { _ScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleX")); } }
-            public float ScaleY { get => _ScaleY; set { _ScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleY")); } }
-            public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
+            public int X { get; set; }
+            public int Y { get; set; }
+            public UndertaleBackground BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BackgroundDefinition))); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ObjectDefinition))); } }
+            public UndertaleSprite SpriteDefinition { get => _SpriteDefinition.Resource; set { _SpriteDefinition.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SpriteDefinition))); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ObjectDefinition))); } }
+            public UndertaleNamedResource ObjectDefinition { get => _SpriteMode ? SpriteDefinition : BackgroundDefinition; set { if (_SpriteMode) SpriteDefinition = (UndertaleSprite)value; else BackgroundDefinition = (UndertaleBackground)value; } }
+            public uint SourceX { get; set; }
+            public uint SourceY { get; set; }
+            public uint Width { get; set; }
+            public uint Height { get; set; }
+            public int TileDepth { get; set; }
+            public uint InstanceID { get; set; }
+            public float ScaleX { get; set; } = 1;
+            public float ScaleY { get; set; } = 1;
+            public uint Color { get; set; } = 0xFFFFFFFF;
 
             public UndertaleTexturePageItem Tpag => _SpriteMode ? SpriteDefinition?.Textures?.FirstOrDefault()?.Texture : BackgroundDefinition?.Texture; // TODO: what happens on sprites with multiple textures?
 
@@ -523,34 +490,22 @@ namespace UndertaleModLib.Models
             }
 
             private UndertaleRoom _ParentRoom;
+            public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ParentRoom))); UpdateParentRoom(); } }
 
-            private UndertaleString _LayerName;
-            private uint _LayerId;
-            private LayerType _LayerType;
-            private int _LayerDepth;
-            private float _XOffset;
-            private float _YOffset;
-            private float _HSpeed;
-            private float _VSpeed;
-            private bool _IsVisible;
-            private LayerData _Data;
-
-            public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ParentRoom")); UpdateParentRoom(); } }
-
-            public UndertaleString LayerName { get => _LayerName; set { _LayerName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LayerName")); } }
-            public uint LayerId { get => _LayerId; set { _LayerId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LayerId")); } }
-            public LayerType LayerType { get => _LayerType; set { _LayerType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LayerType")); } }
-            public int LayerDepth { get => _LayerDepth; set { _LayerDepth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LayerDepth")); } }
-            public float XOffset { get => _XOffset; set { _XOffset = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("XOffset")); } }
-            public float YOffset { get => _YOffset; set { _YOffset = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("YOffset")); } }
-            public float HSpeed { get => _HSpeed; set { _HSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("HSpeed")); } }
-            public float VSpeed { get => _VSpeed; set { _VSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("VSpeed")); } }
-            public bool IsVisible { get => _IsVisible; set { _IsVisible = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsVisible")); } }
-            public LayerData Data { get => _Data; set { _Data = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data")); } }
-            public LayerInstancesData InstancesData => _Data as LayerInstancesData;
-            public LayerTilesData TilesData => _Data as LayerTilesData;
-            public LayerBackgroundData BackgroundData => _Data as LayerBackgroundData;
-            public LayerAssetsData AssetsData => _Data as LayerAssetsData;
+            public UndertaleString LayerName { get; set; }
+            public uint LayerId { get; set; }
+            public LayerType LayerType { get; set; }
+            public int LayerDepth { get; set; }
+            public float XOffset { get; set; }
+            public float YOffset { get; set; }
+            public float HSpeed { get; set; }
+            public float VSpeed { get; set; }
+            public bool IsVisible { get; set; }
+            public LayerData Data { get; set; }
+            public LayerInstancesData InstancesData => Data as LayerInstancesData;
+            public LayerTilesData TilesData => Data as LayerTilesData;
+            public LayerBackgroundData BackgroundData => Data as LayerBackgroundData;
+            public LayerAssetsData AssetsData => Data as LayerAssetsData;
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -656,19 +611,19 @@ namespace UndertaleModLib.Models
                 private uint _TilesY;
                 private uint[][] _TileData; // Each is simply an ID from the tileset/background/sprite
 
-                public UndertaleBackground Background { get => _Background.Resource; set { _Background.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Background")); } }
+                public UndertaleBackground Background { get => _Background.Resource; set { _Background.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Background))); } }
                 public uint TilesX
                 {
                     get => _TilesX; set
                     {
-                        _TilesX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TilesX"));
+                        _TilesX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TilesX)));
                         if (_TileData != null)
                         {
                             for (var y = 0; y < _TileData.Length; y++)
                             {
                                 Array.Resize(ref _TileData[y], (int)value);
                             }
-                            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileData"));
+                            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TileData)));
                         }
                     }
                 }
@@ -676,7 +631,7 @@ namespace UndertaleModLib.Models
                 {
                     get => _TilesY; set
                     {
-                        _TilesY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TilesY"));
+                        _TilesY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TilesY)));
                         if (_TileData != null)
                         {
                             Array.Resize(ref _TileData, (int)value);
@@ -685,11 +640,11 @@ namespace UndertaleModLib.Models
                                 if (_TileData[y] == null)
                                     _TileData[y] = new uint[TilesX];
                             }
-                            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileData"));
+                            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TileData)));
                         }
                     }
                 }
-                public uint[][] TileData { get => _TileData; set { _TileData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TileData")); } }
+                public uint[][] TileData { get => _TileData; set { _TileData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TileData))); } }
 
                 public event PropertyChangedEventHandler PropertyChanged;
 
@@ -731,34 +686,26 @@ namespace UndertaleModLib.Models
             public class LayerBackgroundData : LayerData, INotifyPropertyChanged
             {
                 private Layer _ParentLayer;
-                private float _CalcScaleX = 1;
-                private float _CalcScaleY = 1;
 
-                private bool _Visible;
-                private bool _Foreground;
                 private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>(); // Apparently there's a mode where it's a background reference, but probably not necessary
                 private bool _TiledHorizontally;
                 private bool _TiledVertically;
                 private bool _Stretch;
-                private uint _Color; // includes alpha channel
-                private float _FirstFrame;
-                private float _AnimationSpeed;
-                private AnimationSpeedType _AnimationSpeedType; // 0 means it's in FPS, 1 means it's in "frames per game frame", I believe
 
-                public Layer ParentLayer { get => _ParentLayer; set { _ParentLayer = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ParentLayer")); UpdateScale(); } }
-                public float CalcScaleX { get => _CalcScaleX; set { _CalcScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CalcScaleX")); } }
-                public float CalcScaleY { get => _CalcScaleY; set { _CalcScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CalcScaleY")); } }
+                public Layer ParentLayer { get => _ParentLayer; set { _ParentLayer = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ParentLayer))); UpdateScale(); } }
+                public float CalcScaleX { get; set; }
+                public float CalcScaleY { get; set; }
 
-                public bool Visible { get => _Visible; set { _Visible = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Visible")); } }
-                public bool Foreground { get => _Foreground; set { _Foreground = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Foreground")); } }
-                public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sprite")); } }
-                public bool TiledHorizontally { get => _TiledHorizontally; set { _TiledHorizontally = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TiledHorizontally")); UpdateScale(); } }
-                public bool TiledVertically { get => _TiledVertically; set { _TiledVertically = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TiledVertically")); UpdateScale(); } }
-                public bool Stretch { get => _Stretch; set { _Stretch = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Stretch")); UpdateScale(); } }
-                public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
-                public float FirstFrame { get => _FirstFrame; set { _FirstFrame = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FirstFrame")); } }
-                public float AnimationSpeed { get => _AnimationSpeed; set { _AnimationSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AnimationSpeed")); } }
-                public AnimationSpeedType AnimationSpeedType { get => _AnimationSpeedType; set { _AnimationSpeedType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AnimationSpeedType")); } }
+                public bool Visible { get; set; }
+                public bool Foreground { get; set; }
+                public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sprite))); } }
+                public bool TiledHorizontally { get => _TiledHorizontally; set { _TiledHorizontally = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TiledHorizontally))); UpdateScale(); } }
+                public bool TiledVertically { get => _TiledVertically; set { _TiledVertically = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TiledVertically))); UpdateScale(); } }
+                public bool Stretch { get => _Stretch; set { _Stretch = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Stretch))); UpdateScale(); } }
+                public uint Color { get; set; }
+                public float FirstFrame { get; set; }
+                public float AnimationSpeed { get; set; }
+                public AnimationSpeedType AnimationSpeedType { get; set; }
 
                 public event PropertyChangedEventHandler PropertyChanged;
 
@@ -798,19 +745,13 @@ namespace UndertaleModLib.Models
                 }
             }
 
-            public class LayerAssetsData : LayerData, INotifyPropertyChanged
+            [PropertyChanged.AddINotifyPropertyChangedInterface]
+            public class LayerAssetsData : LayerData
             {
-                private UndertalePointerList<Tile> _LegacyTiles;
-                private UndertalePointerList<SpriteInstance> _Sprites;
-                private UndertalePointerList<SequenceInstance> _Sequences;
-                private UndertalePointerList<SpriteInstance> _NineSlices;  // Removed in 2.3.2, before ever used
-
-                public UndertalePointerList<Tile> LegacyTiles { get => _LegacyTiles; set { _LegacyTiles = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LegacyTiles")); } }
-                public UndertalePointerList<SpriteInstance> Sprites { get => _Sprites; set { _Sprites = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sprites")); } }
-                public UndertalePointerList<SequenceInstance> Sequences { get => _Sequences; set { _Sequences = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sequences")); } }
-                public UndertalePointerList<SpriteInstance> NineSlices { get => _NineSlices; set { _NineSlices = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("NineSlices")); } }  // Read above comment
-
-                public event PropertyChangedEventHandler PropertyChanged;
+                public UndertalePointerList<Tile> LegacyTiles { get; set; }
+                public UndertalePointerList<SpriteInstance> Sprites { get; set; }
+                public UndertalePointerList<SequenceInstance> Sequences { get; set; }
+                public UndertalePointerList<SpriteInstance> NineSlices { get; set; } // Removed in 2.3.2, before ever used
 
                 public void Serialize(UndertaleWriter writer)
                 {
@@ -856,29 +797,19 @@ namespace UndertaleModLib.Models
 
         public class SpriteInstance : UndertaleObject, INotifyPropertyChanged
         {
-            private UndertaleString _Name;
             private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
-            private int _X;
-            private int _Y;
-            private float _ScaleX;
-            private float _ScaleY;
-            private uint _Color;
-            private float _AnimationSpeed;
-            private AnimationSpeedType _AnimationSpeedType;
-            private float _FrameIndex;
-            private float _Rotation;
 
-            public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-            public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sprite")); } }
-            public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
-            public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
-            public float ScaleX { get => _ScaleX; set { _ScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleX")); } }
-            public float ScaleY { get => _ScaleY; set { _ScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleY")); } }
-            public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
-            public float AnimationSpeed { get => _AnimationSpeed; set { _AnimationSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AnimationSpeed")); } }
-            public AnimationSpeedType AnimationSpeedType { get => _AnimationSpeedType; set { _AnimationSpeedType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AnimationSpeedType")); } }
-            public float FrameIndex { get => _FrameIndex; set { _FrameIndex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FrameIndex")); } }
-            public float Rotation { get => _Rotation; set { _Rotation = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Rotation")); } }
+            public UndertaleString Name { get; set; }
+            public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sprite))); } }
+            public int X { get; set; }
+            public int Y { get; set; }
+            public float ScaleX { get; set; }
+            public float ScaleY { get; set; }
+            public uint Color { get; set; }
+            public float AnimationSpeed { get; set; }
+            public AnimationSpeedType AnimationSpeedType { get; set; }
+            public float FrameIndex { get; set; }
+            public float Rotation { get; set; }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -920,29 +851,19 @@ namespace UndertaleModLib.Models
 
         public class SequenceInstance : UndertaleObject, INotifyPropertyChanged
         {
-            private UndertaleString _Name;
             private UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN> _Sequence = new UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>();
-            private int _X;
-            private int _Y;
-            private float _ScaleX;
-            private float _ScaleY;
-            private uint _Color;
-            private float _AnimationSpeed;
-            private AnimationSpeedType _AnimationSpeedType;
-            private float _FrameIndex;
-            private float _Rotation;
 
-            public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-            public UndertaleSequence Sequence { get => _Sequence.Resource; set { _Sequence.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Sequence")); } }
-            public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
-            public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
-            public float ScaleX { get => _ScaleX; set { _ScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleX")); } }
-            public float ScaleY { get => _ScaleY; set { _ScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleY")); } }
-            public uint Color { get => _Color; set { _Color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); } }
-            public float AnimationSpeed { get => _AnimationSpeed; set { _AnimationSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AnimationSpeed")); } }
-            public AnimationSpeedType AnimationSpeedType { get => _AnimationSpeedType; set { _AnimationSpeedType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AnimationSpeedType")); } }
-            public float FrameIndex { get => _FrameIndex; set { _FrameIndex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FrameIndex")); } }
-            public float Rotation { get => _Rotation; set { _Rotation = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Rotation")); } }
+            public UndertaleString Name { get; set; }
+            public UndertaleSequence Sequence { get => _Sequence.Resource; set { _Sequence.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sequence))); } }
+            public int X { get; set; }
+            public int Y { get; set; }
+            public float ScaleX { get; set; }
+            public float ScaleY { get; set; }
+            public uint Color { get; set; }
+            public float AnimationSpeed { get; set; }
+            public AnimationSpeedType AnimationSpeedType { get; set; }
+            public float FrameIndex { get; set; }
+            public float Rotation { get; set; }
 
             public event PropertyChangedEventHandler PropertyChanged;
 

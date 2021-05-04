@@ -20,9 +20,9 @@ namespace UndertaleModTool
     /// <summary>
     /// Interaction logic for TextInputDialog.xaml
     /// </summary>
-    public partial class TextInputDialog : Window, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public partial class TextInputDialog : Window
     {
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public Visibility CancelButtonVisibility { get => PreventClose ? Visibility.Hidden : Visibility.Visible; }
         public string Message { get; set; } // text in the label

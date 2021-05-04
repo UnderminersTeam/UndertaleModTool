@@ -243,7 +243,7 @@ namespace UndertaleModLib
     {
         public static T ByName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
         {
-            foreach(var item in list)
+            foreach (var item in list)
                 if (ignoreCase ? (item.Name.Content.Equals(name, StringComparison.OrdinalIgnoreCase)) : (item.Name.Content == name))
                     return item;
             return default(T);
@@ -258,13 +258,15 @@ namespace UndertaleModLib
         public static UndertaleString MakeString(this IList<UndertaleString> list, string content)
         {
             if (content == null)
-                throw new ArgumentNullException("content");
+                throw new ArgumentNullException(nameof(content));
+
             // TODO: without reference counting the strings, this may leave unused strings in the array
             foreach (UndertaleString str in list)
             {
                 if (str.Content == content)
                     return str;
             }
+
             UndertaleString newString = new UndertaleString(content);
             list.Add(newString);
             return newString;
@@ -273,7 +275,8 @@ namespace UndertaleModLib
         public static UndertaleString MakeString(this IList<UndertaleString> list, string content, out int index)
         {
             if (content == null)
-                throw new ArgumentNullException("content");
+                throw new ArgumentNullException(nameof(content));
+
             // TODO: without reference counting the strings, this may leave unused strings in the array
             for (int i = 0; i < list.Count; i++)
             {
@@ -284,6 +287,7 @@ namespace UndertaleModLib
                     return str;
                 }
             }
+
             UndertaleString newString = new UndertaleString(content);
             index = list.Count;
             list.Add(newString);

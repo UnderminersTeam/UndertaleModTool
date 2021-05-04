@@ -7,13 +7,13 @@ using System.ComponentModel;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleShader : UndertaleNamedResource, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleShader : UndertaleNamedResource
     {
-        public class VertexShaderAttribute : UndertaleObject, INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class VertexShaderAttribute : UndertaleObject
         {
             public UndertaleString Name { get; set; }
-
-            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -49,8 +49,6 @@ namespace UndertaleModLib.Models
 
         public UndertaleSimpleList<VertexShaderAttribute> VertexShaderAttributes { get; set; } = new UndertaleSimpleList<VertexShaderAttribute>();
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public UndertaleShader()
         {
             HLSL11_VertexData = new UndertaleRawShaderData();
@@ -68,7 +66,7 @@ namespace UndertaleModLib.Models
             return Name.Content + " (" + GetType().Name + ")";
         }
 
-        private void WritePadding(UndertaleWriter writer, int amount)
+        private static void WritePadding(UndertaleWriter writer, int amount)
         {
             while ((writer.Position & amount) != 0)
             {
@@ -76,7 +74,7 @@ namespace UndertaleModLib.Models
             }
         }
 
-        private void ReadPadding(UndertaleReader reader, int amount)
+        private static void ReadPadding(UndertaleReader reader, int amount)
         {
             while ((reader.Position & amount) != 0)
             {
@@ -196,7 +194,7 @@ namespace UndertaleModLib.Models
                 ReadPadding(reader, 7);
 
                 // Calculate length of data
-                uint next = 0;
+                uint next;
                 if (!HLSL11_PixelData.IsNull)
                     next = HLSL11_PixelData._Position;
                 else
@@ -209,7 +207,7 @@ namespace UndertaleModLib.Models
                 ReadPadding(reader, 7);
 
                 // Calculate length of data
-                uint next = 0;
+                uint next;
                 if (!PSSL_VertexData.IsNull)
                     next = PSSL_VertexData._Position;
                 else
@@ -223,7 +221,7 @@ namespace UndertaleModLib.Models
                 ReadPadding(reader, 7);
 
                 // Calculate length of data
-                uint next = 0;
+                uint next;
                 if (!PSSL_PixelData.IsNull)
                     next = PSSL_PixelData._Position;
                 else
@@ -236,7 +234,7 @@ namespace UndertaleModLib.Models
                 ReadPadding(reader, 7);
 
                 // Calculate length of data
-                uint next = 0;
+                uint next;
                 if (!Cg_PSVita_VertexData.IsNull)
                     next = Cg_PSVita_VertexData._Position;
                 else
@@ -250,7 +248,7 @@ namespace UndertaleModLib.Models
                 ReadPadding(reader, 7);
 
                 // Calculate length of data
-                uint next = 0;
+                uint next;
                 if (!Cg_PSVita_PixelData.IsNull)
                     next = Cg_PSVita_PixelData._Position;
                 else
@@ -263,7 +261,7 @@ namespace UndertaleModLib.Models
                 ReadPadding(reader, 7);
 
                 // Calculate length of data
-                uint next = 0;
+                uint next;
                 if (!Cg_PS3_VertexData.IsNull)
                     next = Cg_PS3_VertexData._Position;
                 else
@@ -277,7 +275,7 @@ namespace UndertaleModLib.Models
                 ReadPadding(reader, 15);
 
                 // Calculate length of data
-                uint next = 0;
+                uint next;
                 if (!Cg_PS3_PixelData.IsNull)
                     next = Cg_PS3_PixelData._Position;
                 else

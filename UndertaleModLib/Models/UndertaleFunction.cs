@@ -11,7 +11,8 @@ using static UndertaleModLib.Models.UndertaleGeneralInfo;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleFunction : UndertaleNamedResource, INotifyPropertyChanged, UndertaleInstruction.ReferencedObject
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject
     {
         public FunctionClassification Classification { get; set; }
         public UndertaleString Name { get; set; }
@@ -24,8 +25,6 @@ namespace UndertaleModLib.Models
 
         [Obsolete("This variable has been renamed to NameStringID.")]
         public int UnknownChainEndingValue { get => NameStringID; set => NameStringID = value; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {

@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleGeneralInfo : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleGeneralInfo : UndertaleObject
     {
         [Flags]
         public enum InfoFlags : uint
@@ -137,8 +138,6 @@ namespace UndertaleModLib.Models
         public bool GMS2AllowStatistics { get; set; } = true;
         public byte[] GMS2GameGUID { get; set; } = new byte[16]; // more high entropy data
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(DisableDebugger ? (byte)1 : (byte)0);
@@ -223,7 +222,7 @@ namespace UndertaleModLib.Models
 
         public void Unserialize(UndertaleReader reader)
         {
-            DisableDebugger = reader.ReadByte() != 0 ? true : false;
+            DisableDebugger = reader.ReadByte() != 0;
             BytecodeVersion = reader.ReadByte();
             Unknown = reader.ReadUInt16();
             Filename = reader.ReadUndertaleString();
@@ -279,16 +278,14 @@ namespace UndertaleModLib.Models
                 {
                     if (i == infoLocation)
                     {
-                        long curr = reader.ReadInt64();
-                        curr = infoNumber;
-                        GMS2RandomUID.Add(curr);
+                        reader.ReadInt64();
+                        GMS2RandomUID.Add(infoNumber);
                     }
                     else
                     {
-                        int first = reader.ReadInt32();
-                        int second = reader.ReadInt32();
-                        first = random.Next();
-                        second = random.Next();
+                        reader.ReadInt64();
+                        int first = random.Next();
+                        int second = random.Next();
                         GMS2RandomUID.Add(((long)first << 32) | (long)second);
                     }
                 }
@@ -306,7 +303,8 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleOptions : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleOptions : UndertaleObject
     {
         [Flags]
         public enum OptionsFlags : ulong
@@ -358,12 +356,11 @@ namespace UndertaleModLib.Models
         public uint LoadAlpha { get; set; } = 255;
         public UndertaleSimpleList<Constant> Constants { get; private set; } = new UndertaleSimpleList<Constant>();
 
-        public class Constant : UndertaleObject, INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class Constant : UndertaleObject
         {
             public UndertaleString Name { get; set; }
             public UndertaleString Value { get; set; }
-
-            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -377,8 +374,6 @@ namespace UndertaleModLib.Models
                 Value = reader.ReadUndertaleString();
             }
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -419,7 +414,8 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleLanguage : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleLanguage : UndertaleObject
     {
         // Seems to be a list of entry IDs paired to strings for several languages
         public uint Unknown1 { get; set; } = 1;
@@ -428,8 +424,6 @@ namespace UndertaleModLib.Models
 
         public List<UndertaleString> EntryIDs { get; set; } = new List<UndertaleString>();
         public List<LanguageData> Languages { get; set; } = new List<LanguageData>();
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -471,15 +465,13 @@ namespace UndertaleModLib.Models
             }
         }
 
-        public class LanguageData : INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class LanguageData
         {
             public UndertaleString Name { get; set; }
             public UndertaleString Region { get; set; }
             public List<UndertaleString> Entries { get; set; } = new List<UndertaleString>();
-
             // values that correspond to IDs in the main chunk content
-
-            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {

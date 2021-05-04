@@ -386,7 +386,7 @@ namespace UndertaleModLib.Decompiler
                 if (overloaded) {
                     // Copy the array to make sure we don't overwrite existing known types
                     func_types = (AssetIDType[]) func_types.Clone();
-                    AssetIDType scriptArgType = AssetIDType.Other;
+                    AssetIDType scriptArgType;
 
                     for (int i = 0; i < arguments.Length && i < scriptArgs[function_name].Length; i++) 
                     {
@@ -589,11 +589,11 @@ namespace UndertaleModLib.Decompiler
                 { "audio_play_sound", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Boolean } },
                 { "audio_play_sound_at", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other } },
                 { "audio_pause_sound", new AssetIDType[] { AssetIDType.Sound } },
-                { "audio_pause_all", new AssetIDType[] { } },
+                { "audio_pause_all", Array.Empty<AssetIDType>() },
                 { "audio_resume_sound", new AssetIDType[] { AssetIDType.Sound } },
-                { "audio_resume_all", new AssetIDType[] { } },
+                { "audio_resume_all", Array.Empty<AssetIDType>() },
                 { "audio_stop_sound", new AssetIDType[] { AssetIDType.Sound } },
-                { "audio_stop_all", new AssetIDType[] { } },
+                { "audio_stop_all", Array.Empty<AssetIDType>() },
                 { "audio_is_playing", new AssetIDType[] { AssetIDType.Sound } },
                 { "audio_is_paused", new AssetIDType[] { AssetIDType.Sound } },
                 { "audio_create_streaam", new AssetIDType[] { AssetIDType.Other } },
@@ -618,7 +618,7 @@ namespace UndertaleModLib.Decompiler
                 { "sound_play", new AssetIDType[] { AssetIDType.Sound } },
                 { "sound_loop", new AssetIDType[] { AssetIDType.Sound } },
                 { "sound_stop", new AssetIDType[] { AssetIDType.Sound } },
-                { "sound_stop_all", new AssetIDType[] { } },
+                { "sound_stop_all", Array.Empty<AssetIDType>() },
                 { "sound_isplaying", new AssetIDType[] { AssetIDType.Sound } },
                 { "sound_volume", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other } },
                 { "sound_fade", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other } },
@@ -649,7 +649,7 @@ namespace UndertaleModLib.Decompiler
                 { "font_delete", new AssetIDType[] { AssetIDType.Font } },
 
                 { "path_start", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Enum_PathEndAction, AssetIDType.Other } },
-                { "path_end", new AssetIDType[] { } },
+                { "path_end", Array.Empty<AssetIDType>() },
 
                 { "path_exists", new AssetIDType[] { AssetIDType.Path } },
                 { "path_get_closed", new AssetIDType[] { AssetIDType.Path } },
@@ -665,7 +665,7 @@ namespace UndertaleModLib.Decompiler
                 { "path_get_x", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
                 { "path_get_y", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other} },
 
-                { "path_add", new AssetIDType[] { } },
+                { "path_add",Array.Empty<AssetIDType>() },
                 { "path_add_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
                 { "path_change_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
                 { "path_insert_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
@@ -700,11 +700,11 @@ namespace UndertaleModLib.Decompiler
                 { "room_get_name", new AssetIDType[] { AssetIDType.Room } },
 
                 { "room_goto", new AssetIDType[] { AssetIDType.Room } },
-                { "room_goto_next", new AssetIDType[] { } },
-                { "room_goto_previous", new AssetIDType[] { } },
-                { "room_restart", new AssetIDType[] { } },
+                { "room_goto_next", Array.Empty<AssetIDType>() },
+                { "room_goto_previous", Array.Empty<AssetIDType>() },
+                { "room_restart", Array.Empty<AssetIDType>() },
 
-                { "room_add", new AssetIDType[] { } },
+                { "room_add", Array.Empty<AssetIDType>() },
                 { "room_duplicate", new AssetIDType[] { AssetIDType.Room } },
                 { "room_assign", new AssetIDType[] { AssetIDType.Room, AssetIDType.Room } },
                 { "room_instance_add", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
@@ -856,7 +856,7 @@ namespace UndertaleModLib.Decompiler
                 { "window_set_fullscreen", new AssetIDType[] { AssetIDType.Boolean } },
                 { "window_set_color", new AssetIDType[] { AssetIDType.Color } },
 
-                { "io_clear", new AssetIDType[] { } },
+                { "io_clear", Array.Empty<AssetIDType>() },
                 { "keyboard_check", new AssetIDType[] { AssetIDType.KeyboardKey } },
                 { "keyboard_check_pressed", new AssetIDType[] { AssetIDType.KeyboardKey } },
                 { "keyboard_check_released", new AssetIDType[] { AssetIDType.KeyboardKey } },
@@ -868,7 +868,7 @@ namespace UndertaleModLib.Decompiler
                 { "keyboard_get_map", new AssetIDType[] { AssetIDType.KeyboardKey } },
                 { "keyboard_unset_map", new AssetIDType[] { AssetIDType.KeyboardKey } },
                 { "keyboard_set_numlock", new AssetIDType[] { AssetIDType.Boolean } },
-                { "keyboard_get_numlock", new AssetIDType[] { } },
+                { "keyboard_get_numlock", Array.Empty<AssetIDType>() },
 
                 // Mouse functions
                 { "mouse_check_button", new AssetIDType[] { AssetIDType.MouseButton } },

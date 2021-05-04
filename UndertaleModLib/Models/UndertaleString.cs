@@ -10,11 +10,10 @@ using UndertaleModLib.Decompiler;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleString : UndertaleResource, INotifyPropertyChanged, ISearchable
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleString : UndertaleResource, ISearchable
     {
         public string Content { get; set; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public UndertaleString()
         {

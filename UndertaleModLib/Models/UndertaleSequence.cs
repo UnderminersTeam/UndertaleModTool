@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleSequence : UndertaleNamedResource
     {
         public enum PlaybackType : uint
         {
@@ -29,8 +30,6 @@ namespace UndertaleModLib.Models
         public UndertaleSimpleList<Keyframe<Moment>> Moments { get; set; }
         public UndertaleSimpleList<Track> Tracks { get; set; }
         public Dictionary<int, UndertaleString> FunctionIDs { get; set; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {

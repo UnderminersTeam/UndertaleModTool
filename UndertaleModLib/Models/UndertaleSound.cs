@@ -29,10 +29,10 @@ namespace UndertaleModLib.Models
 
         private UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP> _AudioGroup = new UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP>();
         private UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO> _AudioFile = new UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO>();
-        public UndertaleAudioGroup AudioGroup { get => _AudioGroup.Resource; set { _AudioGroup.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AudioGroup")); } }
-        public UndertaleEmbeddedAudio AudioFile { get => _AudioFile.Resource; set { _AudioFile.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AudioFile")); } }
-        public int AudioID { get => _AudioFile.CachedId; set { _AudioFile.CachedId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AudioID")); } }
-        public int GroupID { get => _AudioGroup.CachedId; set { _AudioGroup.CachedId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GroupID")); } }
+        public UndertaleAudioGroup AudioGroup { get => _AudioGroup.Resource; set { _AudioGroup.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AudioGroup))); } }
+        public UndertaleEmbeddedAudio AudioFile { get => _AudioFile.Resource; set { _AudioFile.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AudioFile))); } }
+        public int AudioID { get => _AudioFile.CachedId; set { _AudioFile.CachedId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AudioID))); } }
+        public int GroupID { get => _AudioGroup.CachedId; set { _AudioGroup.CachedId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GroupID))); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -93,12 +93,11 @@ namespace UndertaleModLib.Models
             return Name.Content + " (" + GetType().Name + ")";
         }
     }
-    
-    public class UndertaleAudioGroup : INotifyPropertyChanged, UndertaleNamedResource
+
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleAudioGroup : UndertaleNamedResource
     {
         public UndertaleString Name { get; set; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {

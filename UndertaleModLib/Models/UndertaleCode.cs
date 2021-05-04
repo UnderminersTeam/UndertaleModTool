@@ -65,60 +65,36 @@ namespace UndertaleModLib.Models
 
         public static InstructionType GetInstructionType(Opcode op)
         {
-            switch (op)
+            return op switch
             {
-                case Opcode.Neg:
-                case Opcode.Not:
-                case Opcode.Dup:
-                case Opcode.Ret:
-                case Opcode.Exit:
-                case Opcode.Popz:
-                case Opcode.CallV:
-                    return InstructionType.SingleTypeInstruction;
+                Opcode.Neg or Opcode.Not or Opcode.Dup or 
+                Opcode.Ret or Opcode.Exit or Opcode.Popz or 
+                Opcode.CallV 
+                    => InstructionType.SingleTypeInstruction,
 
-                case Opcode.Conv:
-                case Opcode.Mul:
-                case Opcode.Div:
-                case Opcode.Rem:
-                case Opcode.Mod:
-                case Opcode.Add:
-                case Opcode.Sub:
-                case Opcode.And:
-                case Opcode.Or:
-                case Opcode.Xor:
-                case Opcode.Shl:
-                case Opcode.Shr:
-                    return InstructionType.DoubleTypeInstruction;
+                Opcode.Conv or Opcode.Mul or Opcode.Div or 
+                Opcode.Rem or Opcode.Mod or Opcode.Add or 
+                Opcode.Sub or Opcode.And or Opcode.Or or 
+                Opcode.Xor or Opcode.Shl or Opcode.Shr 
+                    => InstructionType.DoubleTypeInstruction,
 
-                case Opcode.Cmp:
-                    return InstructionType.ComparisonInstruction;
+                Opcode.Cmp => InstructionType.ComparisonInstruction,
 
-                case Opcode.B:
-                case Opcode.Bt:
-                case Opcode.Bf:
-                case Opcode.PushEnv:
-                case Opcode.PopEnv:
-                    return InstructionType.GotoInstruction;
+                Opcode.B or Opcode.Bt or Opcode.Bf or 
+                Opcode.PushEnv or Opcode.PopEnv 
+                    => InstructionType.GotoInstruction,
 
-                case Opcode.Pop:
-                    return InstructionType.PopInstruction;
+                Opcode.Pop => InstructionType.PopInstruction,
 
-                case Opcode.Push:
-                case Opcode.PushLoc:
-                case Opcode.PushGlb:
-                case Opcode.PushBltn:
-                case Opcode.PushI:
-                    return InstructionType.PushInstruction;
+                Opcode.Push or Opcode.PushLoc or Opcode.PushGlb or 
+                Opcode.PushBltn or Opcode.PushI 
+                    => InstructionType.PushInstruction,
 
-                case Opcode.Call:
-                    return InstructionType.CallInstruction;
+                Opcode.Call => InstructionType.CallInstruction,
+                Opcode.Break => InstructionType.BreakInstruction,
 
-                case Opcode.Break:
-                    return InstructionType.BreakInstruction;
-
-                default:
-                    throw new IOException("Unknown opcode " + op.ToString().ToUpper());
-            }
+                _ => throw new IOException("Unknown opcode " + op.ToString().ToUpper()),
+            };
         }
 
         public static int CalculateStackDiff(UndertaleInstruction instr)
@@ -410,9 +386,9 @@ namespace UndertaleModLib.Models
         public Reference<T> GetReference<T>(bool allowResolve = false) where T : class, UndertaleObject, ReferencedObject
         {
             Reference<T> res = (Destination as Reference<T>) ?? (Function as Reference<T>) ?? (Value as Reference<T>);
-            if (allowResolve && res == null && Value is int)
+            if (allowResolve && res == null && Value is int val)
             {
-                Value = new Reference<T>((int)Value);
+                Value = new Reference<T>(val);
                 return (Reference<T>)Value;
             }
             return res;
@@ -436,70 +412,29 @@ namespace UndertaleModLib.Models
 
                         if (writer.Bytecode14OrLower)
                         {
-                            byte k;
-                            switch (Kind)
+                            var k = Kind switch
                             {
-                                case Opcode.Conv:
-                                    k = 0x03;
-                                    break;
-                                case Opcode.Mul:
-                                    k = 0x04;
-                                    break;
-                                case Opcode.Div:
-                                    k = 0x05;
-                                    break;
-                                case Opcode.Rem:
-                                    k = 0x06;
-                                    break;
-                                case Opcode.Mod:
-                                    k = 0x07;
-                                    break;
-                                case Opcode.Add:
-                                    k = 0x08;
-                                    break;
-                                case Opcode.Sub:
-                                    k = 0x09;
-                                    break;
-                                case Opcode.And:
-                                    k = 0x0A;
-                                    break;
-                                case Opcode.Or:
-                                    k = 0x0B;
-                                    break;
-                                case Opcode.Xor:
-                                    k = 0x0C;
-                                    break;
-                                case Opcode.Neg:
-                                    k = 0x0D;
-                                    break;
-                                case Opcode.Not:
-                                    k = 0x0E;
-                                    break;
-                                case Opcode.Shl:
-                                    k = 0x0F;
-                                    break;
-                                case Opcode.Shr:
-                                    k = 0x10;
-                                    break;
-                                case Opcode.Dup:
-                                    k = 0x82;
-                                    break;
-                                case Opcode.Cmp:
-                                    k = (byte)(ComparisonKind + 0x10);
-                                    break;
-                                case Opcode.Ret:
-                                    k = 0x9D;
-                                    break;
-                                case Opcode.Exit:
-                                    k = 0x9E;
-                                    break;
-                                case Opcode.Popz:
-                                    k = 0x9F;
-                                    break;
-                                default:
-                                    k = (byte)Kind;
-                                    break;
-                            }
+                                Opcode.Conv => 0x03,
+                                Opcode.Mul => 0x04,
+                                Opcode.Div => 0x05,
+                                Opcode.Rem => 0x06,
+                                Opcode.Mod => 0x07,
+                                Opcode.Add => 0x08,
+                                Opcode.Sub => 0x09,
+                                Opcode.And => 0x0A,
+                                Opcode.Or => 0x0B,
+                                Opcode.Xor => 0x0C,
+                                Opcode.Neg => 0x0D,
+                                Opcode.Not => 0x0E,
+                                Opcode.Shl => 0x0F,
+                                Opcode.Shr => 0x10,
+                                Opcode.Dup => 0x82,
+                                Opcode.Cmp => (byte)(ComparisonKind + 0x10),
+                                Opcode.Ret => 0x9D,
+                                Opcode.Exit => 0x9E,
+                                Opcode.Popz => 0x9F,
+                                _ => (byte)Kind,
+                            };
                             writer.Write(k);
                         }
                         else
@@ -917,10 +852,10 @@ namespace UndertaleModLib.Models
 
         public override string ToString()
         {
-            return ToString(null, null);
+            return ToString(null);
         }
 
-        public string ToString(UndertaleCode code, IList<UndertaleVariable> vars)
+        public string ToString(UndertaleCode code)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -941,7 +876,7 @@ namespace UndertaleModLib.Models
 
                     if (Kind == Opcode.Dup || Kind == Opcode.CallV)
                     {
-                        sb.Append(" ");
+                        sb.Append(' ');
                         sb.Append(Extra.ToString());
                         if (Kind == Opcode.Dup)
                         {
@@ -962,12 +897,12 @@ namespace UndertaleModLib.Models
                 case InstructionType.ComparisonInstruction:
                     sb.Append("." + Type1.ToOpcodeParam());
                     sb.Append("." + Type2.ToOpcodeParam());
-                    sb.Append(" ");
+                    sb.Append(' ');
                     sb.Append(ComparisonKind.ToString());
                     break;
 
                 case InstructionType.GotoInstruction:
-                    sb.Append(" ");
+                    sb.Append(' ');
                     string tgt = (Address + JumpOffset).ToString("D5");
                     if (code != null && Address + JumpOffset == code.Length / 4)
                         tgt = "func_end";
@@ -979,7 +914,7 @@ namespace UndertaleModLib.Models
                 case InstructionType.PopInstruction:
                     sb.Append("." + Type1.ToOpcodeParam());
                     sb.Append("." + Type2.ToOpcodeParam());
-                    sb.Append(" ");
+                    sb.Append(' ');
                     if (Type1 == DataType.Int16)
                     {
                         // Special scenario - the swap instruction
@@ -991,7 +926,7 @@ namespace UndertaleModLib.Models
                         if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
                         {
                             sb.Append(TypeInst.ToString().ToLower());
-                            sb.Append(".");
+                            sb.Append('.');
                         }
                         sb.Append(Destination.ToString());
                     }
@@ -999,22 +934,22 @@ namespace UndertaleModLib.Models
 
                 case InstructionType.PushInstruction:
                     sb.Append("." + Type1.ToOpcodeParam());
-                    sb.Append(" ");
+                    sb.Append(' ');
                     if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
                     {
                         sb.Append(TypeInst.ToString().ToLower());
-                        sb.Append(".");
+                        sb.Append('.');
                     }
                     sb.Append((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
                     break;
 
                 case InstructionType.CallInstruction:
                     sb.Append("." + Type1.ToOpcodeParam());
-                    sb.Append(" ");
+                    sb.Append(' ');
                     sb.Append(Function.ToString());
                     sb.Append("(argc=");
                     sb.Append(ArgumentsCount.ToString());
-                    sb.Append(")");
+                    sb.Append(')');
                     break;
 
                 case InstructionType.BreakInstruction:
@@ -1043,56 +978,39 @@ namespace UndertaleModLib.Models
     {
         public static string ToOpcodeParam(this UndertaleInstruction.DataType type)
         {
-            switch (type)
+            return type switch
             {
-                case UndertaleInstruction.DataType.Double:
-                    return "d";
-                case UndertaleInstruction.DataType.Float:
-                    return "f";
-                case UndertaleInstruction.DataType.Int32:
-                    return "i";
-                case UndertaleInstruction.DataType.Int64:
-                    return "l";
-                case UndertaleInstruction.DataType.Boolean:
-                    return "b";
-                case UndertaleInstruction.DataType.Variable:
-                    return "v";
-                case UndertaleInstruction.DataType.String:
-                    return "s";
-                case UndertaleInstruction.DataType.Int16:
-                    return "e";
-                default:
-                    return type.ToString().ToLower();
-            }
+                UndertaleInstruction.DataType.Double => "d",
+                UndertaleInstruction.DataType.Float => "f",
+                UndertaleInstruction.DataType.Int32 => "i",
+                UndertaleInstruction.DataType.Int64 => "l",
+                UndertaleInstruction.DataType.Boolean => "b",
+                UndertaleInstruction.DataType.Variable => "v",
+                UndertaleInstruction.DataType.String => "s",
+                UndertaleInstruction.DataType.Int16 => "e",
+                _ => type.ToString().ToLower(),
+            };
         }
 
         public static UndertaleInstruction.DataType FromOpcodeParam(string type)
         {
-            switch (type)
+            return type switch
             {
-                case "d":
-                    return UndertaleInstruction.DataType.Double;
-                case "f":
-                    return UndertaleInstruction.DataType.Float;
-                case "i":
-                    return UndertaleInstruction.DataType.Int32;
-                case "l":
-                    return UndertaleInstruction.DataType.Int64;
-                case "b":
-                    return UndertaleInstruction.DataType.Boolean;
-                case "v":
-                    return UndertaleInstruction.DataType.Variable;
-                case "s":
-                    return UndertaleInstruction.DataType.String;
-                case "e":
-                    return UndertaleInstruction.DataType.Int16;
-                default:
-                    return (UndertaleInstruction.DataType)Enum.Parse(typeof(UndertaleInstruction.DataType), type, true);
-            }
+                "d" => UndertaleInstruction.DataType.Double,
+                "f" => UndertaleInstruction.DataType.Float,
+                "i" => UndertaleInstruction.DataType.Int32,
+                "l" => UndertaleInstruction.DataType.Int64,
+                "b" => UndertaleInstruction.DataType.Boolean,
+                "v" => UndertaleInstruction.DataType.Variable,
+                "s" => UndertaleInstruction.DataType.String,
+                "e" => UndertaleInstruction.DataType.Int16,
+                _ => (UndertaleInstruction.DataType)Enum.Parse(typeof(UndertaleInstruction.DataType), type, true),
+            };
         }
     }
 
-    public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
     {
         public UndertaleString Name { get; set; }
         public uint Length { get; set; }
@@ -1104,8 +1022,6 @@ namespace UndertaleModLib.Models
 
         internal uint _BytecodeAbsoluteAddress;
         internal byte[] _UnsupportedBuffer;
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public void SerializeBlobBefore(UndertaleWriter writer)
         {
@@ -1273,7 +1189,7 @@ namespace UndertaleModLib.Models
                 {
                     sb.Append(" " + vars.IndexOf(refvar));
                 }
-                sb.Append("\n");
+                sb.Append('\n');
             }
 
             return sb.ToString();
@@ -1288,8 +1204,8 @@ namespace UndertaleModLib.Models
                 sb.Append(GenerateLocalVarDefinitions(vars, locals));
             foreach (var inst in Instructions)
             {
-                sb.Append(inst.ToString(this, vars));
-                sb.Append("\n");
+                sb.Append(inst.ToString(this));
+                sb.Append('\n');
             }
             return sb.ToString();
         }

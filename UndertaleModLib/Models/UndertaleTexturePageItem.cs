@@ -25,7 +25,7 @@ namespace UndertaleModLib.Models
         public ushort BoundingWidth { get; set; } // Source sprite/asset dimensions
         public ushort BoundingHeight { get; set; }
         private UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR> _TexturePage = new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();
-        public UndertaleEmbeddedTexture TexturePage { get => _TexturePage.Resource; set { _TexturePage.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TexturePage")); } }
+        public UndertaleEmbeddedTexture TexturePage { get => _TexturePage.Resource; set { _TexturePage.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TexturePage))); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

@@ -16,10 +16,9 @@ namespace UndertaleModLib.Models
         FramesPerGameFrame = 1
     }
 
-    public class UndertaleSpineTextureEntry : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleSpineTextureEntry : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public int PageWidth { get; set; }
         public int PageHeight { get; set; }
         public byte[] PNGBlob { get; set; }
@@ -64,10 +63,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFMatrixColor : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFMatrixColor : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private const int MATRIX_SIZE = 4;
 
         public int[] Additive { get; set; }
@@ -92,10 +90,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFMatrix33 : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFMatrix33 : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private const int MATRIX_SIZE = 9;
         public float[] Values { get; set; }
 
@@ -113,10 +110,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFTimelineObject : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFTimelineObject : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public int CharID { get; set; }
         public int CharIndex { get; set; }
         public int Depth { get; set; }
@@ -157,10 +153,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFTimelineFrame : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFTimelineFrame : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public UndertaleSimpleList<UndertaleYYSWFTimelineObject> FrameObjects { get; set; }
         public float MinX { get; set; }
         public float MaxX { get; set; }
@@ -196,10 +191,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFCollisionMask : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFCollisionMask : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public byte[] RLEData { get; set; } // heavily compressed and pre-processed!
 
         public void Serialize(UndertaleWriter writer)
@@ -266,10 +260,9 @@ namespace UndertaleModLib.Models
         FillRadial
     }
 
-    public class UndertaleYYSWFSolidFillData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFSolidFillData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public byte Red { get; set; }
         public byte Green { get; set; }
         public byte Blue { get; set; }
@@ -292,10 +285,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFGradientRecord : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFGradientRecord : UndertaleObject 
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public int Ratio { get; set; }
         public byte Red { get; set; }
         public byte Green { get; set; }
@@ -321,10 +313,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFGradientFillData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFGradientFillData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public UndertaleYYSWFGradientFillType GradientFillType { get; set; }
         public UndertaleYYSWFMatrix33 TransformationMatrix { get; set; }
         public UndertaleSimpleList<UndertaleYYSWFGradientRecord> Records { get; set; }
@@ -349,10 +340,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFBitmapFillData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFBitmapFillData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public UndertaleYYSWFBitmapFillType BitmapFillType { get; set; }
         public int CharID { get; set; }
         public UndertaleYYSWFMatrix33 TransformationMatrix { get; set; }
@@ -372,10 +362,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFFillData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFFillData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public UndertaleYYSWFFillType Type { get; set; }
         public UndertaleYYSWFBitmapFillData BitmapFillData { get; set; }
         public UndertaleYYSWFGradientFillData GradientFillData { get; set; }
@@ -445,10 +434,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFLineStyleData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFLineStyleData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public byte Red { get; set; }
         public byte Green { get; set; }
         public byte Blue { get; set; }
@@ -476,10 +464,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFVector2 : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFVector2 : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public int X { get; set; }
         public int Y { get; set; }
 
@@ -501,10 +488,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFVector2F : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFVector2F : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public float X { get; set; }
         public float Y { get; set; }
 
@@ -526,10 +512,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFSubshapeData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFSubshapeData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public int FillStyleOne { get; set; }
         public int FillStyleTwo { get; set; }
         public int LineStyle { get; set; }
@@ -680,10 +665,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFShapeData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFShapeData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public float MinX { get; set; }
         public float MaxX { get; set; }
         public float MinY { get; set; }
@@ -715,10 +699,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFStyleGroup : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFStyleGroup : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public UndertaleSimpleList<UndertaleYYSWFFillData> FillStyles { get; set; }
         public UndertaleSimpleList<UndertaleYYSWFLineStyleData> LineStyles { get; set; }
         public UndertaleSimpleList<UndertaleYYSWFSubshapeData> Subshapes { get; set; }
@@ -786,10 +769,9 @@ namespace UndertaleModLib.Models
         TypeLossless32bit
     }
 
-    public class UndertaleYYSWFBitmapData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFBitmapData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public UndertaleYYSWFBitmapType Type { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
@@ -839,10 +821,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFItem : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFItem : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public int ID { get; set; }
         public UndertaleYYSWFItemType ItemType { get; set; }
         public UndertaleYYSWFShapeData ShapeData { get; set; }
@@ -913,10 +894,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFTimeline : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFTimeline : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public int Framerate { get; set; }
         public float MinX { get; set; }
         public float MaxX { get; set; }
@@ -988,10 +968,9 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWF : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWF : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public byte[] JPEGTable { get; set; }
         public int Version { get; set; }
         public UndertaleYYSWFTimeline Timeline { get; set; }
@@ -1071,8 +1050,8 @@ namespace UndertaleModLib.Models
         private int _SWFVersion;
         private UndertaleYYSWF _YYSWF;
 
-        public int SWFVersion { get => _SWFVersion; set { _SWFVersion = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SWFVersion")); } }
-        public UndertaleYYSWF YYSWF { get => _YYSWF; set { _YYSWF = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("YYSWF")); } }
+        public int SWFVersion { get => _SWFVersion; set { _SWFVersion = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SWFVersion))); } }
+        public UndertaleYYSWF YYSWF { get => _YYSWF; set { _YYSWF = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(YYSWF))); } }
 
         public UndertaleSequence V2Sequence;
 
@@ -1107,11 +1086,10 @@ namespace UndertaleModLib.Models
             RotatedRect = 2
         }
 
-        public class TextureEntry : UndertaleObject, INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class TextureEntry : UndertaleObject
         {
             public UndertaleTexturePageItem Texture { get; set; }
-
-            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -1124,11 +1102,10 @@ namespace UndertaleModLib.Models
             }
         }
 
-        public class MaskEntry : INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class MaskEntry
         {
             public byte[] Data { get; set; }
-
-            public event PropertyChangedEventHandler PropertyChanged;
 
             public MaskEntry()
             {
@@ -1285,7 +1262,7 @@ namespace UndertaleModLib.Models
             Debug.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count));
         }
 
-        private byte[] DecodeSpineBlob(byte[] blob)
+        private static byte[] DecodeSpineBlob(byte[] blob)
         {
             // don't ask.
             uint k = 42;
@@ -1297,7 +1274,7 @@ namespace UndertaleModLib.Models
             return blob;
         }
 
-        private byte[] EncodeSpineBlob(byte[] blob)
+        private static byte[] EncodeSpineBlob(byte[] blob)
         {
             // don't ask.
             uint k = 42;
@@ -1477,7 +1454,8 @@ namespace UndertaleModLib.Models
             reader.Align(4);
         }
 
-        public class NineSlice : UndertaleObject, INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class NineSlice : UndertaleObject
         {
             public int Left { get; set; }
             public int Top { get; set; }
@@ -1485,8 +1463,6 @@ namespace UndertaleModLib.Models
             public int Bottom { get; set; }
             public bool Enabled { get; set; }
             public TileMode[] TileModes { get; set; } = new TileMode[5];
-
-            public event PropertyChangedEventHandler PropertyChanged;
 
             public enum TileMode : int
             {

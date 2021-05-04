@@ -463,21 +463,21 @@ namespace UndertaleModTool
                 return;
             }
 
-            //The code should only be written after being successfully edited (if it doesn't successfully assemble for some reason, don't write it).
-            bool CodeEditSuccessful = false;
             try
             {
                 var instructions = Assembler.Assemble(compileContext.ResultAssembly, data);
                 code.Replace(instructions);
-                CodeEditSuccessful = true;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // The code should only be written after being successfully
+                // edited (if it doesn't successfully assemble for some reason, don't write it).
                 return;
             }
 
-            if (CodeEditSuccessful && !(Application.Current.MainWindow as MainWindow).Data.GMS2_3)
+            if (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3)
             {
                 try
                 {

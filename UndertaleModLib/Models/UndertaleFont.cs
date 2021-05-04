@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleFont : UndertaleNamedResource, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleFont : UndertaleNamedResource
     {
         public UndertaleString Name { get; set; }
         public UndertaleString DisplayName { get; set; }
@@ -25,9 +26,8 @@ namespace UndertaleModLib.Models
         public UndertalePointerList<Glyph> Glyphs { get; private set; } = new UndertalePointerList<Glyph>();
         public int AscenderOffset { get; set; }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public class Glyph : UndertaleObject, INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class Glyph : UndertaleObject
         {
             public ushort Character { get; set; }
             public ushort SourceX { get; set; }
@@ -37,8 +37,6 @@ namespace UndertaleModLib.Models
             public short Shift { get; set; }
             public short Offset { get; set; }
             public UndertaleSimpleListShort<GlyphKerning> Kerning { get; set; } = new UndertaleSimpleListShort<GlyphKerning>();
-
-            public event PropertyChangedEventHandler PropertyChanged;
 
             public void Serialize(UndertaleWriter writer)
             {

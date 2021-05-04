@@ -8,13 +8,14 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleBackground : UndertaleNamedResource, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleBackground : UndertaleNamedResource
     {
         public class TileID : UndertaleObject, INotifyPropertyChanged
         {
             private uint _ID;
 
-            public uint ID { get => _ID; set { _ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ID")); } }
+            public uint ID { get => _ID; set { _ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ID))); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -45,8 +46,6 @@ namespace UndertaleModLib.Models
         public uint GMS2UnknownAlwaysZero { get; set; } = 0;
         public long GMS2FrameLength { get; set; } = 66666; // time for each frame (in microseconds seemingly)
         public List<TileID> GMS2TileIds { get; set; } = new List<TileID>();
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {
