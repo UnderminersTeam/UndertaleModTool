@@ -18,12 +18,12 @@
                     <Style.Resources>
                         <VisualBrush x:Key="EmptyBrush" AlignmentX="Left" AlignmentY="Top" Stretch="None">
                             <VisualBrush.Visual>
-                                <Label Padding="2, 0" Content="(empty)" Foreground="DarkGray" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6"/>
+                                <Label Padding="2, 0" Content="(empty)" Foreground="DarkGray" FontFamily="Comic Sans MS" Background="#FFF104A6"/>
                             </VisualBrush.Visual>
                         </VisualBrush>
                         <VisualBrush x:Key="NullBrush" AlignmentX="Left" AlignmentY="Top" Stretch="None">
                             <VisualBrush.Visual>
-                                <Label Padding="2, 0" Content="(null)" Foreground="DarkGray" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6"/>
+                                <Label Padding="2, 0" Content="(null)" Foreground="DarkGray" FontFamily="Comic Sans MS" Background="#FFF104A6"/>
                             </VisualBrush.Visual>
                         </VisualBrush>
                     </Style.Resources>
