@@ -57,7 +57,7 @@
                             </Style>
                         </MenuItem.Style>
                     </MenuItem>
-                    <Separator/>
+                    <Separator Background="#FF111111"/>
                     <MenuItem Header="_Run game" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" Command="Print" InputGestureText="F5">
                         <!-- TODO: I think I need a custom command for that... -->
                         <MenuItem.Style>
@@ -73,13 +73,13 @@
                             </Style>
                         </MenuItem.Style>
                     </MenuItem>
-                    <Separator/>
+                    <Separator Background="#FF111111"/>
                     <MenuItem Header="Generate o_ffset map" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" Click="MenuItem_OffsetMap_Click"/>
-                    <Separator/>
+                    <Separator Background="#FF111111"/>
                     <MenuItem Header="S_ettings" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" Command="Properties"/>
                     <MenuItem Header="_Close" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" Command="Close" InputGestureText="Ctrl+W"/>
                 </MenuItem>
-                <MenuItem Header="_Scripts" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333">
+                <MenuItem Style="{DynamicResource ScriptsTemplate}" Header="_Scripts" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333">
                     <MenuItem Header="_Run builtin script" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" SubmenuOpened="MenuItem_RunBuiltinScript_SubmenuOpened">
                         <MenuItem FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" Header="(...loading...)" IsEnabled="False"/>
                     </MenuItem>
@@ -348,7 +348,7 @@
                             <DataTemplate DataType="{x:Type local:DescriptionView}">
                                 <StackPanel>
                                     <TextBlock Text="{Binding Heading}" FontWeight="Bold"/>
-                                    <Separator/>
+                                    <Separator Background="#FF111111"/>
                                     <TextBlock Text="{Binding Description}"/>
                                 </StackPanel>
                             </DataTemplate>

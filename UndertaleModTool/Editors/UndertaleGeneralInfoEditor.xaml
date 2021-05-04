@@ -147,7 +147,7 @@
                 <TextBox Background="#FF333333" Grid.Row="15" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.Timestamp}"/>
 
                 <TextBlock Grid.Row="16" Grid.Column="0" Margin="3">Display name</TextBlock>
-                <local:UndertaleStringReference Grid.Row="16" Grid.Column="1" Margin="3" ObjectReference="{Binding GeneralInfo.DisplayName}"/>
+                <local:UndertaleStringReference Style="{DynamicResource UndertaleStringReferenceStyleTemplate}" Grid.Row="16" Grid.Column="1" Margin="3" ObjectReference="{Binding GeneralInfo.DisplayName}"/>
 
                 <TextBlock Grid.Row="17" Grid.Column="0" Margin="3">Active targets</TextBlock>
                 <TextBox Background="#FF333333" Grid.Row="17" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.ActiveTargets}"/>
