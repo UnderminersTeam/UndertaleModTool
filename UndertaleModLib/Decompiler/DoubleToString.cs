@@ -26,6 +26,38 @@ namespace UndertaleModLib.Decompiler
 
         public static String ToRoundTrip(double value)
         {
+            if (value.Equals(3.141592653589793))
+                return "pi";
+            else if (value.Equals(6.283185307179586))
+                return "2 * pi";
+            else if (value.Equals(12.566370614359172))
+                return "4 * pi";
+            else if (value.Equals(31.41592653589793))
+                return "10 * pi";
+            else if (value.Equals(0.3333333333333333))
+                return "1/3";
+            else if (value.Equals(0.6666666666666666))
+                return "2/3";
+            else if (value.Equals(1.3333333333333333))
+                return "4/3";
+            else if (value.Equals(23.333333333333332))
+                return "70/3";
+            else if (value.Equals(73.33333333333333))
+                return "220/3";
+            else if (value.Equals(206.66666666666666))
+                return "620/3";
+            else if (value.Equals(0.06666666666666667))
+                return "1/15";
+            else if (value.Equals(0.03333333333333333))
+                return "1/30";
+            else if (value.Equals(0.008333333333333333))
+                return "1/120";
+            else if (value.Equals(51.42857142857143))
+                return "360/7";
+            else if (value.Equals(1.0909090909090908))
+                return "12/11";
+            else if (value.Equals(0.9523809523809523))
+                return "20/21";
             String str = value.ToString("r");
             int x = str.IndexOf('E');
             int x_lower = str.IndexOf('e');
