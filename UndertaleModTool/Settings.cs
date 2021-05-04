@@ -76,6 +76,7 @@ namespace UndertaleModTool
         {
             try
             {
+                Directory.CreateDirectory(AppDataFolder);
                 string path = Path.Combine(AppDataFolder, "settings.json");
                 byte[] bytes = JsonSerializer.SerializeToUtf8Bytes(Instance, JsonOptions);
                 File.WriteAllBytes(path, bytes);
