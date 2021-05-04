@@ -7,32 +7,21 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertalePath : UndertaleNamedResource, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertalePath : UndertaleNamedResource
     {
-        private UndertaleString _Name;
-        private bool _IsSmooth = false;
-        private bool _IsClosed = false;
-        private uint _Precision = 4;
-
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public bool IsSmooth { get => _IsSmooth; set { _IsSmooth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsSmooth")); } }
-        public bool IsClosed { get => _IsClosed; set { _IsClosed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsClosed")); } }
-        public uint Precision { get => _Precision; set { _Precision = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Precision")); } }
+        public UndertaleString Name { get; set; }
+        public bool IsSmooth { get; set; } = false;
+        public bool IsClosed { get; set; } = false;
+        public uint Precision { get; set; } = 4;
         public UndertaleSimpleList<PathPoint> Points { get; private set; } = new UndertaleSimpleList<PathPoint>();
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public class PathPoint : UndertaleObject, INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class PathPoint : UndertaleObject
         {
-            private float _X;
-            private float _Y;
-            private float _Speed;
-
-            public float X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
-            public float Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
-            public float Speed { get => _Speed; set { _Speed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Speed")); } }
-
-            public event PropertyChangedEventHandler PropertyChanged;
+            public float X { get; set; }
+            public float Y { get; set; }
+            public float Speed { get; set; }
 
             public void Serialize(UndertaleWriter writer)
             {

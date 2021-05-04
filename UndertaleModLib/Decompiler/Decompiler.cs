@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using UndertaleModLib.Models;
@@ -28,7 +29,7 @@ namespace UndertaleModLib.Decompiler
             [8421504] = "c_gray",
             [32768] = "c_green",
             [65280] = "c_lime",
-            [12632256] = "c_ltgray",
+            //[12632256] = "c_ltgray",
             [128] = "c_maroon",
             [8388608] = "c_navy",
             [32896] = "c_olive",
@@ -51,6 +52,7 @@ namespace UndertaleModLib.Decompiler
         public Dictionary<UndertaleVariable, AssetIDType> assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
         public int TempVarId;
         public Dictionary<string, AssetIDType[]> scriptArgs = new Dictionary<string, AssetIDType[]>();
+        public FunctionCall currentFunction;
 
         public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
 
@@ -75,6 +77,7 @@ namespace UndertaleModLib.Decompiler
             CompilerTempVar = null;
             assetTypes.Clear();
             LocalVarDefines.Clear();
+            currentFunction = null;
         }
 
         public TempVar NewTempVar()
@@ -127,59 +130,38 @@ namespace UndertaleModLib.Decompiler
             // Helper function to convert opcode operations to "printable" strings.
             public static string OperationToPrintableString(UndertaleInstruction.Opcode op)
             {
-                switch (op)
+                return op switch
                 {
-                    case UndertaleInstruction.Opcode.Mul:
-                        return "*";
-                    case UndertaleInstruction.Opcode.Div:
-                        return "/";
-                    case UndertaleInstruction.Opcode.Rem:
-                        return "div";
-                    case UndertaleInstruction.Opcode.Mod:
-                        return "%";
-                    case UndertaleInstruction.Opcode.Add:
-                        return "+";
-                    case UndertaleInstruction.Opcode.Sub:
-                        return "-";
-                    case UndertaleInstruction.Opcode.And:
-                        return "&";
-                    case UndertaleInstruction.Opcode.Or:
-                        return "|";
-                    case UndertaleInstruction.Opcode.Xor:
-                        return "^";
-                    case UndertaleInstruction.Opcode.Neg:
-                        return "-";
-                    case UndertaleInstruction.Opcode.Not:
-                        return "~";
-                    case UndertaleInstruction.Opcode.Shl:
-                        return "<<";
-                    case UndertaleInstruction.Opcode.Shr:
-                        return ">>";
-                    default:
-                        return op.ToString().ToUpper();
-                }
+                    UndertaleInstruction.Opcode.Mul => "*",
+                    UndertaleInstruction.Opcode.Div => "/",
+                    UndertaleInstruction.Opcode.Rem => "div",
+                    UndertaleInstruction.Opcode.Mod => "%",
+                    UndertaleInstruction.Opcode.Add => "+",
+                    UndertaleInstruction.Opcode.Sub => "-",
+                    UndertaleInstruction.Opcode.And => "&",
+                    UndertaleInstruction.Opcode.Or => "|",
+                    UndertaleInstruction.Opcode.Xor => "^",
+                    UndertaleInstruction.Opcode.Neg => "-",
+                    UndertaleInstruction.Opcode.Not => "~",
+                    UndertaleInstruction.Opcode.Shl => "<<",
+                    UndertaleInstruction.Opcode.Shr => ">>",
+                    _ => op.ToString().ToUpper(),
+                };
             }
 
             // Helper function to convert opcode comparisons to "printable" strings.
             public static string OperationToPrintableString(UndertaleInstruction.ComparisonType op)
             {
-                switch (op)
+                return op switch
                 {
-                    case UndertaleInstruction.ComparisonType.LT:
-                        return "<";
-                    case UndertaleInstruction.ComparisonType.LTE:
-                        return "<=";
-                    case UndertaleInstruction.ComparisonType.EQ:
-                        return "==";
-                    case UndertaleInstruction.ComparisonType.NEQ:
-                        return "!=";
-                    case UndertaleInstruction.ComparisonType.GTE:
-                        return ">=";
-                    case UndertaleInstruction.ComparisonType.GT:
-                        return ">";
-                    default:
-                        return op.ToString().ToUpper();
-                }
+                    UndertaleInstruction.ComparisonType.LT => "<",
+                    UndertaleInstruction.ComparisonType.LTE => "<=",
+                    UndertaleInstruction.ComparisonType.EQ => "==",
+                    UndertaleInstruction.ComparisonType.NEQ => "!=",
+                    UndertaleInstruction.ComparisonType.GTE => ">=",
+                    UndertaleInstruction.ComparisonType.GT => ">",
+                    _ => op.ToString().ToUpper(),
+                };
             }
 
             internal virtual bool IsDuplicationSafe()
@@ -258,10 +240,8 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                if (Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>) // Export string.
+                if (Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> resource) // Export string.
                 {
-                    UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> resource = (UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value;
-
                     string resultStr = resource.Resource.ToString(context);
                     if (context.EnableStringLabels)
                         resultStr += resource.GetMarkerSuffix();
@@ -320,8 +300,28 @@ namespace UndertaleModLib.Decompiler
                     return ConvertToEnumStr<Steam_LeaderBoard_Sort>(Value);
                 else if (AssetType == AssetIDType.Boolean)
                     return ConvertToEnumStr<Boolean>(Value);
+                else if (AssetType == AssetIDType.EventType)
+                    return ConvertToEnumStr<Enum_EventType>(Value);
+                else if (AssetType == AssetIDType.ContextDependent)
+                {
+                    var func = context.currentFunction;
+                    if (func != null && (ContextualAssetResolver.resolvers?.ContainsKey(func.Function.Name.Content) ?? false))
+                    {
+                        List<Expression> actualArguments = new List<Expression>();
+                        foreach(var arg in func.Arguments)
+                        {
+                            if (arg is ExpressionCast)
+                                actualArguments.Add((arg as ExpressionCast).Argument);
+                            else
+                                actualArguments.Add(arg);
+                        }
+                        string result = ContextualAssetResolver.resolvers[func.Function.Name.Content](context, func, actualArguments.IndexOf(this), this);
+                        if (result != null)
+                            return result;
+                    }
+                }
 
-                else if (AssetType == AssetIDType.Color && Value is IFormattable && !(Value is float) && !(Value is double) && !(Value is decimal))
+                else if (AssetType == AssetIDType.Color && Value is IFormattable formattable && !(Value is float) && !(Value is double) && !(Value is decimal))
                 {
                     int vint = Convert.ToInt32(Value);
                     if (vint < 0) // negative value.
@@ -332,29 +332,15 @@ namespace UndertaleModLib.Decompiler
                         if (DecompileContext.ColorDictionary.ContainsKey(vuint))
                             return DecompileContext.ColorDictionary[vuint];
                         else
-                            return (context.isGameMaker2 ? "0x" : "$") + ((IFormattable)Value).ToString("X6", CultureInfo.InvariantCulture); // not a known color and not negative.
+                            return (context.isGameMaker2 ? "0x" : "$") + formattable.ToString("X6", CultureInfo.InvariantCulture); // not a known color and not negative.
                     }
                 }
 
                 else if (AssetType == AssetIDType.KeyboardKey)
                 {
-                    int? tryVal = ConvertToInt(Value);
-                    if (tryVal != null)
-                    {
-                        int val = tryVal ?? -1;
-
-                        bool isAlphaNumeric = val >= (int)EventSubtypeKey.Digit0 && val <= (int)EventSubtypeKey.Z;
-                        if (isAlphaNumeric)
-                            return "ord(\"" + (char)val + "\")";
-
-                        if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
-                            return ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
-
-                        if (!Char.IsControl((char)val) && !Char.IsLower((char)val) && val > 0) // The special keys overlay with the uppercase letters (ugh)
-                            return "ord(" + (((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
-                                : (((char)val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
-                                : "\"" + (char)val + "\"")) + ")";
-                    }
+                    string key = GetAsKeyboard(context);
+                    if (key != null)
+                        return key;
                 }
 
                 if (context.Data != null && AssetType != AssetIDType.Other)
@@ -407,16 +393,39 @@ namespace UndertaleModLib.Decompiler
                     }
                 }
 
-                if (Value is float) // Prevents scientific notation by using high bit number.
-                    return ((decimal)((float)Value)).ToString(CultureInfo.InvariantCulture);
+                if (Value is float f) // More accurate, larger range, double to string.
+                    return RoundTrip.ToRoundTrip(f);
 
-                if (Value is double) // Prevents scientific notation by using high bit number.
-                    return ((decimal)((double)Value)).ToString(CultureInfo.InvariantCulture);
+                if (Value is double d) // More accurate, larger range, double to string.
+                    return RoundTrip.ToRoundTrip(d);
 
-                if (Value is Statement)
-                    return ((Statement)Value).ToString(context);
+                if (Value is Statement statement)
+                    return statement.ToString(context);
 
                 return ((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
+            }
+
+            // Helper function
+            public string GetAsKeyboard(DecompileContext context)
+            {
+                int? tryVal = ConvertToInt(Value);
+                if (tryVal != null)
+                {
+                    int val = tryVal ?? -1;
+
+                    bool isAlphaNumeric = val >= (int)EventSubtypeKey.Digit0 && val <= (int)EventSubtypeKey.Z;
+                    if (isAlphaNumeric)
+                        return "ord(\"" + (char)val + "\")";
+
+                    if (val >= 0 && Enum.IsDefined(typeof(EventSubtypeKey), (uint)val))
+                        return ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
+
+                    if (!Char.IsControl((char)val) && !Char.IsLower((char)val) && val > 0) // The special keys overlay with the uppercase letters (ugh)
+                        return "ord(" + (((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
+                            : (((char)val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
+                            : "\"" + (char)val + "\"")) + ")";
+                }
+                return null;
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -1071,7 +1080,7 @@ namespace UndertaleModLib.Decompiler
         // Represents a high-level function or script call.
         public class FunctionCall : Expression
         {
-            private UndertaleFunction Function;
+            internal UndertaleFunction Function;
             private UndertaleInstruction.DataType ReturnType;
             internal List<Expression> Arguments;
 
@@ -1087,6 +1096,7 @@ namespace UndertaleModLib.Decompiler
                 StringBuilder argumentString = new StringBuilder();
                 foreach (Expression exp in Arguments)
                 {
+                    context.currentFunction = this;
                     if (argumentString.Length > 0)
                         argumentString.Append(", ");
                     argumentString.Append(exp.ToString(context));
@@ -1120,7 +1130,7 @@ namespace UndertaleModLib.Decompiler
                     for (int i = 0; i < 15; i++)
                     {
                         var v = context.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
-                        context.scriptArgs[Function.Name.Content][i] = v.Count() > 0 ? v.First().Value : AssetIDType.Other;
+                        context.scriptArgs[Function.Name.Content][i] = v.Any() ? v.First().Value : AssetIDType.Other;
                     }
                     context.assetTypes = xxx; // restore original / proper map.
                 }
@@ -1128,9 +1138,8 @@ namespace UndertaleModLib.Decompiler
                 AssetIDType[] args = new AssetIDType[Arguments.Count];
                 AssetTypeResolver.AnnotateTypesForFunctionCall(Function.Name.Content, args, context, this);
                 for (var i = 0; i < Arguments.Count; i++)
-                {
                     Arguments[i].DoTypePropagation(context, args[i]);
-                }
+
                 return suggestedType; // TODO: maybe we should handle returned values too?
             }
 
@@ -1209,10 +1218,9 @@ namespace UndertaleModLib.Decompiler
 
                 // NOTE: The "var" prefix is handled in Decompiler.Decompile. 
                 
-                if (InstType is ExpressionConstant) // Only use "global." and "other.", not "self." or "local.". GMS doesn't recognize those.
+                if (InstType is ExpressionConstant constant) // Only use "global." and "other.", not "self." or "local.". GMS doesn't recognize those.
                 {
                     string prefix = InstType.ToString(context) + ".";
-                    ExpressionConstant constant = (ExpressionConstant)InstType;
                     if (!(constant.Value is Int64))
                     {
                         int? val = ExpressionConstant.ConvertToInt(constant.Value);
@@ -1226,7 +1234,7 @@ namespace UndertaleModLib.Decompiler
                         }
                     }
                     return prefix + name;
-                } else if (InstType is ExpressionCast && !(((ExpressionCast)InstType).Argument is ExpressionVar))
+                } else if (InstType is ExpressionCast cast && !(cast.Argument is ExpressionVar))
                 {
                     return "(" + InstType.ToString(context) + ")." + name; // Make sure to put parentheses around these cases
                 }
@@ -1616,6 +1624,24 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.Break:
+                        // GMS 2.3 sub-opcode.
+                        // Stop 'setowner' values from leaking into the decompiled output
+                        // as tempvars. Should be replaced with something better in the future.
+                        if (context.Data.GMS2_3 && (short)instr.Value == -5)
+                        {
+                            if (stack.Count > 0)
+                            {
+                                var statement = stack.Pop();
+                                object owner;
+                                if (statement is ExpressionConstant)
+                                    owner = (statement as ExpressionConstant).Value?.ToString();
+                                else
+                                    owner = statement.ToString(context);
+                                statements.Add(new CommentStatement("setowner: " +  (owner ?? "<null>")));
+                            }
+                            else
+                                statements.Add(new CommentStatement("WARNING: attempted to setowner without an owner on the stack."));
+                        }
                         // This is used for checking bounds in 2D arrays
                         // I'm not sure of the specifics but I guess it causes a debug breakpoint if the top of the stack is >= 32000
                         // anyway, that's not important when decompiling to high-level code so just ignore it
@@ -1833,10 +1859,10 @@ namespace UndertaleModLib.Decompiler
                             sb.Append("    ");
                             resultStr = resultStr.Replace("\n", "\n    ");
                         }
-                        sb.Append(resultStr).Append("\n");
+                        sb.Append(resultStr).Append('\n');
                     }
                     if (!forceSkipBrackets)
-                        sb.Append("}");
+                        sb.Append('}');
                     return sb.ToString().Trim('\n');
                 }
             }
@@ -1897,15 +1923,14 @@ namespace UndertaleModLib.Decompiler
                     ExpressionTwo conditionExpression = ((ExpressionCast)condition).Argument as ExpressionTwo;
                     Statement lastStatement = block.Statements[myIndex - 1];
 
-                    if (conditionExpression.Argument1 is ExpressionTempVar && lastStatement is TempVarAssigmentStatement && conditionExpression.Argument2 is ExpressionConstant
-                        && ((ExpressionTempVar)conditionExpression.Argument1).Var.Var == ((TempVarAssigmentStatement)lastStatement).Var.Var)
+                    if (conditionExpression.Argument1 is ExpressionTempVar tempVar && lastStatement is TempVarAssigmentStatement statement && conditionExpression.Argument2 is ExpressionConstant
+                        && tempVar.Var.Var == statement.Var.Var)
                         condition = conditionExpression.Argument1;
                 }
 
                 // Use if -> else if, instead of nesting ifs.
-                while (falseBlock.Statements.Count == 1 && falseBlock.Statements[0] is IfHLStatement) // The condition of one if statement.
+                while (falseBlock.Statements.Count == 1 && falseBlock.Statements[0] is IfHLStatement nestedIf) // The condition of one if statement.
                 {
-                    IfHLStatement nestedIf = (IfHLStatement)falseBlock.Statements[0];
                     elseConditions.Add(new Pair<Expression, BlockHLStatement>(nestedIf.condition, nestedIf.trueBlock));
                     elseConditions.AddRange(nestedIf.elseConditions);
                     falseBlock = nestedIf.falseBlock;
@@ -1919,7 +1944,7 @@ namespace UndertaleModLib.Decompiler
 
                     if (trueAssign != null && falseAssign != null && trueAssign.Var.Var == falseAssign.Var.Var)
                     {
-                        TempVarAssigmentStatement newAssign = null;
+                        TempVarAssigmentStatement newAssign;
                         if (TestNumber(trueAssign.Value, 1) && (falseAssign.Var.Var.Type == UndertaleInstruction.DataType.Boolean || falseAssign.Value.Type == UndertaleInstruction.DataType.Boolean))
                             newAssign = new TempVarAssigmentStatement(trueAssign.Var, new ExpressionTwoSymbol("||", UndertaleInstruction.DataType.Boolean, condition, falseAssign.Value));
                         else if (TestNumber(falseAssign.Value, 0) && (trueAssign.Var.Var.Type == UndertaleInstruction.DataType.Boolean || trueAssign.Value.Type == UndertaleInstruction.DataType.Boolean))
@@ -2048,7 +2073,7 @@ namespace UndertaleModLib.Decompiler
                         if (firstStatement is IfHLStatement)
                         {
                             IfHLStatement ifStatement = (IfHLStatement)firstStatement;
-                            if (ifStatement.falseBlock is BlockHLStatement && ((BlockHLStatement)ifStatement.falseBlock).Statements.Count == 0 && !ifStatement.HasElseIf)
+                            if (ifStatement.falseBlock is BlockHLStatement statement && statement.Statements.Count == 0 && !ifStatement.HasElseIf)
                             {
                                 Condition = ifStatement.condition;
                                 Block.Statements.Remove(firstStatement); // Remove if statement.
@@ -2081,14 +2106,13 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     // Convert into a for loop.
-                    if (myIndex > 0 && block.Statements[myIndex - 1] is AssignmentStatement && Block.Statements.Count > 0 && Block.Statements.Last() is AssignmentStatement && Condition is ExpressionCompare)
+                    if (myIndex > 0 && block.Statements[myIndex - 1] is AssignmentStatement assignment 
+                        && Block.Statements.Count > 0 && Block.Statements.Last() is AssignmentStatement increment 
+                        && Condition is ExpressionCompare compare)
                     {
-                        ExpressionCompare compare = (ExpressionCompare)Condition;
-                        AssignmentStatement assignment = (AssignmentStatement)block.Statements[myIndex - 1];
-                        AssignmentStatement increment = (AssignmentStatement)Block.Statements.Last();
                         UndertaleVariable variable = assignment.Destination.Var;
 
-                        if (((compare.Argument1 is ExpressionVar && (((ExpressionVar)compare.Argument1).Var == variable)) || (compare.Argument2 is ExpressionVar && (((ExpressionVar)compare.Argument2).Var == variable))) && increment.Destination.Var == variable)
+                        if (((compare.Argument1 is ExpressionVar exprVar && (exprVar.Var == variable)) || (compare.Argument2 is ExpressionVar exprVar2 && (exprVar2.Var == variable))) && increment.Destination.Var == variable)
                         {
                             block.Statements.Remove(assignment);
                             InitializeStatement = assignment;
@@ -2220,7 +2244,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     sb.Append("    ");
                     sb.Append(casee.ToString(context).Replace("\n", "\n    "));
-                    sb.Append("\n");
+                    sb.Append('\n');
                 }
                 sb.Append("}\n");
                 return sb.ToString();
@@ -2283,7 +2307,7 @@ namespace UndertaleModLib.Decompiler
             dominators[entryBlockId].Set(entryBlockId, true);
 
             BitArray temp = new BitArray(blockList.Count);
-            bool changed = true;
+            bool changed;
             do
             {
                 changed = false;
@@ -2416,7 +2440,7 @@ namespace UndertaleModLib.Decompiler
         // Process the base decompilation: clean up, make it readable, identify structures
         private static BlockHLStatement HLDecompileBlocks(DecompileContext context, ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, List<Block> alreadyVisited, Block currentLoop = null, Block stopAt = null, Block breakTo = null, bool decompileTheLoop = false, uint depth = 0)
         {
-            if (depth > 100)
+            if (depth > 200)
                 throw new Exception("Excessive recursion while processing blocks.");
 
             BlockHLStatement output = new BlockHLStatement();
@@ -2461,7 +2485,10 @@ namespace UndertaleModLib.Decompiler
                         output.Statements.Add(stmt);
                 }
 
-                if (output.Statements.Count >= 1 && output.Statements[output.Statements.Count - 1] is TempVarAssigmentStatement && block.Instructions.Count >= 1 && block.Instructions[block.Instructions.Count - 1].Kind == UndertaleInstruction.Opcode.Bt && block.conditionalExit && block.ConditionStatement is ExpressionCompare && (block.ConditionStatement as ExpressionCompare).Opcode == UndertaleInstruction.ComparisonType.EQ)
+                if (output.Statements.Count >= 1 && output.Statements[output.Statements.Count - 1] is TempVarAssigmentStatement && 
+                    block.Instructions.Count >= 1 && block.Instructions[block.Instructions.Count - 1].Kind == UndertaleInstruction.Opcode.Bt && 
+                    block.conditionalExit && block.ConditionStatement is ExpressionCompare && 
+                    (block.ConditionStatement as ExpressionCompare).Opcode == UndertaleInstruction.ComparisonType.EQ)
                 {
                     // Switch statement
                     Expression switchExpression = (output.Statements[output.Statements.Count - 1] as TempVarAssigmentStatement).Value;
@@ -2622,8 +2649,8 @@ namespace UndertaleModLib.Decompiler
 
         private static Statement UnCast(Statement statement)
         {
-            if (statement is ExpressionCast)
-                return UnCast(((ExpressionCast)statement).Argument);
+            if (statement is ExpressionCast cast)
+                return UnCast(cast.Argument);
 
             return statement;
         }
@@ -2631,7 +2658,7 @@ namespace UndertaleModLib.Decompiler
         private static bool TestNumber(Statement statement, int number, DecompileContext context = null)
         {
             statement = UnCast(statement);
-            return (statement is ExpressionConstant) && ((ExpressionConstant)statement).EqualsNumber(number);
+            return (statement is ExpressionConstant constant) && constant.EqualsNumber(number);
         }
 
         private static List<Statement> HLDecompile(DecompileContext context, Dictionary<uint, Block> blocks, Block entryPoint, Block rootExitPoint)
@@ -2672,7 +2699,7 @@ namespace UndertaleModLib.Decompiler
             // Mark local variables as local.
             UndertaleCode code = context.TargetCode;
             StringBuilder tempBuilder = new StringBuilder();
-            UndertaleCodeLocals locals = context.Data != null ? context.Data.CodeLocals.For(code) : null;
+            UndertaleCodeLocals locals = context.Data?.CodeLocals.For(code);
 
             List<string> possibleVars = new List<string>();
             if (locals != null)
@@ -2734,6 +2761,20 @@ namespace UndertaleModLib.Decompiler
         public static string Decompile(UndertaleCode code, DecompileContext context)
         {
             context.Setup(code);
+            try
+            {
+                if (context.Data != null && context.Data.ToolInfo.ProfileMode)
+                {
+                    string GMLPath = Path.Combine(context.Data.ToolInfo.AppDataProfiles, 
+                                                  context.Data.ToolInfo.CurrentMD5, "Temp", code.Name.Content + ".gml");
+                    if (File.Exists(GMLPath))
+                        return File.ReadAllText(GMLPath);
+                }
+            }
+            catch
+            {
+                // Just ignore the exception and decompile normally
+            }
 
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
             DecompileFromBlock(context, blocks[0]);
@@ -2798,7 +2839,7 @@ namespace UndertaleModLib.Decompiler
                 sb.Append("[" + block.ToString() + ", Exit: " + block.conditionalExit + (block.nextBlockTrue != null ? ", T: " + block.nextBlockTrue.Address : "") + (block.nextBlockFalse != null ? ", F: " + block.nextBlockFalse.Address : "") + "]\n");
                 foreach (var instr in block.Instructions)
                     sb.Append(instr.ToString().Replace("\"", "\\\"") + "\\n");
-                sb.Append("\"");
+                sb.Append('"');
                 sb.Append(pair.Key == 0 ? ", color=\"blue\"" : "");
                 sb.AppendLine(", shape=\"box\"];");
             }

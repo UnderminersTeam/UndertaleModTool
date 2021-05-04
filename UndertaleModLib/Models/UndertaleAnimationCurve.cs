@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    // TODO: INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleAnimationCurve : UndertaleNamedResource
     {
         public enum GraphTypeEnum : uint
@@ -50,6 +51,7 @@ namespace UndertaleModLib.Models
             return Name.Content;
         }
 
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class Channel : UndertaleObject
         {
             public enum FunctionType : uint

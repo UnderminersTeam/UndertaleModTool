@@ -2,18 +2,24 @@ EnsureDataLoaded();
 
 /* TODO: Respect loop/no loop setting properly */
 
+ScriptError("This script has not been updated to reflect the new extension format in UndertaleModTool and so has been temporarily disabled.");
+return;
+
+// I don't know how much work it will be to fix this, so I'm going to comment it all out for now, and try to fix it later.
+
+/*
 var browserext = new UndertaleExtension()
 {
-	Name = Data.Strings.MakeString("GMWebBrowser"),
-	ClassName = Data.Strings.MakeString(""),
-	EmptyString = Data.Strings.MakeString("")
+    Name = Data.Strings.MakeString("GMWebBrowser"),
+    ClassName = Data.Strings.MakeString(""),
+    EmptyString = Data.Strings.MakeString("")
 };
 browserext.Files.Add(new UndertaleExtensionFile() 
 {
-	Filename = Data.Strings.MakeString("GMWebExtension.dll"),
-	Kind = UndertaleExtensionKind.DLL,
-	InitScript = Data.Strings.MakeString("__webextension_native_init"),
-	CleanupScript = Data.Strings.MakeString("__webextension_native_exit"),
+    Filename = Data.Strings.MakeString("GMWebExtension.dll"),
+    Kind = UndertaleExtensionKind.DLL,
+    InitScript = Data.Strings.MakeString("__webextension_native_init"),
+    CleanupScript = Data.Strings.MakeString("__webextension_native_exit"),
 });
 // 0xc = cdecl?
 browserext.Files[0].Functions.DefineExtensionFunction(Data.Functions, Data.Strings, 1, 0xc, "RegisterCallbacks", UndertaleExtensionVarType.Double, "RegisterCallbacks", UndertaleExtensionVarType.String, UndertaleExtensionVarType.String, UndertaleExtensionVarType.String, UndertaleExtensionVarType.String);
@@ -428,4 +434,4 @@ scr_drawtext_centered_scaled(160, 150, ""But Every Time A Song Plays\nIts A Rand
 scr_drawtext_centered_scaled(240, 160, ""mod by krzys_h and Kneesnap"", 1, 1);
 _temp_local_var_2 = draw_set_color(0x808080)", Data);
 
-ScriptMessage("Finished! Enjoy!");
+ScriptMessage("Finished! Enjoy!");*/

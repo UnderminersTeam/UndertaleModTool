@@ -16,17 +16,12 @@ namespace UndertaleModLib.Models
         FramesPerGameFrame = 1
     }
 
-    public class UndertaleSpineTextureEntry : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleSpineTextureEntry : UndertaleObject
     {
-        private int _PageWidth;
-        private int _PageHeight;
-        private byte[] _PNGBlob;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public int PageWidth { get => _PageWidth; set { _PageWidth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PageWidth")); } }
-        public int PageHeight { get => _PageHeight; set { _PageHeight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PageHeight")); } }
-        public byte[] PNGBlob { get => _PNGBlob; set { _PNGBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PNGBlob")); } }
+        public int PageWidth { get; set; }
+        public int PageHeight { get; set; }
+        public byte[] PNGBlob { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -68,16 +63,13 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFMatrixColor : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFMatrixColor : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private const int MATRIX_SIZE = 4;
-        private int[] _Additive;
-        private int[] _Multiply;
 
-        public int[] Additive { get => _Additive; set { _Additive = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Additive")); } }
-        public int[] Multiply { get => _Multiply; set { _Multiply = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Multiply")); } }
+        public int[] Additive { get; set; }
+        public int[] Multiply { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -98,13 +90,11 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFMatrix33 : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFMatrix33 : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private const int MATRIX_SIZE = 9;
-        private float[] _Values;
-        public float[] Values { get => _Values; set { _Values = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Values")); } }
+        public float[] Values { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -120,32 +110,19 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFTimelineObject : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFTimelineObject : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private int _CharID;
-        private int _CharIndex;
-        private int _Depth;
-        private int _ClippingDepth;
-        private UndertaleYYSWFMatrix33 _TransformationMatrix;
-        private UndertaleYYSWFMatrixColor _ColorMatrix;
-
-        private float _MinX;
-        private float _MaxX;
-        private float _MinY;
-        private float _MaxY;
-
-        public int CharID { get => _CharID; set { _CharID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CharID")); } }
-        public int CharIndex { get => _CharIndex; set { _CharIndex = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CharIndex")); } }
-        public int Depth { get => _Depth; set { _Depth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Depth")); } }
-        public int ClippingDepth { get => _ClippingDepth; set { _ClippingDepth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ClippingDepth")); } }
-        public UndertaleYYSWFMatrix33 TransformationMatrix { get => _TransformationMatrix; set { _TransformationMatrix = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TransformationMatrix")); } }
-        public UndertaleYYSWFMatrixColor ColorMatrix { get => _ColorMatrix; set { _ColorMatrix = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ColorMatrix")); } }
-        public float MinX { get => _MinX; set { _MinX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MinX")); } }
-        public float MaxX { get => _MaxX; set { _MaxX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MaxX")); } }
-        public float MinY { get => _MinY; set { _MinY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MinY")); } }
-        public float MaxY { get => _MaxY; set { _MaxY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MaxY")); } }
+        public int CharID { get; set; }
+        public int CharIndex { get; set; }
+        public int Depth { get; set; }
+        public int ClippingDepth { get; set; }
+        public UndertaleYYSWFMatrix33 TransformationMatrix { get; set; }
+        public UndertaleYYSWFMatrixColor ColorMatrix { get; set; }
+        public float MinX { get; set; }
+        public float MaxX { get; set; }
+        public float MinY { get; set; }
+        public float MaxY { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -176,21 +153,14 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFTimelineFrame : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFTimelineFrame : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private UndertaleSimpleList<UndertaleYYSWFTimelineObject> _FrameObjects;
-        private float _MinX;
-        private float _MaxX;
-        private float _MinY;
-        private float _MaxY;
-
-        public UndertaleSimpleList<UndertaleYYSWFTimelineObject> FrameObjects { get => _FrameObjects; set { _FrameObjects = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FrameObjects")); } }
-        public float MinX { get => _MinX; set { _MinX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MinX")); } }
-        public float MaxX { get => _MaxX; set { _MaxX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MaxX")); } }
-        public float MinY { get => _MinY; set { _MinY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MinY")); } }
-        public float MaxY { get => _MaxY; set { _MaxY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MaxY")); } }
+        public UndertaleSimpleList<UndertaleYYSWFTimelineObject> FrameObjects { get; set; }
+        public float MinX { get; set; }
+        public float MaxX { get; set; }
+        public float MinY { get; set; }
+        public float MaxY { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -221,13 +191,10 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFCollisionMask : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFCollisionMask : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private byte[] _RLEData; // heavily compressed and pre-processed!
-
-        public byte[] RLEData { get => _RLEData; set { _RLEData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("RLEData")); } }
+        public byte[] RLEData { get; set; } // heavily compressed and pre-processed!
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -293,19 +260,13 @@ namespace UndertaleModLib.Models
         FillRadial
     }
 
-    public class UndertaleYYSWFSolidFillData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFSolidFillData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private byte _Red;
-        private byte _Green;
-        private byte _Blue;
-        private byte _Alpha;
-
-        public byte Red { get => _Red; set { _Red = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Red")); } }
-        public byte Green { get => _Green; set { _Green = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Green")); } }
-        public byte Blue { get => _Blue; set { _Blue = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Blue")); } }
-        public byte Alpha { get => _Alpha; set { _Alpha = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Alpha")); } }
+        public byte Red { get; set; }
+        public byte Green { get; set; }
+        public byte Blue { get; set; }
+        public byte Alpha { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -324,21 +285,14 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFGradientRecord : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFGradientRecord : UndertaleObject 
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private int _Ratio;
-        private byte _Red;
-        private byte _Green;
-        private byte _Blue;
-        private byte _Alpha;
-
-        public int Ratio { get => _Ratio; set { _Ratio = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Ratio")); } }
-        public byte Red { get => _Red; set { _Red = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Red")); } }
-        public byte Green { get => _Green; set { _Green = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Green")); } }
-        public byte Blue { get => _Blue; set { _Blue = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Blue")); } }
-        public byte Alpha { get => _Alpha; set { _Alpha = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Alpha")); } }
+        public int Ratio { get; set; }
+        public byte Red { get; set; }
+        public byte Green { get; set; }
+        public byte Blue { get; set; }
+        public byte Alpha { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -359,17 +313,12 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFGradientFillData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFGradientFillData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private UndertaleYYSWFGradientFillType _GradientFillType;
-        private UndertaleYYSWFMatrix33 _TransformationMatrix;
-        private UndertaleSimpleList<UndertaleYYSWFGradientRecord> _Records;
-
-        public UndertaleYYSWFGradientFillType GradientFillType { get => _GradientFillType; set { _GradientFillType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GradientFillType")); } }
-        public UndertaleYYSWFMatrix33 TransformationMatrix { get => _TransformationMatrix; set { _TransformationMatrix = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TransformationMatrix")); } }
-        public UndertaleSimpleList<UndertaleYYSWFGradientRecord> Records { get => _Records; set { _Records = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Records")); } }
+        public UndertaleYYSWFGradientFillType GradientFillType { get; set; }
+        public UndertaleYYSWFMatrix33 TransformationMatrix { get; set; }
+        public UndertaleSimpleList<UndertaleYYSWFGradientRecord> Records { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -391,17 +340,12 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFBitmapFillData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFBitmapFillData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private UndertaleYYSWFBitmapFillType _BitmapFillType;
-        private int _CharID;
-        private UndertaleYYSWFMatrix33 _TransformationMatrix;
-
-        public UndertaleYYSWFBitmapFillType BitmapFillType { get => _BitmapFillType; set { _BitmapFillType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BitmapFillType")); } }
-        public int CharID { get => _CharID; set { _CharID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CharID")); } }
-        public UndertaleYYSWFMatrix33 TransformationMatrix { get => _TransformationMatrix; set { _TransformationMatrix = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TransformationMatrix")); } }
+        public UndertaleYYSWFBitmapFillType BitmapFillType { get; set; }
+        public int CharID { get; set; }
+        public UndertaleYYSWFMatrix33 TransformationMatrix { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -418,21 +362,13 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFFillData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFFillData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private UndertaleYYSWFFillType _Type;
-        public UndertaleYYSWFFillType Type { get => _Type; set { _Type = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Type")); } }
-
-        private UndertaleYYSWFBitmapFillData _BitmapFillData;
-        public UndertaleYYSWFBitmapFillData BitmapFillData { get => _BitmapFillData; set { _BitmapFillData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BitmapFillData")); } }
-
-        private UndertaleYYSWFGradientFillData _GradientFillData;
-        public UndertaleYYSWFGradientFillData GradientFillData { get => _GradientFillData; set { _GradientFillData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GradientFillData")); } }
-
-        private UndertaleYYSWFSolidFillData _SolidFillData;
-        public UndertaleYYSWFSolidFillData SolidFillData { get => _SolidFillData; set { _SolidFillData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SolidFillData")); } }
+        public UndertaleYYSWFFillType Type { get; set; }
+        public UndertaleYYSWFBitmapFillData BitmapFillData { get; set; }
+        public UndertaleYYSWFGradientFillData GradientFillData { get; set; }
+        public UndertaleYYSWFSolidFillData SolidFillData { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -498,19 +434,13 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFLineStyleData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFLineStyleData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private byte _Red;
-        private byte _Green;
-        private byte _Blue;
-        private byte _Alpha;
-
-        public byte Red { get => _Red; set { _Red = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Red")); } }
-        public byte Green { get => _Green; set { _Green = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Green")); } }
-        public byte Blue { get => _Blue; set { _Blue = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Blue")); } }
-        public byte Alpha { get => _Alpha; set { _Alpha = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Alpha")); } }
+        public byte Red { get; set; }
+        public byte Green { get; set; }
+        public byte Blue { get; set; }
+        public byte Alpha { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -534,15 +464,11 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFVector2 : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFVector2 : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private int _X;
-        private int _Y;
-
-        public int X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
-        public int Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
+        public int X { get; set; }
+        public int Y { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -562,15 +488,11 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFVector2F : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFVector2F : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private float _X;
-        private float _Y;
-
-        public float X { get => _X; set { _X = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("X")); } }
-        public float Y { get => _Y; set { _Y = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Y")); } }
+        public float X { get; set; }
+        public float Y { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -590,43 +512,25 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFSubshapeData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFSubshapeData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public int FillStyleOne { get; set; }
+        public int FillStyleTwo { get; set; }
+        public int LineStyle { get; set; }
 
-        private int _FillStyleOne;
-        private int _FillStyleTwo;
-        private int _LineStyle;
+        public UndertaleSimpleList<UndertaleYYSWFVector2F> Points { get; set; }
+        public UndertaleSimpleList<UndertaleYYSWFVector2> Lines { get; set; }
+        public ObservableCollection<int> Triangles { get; set; }
 
-        private UndertaleSimpleList<UndertaleYYSWFVector2F> _Points;
-        private UndertaleSimpleList<UndertaleYYSWFVector2> _Lines;
-        private ObservableCollection<int> _Triangles;
+        public UndertaleSimpleList<UndertaleYYSWFVector2F> LinePoints { get; set; }
+        public ObservableCollection<int> LineTriangles { get; set; }
 
-        private UndertaleSimpleList<UndertaleYYSWFVector2F> _LinePoints;
-        private ObservableCollection<int> _LineTriangles;
+        public UndertaleSimpleList<UndertaleYYSWFVector2> AALines { get; set; }
+        public UndertaleSimpleList<UndertaleYYSWFVector2F> AAVectors { get; set; }
 
-        private UndertaleSimpleList<UndertaleYYSWFVector2> _AALines;
-        private UndertaleSimpleList<UndertaleYYSWFVector2F> _AAVectors;
-
-        private UndertaleSimpleList<UndertaleYYSWFVector2> _LineAALines;
-        private UndertaleSimpleList<UndertaleYYSWFVector2F> _LineAAVectors;
-
-        public int FillStyleOne { get => _FillStyleOne; set { _FillStyleOne = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FillStyleOne")); } }
-        public int FillStyleTwo { get => _FillStyleTwo; set { _FillStyleTwo = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FillStyleTwo")); } }
-        public int LineStyle { get => _LineStyle; set { _LineStyle = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LineStyle")); } }
-
-        public UndertaleSimpleList<UndertaleYYSWFVector2F> Points { get => _Points; set { _Points = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Points")); } }
-        public UndertaleSimpleList<UndertaleYYSWFVector2> Lines { get => _Lines; set { _Lines = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Lines")); } }
-        public ObservableCollection<int> Triangles { get => _Triangles; set { _Triangles = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Triangles")); } }
-
-        public UndertaleSimpleList<UndertaleYYSWFVector2F> LinePoints { get => _LinePoints; set { _LinePoints = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LinePoints")); } }
-        public ObservableCollection<int> LineTriangles { get => _LineTriangles; set { _LineTriangles = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LineTriangles")); } }
-
-        public UndertaleSimpleList<UndertaleYYSWFVector2> AALines { get => _AALines; set { _AALines = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AALines")); } }
-        public UndertaleSimpleList<UndertaleYYSWFVector2F> AAVectors { get => _AAVectors; set { _AAVectors = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AAVectors")); } }
-
-        public UndertaleSimpleList<UndertaleYYSWFVector2> LineAALines { get => _LineAALines; set { _LineAALines = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LineAALines")); } }
-        public UndertaleSimpleList<UndertaleYYSWFVector2F> LineAAVectors { get => _LineAAVectors; set { _LineAAVectors = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LineAAVectors")); } }
+        public UndertaleSimpleList<UndertaleYYSWFVector2> LineAALines { get; set; }
+        public UndertaleSimpleList<UndertaleYYSWFVector2F> LineAAVectors { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -761,21 +665,14 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFShapeData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFShapeData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private float _MinX;
-        private float _MaxX;
-        private float _MinY;
-        private float _MaxY;
-        private UndertaleSimpleList<UndertaleYYSWFStyleGroup> _StyleGroups;
-
-        public float MinX { get => _MinX; set { _MinX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MinX")); } }
-        public float MaxX { get => _MaxX; set { _MaxX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MaxX")); } }
-        public float MinY { get => _MinY; set { _MinY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MinY")); } }
-        public float MaxY { get => _MaxY; set { _MaxY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MaxY")); } }
-        public UndertaleSimpleList<UndertaleYYSWFStyleGroup> StyleGroups { get => _StyleGroups; set { _StyleGroups = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("StyleGroups")); } }
+        public float MinX { get; set; }
+        public float MaxX { get; set; }
+        public float MinY { get; set; }
+        public float MaxY { get; set; }
+        public UndertaleSimpleList<UndertaleYYSWFStyleGroup> StyleGroups { get; set; }
 
 
         public void Serialize(UndertaleWriter writer)
@@ -802,17 +699,12 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFStyleGroup : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFStyleGroup : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private UndertaleSimpleList<UndertaleYYSWFFillData> _FillStyles;
-        private UndertaleSimpleList<UndertaleYYSWFLineStyleData> _LineStyles;
-        private UndertaleSimpleList<UndertaleYYSWFSubshapeData> _Subshapes;
-
-        public UndertaleSimpleList<UndertaleYYSWFFillData> FillStyles { get => _FillStyles; set { _FillStyles = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FillStyles")); } }
-        public UndertaleSimpleList<UndertaleYYSWFLineStyleData> LineStyles { get => _LineStyles; set { _LineStyles = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LineStyles")); } }
-        public UndertaleSimpleList<UndertaleYYSWFSubshapeData> Subshapes { get => _Subshapes; set { _Subshapes = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Subshapes")); } }
+        public UndertaleSimpleList<UndertaleYYSWFFillData> FillStyles { get; set; }
+        public UndertaleSimpleList<UndertaleYYSWFLineStyleData> LineStyles { get; set; }
+        public UndertaleSimpleList<UndertaleYYSWFSubshapeData> Subshapes { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -877,23 +769,15 @@ namespace UndertaleModLib.Models
         TypeLossless32bit
     }
 
-    public class UndertaleYYSWFBitmapData : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFBitmapData : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private UndertaleYYSWFBitmapType _Type;
-        private int _Width;
-        private int _Height;
-        private byte[] _ImageData;
-        private byte[] _AlphaData;
-        private byte[] _ColorPaletteData;
-
-        public UndertaleYYSWFBitmapType Type { get => _Type; set { _Type = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Type")); } }
-        public int Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
-        public int Height { get => _Height; set { _Height = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Height")); } }
-        public byte[] ImageData { get => _ImageData; set { _ImageData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ImageData")); } }
-        public byte[] AlphaData { get => _AlphaData; set { _AlphaData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AlphaData")); } }
-        public byte[] ColorPaletteData { get => _ColorPaletteData; set { _ColorPaletteData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ColorPaletteData")); } }
+        public UndertaleYYSWFBitmapType Type { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public byte[] ImageData { get; set; }
+        public byte[] AlphaData { get; set; }
+        public byte[] ColorPaletteData { get; set; }
 
 
         public void Serialize(UndertaleWriter writer)
@@ -937,21 +821,13 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFItem : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFItem : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private int _ID;
-        public int ID { get => _ID; set { _ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ID")); } }
-
-        private UndertaleYYSWFItemType _ItemType;
-        public UndertaleYYSWFItemType ItemType { get => _ItemType; set { _ItemType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ItemType")); } }
-
-        public UndertaleYYSWFShapeData _ShapeData;
-        public UndertaleYYSWFShapeData ShapeData { get => _ShapeData; set { _ShapeData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ShapeData")); } }
-
-        private UndertaleYYSWFBitmapData _BitmapData;
-        public UndertaleYYSWFBitmapData BitmapData { get => _BitmapData; set { _BitmapData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BitmapData")); } }
+        public int ID { get; set; }
+        public UndertaleYYSWFItemType ItemType { get; set; }
+        public UndertaleYYSWFShapeData ShapeData { get; set; }
+        public UndertaleYYSWFBitmapData BitmapData { get; set; }
 
         public UndertaleYYSWFItem()
         {
@@ -1018,31 +894,19 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWFTimeline : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWFTimeline : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private int _Framerate;
-        private float _MinX;
-        private float _MaxX;
-        private float _MinY;
-        private float _MaxY;
-        private int _MaskWidth;
-        private int _MaskHeight;
-        private UndertaleSimpleList<UndertaleYYSWFItem> _UsedItems;
-        private UndertaleSimpleList<UndertaleYYSWFTimelineFrame> _Frames;
-        private UndertaleSimpleList<UndertaleYYSWFCollisionMask> _CollisionMasks;
-
-        public int Framerate { get => _Framerate; set { _Framerate = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Framerate")); } }
-        public float MinX { get => _MinX; set { _MinX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MinX")); } }
-        public float MaxX { get => _MaxX; set { _MaxX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MaxX")); } }
-        public float MinY { get => _MinY; set { _MinY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MinY")); } }
-        public float MaxY { get => _MaxY; set { _MaxY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MaxY")); } }
-        public int MaskWidth { get => _MaskWidth; set { _MaskWidth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MaskWidth")); } }
-        public int MaskHeight { get => _MaskHeight; set { _MaskHeight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MaskHeight")); } }
-        public UndertaleSimpleList<UndertaleYYSWFItem> UsedItems { get => _UsedItems; set { _UsedItems = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UsedItems")); } }
-        public UndertaleSimpleList<UndertaleYYSWFTimelineFrame> Frames { get => _Frames; set { _Frames = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Frames")); } }
-        public UndertaleSimpleList<UndertaleYYSWFCollisionMask> CollisionMasks { get => _CollisionMasks; set { _CollisionMasks = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CollisionMasks")); } }
+        public int Framerate { get; set; }
+        public float MinX { get; set; }
+        public float MaxX { get; set; }
+        public float MinY { get; set; }
+        public float MaxY { get; set; }
+        public int MaskWidth { get; set; }
+        public int MaskHeight { get; set; }
+        public UndertaleSimpleList<UndertaleYYSWFItem> UsedItems { get; set; }
+        public UndertaleSimpleList<UndertaleYYSWFTimelineFrame> Frames { get; set; }
+        public UndertaleSimpleList<UndertaleYYSWFCollisionMask> CollisionMasks { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -1104,17 +968,12 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleYYSWF : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleYYSWF : UndertaleObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private byte[] _JPEGTable; // prebaked embedded JPEG? no idea!
-        private int _Version;
-        private UndertaleYYSWFTimeline _Timeline;
-
-        public byte[] JPEGTable { get => _JPEGTable; set { _JPEGTable = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("JPEGTable")); } }
-        public int Version { get => _Version; set { _Version = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Version")); } }
-        public UndertaleYYSWFTimeline Timeline { get => _Timeline; set { _Timeline = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Timeline")); } }
+        public byte[] JPEGTable { get; set; }
+        public int Version { get; set; }
+        public UndertaleYYSWFTimeline Timeline { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -1156,58 +1015,34 @@ namespace UndertaleModLib.Models
 
     public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyPropertyChanged
     {
-        private UndertaleString _Name;
-        private uint _Width;
-        private uint _Height;
-        private int _MarginLeft;
-        private int _MarginRight;
-        private int _MarginBottom;
-        private int _MarginTop;
-        private bool _Transparent;
-        private bool _Smooth;
-        private bool _Preload;
-        private uint _BBoxMode;
-        private SepMaskType _SepMasks; // Whether or not multiple collision masks will be used. 0-2.
-        private int _OriginX;
-        private int _OriginY;
-        private uint _GMS2Version = 1;
-        private SpriteType _SSpriteType = 0;
-        private float _GMS2PlaybackSpeed = 15.0f;
-        private AnimSpeedType _GMS2PlaybackSpeedType = 0;
-        private bool _IsSpecialType = false;
-        private int _SpineVersion;
-        private string _SpineJSON;
-        private string _SpineAtlas;
-        private UndertaleSimpleList<UndertaleSpineTextureEntry> _SpineTextures; // a list of embedded PNGs really.
-
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public uint Width { get => _Width; set { _Width = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Width")); } }
-        public uint Height { get => _Height; set { _Height = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Height")); } }
-        public int MarginLeft { get => _MarginLeft; set { _MarginLeft = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginLeft")); } }
-        public int MarginRight { get => _MarginRight; set { _MarginRight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginRight")); } }
-        public int MarginBottom { get => _MarginBottom; set { _MarginBottom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginBottom")); } }
-        public int MarginTop { get => _MarginTop; set { _MarginTop = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MarginTop")); } }
-        public bool Transparent { get => _Transparent; set { _Transparent = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Transparent")); } }
-        public bool Smooth { get => _Smooth; set { _Smooth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Smooth")); } }
-        public bool Preload { get => _Preload; set { _Preload = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Preload")); } }
-        public uint BBoxMode { get => _BBoxMode; set { _BBoxMode = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BBoxMode")); } }
-        public SepMaskType SepMasks { get => _SepMasks; set { _SepMasks = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SepMasks")); } }
-        public int OriginX { get => _OriginX; set { _OriginX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OriginX")); } }
-        public int OriginY { get => _OriginY; set { _OriginY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OriginY")); } }
+        public UndertaleString Name { get; set; }
+        public uint Width { get; set; }
+        public uint Height { get; set; }
+        public int MarginLeft { get; set; }
+        public int MarginRight { get; set; }
+        public int MarginBottom { get; set; }
+        public int MarginTop { get; set; }
+        public bool Transparent { get; set; }
+        public bool Smooth { get; set; }
+        public bool Preload { get; set; }
+        public uint BBoxMode { get; set; }
+        public SepMaskType SepMasks { get; set; }
+        public int OriginX { get; set; }
+        public int OriginY { get; set; }
         public UndertaleSimpleList<TextureEntry> Textures { get; private set; } = new UndertaleSimpleList<TextureEntry>();
         public ObservableCollection<MaskEntry> CollisionMasks { get; } = new ObservableCollection<MaskEntry>();
-        
-        // Special sprite types (always used in GMS2)
-        public uint SVersion { get => _GMS2Version; set { _GMS2Version = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SVersion")); } }
-        public SpriteType SSpriteType { get => _SSpriteType; set { _SSpriteType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SSpriteType")); } }
-        public float GMS2PlaybackSpeed { get => _GMS2PlaybackSpeed; set { _GMS2PlaybackSpeed = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2PlaybackSpeed")); } }
-        public AnimSpeedType GMS2PlaybackSpeedType { get => _GMS2PlaybackSpeedType; set { _GMS2PlaybackSpeedType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GMS2PlaybackSpeedType")); } }
-        public bool IsSpecialType { get => _IsSpecialType; set { _IsSpecialType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsSpecialType")); } }
 
-        public int SpineVersion { get => _SpineVersion; set { _SpineVersion = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpineVersion")); } }
-        public string SpineJSON { get => _SpineJSON; set { _SpineJSON = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpineJSON")); } }
-        public string SpineAtlas { get => _SpineAtlas; set { _SpineAtlas = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpineAtlas")); } }
-        public UndertaleSimpleList<UndertaleSpineTextureEntry> SpineTextures { get => _SpineTextures; set { _SpineTextures = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SpineTextures")); } }
+        // Special sprite types (always used in GMS2)
+        public uint SVersion { get; set; } = 1;
+        public SpriteType SSpriteType { get; set; }
+        public float GMS2PlaybackSpeed { get; set; } = 15.0f;
+        public AnimSpeedType GMS2PlaybackSpeedType { get; set; } = 0;
+        public bool IsSpecialType { get; set; } = false;
+
+        public int SpineVersion { get; set; }
+        public string SpineJSON { get; set; }
+        public string SpineAtlas { get; set; }
+        public UndertaleSimpleList<UndertaleSpineTextureEntry> SpineTextures { get; set; }
 
         public bool IsSpineSprite { get => SpineJSON != null && SpineAtlas != null && SpineTextures != null; }
         public bool IsYYSWFSprite { get => YYSWF != null; }
@@ -1215,8 +1050,8 @@ namespace UndertaleModLib.Models
         private int _SWFVersion;
         private UndertaleYYSWF _YYSWF;
 
-        public int SWFVersion { get => _SWFVersion; set { _SWFVersion = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SWFVersion")); } }
-        public UndertaleYYSWF YYSWF { get => _YYSWF; set { _YYSWF = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("YYSWF")); } }
+        public int SWFVersion { get => _SWFVersion; set { _SWFVersion = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SWFVersion))); } }
+        public UndertaleYYSWF YYSWF { get => _YYSWF; set { _YYSWF = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(YYSWF))); } }
 
         public UndertaleSequence V2Sequence;
 
@@ -1251,12 +1086,10 @@ namespace UndertaleModLib.Models
             RotatedRect = 2
         }
 
-        public class TextureEntry : UndertaleObject, INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class TextureEntry : UndertaleObject
         {
-            private UndertaleTexturePageItem _Texture;
-            public UndertaleTexturePageItem Texture { get => _Texture; set { _Texture = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Texture")); } }
-
-            public event PropertyChangedEventHandler PropertyChanged;
+            public UndertaleTexturePageItem Texture { get; set; }
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -1269,12 +1102,10 @@ namespace UndertaleModLib.Models
             }
         }
 
-        public class MaskEntry : INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class MaskEntry
         {
-            private byte[] _Data;
-            public byte[] Data { get => _Data; set { _Data = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data")); } }
-
-            public event PropertyChangedEventHandler PropertyChanged;
+            public byte[] Data { get; set; }
 
             public MaskEntry()
             {
@@ -1431,7 +1262,7 @@ namespace UndertaleModLib.Models
             Debug.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count));
         }
 
-        private byte[] DecodeSpineBlob(byte[] blob)
+        private static byte[] DecodeSpineBlob(byte[] blob)
         {
             // don't ask.
             uint k = 42;
@@ -1443,7 +1274,7 @@ namespace UndertaleModLib.Models
             return blob;
         }
 
-        private byte[] EncodeSpineBlob(byte[] blob)
+        private static byte[] EncodeSpineBlob(byte[] blob)
         {
             // don't ask.
             uint k = 42;
@@ -1623,11 +1454,15 @@ namespace UndertaleModLib.Models
             reader.Align(4);
         }
 
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class NineSlice : UndertaleObject
         {
-            public int Left, Top, Right, Bottom;
-            public bool Enabled;
-            public TileMode[] TileModes = new TileMode[5];
+            public int Left { get; set; }
+            public int Top { get; set; }
+            public int Right { get; set; }
+            public int Bottom { get; set; }
+            public bool Enabled { get; set; }
+            public TileMode[] TileModes { get; set; } = new TileMode[5];
 
             public enum TileMode : int
             {

@@ -359,11 +359,6 @@ namespace UndertaleModLib.Compiler
             public static Statement ParseTokens(CompileContext context, List<Lexer.Token> tokens)
             {
                 // Basic initialization
-                if (context.BuiltInList == null)
-                {
-                    context.BuiltInList = new BuiltinList();
-                    context.BuiltInList.Initialize(context.Data);
-                }
                 remainingStageOne.Clear();
                 ErrorMessages.Clear();
                 context.LocalVars.Clear();
@@ -390,11 +385,10 @@ namespace UndertaleModLib.Compiler
                     else if (tokens[i].Kind == TokenKind.Identifier)
                     {
                         // Convert identifiers into their proper references, at least sort of.
-                        ExpressionConstant constant;
-                        if ((i != 0 && tokens[i - 1].Kind == TokenKind.Dot) || !ResolveIdentifier(context, tokens[i].Content, out constant))
+                        if ((i != 0 && tokens[i - 1].Kind == TokenKind.Dot) || 
+                            !ResolveIdentifier(context, tokens[i].Content, out ExpressionConstant constant))
                         {
-                            bool isGlobalBuiltin;
-                            int ID = GetVariableID(context, tokens[i].Content, out isGlobalBuiltin);
+                            int ID = GetVariableID(context, tokens[i].Content, out _);
                             if (ID >= 0 && ID < 100000)
                                 firstPass.Add(new Statement(TokenKind.ProcVariable, tokens[i], -1)); // becomes self anyway?
                             else
@@ -423,7 +417,7 @@ namespace UndertaleModLib.Compiler
                                 firstPass.Add(new Statement(TokenKind.ProcConstant, t, constant));
                                 continue;
                             }
-                            if (val > Int32.MaxValue || val < Int32.MinValue)
+                            if (val > int.MaxValue || val < int.MinValue)
                             {
                                 constant = new ExpressionConstant(val);
                             }
@@ -434,10 +428,9 @@ namespace UndertaleModLib.Compiler
                         }
                         else
                         {
-                            double val = 0d;
-                            if (!Double.TryParse(t.Content, System.Globalization.NumberStyles.Float,
-                                                 (IFormatProvider)System.Globalization.CultureInfo.InvariantCulture,
-                                                 out val))
+                            if (!double.TryParse(t.Content, System.Globalization.NumberStyles.Float,
+                                                 System.Globalization.CultureInfo.InvariantCulture,
+                                                 out double val))
                             {
                                 ReportCodeError("Invalid double number format.", t, false);
                             }
@@ -477,7 +470,7 @@ namespace UndertaleModLib.Compiler
                 if (!isRoot)
                     EnsureTokenKind(TokenKind.OpenBlock);
 
-                while (remainingStageOne.Count > 0 && !IsNextToken(TokenKind.CloseBlock, TokenKind.EOF))
+                while (remainingStageOne.Count > 0 && (isRoot || !IsNextToken(TokenKind.CloseBlock)) && !IsNextToken(TokenKind.EOF))
                 {
                     Statement parsed = ParseStatement(context);
                     if (parsed != null) // Sometimes it can be null, for instance if there's a bunch of semicolons, or an error
@@ -943,8 +936,8 @@ namespace UndertaleModLib.Compiler
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
                 // Check for proper argument count, at least for builtins
-                FunctionInfo fi;
-                if (context.BuiltInList.Functions.TryGetValue(s.Text, out fi) && fi.ArgumentCount != -1 && result.Children.Count != fi.ArgumentCount)
+                if (context.BuiltInList.Functions.TryGetValue(s.Text, out FunctionInfo fi) && 
+                    fi.ArgumentCount != -1 && result.Children.Count != fi.ArgumentCount)
                     ReportCodeError(string.Format("Function {0} expects {1} arguments, got {2}.",
                                                   s.Text, fi.ArgumentCount, result.Children.Count)
                                                   , s.Token, false);
@@ -1287,8 +1280,6 @@ namespace UndertaleModLib.Compiler
                     ReportCodeError(string.Format("Variable name {0} cannot be used; a function or script already has the name.", s.Text), false);
                 }
 
-                VariableInfo vi = null;
-
                 Statement result = new Statement(Statement.StatementKind.ExprSingleVariable, s.Token);
                 result.ID = s.ID;
                 // Check for array
@@ -1333,7 +1324,7 @@ namespace UndertaleModLib.Compiler
 
                     if (EnsureTokenKind(TokenKind.CloseArray) == null) return null;
                 }
-                else if (context.BuiltInList.GlobalArray.TryGetValue(result.Text, out vi) || context.BuiltInList.InstanceLimitedEvent.TryGetValue(result.Text, out vi))
+                else if (context.BuiltInList.GlobalArray.TryGetValue(result.Text, out _) || context.BuiltInList.InstanceLimitedEvent.TryGetValue(result.Text, out _))
                 {
                     // The compiler apparently does this
                     // I think this makes some undefined value for whatever reason
@@ -1436,7 +1427,10 @@ namespace UndertaleModLib.Compiler
                     {
                         if (!IsNextToken(TokenKind.CloseArray))
                         {
-                            ReportCodeError("Expected ',' or ']' after value in inline array.", remainingStageOne.Peek().Token, true);
+                            if (remainingStageOne.Any())
+                                ReportCodeError("Expected ',' or ']' after value in inline array.", remainingStageOne.Peek().Token, true);
+                            else
+                                ReportCodeError("Malformed array literal.", false);
                             break;
                         }
                     }
@@ -1577,6 +1571,12 @@ namespace UndertaleModLib.Compiler
                                     result = new Statement(Statement.StatementKind.Discard);
                                 }
                             }
+                            // Optimize if statements like "if(true)" or "if(1)"
+                            else if (result.Children[0].Constant.kind == ExpressionConstant.Kind.Number &&
+                                result.Children[0].Constant.valueNumber > 0.5d)
+                            {
+                                result = result.Children[1];
+                            }
                         }
                         break;
                     case Statement.StatementKind.FunctionCall:
@@ -1597,7 +1597,7 @@ namespace UndertaleModLib.Compiler
                                     // Ignore the optimization for GMS build versions less than 1763 and not equal to 1539.
                                     if ((context.Data?.GeneralInfo.Build >= 1763) || (context.Data?.GeneralInfo.Major >= 2) || (context.Data?.GeneralInfo.Build == 1539))
                                     {
-                                        string conversion = "";
+                                        string conversion;
                                         switch (result.Children[0].Constant.kind)
                                         {
                                             case ExpressionConstant.Kind.Number:
@@ -1622,7 +1622,7 @@ namespace UndertaleModLib.Compiler
                                     // Ignore the optimization for GMS build versions less than 1763 and not equal to 1539.
                                     if ((context.Data?.GeneralInfo.Build >= 1763) || (context.Data?.GeneralInfo.Major >= 2) || (context.Data?.GeneralInfo.Build == 1539))
                                     {
-                                        double conversion = 0d;
+                                        double conversion;
                                         switch (result.Children[0].Constant.kind)
                                         {
                                             case ExpressionConstant.Kind.Number:
@@ -1647,7 +1647,7 @@ namespace UndertaleModLib.Compiler
                                 break;
                             case "int64":
                                 {
-                                    long conversion = 0;
+                                    long conversion;
                                     switch (result.Children[0].Constant.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
@@ -1665,7 +1665,7 @@ namespace UndertaleModLib.Compiler
                                 break;
                             case "chr":
                                 {
-                                    string conversion = "";
+                                    string conversion;
                                     switch (result.Children[0].Constant.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
@@ -2604,7 +2604,7 @@ namespace UndertaleModLib.Compiler
 
             private static int GetVariableID(CompileContext context, string name, out bool isGlobalBuiltin)
             {
-                VariableInfo vi = null;
+                VariableInfo vi;
 
                 isGlobalBuiltin = true;
                 if (!context.BuiltInList.GlobalNotArray.TryGetValue(name, out vi) && !context.BuiltInList.GlobalArray.TryGetValue(name, out vi))

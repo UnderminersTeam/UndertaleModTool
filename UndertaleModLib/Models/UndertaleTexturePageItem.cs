@@ -13,31 +13,19 @@ namespace UndertaleModLib.Models
      */
     public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyChanged
     {
-        private UndertaleString _Name;
-        private ushort _SourceX; // The position in the texture sheet.
-        private ushort _SourceY;
-        private ushort _SourceWidth; // The dimensions of the image in the texture sheet.
-        private ushort _SourceHeight;
-        private ushort _TargetX;
-        private ushort _TargetY;
-        private ushort _TargetWidth; // The dimensions to scale the image to. (Is this BoundingWidth - TargetX)?
-        private ushort _TargetHeight;
-        private ushort _BoundingWidth; // The UndertaleSprite dimensions. (Yes, it matches.)
-        private ushort _BoundingHeight;
+        public UndertaleString Name { get; set; }
+        public ushort SourceX { get; set; } // X/Y of item on the texture page
+        public ushort SourceY { get; set; }
+        public ushort SourceWidth { get; set; } // Width/height of item on the texture page
+        public ushort SourceHeight { get; set; }
+        public ushort TargetX { get; set; } // X/Y of where to place inside of bound width/height
+        public ushort TargetY { get; set; }
+        public ushort TargetWidth { get; set; } // Dimensions of where to scale/place inside of bound width/height
+        public ushort TargetHeight { get; set; }
+        public ushort BoundingWidth { get; set; } // Source sprite/asset dimensions
+        public ushort BoundingHeight { get; set; }
         private UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR> _TexturePage = new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();
-
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public ushort SourceX { get => _SourceX; set { _SourceX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceX")); } }
-        public ushort SourceY { get => _SourceY; set { _SourceY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceY")); } }
-        public ushort SourceWidth { get => _SourceWidth; set { _SourceWidth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceWidth")); } }
-        public ushort SourceHeight { get => _SourceHeight; set { _SourceHeight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceHeight")); } }
-        public ushort TargetX { get => _TargetX; set { _TargetX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TargetX")); } }
-        public ushort TargetY { get => _TargetY; set { _TargetY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TargetY")); } }
-        public ushort TargetWidth { get => _TargetWidth; set { _TargetWidth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TargetWidth")); } }
-        public ushort TargetHeight { get => _TargetHeight; set { _TargetHeight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TargetHeight")); } }
-        public ushort BoundingWidth { get => _BoundingWidth; set { _BoundingWidth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BoundingWidth")); } }
-        public ushort BoundingHeight { get => _BoundingHeight; set { _BoundingHeight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BoundingHeight")); } }
-        public UndertaleEmbeddedTexture TexturePage { get => _TexturePage.Resource; set { _TexturePage.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TexturePage")); } }
+        public UndertaleEmbeddedTexture TexturePage { get => _TexturePage.Resource; set { _TexturePage.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TexturePage))); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

@@ -10,13 +10,10 @@ using UndertaleModLib.Decompiler;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleString : UndertaleResource, INotifyPropertyChanged, ISearchable
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleString : UndertaleResource, ISearchable
     {
-        private string _Content;
-
-        public string Content { get => _Content; set { _Content = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Content")); } }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        public string Content { get; set; }
 
         public UndertaleString()
         {
@@ -29,7 +26,7 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
-            writer.WriteGMString(_Content);
+            writer.WriteGMString(Content);
         }
 
         public void Unserialize(UndertaleReader reader)

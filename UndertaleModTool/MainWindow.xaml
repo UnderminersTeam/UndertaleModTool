@@ -1,4 +1,5 @@
 ﻿<Window x:Class="UndertaleModTool.MainWindow"
+        Closing="DataWindow_Closing"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -82,7 +83,16 @@
                     <MenuItem Header="_Run builtin script" SubmenuOpened="MenuItem_RunBuiltinScript_SubmenuOpened">
                         <MenuItem Header="(...loading...)" IsEnabled="False"/>
                     </MenuItem>
-                    <MenuItem Header="_Run experimental script" SubmenuOpened="MenuItem_RunExperimentalScript_SubmenuOpened">
+                    <MenuItem Header="_Run community script" SubmenuOpened="MenuItem_RunCommunityScript_SubmenuOpened">
+                        <MenuItem Header="(...loading...)" IsEnabled="False"/>
+                    </MenuItem>
+                    <MenuItem Header="_Unpack assets" SubmenuOpened="MenuItem_RunUnpackScript_SubmenuOpened">
+                        <MenuItem Header="(...loading...)" IsEnabled="False"/>
+                    </MenuItem>
+                    <MenuItem Header="_Repack assets" SubmenuOpened="MenuItem_RunRepackScript_SubmenuOpened">
+                        <MenuItem Header="(...loading...)" IsEnabled="False"/>
+                    </MenuItem>
+                    <MenuItem Header="_Run technical script" SubmenuOpened="MenuItem_RunTechnicalScript_SubmenuOpened">
                         <MenuItem Header="(...loading...)" IsEnabled="False"/>
                     </MenuItem>
                     <MenuItem Header="Run _other script..." Click="MenuItem_RunOtherScript_Click"/>

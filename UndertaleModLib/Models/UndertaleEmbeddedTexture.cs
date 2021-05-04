@@ -8,19 +8,13 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleEmbeddedTexture : UndertaleNamedResource, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleEmbeddedTexture : UndertaleNamedResource
     {
-        private UndertaleString _Name;
-        private uint _GeneratedMips;
-        private uint _Scaled = 0;
-        private TexData _TextureData = new TexData();
-
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public uint Scaled { get => _Scaled; set { _Scaled = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Scaled")); } }
-        public uint GeneratedMips { get => _GeneratedMips; set { _GeneratedMips = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GeneratedMips")); } }
-        public TexData TextureData { get => _TextureData; set { _TextureData = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureData")); } }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        public UndertaleString Name { get; set; }
+        public uint Scaled { get; set; } = 0;
+        public uint GeneratedMips { get; set; }
+        public TexData TextureData { get; set; } = new TexData();
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -73,7 +67,7 @@ namespace UndertaleModLib.Models
         {
             private byte[] _TextureBlob;
 
-            public byte[] TextureBlob { get => _TextureBlob; set { _TextureBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TextureBlob")); } }
+            public byte[] TextureBlob { get => _TextureBlob; set { _TextureBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextureBlob))); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -95,8 +89,7 @@ namespace UndertaleModLib.Models
                     // PNG is big endian and BinaryRead can't handle that (damn)
                     uint len = (uint)reader.ReadByte() << 24 | (uint)reader.ReadByte() << 16 | (uint)reader.ReadByte() << 8 | (uint)reader.ReadByte();
                     string type = Encoding.UTF8.GetString(reader.ReadBytes(4));
-                    byte[] data = reader.ReadBytes((int)len);
-                    uint crc = (uint)reader.ReadByte() << 24 | (uint)reader.ReadByte() << 16 | (uint)reader.ReadByte() << 8 | (uint)reader.ReadByte();
+                    reader.Position += len + 4;
                     if (type == "IEND")
                         break;
                 }

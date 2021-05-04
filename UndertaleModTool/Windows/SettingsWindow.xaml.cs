@@ -23,49 +23,71 @@ namespace UndertaleModTool
     {
         public static string GraphVizPath
         {
-            get => ConfigurationManager.AppSettings["graphVizLocation"] as String;
+            get => Settings.Instance.GraphVizPath;
             set
             {
-                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["graphVizLocation"].Value = value;
-                config.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection("appSettings");
+                Settings.Instance.GraphVizPath = value;
+                Settings.Save();
             }
         }
 
         public static string GameMakerStudioPath
         {
-            get => ConfigurationManager.AppSettings["GameMakerStudioPath"] as String;
+            get => Settings.Instance.GameMakerStudioPath;
             set
             {
-                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["GameMakerStudioPath"].Value = value;
-                config.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection("appSettings");
+                Settings.Instance.GameMakerStudioPath = value;
+                Settings.Save();
             }
         }
 
         public static string GameMakerStudio2RuntimesPath
         {
-            get => ConfigurationManager.AppSettings["GameMakerStudio2RuntimesPath"] as String;
+            get => Settings.Instance.GameMakerStudio2RuntimesPath;
             set
             {
-                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["GameMakerStudio2RuntimesPath"].Value = value;
-                config.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection("appSettings");
+                Settings.Instance.GameMakerStudio2RuntimesPath = value;
+                Settings.Save();
             }
         }
 
-        public static string AssetOrderSwappingEnabled
+        public static bool AssetOrderSwappingEnabled
         {
-            get => ConfigurationManager.AppSettings["AssetOrderSwappingEnabled"] as String;
+            get => Settings.Instance.AssetOrderSwappingEnabled;
             set
             {
-                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["AssetOrderSwappingEnabled"].Value = value;
-                config.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection("appSettings");
+                Settings.Instance.AssetOrderSwappingEnabled = value;
+                Settings.Save();
+            }
+        }
+
+        public static bool ProfileModeEnabled
+        {
+            get => Settings.Instance.ProfileModeEnabled;
+            set
+            {
+                Settings.Instance.ProfileModeEnabled = value;
+                Settings.Save();
+            }
+        }
+
+        public static bool ProfileMessageShown
+        {
+            get => Settings.Instance.ProfileMessageShown;
+            set
+            {
+                Settings.Instance.ProfileMessageShown = value;
+                Settings.Save();
+            }
+        }
+
+        public static bool DeleteOldProfileOnSave
+        {
+            get => Settings.Instance.DeleteOldProfileOnSave;
+            set
+            {
+                Settings.Instance.DeleteOldProfileOnSave = value;
+                Settings.Save();
             }
         }
 
@@ -73,6 +95,7 @@ namespace UndertaleModTool
         {
             InitializeComponent();
             this.DataContext = this;
+            Settings.Load();
         }
     }
 }

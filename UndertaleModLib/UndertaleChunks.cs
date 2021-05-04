@@ -71,7 +71,7 @@ namespace UndertaleModLib
                 lastChunk = reader.ReadChars(4);
                 reader.AllChunkNames.Add(lastChunk);
                 uint length = reader.ReadUInt32();
-                reader.SmallReadAt(reader.Position + length, 8);
+                reader.Position += length;
             }
             reader.LastChunkName = lastChunk;
             reader.Position = startPos;
@@ -120,7 +120,7 @@ namespace UndertaleModLib
             // Strange data for each extension, some kind of unique identifier based on
             // the product ID for each of them
             productIdData = new List<byte[]>();
-            //NOTE: I do not know if 1773 is the youngest version which contains product IDs.
+            // NOTE: I do not know if 1773 is the earliest version which contains product IDs.
             if (reader.undertaleData.GeneralInfo?.Major >= 2 || (reader.undertaleData.GeneralInfo?.Major == 1 && reader.undertaleData.GeneralInfo?.Build >= 1773) || (reader.undertaleData.GeneralInfo?.Major == 1 && reader.undertaleData.GeneralInfo?.Build == 1539))
             {
                 for (int i = 0; i < List.Count; i++)
@@ -639,13 +639,18 @@ namespace UndertaleModLib
             if (reader.undertaleData.GeneralInfo.Major < 2)
                 throw new InvalidOperationException();
 
+            // Apparently SEQN can be empty
+            if (Length == 0)
+                return;
+
             // Padding
             while (reader.Position % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
-            if (reader.ReadUInt32() != 1)
-                throw new IOException("Expected SEQN version 1");
+            uint version = reader.ReadUInt32();
+            if (version != 1)
+                throw new IOException("Expected SEQN version 1, got " + version.ToString());
 
             base.UnserializeChunk(reader);
         }

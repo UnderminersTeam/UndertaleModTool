@@ -7,61 +7,36 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleFont : UndertaleNamedResource, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleFont : UndertaleNamedResource
     {
-        private UndertaleString _Name;
-        private UndertaleString _DisplayName;
-        private bool _EmSizeIsFloat;
-        private uint _EmSize;
-        private bool _Bold;
-        private bool _Italic;
-        private ushort _RangeStart;
-        private byte _Charset;
-        private byte _AntiAliasing;
-        private uint _RangeEnd;
-        private UndertaleTexturePageItem _Texture;
-        private float _ScaleX;
-        private float _ScaleY;
-        private int _AscenderOffset;
-
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public UndertaleString DisplayName { get => _DisplayName; set { _DisplayName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("DisplayName")); } }
-        public bool EmSizeIsFloat { get => _EmSizeIsFloat; set { _EmSizeIsFloat = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("EmSizeIsFloat")); } }
-        public uint EmSize { get => _EmSize; set { _EmSize = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("EmSize")); } }
-        public bool Bold { get => _Bold; set { _Bold = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Bold")); } }
-        public bool Italic { get => _Italic; set { _Italic = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Italic")); } }
-        public ushort RangeStart { get => _RangeStart; set { _RangeStart = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("RangeStart")); } }
-        public byte Charset { get => _Charset; set { _Charset = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Charset")); } }
-        public byte AntiAliasing { get => _AntiAliasing; set { _AntiAliasing = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AntiAliasing")); } }
-        public uint RangeEnd { get => _RangeEnd; set { _RangeEnd = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("RangeEnd")); } }
-        public UndertaleTexturePageItem Texture { get => _Texture; set { _Texture = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Texture")); } }
-        public float ScaleX { get => _ScaleX; set { _ScaleX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleX")); } }
-        public float ScaleY { get => _ScaleY; set { _ScaleY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaleY")); } }
+        public UndertaleString Name { get; set; }
+        public UndertaleString DisplayName { get; set; }
+        public bool EmSizeIsFloat { get; set; }
+        public uint EmSize { get; set; }
+        public bool Bold { get; set; }
+        public bool Italic { get; set; }
+        public ushort RangeStart { get; set; }
+        public byte Charset { get; set; }
+        public byte AntiAliasing { get; set; }
+        public uint RangeEnd { get; set; }
+        public UndertaleTexturePageItem Texture { get; set; }
+        public float ScaleX { get; set; }
+        public float ScaleY { get; set; }
         public UndertalePointerList<Glyph> Glyphs { get; private set; } = new UndertalePointerList<Glyph>();
-        public int AscenderOffset { get => _AscenderOffset; set { _AscenderOffset = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AscenderOffset")); } }
+        public int AscenderOffset { get; set; }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public class Glyph : UndertaleObject, INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class Glyph : UndertaleObject
         {
-            private ushort _Character;
-            private ushort _SourceX;
-            private ushort _SourceY;
-            private ushort _SourceWidth;
-            private ushort _SourceHeight;
-            private short _Shift;
-            private short _Offset;
-            private UndertaleSimpleListShort<GlyphKerning> _Kerning = new UndertaleSimpleListShort<GlyphKerning>();
-            public ushort Character { get => _Character; set { _Character = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Character")); } }
-            public ushort SourceX { get => _SourceX; set { _SourceX = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceX")); } }
-            public ushort SourceY { get => _SourceY; set { _SourceY = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceY")); } }
-            public ushort SourceWidth { get => _SourceWidth; set { _SourceWidth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceWidth")); } }
-            public ushort SourceHeight { get => _SourceHeight; set { _SourceHeight = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SourceHeight")); } }
-            public short Shift { get => _Shift; set { _Shift = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Shift")); } }
-            public short Offset { get => _Offset; set { _Offset = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Offset")); } }
-            public UndertaleSimpleListShort<GlyphKerning> Kerning { get => _Kerning; set { _Kerning = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Kerning")); } }
-
-            public event PropertyChangedEventHandler PropertyChanged;
+            public ushort Character { get; set; }
+            public ushort SourceX { get; set; }
+            public ushort SourceY { get; set; }
+            public ushort SourceWidth { get; set; }
+            public ushort SourceHeight { get; set; }
+            public short Shift { get; set; }
+            public short Offset { get; set; }
+            public UndertaleSimpleListShort<GlyphKerning> Kerning { get; set; } = new UndertaleSimpleListShort<GlyphKerning>();
 
             public void Serialize(UndertaleWriter writer)
             {

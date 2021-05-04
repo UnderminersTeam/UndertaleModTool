@@ -8,17 +8,14 @@ using System.Collections.ObjectModel;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleTimeline : UndertaleNamedResource, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleTimeline : UndertaleNamedResource
     {
-        public class UndertaleTimelineMoment : UndertaleObject, INotifyPropertyChanged
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class UndertaleTimelineMoment : UndertaleObject
         {
-            private uint _Step { get; set; }
-            public uint Step { get => _Step; set { _Step = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Step")); } }
-
-            private UndertalePointerList<UndertaleGameObject.EventAction> _Event { get; set; }
-            public UndertalePointerList<UndertaleGameObject.EventAction> Event { get => _Event; set { _Event = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Event")); } }
-
-            public event PropertyChangedEventHandler PropertyChanged;
+            public uint Step { get; set; }
+            public UndertalePointerList<UndertaleGameObject.EventAction> Event { get; set; }
 
             public UndertaleTimelineMoment()
             {
@@ -45,13 +42,8 @@ namespace UndertaleModLib.Models
             }
         }
 
-        private UndertaleString _Name;
-        private ObservableCollection<UndertaleTimelineMoment> _Moments = new ObservableCollection<UndertaleTimelineMoment>();
-
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public ObservableCollection<UndertaleTimelineMoment> Moments { get => _Moments; set { _Moments = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Moments")); } }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        public UndertaleString Name { get; set; }
+        public ObservableCollection<UndertaleTimelineMoment> Moments { get; set; } = new ObservableCollection<UndertaleTimelineMoment>();
 
         public override string ToString()
         {

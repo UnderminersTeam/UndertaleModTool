@@ -20,27 +20,19 @@ namespace UndertaleModTool
     /// <summary>
     /// Interaction logic for TextInputDialog.xaml
     /// </summary>
-    public partial class TextInputDialog : Window, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public partial class TextInputDialog : Window
     {
-        private string _Message; // text in the label
-        private string _MessageTitle; // label of the window
-        private string _ButtonTitle; // text inside the button
-        private string _CancelButtonTitle;
-        private string _InputText; // text in the textbox.
-        private bool _PreventClose; // should the dialog prevent itself from closing?
-        private bool _IsMultiline;
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public Visibility CancelButtonVisibility { get => PreventClose ? Visibility.Hidden : Visibility.Visible; }
-        public string Message { get => _Message; set { _Message = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Message")); } }
-        public string MessageTitle { get => _MessageTitle; set { _MessageTitle = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MessageTitle")); } }
-        public string ButtonTitle { get => _ButtonTitle; set { _ButtonTitle = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ButtonTitle")); } }
-        public string CancelButtonTitle { get => _CancelButtonTitle; set { _CancelButtonTitle = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CancelButtonTitle")); } }
-        public string InputText { get => _InputText; set { _InputText = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("InputText")); } }
-        public bool PreventClose { get => _PreventClose; set { _PreventClose = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("PreventClose")); } }
-        public bool IsMultiline { get => _IsMultiline; set { _IsMultiline = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsMultiline")); } }
-        
+        public string Message { get; set; } // text in the label
+        public string MessageTitle { get; set; } // label of the window
+        public string ButtonTitle { get; set; } // text inside the button
+        public string CancelButtonTitle { get; set; }
+        public string InputText { get; set; } // text in the textbox.
+        public bool PreventClose { get; set; } // should the dialog prevent itself from closing?
+        public bool IsMultiline { get; set; }
+
         public TextInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
         {
             IsMultiline = isMultiline;

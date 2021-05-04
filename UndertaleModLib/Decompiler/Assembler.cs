@@ -207,7 +207,10 @@ namespace UndertaleModLib.Decompiler
                     break;
 
                 case UndertaleInstruction.InstructionType.BreakInstruction:
-                    instr.Value = breakId;
+                    if (breakId != 0)
+                        instr.Value = breakId;
+                    else
+                        instr.Value = Int16.Parse(line);
                     line = "";
                     break;
             }

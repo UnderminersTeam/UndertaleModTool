@@ -1449,7 +1449,7 @@ namespace UndertaleModLib.Compiler
                             {
                                 cw.Write(useLongDupForArray ? "dup.l 0" : "dup.i 1");
                             }
-                            cw.Write("push.v [array]" + e.Children[0].Text);
+                            cw.Write("push.v [array]" + GetIDPrefixSpecial(e.Children[0].ID) + e.Children[0].Text);
                             cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
                             isArray = true;
                             return;
@@ -1524,7 +1524,7 @@ namespace UndertaleModLib.Compiler
                                 {
                                     cw.Write(useLongDupForArray ? "dup.l 0" : "dup.i 1");
                                 }
-                                cw.Write("push.v [array]" + e.Children[next].Text);
+                                cw.Write("push.v [array]" + GetIDPrefixSpecial(e.Children[next].ID) + e.Children[next].Text);
                                 cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
                                 if (notLast)
                                 {
@@ -1540,7 +1540,7 @@ namespace UndertaleModLib.Compiler
                                 {
                                     cw.Write("dup.i 0");
                                 }
-                                cw.Write("push.v [stacktop]" + e.Children[next].Text);
+                                cw.Write("push.v [stacktop]" + GetIDPrefixSpecial(e.Children[next].ID) + e.Children[next].Text);
                                 cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
                                 if (next + 1 < e.Children.Count)
                                 {
@@ -1595,7 +1595,7 @@ namespace UndertaleModLib.Compiler
                 // 2D index
                 if (a.Children.Count != 1)
                 {
-                    cw.Write("break.e -1"); // These instructions are hardcoded. Honestly it seems pretty
+                    cw.Write("chkindex.e"); // These instructions are hardcoded. Honestly it seems pretty
                     cw.Write("push.i 32000"); // inefficient because these could be easily combined into
                     cw.Write("mul.i.i"); // one small instruction.
 
@@ -1613,7 +1613,7 @@ namespace UndertaleModLib.Compiler
                         cw.typeStack.Push(UndertaleInstruction.DataType.Int32);
                     }
 
-                    cw.Write("break.e -1");
+                    cw.Write("chkindex.e");
                     cw.Write("add.i.i");
 
                     cw.typeStack.Pop();
@@ -1623,19 +1623,25 @@ namespace UndertaleModLib.Compiler
 
             private static string GetIDPrefix(int ID)
             {
-                switch (ID)
+                return ID switch
                 {
-                    case -1:
-                        return "self.";
-                    case -2:
-                        return "other."; // maybe?
-                    case -5:
-                        return "global.";
-                    case -7:
-                        return "local.";
-                    default:
-                        return ID.ToString() + ".";
-                }
+                    -1 => "self.",
+                    -2 => "other.",
+                    -5 => "global.",
+                    -7 => "local.",
+                    _ => ID.ToString() + ".",
+                };
+            }
+
+            private static string GetIDPrefixSpecial(int ID)
+            {
+                return ID switch
+                {
+                    -2 => "other.",
+                    -5 => "global.",
+                    -7 => "local.",
+                    _ => "self.",
+                };
             }
 
             private static void AssembleStoreVariable(CodeWriter cw, Parser.Statement s, UndertaleInstruction.DataType typeToStore, bool skip = false)
@@ -1660,7 +1666,7 @@ namespace UndertaleModLib.Compiler
                             {
                                 cw.compileContext.Data?.Variables?.EnsureDefined(s.Children[0].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(s.Children[0].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(s.Children[0].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
                             }
-                            cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [array]" + s.Children[0].Text);
+                            cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [array]" + GetIDPrefixSpecial(s.Children[0].ID) + s.Children[0].Text);
                             return;
                         }
 
@@ -1705,26 +1711,26 @@ namespace UndertaleModLib.Compiler
                                     AssembleArrayPush(cw, s.Children[next]);
                                 if (next + 1 < s.Children.Count)
                                 {
-                                    cw.Write("push.v [array]" + s.Children[next].Text);
+                                    cw.Write("push.v [array]" + GetIDPrefixSpecial(s.Children[next].ID) + s.Children[next].Text);
                                     cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
                                     cw.Write("conv." + cw.typeStack.Pop().ToOpcodeParam() + ".i");
                                 }
                                 else
                                 {
-                                    cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [array]" + s.Children[next].Text);
+                                    cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [array]" + GetIDPrefixSpecial(s.Children[next].ID) + s.Children[next].Text);
                                 }
                             }
                             else
                             {
                                 if (next + 1 < s.Children.Count)
                                 {
-                                    cw.Write("push.v [stacktop]" + s.Children[next].Text);
+                                    cw.Write("push.v [stacktop]" + GetIDPrefixSpecial(s.Children[next].ID) + s.Children[next].Text);
                                     cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
                                     cw.Write("conv." + cw.typeStack.Pop().ToOpcodeParam() + ".i");
                                 }
                                 else
                                 {
-                                    cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [stacktop]" + s.Children[next].Text);
+                                    cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [stacktop]" + GetIDPrefixSpecial(s.Children[next].ID) + s.Children[next].Text);
                                 }
                             }
                             next++;

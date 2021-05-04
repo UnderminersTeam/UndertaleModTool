@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,17 +11,20 @@ using static UndertaleModLib.Models.UndertaleGeneralInfo;
 
 namespace UndertaleModLib.Models
 {
-    // TODO: INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject
     {
         public FunctionClassification Classification { get; set; }
         public UndertaleString Name { get; set; }
-        public int UnknownChainEndingValue { get; set; }
+        public int NameStringID { get; set; }
 
         public uint Occurrences { get; set; }
         public UndertaleInstruction FirstAddress { get; set; }
 
         public bool GMS2_3 { get; set; } = false;
+
+        [Obsolete("This variable has been renamed to NameStringID.")]
+        public int UnknownChainEndingValue { get => NameStringID; set => NameStringID = value; }
 
         public void Serialize(UndertaleWriter writer)
         {

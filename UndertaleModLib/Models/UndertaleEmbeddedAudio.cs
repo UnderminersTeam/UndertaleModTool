@@ -9,15 +9,11 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleEmbeddedAudio : UndertaleNamedResource, PaddedObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleEmbeddedAudio : UndertaleNamedResource, PaddedObject
     {
-        private UndertaleString _Name;
-        private byte[] _Data = new byte[0];
-
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public byte[] Data { get => _Data; set { _Data = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Data")); } }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        public UndertaleString Name { get; set; }
+        public byte[] Data { get; set; } = Array.Empty<byte>();
 
         public void Serialize(UndertaleWriter writer)
         {

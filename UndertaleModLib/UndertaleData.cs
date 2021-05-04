@@ -55,7 +55,10 @@ namespace UndertaleModLib
         public bool GMS2_3 = false;
         public bool GMS2_3_1 = false;
         public bool GMS2_3_2 = false;
+        public ToolInfo ToolInfo = new ToolInfo();
         public int PaddingAlignException = -1;
+
+        public BuiltinList BuiltinList;
 
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {
@@ -231,6 +234,7 @@ namespace UndertaleModLib
             data.Options.Constants.Add(new UndertaleOptions.Constant() { Name = data.Strings.MakeString("@@SleepMargin"), Value = data.Strings.MakeString(1.ToString()) });
             data.Options.Constants.Add(new UndertaleOptions.Constant() { Name = data.Strings.MakeString("@@DrawColour"), Value = data.Strings.MakeString(0xFFFFFFFF.ToString()) });
             data.Rooms.Add(new UndertaleRoom() { Name = data.Strings.MakeString("room0"), Caption = data.Strings.MakeString("") });
+            data.BuiltinList = new BuiltinList(data);
             return data;
         }
     }
@@ -239,7 +243,7 @@ namespace UndertaleModLib
     {
         public static T ByName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
         {
-            foreach(var item in list)
+            foreach (var item in list)
                 if (ignoreCase ? (item.Name.Content.Equals(name, StringComparison.OrdinalIgnoreCase)) : (item.Name.Content == name))
                     return item;
             return default(T);
@@ -254,14 +258,38 @@ namespace UndertaleModLib
         public static UndertaleString MakeString(this IList<UndertaleString> list, string content)
         {
             if (content == null)
-                throw new ArgumentNullException("content");
+                throw new ArgumentNullException(nameof(content));
+
             // TODO: without reference counting the strings, this may leave unused strings in the array
             foreach (UndertaleString str in list)
             {
                 if (str.Content == content)
                     return str;
             }
+
             UndertaleString newString = new UndertaleString(content);
+            list.Add(newString);
+            return newString;
+        }
+
+        public static UndertaleString MakeString(this IList<UndertaleString> list, string content, out int index)
+        {
+            if (content == null)
+                throw new ArgumentNullException(nameof(content));
+
+            // TODO: without reference counting the strings, this may leave unused strings in the array
+            for (int i = 0; i < list.Count; i++)
+            {
+                UndertaleString str = list[i];
+                if (str.Content == content)
+                {
+                    index = i;
+                    return str;
+                }
+            }
+
+            UndertaleString newString = new UndertaleString(content);
+            index = list.Count;
             list.Add(newString);
             return newString;
         }
@@ -271,10 +299,11 @@ namespace UndertaleModLib
             UndertaleFunction func = list.ByName(name);
             if (func == null)
             {
+                var str = strg.MakeString(name, out int id);
                 func = new UndertaleFunction()
                 {
-                    Name = strg.MakeString(name),
-                    UnknownChainEndingValue = 0 // TODO: seems to work...
+                    Name = str,
+                    NameStringID = id
                 };
                 list.Add(func);
             }
@@ -295,15 +324,17 @@ namespace UndertaleModLib
                 if (!bytecode14)
                 {
                     if (data.InstanceVarCount == data.InstanceVarCountAgain)
-                    { // Bytecode 16+.
+                    { 
+                        // Bytecode 16+
                         data.InstanceVarCount++;
                         data.InstanceVarCountAgain++;
                     }
                     else
-                    { // Bytecode 15.
+                    { 
+                        // Bytecode 15
                         if (inst == UndertaleInstruction.InstanceType.Self && !isBuiltin)
                         {
-			    oldId = data.InstanceVarCountAgain;
+			                oldId = data.InstanceVarCountAgain;
                             data.InstanceVarCountAgain++;
                         }
                         else if (inst == UndertaleInstruction.InstanceType.Global)
@@ -313,12 +344,13 @@ namespace UndertaleModLib
                     }
                 }
 
+                var str = strg.MakeString(name, out int id);
                 vari = new UndertaleVariable()
                 {
-                    Name = strg.MakeString(name),
+                    Name = str,
                     InstanceType = inst,
                     VarID = bytecode14 ? 0 : (isBuiltin ? (int)UndertaleInstruction.InstanceType.Builtin : (int)oldId),
-                    UnknownChainEndingValue = 0 // TODO: seems to work...
+                    NameStringID = id
                 };
                 list.Add(vari);
             }
@@ -344,12 +376,13 @@ namespace UndertaleModLib
                     return refvar;
             }
 
+            var str = strg.MakeString(name, out int id);
             UndertaleVariable vari = new UndertaleVariable()
             {
-                Name = strg.MakeString(name),
+                Name = str,
                 InstanceType = bytecode14 ? UndertaleInstruction.InstanceType.Undefined : UndertaleInstruction.InstanceType.Local,
                 VarID = bytecode14 ? 0 : localId,
-                UnknownChainEndingValue = 0 // TODO: seems to work...
+                NameStringID = id
             };
             if (!bytecode14 && list?.Count >= data.MaxLocalVarCount)
                 data.MaxLocalVarCount = (uint) list?.Count + 1;
@@ -373,5 +406,13 @@ namespace UndertaleModLib
             funcs.EnsureDefined(name, strg);
             return func;
         }
+    }
+
+    public class ToolInfo
+    {
+        // Info handle for the actual editor to store data on
+        public bool ProfileMode = false;
+        public string AppDataProfiles = null;
+        public string CurrentMD5 = "Unknown";
     }
 }

@@ -37,7 +37,7 @@
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">VarID</TextBlock>
         <TextBox Background="#FFF104A6" Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding VarID}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Unknown end-of-chain value</TextBlock>
-        <TextBox Background="#FFF104A6" Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding UnknownChainEndingValue}"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Name string ID</TextBlock>
+        <TextBox Background="#FFF104A6" Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding NameStringID}"/>
     </Grid>
 </UserControl>

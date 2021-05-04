@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    // TODO: INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleGeneralInfo : UndertaleObject
     {
         [Flags]
@@ -222,7 +222,7 @@ namespace UndertaleModLib.Models
 
         public void Unserialize(UndertaleReader reader)
         {
-            DisableDebugger = reader.ReadByte() != 0 ? true : false;
+            DisableDebugger = reader.ReadByte() != 0;
             BytecodeVersion = reader.ReadByte();
             Unknown = reader.ReadUInt16();
             Filename = reader.ReadUndertaleString();
@@ -278,16 +278,14 @@ namespace UndertaleModLib.Models
                 {
                     if (i == infoLocation)
                     {
-                        long curr = reader.ReadInt64();
-                        curr = infoNumber;
-                        GMS2RandomUID.Add(curr);
+                        reader.ReadInt64();
+                        GMS2RandomUID.Add(infoNumber);
                     }
                     else
                     {
-                        int first = reader.ReadInt32();
-                        int second = reader.ReadInt32();
-                        first = random.Next();
-                        second = random.Next();
+                        reader.ReadInt64();
+                        int first = random.Next();
+                        int second = random.Next();
                         GMS2RandomUID.Add(((long)first << 32) | (long)second);
                     }
                 }
@@ -305,6 +303,7 @@ namespace UndertaleModLib.Models
         }
     }
 
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleOptions : UndertaleObject
     {
         [Flags]
@@ -357,6 +356,7 @@ namespace UndertaleModLib.Models
         public uint LoadAlpha { get; set; } = 255;
         public UndertaleSimpleList<Constant> Constants { get; private set; } = new UndertaleSimpleList<Constant>();
 
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class Constant : UndertaleObject
         {
             public UndertaleString Name { get; set; }
@@ -414,6 +414,7 @@ namespace UndertaleModLib.Models
         }
     }
 
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleLanguage : UndertaleObject
     {
         // Seems to be a list of entry IDs paired to strings for several languages
@@ -464,6 +465,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class LanguageData
         {
             public UndertaleString Name { get; set; }

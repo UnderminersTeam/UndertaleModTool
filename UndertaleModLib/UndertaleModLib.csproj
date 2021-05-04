@@ -1,95 +1,19 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4781ADAC-9469-42C4-B357-4A0A157D7FCD}</ProjectGuid>
+    <TargetFramework>net5.0</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UndertaleModLib</RootNamespace>
-    <AssemblyName>UndertaleModLib</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Net.Http" />
+    <PackageReference Include="Fody" Version="6.5.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="PropertyChanged.Fody" Version="3.3.3" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Compiler\AssemblyWriter.cs" />
-    <Compile Include="Compiler\BuiltinList.cs" />
-    <Compile Include="Compiler\Compiler.cs" />
-    <Compile Include="Compiler\Lexer.cs" />
-    <Compile Include="Compiler\Parser.cs" />
-    <Compile Include="Decompiler\Assembler.cs" />
-    <Compile Include="Decompiler\AssetTypeResolver.cs" />
-    <Compile Include="Decompiler\Decompiler.cs" />
-    <Compile Include="ModelsDebug\UndertaleDebugInfo.cs" />
-    <Compile Include="ModelsDebug\UndertaleInstanceVars.cs" />
-    <Compile Include="ModelsDebug\UndertaleScriptSource.cs" />
-    <Compile Include="Models\UndertaleAnimationCurve.cs" />
-    <Compile Include="Models\UndertaleEmbeddedImage.cs" />
-    <Compile Include="Models\UndertaleExtension.cs" />
-    <Compile Include="Models\UndertaleBackground.cs" />
-    <Compile Include="Models\UndertaleCode.cs" />
-    <Compile Include="Models\UndertaleEmbeddedAudio.cs" />
-    <Compile Include="Models\UndertaleEmbeddedTexture.cs" />
-    <Compile Include="Models\UndertaleFont.cs" />
-    <Compile Include="Models\UndertaleFunction.cs" />
-    <Compile Include="Models\UndertaleGameObject.cs" />
-    <Compile Include="Models\UndertaleGeneralInfo.cs" />
-    <Compile Include="Models\UndertaleGlobalInit.cs" />
-    <Compile Include="Models\UndertalePath.cs" />
-    <Compile Include="Models\UndertaleRoom.cs" />
-    <Compile Include="Models\UndertaleScript.cs" />
-    <Compile Include="Models\UndertaleSequence.cs" />
-    <Compile Include="Models\UndertaleShader.cs" />
-    <Compile Include="Models\UndertaleSound.cs" />
-    <Compile Include="Models\UndertaleSprite.cs" />
-    <Compile Include="Models\UndertaleString.cs" />
-    <Compile Include="Models\UndertaleTags.cs" />
-    <Compile Include="Models\UndertaleTextureGroupInfo.cs" />
-    <Compile Include="Models\UndertaleTexturePageItem.cs" />
-    <Compile Include="Models\UndertaleTimeline.cs" />
-    <Compile Include="Models\UndertaleUnused.cs" />
-    <Compile Include="Models\UndertaleVariable.cs" />
-    <Compile Include="Scripting\IScriptInterface.cs" />
-    <Compile Include="UndertaleChunks.cs" />
-    <Compile Include="UndertaleChunkTypes.cs" />
-    <Compile Include="UndertaleDebugChunks.cs" />
-    <Compile Include="UndertaleDebugData.cs" />
-    <Compile Include="UndertaleLists.cs" />
-    <Compile Include="UndertaleBaseTypes.cs" />
-    <Compile Include="UndertaleData.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UndertaleIO.cs" />
-    <Compile Include="UndertaleSerializationException.cs" />
-    <Compile Include="Util\BufferBinaryReader.cs" />
-    <Compile Include="Util\BufferBinaryWriter.cs" />
-    <Compile Include="Util\Pair.cs" />
-    <Compile Include="Util\TextureWorker.cs" />
-    <Compile Include="Util\DictionaryExtensions.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
