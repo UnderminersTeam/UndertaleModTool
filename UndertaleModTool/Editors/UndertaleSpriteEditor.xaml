@@ -79,7 +79,7 @@
         </Grid>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Transparent</TextBlock>
-        <CheckBox Background="#FFF104A6" Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Transparent}" Checked="CheckBox_Checked"/>
+        <CheckBox Background="#FFF104A6" Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Transparent}"/>
         
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Smooth</TextBlock>
         <CheckBox Background="#FFF104A6" Grid.Row="5" Grid.Column="1" Margin="3" IsChecked="{Binding Smooth}"/>
