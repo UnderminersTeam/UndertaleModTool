@@ -188,6 +188,7 @@ namespace UndertaleModTool
 
             string text;
 
+            DisassemblyEditor.TextArea.ClearSelection();
             if (code.DuplicateEntry)
             {
                 DisassemblyEditor.IsReadOnly = true;
@@ -267,6 +268,7 @@ namespace UndertaleModTool
         private async void DecompileCode(UndertaleCode code)
         {
             DecompiledEditor.IsReadOnly = true;
+            DecompiledEditor.TextArea.ClearSelection();
             if (code.DuplicateEntry)
             {
                 DecompiledEditor.Text = "// Duplicate code entry; cannot edit here.";
