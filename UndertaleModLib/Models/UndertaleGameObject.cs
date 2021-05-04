@@ -150,11 +150,19 @@ namespace UndertaleModLib.Models
                 var name = strg.MakeString("gml_Object_" + Name.Content + "_" + type.ToString() + "_" + subtype);
                 code = action.CodeId = new UndertaleCode();
                 code.Name = name;
+                code.LocalsCount = 1;
                 codelist.Add(code);
-                localslist.Add(new UndertaleCodeLocals()
+
+                UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+                argsLocal.Name = strg.MakeString("arguments");
+                argsLocal.Index = 0;
+
+                var locals = new UndertaleCodeLocals()
                 {
                     Name = name
-                });
+                };
+                locals.Locals.Add(argsLocal);
+                localslist.Add(locals);
             }
             return code;
         }
