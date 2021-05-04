@@ -5,15 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
-        Title="{Binding MessageTitle}" Height="150" Width="400" MinHeight="150" MinWidth="400" WindowStartupLocation="CenterOwner" FontFamily="Comic Sans MS" Background="#FFF104A6">
+        Title="{Binding MessageTitle}" Height="150" Width="400" MinHeight="150" MinWidth="400" WindowStartupLocation="CenterOwner" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="{Binding Message}" FontFamily="Comic Sans MS" Background="#FFF104A6"/>
-        <TextBox Background="#FFF104A6" Grid.Row="1" VerticalAlignment="Center" AcceptsReturn="{Binding IsMultiline}" Text="{Binding InputText}" FontFamily="Comic Sans MS"></TextBox>
+        <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="{Binding Message}" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6"/>
+        <TextBox Background="#FFF104A6" Grid.Row="1" VerticalAlignment="Center" AcceptsReturn="{Binding IsMultiline}" Text="{Binding InputText}" FontFamily="Comic Sans MS" Foreground="#FF000000"></TextBox>
 
         <Grid Grid.Row="2" Name="Buttons">
             <Grid.ColumnDefinitions>
@@ -23,8 +23,8 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Button Grid.Row="2" Grid.Column="0" Margin="3,3" VerticalAlignment="Center" Visibility="{Binding CancelButtonVisibility}" Content="{Binding CancelButtonTitle}" Click="CancelButton_Click" FontFamily="Comic Sans MS" Background="#FFF104A6"></Button>
-            <Button Grid.Row="2" Grid.Column="1" Margin="3,3" VerticalAlignment="Center" Content="{Binding ButtonTitle}" Click="Button_Click" FontFamily="Comic Sans MS" Background="#FFF104A6"></Button>
+            <Button Grid.Row="2" Grid.Column="0" Margin="3,3" VerticalAlignment="Center" Visibility="{Binding CancelButtonVisibility}" Content="{Binding CancelButtonTitle}" Click="CancelButton_Click" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6"></Button>
+            <Button Grid.Row="2" Grid.Column="1" Margin="3,3" VerticalAlignment="Center" Content="{Binding ButtonTitle}" Click="Button_Click" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6"></Button>
         </Grid>
         
     </Grid>

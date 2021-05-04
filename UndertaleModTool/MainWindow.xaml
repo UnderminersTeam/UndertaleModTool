@@ -10,7 +10,7 @@
         xmlns:scol="clr-namespace:System.Collections;assembly=mscorlib" 
         xmlns:cmod="clr-namespace:System.ComponentModel;assembly=WindowsBase" 
         mc:Ignorable="d"
-        Height="450" Width="800" Loaded="Window_Loaded" FontFamily="Comic Sans MS" Background="#FFF104A6">
+        Height="450" Width="800" Loaded="Window_Loaded" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6">
     <Window.Title>
         <MultiBinding StringFormat="{}{0} - {1} [{2}]" >
             <Binding Path="TitleMain"/>
@@ -46,7 +46,7 @@
     </Window.InputBindings>
     <Grid>
         <DockPanel>
-            <Menu DockPanel.Dock="Top" FontFamily="Comic Sans MS" Background="#FFF104A6">
+            <Menu DockPanel.Dock="Top" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6">
                 <MenuItem Header="_File">
                     <MenuItem Header="_New" Command="New" InputGestureText="Ctrl+N"/>
                     <MenuItem Header="_Open" Command="Open" InputGestureText="Ctrl+O"/>
@@ -179,7 +179,7 @@
                             </Style.Triggers>
                         </Style>
                     </TreeView.Resources>
-                    <TreeViewItem Header="Data" IsExpanded="True" FontFamily="Comic Sans MS" Background="#FFF104A6">
+                    <TreeViewItem Header="Data" IsExpanded="True" FontFamily="Comic Sans MS" Foreground="#FF000000" Background="#FFF104A6">
                         <TreeViewItem Header="General info" Visibility="{Binding GeneralInfo, Converter={StaticResource VisibleIfNotNull}}"/>
                         <TreeViewItem Header="Global init" Visibility="{Binding GlobalInitScripts, Converter={StaticResource VisibleIfNotNull}}"/>
                         <TreeViewItem Header="Game End scripts" Visibility="{Binding GameEndScripts, Converter={StaticResource VisibleIfNotNull}}"/>
