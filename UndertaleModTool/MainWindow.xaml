@@ -184,7 +184,7 @@
                         <TreeViewItem Header="Global init" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" Visibility="{Binding GlobalInitScripts, Converter={StaticResource VisibleIfNotNull}}"/>
                         <TreeViewItem Header="Game End scripts" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" Visibility="{Binding GameEndScripts, Converter={StaticResource VisibleIfNotNull}}"/>
                         <TreeViewItem Header="Audio groups" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding AudioGroups, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding AudioGroups, Converter={StaticResource VisibleIfNotNull}}">
-                            <TreeViewItem.ItemTemplate FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333">
+                            <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleAudioGroup}">
                                     <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>

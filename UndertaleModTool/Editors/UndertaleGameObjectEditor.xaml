@@ -7,7 +7,7 @@
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib" 
              mc:Ignorable="d" 
-             d:DesignHeight="800" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleGameObject}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333">
+             d:DesignHeight="800" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleGameObject}">
     <UserControl.Resources>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="CollisionShapeFlags">
             <ObjectDataProvider.MethodParameters>
@@ -305,14 +305,14 @@
                     <DataGridTemplateColumn Header="X" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
+                                <TextBox Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTemplateColumn Header="Y" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <TextBox Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -329,7 +329,7 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
-                        <TextBlock Background="#FF333333" Margin="3" Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource EventNameConverter}}" Name="EventTypeName"/>
+                        <TextBlock Margin="3" Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource EventNameConverter}}" Name="EventTypeName"/>
                         <DataGrid ItemsSource="{Binding .}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" AddingNewItem="DataGrid_AddingNewItem" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
                             <DataGrid.Resources>
                                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
@@ -348,7 +348,7 @@
                                             <Setter Property="Template">
                                                 <Setter.Value>
                                                     <ControlTemplate>
-                                                        <TextBlock Background="#FF333333" Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
                                                     </ControlTemplate>
                                                 </Setter.Value>
                                             </Setter>
@@ -370,7 +370,7 @@
                                                                         <DataTemplate>
                                                                             <StackPanel>
                                                                                 <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                                                <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                                                                <TextBox Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
@@ -382,7 +382,7 @@
                                                                         <DataTemplate>
                                                                             <StackPanel>
                                                                                 <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                                                <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                                                                <TextBox Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
@@ -394,7 +394,7 @@
                                                                         <DataTemplate>
                                                                             <StackPanel>
                                                                                 <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                                                <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                                                                <TextBox Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
@@ -404,7 +404,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <TextBlock Background="#FF333333" TextAlignment="Center">n/a</TextBlock>
+                                                                            <TextBlock TextAlignment="Center">n/a</TextBlock>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -413,7 +413,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <TextBlock Background="#FF333333" TextAlignment="Center">n/a</TextBlock>
+                                                                            <TextBlock TextAlignment="Center">n/a</TextBlock>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -466,7 +466,7 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </ContentControl.Style>
-                                                <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Text="{Binding EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                                <TextBox Text="{Binding EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                             </ContentControl>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>

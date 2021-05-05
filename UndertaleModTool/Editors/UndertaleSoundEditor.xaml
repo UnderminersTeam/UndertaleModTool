@@ -51,7 +51,7 @@
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Audio group</TextBlock>
         <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding AudioGroup}" ObjectType="{x:Type undertale:UndertaleAudioGroup}"/>
 
-        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Audio file</TextBlock>
+        <TextBlock Grid.Row="8" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" Grid.Column="0" Margin="3">Audio file</TextBlock>
         <local:AudioFileReference Grid.Row="8" Grid.Column="1" Margin="3" AudioReference="{Binding AudioFile}" GroupReference="{Binding AudioGroup}" AudioID="{Binding AudioID}" GroupID="{Binding GroupID}"/>
 
         <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Preload (old audio system)</TextBlock>
