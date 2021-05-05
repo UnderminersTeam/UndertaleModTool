@@ -17,7 +17,7 @@ namespace UndertaleModTool
 
         public string GraphVizPath { get; set; } = ".\\graphviz\\bin";
         public string GameMakerStudioPath { get; set; } = "%appdata%\\GameMaker-Studio";
-        public string GameMakerStudio2RuntimesPath { get; set; } = "C:\\ProgramData\\GameMakerStudio2\\Cache\\runtimes";
+        public string GameMakerStudio2RuntimesPath { get; set; } = "%systemdrive%\\ProgramData\\GameMakerStudio2\\Cache\\runtimes"; /* Using %systemdrive% here fixes the runtimes not being found when the system drive is not C:\\ */
         public bool AssetOrderSwappingEnabled { get; set; } = false;
         public bool ProfileModeEnabled { get; set; } = true;
         public bool ProfileMessageShown { get; set; } = false;
