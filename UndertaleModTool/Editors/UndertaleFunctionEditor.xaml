@@ -21,6 +21,6 @@
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Name string ID</TextBlock>
-        <TextBox Background="#FF333333" Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding NameStringID}"/>
+        <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding NameStringID}"/>
     </Grid>
 </UserControl>

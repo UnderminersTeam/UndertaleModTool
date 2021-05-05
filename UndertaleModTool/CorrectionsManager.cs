@@ -9,6 +9,10 @@ namespace UndertaleModTool
     //Make new GUID helper functions
     public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
+        public string LintAllScripts()
+        {
+            return "None";
+        }
         public void ReplaceTempWithMain(bool ImAnExpertBTW = false)
         {
             try

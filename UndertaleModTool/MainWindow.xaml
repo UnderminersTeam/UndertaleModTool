@@ -149,7 +149,7 @@
                             </Image.Style>
                         </Image>
                     </Button>
-                    <TextBox Grid.Column="1" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged" Background="#FF333333"/>
+                    <TextBox Grid.Column="1" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged" Background="#FF333333" Foreground="#FFFFFFFF"/>
                 </Grid>
                 <TreeView Grid.Column="0" Grid.Row="1" Margin="5" DataContext="{Binding Data}" SelectedItemChanged="TreeView_SelectedItemChanged" MouseDoubleClick="MainTree_MouseDoubleClick" KeyUp="MainTree_KeyUp" AllowDrop="True" Name="MainTree" KeyDown="MainTree_KeyDown" PreviewMouseRightButtonDown="MainTree_PreviewMouseRightButtonDown"
                     VirtualizingStackPanel.IsVirtualizing="True"
@@ -184,58 +184,58 @@
                         <TreeViewItem Header="Global init" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" Visibility="{Binding GlobalInitScripts, Converter={StaticResource VisibleIfNotNull}}"/>
                         <TreeViewItem Header="Game End scripts" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" Visibility="{Binding GameEndScripts, Converter={StaticResource VisibleIfNotNull}}"/>
                         <TreeViewItem Header="Audio groups" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding AudioGroups, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding AudioGroups, Converter={StaticResource VisibleIfNotNull}}">
-                            <TreeViewItem.ItemTemplate>
+                            <TreeViewItem.ItemTemplate FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333">
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleAudioGroup}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Sounds" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding Sounds, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Sounds, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleSound}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Sprites" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding Sprites, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Sprites, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleSprite}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Backgrounds &amp; Tile sets" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding Backgrounds, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Backgrounds, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleBackground}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Paths" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding Paths, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Paths, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertalePath}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Scripts" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding Scripts, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Scripts, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleScript}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Shaders" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding Shaders, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Shaders, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleShader}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Fonts" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding Fonts, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Fonts, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleFont}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
@@ -249,91 +249,91 @@
                         <TreeViewItem Header="Game objects" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding GameObjects, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding GameObjects, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Rooms" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding Rooms, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Rooms, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleRoom}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Extensions" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding Extensions, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Extensions, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleExtension}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Texture page items" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding TexturePageItems, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding TexturePageItems, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleTexturePageItem}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding .}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Code" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding Code, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Code, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleCode}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Variables" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding Variables, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Variables, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleVariable}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Functions" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding Functions, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Functions, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleFunction}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Code locals (unused?)" FontFamily="Comic Sans MS" Background="#FF333333" ItemsSource="{Binding CodeLocals, Converter={StaticResource FilteredViewConverter}}" Foreground="Gray" Visibility="{Binding CodeLocals, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleCodeLocals}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Strings" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding Strings, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Strings, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleString}">
-                                    <TextBlock Text="{Binding Content}" />
+                                    <TextBlock Text="{Binding Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Embedded textures" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding EmbeddedTextures, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding EmbeddedTextures, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleEmbeddedTexture}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding .}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Embedded audio" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding EmbeddedAudio, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding EmbeddedAudio, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleEmbeddedAudio}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <TextBlock Text="{Binding .}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Texture group information" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding TextureGroupInfo, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding TextureGroupInfo, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleTextureGroupInfo}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Embedded images" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333" ItemsSource="{Binding EmbeddedImages, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding EmbeddedImages, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleEmbeddedImage}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>

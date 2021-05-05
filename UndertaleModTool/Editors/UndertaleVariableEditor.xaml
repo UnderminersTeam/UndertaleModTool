@@ -35,9 +35,9 @@
         <ComboBox Grid.Row="1" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource InstanceType}}" SelectedItem="{Binding InstanceType}" />
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">VarID</TextBlock>
-        <TextBox Background="#FF333333" Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding VarID}"/>
+        <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding VarID}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Name string ID</TextBlock>
-        <TextBox Background="#FF333333" Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding NameStringID}"/>
+        <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding NameStringID}"/>
     </Grid>
 </UserControl>

@@ -24,6 +24,6 @@
             </Border>
         </Viewbox>
 
-        <TextBox Background="#FF333333" Grid.Column="1" Text="{Binding Color, Converter={StaticResource ColorTextConverter}, RelativeSource={RelativeSource AncestorType={x:Type local:ColorPicker}}, UpdateSourceTrigger=PropertyChanged}" ToolTip="A, B, G, R"/>
+        <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Column="1" Text="{Binding Color, Converter={StaticResource ColorTextConverter}, RelativeSource={RelativeSource AncestorType={x:Type local:ColorPicker}}, UpdateSourceTrigger=PropertyChanged}" ToolTip="A, B, G, R"/>
     </Grid>
 </UserControl>

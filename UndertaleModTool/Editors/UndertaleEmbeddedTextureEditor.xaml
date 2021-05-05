@@ -19,10 +19,10 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Scaled</TextBlock>
-        <TextBox Background="#FF333333" Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Scaled}"/>
+        <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Scaled}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Generated mips</TextBlock>
-        <TextBox Background="#FF333333" Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneratedMips}" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
+        <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneratedMips}" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
 
         <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="3">
             <Grid.ColumnDefinitions>

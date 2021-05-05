@@ -14,15 +14,13 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using System.Windows.Data;
+using System.Text;
 
 namespace UndertaleModTool
 {
     // Adding misc. scripting functions here
     public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
-        public string LintAllScripts()
-        {
-            return "Not implemented!";
-        }
     }
 }

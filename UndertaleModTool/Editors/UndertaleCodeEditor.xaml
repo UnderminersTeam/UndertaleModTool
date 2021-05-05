@@ -29,10 +29,10 @@
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Locals count</TextBlock>
-        <TextBox Background="#FF333333" Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding LocalsCount}"/>
+        <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding LocalsCount}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Offset</TextBlock>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding Offset}" Background="#FF333333"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding Offset}" Background="#FF333333" Foreground="#FFFFFFFF"/>
 
         <TabControl Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
             <TabItem Header="Decompiled" Name="DecompiledTab">

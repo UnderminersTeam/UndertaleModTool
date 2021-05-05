@@ -12,7 +12,7 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <TextBox Background="#FF333333" Grid.Column="0" IsReadOnly="True" Cursor="Arrow" ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!" AllowDrop="True" PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" Text="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+        <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Column="0" IsReadOnly="True" Cursor="Arrow" ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!" AllowDrop="True" PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" Text="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
         <Button Grid.Column="1" Click="Details_Click" Content=" ... " ToolTip="Open referenced object">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">

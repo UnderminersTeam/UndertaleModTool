@@ -31,13 +31,13 @@
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Smooth</TextBlock>
-        <CheckBox Background="#FF333333" Grid.Row="1" Grid.Column="1" Margin="3" IsChecked="{Binding IsSmooth}"/>
+        <CheckBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="1" Grid.Column="1" Margin="3" IsChecked="{Binding IsSmooth}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Closed</TextBlock>
-        <CheckBox Background="#FF333333" Grid.Row="2" Grid.Column="1" Margin="3" IsChecked="{Binding IsClosed}"/>
+        <CheckBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="2" Grid.Column="1" Margin="3" IsChecked="{Binding IsClosed}"/>
         
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Precision</TextBlock>
-        <TextBox Background="#FF333333" Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Precision}"/>
+        <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Precision}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Points</TextBlock>
         <DataGrid Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Points}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
@@ -70,21 +70,21 @@
                 <DataGridTemplateColumn Header="X" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Background="#FF333333" Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
+                            <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Y" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Background="#FF333333" Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Speed" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Background="#FF333333" Text="{Binding Speed, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Text="{Binding Speed, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

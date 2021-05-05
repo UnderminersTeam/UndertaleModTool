@@ -30,10 +30,10 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Background="#FF333333" Grid.Column="0" Margin="3" Text="{Binding SourceX}"/>
-            <TextBox Background="#FF333333" Grid.Column="1" Margin="3" Text="{Binding SourceY}"/>
-            <TextBox Background="#FF333333" Grid.Column="2" Margin="3" Text="{Binding SourceWidth}"/>
-            <TextBox Background="#FF333333" Grid.Column="3" Margin="3" Text="{Binding SourceHeight}"/>
+            <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Column="0" Margin="3" Text="{Binding SourceX}"/>
+            <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Column="1" Margin="3" Text="{Binding SourceY}"/>
+            <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Column="2" Margin="3" Text="{Binding SourceWidth}"/>
+            <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Column="3" Margin="3" Text="{Binding SourceHeight}"/>
         </Grid>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Target position/size</TextBlock>
@@ -44,10 +44,10 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Background="#FF333333" Grid.Column="0" Margin="3" Text="{Binding TargetX}"/>
-            <TextBox Background="#FF333333" Grid.Column="1" Margin="3" Text="{Binding TargetY}"/>
-            <TextBox Background="#FF333333" Grid.Column="2" Margin="3" Text="{Binding TargetWidth}"/>
-            <TextBox Background="#FF333333" Grid.Column="3" Margin="3" Text="{Binding TargetHeight}"/>
+            <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Column="0" Margin="3" Text="{Binding TargetX}"/>
+            <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Column="1" Margin="3" Text="{Binding TargetY}"/>
+            <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Column="2" Margin="3" Text="{Binding TargetWidth}"/>
+            <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Column="3" Margin="3" Text="{Binding TargetHeight}"/>
         </Grid>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Bounding size</TextBlock>
@@ -56,8 +56,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Background="#FF333333" Grid.Column="0" Margin="3" Text="{Binding BoundingWidth}"/>
-            <TextBox Background="#FF333333" Grid.Column="1" Margin="3" Text="{Binding BoundingHeight}"/>
+            <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Column="0" Margin="3" Text="{Binding BoundingWidth}"/>
+            <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Column="1" Margin="3" Text="{Binding BoundingHeight}"/>
         </Grid>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Texture</TextBlock>

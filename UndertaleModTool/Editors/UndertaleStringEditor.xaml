@@ -17,6 +17,6 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Content</TextBlock>
-        <TextBox Background="#FF333333" Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Content}"/>
+        <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Content}"/>
     </Grid>
 </UserControl>
