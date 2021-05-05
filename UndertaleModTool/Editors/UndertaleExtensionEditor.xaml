@@ -24,9 +24,6 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Empty Folder Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding FolderName}"/>
-        
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Name</TextBlock>
         <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
@@ -81,12 +78,6 @@
                 - Keep in mind that .gml files are either not present, or will be empty. (e.g. no functions)
                   <LineBreak/>
                   Because they are prebaked into GML scripts. That is completely normal.
-                  <LineBreak/>
-                - Folder Name thing is a remnant from the legacy
-                  <LineBreak/>
-                  GM7-8.1 extension editor (aka ExtMaker), Runner reads the name but ignores it.
-                  <LineBreak/>
-                  (although I advise that you don't change it...)
             </TextBlock>
             <!-- Meaning, it is useless to add your own .gml files :p -->
         </StackPanel>

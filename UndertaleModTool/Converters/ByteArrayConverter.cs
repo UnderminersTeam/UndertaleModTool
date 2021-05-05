@@ -16,8 +16,15 @@ namespace UndertaleModTool
         public byte[] bytes = new byte[16];
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            loaded_for_edit = (byte[])value;
-            return BitConverter.ToString((byte[])value).Replace("-", " ");
+            try
+            {
+                loaded_for_edit = (byte[])value;
+                return BitConverter.ToString((byte[])value).Replace("-", " ");
+            }
+            catch
+            {
+                return "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00";
+            }
         }
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {

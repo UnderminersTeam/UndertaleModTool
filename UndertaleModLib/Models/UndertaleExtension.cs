@@ -123,6 +123,13 @@ namespace UndertaleModLib.Models
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleExtension : UndertaleNamedResource
     {
+/*                  <LineBreak/>
+                - Folder Name thing is a remnant from the legacy
+                  <LineBreak/>
+                  GM7-8.1 extension editor(aka ExtMaker), Runner reads the name but ignores it.
+                  <LineBreak/>
+                  (although I advise that you don't change it...)
+*/
         public UndertaleString FolderName { get; set; }
         public UndertaleString Name { get; set; }
         public UndertaleString ClassName { get; set; }
