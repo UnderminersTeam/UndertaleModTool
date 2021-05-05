@@ -7,6 +7,9 @@
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleExtension}">
+    <UserControl.Resources>
+        <local:ByteArrayConverter x:Key="byteArrayConverter"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -69,28 +72,7 @@
         </DataGrid>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Product ID</TextBlock>
-        <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
-            <TextBox.Text>
-                <MultiBinding StringFormat="{}{0:X2} {1:X2} {2:X2} {3:X2} {4:X2} {5:X2} {6:X2} {7:X2} {8:X2} {9:X2} {10:X2} {11:X2} {12:X2} {13:X2} {14:X2} {15:X2}">
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[0]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[1]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[2]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[3]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[4]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[5]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[6]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[7]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[8]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[9]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[10]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[11]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[12]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[13]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[14]"/>
-                    <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="ProductIdData[15]"/>
-                </MultiBinding>
-            </TextBox.Text>
-        </TextBox>
+        <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="4" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Text="{Binding ProductIdData, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleExtensionEditor}}, Mode = TwoWay, Converter={StaticResource byteArrayConverter}}"/>
 
         <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2">
             <TextBlock Foreground="Red" FontStyle="Italic">
