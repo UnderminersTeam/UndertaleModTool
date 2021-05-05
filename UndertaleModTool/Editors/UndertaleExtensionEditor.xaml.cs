@@ -31,9 +31,9 @@ namespace UndertaleModTool
             InitializeComponent();
         }
 
-        private void DataGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
-            int lastItem = ((sender as DataGrid).ItemsSource as IList<UndertaleExtensionFile>).Count;
+            int lastItem = ((Application.Current.MainWindow as MainWindow).Data.Extensions[MyIndex]).Files.Count;
 
             UndertaleExtensionFile obj = new UndertaleExtensionFile()
             {
@@ -42,7 +42,7 @@ namespace UndertaleModTool
                 Functions = new UndertalePointerList<UndertaleExtensionFunction>()
             };
 
-            e.NewItem = obj;
+            ((Application.Current.MainWindow as MainWindow).Data.Extensions[MyIndex]).Files.Add(obj);
         }
     }
 }
