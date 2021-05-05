@@ -17,7 +17,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333">Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" FontFamily="Segoe UI" Foreground="#FFFFFFFF" Background="#FF333333">Name</TextBlock>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}" FontFamily="Segoe UI" Foreground="#FFFFFFFF" Background="#FF333333"/>
     </Grid>
 </UserControl>

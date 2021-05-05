@@ -7,7 +7,7 @@
 		     xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
 		     xmlns:undertaleModels="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance local:GlobalInitEditor}" FontFamily="Comic Sans MS" Foreground="#FFFFFFFF" Background="#FF333333">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance local:GlobalInitEditor}" FontFamily="Segoe UI" Foreground="#FFFFFFFF" Background="#FF333333">
     <StackPanel>
         <TextBlock Text="Global initialization scripts" FontWeight="Bold"/>
         <Separator/>
