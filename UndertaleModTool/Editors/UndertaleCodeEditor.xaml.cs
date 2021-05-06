@@ -468,9 +468,10 @@ namespace UndertaleModTool
 
             CompileContext compileContext = null;
             string text = DecompiledEditor.Text;
+            var dispatcher = Dispatcher;
             Task t = Task.Run(() =>
             {
-                compileContext = Compiler.CompileGMLText(text, data, code);
+                compileContext = Compiler.CompileGMLText(text, data, code, (f) => { dispatcher.Invoke(() => f()); });
             });
             await t;
 

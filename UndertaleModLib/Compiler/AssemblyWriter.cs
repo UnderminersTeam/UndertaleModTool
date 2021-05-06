@@ -239,14 +239,17 @@ namespace UndertaleModLib.Compiler
                     }
 
                     int localId = 1;
-                    foreach (KeyValuePair<string, string> v in compileContext.LocalVars)
+                    compileContext.MainThreadDelegate.Invoke(() =>
                     {
-                        int id = (compileContext.Data?.Variables?.Count ?? 0);
-                        if (compileContext.ensureVariablesDefined)
-                            id = (compileContext.Data?.Variables?.IndexOf(compileContext.Data?.Variables?.DefineLocal(compileContext.OriginalCode, localId, v.Key, compileContext.Data.Strings, compileContext.Data)) ?? 0);
-                        if (id >= 0)
-                            sb.AppendLine(".localvar " + localId++.ToString() + " " + v.Key + " " + id.ToString());
-                    }
+                        foreach (KeyValuePair<string, string> v in compileContext.LocalVars)
+                        {
+                            int id = (compileContext.Data?.Variables?.Count ?? 0);
+                            if (compileContext.ensureVariablesDefined)
+                                id = (compileContext.Data?.Variables?.IndexOf(compileContext.Data?.Variables?.DefineLocal(compileContext.OriginalCode, localId, v.Key, compileContext.Data.Strings, compileContext.Data)) ?? 0);
+                            if (id >= 0)
+                                sb.AppendLine(".localvar " + localId++.ToString() + " " + v.Key + " " + id.ToString());
+                        }
+                    });
 
                     // Now, write all of the instructions!
                     for (int i = 0; i < instructions.Count; i++)
@@ -974,7 +977,10 @@ namespace UndertaleModLib.Compiler
 
                 if (cw.compileContext.ensureFunctionsDefined)
                 {
-                    cw.compileContext.Data?.Functions?.EnsureDefined(fc.Text, cw.compileContext.Data.Strings);
+                    cw.compileContext.MainThreadDelegate.Invoke(() =>
+                    {
+                        cw.compileContext.Data?.Functions?.EnsureDefined(fc.Text, cw.compileContext.Data.Strings);
+                    });
                 }
                 cw.Write("call.i " + fc.Text + "(argc=" + fc.Children.Count.ToString() + ")");
                 cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
@@ -1442,7 +1448,10 @@ namespace UndertaleModLib.Compiler
                             cw.Write("pushi.e " + e.Children[0].ID.ToString());
                             if (cw.compileContext.ensureVariablesDefined && e.Children[0].ID == -1)
                             {
-                                cw.compileContext.Data?.Variables?.EnsureDefined(e.Children[0].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(e.Children[0].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(e.Children[0].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                cw.compileContext.MainThreadDelegate.Invoke(() =>
+                                {
+                                    cw.compileContext.Data?.Variables?.EnsureDefined(e.Children[0].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(e.Children[0].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(e.Children[0].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                });
                             }
                             AssembleArrayPush(cw, e.Children[0]);
                             if (duplicate)
@@ -1468,7 +1477,10 @@ namespace UndertaleModLib.Compiler
                                     cw.Write((useNoSpecificType ? "push.v self." : "pushbltn.v self.") + name);
                                     if (cw.compileContext.ensureVariablesDefined)
                                     {
-                                        cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Self, true, cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                        cw.compileContext.MainThreadDelegate.Invoke(() =>
+                                        {
+                                            cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Self, true, cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                        });
                                     }
                                 }
                                 else
@@ -1477,14 +1489,20 @@ namespace UndertaleModLib.Compiler
                                     if (cw.compileContext.ensureVariablesDefined)
                                     {
                                         // this is probably hardcoded false, but not sure
-                                        cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Self, false/*BuiltinList.Instance.ContainsKey(name) || BuiltinList.InstanceLimitedEvent.ContainsKey(name)*/, cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                        cw.compileContext.MainThreadDelegate.Invoke(() =>
+                                        {
+                                            cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Self, false/*BuiltinList.Instance.ContainsKey(name) || BuiltinList.InstanceLimitedEvent.ContainsKey(name)*/, cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                        });
                                     }
                                 }
                                 break;
                             case -5:
                                 if (cw.compileContext.ensureVariablesDefined)
                                 {
-                                    cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Global, false, cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                    cw.compileContext.MainThreadDelegate.Invoke(() =>
+                                    {
+                                        cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Global, false, cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                    });
                                 }
                                 cw.Write((useNoSpecificType ? "push.v global." : "pushglb.v global.") + name);
                                 break;
@@ -1494,7 +1512,10 @@ namespace UndertaleModLib.Compiler
                             default:
                                 if (cw.compileContext.ensureVariablesDefined)
                                 {
-                                    cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(name) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(name), cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                    cw.compileContext.MainThreadDelegate.Invoke(() =>
+                                    {
+                                        cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(name) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(name), cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                    });
                                 }
                                 cw.Write("push.v " + GetIDPrefix(id) + name);
                                 break;
@@ -1514,7 +1535,10 @@ namespace UndertaleModLib.Compiler
                         {
                             if (cw.compileContext.ensureVariablesDefined)
                             {
-                                cw.compileContext.Data?.Variables?.EnsureDefined(e.Children[next].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(e.Children[next].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(e.Children[next].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                cw.compileContext.MainThreadDelegate.Invoke(() =>
+                                {
+                                    cw.compileContext.Data?.Variables?.EnsureDefined(e.Children[next].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(e.Children[next].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(e.Children[next].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                });
                             }
                             if (e.Children[next].Children.Count != 0)
                             {
@@ -1664,7 +1688,10 @@ namespace UndertaleModLib.Compiler
                             }
                             if (cw.compileContext.ensureVariablesDefined && s.Children[0].ID == -1)
                             {
-                                cw.compileContext.Data?.Variables?.EnsureDefined(s.Children[0].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(s.Children[0].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(s.Children[0].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                cw.compileContext.MainThreadDelegate.Invoke(() =>
+                                {
+                                    cw.compileContext.Data?.Variables?.EnsureDefined(s.Children[0].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(s.Children[0].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(s.Children[0].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                });
                             }
                             cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [array]" + GetIDPrefixSpecial(s.Children[0].ID) + s.Children[0].Text);
                             return;
@@ -1676,7 +1703,10 @@ namespace UndertaleModLib.Compiler
                             id -= 100000;
                         if (cw.compileContext.ensureVariablesDefined && id == -1)
                         {
-                            cw.compileContext.Data?.Variables?.EnsureDefined(s.Children[0].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(s.Children[0].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(s.Children[0].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
+                            cw.compileContext.MainThreadDelegate.Invoke(() =>
+                            {
+                                cw.compileContext.Data?.Variables?.EnsureDefined(s.Children[0].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(s.Children[0].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(s.Children[0].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
+                            });
                         }
                         cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " " + GetIDPrefix(id) + s.Children[0].Text);
                     }
@@ -1703,7 +1733,10 @@ namespace UndertaleModLib.Compiler
                         {
                             if (cw.compileContext.ensureVariablesDefined)
                             {
-                                cw.compileContext.Data?.Variables?.EnsureDefined(s.Children[next].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(s.Children[next].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(s.Children[next].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                cw.compileContext.MainThreadDelegate.Invoke(() =>
+                                {
+                                    cw.compileContext.Data?.Variables?.EnsureDefined(s.Children[next].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(s.Children[next].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(s.Children[next].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
+                                });
                             }
                             if (s.Children[next].Children.Count != 0)
                             {

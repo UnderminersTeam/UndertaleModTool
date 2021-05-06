@@ -1483,7 +1483,12 @@ namespace UndertaleModLib.Compiler
                                     Statement curr = left.Children[i];
 
                                     if (context.ensureVariablesDefined)
-                                        context.Data?.Variables?.EnsureDefined(curr.Text, (UndertaleInstruction.InstanceType)(short)curr.ID, context.BuiltInList.Instance.ContainsKey(curr.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(curr.Text) || context.BuiltInList.GlobalNotArray.ContainsKey(curr.Text) || context.BuiltInList.GlobalArray.ContainsKey(curr.Text), context.Data?.Strings, context.Data);
+                                    {
+                                        context.MainThreadDelegate.Invoke(() =>
+                                        {
+                                            context.Data?.Variables?.EnsureDefined(curr.Text, (UndertaleInstruction.InstanceType)(short)curr.ID, context.BuiltInList.Instance.ContainsKey(curr.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(curr.Text) || context.BuiltInList.GlobalNotArray.ContainsKey(curr.Text) || context.BuiltInList.GlobalArray.ContainsKey(curr.Text), context.Data?.Strings, context.Data);
+                                        });
+                                    }
 
                                     AccessorInfo ai = GetAccessorInfoFromStatement(context, curr);
                                     if (ai != null)
@@ -1763,7 +1768,12 @@ namespace UndertaleModLib.Compiler
                         break;
                     case Statement.StatementKind.ExprSingleVariable:
                         if (context.ensureVariablesDefined)
-                            context.Data?.Variables?.EnsureDefined(result.Text, (UndertaleInstruction.InstanceType)(short)result.ID, context.BuiltInList.Instance.ContainsKey(result.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(result.Text) || context.BuiltInList.GlobalNotArray.ContainsKey(result.Text) || context.BuiltInList.GlobalArray.ContainsKey(result.Text), context.Data?.Strings, context.Data);
+                        {
+                            context.MainThreadDelegate.Invoke(() =>
+                            {
+                                context.Data?.Variables?.EnsureDefined(result.Text, (UndertaleInstruction.InstanceType)(short)result.ID, context.BuiltInList.Instance.ContainsKey(result.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(result.Text) || context.BuiltInList.GlobalNotArray.ContainsKey(result.Text) || context.BuiltInList.GlobalArray.ContainsKey(result.Text), context.Data?.Strings, context.Data);
+                            });
+                        }
                         if (result.Children.Count >= 2 && result.Children[0].Kind == Statement.StatementKind.Token)
                         {
                             AccessorInfo ai = GetAccessorInfoFromStatement(context, result);
@@ -1790,7 +1800,12 @@ namespace UndertaleModLib.Compiler
                                 Statement curr = result.Children[i];
 
                                 if (context.ensureVariablesDefined)
-                                    context.Data?.Variables?.EnsureDefined(curr.Text, (UndertaleInstruction.InstanceType)(short)curr.ID, context.BuiltInList.Instance.ContainsKey(curr.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(curr.Text) || context.BuiltInList.GlobalNotArray.ContainsKey(curr.Text) || context.BuiltInList.GlobalArray.ContainsKey(curr.Text), context.Data?.Strings, context.Data);
+                                {
+                                    context.MainThreadDelegate.Invoke(() =>
+                                    {
+                                        context.Data?.Variables?.EnsureDefined(curr.Text, (UndertaleInstruction.InstanceType)(short)curr.ID, context.BuiltInList.Instance.ContainsKey(curr.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(curr.Text) || context.BuiltInList.GlobalNotArray.ContainsKey(curr.Text) || context.BuiltInList.GlobalArray.ContainsKey(curr.Text), context.Data?.Strings, context.Data);
+                                    });
+                                }
 
                                 AccessorInfo ai = GetAccessorInfoFromStatement(context, curr);
                                 if (ai != null)

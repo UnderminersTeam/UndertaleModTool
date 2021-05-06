@@ -28,6 +28,8 @@ namespace UndertaleModLib.Compiler
         public string ResultError = null;
         public string ResultAssembly = null;
 
+        public Compiler.MainThreadDelegate MainThreadDelegate = (f) => { f(); };
+
         public CompileContext(UndertaleData data, UndertaleCode oldCode)
         {
             Data = data;
@@ -42,8 +44,13 @@ namespace UndertaleModLib.Compiler
         public void OnSuccessfulFinish()
         {
             if (ensureVariablesDefined)
-                foreach (KeyValuePair<string, string> v in GlobalVars)
-                    Data?.Variables?.EnsureDefined(v.Key, UndertaleInstruction.InstanceType.Global, false, Data.Strings, Data);
+            {
+                MainThreadDelegate.Invoke(() =>
+                {
+                    foreach (KeyValuePair<string, string> v in GlobalVars)
+                        Data?.Variables?.EnsureDefined(v.Key, UndertaleInstruction.InstanceType.Global, false, Data.Strings, Data);
+                });
+            }
 
             SuccessfulCompile = true;
         }
@@ -126,11 +133,20 @@ namespace UndertaleModLib.Compiler
 
     public static partial class Compiler
     {
+        public delegate void MainThreadFunc();
+        public delegate void MainThreadDelegate(MainThreadFunc f);
 
         // A simple matching convenience
         public static bool In<T>(this T obj, params T[] args)
         {
             return args.Contains(obj);
+        }
+
+        public static CompileContext CompileGMLText(string input, UndertaleData data, UndertaleCode code, MainThreadDelegate mainThreadDelegate)
+        {
+            var ctx = new CompileContext(data, code);
+            ctx.MainThreadDelegate = mainThreadDelegate;
+            return CompileGMLText(input, ctx);
         }
 
         public static CompileContext CompileGMLText(string input, UndertaleData data, UndertaleCode code)
