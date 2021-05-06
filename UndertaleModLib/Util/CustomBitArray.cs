@@ -54,18 +54,18 @@ namespace UndertaleModLib.Util
             {
                 fixed (int* ptr2 = &other.Array[0])
                 {
-                    uint* currPtr = (uint*)ptr;
-                    uint* otherPtr = (uint*)ptr2;
+                    int* currPtr = ptr;
+                    int* otherPtr = ptr2;
 
                     int i;
                     int len = Array.Length;
                     for (i = 0; i < len; i++)
                     {
-                        uint before = *currPtr;
-                        uint after = before;
+                        int before = *currPtr;
+                        int after = before;
                         after &= *otherPtr;
                         if (setIndexArr == i)
-                            after |= ((uint)1 << (setIndex % 32));
+                            after |= (1 << (setIndex % 32));
                         if (before != after)
                         {
                             *currPtr = after;
@@ -81,7 +81,7 @@ namespace UndertaleModLib.Util
                     {
                         *currPtr &= *otherPtr;
                         if (setIndexArr == i)
-                            *currPtr |= ((uint)1 << (setIndex % 32));
+                            *currPtr |= (1 << (setIndex % 32));
                         currPtr++;
                         otherPtr++;
                     }
