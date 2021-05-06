@@ -2299,7 +2299,7 @@ namespace UndertaleModLib.Decompiler
         }
 
         // Based on http://www.backerstreet.com/decompiler/loop_analysis.php
-        public static Dictionary<Block, List<Block>> ComputeDominators(Dictionary<uint, Block> blocks, Block entryBlock, bool reversed)
+        public static Dictionary<Block, List<Block>> ComputeReverseDominators(Dictionary<uint, Block> blocks, Block entryBlock)
         {
             Block[] blockList = blocks.Values.ToArray();
             BitArray[] dominators = new BitArray[blockList.Length];
@@ -2332,6 +2332,8 @@ namespace UndertaleModLib.Decompiler
 
             BitArray temp = new BitArray(blockList.Length);
             bool changed;
+            Block[] reverseUse1 = { null };
+            Block[] reverseUse2 = { null, null };
             do
             {
                 changed = false;
@@ -2340,17 +2342,23 @@ namespace UndertaleModLib.Decompiler
                     if (i == entryBlockId)
                         continue;
 
-                    IEnumerable<Block> e = blockList[i].entryPoints;
-                    if (reversed)
-                        if (blockList[i].conditionalExit)
-                            e = new Block[] { blockList[i].nextBlockTrue, blockList[i].nextBlockFalse };
-                        else
-                            e = new Block[] { blockList[i].nextBlockTrue };
+                    Block b = blockList[i];
+
+                    IEnumerable<Block> e;
+                    if (b.conditionalExit)
+                    {
+                        reverseUse2[0] = b.nextBlockTrue;
+                        reverseUse2[1] = b.nextBlockFalse;
+                        e = reverseUse2;
+                    }
+                    else
+                    {
+                        reverseUse1[0] = b.nextBlockTrue;
+                        e = reverseUse1;
+                    }
+
                     foreach (Block pred in e)
                     {
-                        if (pred == null)
-                            continue; // Happens in do-until loops. No other known situations.
-
                         BitArray curr = dominators[i];
                         temp.SetAll(false);
                         temp.Or(curr);
@@ -2379,6 +2387,7 @@ namespace UndertaleModLib.Decompiler
                         result[blockList[i]].Add(blockList[j]);
                 }
             }
+
             return result;
         }
 
@@ -2412,7 +2421,6 @@ namespace UndertaleModLib.Decompiler
 
         private static Dictionary<Block, List<Block>> ComputeNaturalLoops(Dictionary<uint, Block> blocks, Block entryBlock)
         {
-            var dominators = ComputeDominators(blocks, entryBlock, false);
             Dictionary<Block, List<Block>> loopSet = new Dictionary<Block, List<Block>>();
 
             foreach (var block in blocks.Values)
@@ -2421,14 +2429,17 @@ namespace UndertaleModLib.Decompiler
                 // must be the header of a loop.
                 // That is, block -> succ is a back edge.
 
+                // Future update: We're going to take a much more efficient but assuming
+                // route that the compiler outputs in a specific order, which it always should
+
                 if (block.nextBlockTrue != null && !loopSet.ContainsKey(block.nextBlockTrue))
                 {
-                    if (dominators[block].Contains(block.nextBlockTrue))
+                    if (block.nextBlockTrue.Address <= block.Address)
                         loopSet.Add(block.nextBlockTrue, NaturalLoopForEdge(block.nextBlockTrue, block));
                 }
                 if (block.nextBlockFalse != null && block.nextBlockTrue != block.nextBlockFalse && !loopSet.ContainsKey(block.nextBlockFalse))
                 {
-                    if (dominators[block].Contains(block.nextBlockFalse))
+                    if (block.nextBlockFalse.Address <= block.Address)
                         loopSet.Add(block.nextBlockFalse, NaturalLoopForEdge(block.nextBlockFalse, block));
                 }
             }
@@ -2691,7 +2702,7 @@ namespace UndertaleModLib.Decompiler
         private static List<Statement> HLDecompile(DecompileContext context, Dictionary<uint, Block> blocks, Block entryPoint, Block rootExitPoint)
         {
             Dictionary<Block, List<Block>> loops = ComputeNaturalLoops(blocks, entryPoint);
-            var reverseDominators = ComputeDominators(blocks, rootExitPoint, true);
+            var reverseDominators = ComputeReverseDominators(blocks, rootExitPoint);
             Block bl = entryPoint;
             return (HLDecompileBlocks(context, ref bl, blocks, loops, reverseDominators, new List<Block>()).CleanBlockStatement(context)).Statements;
         }
