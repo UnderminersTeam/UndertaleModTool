@@ -2302,7 +2302,7 @@ namespace UndertaleModLib.Decompiler
         public static Dictionary<Block, List<Block>> ComputeReverseDominators(Dictionary<uint, Block> blocks, Block entryBlock)
         {
             Block[] blockList = blocks.Values.ToArray();
-            BitArray[] dominators = new BitArray[blockList.Length];
+            CustomBitArray[] dominators = new CustomBitArray[blockList.Length];
 
             int entryBlockId = -1;
             {
@@ -2312,25 +2312,30 @@ namespace UndertaleModLib.Decompiler
                     Block b = blockList[i];
                     b._CachedIndex = i;
 
+                    CustomBitArray ba;
+
                     if (blockList[i] == entryBlock)
                     {
                         entryBlockId = i;
-                        BitArray ba = new BitArray(blockList.Length, false);
-                        ba.Set(i, true);
+                        ba = new CustomBitArray(blockList.Length);
+                        ba.SetTrue(i);
                         dominators[i] = ba;
                         break;
                     }
 
-                    dominators[i] = new BitArray(blockList.Length, true);
+                    ba = new CustomBitArray(blockList.Length);
+                    ba.SetAllTrue();
+                    dominators[i] = ba;
                 }
                 for (i++; i < blockList.Length; i++)
                 {
                     blockList[i]._CachedIndex = i;
-                    dominators[i] = new BitArray(blockList.Length, true);
+                    CustomBitArray ba = new CustomBitArray(blockList.Length);
+                    ba.SetAllTrue();
+                    dominators[i] = ba;
                 }
             }
 
-            BitArray temp = new BitArray(blockList.Length);
             bool changed;
             Block[] reverseUse1 = { null };
             Block[] reverseUse2 = { null, null };
@@ -2358,32 +2363,18 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     foreach (Block pred in e)
-                    {
-                        BitArray curr = dominators[i];
-                        temp.SetAll(false);
-                        temp.Or(curr);
-                        curr.And(dominators[pred._CachedIndex]);
-                        curr.Set(i, true);
-                        for (var j = 0; j < blockList.Length; j++)
-                        {
-                            if (curr[j] != temp[j])
-                            {
-                                changed = true;
-                                break;
-                            }
-                        }
-                    }
+                        changed |= dominators[i].And(dominators[pred._CachedIndex], i);
                 }
             } while (changed);
 
             Dictionary<Block, List<Block>> result = new Dictionary<Block, List<Block>>(blockList.Length);
             for (var i = 0; i < blockList.Length; i++)
             {
-                BitArray curr = dominators[i];
+                CustomBitArray curr = dominators[i];
                 result[blockList[i]] = new List<Block>(4);
                 for (var j = 0; j < blockList.Length; j++)
                 {
-                    if (curr[j])
+                    if (curr.Get(j))
                         result[blockList[i]].Add(blockList[j]);
                 }
             }
