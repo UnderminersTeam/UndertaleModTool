@@ -19,7 +19,6 @@ bool multiline = ScriptQuestion("Multi-line search?");
 bool isRegex = ScriptQuestion("Is regex search?");
 String keyword = SimpleTextInput("Enter search terms", "Search box below", "", multiline);
 String replacement = SimpleTextInput("Enter replacement term", "Search box below", "", multiline);
-String replacement = SimpleTextInput("Enter replacement term", "Search box below", "", multiline);
 
 foreach(UndertaleCode code in Data.Code)
 {
