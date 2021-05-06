@@ -265,7 +265,8 @@ namespace UndertaleModTool
             }
             return null;
         }
-        private async void DecompileCode(UndertaleCode code)
+
+        private async void DecompileCode(UndertaleCode code, LoaderDialog existingDialog = null)
         {
             DecompiledEditor.IsReadOnly = true;
             DecompiledEditor.TextArea.ClearSelection();
@@ -273,12 +274,22 @@ namespace UndertaleModTool
             {
                 DecompiledEditor.Text = "// Duplicate code entry; cannot edit here.";
                 CurrentDecompiled = code;
+                existingDialog?.TryClose();
             }
             else
             {
-                LoaderDialog dialog = new LoaderDialog("Decompiling", "Decompiling, please wait... This can take a while on complex scripts");
-                dialog.Owner = Window.GetWindow(this);
-                _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.TryShowDialog(); }));
+                LoaderDialog dialog;
+                if (existingDialog != null)
+                {
+                    dialog = existingDialog;
+                    dialog.Message = "Decompiling, please wait...";
+                }
+                else
+                {
+                    dialog = new LoaderDialog("Decompiling", "Decompiling, please wait... This can take a while on complex scripts.");
+                    dialog.Owner = Window.GetWindow(this);
+                    _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.TryShowDialog(); }));
+                }
 
                 UndertaleCode gettextCode = null;
                 if (gettext == null)
@@ -424,7 +435,7 @@ namespace UndertaleModTool
             DecompiledFocused = true;
         }
 
-        private void DecompiledEditor_LostFocus(object sender, RoutedEventArgs e)
+        private async void DecompiledEditor_LostFocus(object sender, RoutedEventArgs e)
         {
             if (!DecompiledFocused)
                 return;
@@ -451,17 +462,36 @@ namespace UndertaleModTool
 
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
 
-            CompileContext compileContext = Compiler.CompileGMLText(DecompiledEditor.Text, data, code);
+            LoaderDialog dialog = new LoaderDialog("Compiling", "Compiling, please wait...");
+            dialog.Owner = Window.GetWindow(this);
+            _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.TryShowDialog(); }));
+
+            CompileContext compileContext = null;
+            string text = DecompiledEditor.Text;
+            Task t = Task.Run(() =>
+            {
+                compileContext = Compiler.CompileGMLText(text, data, code);
+            });
+            await t;
+
+            if (compileContext == null)
+            {
+                MessageBox.Show("Compile context was null for some reason...", "This shouldn't happen", MessageBoxButton.OK, MessageBoxImage.Error);
+                dialog.TryClose();
+                return;
+            }
 
             if (compileContext.HasError)
             {
                 MessageBox.Show(compileContext.ResultError, "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                dialog.TryClose();
                 return;
             }
 
             if (!compileContext.SuccessfulCompile)
             {
                 MessageBox.Show(compileContext.ResultAssembly, "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                dialog.TryClose();
                 return;
             }
 
@@ -473,6 +503,8 @@ namespace UndertaleModTool
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                dialog.TryClose();
 
                 // The code should only be written after being successfully
                 // edited (if it doesn't successfully assemble for some reason, don't write it).
@@ -514,7 +546,7 @@ namespace UndertaleModTool
                 return;
 
             // Decompile new code
-            DecompileCode(code);
+            DecompileCode(code, dialog);
         }
 
         private void DisassemblyEditor_GotFocus(object sender, RoutedEventArgs e)
@@ -831,8 +863,12 @@ namespace UndertaleModTool
                         if (val == null)
                         {
                             if (data.BuiltinList.Functions.ContainsKey(m.Value))
-                                return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
-                                                                new SolidColorBrush(Color.FromRgb(0xFF, 0xB8, 0x71)));
+                            {
+                                var res = new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
+                                                                  new SolidColorBrush(Color.FromRgb(0xFF, 0xB8, 0x71)));
+                                res.Bold = true;
+                                return res;
+                            }
                         }
                     }
                     else
@@ -877,10 +913,13 @@ namespace UndertaleModTool
                 return null;
             }
         }
+
         public class ColorVisualLineText : VisualLineText
         {
             private string Text { get; set; }
             private Brush ForegroundBrush { get; set; }
+
+            public bool Bold { get; set; } = false;
 
             /// <summary>
             /// Creates a visual line text element with the specified length.
@@ -898,6 +937,8 @@ namespace UndertaleModTool
             {
                 if (ForegroundBrush != null)
                     TextRunProperties.SetForegroundBrush(ForegroundBrush);
+                if (Bold)
+                    TextRunProperties.SetTypeface(new Typeface(TextRunProperties.Typeface.FontFamily, FontStyles.Normal, FontWeights.Bold, FontStretches.Normal));
                 return base.CreateTextRun(startVisualColumn, context);
             }
 
