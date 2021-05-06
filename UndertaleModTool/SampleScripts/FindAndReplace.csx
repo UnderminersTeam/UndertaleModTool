@@ -16,12 +16,14 @@ if (!ScriptQuestion("This will make changes across all of the code! Are you sure
 }
 bool case_sensitive = ScriptQuestion("Case sensitive?"); 
 bool multiline = ScriptQuestion("Multi-line search?"); 
+bool isRegex = ScriptQuestion("Is regex search?");
 String keyword = SimpleTextInput("Enter search terms", "Search box below", "", multiline);
+String replacement = SimpleTextInput("Enter replacement term", "Search box below", "", multiline);
 String replacement = SimpleTextInput("Enter replacement term", "Search box below", "", multiline);
 
 foreach(UndertaleCode code in Data.Code)
 {
-    ReplaceTextInGML(code.Name.Content, keyword, replacement, case_sensitive);
+    ReplaceTextInGML(code.Name.Content, keyword, replacement, case_sensitive, isRegex);
     UpdateProgress();
 }
 

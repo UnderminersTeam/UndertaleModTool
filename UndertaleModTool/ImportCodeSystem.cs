@@ -64,19 +64,29 @@ namespace UndertaleModTool
             }
         }
 
-        public string GetPassBack(string decompiled_text, string keyword, string replacement, bool case_sensitive = false)
+        public string GetPassBack(string decompiled_text, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false)
         {
             keyword = keyword.Replace("\r\n", "\n");
             replacement = replacement.Replace("\r\n", "\n");
             string passBack;
-            if (case_sensitive)
-                passBack = decompiled_text.Replace(keyword, replacement);
+            if (!isRegex)
+            {
+                if (case_sensitive)
+                    passBack = decompiled_text.Replace(keyword, replacement);
+                else
+                    passBack = Regex.Replace(decompiled_text, Regex.Escape(keyword), Regex.Escape(replacement), RegexOptions.IgnoreCase);
+            }
             else
-                passBack = Regex.Replace(decompiled_text, Regex.Escape(keyword), replacement, RegexOptions.IgnoreCase);
+            {
+                if (case_sensitive)
+                    passBack = Regex.Replace(decompiled_text, keyword, replacement, RegexOptions.IgnoreCase);
+                else
+                    passBack = Regex.Replace(decompiled_text, keyword, replacement, RegexOptions.None);
+            }
             return passBack;
         }
 
-        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false)
+        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false)
         {
             UndertaleCode code;
             string passBack;
@@ -93,7 +103,7 @@ namespace UndertaleModTool
                 ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
                 try
                 {
-                    passBack = GetPassBack((code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""), keyword, replacement);
+                    passBack = GetPassBack((code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""), keyword, replacement, case_sensitive, isRegex);
                     code.ReplaceGML(passBack, Data);
                 }
                 catch (Exception exc)
