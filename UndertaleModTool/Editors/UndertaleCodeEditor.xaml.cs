@@ -554,6 +554,7 @@ namespace UndertaleModTool
             {
                 var instructions = Assembler.Assemble(DisassemblyEditor.Text, data);
                 code.Replace(instructions);
+                (Application.Current.MainWindow as MainWindow).NukeProfileGML(code.Name.Content);
             }
             catch (Exception ex)
             {
