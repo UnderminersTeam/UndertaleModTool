@@ -37,7 +37,14 @@ namespace UndertaleModTool
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
-            Process.Start(e.Uri.ToString());
+            try
+            {
+                Process.Start(e.Uri.ToString());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hyperlink_RequestNavigate error! This URL has probably returned a 404 error, or is otherwise unavailable.\nError:\n" + ex.ToString());
+            }
         }
     }
 
