@@ -346,15 +346,22 @@ namespace UndertaleModLib
         }
     }
 
-    // TODO: INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleChunkVARI : UndertaleChunk
     {
         public override string Name => "VARI";
+        
+        public uint VarCount1 { get; set; }
 
-        public uint InstanceVarCount { get; set; }
-        public uint InstanceVarCountAgain { get; set; }
+        public uint VarCount2 { get; set; }
         public uint MaxLocalVarCount { get; set; }
+        public bool DifferentVarCounts { get; set; }
         public List<UndertaleVariable> List = new List<UndertaleVariable>();
+
+        [Obsolete]
+        public uint InstanceVarCount { get => VarCount1; set => VarCount1 = value; }
+        [Obsolete]
+        public uint InstanceVarCountAgain { get => VarCount2; set => VarCount2 = value; }
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
@@ -368,8 +375,34 @@ namespace UndertaleModLib
 
             if (!writer.Bytecode14OrLower)
             {
-                writer.Write(InstanceVarCount);
-                writer.Write(InstanceVarCountAgain);
+                // Count instance/global variables, to make sure they're properly updated
+                if (DifferentVarCounts)
+                {
+                    VarCount1 = 0;
+                    VarCount2 = 0;
+                    foreach (var v in List)
+                    {
+                        if (v.InstanceType == UndertaleInstruction.InstanceType.Global)
+                            VarCount1++;
+                        else if (v.VarID >= 0 && v.InstanceType == UndertaleInstruction.InstanceType.Self)
+                            VarCount2++;
+                    }
+                }
+                else
+                {
+                    int count = -1;
+                    foreach (var v in List)
+                    {
+                        if (v.InstanceType == UndertaleInstruction.InstanceType.Global ||
+                            v.InstanceType == UndertaleInstruction.InstanceType.Self)
+                            count = Math.Max(count, v.VarID);
+                    }
+                    VarCount1 = (uint)(count + 1);
+                    VarCount2 = VarCount1;
+                }
+
+                writer.Write(VarCount1);
+                writer.Write(VarCount2);
                 writer.Write(MaxLocalVarCount);
             }
             foreach (UndertaleVariable var in List)
@@ -390,8 +423,9 @@ namespace UndertaleModLib
             uint varLength;
             if (!reader.Bytecode14OrLower)
             {
-                InstanceVarCount = reader.ReadUInt32();
-                InstanceVarCountAgain = reader.ReadUInt32();
+                VarCount1 = reader.ReadUInt32();
+                VarCount2 = reader.ReadUInt32();
+                DifferentVarCounts = VarCount1 != VarCount2;
                 MaxLocalVarCount = reader.ReadUInt32();
                 varLength = 20;
             }

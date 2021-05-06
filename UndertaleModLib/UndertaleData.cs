@@ -34,8 +34,13 @@ namespace UndertaleModLib
         public IList<UndertaleTexturePageItem> TexturePageItems => FORM.TPAG?.List;
         public IList<UndertaleCode> Code => FORM.CODE?.List;
         public IList<UndertaleVariable> Variables => FORM.VARI?.List;
-        public uint InstanceVarCount { get => FORM.VARI.InstanceVarCount; set => FORM.VARI.InstanceVarCount = value; }
-        public uint InstanceVarCountAgain { get => FORM.VARI.InstanceVarCountAgain; set => FORM.VARI.InstanceVarCountAgain = value; }
+        public uint VarCount1 { get => FORM.VARI.VarCount1; set => FORM.VARI.VarCount1 = value; }
+        public uint VarCount2 { get => FORM.VARI.VarCount2; set => FORM.VARI.VarCount2 = value; }
+        public bool DifferentVarCounts { get => FORM.VARI.DifferentVarCounts; set => FORM.VARI.DifferentVarCounts = value; }
+        [Obsolete]
+        public uint InstanceVarCount { get => VarCount1; set => VarCount1 = value; }
+        [Obsolete]
+        public uint InstanceVarCountAgain { get => VarCount2; set => VarCount2 = value; }
         public uint MaxLocalVarCount { get => FORM.VARI.MaxLocalVarCount; set => FORM.VARI.MaxLocalVarCount = value; }
         public IList<UndertaleFunction> Functions => FORM.FUNC?.Functions;
         public IList<UndertaleCodeLocals> CodeLocals => FORM.FUNC?.CodeLocals;
@@ -320,26 +325,26 @@ namespace UndertaleModLib
             UndertaleVariable vari = list.Where((x) => x.Name.Content == name && x.InstanceType == inst).FirstOrDefault();
             if (vari == null)
             {
-                var oldId = data.InstanceVarCount;
+                var oldId = data.VarCount1;
                 if (!bytecode14)
                 {
-                    if (data.InstanceVarCount == data.InstanceVarCountAgain)
+                    if (data.DifferentVarCounts)
                     { 
                         // Bytecode 16+
-                        data.InstanceVarCount++;
-                        data.InstanceVarCountAgain++;
+                        data.VarCount1++;
+                        data.VarCount2++;
                     }
                     else
                     { 
                         // Bytecode 15
                         if (inst == UndertaleInstruction.InstanceType.Self && !isBuiltin)
                         {
-			                oldId = data.InstanceVarCountAgain;
-                            data.InstanceVarCountAgain++;
+			                oldId = data.VarCount2;
+                            data.VarCount2++;
                         }
                         else if (inst == UndertaleInstruction.InstanceType.Global)
                         {
-                            data.InstanceVarCount++;
+                            data.VarCount1++;
                         }
                     }
                 }
