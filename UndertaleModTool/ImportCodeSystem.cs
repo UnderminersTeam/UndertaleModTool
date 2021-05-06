@@ -118,7 +118,7 @@ namespace UndertaleModTool
                     string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, codeName + ".gml");
                     if (File.Exists(path))
                     {
-                        passBack = GetPassBack(File.ReadAllText(path), keyword, replacement, case_sensitive);
+                        passBack = GetPassBack(File.ReadAllText(path), keyword, replacement, case_sensitive, isRegex);
                         File.WriteAllText(path, passBack);
                         code.ReplaceGML(passBack, Data);
                     }
@@ -127,7 +127,7 @@ namespace UndertaleModTool
                         ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
                         try
                         {
-                            passBack = GetPassBack((code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""), keyword, replacement);
+                            passBack = GetPassBack((code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""), keyword, replacement, case_sensitive, isRegex);
                             code.ReplaceGML(passBack, Data);
                         }
                         catch (Exception exc)
