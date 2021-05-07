@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
@@ -133,23 +133,36 @@ namespace UndertaleModLib.Decompiler
 
                 return null;
             };
-
-            Func<DecompileContext, Decompiler.FunctionCall, int, Decompiler.ExpressionConstant, string> resolve_blend_mode = (context, func, index, self) => 
-            {
-                int? val = Decompiler.ExpressionConstant.ConvertToInt(self.Value);
-                if (val == null)
-                    return null;
-
-                return blend_modes.ContainsKey(val.Value) ? blend_modes[val.Value] : null;
-            };
-
             resolvers = new Dictionary<string, Func<DecompileContext, Decompiler.FunctionCall, int, Decompiler.ExpressionConstant, string>>()
             {
                 // TODO: __background* compatibility scripts
                 { "event_perform", resolve_event_perform },
                 { "event_perform_object", resolve_event_perform },
-                { "draw_set_blend_mode", resolve_blend_mode },
-                { "draw_set_blend_mode_ext", resolve_blend_mode },
+                { "draw_set_blend_mode", (context, func, index, self) =>
+                    {
+                        int? val = Decompiler.ExpressionConstant.ConvertToInt(self.Value);
+                        if (val != null)
+                        {
+                            switch(val)
+                            {
+                                case 0: return "bm_normal";
+                                case 1: return "bm_add";
+                                case 2: return "bm_max";
+                                case 3: return "bm_subtract";
+                            }
+                        }
+                        return null;
+                    }
+                },
+                { "draw_set_blend_mode_ext", (context, func, index, self) =>
+                    {
+                        int? val = Decompiler.ExpressionConstant.ConvertToInt(self.Value);
+                        if (val == null)
+                            return null;
+
+                        return blend_modes.ContainsKey(val.Value) ? blend_modes[val.Value] : null;
+                    }
+                },
                 { "__view_set", (context, func, index, self) => 
                     {
                         var first = ConvertToConstExpression(func.Arguments[0]);
