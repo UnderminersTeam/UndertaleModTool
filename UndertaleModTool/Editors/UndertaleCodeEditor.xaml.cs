@@ -435,6 +435,11 @@ namespace UndertaleModTool
             DecompiledFocused = true;
         }
 
+        private static string Truncate(string value, int maxChars)
+        {
+            return value.Length <= maxChars ? value : value.Substring(0, maxChars) + "...";
+        }
+
         private async void DecompiledEditor_LostFocus(object sender, RoutedEventArgs e)
         {
             if (!DecompiledFocused)
@@ -484,14 +489,14 @@ namespace UndertaleModTool
 
             if (compileContext.HasError)
             {
-                MessageBox.Show(compileContext.ResultError, "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Truncate(compileContext.ResultError, 512), "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 dialog.TryClose();
                 return;
             }
 
             if (!compileContext.SuccessfulCompile)
             {
-                MessageBox.Show(compileContext.ResultAssembly, "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Truncate(compileContext.ResultAssembly, 512), "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 dialog.TryClose();
                 return;
             }
