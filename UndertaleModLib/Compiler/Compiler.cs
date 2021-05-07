@@ -157,6 +157,7 @@ namespace UndertaleModLib.Compiler
         public static CompileContext CompileGMLText(string input, CompileContext context, bool redoAssets = false)
         {
             context.Setup(redoAssets); // Set up
+
             List<Lexer.Token> tokens = Lexer.LexString(context, input); // Peform lexical analysis
             Parser.Statement block = Parser.ParseTokens(context, tokens); // Parse tokens, make syntax tree
 

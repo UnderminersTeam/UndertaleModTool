@@ -1386,8 +1386,9 @@ namespace UndertaleModLib.Compiler
                         if (type != UndertaleInstruction.DataType.Int32)
                         {
                             cw.typeStack.Pop();
-                            if (!type.In(UndertaleInstruction.DataType.Variable, UndertaleInstruction.DataType.Double,
-                                         UndertaleInstruction.DataType.Int64))
+                            if (type != UndertaleInstruction.DataType.Variable &&
+                                type != UndertaleInstruction.DataType.Double &&
+                                type != UndertaleInstruction.DataType.Int64)
                             {
                                 cw.Write("conv." + type.ToOpcodeParam() + ".i");
                                 cw.typeStack.Push(UndertaleInstruction.DataType.Int32);

@@ -208,36 +208,36 @@ namespace UndertaleModTool
             DisassemblyChanged = false;
         }
 
-        private static Dictionary<string, int> gettext = null;
+        public static Dictionary<string, string> gettext = null;
         private void UpdateGettext(UndertaleCode gettextCode)
         {
-            gettext = new Dictionary<string, int>();
-            string[] DecompilationOutput;
+            gettext = new Dictionary<string, string>();
+            string[] decompilationOutput;
             if (!SettingsWindow.ProfileModeEnabled)
-                DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
+                decompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
             else
             {
                 try
                 {
                     string path = Path.Combine(TempPath, gettextCode.Name.Content + ".gml");
                     if (File.Exists(path))
-                        DecompilationOutput = File.ReadAllText(path).Replace("\r\n", "\n").Split('\n');
+                        decompilationOutput = File.ReadAllText(path).Replace("\r\n", "\n").Split('\n');
                     else
-                        DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
+                        decompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
                 }
                 catch
                 {
-                    DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
+                    decompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
                 }
             }
-            foreach (var line in DecompilationOutput)
+            foreach (var line in decompilationOutput)
             {
-                Match m = Regex.Match(line, "^ds_map_add\\(global.text_data_en, \"(.*)\"@([0-9]+), \"(.*)\"@([0-9]+)\\)");
+                Match m = Regex.Match(line, "^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", \\\"(.*)\\\"\\)");
                 if (m.Success)
                 {
                     try
                     {
-                        gettext.Add(m.Groups[1].Value, Int32.Parse(m.Groups[4].Value));
+                        gettext.Add(m.Groups[1].Value, m.Groups[2].Value);
                     }
                     catch (ArgumentException)
                     {
@@ -251,7 +251,7 @@ namespace UndertaleModTool
             }
         }
 
-        private static Dictionary<string, string> gettextJSON = null;
+        public static Dictionary<string, string> gettextJSON = null;
         private string UpdateGettextJSON(string json)
         {
             try
@@ -340,6 +340,42 @@ namespace UndertaleModTool
                         string err = UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
                         if (err != null)
                             e = new Exception(err);
+                    }
+
+                    string[] decompiledLines;
+                    if (gettext != null && decompiled.Contains("scr_gettext"))
+                    {
+                        decompiledLines = decompiled.Split('\n');
+                        for (int i = 0; i < decompiledLines.Length; i++)
+                        {
+                            var matches = Regex.Matches(decompiledLines[i], "scr_gettext\\(\\\"(\\w*)\\\"\\)");
+                            foreach (Match match in matches)
+                            {
+                                if (match.Success)
+                                {
+                                    if (gettext.TryGetValue(match.Groups[1].Value, out string text))
+                                        decompiledLines[i] += $" // {text}";
+                                }
+                            }
+                        }
+                        decompiled = string.Join('\n', decompiledLines);
+                    } 
+                    else if (gettextJSON != null && decompiled.Contains("scr_84_get_lang_string"))
+                    {
+                        decompiledLines = decompiled.Split('\n');
+                        for (int i = 0; i < decompiledLines.Length; i++)
+                        {
+                            var matches = Regex.Matches(decompiledLines[i], "scr_84_get_lang_string\\(\\\"(\\w*)\\\"\\)");
+                            foreach (Match match in matches)
+                            {
+                                if (match.Success)
+                                {
+                                    if (gettextJSON.TryGetValue(match.Groups[1].Value, out string text))
+                                        decompiledLines[i] += $" // {text}";
+                                }
+                            }
+                        }
+                        decompiled = string.Join('\n', decompiledLines);
                     }
 
                     Dispatcher.Invoke(() =>
@@ -542,6 +578,10 @@ namespace UndertaleModTool
                 }
             }
 
+            // Invalidate gettext if necessary
+            if (code.Name.Content == "gml_Script_textdata_en")
+                gettext = null;
+
             // Show new code, decompiled.
             CurrentDisassembled = null;
             CurrentDecompiled = null;
@@ -612,7 +652,6 @@ namespace UndertaleModTool
             // Disassemble new code
             DisassembleCode(code);
         }
-
 
         // Based on https://stackoverflow.com/questions/28379206/custom-hyperlinks-using-avalonedit
         public class NumberGenerator : VisualLineElementGenerator
