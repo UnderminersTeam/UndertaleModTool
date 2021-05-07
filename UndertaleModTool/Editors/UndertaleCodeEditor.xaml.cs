@@ -342,40 +342,43 @@ namespace UndertaleModTool
                             e = new Exception(err);
                     }
 
-                    string[] decompiledLines;
-                    if (gettext != null && decompiled.Contains("scr_gettext"))
+                    if (decompiled != null)
                     {
-                        decompiledLines = decompiled.Split('\n');
-                        for (int i = 0; i < decompiledLines.Length; i++)
+                        string[] decompiledLines;
+                        if (gettext != null && decompiled.Contains("scr_gettext"))
                         {
-                            var matches = Regex.Matches(decompiledLines[i], "scr_gettext\\(\\\"(\\w*)\\\"\\)");
-                            foreach (Match match in matches)
+                            decompiledLines = decompiled.Split('\n');
+                            for (int i = 0; i < decompiledLines.Length; i++)
                             {
-                                if (match.Success)
+                                var matches = Regex.Matches(decompiledLines[i], "scr_gettext\\(\\\"(\\w*)\\\"\\)");
+                                foreach (Match match in matches)
                                 {
-                                    if (gettext.TryGetValue(match.Groups[1].Value, out string text))
-                                        decompiledLines[i] += $" // {text}";
+                                    if (match.Success)
+                                    {
+                                        if (gettext.TryGetValue(match.Groups[1].Value, out string text))
+                                            decompiledLines[i] += $" // {text}";
+                                    }
                                 }
                             }
+                            decompiled = string.Join('\n', decompiledLines);
                         }
-                        decompiled = string.Join('\n', decompiledLines);
-                    } 
-                    else if (gettextJSON != null && decompiled.Contains("scr_84_get_lang_string"))
-                    {
-                        decompiledLines = decompiled.Split('\n');
-                        for (int i = 0; i < decompiledLines.Length; i++)
+                        else if (gettextJSON != null && decompiled.Contains("scr_84_get_lang_string"))
                         {
-                            var matches = Regex.Matches(decompiledLines[i], "scr_84_get_lang_string\\(\\\"(\\w*)\\\"\\)");
-                            foreach (Match match in matches)
+                            decompiledLines = decompiled.Split('\n');
+                            for (int i = 0; i < decompiledLines.Length; i++)
                             {
-                                if (match.Success)
+                                var matches = Regex.Matches(decompiledLines[i], "scr_84_get_lang_string\\(\\\"(\\w*)\\\"\\)");
+                                foreach (Match match in matches)
                                 {
-                                    if (gettextJSON.TryGetValue(match.Groups[1].Value, out string text))
-                                        decompiledLines[i] += $" // {text}";
+                                    if (match.Success)
+                                    {
+                                        if (gettextJSON.TryGetValue(match.Groups[1].Value, out string text))
+                                            decompiledLines[i] += $" // {text}";
+                                    }
                                 }
                             }
+                            decompiled = string.Join('\n', decompiledLines);
                         }
-                        decompiled = string.Join('\n', decompiledLines);
                     }
 
                     Dispatcher.Invoke(() =>
