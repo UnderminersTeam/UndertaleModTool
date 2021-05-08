@@ -46,6 +46,12 @@ namespace UndertaleModLib
             this.Resource = res;
         }
 
+        public UndertaleResourceById(T res, int id = -1)
+        {
+            this.Resource = res;
+            this.CachedId = id;
+        }
+
         private ChunkT FindListChunk(UndertaleData data)
         {
             var chunk = data.FORM.Chunks.Where((x) => x.Value is ChunkT);

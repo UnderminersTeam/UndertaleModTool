@@ -535,26 +535,12 @@ namespace UndertaleModTool
 
             if (!compileContext.SuccessfulCompile)
             {
-                MessageBox.Show(Truncate(compileContext.ResultAssembly, 512), "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("(unknown error message)", "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 dialog.TryClose();
                 return;
             }
 
-            try
-            {
-                var instructions = Assembler.Assemble(compileContext.ResultAssembly, data);
-                code.Replace(instructions);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                dialog.TryClose();
-
-                // The code should only be written after being successfully
-                // edited (if it doesn't successfully assemble for some reason, don't write it).
-                return;
-            }
+            code.Replace(compileContext.ResultAssembly);
 
             if (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3)
             {

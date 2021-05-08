@@ -432,6 +432,7 @@ namespace UndertaleModLib.Compiler
                 remainingStageOne.Clear();
                 ErrorMessages.Clear();
                 context.LocalVars.Clear();
+                context.LocalVars["arguments"] = "arguments";
                 context.GlobalVars.Clear();
                 context.Enums.Clear();
                 hasError = false;
