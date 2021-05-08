@@ -246,29 +246,20 @@ namespace UndertaleModLib
     public class UndertaleChunkFONT : UndertaleListChunk<UndertaleFont>
     {
         public override string Name => "FONT";
+        public byte[] Padding;
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
             base.SerializeChunk(writer);
 
-            // padding?
-            for (ushort i = 0; i < 0x80; i++)
-                writer.Write(i);
-            for (ushort i = 0; i < 0x80; i++)
-                writer.Write((ushort)0x3f);
+            writer.Write(Padding);
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
             base.UnserializeChunk(reader);
 
-            // padding?
-            for (ushort i = 0; i < 0x80; i++)
-                if (reader.ReadUInt16() != i)
-                    throw new IOException("Incorrect padding in FONT, expected " + i);
-            for (ushort i = 0; i < 0x80; i++)
-                if (reader.ReadUInt16() != 0x3f)
-                    throw new IOException("Incorrect padding in FONT");
+            Padding = reader.ReadBytes(512);
         }
     }
 

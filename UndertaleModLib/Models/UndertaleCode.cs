@@ -412,7 +412,7 @@ namespace UndertaleModLib.Models
 
                         if (writer.Bytecode14OrLower)
                         {
-                            var k = Kind switch
+                            byte k = Kind switch
                             {
                                 Opcode.Conv => 0x03,
                                 Opcode.Mul => 0x04,
