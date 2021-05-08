@@ -358,6 +358,8 @@ namespace UndertaleModLib.Models
         public uint LoadAlpha { get; set; } = 255;
         public UndertaleSimpleList<Constant> Constants { get; private set; } = new UndertaleSimpleList<Constant>();
 
+        public bool NewFormat { get; set; } = true;
+
         [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class Constant : UndertaleObject
         {
@@ -379,7 +381,7 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
-            if (writer.undertaleData.GeneralInfo.BytecodeVersion >= 14)
+            if (NewFormat)
             {
                 writer.Write(Unknown1);
                 writer.Write(Unknown2);
@@ -439,7 +441,9 @@ namespace UndertaleModLib.Models
 
         public void Unserialize(UndertaleReader reader)
         {
-            if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 14)
+            NewFormat = reader.ReadInt32() == int.MinValue;
+            reader.Position -= 4;
+            if (NewFormat)
             {
                 Unknown1 = reader.ReadUInt32();
                 Unknown2 = reader.ReadUInt32();
