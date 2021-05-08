@@ -45,7 +45,7 @@ namespace UndertaleModLib.Models
             writer.Write(Effects);
             writer.Write(Volume);
             writer.Write(Pitch);
-            if (Flags.HasFlag(AudioEntryFlags.Regular))
+            if (Flags.HasFlag(AudioEntryFlags.Regular) && writer.undertaleData.GeneralInfo.BytecodeVersion >= 14)
                 writer.WriteUndertaleObject(_AudioGroup);
             else
                 writer.Write(Preload);
@@ -66,7 +66,7 @@ namespace UndertaleModLib.Models
             Volume = reader.ReadSingle();
             Pitch = reader.ReadSingle();
 
-            if (Flags.HasFlag(AudioEntryFlags.Regular))
+            if (Flags.HasFlag(AudioEntryFlags.Regular) && reader.undertaleData.GeneralInfo.BytecodeVersion >= 14)
             {
                 _AudioGroup = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP>>();
                 Preload = true;

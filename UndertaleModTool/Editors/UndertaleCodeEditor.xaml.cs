@@ -188,6 +188,7 @@ namespace UndertaleModTool
 
             string text;
 
+            DisassemblyEditor.TextArea.ClearSelection();
             if (code.DuplicateEntry)
             {
                 DisassemblyEditor.IsReadOnly = true;
@@ -207,36 +208,36 @@ namespace UndertaleModTool
             DisassemblyChanged = false;
         }
 
-        private static Dictionary<string, int> gettext = null;
+        public static Dictionary<string, string> gettext = null;
         private void UpdateGettext(UndertaleCode gettextCode)
         {
-            gettext = new Dictionary<string, int>();
-            string[] DecompilationOutput;
+            gettext = new Dictionary<string, string>();
+            string[] decompilationOutput;
             if (!SettingsWindow.ProfileModeEnabled)
-                DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
+                decompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
             else
             {
                 try
                 {
                     string path = Path.Combine(TempPath, gettextCode.Name.Content + ".gml");
                     if (File.Exists(path))
-                        DecompilationOutput = File.ReadAllText(path).Replace("\r\n", "\n").Split('\n');
+                        decompilationOutput = File.ReadAllText(path).Replace("\r\n", "\n").Split('\n');
                     else
-                        DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
+                        decompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
                 }
                 catch
                 {
-                    DecompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, true)).Replace("\r\n", "\n").Split('\n');
+                    decompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
                 }
             }
-            foreach (var line in DecompilationOutput)
+            foreach (var line in decompilationOutput)
             {
-                Match m = Regex.Match(line, "^ds_map_add\\(global.text_data_en, \"(.*)\"@([0-9]+), \"(.*)\"@([0-9]+)\\)");
+                Match m = Regex.Match(line, "^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", \\\"(.*)\\\"\\)");
                 if (m.Success)
                 {
                     try
                     {
-                        gettext.Add(m.Groups[1].Value, Int32.Parse(m.Groups[4].Value));
+                        gettext.Add(m.Groups[1].Value, m.Groups[2].Value);
                     }
                     catch (ArgumentException)
                     {
@@ -250,7 +251,7 @@ namespace UndertaleModTool
             }
         }
 
-        private static Dictionary<string, string> gettextJSON = null;
+        public static Dictionary<string, string> gettextJSON = null;
         private string UpdateGettextJSON(string json)
         {
             try
@@ -264,19 +265,31 @@ namespace UndertaleModTool
             }
             return null;
         }
-        private async void DecompileCode(UndertaleCode code)
+
+        private async void DecompileCode(UndertaleCode code, LoaderDialog existingDialog = null)
         {
             DecompiledEditor.IsReadOnly = true;
+            DecompiledEditor.TextArea.ClearSelection();
             if (code.DuplicateEntry)
             {
                 DecompiledEditor.Text = "// Duplicate code entry; cannot edit here.";
                 CurrentDecompiled = code;
+                existingDialog?.TryClose();
             }
             else
             {
-                LoaderDialog dialog = new LoaderDialog("Decompiling", "Decompiling, please wait... This can take a while on complex scripts");
-                dialog.Owner = Window.GetWindow(this);
-                _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.TryShowDialog(); }));
+                LoaderDialog dialog;
+                if (existingDialog != null)
+                {
+                    dialog = existingDialog;
+                    dialog.Message = "Decompiling, please wait...";
+                }
+                else
+                {
+                    dialog = new LoaderDialog("Decompiling", "Decompiling, please wait... This can take a while on complex scripts.");
+                    dialog.Owner = Window.GetWindow(this);
+                    _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.TryShowDialog(); }));
+                }
 
                 UndertaleCode gettextCode = null;
                 if (gettext == null)
@@ -327,6 +340,45 @@ namespace UndertaleModTool
                         string err = UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
                         if (err != null)
                             e = new Exception(err);
+                    }
+
+                    if (decompiled != null)
+                    {
+                        string[] decompiledLines;
+                        if (gettext != null && decompiled.Contains("scr_gettext"))
+                        {
+                            decompiledLines = decompiled.Split('\n');
+                            for (int i = 0; i < decompiledLines.Length; i++)
+                            {
+                                var matches = Regex.Matches(decompiledLines[i], "scr_gettext\\(\\\"(\\w*)\\\"\\)");
+                                foreach (Match match in matches)
+                                {
+                                    if (match.Success)
+                                    {
+                                        if (gettext.TryGetValue(match.Groups[1].Value, out string text))
+                                            decompiledLines[i] += $" // {text}";
+                                    }
+                                }
+                            }
+                            decompiled = string.Join('\n', decompiledLines);
+                        }
+                        else if (gettextJSON != null && decompiled.Contains("scr_84_get_lang_string"))
+                        {
+                            decompiledLines = decompiled.Split('\n');
+                            for (int i = 0; i < decompiledLines.Length; i++)
+                            {
+                                var matches = Regex.Matches(decompiledLines[i], "scr_84_get_lang_string\\(\\\"(\\w*)\\\"\\)");
+                                foreach (Match match in matches)
+                                {
+                                    if (match.Success)
+                                    {
+                                        if (gettextJSON.TryGetValue(match.Groups[1].Value, out string text))
+                                            decompiledLines[i] += $" // {text}";
+                                    }
+                                }
+                            }
+                            decompiled = string.Join('\n', decompiledLines);
+                        }
                     }
 
                     Dispatcher.Invoke(() =>
@@ -422,7 +474,12 @@ namespace UndertaleModTool
             DecompiledFocused = true;
         }
 
-        private void DecompiledEditor_LostFocus(object sender, RoutedEventArgs e)
+        private static string Truncate(string value, int maxChars)
+        {
+            return value.Length <= maxChars ? value : value.Substring(0, maxChars) + "...";
+        }
+
+        private async void DecompiledEditor_LostFocus(object sender, RoutedEventArgs e)
         {
             if (!DecompiledFocused)
                 return;
@@ -449,33 +506,41 @@ namespace UndertaleModTool
 
             UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
 
-            CompileContext compileContext = Compiler.CompileGMLText(DecompiledEditor.Text, data, code);
+            LoaderDialog dialog = new LoaderDialog("Compiling", "Compiling, please wait...");
+            dialog.Owner = Window.GetWindow(this);
+            _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.TryShowDialog(); }));
+
+            CompileContext compileContext = null;
+            string text = DecompiledEditor.Text;
+            var dispatcher = Dispatcher;
+            Task t = Task.Run(() =>
+            {
+                compileContext = Compiler.CompileGMLText(text, data, code, (f) => { dispatcher.Invoke(() => f()); });
+            });
+            await t;
+
+            if (compileContext == null)
+            {
+                MessageBox.Show("Compile context was null for some reason...", "This shouldn't happen", MessageBoxButton.OK, MessageBoxImage.Error);
+                dialog.TryClose();
+                return;
+            }
 
             if (compileContext.HasError)
             {
-                MessageBox.Show(compileContext.ResultError, "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Truncate(compileContext.ResultError, 512), "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                dialog.TryClose();
                 return;
             }
 
             if (!compileContext.SuccessfulCompile)
             {
-                MessageBox.Show(compileContext.ResultAssembly, "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("(unknown error message)", "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                dialog.TryClose();
                 return;
             }
 
-            try
-            {
-                var instructions = Assembler.Assemble(compileContext.ResultAssembly, data);
-                code.Replace(instructions);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                // The code should only be written after being successfully
-                // edited (if it doesn't successfully assemble for some reason, don't write it).
-                return;
-            }
+            code.Replace(compileContext.ResultAssembly);
 
             if (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3)
             {
@@ -502,6 +567,10 @@ namespace UndertaleModTool
                 }
             }
 
+            // Invalidate gettext if necessary
+            if (code.Name.Content == "gml_Script_textdata_en")
+                gettext = null;
+
             // Show new code, decompiled.
             CurrentDisassembled = null;
             CurrentDecompiled = null;
@@ -512,7 +581,7 @@ namespace UndertaleModTool
                 return;
 
             // Decompile new code
-            DecompileCode(code);
+            DecompileCode(code, dialog);
         }
 
         private void DisassemblyEditor_GotFocus(object sender, RoutedEventArgs e)
@@ -552,6 +621,7 @@ namespace UndertaleModTool
             {
                 var instructions = Assembler.Assemble(DisassemblyEditor.Text, data);
                 code.Replace(instructions);
+                (Application.Current.MainWindow as MainWindow).NukeProfileGML(code.Name.Content);
             }
             catch (Exception ex)
             {
@@ -571,7 +641,6 @@ namespace UndertaleModTool
             // Disassemble new code
             DisassembleCode(code);
         }
-
 
         // Based on https://stackoverflow.com/questions/28379206/custom-hyperlinks-using-avalonedit
         public class NumberGenerator : VisualLineElementGenerator
@@ -829,8 +898,12 @@ namespace UndertaleModTool
                         if (val == null)
                         {
                             if (data.BuiltinList.Functions.ContainsKey(m.Value))
-                                return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
-                                                                new SolidColorBrush(Color.FromRgb(0xFF, 0xB8, 0x71)));
+                            {
+                                var res = new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
+                                                                  new SolidColorBrush(Color.FromRgb(0xFF, 0xB8, 0x71)));
+                                res.Bold = true;
+                                return res;
+                            }
                         }
                     }
                     else
@@ -875,10 +948,13 @@ namespace UndertaleModTool
                 return null;
             }
         }
+
         public class ColorVisualLineText : VisualLineText
         {
             private string Text { get; set; }
             private Brush ForegroundBrush { get; set; }
+
+            public bool Bold { get; set; } = false;
 
             /// <summary>
             /// Creates a visual line text element with the specified length.
@@ -896,6 +972,8 @@ namespace UndertaleModTool
             {
                 if (ForegroundBrush != null)
                     TextRunProperties.SetForegroundBrush(ForegroundBrush);
+                if (Bold)
+                    TextRunProperties.SetTypeface(new Typeface(TextRunProperties.Typeface.FontFamily, FontStyles.Normal, FontWeights.Bold, FontStretches.Normal));
                 return base.CreateTextRun(startVisualColumn, context);
             }
 

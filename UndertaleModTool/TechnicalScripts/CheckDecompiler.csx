@@ -126,6 +126,7 @@ bool InitChecks()
 
 void ReImportASM(string[] dirFiles)
 {
+    progress = 0;
     foreach (string file in dirFiles)
     {
         UpdateProgressBar(null, "Reapply original ASM files", progress++, dirFiles.Length);

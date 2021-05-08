@@ -5,198 +5,102 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
+using static UndertaleModLib.Models.UndertaleInstruction;
 
 namespace UndertaleModLib.Compiler
 {
     public static partial class Compiler
     {
-
         public static class AssemblyWriter
         {
-
             public class CodeWriter
             {
-
-                private class WrittenInstruction
-                {
-                    public enum WIKind
-                    {
-                        Normal,
-                        Branch,
-                        Label,
-                        Comment,
-                        LabelAndBranch
-                    }
-
-                    public string Text;
-                    public WIKind Kind;
-                    public List<int> LabelIDs;
-                    public int BranchLabelID;
-
-                    public WrittenInstruction(string text)
-                    {
-                        Text = text;
-                        Kind = WIKind.Normal;
-                    }
-
-                    public WrittenInstruction(string text, WIKind kind)
-                    {
-                        Text = text;
-                        Kind = kind;
-                    }
-
-                    public WrittenInstruction(string text, List<int> labelIDs)
-                    {
-                        Text = text;
-                        Kind = WIKind.Label;
-                        LabelIDs = new List<int>(labelIDs);
-                    }
-
-                    public WrittenInstruction(string text, int branchLabelID)
-                    {
-                        Text = text;
-                        Kind = WIKind.Branch;
-                        BranchLabelID = branchLabelID;
-                    }
-
-                    public WrittenInstruction(string text, List<int> labelIDs, int branchLabelID)
-                    {
-                        Text = text;
-                        Kind = WIKind.LabelAndBranch;
-                        LabelIDs = new List<int>(labelIDs);
-                        BranchLabelID = branchLabelID;
-                    }
-                }
-
                 public CompileContext compileContext;
-                private List<WrittenInstruction> instructions;
-                public int currentLabel;
-                public bool doesNextInstructionHaveLabel;
-                public List<int> nextInstructionLabelIDs;
-                public Stack<UndertaleInstruction.DataType> typeStack = new Stack<UndertaleInstruction.DataType>();
+                public List<UndertaleInstruction> instructions;
+                public uint offset = 0;
+                public Stack<DataType> typeStack = new Stack<DataType>();
                 public Stack<LoopContext> loopContexts = new Stack<LoopContext>();
                 public Stack<OtherContext> otherContexts = new Stack<OtherContext>();
-                public int currentLabelId = 0;
                 public List<string> ErrorMessages = new List<string>();
+                public List<VariablePatch> varPatches = new List<VariablePatch>();
+                public List<FunctionPatch> funcPatches = new List<FunctionPatch>();
+                public List<StringPatch> stringPatches = new List<StringPatch>();
 
                 public CodeWriter(CompileContext context)
                 {
                     compileContext = context;
-                    instructions = new List<WrittenInstruction>();
-                    currentLabel = 0;
-                    doesNextInstructionHaveLabel = false;
-                    nextInstructionLabelIDs = new List<int>();
+                    instructions = new List<UndertaleInstruction>(128);
+                    offset = 0;
                 }
 
-                public void Reset()
+                public UndertaleInstruction Emit(Opcode opcode)
                 {
-                    typeStack.Clear();
-                    loopContexts.Clear();
-                    currentLabelId = 0;
-                    ErrorMessages.Clear();
-                }
-                public int GetNextLabelID()
-                {
-                    return currentLabelId++;
-                }
-
-                public void Write(string instruction)
-                {
-                    if (!doesNextInstructionHaveLabel)
+                    var res = new UndertaleInstruction()
                     {
-                        instructions.Add(new WrittenInstruction(instruction));
-                    } else
-                    {
-                        instructions.Add(new WrittenInstruction(instruction, nextInstructionLabelIDs));
-                        doesNextInstructionHaveLabel = false;
-                        nextInstructionLabelIDs.Clear();
-                    }
+                        Kind = opcode,
+                        Address = offset
+                    };
+                    instructions.Add(res);
+                    offset += res.CalculateInstructionSize();
+                    return res;
                 }
 
-                public void Write(string branchType, int labelID)
+                public UndertaleInstruction Emit(Opcode opcode, DataType type1)
                 {
-                    if (!doesNextInstructionHaveLabel)
+                    var res = new UndertaleInstruction()
                     {
-                        instructions.Add(new WrittenInstruction(branchType, labelID));
-                    } else
-                    {
-                        instructions.Add(new WrittenInstruction(branchType, nextInstructionLabelIDs, labelID));
-                        doesNextInstructionHaveLabel = false;
-                        nextInstructionLabelIDs.Clear();
-                    }
+                        Kind = opcode,
+                        Address = offset,
+                        Type1 = type1
+                    };
+                    instructions.Add(res);
+                    offset += res.CalculateInstructionSize();
+                    return res;
                 }
 
-                public void Write(int labelID)
+                public UndertaleInstruction Emit(Opcode opcode, DataType type1, DataType type2)
                 {
-                    doesNextInstructionHaveLabel = true;
-                    nextInstructionLabelIDs.Add(labelID);
-                }
-
-                public void Comment(string comment)
-                {
-                    instructions.Add(new WrittenInstruction("; " + comment, WrittenInstruction.WIKind.Comment));
-                }
-
-                private string GenerateNewLabel()
-                {
-                    return "l_" + currentLabel++.ToString();
-                }
-
-                public string Finish()
-                {
-                    // Figure out which labels actually have references
-                    List<int> referencedLabelIDs = new List<int>();
-                    foreach (WrittenInstruction wi in instructions)
+                    var res = new UndertaleInstruction()
                     {
-                        if (wi.Kind == WrittenInstruction.WIKind.Branch || wi.Kind == WrittenInstruction.WIKind.LabelAndBranch)
-                        {
-                            if (!referencedLabelIDs.Contains(wi.BranchLabelID))
-                            {
-                                referencedLabelIDs.Add(wi.BranchLabelID);
-                            }
-                        }
-                    }
+                        Kind = opcode,
+                        Address = offset,
+                        Type1 = type1,
+                        Type2 = type2
+                    };
+                    instructions.Add(res);
+                    offset += res.CalculateInstructionSize();
+                    return res;
+                }
 
-                    // Figure out which label IDs correspond to which instruction indices,
-                    // and assign names to each index. Also clear out unreferenced labels if necessary.
-                    Dictionary<int /* label id */, int /* index */> labelTargets = new Dictionary<int, int>();
-                    Dictionary<int /* index */, string /* label name */> labelNames = new Dictionary<int, string>();
-                    for (int i = 0; i < instructions.Count; i++)
+                public UndertaleInstruction EmitRef(Opcode opcode, DataType type1)
+                {
+                    var res = new UndertaleInstruction()
                     {
-                        WrittenInstruction wi = instructions[i];
-                        if (wi.Kind == WrittenInstruction.WIKind.Label || wi.Kind == WrittenInstruction.WIKind.LabelAndBranch)
-                        {
-                            bool isReferenced = false;
-                            foreach (int labelId in wi.LabelIDs)
-                            {
-                                if (referencedLabelIDs.Contains(labelId))
-                                {
-                                    isReferenced = true;
-                                    labelTargets[labelId] = i;
-                                }
-                            }
-                            if (isReferenced)
-                            {
-                                labelNames[i] = GenerateNewLabel();
-                            } else
-                            {
-                                // Get rid of the label part of the instruction, it's never referenced
-                                if (wi.Kind == WrittenInstruction.WIKind.Label)
-                                {
-                                    instructions[i] = new WrittenInstruction(wi.Text);
-                                } else
-                                {
-                                    instructions[i] = new WrittenInstruction(wi.Text, wi.BranchLabelID);
-                                }
-                            }
-                        }
-                    }
-                    
-                    StringBuilder sb = new StringBuilder();
+                        Kind = opcode,
+                        Address = offset,
+                        Type1 = type1
+                    };
+                    instructions.Add(res);
+                    offset += 2;
+                    return res;
+                }
 
-                    // First, code locals
-                    sb.AppendLine(".localvar 0 arguments");
+                public UndertaleInstruction EmitRef(Opcode opcode, DataType type1, DataType type2)
+                {
+                    var res = new UndertaleInstruction()
+                    {
+                        Kind = opcode,
+                        Address = offset,
+                        Type1 = type1,
+                        Type2 = type2
+                    };
+                    instructions.Add(res);
+                    offset += 2;
+                    return res;
+                }
 
+                public List<UndertaleInstruction> Finish()
+                {
                     if (compileContext.OriginalCode != null)
                     {
                         UndertaleCodeLocals locals = compileContext.Data?.CodeLocals.For(compileContext.OriginalCode);
@@ -211,7 +115,6 @@ namespace UndertaleModLib.Compiler
                                 locals.Locals[i].Index = (uint)i;
                                 if (!compileContext.LocalVars.ContainsKey(localName))
                                 {
-                                    compileContext.LocalVars.Remove(localName);
                                     locals.Locals.RemoveAt(i--);
                                 }
                             }
@@ -226,65 +129,210 @@ namespace UndertaleModLib.Compiler
                                 }
                                 return false;
                             }
-                            foreach (var l in compileContext.LocalVars)
+                            compileContext.MainThreadDelegate.Invoke(() =>
                             {
-                                string name = l.Key;
-                                if (!hasLocal(name))
+                                foreach (var l in compileContext.LocalVars)
                                 {
-                                    locals.Locals.Add(new UndertaleCodeLocals.LocalVar() { Index = (uint)locals.Locals.Count, Name = compileContext.Data?.Strings?.MakeString(name) });
-                                    compileContext.OriginalCode.LocalsCount++;
+                                    string name = l.Key;
+                                    if (!hasLocal(name))
+                                    {
+                                        locals.Locals.Add(new UndertaleCodeLocals.LocalVar() { Index = (uint)locals.Locals.Count, Name = compileContext.Data?.Strings?.MakeString(name) });
+                                        compileContext.OriginalCode.LocalsCount++;
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    int localId = 0;
+                    List<VariablePatch> localPatches = varPatches.FindAll(p => p.InstType == InstanceType.Local);
+                    compileContext.MainThreadDelegate.Invoke(() =>
+                    {
+                        if (compileContext.ensureVariablesDefined)
+                        {
+                            var variables = compileContext.Data?.Variables;
+                            if (variables != null)
+                            {
+                                foreach (KeyValuePair<string, string> v in compileContext.LocalVars)
+                                {
+                                    UndertaleVariable def = variables.DefineLocal(compileContext.OriginalCode, localId++, v.Key, compileContext.Data.Strings, compileContext.Data);
+                                    if (def != null)
+                                    {
+                                        foreach (var patch in localPatches.FindAll(p => p.Name == v.Key))
+                                        {
+                                            if (patch.Target.Kind == Opcode.Pop)
+                                                patch.Target.Destination = new Reference<UndertaleVariable>(def, patch.VarType);
+                                            else
+                                                patch.Target.Value = new Reference<UndertaleVariable>(def, patch.VarType);
+                                            if (patch.VarType == VariableType.Normal)
+                                                patch.Target.TypeInst = InstanceType.Local;
+                                        }
+                                    }
+                                }
+
+                                foreach (var patch in varPatches)
+                                {
+                                    if (patch.InstType != InstanceType.Local)
+                                    {
+                                        var realInstType = patch.InstType;
+                                        if (realInstType >= 0)
+                                            realInstType = InstanceType.Self;
+                                        else if (realInstType == InstanceType.Other)
+                                            realInstType = InstanceType.Self;
+                                        else if (realInstType == InstanceType.Arg)
+                                            realInstType = InstanceType.Builtin;
+                                        else if (realInstType == InstanceType.Builtin)
+                                            realInstType = InstanceType.Self; // used with @@This@@
+                                        else if (realInstType == InstanceType.Stacktop)
+                                            realInstType = InstanceType.Self; // used with @@GetInstance@@
+
+                                        UndertaleVariable def = variables.EnsureDefined(patch.Name, realInstType,
+                                                                 compileContext.BuiltInList.GlobalArray.ContainsKey(patch.Name) ||
+                                                                 compileContext.BuiltInList.GlobalNotArray.ContainsKey(patch.Name), 
+                                                                 compileContext.Data.Strings, compileContext.Data);
+                                        if (patch.Target.Kind == Opcode.Pop)
+                                            patch.Target.Destination = new Reference<UndertaleVariable>(def, patch.VarType);
+                                        else
+                                            patch.Target.Value = new Reference<UndertaleVariable>(def, patch.VarType);
+                                        if (patch.VarType == VariableType.Normal)
+                                            patch.Target.TypeInst = patch.InstType;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    int localId = 1;
-                    foreach (KeyValuePair<string, string> v in compileContext.LocalVars)
-                    {
-                        int id = (compileContext.Data?.Variables?.Count ?? 0);
-                        if (compileContext.ensureVariablesDefined)
-                            id = (compileContext.Data?.Variables?.IndexOf(compileContext.Data?.Variables?.DefineLocal(compileContext.OriginalCode, localId, v.Key, compileContext.Data.Strings, compileContext.Data)) ?? 0);
-                        if (id >= 0)
-                            sb.AppendLine(".localvar " + localId++.ToString() + " " + v.Key + " " + id.ToString());
-                    }
-
-                    // Now, write all of the instructions!
-                    for (int i = 0; i < instructions.Count; i++)
-                    {
-                        WrittenInstruction wi = instructions[i];
-                        switch (wi.Kind)
+                        if (compileContext.ensureFunctionsDefined)
                         {
-                            case WrittenInstruction.WIKind.Normal:
-                            case WrittenInstruction.WIKind.Comment:
-                                sb.AppendLine(wi.Text);
-                                break;
-                            case WrittenInstruction.WIKind.Label:
-                                sb.AppendLine(labelNames[i] + ": " + wi.Text);
-                                break;
-                            case WrittenInstruction.WIKind.Branch:
-                                if (!labelTargets.ContainsKey(wi.BranchLabelID))
+                            foreach (var patch in funcPatches)
+                            {
+                                patch.Target.ArgumentsCount = (ushort)patch.ArgCount;
+                                UndertaleFunction def = compileContext.Data.Functions?.EnsureDefined(patch.Name, compileContext.Data.Strings);
+                                if (def != null)
                                 {
-                                    sb.AppendLine(wi.Text + " func_end");
+                                    patch.Target.Function = new Reference<UndertaleFunction>(def);
                                 }
-                                else
+                            }
+                        }
+
+                        if (stringPatches.Count >= 512)
+                        {
+                            // Kick in optimization by mapping all of them to indices
+                            Dictionary<string, int> stringMap = new Dictionary<string, int>(compileContext.Data.Strings.Count);
+                            int i = 0;
+                            foreach (var s in compileContext.Data.Strings)
+                                stringMap[s.Content] = i++;
+                            foreach (var patch in stringPatches)
+                            {
+                                if (stringMap.TryGetValue(patch.Content, out int ind))
                                 {
-                                    sb.AppendLine(wi.Text + " " + labelNames[labelTargets[wi.BranchLabelID]]);
-                                }
-                                break;
-                            case WrittenInstruction.WIKind.LabelAndBranch:
-                                if (!labelTargets.ContainsKey(wi.BranchLabelID))
+                                    patch.Target.Value = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>(
+                                                                        compileContext.Data.Strings[ind], ind);
+                                } else
                                 {
-                                    sb.AppendLine(labelNames[i] + ": " + wi.Text + " func_end");
+                                    UndertaleString newString = new UndertaleString(patch.Content);
+                                    patch.Target.Value = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>(
+                                                                        newString, compileContext.Data.Strings.Count);
+                                    compileContext.Data.Strings.Add(newString);
                                 }
-                                else
-                                {
-                                    sb.AppendLine(labelNames[i] + ": " + wi.Text + " " + labelNames[labelTargets[wi.BranchLabelID]]);
-                                }
-                                break;
+                            }
+                        }
+                        else
+                        {
+                            foreach (var patch in stringPatches)
+                            {
+                                int ind;
+                                UndertaleString str = compileContext.Data.Strings.MakeString(patch.Content, out ind);
+                                var def = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>(str, ind);
+                                patch.Target.Value = def;
+                            }
+                        }
+                    });
+
+                    return instructions;
+                }
+            }
+
+            public class VariablePatch
+            {
+                public UndertaleInstruction Target;
+                public string Name;
+                public VariableType VarType;
+                public InstanceType InstType;
+            }
+
+            public class FunctionPatch
+            {
+                public UndertaleInstruction Target;
+                public string Name;
+                public int ArgCount;
+            }
+
+            public class StringPatch
+            {
+                public UndertaleInstruction Target;
+                public string Content;
+            }
+
+            public class Patch
+            {
+                public List<UndertaleInstruction> Patches;
+                public UndertaleInstruction Target;
+                public int TargetIndex = -1;
+
+                public static Patch Start()
+                {
+                    return new Patch()
+                    {
+                        Patches = new List<UndertaleInstruction>()
+                    };
+                }
+
+                public static Patch StartHere(CodeWriter cw)
+                {
+                    return new Patch()
+                    {
+                        TargetIndex = cw.instructions.Count,
+                        Patches = new List<UndertaleInstruction>()
+                    };
+                }
+
+                public static Patch Start(UndertaleInstruction target)
+                {
+                    return new Patch()
+                    {
+                        Target = target
+                    };
+                }
+
+                public void Finish(CodeWriter cw)
+                {
+                    if (TargetIndex != -1)
+                    {
+                        var target = cw.instructions[TargetIndex];
+                        foreach (UndertaleInstruction i in Patches)
+                        {
+                            i.JumpOffset = (int)target.Address - (int)i.Address;
                         }
                     }
+                    else if (Target == null)
+                    {
+                        foreach (UndertaleInstruction i in Patches)
+                        {
+                            i.JumpOffset = (int)cw.offset - (int)i.Address;
+                        }
+                    }
+                }
 
-                    return sb.ToString();
+                public void Add(UndertaleInstruction instr)
+                {
+                    if (TargetIndex != -1 || Target == null)
+                    {
+                        Patches.Add(instr);
+                    }
+                    else
+                    {
+                        instr.JumpOffset = (int)Target.Address - (int)instr.Address;
+                    }
                 }
             }
 
@@ -297,108 +345,95 @@ namespace UndertaleModLib.Compiler
                 }
 
                 public ContextKind Kind;
-                public int BreakLabel = -1;
-                public int ContinueLabel = -1;
-                public bool IsBreakUsed;
-                public bool IsContinueUsed;
-                public UndertaleInstruction.DataType TypeToPop; // switch statements
+                public Patch Break;
+                public Patch Continue;
+                public DataType TypeToPop; // switch statements
+                public bool BreakUsed = false;
+                public bool ContinueUsed = false;
 
-                public OtherContext(int breakLabel, int continueLabel, UndertaleInstruction.DataType typeToPop)
+                public OtherContext(Patch @break, Patch @continue, DataType typeToPop)
                 {
                     Kind = ContextKind.Switch;
-                    BreakLabel = breakLabel;
-                    ContinueLabel = continueLabel;
+                    Break = @break;
+                    Continue = @continue;
                     TypeToPop = typeToPop;
                 }
 
-                public OtherContext(int breakLabel, int continueLabel)
+                public OtherContext(Patch @break, Patch @continue)
                 {
                     Kind = ContextKind.With;
-                    BreakLabel = breakLabel;
-                    ContinueLabel = continueLabel;
+                    Break = @break;
+                    Continue = @continue;
                 }
 
-                public int UseBreakLabel()
+                public Patch UseBreak()
                 {
-                    IsBreakUsed = true;
-                    return BreakLabel;
+                    BreakUsed = true;
+                    return Break;
                 }
 
-                public int UseContinueLabel()
+                public Patch UseContinue()
                 {
-                    IsContinueUsed = true;
-                    return ContinueLabel;
+                    ContinueUsed = true;
+                    return Continue;
                 }
             }
 
             public struct LoopContext
             {
-                public int BreakLabel;
-                public int ContinueLabel;
-                public bool IsBreakUsed;
-                public bool IsContinueUsed;
+                public Patch Break;
+                public Patch Continue;
+                public bool BreakUsed;
+                public bool ContinueUsed;
 
-                public LoopContext(int breakLabel, int continueLabel)
+                public LoopContext(Patch @break, Patch @continue)
                 {
-                    BreakLabel = breakLabel;
-                    ContinueLabel = continueLabel;
-                    IsBreakUsed = false;
-                    IsContinueUsed = false;
+                    Break = @break;
+                    Continue = @continue;
+                    BreakUsed = false;
+                    ContinueUsed = false;
                 }
 
-                public int UseBreakLabel()
+                public Patch UseBreak()
                 {
-                    IsBreakUsed = true;
-                    return BreakLabel;
+                    BreakUsed = true;
+                    return Break;
                 }
 
-                public int UseContinueLabel()
+                public Patch UseContinue()
                 {
-                    IsContinueUsed = true;
-                    return ContinueLabel;
+                    ContinueUsed = true;
+                    return Continue;
                 }
             }
 
-            private static int HelpUseBreakLabel(ref Stack<LoopContext> s)
+            private static Patch HelpUseBreak(ref Stack<LoopContext> s)
             {
                 LoopContext c = s.Pop();
-                int res = c.UseBreakLabel();
+                Patch res = c.UseBreak();
                 s.Push(c);
                 return res;
             }
-            private static int HelpUseContinueLabel(ref Stack<LoopContext> s)
+            private static Patch HelpUseContinue(ref Stack<LoopContext> s)
             {
                 LoopContext c = s.Pop();
-                int res = c.UseContinueLabel();
+                Patch res = c.UseContinue();
                 s.Push(c);
                 return res;
             }
-            private static int HelpUseBreakLabel(ref Stack<OtherContext> s)
+            private static Patch HelpUseBreak(ref Stack<OtherContext> s)
             {
                 OtherContext c = s.Pop();
-                int res = c.UseBreakLabel();
+                Patch res = c.UseBreak();
                 s.Push(c);
                 return res;
             }
-            private static int HelpUseContinueLabel(ref Stack<OtherContext> s)
+            private static Patch HelpUseContinue(ref Stack<OtherContext> s)
             {
                 OtherContext c = s.Pop();
-                int res = c.UseContinueLabel();
+                Patch res = c.UseContinue();
                 s.Push(c);
                 return res;
-            }
-
-            // Returns the label ID
-            private static int AssembleNewLabel(CodeWriter cw)
-            {
-                int newLabelID = cw.GetNextLabelID();
-                cw.Write(newLabelID);
-                return newLabelID;
-            }
-
-            public static string GetAssemblyCodeFromStatement(CompileContext compileContext, Parser.Statement s)
-            {
-                return AssembleStatement(compileContext, s).Finish();
             }
 
             public static CodeWriter AssembleStatement(CompileContext compileContext, Parser.Statement s)
@@ -437,28 +472,28 @@ namespace UndertaleModLib.Compiler
                                     AssembleStoreVariable(cw, s.Children[0], cw.typeStack.Pop()); // variable reference
                                     break;
                                 case Lexer.Token.TokenKind.AssignPlus:
-                                    AssembleOperationAssign(cw, s, "add");
+                                    AssembleOperationAssign(cw, s, Opcode.Add);
                                     break;
                                 case Lexer.Token.TokenKind.AssignMinus:
-                                    AssembleOperationAssign(cw, s, "sub");
+                                    AssembleOperationAssign(cw, s, Opcode.Sub);
                                     break;
                                 case Lexer.Token.TokenKind.AssignTimes:
-                                    AssembleOperationAssign(cw, s, "mul");
+                                    AssembleOperationAssign(cw, s, Opcode.Mul);
                                     break;
                                 case Lexer.Token.TokenKind.AssignDivide:
-                                    AssembleOperationAssign(cw, s, "div");
+                                    AssembleOperationAssign(cw, s, Opcode.Div);
                                     break;
                                 case Lexer.Token.TokenKind.AssignAnd:
-                                    AssembleOperationAssign(cw, s, "and", true);
+                                    AssembleOperationAssign(cw, s, Opcode.And, true);
                                     break;
                                 case Lexer.Token.TokenKind.AssignOr:
-                                    AssembleOperationAssign(cw, s, "or", true);
+                                    AssembleOperationAssign(cw, s, Opcode.Or, true);
                                     break;
                                 case Lexer.Token.TokenKind.AssignXor:
-                                    AssembleOperationAssign(cw, s, "xor", true);
+                                    AssembleOperationAssign(cw, s, Opcode.Xor, true);
                                     break;
                                 case Lexer.Token.TokenKind.AssignMod:
-                                    AssembleOperationAssign(cw, s, "mod");
+                                    AssembleOperationAssign(cw, s, Opcode.Mod);
                                     break;
                             }
                         }
@@ -484,28 +519,27 @@ namespace UndertaleModLib.Compiler
                         break;
                     case Parser.Statement.StatementKind.If:
                         {
-                            int endLabel = cw.GetNextLabelID();
-                            int elseLabel = -1;
-                            if (s.Children.Count == 3)
-                                elseLabel = cw.GetNextLabelID();
-
                             AssembleExpression(cw, s.Children[0]); // condition
-                            UndertaleInstruction.DataType type = cw.typeStack.Pop();
-                            if (type != UndertaleInstruction.DataType.Boolean)
+                            DataType type = cw.typeStack.Pop();
+                            if (type != DataType.Boolean)
                             {
-                                cw.Write("conv." + type.ToOpcodeParam() + ".b");
+                                cw.Emit(Opcode.Conv, type, DataType.Boolean);
                             }
-                            cw.Write("bf", (elseLabel != -1 ? elseLabel : endLabel));
+                            var conditionPatch = Patch.Start();
+                            conditionPatch.Add(cw.Emit(Opcode.Bf));
 
                             AssembleStatement(cw, s.Children[1]); // body
-                            if (elseLabel != -1)
+                            if (s.Children.Count == 3)
                             {
-                                cw.Write("b", endLabel);
-                                cw.Write(elseLabel);
+                                var elsePatch = Patch.Start();
+                                elsePatch.Add(cw.Emit(Opcode.B));
+                                conditionPatch.Finish(cw);
                                 AssembleStatement(cw, s.Children[2]); // else statement
+                                elsePatch.Finish(cw);
+                            } else
+                            {
+                                conditionPatch.Finish(cw);
                             }
-
-                            cw.Write(endLabel);
                         }
                         break;
                     case Parser.Statement.StatementKind.ForLoop:
@@ -517,23 +551,26 @@ namespace UndertaleModLib.Compiler
                             }
 
                             AssembleStatement(cw, s.Children[0]); // initial set
-                            int conditionLabel = AssembleNewLabel(cw);
-                            int endLoopLabel = cw.GetNextLabelID();
+
+                            var conditionPatch = Patch.StartHere(cw);
                             AssembleExpression(cw, s.Children[1]); // condition
-                            UndertaleInstruction.DataType type = cw.typeStack.Pop();
-                            if (type != UndertaleInstruction.DataType.Boolean)
+                            DataType type = cw.typeStack.Pop();
+                            if (type != DataType.Boolean)
                             {
-                                cw.Write("conv." + type.ToOpcodeParam() + ".b");
+                                cw.Emit(Opcode.Conv, type, DataType.Boolean);
                             }
-                            cw.Write("bf", endLoopLabel);
-                            int continueLabel = cw.GetNextLabelID();
-                            cw.loopContexts.Push(new LoopContext(endLoopLabel, continueLabel));
+                            var endLoopPatch = Patch.Start();
+                            endLoopPatch.Add(cw.Emit(Opcode.Bf));
+
+                            var continuePatch = Patch.Start();
+                            cw.loopContexts.Push(new LoopContext(endLoopPatch, continuePatch));
                             AssembleStatement(cw, s.Children[3]); // body
-                            if (cw.loopContexts.Pop().IsContinueUsed)
-                                cw.Write(continueLabel);
+                            cw.loopContexts.Pop();
+                            continuePatch.Finish(cw);
                             AssembleStatement(cw, s.Children[2]); // code that runs each iteration, usually "i++" or something
-                            cw.Write("b", conditionLabel);
-                            cw.Write(endLoopLabel);
+                            conditionPatch.Add(cw.Emit(Opcode.B));
+                            conditionPatch.Finish(cw);
+                            endLoopPatch.Finish(cw);
                         }
                         break;
                     case Parser.Statement.StatementKind.WhileLoop:
@@ -544,20 +581,21 @@ namespace UndertaleModLib.Compiler
                                 break;
                             }
 
-                            int conditionLabel = AssembleNewLabel(cw);
-                            int endLoopLabel = cw.GetNextLabelID();
+                            Patch conditionPatch = Patch.StartHere(cw);
                             AssembleExpression(cw, s.Children[0]); // condition
-                            UndertaleInstruction.DataType type = cw.typeStack.Pop();
-                            if (type != UndertaleInstruction.DataType.Boolean)
+                            DataType type = cw.typeStack.Pop();
+                            if (type != DataType.Boolean)
                             {
-                                cw.Write("conv." + type.ToOpcodeParam() + ".b");
+                                cw.Emit(Opcode.Conv, type, DataType.Boolean);
                             }
-                            cw.Write("bf", endLoopLabel);
-                            cw.loopContexts.Push(new LoopContext(endLoopLabel, conditionLabel));
+                            Patch endLoopPatch = Patch.Start();
+                            endLoopPatch.Add(cw.Emit(Opcode.Bf));
+                            cw.loopContexts.Push(new LoopContext(endLoopPatch, conditionPatch));
                             AssembleStatement(cw, s.Children[1]); // body
                             cw.loopContexts.Pop();
-                            cw.Write("b", conditionLabel);
-                            cw.Write(endLoopLabel);
+                            conditionPatch.Add(cw.Emit(Opcode.B));
+                            conditionPatch.Finish(cw);
+                            endLoopPatch.Finish(cw);
                         }
                         break;
                     case Parser.Statement.StatementKind.RepeatLoop:
@@ -568,38 +606,39 @@ namespace UndertaleModLib.Compiler
                                 break;
                             }
                             
-                            // This loop keeps things on the stack
+                            // This loop keeps its counter on the stack
 
                             AssembleExpression(cw, s.Children[0]); // number of times to repeat
-                            UndertaleInstruction.DataType type = cw.typeStack.Pop();
-                            if (type != UndertaleInstruction.DataType.Int32)
+                            DataType type = cw.typeStack.Pop();
+                            if (type != DataType.Int32)
                             {
-                                cw.Write("conv." + type.ToOpcodeParam() + ".i");
+                                cw.Emit(Opcode.Conv, type, DataType.Int32);
                             }
 
-                            int endLabel = cw.GetNextLabelID();
-                            int repeatLabel = cw.GetNextLabelID();
-                            int startLabel = cw.GetNextLabelID();
+                            Patch endPatch = Patch.Start();
+                            Patch repeatPatch = Patch.Start();
 
-                            cw.Write("dup.i 0");
-                            cw.Write("push.i 0"); // This is REALLY weird, but this happens, always- normally it's pushi.e
-                            cw.Write("cmp.i.i LTE");
-                            cw.Write("bt", endLabel);
+                            cw.Emit(Opcode.Dup, DataType.Int32).Extra = 0;
+                            cw.Emit(Opcode.Push, DataType.Int32).Value = 0; // This is REALLY weird, but this happens, always- normally it's pushi.e
+                            cw.Emit(Opcode.Cmp, DataType.Int32, DataType.Int32)
+                                        .ComparisonKind = ComparisonType.LTE;
+                            endPatch.Add(cw.Emit(Opcode.Bt));
 
-                            cw.loopContexts.Push(new LoopContext(endLabel, repeatLabel));
+                            cw.loopContexts.Push(new LoopContext(endPatch, repeatPatch));
 
-                            cw.Write(startLabel);
+                            Patch startPatch = Patch.StartHere(cw);
                             AssembleStatement(cw, s.Children[1]); // body
 
-                            cw.Write(repeatLabel);
-                            cw.Write("push.i 1"); // This is also weird- normally it's pushi.e
-                            cw.Write("sub.i.i");
-                            cw.Write("dup.i 0");
-                            cw.Write("conv.i.b");
-                            cw.Write("bt", startLabel);
+                            repeatPatch.Finish(cw);
+                            cw.Emit(Opcode.Push, DataType.Int32).Value = 1; // This is also weird- normally it's pushi.e
+                            cw.Emit(Opcode.Sub, DataType.Int32, DataType.Int32);
+                            cw.Emit(Opcode.Dup, DataType.Int32).Extra = 0;
+                            cw.Emit(Opcode.Conv, DataType.Int32, DataType.Boolean);
+                            startPatch.Add(cw.Emit(Opcode.Bt));
+                            startPatch.Finish(cw);
 
-                            cw.Write(endLabel);
-                            cw.Write("popz.i"); // Cleans up the stack of the decrementing value, which at this point should be <= 0
+                            endPatch.Finish(cw);
+                            cw.Emit(Opcode.Popz, DataType.Int32); // Cleans up the stack of the decrementing value, which at this point should be <= 0
 
                             cw.loopContexts.Pop();
                         }
@@ -612,37 +651,37 @@ namespace UndertaleModLib.Compiler
                                 break;
                             }
 
-                            int startLabel = cw.GetNextLabelID();
-                            int endLabel = cw.GetNextLabelID();
-                            int repeatLabel = cw.GetNextLabelID();
+                            Patch endPatch = Patch.Start();
+                            Patch repeatPatch = Patch.Start();
 
-                            cw.loopContexts.Push(new LoopContext(endLabel, repeatLabel));
+                            cw.loopContexts.Push(new LoopContext(endPatch, repeatPatch));
 
-                            cw.Write(startLabel);
+                            Patch startPatch = Patch.StartHere(cw);
                             AssembleStatement(cw, s.Children[0]); // body
-                            
-                            cw.Write(repeatLabel);
-                            AssembleExpression(cw, s.Children[1]); // condition
-                            UndertaleInstruction.DataType type = cw.typeStack.Pop();
-                            if (type != UndertaleInstruction.DataType.Boolean)
-                            {
-                                cw.Write("conv." + type.ToOpcodeParam() + ".b");
-                            }
-                            cw.Write("bf", startLabel);
 
-                            cw.Write(endLabel);
+                            repeatPatch.Finish(cw);
+                            AssembleExpression(cw, s.Children[1]); // condition
+                            DataType type = cw.typeStack.Pop();
+                            if (type != DataType.Boolean)
+                            {
+                                cw.Emit(Opcode.Conv, type, DataType.Boolean);
+                            }
+                            startPatch.Add(cw.Emit(Opcode.Bf));
+                            startPatch.Finish(cw);
+
+                            endPatch.Finish(cw);
                             cw.loopContexts.Pop();
                         }
                         break;
                     case Parser.Statement.StatementKind.Switch:
                         {
-                            int endLabel = cw.GetNextLabelID();
+                            Patch endPatch = Patch.Start();
                             bool isEnclosingLoop = (cw.loopContexts.Count > 0);
-                            int continueEndLabel = -1;
+                            Patch continueEndPatch = null;
                             LoopContext enclosingContext = default(LoopContext);
                             if (isEnclosingLoop)
                             {
-                                continueEndLabel = cw.GetNextLabelID();
+                                continueEndPatch = Patch.Start();
                                 enclosingContext = cw.loopContexts.Peek();
                             }
 
@@ -650,10 +689,10 @@ namespace UndertaleModLib.Compiler
                             AssembleExpression(cw, s.Children[0]);
                             var compareType = cw.typeStack.Pop();
 
-                            cw.otherContexts.Push(new OtherContext(endLabel, continueEndLabel, compareType));
+                            cw.otherContexts.Push(new OtherContext(endPatch, continueEndPatch, compareType));
 
-                            List<Tuple<Parser.Statement, int /* label id */, int /* index in s.Children */>> cases = new List<Tuple<Parser.Statement, int, int>>();
-                            int defaultLabel = -1;
+                            List<Tuple<Parser.Statement, Patch, int /* index in s.Children */>> cases = new List<Tuple<Parser.Statement, Patch, int>>();
+                            Patch defaultPatch = null;
                             bool isReadyForOtherStatements = false;
 
                             for (int i = 1; i < s.Children.Count; i++)
@@ -663,22 +702,22 @@ namespace UndertaleModLib.Compiler
                                 {
                                     case Parser.Statement.StatementKind.SwitchCase:
                                         {
-                                            cw.Write("dup." + compareType.ToOpcodeParam() + " 0");
+                                            cw.Emit(Opcode.Dup, compareType).Extra = 0;
                                             AssembleExpression(cw, s2.Children[0]);
-                                            cw.Write("cmp." + cw.typeStack.Pop().ToOpcodeParam() + "." + compareType.ToOpcodeParam() + " EQ");
-                                            
-                                            int label = cw.GetNextLabelID();
-                                            cw.Write("bt", label);
+                                            cw.Emit(Opcode.Cmp, cw.typeStack.Pop(), compareType).ComparisonKind = ComparisonType.EQ;
 
-                                            cases.Add(new Tuple<Parser.Statement, int, int>(s2, label, i));
+                                            Patch patch = Patch.Start();
+                                            patch.Add(cw.Emit(Opcode.Bt));
+
+                                            cases.Add(new Tuple<Parser.Statement, Patch, int>(s2, patch, i));
 
                                             isReadyForOtherStatements = true;
                                         }
                                         break;
                                     case Parser.Statement.StatementKind.SwitchDefault:
                                         {
-                                            defaultLabel = cw.GetNextLabelID();
-                                            cases.Add(new Tuple<Parser.Statement, int, int>(s2, defaultLabel, i));
+                                            defaultPatch = Patch.Start();
+                                            cases.Add(new Tuple<Parser.Statement, Patch, int>(s2, defaultPatch, i));
 
                                             isReadyForOtherStatements = true;
                                         }
@@ -692,11 +731,11 @@ namespace UndertaleModLib.Compiler
                                 }
                             }
 
-                            if (defaultLabel != -1)
+                            if (defaultPatch != null)
                             {
-                                cw.Write("b", defaultLabel);
+                                defaultPatch.Add(cw.Emit(Opcode.B));
                             }
-                            cw.Write("b", endLabel); // Even if the default exists, this happens...
+                            endPatch.Add(cw.Emit(Opcode.B)); // Even if the default exists, this happens...
 
                             // Search for duplicates
                             List<Parser.Statement> alreadyUsed = new List<Parser.Statement>();
@@ -725,7 +764,7 @@ namespace UndertaleModLib.Compiler
                                 var next = (i + 1 < cases.Count) ? cases[i + 1] : null;
                                 int endIndex = (next?.Item3 ?? s.Children.Count) - 1;
 
-                                cw.Write(c.Item2);
+                                c.Item2.Finish(cw);
 
                                 for (int j = c.Item3 + 1; j <= endIndex; j++)
                                 {
@@ -735,68 +774,71 @@ namespace UndertaleModLib.Compiler
 
                             // Write part at end in case a continue statement is used
                             OtherContext context = cw.otherContexts.Pop();
-                            if (isEnclosingLoop && context.IsContinueUsed)
+                            if (isEnclosingLoop && context.ContinueUsed)
                             {
-                                cw.Write("b", endLabel);
+                                endPatch.Add(cw.Emit(Opcode.B));
 
-                                cw.Write(continueEndLabel);
-                                cw.Write("popz." + compareType.ToOpcodeParam());
-                                cw.Write("b", enclosingContext.UseContinueLabel());
+                                continueEndPatch.Finish(cw);
+                                cw.Emit(Opcode.Popz, compareType);
+                                enclosingContext.UseContinue().Add(cw.Emit(Opcode.B));
                             }
 
-                            cw.Write(endLabel);
-                            cw.Write("popz." + compareType.ToOpcodeParam());
+                            endPatch.Finish(cw);
+                            cw.Emit(Opcode.Popz, compareType);
                         }
                         break;
                     case Parser.Statement.StatementKind.With:
                         {
-                            int endLabel = cw.GetNextLabelID();
-                            int startLabel = cw.GetNextLabelID();
-                            int popEnvLabel = cw.GetNextLabelID();
+                            Patch endPatch = Patch.Start();
+                            Patch popEnvPatch = Patch.Start();
 
                             AssembleExpression(cw, s.Children[0]); // new object/context
                             var type = cw.typeStack.Pop();
-                            if (type != UndertaleInstruction.DataType.Int32)
+                            if (type != DataType.Int32)
                             {
-                                cw.Write("conv." + type.ToOpcodeParam() + ".i");
+                                cw.Emit(Opcode.Conv, type, DataType.Int32);
                             }
 
-                            cw.otherContexts.Push(new OtherContext(endLabel, popEnvLabel));
+                            cw.otherContexts.Push(new OtherContext(endPatch, popEnvPatch));
 
-                            cw.Write("pushenv", popEnvLabel);
-                            cw.Write(startLabel);
+                            popEnvPatch.Add(cw.Emit(Opcode.PushEnv));
+                            Patch startPatch = Patch.StartHere(cw);
 
                             AssembleStatement(cw, s.Children[1]);
 
-                            cw.Write(popEnvLabel);
-                            cw.Write("popenv", startLabel);
+                            popEnvPatch.Finish(cw);
+                            startPatch.Add(cw.Emit(Opcode.PopEnv));
+                            startPatch.Finish(cw);
 
-                            if (cw.otherContexts.Pop().IsBreakUsed)
+                            if (cw.otherContexts.Pop().BreakUsed)
                             {
-                                int cleanUpEndLabel = cw.GetNextLabelID();
-                                cw.Write("b", cleanUpEndLabel);
+                                Patch cleanUpEndPatch = Patch.Start();
+                                cleanUpEndPatch.Add(cw.Emit(Opcode.B));
 
-                                cw.Write(endLabel);
-                                cw.Write("popenv [drop]");
+                                endPatch.Finish(cw);
+                                var dropPopenv = cw.Emit(Opcode.PopEnv);
+                                dropPopenv.JumpOffsetPopenvExitMagic = true;
+                                if (cw.compileContext.Data?.GeneralInfo?.BytecodeVersion <= 14)
+                                    dropPopenv.JumpOffset = -1048576; // magic for older versions
 
-                                cw.Write(cleanUpEndLabel);
+                                cleanUpEndPatch.Finish(cw);
                             } else
                             {
-                                cw.Write(endLabel);
+                                endPatch.Finish(cw);
                             }
                         }
                         break;
                     case Parser.Statement.StatementKind.Continue:
-                        if (cw.loopContexts.Count == 0 && (cw.otherContexts.Count == 0 || cw.otherContexts.Peek().ContinueLabel == -1))
+                        if (cw.loopContexts.Count == 0 && (cw.otherContexts.Count == 0 || cw.otherContexts.Peek().Continue == null))
                         {
                             AssemblyWriterError(cw, "Continue statement placed outside of any loops.", s.Token);
                         }
                         else
                         {
-                            if (cw.otherContexts.Count > 0 && cw.otherContexts.Peek().ContinueLabel != -1)
-                                cw.Write("b", HelpUseContinueLabel(ref cw.otherContexts));
+                            if (cw.otherContexts.Count > 0 && cw.otherContexts.Peek().Continue != null)
+                                HelpUseContinue(ref cw.otherContexts).Add(cw.Emit(Opcode.B));
                             else
-                                cw.Write("b", HelpUseContinueLabel(ref cw.loopContexts));
+                                HelpUseContinue(ref cw.loopContexts).Add(cw.Emit(Opcode.B));
                         }
                         break;
                     case Parser.Statement.StatementKind.Break:
@@ -806,10 +848,10 @@ namespace UndertaleModLib.Compiler
                         }
                         else
                         {
-                            if (cw.otherContexts.Count > 0 && cw.otherContexts.Peek().BreakLabel != -1)
-                                cw.Write("b", HelpUseBreakLabel(ref cw.otherContexts));
+                            if (cw.otherContexts.Count > 0 && cw.otherContexts.Peek().Break != null)
+                                HelpUseBreak(ref cw.otherContexts).Add(cw.Emit(Opcode.B));
                             else
-                                cw.Write("b", HelpUseBreakLabel(ref cw.loopContexts));
+                                HelpUseBreak(ref cw.loopContexts).Add(cw.Emit(Opcode.B));
                         }
                         break;
                     case Parser.Statement.StatementKind.FunctionCall:
@@ -819,7 +861,7 @@ namespace UndertaleModLib.Compiler
                             // Since this is a statement, nothing's going to happen with
                             // the return value. So it must be discarded so it doesn't
                             // make a mess on the stack.
-                            cw.Write("popz." + cw.typeStack.Pop().ToOpcodeParam());
+                            cw.Emit(Opcode.Popz, cw.typeStack.Pop());
                         }
                         break;
                     case Parser.Statement.StatementKind.Return:
@@ -828,9 +870,9 @@ namespace UndertaleModLib.Compiler
                             // Returns a value to caller
                             AssembleExpression(cw, s.Children[0]);
                             var type = cw.typeStack.Pop();
-                            if (type != UndertaleInstruction.DataType.Variable)
+                            if (type != DataType.Variable)
                             {
-                                cw.Write("conv." + type.ToOpcodeParam() + ".v");
+                                cw.Emit(Opcode.Conv, type, DataType.Variable);
                             }
 
                             // Clean up contexts if necessary
@@ -840,23 +882,40 @@ namespace UndertaleModLib.Compiler
                                 // Put the return value into a local variable (GM does this as well)
                                 // so that it doesn't get cleared out of the stack??
                                 // See here: https://github.com/krzys-h/UndertaleModTool/issues/164
-                                cw.Write("pop.v.v local.$$$$temp$$$$");
+                                cw.varPatches.Add(new VariablePatch()
+                                {
+                                    Target = cw.EmitRef(Opcode.Pop, DataType.Variable, DataType.Variable),
+                                    InstType = InstanceType.Local,
+                                    Name = "$$$$temp$$$$",
+                                    VarType = VariableType.Normal
+                                });
                                 cw.compileContext.LocalVars["$$$$temp$$$$"] = "$$$$temp$$$$";
                             }
                             foreach (OtherContext oc in cw.otherContexts)
                             {
                                 if (oc.Kind == OtherContext.ContextKind.Switch)
                                 {
-                                    cw.Write("popz." + oc.TypeToPop.ToOpcodeParam());
+                                    cw.Emit(Opcode.Popz, oc.TypeToPop);
                                 } else
                                 {
                                     // With
-                                    cw.Write("popenv [drop]");
+                                    var dropPopenv = cw.Emit(Opcode.PopEnv);
+                                    dropPopenv.JumpOffsetPopenvExitMagic = true;
+                                    if (cw.compileContext.Data?.GeneralInfo?.BytecodeVersion <= 14)
+                                        dropPopenv.JumpOffset = -1048576; // magic for older versions
                                 }
                             }
                             if (useLocalVar)
-                                cw.Write("push.v local.$$$$temp$$$$");
-                            cw.Write("ret.v");
+                            {
+                                cw.varPatches.Add(new VariablePatch()
+                                {
+                                    Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                                    InstType = InstanceType.Local,
+                                    Name = "$$$$temp$$$$",
+                                    VarType = VariableType.Normal
+                                });
+                            }
+                            cw.Emit(Opcode.Ret, DataType.Variable);
                         } else
                         {
                             // Returns nothing, basically the same as exit
@@ -872,7 +931,7 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static void AssembleOperationAssign(CodeWriter cw, Parser.Statement s, string op, bool needsToBeIntOrLong = false)
+            private static void AssembleOperationAssign(CodeWriter cw, Parser.Statement s, Opcode op, bool needsToBeIntOrLong = false)
             {
                 // Variable to operate on, duplicated second-to-last variable if necessary
                 bool isSingle;
@@ -887,18 +946,18 @@ namespace UndertaleModLib.Compiler
                 // Right
                 AssembleExpression(cw, s.Children[2]);
                 var type = cw.typeStack.Pop();
-                if ((needsToBeIntOrLong && type != UndertaleInstruction.DataType.Int32 && type != UndertaleInstruction.DataType.Int64) 
-                    || (!needsToBeIntOrLong && type == UndertaleInstruction.DataType.Boolean))
+                if ((needsToBeIntOrLong && type != DataType.Int32 && type != DataType.Int64) 
+                    || (!needsToBeIntOrLong && type == DataType.Boolean))
                 {
-                        cw.Write("conv." + type.ToOpcodeParam() + ".i");
-                        type = UndertaleInstruction.DataType.Int32;
+                    cw.Emit(Opcode.Conv, type, DataType.Int32);
+                    type = DataType.Int32;
                 }
 
                 // Actual operation
-                cw.Write(op + "." + type.ToOpcodeParam() + ".v");
+                cw.Emit(op, type, DataType.Variable);
                 
                 // Store back, using duplicate reference if necessary
-                AssembleStoreVariable(cw, s.Children[0], UndertaleInstruction.DataType.Variable, !isSingle);
+                AssembleStoreVariable(cw, s.Children[0], DataType.Variable, !isSingle);
             }
 
             private static void AssemblePostOrPre(CodeWriter cw, Parser.Statement s, bool isPost, bool isExpression)
@@ -917,21 +976,21 @@ namespace UndertaleModLib.Compiler
                 // Do the operation... somewhat strangely for expressions...
                 if (isExpression && isPost)
                     AssemblePostPreStackOperation(cw, isSingle, isArray);
-                cw.Write("push.e 1");
-                cw.Write(((s.Token.Kind == Lexer.Token.TokenKind.Increment) ? "add" : "sub") + ".i.v");
+                cw.Emit(Opcode.Push, DataType.Int16).Value = (short)1;
+                cw.Emit((s.Token.Kind == Lexer.Token.TokenKind.Increment) ? Opcode.Add : Opcode.Sub, DataType.Int32, DataType.Variable);
                 if (isExpression && !isPost)
                     AssemblePostPreStackOperation(cw, isSingle, isArray);
 
                 // Store back, using duplicate reference if necessary
-                AssembleStoreVariable(cw, s.Children[0], UndertaleInstruction.DataType.Variable, !isSingle);
+                AssembleStoreVariable(cw, s.Children[0], DataType.Variable, !isSingle);
             }
 
             private static void AssemblePostPreStackOperation(CodeWriter cw, bool isSingle, bool isArray)
             {
-                cw.Write("dup.v 0");
-                cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
+                cw.Emit(Opcode.Dup, DataType.Variable).Extra = 0;
+                cw.typeStack.Push(DataType.Variable);
                 if (!isSingle)
-                    cw.Write("pop.e.v " + (isArray ? "6" : "5")); // todo: fix this when instruction name finalized
+                    cw.Emit(Opcode.Pop, DataType.Int16, DataType.Variable).SwapExtra = (ushort)(isArray ? 6 : 5);
             }
 
             private static void AssembleExit(CodeWriter cw)
@@ -941,7 +1000,7 @@ namespace UndertaleModLib.Compiler
                 {
                     if (oc.Kind == OtherContext.ContextKind.Switch)
                     {
-                        cw.Write("popz." + oc.TypeToPop.ToOpcodeParam());
+                        cw.Emit(Opcode.Popz, oc.TypeToPop);
                     }
                 }
 
@@ -950,11 +1009,14 @@ namespace UndertaleModLib.Compiler
                 {
                     if (oc.Kind == OtherContext.ContextKind.With)
                     {
-                        cw.Write("popenv [drop]");
+                        var dropPopenv = cw.Emit(Opcode.PopEnv);
+                        dropPopenv.JumpOffsetPopenvExitMagic = true;
+                        if (cw.compileContext.Data?.GeneralInfo?.BytecodeVersion <= 14)
+                            dropPopenv.JumpOffset = -1048576; // magic for older versions
                     }
                 }
 
-                cw.Write("exit.i");
+                cw.Emit(Opcode.Exit, DataType.Int32);
             }
 
             private static void AssembleFunctionCall(CodeWriter cw, Parser.Statement fc)
@@ -966,23 +1028,19 @@ namespace UndertaleModLib.Compiler
 
                     // Convert to Variable data type
                     var typeToConvertFrom = cw.typeStack.Pop();
-                    if (typeToConvertFrom != UndertaleInstruction.DataType.Variable)
+                    if (typeToConvertFrom != DataType.Variable)
                     {
-                        cw.Write("conv." + typeToConvertFrom.ToOpcodeParam() + ".v");
+                        cw.Emit(Opcode.Conv, typeToConvertFrom, DataType.Variable);
                     }
                 }
 
-                if (cw.compileContext.ensureFunctionsDefined)
+                cw.funcPatches.Add(new FunctionPatch()
                 {
-                    cw.compileContext.Data?.Functions?.EnsureDefined(fc.Text, cw.compileContext.Data.Strings);
-                }
-                cw.Write("call.i " + fc.Text + "(argc=" + fc.Children.Count.ToString() + ")");
-                cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
-            }
-
-            private static string FormatString(string s)
-            {
-                return s.Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"");
+                    Target = cw.EmitRef(Opcode.Call, DataType.Int32),
+                    Name = fc.Text,
+                    ArgCount = fc.Children.Count
+                });
+                cw.typeStack.Push(DataType.Variable);
             }
 
             private static void AssembleExpression(CodeWriter cw, Parser.Statement e)
@@ -995,7 +1053,7 @@ namespace UndertaleModLib.Compiler
                             if (value == null)
                             {
                                 AssemblyWriterError(cw, "Invalid constant", e.Token);
-                                cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
+                                cw.typeStack.Push(DataType.Variable);
                                 break;
                             }
 
@@ -1004,8 +1062,8 @@ namespace UndertaleModLib.Compiler
                                 case Parser.ExpressionConstant.Kind.Number:
                                     if (value.isBool)
                                     {
-                                        cw.Write("pushi.e " + ((short)value.valueNumber).ToString());
-                                        cw.typeStack.Push(UndertaleInstruction.DataType.Boolean);
+                                        cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)value.valueNumber;
+                                        cw.typeStack.Push(DataType.Boolean);
                                     }
                                     else if ((double)((long)value.valueNumber) == value.valueNumber)
                                     {
@@ -1016,40 +1074,44 @@ namespace UndertaleModLib.Compiler
                                             if (valueAsInt <= Int16.MaxValue && valueAsInt >= Int16.MinValue)
                                             {
                                                 // Int16
-                                                cw.Write("pushi.e " + valueAsInt.ToString());
-                                                cw.typeStack.Push(UndertaleInstruction.DataType.Int32); // apparently?
+                                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)valueAsInt;
+                                                cw.typeStack.Push(DataType.Int32); // apparently?
                                             }
                                             else
                                             {
                                                 // Int32
-                                                cw.Write("push.i " + valueAsInt.ToString());
-                                                cw.typeStack.Push(UndertaleInstruction.DataType.Int32);
+                                                cw.Emit(Opcode.Push, DataType.Int32).Value = (int)valueAsInt;
+                                                cw.typeStack.Push(DataType.Int32);
                                             }
                                         }
                                         else
                                         {
                                             // Int64
-                                            cw.Write("push.l " + valueAsInt.ToString());
-                                            cw.typeStack.Push(UndertaleInstruction.DataType.Int64);
+                                            cw.Emit(Opcode.Push, DataType.Int64).Value = valueAsInt;
+                                            cw.typeStack.Push(DataType.Int64);
                                         }
                                     }
                                     else
                                     {
                                         // It's a double
-                                        cw.Write("push.d " + value.valueNumber.ToString(CultureInfo.InvariantCulture));
-                                        cw.typeStack.Push(UndertaleInstruction.DataType.Double);
+                                        cw.Emit(Opcode.Push, DataType.Double).Value = value.valueNumber;
+                                        cw.typeStack.Push(DataType.Double);
                                     }
                                     break;
                                 case Parser.ExpressionConstant.Kind.String:
-                                    cw.Write("push.s \"" + FormatString(value.valueString) + "\"");
-                                    cw.typeStack.Push(UndertaleInstruction.DataType.String);
+                                    cw.stringPatches.Add(new StringPatch()
+                                    {
+                                        Target = cw.EmitRef(Opcode.Push, DataType.String),
+                                        Content = value.valueString
+                                    });
+                                    cw.typeStack.Push(DataType.String);
                                     break;
                                 case Parser.ExpressionConstant.Kind.Int64:
-                                    cw.Write("push.l " + value.valueInt64.ToString());
-                                    cw.typeStack.Push(UndertaleInstruction.DataType.Int64);
+                                    cw.Emit(Opcode.Push, DataType.Int64).Value = value.valueInt64;
+                                    cw.typeStack.Push(DataType.Int64);
                                     break;
                                 default:
-                                    cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
+                                    cw.typeStack.Push(DataType.Variable);
                                     AssemblyWriterError(cw, "Invalid constant type.", e.Token);
                                     break;
                             }
@@ -1071,45 +1133,45 @@ namespace UndertaleModLib.Compiler
                             if (e.Token.Kind == Lexer.Token.TokenKind.LogicalAnd || e.Token.Kind == Lexer.Token.TokenKind.LogicalOr)
                             {
                                 // Short circuit
-                                int endLabel = cw.GetNextLabelID();
-                                int branchLabel = cw.GetNextLabelID();
+                                Patch endPatch = Patch.Start();
+                                Patch branchPatch = Patch.Start();
 
                                 bool isAnd = (e.Token.Kind == Lexer.Token.TokenKind.LogicalAnd);
 
                                 for (int i = 1; i < e.Children.Count; i++)
                                 {
-                                    UndertaleInstruction.DataType type2 = cw.typeStack.Pop();
-                                    if (type2 != UndertaleInstruction.DataType.Boolean)
+                                    DataType type2 = cw.typeStack.Pop();
+                                    if (type2 != DataType.Boolean)
                                     {
-                                        cw.Write("conv." + type2.ToOpcodeParam() + ".b");
+                                        cw.Emit(Opcode.Conv, type2, DataType.Boolean);
                                     }
                                     if (isAnd)
                                     {
-                                        cw.Write("bf", branchLabel);
+                                        branchPatch.Add(cw.Emit(Opcode.Bf));
                                     } else
                                     {
-                                        cw.Write("bt", branchLabel);
+                                        branchPatch.Add(cw.Emit(Opcode.Bt));
                                     }
                                     AssembleExpression(cw, e.Children[i]);
                                 }
 
-                                UndertaleInstruction.DataType type = cw.typeStack.Pop();
-                                if (type != UndertaleInstruction.DataType.Boolean)
+                                DataType type = cw.typeStack.Pop();
+                                if (type != DataType.Boolean)
                                 {
-                                    cw.Write("conv." + type.ToOpcodeParam() + ".b");
+                                    cw.Emit(Opcode.Conv, type, DataType.Boolean);
                                 }
-                                cw.typeStack.Push(UndertaleInstruction.DataType.Boolean);
+                                cw.typeStack.Push(DataType.Boolean);
 
-                                cw.Write("b", endLabel);
-                                cw.Write(branchLabel);
+                                endPatch.Add(cw.Emit(Opcode.B));
+                                branchPatch.Finish(cw);
                                 if (isAnd)
                                 {
-                                    cw.Write("push.e 0");
+                                    cw.Emit(Opcode.Push, DataType.Int16).Value = (short)0;
                                 } else
                                 {
-                                    cw.Write("push.e 1");
+                                    cw.Emit(Opcode.Push, DataType.Int16).Value = (short)1;
                                 }
-                                cw.Write(endLabel);
+                                endPatch.Finish(cw);
 
                                 return;
                             }
@@ -1121,14 +1183,14 @@ namespace UndertaleModLib.Compiler
                                 ConvertTypeForBinaryOp(cw, e.Token.Kind);
 
                                 // Decide what the resulting type will be after the operation
-                                UndertaleInstruction.DataType type1 = cw.typeStack.Pop();
-                                UndertaleInstruction.DataType type2 = cw.typeStack.Pop();
+                                DataType type1 = cw.typeStack.Pop();
+                                DataType type2 = cw.typeStack.Pop();
                                 int type1Bias = DataTypeBias(type1);
                                 int type2Bias = DataTypeBias(type2);
-                                UndertaleInstruction.DataType resultingType;
+                                DataType resultingType;
                                 if (type1Bias == type2Bias)
                                 {
-                                    resultingType = (UndertaleInstruction.DataType)Math.Min((byte)type1, (byte)type2);
+                                    resultingType = (DataType)Math.Min((byte)type1, (byte)type2);
                                 }
                                 else
                                 {
@@ -1136,135 +1198,129 @@ namespace UndertaleModLib.Compiler
                                 }
 
                                 // Push the operation instructions
-                                string instructionName = "";
-                                string instructionEnd = "";
+                                var instr = cw.Emit(Opcode.Add, type1, type2);
                                 bool pushesABoolInstead = false;
                                 switch (e.Token.Kind)
                                 {
                                     case Lexer.Token.TokenKind.Plus:
-                                        instructionName = "add";
+                                        instr.Kind = Opcode.Add;
                                         break;
                                     case Lexer.Token.TokenKind.Minus:
-                                        instructionName = "sub";
+                                        instr.Kind = Opcode.Sub;
                                         break;
                                     case Lexer.Token.TokenKind.Times:
-                                        instructionName = "mul";
+                                        instr.Kind = Opcode.Mul;
                                         break;
                                     case Lexer.Token.TokenKind.Divide:
-                                        instructionName = "div";
+                                        instr.Kind = Opcode.Div;
                                         break;
                                     case Lexer.Token.TokenKind.Div:
-                                        instructionName = "rem";
+                                        instr.Kind = Opcode.Rem;
                                         break;
                                     case Lexer.Token.TokenKind.Mod:
-                                        instructionName = "mod";
+                                        instr.Kind = Opcode.Mod;
                                         break;
                                     case Lexer.Token.TokenKind.CompareEqual:
-                                        instructionName = "cmp";
-                                        instructionEnd = "EQ";
+                                        instr.Kind = Opcode.Cmp;
+                                        instr.ComparisonKind = ComparisonType.EQ;
                                         pushesABoolInstead = true;
                                         break;
                                     case Lexer.Token.TokenKind.CompareNotEqual:
-                                        instructionName = "cmp";
-                                        instructionEnd = "NEQ";
+                                        instr.Kind = Opcode.Cmp;
+                                        instr.ComparisonKind = ComparisonType.NEQ;
                                         pushesABoolInstead = true;
                                         break;
                                     case Lexer.Token.TokenKind.CompareGreater:
-                                        instructionName = "cmp";
-                                        instructionEnd = "GT";
+                                        instr.Kind = Opcode.Cmp;
+                                        instr.ComparisonKind = ComparisonType.GT;
                                         pushesABoolInstead = true;
                                         break;
                                     case Lexer.Token.TokenKind.CompareGreaterEqual:
-                                        instructionName = "cmp";
-                                        instructionEnd = "GTE";
+                                        instr.Kind = Opcode.Cmp;
+                                        instr.ComparisonKind = ComparisonType.GTE;
                                         pushesABoolInstead = true;
                                         break;
                                     case Lexer.Token.TokenKind.CompareLess:
-                                        instructionName = "cmp";
-                                        instructionEnd = "LT";
+                                        instr.Kind = Opcode.Cmp;
+                                        instr.ComparisonKind = ComparisonType.LT;
                                         pushesABoolInstead = true;
                                         break;
                                     case Lexer.Token.TokenKind.CompareLessEqual:
-                                        instructionName = "cmp";
-                                        instructionEnd = "LTE";
+                                        instr.Kind = Opcode.Cmp;
+                                        instr.ComparisonKind = ComparisonType.LTE;
                                         pushesABoolInstead = true;
                                         break;
                                     case Lexer.Token.TokenKind.BitwiseShiftLeft:
-                                        instructionName = "shl";
+                                        instr.Kind = Opcode.Shl;
                                         break;
                                     case Lexer.Token.TokenKind.BitwiseShiftRight:
-                                        instructionName = "shr";
+                                        instr.Kind = Opcode.Shr;
                                         break;
                                     case Lexer.Token.TokenKind.BitwiseAnd:
-                                        instructionName = "and";
+                                        instr.Kind = Opcode.And;
                                         break;
                                     case Lexer.Token.TokenKind.BitwiseOr:
-                                        instructionName = "or";
+                                        instr.Kind = Opcode.Or;
                                         break;
                                     case Lexer.Token.TokenKind.BitwiseXor:
                                     case Lexer.Token.TokenKind.LogicalXor: // doesn't do short circuit
-                                        instructionName = "xor";
+                                        instr.Kind = Opcode.Xor;
                                         break;
                                 }
 
-                                cw.typeStack.Push(pushesABoolInstead ? UndertaleInstruction.DataType.Boolean : resultingType);
-                                string final = instructionName + "." + type1.ToOpcodeParam() + "." + type2.ToOpcodeParam();
-                                if (instructionEnd != "")
-                                    final += " " + instructionEnd;
-
-                                cw.Write(final);
+                                cw.typeStack.Push(pushesABoolInstead ? DataType.Boolean : resultingType);
                             }
                         }
                         break;
                     case Parser.Statement.StatementKind.ExprUnary:
                         {
                             AssembleExpression(cw, e.Children[0]);
-                            UndertaleInstruction.DataType type = cw.typeStack.Peek();
+                            DataType type = cw.typeStack.Peek();
 
                             switch (e.Token.Kind)
                             {
                                 case Lexer.Token.TokenKind.Not:
-                                    if (type == UndertaleInstruction.DataType.String)
+                                    if (type == DataType.String)
                                     {
                                         AssemblyWriterError(cw, "Cannot logically negate a string.", e.Token);
                                     }
-                                    else if (type != UndertaleInstruction.DataType.Boolean)
+                                    else if (type != DataType.Boolean)
                                     {
                                         cw.typeStack.Pop();
-                                        cw.Write("conv." + type.ToOpcodeParam() + ".b");
-                                        cw.typeStack.Push(UndertaleInstruction.DataType.Boolean);
+                                        cw.Emit(Opcode.Conv, type, DataType.Boolean);
+                                        cw.typeStack.Push(DataType.Boolean);
                                     }
-                                    cw.Write("not.b");
+                                    cw.Emit(Opcode.Not, DataType.Boolean);
                                     break;
                                 case Lexer.Token.TokenKind.BitwiseNegate:
-                                    if (type == UndertaleInstruction.DataType.String)
+                                    if (type == DataType.String)
                                     {
                                         AssemblyWriterError(cw, "Cannot bitwise negate a string.", e.Token);
                                     }
-                                    else if (type == UndertaleInstruction.DataType.Double ||
-                                             type == UndertaleInstruction.DataType.Float ||
-                                             type == UndertaleInstruction.DataType.Variable)
+                                    else if (type == DataType.Double ||
+                                             type == DataType.Float ||
+                                             type == DataType.Variable)
                                     {
                                         cw.typeStack.Pop();
-                                        cw.Write("conv." + type.ToOpcodeParam() + ".i");
-                                        cw.typeStack.Push(UndertaleInstruction.DataType.Int32);
-                                        type = UndertaleInstruction.DataType.Int32;
+                                        cw.Emit(Opcode.Conv, type, DataType.Int32);
+                                        cw.typeStack.Push(DataType.Int32);
+                                        type = DataType.Int32;
                                     }
-                                    cw.Write("not." + type.ToOpcodeParam());
+                                    cw.Emit(Opcode.Not, type);
                                     break;
                                 case Lexer.Token.TokenKind.Minus:
-                                    if (type == UndertaleInstruction.DataType.String)
+                                    if (type == DataType.String)
                                     {
                                         AssemblyWriterError(cw, "Cannot negate a string.", e.Token);
                                     }
-                                    else if (type == UndertaleInstruction.DataType.Boolean)
+                                    else if (type == DataType.Boolean)
                                     {
                                         cw.typeStack.Pop();
-                                        cw.Write("conv." + type.ToOpcodeParam() + ".i");
-                                        cw.typeStack.Push(UndertaleInstruction.DataType.Int32);
-                                        type = UndertaleInstruction.DataType.Int32;
+                                        cw.Emit(Opcode.Conv, type, DataType.Int32);
+                                        cw.typeStack.Push(DataType.Int32);
+                                        type = DataType.Int32;
                                     }
-                                    cw.Write("neg." + type.ToOpcodeParam());
+                                    cw.Emit(Opcode.Neg, type);
                                     break;
                             }
                         }
@@ -1277,61 +1333,61 @@ namespace UndertaleModLib.Compiler
                         break;
                     case Parser.Statement.StatementKind.ExprConditional:
                         {
-                            int falseLabel = cw.GetNextLabelID();
-                            int endLabel = cw.GetNextLabelID();
+                            Patch falsePatch = Patch.Start();
+                            Patch endPatch = Patch.Start();
 
                             // Condition
                             AssembleExpression(cw, e.Children[0]);
                             var t = cw.typeStack.Pop();
-                            if (t != UndertaleInstruction.DataType.Boolean)
+                            if (t != DataType.Boolean)
                             {
-                                cw.Write("conv." + t.ToOpcodeParam() + ".b");
+                                cw.Emit(Opcode.Conv, t, DataType.Boolean);
                             }
-                            cw.Write("bf", falseLabel);
+                            falsePatch.Add(cw.Emit(Opcode.Bf));
 
                             // True expression
                             AssembleExpression(cw, e.Children[1]);
                             t = cw.typeStack.Pop();
-                            if (t != UndertaleInstruction.DataType.Variable)
+                            if (t != DataType.Variable)
                             {
-                                cw.Write("conv." + t.ToOpcodeParam() + ".v");
+                                cw.Emit(Opcode.Conv, t, DataType.Variable);
                             }
-                            cw.Write("b", endLabel);
+                            endPatch.Add(cw.Emit(Opcode.B));
 
                             // False expression
-                            cw.Write(falseLabel);
+                            falsePatch.Finish(cw);
                             AssembleExpression(cw, e.Children[2]);
                             t = cw.typeStack.Pop();
-                            if (t != UndertaleInstruction.DataType.Variable)
+                            if (t != DataType.Variable)
                             {
-                                cw.Write("conv." + t.ToOpcodeParam() + ".v");
+                                cw.Emit(Opcode.Conv, t, DataType.Variable);
                             }
 
-                            cw.Write(endLabel);
-                            cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
+                            endPatch.Finish(cw);
+                            cw.typeStack.Push(DataType.Variable);
                         }
                         break;
                     default:
                         AssemblyWriterError(cw, "Expected expression, none found.", e.Token);
-                        cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
+                        cw.typeStack.Push(DataType.Variable);
                         break;
                 }
             }
 
             // Used to determine which types have dominance over operations- the higher the more
-            private static int DataTypeBias(UndertaleInstruction.DataType type)
+            private static int DataTypeBias(DataType type)
             {
                 switch (type)
                 {
-                    case UndertaleInstruction.DataType.Float:
-                    case UndertaleInstruction.DataType.Int32:
-                    case UndertaleInstruction.DataType.Boolean:
-                    case UndertaleInstruction.DataType.String:
+                    case DataType.Float:
+                    case DataType.Int32:
+                    case DataType.Boolean:
+                    case DataType.String:
                         return 0;
-                    case UndertaleInstruction.DataType.Double:
-                    case UndertaleInstruction.DataType.Int64:
+                    case DataType.Double:
+                    case DataType.Int64:
                         return 1;
-                    case UndertaleInstruction.DataType.Variable:
+                    case DataType.Variable:
                         return 2;
                     default:
                         return -1;
@@ -1345,11 +1401,11 @@ namespace UndertaleModLib.Compiler
                 switch (kind)
                 {
                     case Lexer.Token.TokenKind.Divide:
-                        if (type != UndertaleInstruction.DataType.Double && type != UndertaleInstruction.DataType.Variable)
+                        if (type != DataType.Double && type != DataType.Variable)
                         {
                             cw.typeStack.Pop();
-                            cw.Write("conv." + type.ToOpcodeParam() + ".d");
-                            cw.typeStack.Push(UndertaleInstruction.DataType.Double);
+                            cw.Emit(Opcode.Conv, type, DataType.Double);
+                            cw.typeStack.Push(DataType.Double);
                         }
                         break;
                     case Lexer.Token.TokenKind.Plus:
@@ -1357,52 +1413,53 @@ namespace UndertaleModLib.Compiler
                     case Lexer.Token.TokenKind.Times:
                     case Lexer.Token.TokenKind.Div:
                     case Lexer.Token.TokenKind.Mod:
-                        if (type == UndertaleInstruction.DataType.Boolean)
+                        if (type == DataType.Boolean)
                         {
                             cw.typeStack.Pop();
-                            cw.Write("conv." + type.ToOpcodeParam() + ".i");
-                            cw.typeStack.Push(UndertaleInstruction.DataType.Double);
+                            cw.Emit(Opcode.Conv, type, DataType.Int32);
+                            cw.typeStack.Push(DataType.Double);
                         }
                         break;
                     case Lexer.Token.TokenKind.LogicalAnd:
                     case Lexer.Token.TokenKind.LogicalOr:
                     case Lexer.Token.TokenKind.LogicalXor:
-                        if (type != UndertaleInstruction.DataType.Boolean)
+                        if (type != DataType.Boolean)
                         {
                             cw.typeStack.Pop();
-                            cw.Write("conv." + type.ToOpcodeParam() + ".b");
-                            cw.typeStack.Push(UndertaleInstruction.DataType.Boolean);
+                            cw.Emit(Opcode.Conv, type, DataType.Boolean);
+                            cw.typeStack.Push(DataType.Boolean);
                         }
                         break;
                     case Lexer.Token.TokenKind.BitwiseAnd:
                     case Lexer.Token.TokenKind.BitwiseOr:
                     case Lexer.Token.TokenKind.BitwiseXor:
-                        if (type != UndertaleInstruction.DataType.Int32)
+                        if (type != DataType.Int32)
                         {
                             cw.typeStack.Pop();
-                            if (!type.In(UndertaleInstruction.DataType.Variable, UndertaleInstruction.DataType.Double,
-                                         UndertaleInstruction.DataType.Int64))
+                            if (type != DataType.Variable &&
+                                type != DataType.Double &&
+                                type != DataType.Int64)
                             {
-                                cw.Write("conv." + type.ToOpcodeParam() + ".i");
-                                cw.typeStack.Push(UndertaleInstruction.DataType.Int32);
+                                cw.Emit(Opcode.Conv, type, DataType.Int32);
+                                cw.typeStack.Push(DataType.Int32);
                             }
                             else
                             {
-                                if (type != UndertaleInstruction.DataType.Int64)
+                                if (type != DataType.Int64)
                                 {
-                                    cw.Write("conv." + type.ToOpcodeParam() + ".l");
+                                    cw.Emit(Opcode.Conv, type, DataType.Int64);
                                 }
-                                cw.typeStack.Push(UndertaleInstruction.DataType.Int64);
+                                cw.typeStack.Push(DataType.Int64);
                             }
                         }
                         break;
                     case Lexer.Token.TokenKind.BitwiseShiftLeft:
                     case Lexer.Token.TokenKind.BitwiseShiftRight:
-                        if (type != UndertaleInstruction.DataType.Int64)
+                        if (type != DataType.Int64)
                         {
                             cw.typeStack.Pop();
-                            cw.Write("conv." + type.ToOpcodeParam() + ".l");
-                            cw.typeStack.Push(UndertaleInstruction.DataType.Int64);
+                            cw.Emit(Opcode.Conv, type, DataType.Int64);
+                            cw.typeStack.Push(DataType.Int64);
                         }
                         break;
                 }
@@ -1434,23 +1491,28 @@ namespace UndertaleModLib.Compiler
                             {
                                 // Function call
                                 AssembleFunctionCall(cw, e.Children[0]);
-                                cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
+                                cw.typeStack.Push(DataType.Variable);
                                 return;
                             }
 
                             // Special array access- instance type needs to be pushed beforehand
-                            cw.Write("pushi.e " + e.Children[0].ID.ToString());
-                            if (cw.compileContext.ensureVariablesDefined && e.Children[0].ID == -1)
-                            {
-                                cw.compileContext.Data?.Variables?.EnsureDefined(e.Children[0].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(e.Children[0].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(e.Children[0].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
-                            }
+                            cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)e.Children[0].ID;
                             AssembleArrayPush(cw, e.Children[0]);
                             if (duplicate)
                             {
-                                cw.Write(useLongDupForArray ? "dup.l 0" : "dup.i 1");
+                                if (useLongDupForArray)
+                                    cw.Emit(Opcode.Dup, DataType.Int64).Extra = 0;
+                                else
+                                    cw.Emit(Opcode.Dup, DataType.Int32).Extra = 1;
                             }
-                            cw.Write("push.v [array]" + GetIDPrefixSpecial(e.Children[0].ID) + e.Children[0].Text);
-                            cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
+                            cw.varPatches.Add(new VariablePatch()
+                            {
+                                Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                                Name = e.Children[0].Text,
+                                InstType = GetIDPrefixSpecial(e.Children[0].ID),
+                                VarType = VariableType.Array
+                            });
+                            cw.typeStack.Push(DataType.Variable);
                             isArray = true;
                             return;
                         }
@@ -1465,70 +1527,88 @@ namespace UndertaleModLib.Compiler
                                 if (cw.compileContext.BuiltInList.GlobalArray.ContainsKey(name) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(name))
                                 {
                                     // Builtin global
-                                    cw.Write((useNoSpecificType ? "push.v self." : "pushbltn.v self.") + name);
-                                    if (cw.compileContext.ensureVariablesDefined)
+                                    cw.varPatches.Add(new VariablePatch()
                                     {
-                                        cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Self, true, cw.compileContext.Data.Strings, cw.compileContext.Data);
-                                    }
+                                        Target = cw.EmitRef(useNoSpecificType ? Opcode.Push : Opcode.PushBltn, DataType.Variable),
+                                        Name = name,
+                                        InstType = InstanceType.Self,
+                                        VarType = VariableType.Normal
+                                    });
                                 }
                                 else
                                 {
-                                    cw.Write("push.v self." + name);
-                                    if (cw.compileContext.ensureVariablesDefined)
+                                    cw.varPatches.Add(new VariablePatch()
                                     {
-                                        // this is probably hardcoded false, but not sure
-                                        cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Self, false/*BuiltinList.Instance.ContainsKey(name) || BuiltinList.InstanceLimitedEvent.ContainsKey(name)*/, cw.compileContext.Data.Strings, cw.compileContext.Data);
-                                    }
+                                        Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                                        Name = name,
+                                        InstType = InstanceType.Self,
+                                        VarType = VariableType.Normal
+                                    });
                                 }
                                 break;
                             case -5:
-                                if (cw.compileContext.ensureVariablesDefined)
+                                cw.varPatches.Add(new VariablePatch()
                                 {
-                                    cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Global, false, cw.compileContext.Data.Strings, cw.compileContext.Data);
-                                }
-                                cw.Write((useNoSpecificType ? "push.v global." : "pushglb.v global.") + name);
+                                    Target = cw.EmitRef(useNoSpecificType ? Opcode.Push : Opcode.PushGlb, DataType.Variable),
+                                    Name = name,
+                                    InstType = InstanceType.Global,
+                                    VarType = VariableType.Normal
+                                });
                                 break;
                             case -7:
-                                cw.Write((useNoSpecificType ? "push.v local." : "pushloc.v local.") + name);
+                                cw.varPatches.Add(new VariablePatch()
+                                {
+                                    Target = cw.EmitRef(useNoSpecificType ? Opcode.Push : Opcode.PushLoc, DataType.Variable),
+                                    Name = name,
+                                    InstType = InstanceType.Local,
+                                    VarType = VariableType.Normal
+                                });
                                 break;
                             default:
-                                if (cw.compileContext.ensureVariablesDefined)
+                                cw.varPatches.Add(new VariablePatch()
                                 {
-                                    cw.compileContext.Data?.Variables?.EnsureDefined(name, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(name) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(name), cw.compileContext.Data.Strings, cw.compileContext.Data);
-                                }
-                                cw.Write("push.v " + GetIDPrefix(id) + name);
+                                    Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                                    Name = name,
+                                    InstType = (InstanceType)id,
+                                    VarType = VariableType.Normal
+                                });
                                 break;
                         }
-                        cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
+                        cw.typeStack.Push(DataType.Variable);
                     }
                     else
                     {
                         AssembleExpression(cw, e.Children[0]);
-                        if (cw.typeStack.Peek() != UndertaleInstruction.DataType.Int32) // apparently it converts to ints
+                        if (cw.typeStack.Peek() != DataType.Int32) // apparently it converts to ints
                         {
-                            cw.Write("conv." + cw.typeStack.Pop().ToOpcodeParam() + ".i");
+                            cw.Emit(Opcode.Conv, cw.typeStack.Pop(), DataType.Int32);
                         }
 
                         int next = 1;
                         while (next < e.Children.Count)
                         {
-                            if (cw.compileContext.ensureVariablesDefined)
-                            {
-                                cw.compileContext.Data?.Variables?.EnsureDefined(e.Children[next].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(e.Children[next].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(e.Children[next].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
-                            }
                             if (e.Children[next].Children.Count != 0)
                             {
                                 AssembleArrayPush(cw, e.Children[next]);
                                 bool notLast = (next + 1 < e.Children.Count);
                                 if (!notLast && duplicate) // ha ha, double negatives
                                 {
-                                    cw.Write(useLongDupForArray ? "dup.l 0" : "dup.i 1");
+                                    if (useLongDupForArray)
+                                        cw.Emit(Opcode.Dup, DataType.Int64).Extra = 0;
+                                    else
+                                        cw.Emit(Opcode.Dup, DataType.Int32).Extra = 1;
                                 }
-                                cw.Write("push.v [array]" + GetIDPrefixSpecial(e.Children[next].ID) + e.Children[next].Text);
-                                cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
+                                cw.varPatches.Add(new VariablePatch()
+                                {
+                                    Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                                    Name = e.Children[next].Text,
+                                    InstType = GetIDPrefixSpecial(e.Children[next].ID),
+                                    VarType = VariableType.Array
+                                });
+                                cw.typeStack.Push(DataType.Variable);
                                 if (notLast)
                                 {
-                                    cw.Write("conv." + cw.typeStack.Pop().ToOpcodeParam() + ".i");
+                                    cw.Emit(Opcode.Conv, cw.typeStack.Pop(), DataType.Int32);
                                 }
                                 else
                                     isArray = true;
@@ -1538,13 +1618,19 @@ namespace UndertaleModLib.Compiler
                             {
                                 if (duplicate && next + 1 >= e.Children.Count)
                                 {
-                                    cw.Write("dup.i 0");
+                                    cw.Emit(Opcode.Dup, DataType.Int32).Extra = 0;
                                 }
-                                cw.Write("push.v [stacktop]" + GetIDPrefixSpecial(e.Children[next].ID) + e.Children[next].Text);
-                                cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
+                                cw.varPatches.Add(new VariablePatch()
+                                {
+                                    Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                                    Name = e.Children[next].Text,
+                                    InstType = GetIDPrefixSpecial(e.Children[next].ID),
+                                    VarType = VariableType.StackTop
+                                });
+                                cw.typeStack.Push(DataType.Variable);
                                 if (next + 1 < e.Children.Count)
                                 {
-                                    cw.Write("conv." + cw.typeStack.Pop().ToOpcodeParam() + ".i");
+                                    cw.Emit(Opcode.Conv, cw.typeStack.Pop(), DataType.Int32);
                                 }
                                 next++;
                             }
@@ -1586,18 +1672,21 @@ namespace UndertaleModLib.Compiler
                     AssemblyWriterError(cw, "Array index should not be negative.", index1d.Token);
 
                 AssembleExpression(cw, index1d);
-                if (cw.typeStack.Peek() != UndertaleInstruction.DataType.Int32)
+                if (cw.typeStack.Peek() != DataType.Int32)
                 {
-                    cw.Write("conv." + cw.typeStack.Pop().ToOpcodeParam() + ".i");
-                    cw.typeStack.Push(UndertaleInstruction.DataType.Int32);
+                    cw.Emit(Opcode.Conv, cw.typeStack.Pop(), DataType.Int32);
+                    cw.typeStack.Push(DataType.Int32);
                 }
 
                 // 2D index
                 if (a.Children.Count != 1)
                 {
-                    cw.Write("chkindex.e"); // These instructions are hardcoded. Honestly it seems pretty
-                    cw.Write("push.i 32000"); // inefficient because these could be easily combined into
-                    cw.Write("mul.i.i"); // one small instruction.
+                    // These instructions are hardcoded. Honestly it seems pretty
+                    // inefficient because these could be easily combined into
+                    // one small instruction.
+                    cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-1; // chkindex
+                    cw.Emit(Opcode.Push, DataType.Int32).Value = 32000; 
+                    cw.Emit(Opcode.Mul, DataType.Int32, DataType.Int32); 
 
                     Parser.Statement index2d = a.Children[1];
                     if (index2d.Kind == Parser.Statement.StatementKind.ExprConstant &&
@@ -1607,66 +1696,56 @@ namespace UndertaleModLib.Compiler
                         AssemblyWriterError(cw, "Array index should not be negative.", index2d.Token);
 
                     AssembleExpression(cw, index2d);
-                    if (cw.typeStack.Peek() != UndertaleInstruction.DataType.Int32)
+                    if (cw.typeStack.Peek() != DataType.Int32)
                     {
-                        cw.Write("conv." + cw.typeStack.Pop().ToOpcodeParam() + ".i");
-                        cw.typeStack.Push(UndertaleInstruction.DataType.Int32);
+                        cw.Emit(Opcode.Conv, cw.typeStack.Pop(), DataType.Int32);
+                        cw.typeStack.Push(DataType.Int32);
                     }
 
-                    cw.Write("chkindex.e");
-                    cw.Write("add.i.i");
+                    cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-1; // chkindex
+                    cw.Emit(Opcode.Add, DataType.Int32, DataType.Int32);
 
                     cw.typeStack.Pop();
                 }
                 cw.typeStack.Pop();
             }
 
-            private static string GetIDPrefix(int ID)
+            private static InstanceType GetIDPrefixSpecial(int ID)
             {
                 return ID switch
                 {
-                    -1 => "self.",
-                    -2 => "other.",
-                    -5 => "global.",
-                    -7 => "local.",
-                    _ => ID.ToString() + ".",
+                    -2 => InstanceType.Other,
+                    -5 => InstanceType.Global,
+                    -7 => InstanceType.Local,
+                    _ => InstanceType.Self,
                 };
             }
 
-            private static string GetIDPrefixSpecial(int ID)
-            {
-                return ID switch
-                {
-                    -2 => "other.",
-                    -5 => "global.",
-                    -7 => "local.",
-                    _ => "self.",
-                };
-            }
-
-            private static void AssembleStoreVariable(CodeWriter cw, Parser.Statement s, UndertaleInstruction.DataType typeToStore, bool skip = false)
+            private static void AssembleStoreVariable(CodeWriter cw, Parser.Statement s, DataType typeToStore, bool skip = false)
             {
                 if (s.Kind == Parser.Statement.StatementKind.ExprVariableRef)
                 {
                     if (s.Children.Count == 1)
                     {
-                        string popLocation = "v";
+                        DataType popLocation = DataType.Variable;
                         if (skip)
-                            popLocation = "i";
+                            popLocation = DataType.Int32;
 
                         if (s.Children[0].Children.Count != 0)
                         {
                             // Special array set- instance type needs to be pushed beforehand
                             if (!skip)
                             {
-                                cw.Write("pushi.e " + s.Children[0].ID.ToString());
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)s.Children[0].ID;
                                 AssembleArrayPush(cw, s.Children[0]);
                             }
-                            if (cw.compileContext.ensureVariablesDefined && s.Children[0].ID == -1)
+                            cw.varPatches.Add(new VariablePatch()
                             {
-                                cw.compileContext.Data?.Variables?.EnsureDefined(s.Children[0].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(s.Children[0].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(s.Children[0].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
-                            }
-                            cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [array]" + GetIDPrefixSpecial(s.Children[0].ID) + s.Children[0].Text);
+                                Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
+                                Name = s.Children[0].Text,
+                                InstType = GetIDPrefixSpecial(s.Children[0].ID),
+                                VarType = VariableType.Array
+                            });
                             return;
                         }
 
@@ -1674,63 +1753,83 @@ namespace UndertaleModLib.Compiler
                         int id = s.Children[0].ID;
                         if (id >= 100000)
                             id -= 100000;
-                        if (cw.compileContext.ensureVariablesDefined && id == -1)
+                        cw.varPatches.Add(new VariablePatch()
                         {
-                            cw.compileContext.Data?.Variables?.EnsureDefined(s.Children[0].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(s.Children[0].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(s.Children[0].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
-                        }
-                        cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " " + GetIDPrefix(id) + s.Children[0].Text);
+                            Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
+                            Name = s.Children[0].Text,
+                            InstType = (InstanceType)id,
+                            VarType = VariableType.Normal
+                        });
                     }
                     else
                     {
                         if (!skip)
                         {
                             AssembleExpression(cw, s.Children[0]);
-                            if (cw.typeStack.Peek() != UndertaleInstruction.DataType.Int32) // apparently it converts to ints
+                            if (cw.typeStack.Peek() != DataType.Int32) // apparently it converts to ints
                             {
-                                cw.Write("conv." + cw.typeStack.Pop().ToOpcodeParam() + ".i");
-                                cw.typeStack.Push(UndertaleInstruction.DataType.Int32);
+                                cw.Emit(Opcode.Conv, cw.typeStack.Pop(), DataType.Int32);
+                                cw.typeStack.Push(DataType.Int32);
                             }
                         }
 
                         int next = 1;
-                        string popLocation = "v";
+                        DataType popLocation = DataType.Variable;
                         if (skip)
                         {
-                            popLocation = "i";
+                            popLocation = DataType.Int32;
                             next = s.Children.Count - 1;
                         }
                         while (next < s.Children.Count)
                         {
-                            if (cw.compileContext.ensureVariablesDefined)
-                            {
-                                cw.compileContext.Data?.Variables?.EnsureDefined(s.Children[next].Text, UndertaleInstruction.InstanceType.Self, cw.compileContext.BuiltInList.GlobalArray.ContainsKey(s.Children[next].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(s.Children[next].Text), cw.compileContext.Data.Strings, cw.compileContext.Data);
-                            }
                             if (s.Children[next].Children.Count != 0)
                             {
                                 if (!skip) // don't push the index again
                                     AssembleArrayPush(cw, s.Children[next]);
                                 if (next + 1 < s.Children.Count)
                                 {
-                                    cw.Write("push.v [array]" + GetIDPrefixSpecial(s.Children[next].ID) + s.Children[next].Text);
-                                    cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
-                                    cw.Write("conv." + cw.typeStack.Pop().ToOpcodeParam() + ".i");
+                                    cw.varPatches.Add(new VariablePatch()
+                                    {
+                                        Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                                        Name = s.Children[next].Text,
+                                        InstType = GetIDPrefixSpecial(s.Children[next].ID),
+                                        VarType = VariableType.Array
+                                    });
+                                    cw.Emit(Opcode.Conv, DataType.Variable, DataType.Int32);
                                 }
                                 else
                                 {
-                                    cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [array]" + GetIDPrefixSpecial(s.Children[next].ID) + s.Children[next].Text);
+                                    cw.varPatches.Add(new VariablePatch()
+                                    {
+                                        Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
+                                        Name = s.Children[next].Text,
+                                        InstType = GetIDPrefixSpecial(s.Children[next].ID),
+                                        VarType = VariableType.Array
+                                    });
                                 }
                             }
                             else
                             {
                                 if (next + 1 < s.Children.Count)
                                 {
-                                    cw.Write("push.v [stacktop]" + GetIDPrefixSpecial(s.Children[next].ID) + s.Children[next].Text);
-                                    cw.typeStack.Push(UndertaleInstruction.DataType.Variable);
-                                    cw.Write("conv." + cw.typeStack.Pop().ToOpcodeParam() + ".i");
+                                    cw.varPatches.Add(new VariablePatch()
+                                    {
+                                        Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                                        Name = s.Children[next].Text,
+                                        InstType = GetIDPrefixSpecial(s.Children[next].ID),
+                                        VarType = VariableType.StackTop
+                                    });
+                                    cw.Emit(Opcode.Conv, DataType.Variable, DataType.Int32);
                                 }
                                 else
                                 {
-                                    cw.Write("pop." + popLocation + "." + typeToStore.ToOpcodeParam() + " [stacktop]" + GetIDPrefixSpecial(s.Children[next].ID) + s.Children[next].Text);
+                                    cw.varPatches.Add(new VariablePatch()
+                                    {
+                                        Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
+                                        Name = s.Children[next].Text,
+                                        InstType = GetIDPrefixSpecial(s.Children[next].ID),
+                                        VarType = VariableType.StackTop
+                                    });
                                 }
                             }
                             next++;
@@ -1770,7 +1869,6 @@ namespace UndertaleModLib.Compiler
 
             private static void AssemblyWriterError(CodeWriter cw, string msg, Lexer.Token context)
             {
-                cw.Comment(msg);
                 string finalMsg = msg;
                 if (context?.Location != null)
                     finalMsg += string.Format(" Around line {0}, column {1}.", context.Location.Line, context.Location.Column);

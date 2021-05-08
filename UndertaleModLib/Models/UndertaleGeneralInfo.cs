@@ -171,7 +171,8 @@ namespace UndertaleModLib.Models
             writer.Write((ulong)FunctionClassifications);
 
             writer.Write(SteamAppID);
-            writer.Write(DebuggerPort);
+            if (BytecodeVersion >= 14)
+                writer.Write(DebuggerPort);
             writer.WriteUndertaleObject(RoomOrder);
             if (Major >= 2)
             {
@@ -247,7 +248,8 @@ namespace UndertaleModLib.Models
             ActiveTargets = reader.ReadUInt64();
             FunctionClassifications = (FunctionClassification)reader.ReadUInt64();
             SteamAppID = reader.ReadInt32();
-            DebuggerPort = reader.ReadUInt32();
+            if (BytecodeVersion >= 14)
+                DebuggerPort = reader.ReadUInt32();
             RoomOrder = reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>>();
             if (Major >= 2)
             {
@@ -293,7 +295,7 @@ namespace UndertaleModLib.Models
                 GMS2AllowStatistics = reader.ReadBoolean();
                 GMS2GameGUID = reader.ReadBytes(16);
             }
-            reader.undertaleData.UnsupportedBytecodeVersion = BytecodeVersion < 14 || BytecodeVersion > 17;
+            reader.undertaleData.UnsupportedBytecodeVersion = BytecodeVersion < 13 || BytecodeVersion > 17;
             reader.Bytecode14OrLower = BytecodeVersion <= 14;
         }
 
@@ -356,6 +358,8 @@ namespace UndertaleModLib.Models
         public uint LoadAlpha { get; set; } = 255;
         public UndertaleSimpleList<Constant> Constants { get; private set; } = new UndertaleSimpleList<Constant>();
 
+        public bool NewFormat { get; set; } = true;
+
         [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class Constant : UndertaleObject
         {
@@ -377,40 +381,126 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
-            writer.Write(Unknown1);
-            writer.Write(Unknown2);
-            writer.Write((ulong)Info);
-            writer.Write(Scale);
-            writer.Write(WindowColor);
-            writer.Write(ColorDepth);
-            writer.Write(Resolution);
-            writer.Write(Frequency);
-            writer.Write(VertexSync);
-            writer.Write(Priority);
-            writer.WriteUndertaleObject(BackImage);
-            writer.WriteUndertaleObject(FrontImage);
-            writer.WriteUndertaleObject(LoadImage);
-            writer.Write(LoadAlpha);
-            writer.WriteUndertaleObject(Constants);
+            if (NewFormat)
+            {
+                writer.Write(Unknown1);
+                writer.Write(Unknown2);
+                writer.Write((ulong)Info);
+                writer.Write(Scale);
+                writer.Write(WindowColor);
+                writer.Write(ColorDepth);
+                writer.Write(Resolution);
+                writer.Write(Frequency);
+                writer.Write(VertexSync);
+                writer.Write(Priority);
+                writer.WriteUndertaleObject(BackImage);
+                writer.WriteUndertaleObject(FrontImage);
+                writer.WriteUndertaleObject(LoadImage);
+                writer.Write(LoadAlpha);
+                writer.WriteUndertaleObject(Constants);
+            } else
+            {
+                writer.Write((Info & OptionsFlags.FullScreen) == OptionsFlags.FullScreen);
+                writer.Write((Info & OptionsFlags.InterpolatePixels) == OptionsFlags.InterpolatePixels);
+                writer.Write((Info & OptionsFlags.UseNewAudio) == OptionsFlags.UseNewAudio);
+                writer.Write((Info & OptionsFlags.NoBorder) == OptionsFlags.NoBorder);
+                writer.Write((Info & OptionsFlags.ShowCursor) == OptionsFlags.ShowCursor);
+                writer.Write(Scale);
+                writer.Write((Info & OptionsFlags.Sizeable) == OptionsFlags.Sizeable);
+                writer.Write((Info & OptionsFlags.StayOnTop) == OptionsFlags.StayOnTop);
+                writer.Write(WindowColor);
+                writer.Write((Info & OptionsFlags.ChangeResolution) == OptionsFlags.ChangeResolution);
+                writer.Write(ColorDepth);
+                writer.Write(Resolution);
+                writer.Write(Frequency);
+                writer.Write((Info & OptionsFlags.NoButtons) == OptionsFlags.NoButtons);
+                writer.Write(VertexSync);
+                writer.Write((Info & OptionsFlags.ScreenKey) == OptionsFlags.ScreenKey);
+                writer.Write((Info & OptionsFlags.HelpKey) == OptionsFlags.HelpKey);
+                writer.Write((Info & OptionsFlags.QuitKey) == OptionsFlags.QuitKey);
+                writer.Write((Info & OptionsFlags.SaveKey) == OptionsFlags.SaveKey);
+                writer.Write((Info & OptionsFlags.ScreenShotKey) == OptionsFlags.ScreenShotKey);
+                writer.Write((Info & OptionsFlags.CloseSec) == OptionsFlags.CloseSec);
+                writer.Write(Priority);
+                writer.Write((Info & OptionsFlags.Freeze) == OptionsFlags.Freeze);
+                writer.Write((Info & OptionsFlags.ShowProgress) == OptionsFlags.ShowProgress);
+                writer.WriteUndertaleObject(BackImage);
+                writer.WriteUndertaleObject(FrontImage);
+                writer.WriteUndertaleObject(LoadImage);
+                writer.Write((Info & OptionsFlags.LoadTransparent) == OptionsFlags.LoadTransparent);
+                writer.Write(LoadAlpha);
+                writer.Write((Info & OptionsFlags.ScaleProgress) == OptionsFlags.ScaleProgress);
+                writer.Write((Info & OptionsFlags.DisplayErrors) == OptionsFlags.DisplayErrors);
+                writer.Write((Info & OptionsFlags.WriteErrors) == OptionsFlags.WriteErrors);
+                writer.Write((Info & OptionsFlags.AbortErrors) == OptionsFlags.AbortErrors);
+                writer.Write((Info & OptionsFlags.VariableErrors) == OptionsFlags.VariableErrors);
+                writer.Write((Info & OptionsFlags.CreationEventOrder) == OptionsFlags.CreationEventOrder);
+                writer.WriteUndertaleObject(Constants);
+            }
         }
 
         public void Unserialize(UndertaleReader reader)
         {
-            Unknown1 = reader.ReadUInt32();
-            Unknown2 = reader.ReadUInt32();
-            Info = (OptionsFlags)reader.ReadUInt64();
-            Scale = reader.ReadInt32();
-            WindowColor = reader.ReadUInt32();
-            ColorDepth = reader.ReadUInt32();
-            Resolution = reader.ReadUInt32();
-            Frequency = reader.ReadUInt32();
-            VertexSync = reader.ReadUInt32();
-            Priority = reader.ReadUInt32();
-            BackImage = reader.ReadUndertaleObject<UndertaleSprite.TextureEntry>();
-            FrontImage = reader.ReadUndertaleObject<UndertaleSprite.TextureEntry>();
-            LoadImage = reader.ReadUndertaleObject<UndertaleSprite.TextureEntry>();
-            LoadAlpha = reader.ReadUInt32();
-            Constants = reader.ReadUndertaleObject<UndertaleSimpleList<Constant>>();
+            NewFormat = reader.ReadInt32() == int.MinValue;
+            reader.Position -= 4;
+            if (NewFormat)
+            {
+                Unknown1 = reader.ReadUInt32();
+                Unknown2 = reader.ReadUInt32();
+                Info = (OptionsFlags)reader.ReadUInt64();
+                Scale = reader.ReadInt32();
+                WindowColor = reader.ReadUInt32();
+                ColorDepth = reader.ReadUInt32();
+                Resolution = reader.ReadUInt32();
+                Frequency = reader.ReadUInt32();
+                VertexSync = reader.ReadUInt32();
+                Priority = reader.ReadUInt32();
+                BackImage = reader.ReadUndertaleObject<UndertaleSprite.TextureEntry>();
+                FrontImage = reader.ReadUndertaleObject<UndertaleSprite.TextureEntry>();
+                LoadImage = reader.ReadUndertaleObject<UndertaleSprite.TextureEntry>();
+                LoadAlpha = reader.ReadUInt32();
+                Constants = reader.ReadUndertaleObject<UndertaleSimpleList<Constant>>();
+            }
+            else
+            {
+                Info = 0;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.FullScreen;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.InterpolatePixels;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.UseNewAudio;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.NoBorder;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.ShowCursor;
+                Scale = reader.ReadInt32();
+                if (reader.ReadBoolean()) Info |= OptionsFlags.Sizeable;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.StayOnTop;
+                WindowColor = reader.ReadUInt32();
+                if (reader.ReadBoolean()) Info |= OptionsFlags.ChangeResolution;
+                ColorDepth = reader.ReadUInt32();
+                Resolution = reader.ReadUInt32();
+                Frequency = reader.ReadUInt32();
+                if (reader.ReadBoolean()) Info |= OptionsFlags.NoButtons;
+                VertexSync = reader.ReadUInt32();
+                if (reader.ReadBoolean()) Info |= OptionsFlags.ScreenKey;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.HelpKey;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.QuitKey;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.SaveKey;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.ScreenShotKey;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.CloseSec;
+                Priority = reader.ReadUInt32();
+                if (reader.ReadBoolean()) Info |= OptionsFlags.Freeze;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.ShowProgress;
+                BackImage = reader.ReadUndertaleObject<UndertaleSprite.TextureEntry>();
+                FrontImage = reader.ReadUndertaleObject<UndertaleSprite.TextureEntry>();
+                LoadImage = reader.ReadUndertaleObject<UndertaleSprite.TextureEntry>();
+                if (reader.ReadBoolean()) Info |= OptionsFlags.LoadTransparent;
+                LoadAlpha = reader.ReadUInt32();
+                if (reader.ReadBoolean()) Info |= OptionsFlags.ScaleProgress;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.DisplayErrors;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.WriteErrors;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.AbortErrors;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.VariableErrors;
+                if (reader.ReadBoolean()) Info |= OptionsFlags.CreationEventOrder;
+                Constants = reader.ReadUndertaleObject<UndertaleSimpleList<Constant>>();
+            }
         }
     }
 

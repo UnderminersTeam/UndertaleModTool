@@ -91,9 +91,9 @@ namespace UndertaleModTests
         {
             Console.Write("SetUMTConsoleText(): " + message);
         }
-        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false)
+        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false)
         {
-            Console.Write("ReplaceTextInGML(): " + codeName + ", " + keyword + ", " + replacement + ", " + case_sensitive.ToString());
+            Console.Write("ReplaceTextInGML(): " + codeName + ", " + keyword + ", " + replacement + ", " + case_sensitive.ToString() + ", " + isRegex.ToString());
         }
         public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false)
         {

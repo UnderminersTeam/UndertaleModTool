@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
@@ -117,12 +118,14 @@ namespace UndertaleModLib.Compiler
                     Discard // optimization stage produces this
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public Statement()
                 {
                     Children = new List<Statement>();
                 }
 
                 // Copy
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public Statement(Statement s)
                 {
                     Kind = s.Kind;
@@ -137,6 +140,7 @@ namespace UndertaleModLib.Compiler
                 }
 
                 // Copy with new token kind
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public Statement(TokenKind newType, Statement s)
                 {
                     Token = s.Token;
@@ -150,12 +154,14 @@ namespace UndertaleModLib.Compiler
                         Constant = new ExpressionConstant(s.Constant);
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public Statement(StatementKind kind)
                 {
                     Kind = kind;
                     Children = new List<Statement>();
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public Statement(StatementKind kind, string text)
                 {
                     Kind = kind;
@@ -163,6 +169,7 @@ namespace UndertaleModLib.Compiler
                     Children = new List<Statement>();
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public Statement(StatementKind kind, Lexer.Token token)
                 {
                     Kind = kind;
@@ -172,6 +179,7 @@ namespace UndertaleModLib.Compiler
                     Children = new List<Statement>();
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public Statement(StatementKind kind, Lexer.Token token, ExpressionConstant constant)
                 {
                     Kind = kind;
@@ -183,6 +191,7 @@ namespace UndertaleModLib.Compiler
                         Constant = new ExpressionConstant(constant);
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public Statement(TokenKind newKind, Lexer.Token copyFrom)
                 {
                     Kind = StatementKind.Token;
@@ -194,6 +203,7 @@ namespace UndertaleModLib.Compiler
                     Children = new List<Statement>();
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public Statement(TokenKind newKind, Lexer.Token copyFrom, int id)
                 {
                     Kind = StatementKind.Token;
@@ -206,6 +216,7 @@ namespace UndertaleModLib.Compiler
                     Children = new List<Statement>();
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public Statement(TokenKind newKind, Lexer.Token copyFrom, ExpressionConstant constant)
                 {
                     Kind = StatementKind.Token;
@@ -219,6 +230,7 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static Statement EnsureStatementKind(Statement.StatementKind kind)
             {
                 if (remainingStageOne.Count == 0)
@@ -238,6 +250,7 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static Statement EnsureTokenKind(TokenKind kind)
             {
                 if (remainingStageOne.Count == 0)
@@ -257,16 +270,66 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            public static bool IsNextStatement(params Statement.StatementKind[] kinds)
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool IsNextToken(TokenKind kind)
             {
                 if (remainingStageOne.Count == 0)
                 {
                     ReportCodeError("Unexpected end of code.", false);
                     return false;
                 }
-                return remainingStageOne.Peek().Kind.In(kinds);
+                var t = remainingStageOne.Peek().Token;
+                if (t == null)
+                    return false;
+                return t.Kind == kind;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool IsNextToken(TokenKind kind, TokenKind kind2)
+            {
+                if (remainingStageOne.Count == 0)
+                {
+                    ReportCodeError("Unexpected end of code.", false);
+                    return false;
+                }
+                var t = remainingStageOne.Peek().Token;
+                if (t == null)
+                    return false;
+                TokenKind actualKind = t.Kind;
+                return actualKind == kind || actualKind == kind2;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool IsNextToken(TokenKind kind, TokenKind kind2, TokenKind kind3)
+            {
+                if (remainingStageOne.Count == 0)
+                {
+                    ReportCodeError("Unexpected end of code.", false);
+                    return false;
+                }
+                var t = remainingStageOne.Peek().Token;
+                if (t == null)
+                    return false;
+                TokenKind actualKind = t.Kind;
+                return actualKind == kind || actualKind == kind2 || actualKind == kind3;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool IsNextToken(TokenKind kind, TokenKind kind2, TokenKind kind3, TokenKind kind4)
+            {
+                if (remainingStageOne.Count == 0)
+                {
+                    ReportCodeError("Unexpected end of code.", false);
+                    return false;
+                }
+                var t = remainingStageOne.Peek().Token;
+                if (t == null)
+                    return false;
+                TokenKind actualKind = t.Kind;
+                return actualKind == kind || actualKind == kind2 || actualKind == kind3 || actualKind == kind4;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool IsNextToken(params TokenKind[] kinds)
             {
                 if (remainingStageOne.Count == 0)
@@ -274,22 +337,25 @@ namespace UndertaleModLib.Compiler
                     ReportCodeError("Unexpected end of code.", false);
                     return false;
                 }
-                if (remainingStageOne.Peek().Token == null)
+                var t = remainingStageOne.Peek().Token;
+                if (t == null)
                     return false;
-                return remainingStageOne.Peek().Token.Kind.In(kinds);
+                return t.Kind.In(kinds);
             }
 
             // Discards token if the next token kind is of <kinds>
-            public static bool IsNextTokenDiscard(params TokenKind[] kinds)
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool IsNextTokenDiscard(TokenKind kind)
             {
                 if (remainingStageOne.Count == 0)
                 {
                     ReportCodeError("Unexpected end of code.", false);
                     return false;
                 }
-                if (remainingStageOne.Peek().Token == null)
+                var t = remainingStageOne.Peek().Token;
+                if (t == null)
                     return false;
-                if (remainingStageOne.Peek().Token.Kind.In(kinds))
+                if (t.Kind == kind)
                 {
                     remainingStageOne.Dequeue();
                     return true;
@@ -300,6 +366,7 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static TokenKind GetNextTokenKind()
             {
                 if (remainingStageOne.Count == 0)
@@ -307,11 +374,13 @@ namespace UndertaleModLib.Compiler
                     ReportCodeError("Unexpected end of code.", false);
                     return TokenKind.Error;
                 }
-                if (remainingStageOne.Peek().Token == null)
+                var t = remainingStageOne.Peek().Token;
+                if (t == null)
                     return TokenKind.Error;
-                return remainingStageOne.Peek().Token.Kind;
+                return t.Kind;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private static void ReportCodeError(string msg, bool synchronize)
             {
                 ErrorMessages.Add(msg);
@@ -320,6 +389,7 @@ namespace UndertaleModLib.Compiler
                     Synchronize();
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private static void ReportCodeError(string msg, Lexer.Token context, bool synchronize)
             {
                 if (context != null)
@@ -362,6 +432,7 @@ namespace UndertaleModLib.Compiler
                 remainingStageOne.Clear();
                 ErrorMessages.Clear();
                 context.LocalVars.Clear();
+                context.LocalVars["arguments"] = "arguments";
                 context.GlobalVars.Clear();
                 context.Enums.Clear();
                 hasError = false;
@@ -631,7 +702,7 @@ namespace UndertaleModLib.Compiler
                 Statement left = ParsePostAndRef(context);
                 if (left != null)
                 {
-                    if (!left.Kind.In(Statement.StatementKind.Pre, Statement.StatementKind.Post))
+                    if (left.Kind != Statement.StatementKind.Pre && left.Kind != Statement.StatementKind.Post)
                     {
                         // hack because I don't know what I'm doing
                         string name;
@@ -876,34 +947,17 @@ namespace UndertaleModLib.Compiler
                     if (!IsNextTokenDiscard(TokenKind.Comma))
                         break;
                 }
+                if (result.Children.Count == 0)
+                    ReportCodeError("Expected local variable declaration, got nothing.", result.Token, false);
 
                 return result;
             }
 
             private static Statement ParseGlobalVarDeclare(CompileContext context)
             {
-                Statement result = new Statement(Statement.StatementKind.GlobalVarDeclare, EnsureTokenKind(TokenKind.KeywordGlobalVar).Token);
-                while (remainingStageOne.Count > 0 && IsNextToken(TokenKind.ProcVariable))
-                {
-                    Statement var = remainingStageOne.Dequeue();
+                ReportCodeError("Global variable declaration currently unsupported", remainingStageOne.Dequeue().Token, true);
 
-                    // Error checking on variable
-                    if (var.ID < 100000)
-                        ReportCodeError("Redeclaration of builtin variable.", var.Token, false);
-                    if (context.BuiltInList.Functions.ContainsKey(var.Text) || context.scripts.Contains(var.Text))
-                        ReportCodeError(string.Format("Variable name {0} cannot be used; a function or script already has the name.", var.Text), var.Token, false);
-                    if (context.assetIds.ContainsKey(var.Text))
-                        ReportCodeError(string.Format("Variable name {0} cannot be used; a resource already has the name.", var.Text), var.Token, false);
-
-                    Statement variable = new Statement(var) { Kind = Statement.StatementKind.ExprSingleVariable };
-                    result.Children.Add(variable);
-                    context.LocalVars[var.Text] = var.Text;
-
-                    if (!IsNextTokenDiscard(TokenKind.Comma))
-                        break;
-                }
-
-                return result;
+                return null;
             }
 
             private static Statement ParseFunctionCall(CompileContext context, bool expression = false)
@@ -1250,8 +1304,7 @@ namespace UndertaleModLib.Compiler
                     }
 
                     // Post increment/decrement check
-                    if (remainingStageOne.Count > 0 && GetNextTokenKind().In(TokenKind.Increment,
-                                                                             TokenKind.Decrement))
+                    if (remainingStageOne.Count > 0 && IsNextToken(TokenKind.Increment, TokenKind.Decrement))
                     {
                         Statement newResult = new Statement(Statement.StatementKind.Post, remainingStageOne.Dequeue().Token);
                         newResult.Children.Add(result);
@@ -1443,24 +1496,34 @@ namespace UndertaleModLib.Compiler
 
             public static Statement Optimize(CompileContext context, Statement s)
             {
-                Statement result = new Statement(s);
-
                 // Process children (if we can)
-                if (!s.Kind.In(Statement.StatementKind.ExprVariableRef, Statement.StatementKind.Assign))
+                Statement result;
+                if (s.Kind != Statement.StatementKind.ExprVariableRef && s.Kind != Statement.StatementKind.Assign)
                 {
-                    for (int i = 0; i < result.Children.Count; i++)
+                    if (s.Children.Count == 0)
                     {
-                        if (result.Children[i] == null)
-                            result.Children[i] = new Statement(Statement.StatementKind.Discard);
-                        else
-                            result.Children[i] = Optimize(context, result.Children[i]);
+                        // There's nothing to optimize here, don't waste time checking
+                        return s;
                     }
-                }
+                    else
+                    {
+                        result = new Statement(s);
+                        for (int i = 0; i < result.Children.Count; i++)
+                        {
+                            if (result.Children[i] == null)
+                                result.Children[i] = new Statement(Statement.StatementKind.Discard);
+                            else
+                                result.Children[i] = Optimize(context, result.Children[i]);
+                        }
+                    }
+                } else
+                    result = new Statement(s);
+                Statement child0 = result.Children[0];
 
                 switch (s.Kind)
                 {
                     case Statement.StatementKind.Assign:
-                        Statement left = result.Children[0];
+                        Statement left = child0;
                         bool isVarRef = (left.Kind == Statement.StatementKind.ExprVariableRef);
                         if (isVarRef || (left.Kind == Statement.StatementKind.ExprSingleVariable && left.Children.Count >= 2 && left.Children[0].Kind == Statement.StatementKind.Token))
                         {
@@ -1483,7 +1546,12 @@ namespace UndertaleModLib.Compiler
                                     Statement curr = left.Children[i];
 
                                     if (context.ensureVariablesDefined)
-                                        context.Data?.Variables?.EnsureDefined(curr.Text, (UndertaleInstruction.InstanceType)(short)curr.ID, context.BuiltInList.Instance.ContainsKey(curr.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(curr.Text) || context.BuiltInList.GlobalNotArray.ContainsKey(curr.Text) || context.BuiltInList.GlobalArray.ContainsKey(curr.Text), context.Data?.Strings, context.Data);
+                                    {
+                                        context.MainThreadDelegate.Invoke(() =>
+                                        {
+                                            context.Data?.Variables?.EnsureDefined(curr.Text, (UndertaleInstruction.InstanceType)(short)curr.ID, context.BuiltInList.Instance.ContainsKey(curr.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(curr.Text) || context.BuiltInList.GlobalNotArray.ContainsKey(curr.Text) || context.BuiltInList.GlobalArray.ContainsKey(curr.Text), context.Data?.Strings, context.Data);
+                                        });
+                                    }
 
                                     AccessorInfo ai = GetAccessorInfoFromStatement(context, curr);
                                     if (ai != null)
@@ -1555,10 +1623,10 @@ namespace UndertaleModLib.Compiler
                         break;
                     case Statement.StatementKind.If:
                         // Optimize if statements like "if(false)" or "if(0)"
-                        if (result.Children.Count >= 2 && result.Children[0].Kind == Statement.StatementKind.ExprConstant)
+                        if (result.Children.Count >= 2 && child0.Kind == Statement.StatementKind.ExprConstant)
                         {
-                            if (result.Children[0].Constant.kind == ExpressionConstant.Kind.Number &&
-                                result.Children[0].Constant.valueNumber <= 0.5d)
+                            if (child0.Constant.kind == ExpressionConstant.Kind.Number &&
+                                child0.Constant.valueNumber <= 0.5d)
                             {
                                 if (result.Children.Count == 3)
                                 {
@@ -1572,8 +1640,8 @@ namespace UndertaleModLib.Compiler
                                 }
                             }
                             // Optimize if statements like "if(true)" or "if(1)"
-                            else if (result.Children[0].Constant.kind == ExpressionConstant.Kind.Number &&
-                                result.Children[0].Constant.valueNumber > 0.5d)
+                            else if (child0.Constant.kind == ExpressionConstant.Kind.Number &&
+                                     child0.Constant.valueNumber > 0.5d)
                             {
                                 result = result.Children[1];
                             }
@@ -1584,7 +1652,9 @@ namespace UndertaleModLib.Compiler
                         // Optimize a few basic functions if possible
 
                         // Rule out any non-constant parameters
-                        for (int i = 0; i < result.Children.Count; i++)
+                        if (child0.Kind != Statement.StatementKind.ExprConstant)
+                            return result;
+                        for (int i = 1; i < result.Children.Count; i++)
                         {
                             if (result.Children[i].Kind != Statement.StatementKind.ExprConstant)
                                 return result;
@@ -1598,16 +1668,16 @@ namespace UndertaleModLib.Compiler
                                     if ((context.Data?.GeneralInfo.Build >= 1763) || (context.Data?.GeneralInfo.Major >= 2) || (context.Data?.GeneralInfo.Build == 1539))
                                     {
                                         string conversion;
-                                        switch (result.Children[0].Constant.kind)
+                                        switch (child0.Constant.kind)
                                         {
                                             case ExpressionConstant.Kind.Number:
-                                                conversion = result.Children[0].Constant.valueNumber.ToString();
+                                                conversion = child0.Constant.valueNumber.ToString();
                                                 break;
                                             case ExpressionConstant.Kind.Int64:
-                                                conversion = result.Children[0].Constant.valueInt64.ToString();
+                                                conversion = child0.Constant.valueInt64.ToString();
                                                 break;
                                             case ExpressionConstant.Kind.String:
-                                                conversion = result.Children[0].Constant.valueString;
+                                                conversion = child0.Constant.valueString;
                                                 break;
                                             default:
                                                 return result; // This shouldn't happen
@@ -1623,18 +1693,18 @@ namespace UndertaleModLib.Compiler
                                     if ((context.Data?.GeneralInfo.Build >= 1763) || (context.Data?.GeneralInfo.Major >= 2) || (context.Data?.GeneralInfo.Build == 1539))
                                     {
                                         double conversion;
-                                        switch (result.Children[0].Constant.kind)
+                                        switch (child0.Constant.kind)
                                         {
                                             case ExpressionConstant.Kind.Number:
-                                                conversion = result.Children[0].Constant.valueNumber;
+                                                conversion = child0.Constant.valueNumber;
                                                 break;
                                             case ExpressionConstant.Kind.Int64:
-                                                conversion = result.Children[0].Constant.valueInt64;
+                                                conversion = child0.Constant.valueInt64;
                                                 break;
                                             case ExpressionConstant.Kind.String:
-                                                if (!double.TryParse(result.Children[0].Constant.valueString, out conversion))
+                                                if (!double.TryParse(child0.Constant.valueString, out conversion))
                                                 {
-                                                    ReportCodeError("Cannot convert non-number string to a number.", result.Children[0].Token, false);
+                                                    ReportCodeError("Cannot convert non-number string to a number.", child0.Token, false);
                                                 }
                                                 break;
                                             default:
@@ -1648,13 +1718,13 @@ namespace UndertaleModLib.Compiler
                             case "int64":
                                 {
                                     long conversion;
-                                    switch (result.Children[0].Constant.kind)
+                                    switch (child0.Constant.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
-                                            conversion = Convert.ToInt64(result.Children[0].Constant.valueNumber);
+                                            conversion = Convert.ToInt64(child0.Constant.valueNumber);
                                             break;
                                         case ExpressionConstant.Kind.Int64:
-                                            conversion = result.Children[0].Constant.valueInt64;
+                                            conversion = child0.Constant.valueInt64;
                                             break;
                                         default:
                                             return result; // This happens if you input a string for some reason
@@ -1666,13 +1736,13 @@ namespace UndertaleModLib.Compiler
                             case "chr":
                                 {
                                     string conversion;
-                                    switch (result.Children[0].Constant.kind)
+                                    switch (child0.Constant.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
-                                            conversion = ((char)(ushort)Convert.ToInt64(result.Children[0].Constant.valueNumber)).ToString();
+                                            conversion = ((char)(ushort)Convert.ToInt64(child0.Constant.valueNumber)).ToString();
                                             break;
                                         case ExpressionConstant.Kind.Int64:
-                                            conversion = ((char)(ushort)(result.Children[0].Constant.valueInt64)).ToString();
+                                            conversion = ((char)(ushort)(child0.Constant.valueInt64)).ToString();
                                             break;
                                         default:
                                             return result; // This happens if you input a string for some reason
@@ -1684,10 +1754,10 @@ namespace UndertaleModLib.Compiler
                             case "ord":
                                 {
                                     double conversion = 0d;
-                                    if (result.Children[0].Constant.kind == ExpressionConstant.Kind.String &&
-                                        result.Children[0].Constant.valueString != "")
+                                    if (child0.Constant.kind == ExpressionConstant.Kind.String &&
+                                        child0.Constant.valueString != "")
                                     {
-                                        conversion = (double)(int)result.Children[0].Constant.valueString[0];
+                                        conversion = (double)(int)child0.Constant.valueString[0];
                                     }
                                     result = new Statement(Statement.StatementKind.ExprConstant);
                                     result.Constant = new ExpressionConstant(conversion);
@@ -1701,11 +1771,11 @@ namespace UndertaleModLib.Compiler
                         return OptimizeBinaryOp(result);
                     case Statement.StatementKind.ExprUnary:
                         {
-                            if (result.Children[0].Kind != Statement.StatementKind.ExprConstant)
+                            if (child0.Kind != Statement.StatementKind.ExprConstant)
                                 break;
                             bool optimized = true;
                             Statement newConstant = new Statement(Statement.StatementKind.ExprConstant);
-                            ExpressionConstant val = result.Children[0].Constant;
+                            ExpressionConstant val = child0.Constant;
                             switch (result.Token.Kind)
                             {
                                 case TokenKind.Not:
@@ -1763,8 +1833,13 @@ namespace UndertaleModLib.Compiler
                         break;
                     case Statement.StatementKind.ExprSingleVariable:
                         if (context.ensureVariablesDefined)
-                            context.Data?.Variables?.EnsureDefined(result.Text, (UndertaleInstruction.InstanceType)(short)result.ID, context.BuiltInList.Instance.ContainsKey(result.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(result.Text) || context.BuiltInList.GlobalNotArray.ContainsKey(result.Text) || context.BuiltInList.GlobalArray.ContainsKey(result.Text), context.Data?.Strings, context.Data);
-                        if (result.Children.Count >= 2 && result.Children[0].Kind == Statement.StatementKind.Token)
+                        {
+                            context.MainThreadDelegate.Invoke(() =>
+                            {
+                                context.Data?.Variables?.EnsureDefined(result.Text, (UndertaleInstruction.InstanceType)(short)result.ID, context.BuiltInList.Instance.ContainsKey(result.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(result.Text) || context.BuiltInList.GlobalNotArray.ContainsKey(result.Text) || context.BuiltInList.GlobalArray.ContainsKey(result.Text), context.Data?.Strings, context.Data);
+                            });
+                        }
+                        if (result.Children.Count >= 2 && child0.Kind == Statement.StatementKind.Token)
                         {
                             AccessorInfo ai = GetAccessorInfoFromStatement(context, result);
                             if (ai != null)
@@ -1790,7 +1865,12 @@ namespace UndertaleModLib.Compiler
                                 Statement curr = result.Children[i];
 
                                 if (context.ensureVariablesDefined)
-                                    context.Data?.Variables?.EnsureDefined(curr.Text, (UndertaleInstruction.InstanceType)(short)curr.ID, context.BuiltInList.Instance.ContainsKey(curr.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(curr.Text) || context.BuiltInList.GlobalNotArray.ContainsKey(curr.Text) || context.BuiltInList.GlobalArray.ContainsKey(curr.Text), context.Data?.Strings, context.Data);
+                                {
+                                    context.MainThreadDelegate.Invoke(() =>
+                                    {
+                                        context.Data?.Variables?.EnsureDefined(curr.Text, (UndertaleInstruction.InstanceType)(short)curr.ID, context.BuiltInList.Instance.ContainsKey(curr.Text) || context.BuiltInList.InstanceLimitedEvent.ContainsKey(curr.Text) || context.BuiltInList.GlobalNotArray.ContainsKey(curr.Text) || context.BuiltInList.GlobalArray.ContainsKey(curr.Text), context.Data?.Strings, context.Data);
+                                    });
+                                }
 
                                 AccessorInfo ai = GetAccessorInfoFromStatement(context, curr);
                                 if (ai != null)
@@ -1813,14 +1893,14 @@ namespace UndertaleModLib.Compiler
                         }
                         break;
                     case Statement.StatementKind.SwitchCase:
-                        if (result.Children[0].Kind != Statement.StatementKind.ExprConstant &&
-                            result.Children[0].Kind != Statement.StatementKind.ExprVariableRef &&
-                            result.Children[0].Kind != Statement.StatementKind.ExprSingleVariable)
+                        if (child0.Kind != Statement.StatementKind.ExprConstant &&
+                            child0.Kind != Statement.StatementKind.ExprVariableRef &&
+                            child0.Kind != Statement.StatementKind.ExprSingleVariable)
                         {
                             ReportCodeError("Case argument must be constant.", result.Token, false);
                         }
                         break;
-                        // todo: parse enum references
+                    // todo: parse enum references
                 }
                 return result;
             }
@@ -2554,11 +2634,6 @@ namespace UndertaleModLib.Compiler
                 if (result.Children.Count == 1)
                     result = result.Children[0];
                 return result;
-            }
-
-            private static bool IsKeyword(Lexer.Token t)
-            {
-                return IsKeyword(t.Kind);
             }
 
             private static bool IsKeyword(TokenKind t)

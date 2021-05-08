@@ -72,7 +72,9 @@ namespace UndertaleModTool
         public string ProfileHash = "Unknown";
         public bool CrashedWhileEditing = false;
 
-        // TODO: extract the scripting interface into a separate class
+        // Scripting interface-related
+        private ScriptOptions scriptOptions;
+        private Task scriptSetupTask;
 
         public MainWindow()
         {
@@ -85,6 +87,19 @@ namespace UndertaleModTool
 
             CanSave = false;
             CanSafelySave = false;
+
+            scriptSetupTask = Task.Run(() =>
+            {
+                scriptOptions = ScriptOptions.Default
+                                .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", 
+                                            "UndertaleModLib.Scripting", "UndertaleModLib.Compiler",
+                                            "UndertaleModTool", "System", "System.IO", "System.Collections.Generic", 
+                                            "System.Text.RegularExpressions")
+                                .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
+                                                GetType().GetTypeInfo().Assembly,
+                                                typeof(JsonConvert).GetTypeInfo().Assembly,
+                                                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly);
+            });
         }
 
         private void SetIDString(string str)
@@ -417,6 +432,8 @@ namespace UndertaleModTool
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Data)));
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilePath)));
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGMS2)));
+                        UndertaleCodeEditor.gettext = null;
+                        UndertaleCodeEditor.gettextJSON = null;
                         ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"));
                         SelectionHistory.Clear();
                     }
@@ -581,6 +598,8 @@ namespace UndertaleModTool
                     Data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
                     Data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                 }
+
+                UndertaleCodeEditor.gettextJSON = null;
 
                 Dispatcher.Invoke(() =>
                 {
@@ -1035,32 +1054,19 @@ namespace UndertaleModTool
             Dispatcher.Invoke(() => CommandBox.Text = "Running " + Path.GetFileName(path) + " ...");
             try
             {
-                using (var loader = new InteractiveAssemblyLoader())
+                if (!scriptSetupTask.IsCompleted)
+                    await scriptSetupTask;
+                
+                ScriptPath = path;
+
+                object result = await CSharpScript.EvaluateAsync(File.ReadAllText(path), scriptOptions, this, typeof(IScriptInterface));
+                if (FinishedMessageEnabled)
                 {
-                    loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
-                    loader.RegisterDependency(GetType().GetTypeInfo().Assembly);
-                    loader.RegisterDependency(typeof(JsonConvert).GetTypeInfo().Assembly);
-
-                    var script = CSharpScript.Create<object>(File.ReadAllText(path), ScriptOptions.Default
-                        .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "UndertaleModLib.Compiler")
-                        .AddImports("UndertaleModTool", "System", "System.IO", "System.Collections.Generic", "System.Text.RegularExpressions")
-                        .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly)
-                        .AddReferences(GetType().GetTypeInfo().Assembly)
-                        .AddReferences(typeof(JsonConvert).GetTypeInfo().Assembly)
-                        .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
-                        typeof(IScriptInterface), loader);
-
-                    ScriptPath = path;
-
-                    object result = (await script.RunAsync(this)).ReturnValue;
-                    if (FinishedMessageEnabled)
-                    {
-                        Dispatcher.Invoke(() => CommandBox.Text = result != null ? result.ToString() : Path.GetFileName(path) + " finished!");
-                    }
-                    else
-                    {
-                        FinishedMessageEnabled = true;
-                    }
+                    Dispatcher.Invoke(() => CommandBox.Text = result != null ? result.ToString() : Path.GetFileName(path) + " finished!");
+                }
+                else
+                {
+                    FinishedMessageEnabled = true;
                 }
             }
             catch (CompilationErrorException exc)

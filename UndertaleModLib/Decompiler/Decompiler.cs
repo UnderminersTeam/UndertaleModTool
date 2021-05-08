@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using static UndertaleModLib.Decompiler.Decompiler;
@@ -100,6 +101,8 @@ namespace UndertaleModLib.Decompiler
             public Block nextBlockFalse;
             public List<Block> entryPoints = new List<Block>();
             internal List<TempVarReference> TempVarsOnEntry;
+
+            public int _CachedIndex;
 
             public Block(uint? address)
             {
@@ -208,35 +211,35 @@ namespace UndertaleModLib.Decompiler
             // Helper function to carefully check if an object is in fact an integer, for asset types.
             public static int? ConvertToInt(object val)
             {
-                 if (val is int || val is short || val is ushort || val is UndertaleInstruction.InstanceType)
-                 {
-                     return Convert.ToInt32(val);
-                 }
-                 else if (val is double)
-                 {
-                     var v = Convert.ToDouble(val);
-                     int res = (int)v;
-                     if (v == res)
-                         return res;
-                 }
-                 else if (val is float)
-                 {
-                     var v = Convert.ToSingle(val);
-                     int res = (int)v;
-                     if (v == res)
-                         return res;
-                 }
-                 return null;
-             }
+                if (val is int || val is short || val is ushort || val is UndertaleInstruction.InstanceType)
+                {
+                    return Convert.ToInt32(val);
+                }
+                else if (val is double)
+                {
+                    var v = Convert.ToDouble(val);
+                    int res = (int)v;
+                    if (v == res)
+                        return res;
+                }
+                else if (val is float)
+                {
+                    var v = Convert.ToSingle(val);
+                    int res = (int)v;
+                    if (v == res)
+                        return res;
+                }
+                return null;
+            }
 
-             // Helper function, using the one above, to convert an object into its respective asset type enum, if possible.
-             public static string ConvertToEnumStr<T>(object val)
-             {
-                 int? intVal = ConvertToInt(val);
-                 if (intVal == null)
-                     return val.ToString();
-                 return ((T)(object) intVal).ToString();
-             }
+            // Helper function, using the one above, to convert an object into its respective asset type enum, if possible.
+            public static string ConvertToEnumStr<T>(object val)
+            {
+                int? intVal = ConvertToInt(val);
+                if (intVal == null)
+                    return val.ToString();
+                return ((T)(object)intVal).ToString();
+            }
 
             public override string ToString(DecompileContext context)
             {
@@ -308,7 +311,7 @@ namespace UndertaleModLib.Decompiler
                     if (func != null && (ContextualAssetResolver.resolvers?.ContainsKey(func.Function.Name.Content) ?? false))
                     {
                         List<Expression> actualArguments = new List<Expression>();
-                        foreach(var arg in func.Arguments)
+                        foreach (var arg in func.Arguments)
                         {
                             if (arg is ExpressionCast)
                                 actualArguments.Add((arg as ExpressionCast).Argument);
@@ -382,14 +385,14 @@ namespace UndertaleModLib.Decompiler
 
                     if (!(Value is Int64)) // It is unknown what Int64 data represents, but it's not this.
                     {
-                         int? tryVal = ConvertToInt(Value);
-                         int val;
-                         if (tryVal != null)
-                         {
-                             val = tryVal ?? -1;
-                             if (assetList != null && val >= 0 && val < assetList.Count)
-                                 return ((UndertaleNamedResource)assetList[val]).Name.Content;
-                         }
+                        int? tryVal = ConvertToInt(Value);
+                        int val;
+                        if (tryVal != null)
+                        {
+                            val = tryVal ?? -1;
+                            if (assetList != null && val >= 0 && val < assetList.Count)
+                                return ((UndertaleNamedResource)assetList[val]).Name.Content;
+                        }
                     }
                 }
 
@@ -959,9 +962,11 @@ namespace UndertaleModLib.Decompiler
             {
                 string varName = Destination.ToString(context);
 
-                if (context.isGameMaker2 && !HasVarKeyword) {
+                if (context.isGameMaker2 && !HasVarKeyword)
+                {
                     var data = context.Data;
-                    if (data != null) {
+                    if (data != null)
+                    {
                         var locals = data.CodeLocals.For(context.TargetCode);
                         // Stop decompiler from erroring on missing CodeLocals
                         if (locals != null && locals.HasLocal(varName) && context.LocalVarDefines.Add(varName))
@@ -972,7 +977,7 @@ namespace UndertaleModLib.Decompiler
                 string varPrefix = (HasVarKeyword ? "var " : "");
 
                 // Check for possible ++, --, or operation equal (for single vars)
-                if (Value is ExpressionTwo && ((Value as ExpressionTwo).Argument1 is ExpressionVar) && 
+                if (Value is ExpressionTwo && ((Value as ExpressionTwo).Argument1 is ExpressionVar) &&
                     ((Value as ExpressionTwo).Argument1 as ExpressionVar).Var == Destination.Var)
                 {
                     ExpressionTwo two = (Value as ExpressionTwo);
@@ -982,7 +987,7 @@ namespace UndertaleModLib.Decompiler
                         if (c.IsPushE && ExpressionConstant.ConvertToInt(c.Value) == 1)
                             return String.Format("{0}" + ((two.Opcode == UndertaleInstruction.Opcode.Add) ? "++" : "--"), varName);
                     }
-                    
+
                     // Not ++ or --, could potentially be an operation equal
                     bool checkEqual(ExpressionVar a, ExpressionVar b)
                     {
@@ -1217,7 +1222,7 @@ namespace UndertaleModLib.Decompiler
                     name = name + "[" + ArrayIndex1.ToString(context) + "]";
 
                 // NOTE: The "var" prefix is handled in Decompiler.Decompile. 
-                
+
                 if (InstType is ExpressionConstant constant) // Only use "global." and "other.", not "self." or "local.". GMS doesn't recognize those.
                 {
                     string prefix = InstType.ToString(context) + ".";
@@ -1234,7 +1239,8 @@ namespace UndertaleModLib.Decompiler
                         }
                     }
                     return prefix + name;
-                } else if (InstType is ExpressionCast cast && !(cast.Argument is ExpressionVar))
+                }
+                else if (InstType is ExpressionCast cast && !(cast.Argument is ExpressionVar))
                 {
                     return "(" + InstType.ToString(context) + ")." + name; // Make sure to put parentheses around these cases
                 }
@@ -1387,8 +1393,8 @@ namespace UndertaleModLib.Decompiler
                                 TempVarReference varref = new TempVarReference(var);
                                 statements.Add(new TempVarAssigmentStatement(varref, item));
 
-                                topExpressions1.Add(new ExpressionTempVar(varref, varref.Var.Type) { WasDuplicated = true } );
-                                topExpressions2.Add(new ExpressionTempVar(varref, instr.Type1) { WasDuplicated = true } );
+                                topExpressions1.Add(new ExpressionTempVar(varref, varref.Var.Type) { WasDuplicated = true });
+                                topExpressions2.Add(new ExpressionTempVar(varref, instr.Type1) { WasDuplicated = true });
                             }
                         }
                         topExpressions1.Reverse();
@@ -1587,8 +1593,9 @@ namespace UndertaleModLib.Decompiler
 
                                     while (i < block.Instructions.Count && (block.Instructions[i].Kind != UndertaleInstruction.Opcode.Pop || (block.Instructions[i].Type1 == UndertaleInstruction.DataType.Int16 && block.Instructions[i].Type2 == UndertaleInstruction.DataType.Variable)))
                                         i++;
-                                } else if (i + 2 < block.Instructions.Count && (block.Instructions[i + 1].Kind == UndertaleInstruction.Opcode.Add || block.Instructions[i + 1].Kind == UndertaleInstruction.Opcode.Sub) &&
-                                          block.Instructions[i + 2].Kind == UndertaleInstruction.Opcode.Dup && block.Instructions[i + 2].Type1 == UndertaleInstruction.DataType.Variable)
+                                }
+                                else if (i + 2 < block.Instructions.Count && (block.Instructions[i + 1].Kind == UndertaleInstruction.Opcode.Add || block.Instructions[i + 1].Kind == UndertaleInstruction.Opcode.Sub) &&
+                                        block.Instructions[i + 2].Kind == UndertaleInstruction.Opcode.Dup && block.Instructions[i + 2].Type1 == UndertaleInstruction.DataType.Variable)
                                 {
                                     // We've detected a pre increment/decrement (i.e., x = ++y)
                                     // Do the magic
@@ -1609,7 +1616,8 @@ namespace UndertaleModLib.Decompiler
                                 {
                                     stack.Push(pushTarget);
                                 }
-                            } else
+                            }
+                            else
                             {
                                 stack.Push(pushTarget);
                             }
@@ -1637,7 +1645,7 @@ namespace UndertaleModLib.Decompiler
                                     owner = (statement as ExpressionConstant).Value?.ToString();
                                 else
                                     owner = statement.ToString(context);
-                                statements.Add(new CommentStatement("setowner: " +  (owner ?? "<null>")));
+                                statements.Add(new CommentStatement("setowner: " + (owner ?? "<null>")));
                             }
                             else
                                 statements.Add(new CommentStatement("WARNING: attempted to setowner without an owner on the stack."));
@@ -2106,8 +2114,8 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     // Convert into a for loop.
-                    if (myIndex > 0 && block.Statements[myIndex - 1] is AssignmentStatement assignment 
-                        && Block.Statements.Count > 0 && Block.Statements.Last() is AssignmentStatement increment 
+                    if (myIndex > 0 && block.Statements[myIndex - 1] is AssignmentStatement assignment
+                        && Block.Statements.Count > 0 && Block.Statements.Last() is AssignmentStatement increment
                         && Condition is ExpressionCompare compare)
                     {
                         UndertaleVariable variable = assignment.Destination.Var;
@@ -2291,77 +2299,93 @@ namespace UndertaleModLib.Decompiler
         }
 
         // Based on http://www.backerstreet.com/decompiler/loop_analysis.php
-        public static Dictionary<Block, List<Block>> ComputeDominators(Dictionary<uint, Block> blocks, Block entryBlock, bool reversed)
+        public static Dictionary<Block, List<Block>> ComputeReverseDominators(Dictionary<uint, Block> blocks, Block entryBlock)
         {
-            List<Block> blockList = blocks.Values.ToList();
-            List<BitArray> dominators = new List<BitArray>();
+            Block[] blockList = blocks.Values.ToArray();
+            CustomBitArray[] dominators = new CustomBitArray[blockList.Length];
 
-            for (int i = 0; i < blockList.Count; i++)
+            int entryBlockId = -1;
             {
-                dominators.Add(new BitArray(blockList.Count));
-                dominators[i].SetAll(true);
+                int i;
+                for (i = 0; i < blockList.Length; i++)
+                {
+                    Block b = blockList[i];
+                    b._CachedIndex = i;
+
+                    CustomBitArray ba;
+
+                    if (blockList[i] == entryBlock)
+                    {
+                        entryBlockId = i;
+                        ba = new CustomBitArray(blockList.Length);
+                        ba.SetTrue(i);
+                        dominators[i] = ba;
+                        break;
+                    }
+
+                    ba = new CustomBitArray(blockList.Length);
+                    ba.SetAllTrue();
+                    dominators[i] = ba;
+                }
+                for (i++; i < blockList.Length; i++)
+                {
+                    blockList[i]._CachedIndex = i;
+                    CustomBitArray ba = new CustomBitArray(blockList.Length);
+                    ba.SetAllTrue();
+                    dominators[i] = ba;
+                }
             }
 
-            var entryBlockId = blockList.IndexOf(entryBlock);
-            dominators[entryBlockId].SetAll(false);
-            dominators[entryBlockId].Set(entryBlockId, true);
-
-            BitArray temp = new BitArray(blockList.Count);
             bool changed;
+            Block[] reverseUse1 = { null };
+            Block[] reverseUse2 = { null, null };
             do
             {
                 changed = false;
-                for (int i = 0; i < blockList.Count; i++)
+                for (int i = 0; i < blockList.Length; i++)
                 {
                     if (i == entryBlockId)
                         continue;
 
-                    IEnumerable<Block> e = blockList[i].entryPoints;
-                    if (reversed)
-                        if (blockList[i].conditionalExit)
-                            e = new Block[] { blockList[i].nextBlockTrue, blockList[i].nextBlockFalse };
-                        else
-                            e = new Block[] { blockList[i].nextBlockTrue };
-                    foreach (Block pred in e)
-                    {
-                        if (pred == null)
-                            continue; // Happens in do-until loops. No other known situations.
+                    Block b = blockList[i];
 
-                        var predId = blockList.IndexOf(pred);
-                        Debug.Assert(predId >= 0, "predId < 0");
-                        temp.SetAll(false);
-                        temp.Or(dominators[i]);
-                        dominators[i].And(dominators[predId]);
-                        dominators[i].Set(i, true);
-                        for (var j = 0; j < blockList.Count; j++)
-                        {
-                            if (dominators[i][j] != temp[j])
-                            {
-                                changed = true;
-                                break;
-                            }
-                        }
+                    IEnumerable<Block> e;
+                    if (b.conditionalExit)
+                    {
+                        reverseUse2[0] = b.nextBlockTrue;
+                        reverseUse2[1] = b.nextBlockFalse;
+                        e = reverseUse2;
                     }
+                    else
+                    {
+                        reverseUse1[0] = b.nextBlockTrue;
+                        e = reverseUse1;
+                    }
+
+                    foreach (Block pred in e)
+                        changed |= dominators[i].And(dominators[pred._CachedIndex], i);
                 }
             } while (changed);
 
-            Dictionary<Block, List<Block>> result = new Dictionary<Block, List<Block>>();
-            for (var i = 0; i < blockList.Count; i++)
+            Dictionary<Block, List<Block>> result = new Dictionary<Block, List<Block>>(blockList.Length);
+            for (var i = 0; i < blockList.Length; i++)
             {
-                result[blockList[i]] = new List<Block>();
-                for (var j = 0; j < blockList.Count; j++)
+                CustomBitArray curr = dominators[i];
+                result[blockList[i]] = new List<Block>(4);
+                for (var j = 0; j < blockList.Length; j++)
                 {
-                    if (dominators[i].Get(j))
+                    if (curr.Get(j))
                         result[blockList[i]].Add(blockList[j]);
                 }
             }
+
             return result;
         }
 
         private static List<Block> NaturalLoopForEdge(Block header, Block tail)
         {
-            Stack<Block> workList = new Stack<Block>();
-            List<Block> loopBlocks = new List<Block>();
+            Stack<Block> workList = new Stack<Block>(16);
+            List<Block> loopBlocks = new List<Block>(8);
 
             loopBlocks.Add(header);
             if (header != tail)
@@ -2388,7 +2412,6 @@ namespace UndertaleModLib.Decompiler
 
         private static Dictionary<Block, List<Block>> ComputeNaturalLoops(Dictionary<uint, Block> blocks, Block entryBlock)
         {
-            var dominators = ComputeDominators(blocks, entryBlock, false);
             Dictionary<Block, List<Block>> loopSet = new Dictionary<Block, List<Block>>();
 
             foreach (var block in blocks.Values)
@@ -2397,14 +2420,17 @@ namespace UndertaleModLib.Decompiler
                 // must be the header of a loop.
                 // That is, block -> succ is a back edge.
 
+                // Future update: We're going to take a much more efficient but assuming
+                // route that the compiler outputs in a specific order, which it always should
+
                 if (block.nextBlockTrue != null && !loopSet.ContainsKey(block.nextBlockTrue))
                 {
-                    if (dominators[block].Contains(block.nextBlockTrue))
+                    if (block.nextBlockTrue.Address <= block.Address)
                         loopSet.Add(block.nextBlockTrue, NaturalLoopForEdge(block.nextBlockTrue, block));
                 }
                 if (block.nextBlockFalse != null && block.nextBlockTrue != block.nextBlockFalse && !loopSet.ContainsKey(block.nextBlockFalse))
                 {
-                    if (dominators[block].Contains(block.nextBlockFalse))
+                    if (block.nextBlockFalse.Address <= block.Address)
                         loopSet.Add(block.nextBlockFalse, NaturalLoopForEdge(block.nextBlockFalse, block));
                 }
             }
@@ -2463,7 +2489,9 @@ namespace UndertaleModLib.Decompiler
                         output.Statements.Add(statement);
                         continue;
                     }
-                } else if (currentLoop != null && !loops[currentLoop].Contains(block) && decompileTheLoop) {
+                }
+                else if (currentLoop != null && !loops[currentLoop].Contains(block) && decompileTheLoop)
+                {
                     break;
                 }
 
@@ -2477,7 +2505,7 @@ namespace UndertaleModLib.Decompiler
                 if (!alreadyVisited.Contains(block))
                     alreadyVisited.Add(block);
 
-                
+
                 for (int i = 0; i < block.Statements.Count; i++)
                 {
                     Statement stmt = block.Statements[i];
@@ -2485,9 +2513,9 @@ namespace UndertaleModLib.Decompiler
                         output.Statements.Add(stmt);
                 }
 
-                if (output.Statements.Count >= 1 && output.Statements[output.Statements.Count - 1] is TempVarAssigmentStatement && 
-                    block.Instructions.Count >= 1 && block.Instructions[block.Instructions.Count - 1].Kind == UndertaleInstruction.Opcode.Bt && 
-                    block.conditionalExit && block.ConditionStatement is ExpressionCompare && 
+                if (output.Statements.Count >= 1 && output.Statements[output.Statements.Count - 1] is TempVarAssigmentStatement &&
+                    block.Instructions.Count >= 1 && block.Instructions[block.Instructions.Count - 1].Kind == UndertaleInstruction.Opcode.Bt &&
+                    block.conditionalExit && block.ConditionStatement is ExpressionCompare &&
                     (block.ConditionStatement as ExpressionCompare).Opcode == UndertaleInstruction.ComparisonType.EQ)
                 {
                     // Switch statement
@@ -2584,7 +2612,8 @@ namespace UndertaleModLib.Decompiler
                             // If there is no default-case, remove the default break, since that creates different bytecode.
                             cases.Remove(defaultCase);
                         }
-                    } else
+                    }
+                    else
                     {
                         block = block.nextBlockTrue;
                     }
@@ -2664,7 +2693,7 @@ namespace UndertaleModLib.Decompiler
         private static List<Statement> HLDecompile(DecompileContext context, Dictionary<uint, Block> blocks, Block entryPoint, Block rootExitPoint)
         {
             Dictionary<Block, List<Block>> loops = ComputeNaturalLoops(blocks, entryPoint);
-            var reverseDominators = ComputeDominators(blocks, rootExitPoint, true);
+            var reverseDominators = ComputeReverseDominators(blocks, rootExitPoint);
             Block bl = entryPoint;
             return (HLDecompileBlocks(context, ref bl, blocks, loops, reverseDominators, new List<Block>()).CleanBlockStatement(context)).Statements;
         }
@@ -2765,7 +2794,7 @@ namespace UndertaleModLib.Decompiler
             {
                 if (context.Data != null && context.Data.ToolInfo.ProfileMode)
                 {
-                    string GMLPath = Path.Combine(context.Data.ToolInfo.AppDataProfiles, 
+                    string GMLPath = Path.Combine(context.Data.ToolInfo.AppDataProfiles,
                                                   context.Data.ToolInfo.CurrentMD5, "Temp", code.Name.Content + ".gml");
                     if (File.Exists(GMLPath))
                         return File.ReadAllText(GMLPath);

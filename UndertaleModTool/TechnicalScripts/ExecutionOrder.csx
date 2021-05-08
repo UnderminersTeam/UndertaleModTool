@@ -46,9 +46,9 @@ if (func == null)
 }
 else
 {
-    if (ScriptQuestion(@"It cannot be removed, but it can be made invisible.
+    if (ScriptQuestion(@"This script cannot be removed, but it can be made invisible.
 Select 'YES' to make it invisible.
-If it is already invisible, select 'NO' to toggle the profiler back on."))
+If it is already invisible, select 'NO' to toggle it back on."))
     {
         ClearCustomGML();
         return;

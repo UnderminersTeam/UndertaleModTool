@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace UndertaleModLib.Models
 {
@@ -116,13 +117,23 @@ namespace UndertaleModLib.Models
 
         public override string ToString()
         {
-            return Filename.Content + " (" + GetType().Name + ")";
+            try
+            {
+                return Filename.Content + " (" + GetType().Name + ")";
+            }
+            catch
+            {
+                return "(Unknown extension file)";
+            }
         }
     }
 
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleExtension : UndertaleNamedResource
     {
+        // Folder Name thing is a remnant from the legacy GM7-8.1 extension editor(aka ExtMaker).
+        // The runner reads the name but ignores it.
+        // Though you probably shouldn't change it anyways. 
         public UndertaleString FolderName { get; set; }
         public UndertaleString Name { get; set; }
         public UndertaleString ClassName { get; set; }

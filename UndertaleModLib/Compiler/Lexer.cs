@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -73,6 +74,7 @@ namespace UndertaleModLib.Compiler
                     LineStartPositions.Add(i + 1);
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public char ReadChar()
                 {
                     if (EOF)
@@ -80,6 +82,7 @@ namespace UndertaleModLib.Compiler
                     return Text[Position++];
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public char PeekChar()
                 {
                     if (EOF)
@@ -87,6 +90,7 @@ namespace UndertaleModLib.Compiler
                     return Text[Position];
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public char PeekCharAhead(int lookahead = 1)
                 {
                     if (EOF)
@@ -97,29 +101,36 @@ namespace UndertaleModLib.Compiler
                     return Text[index];
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public void AdvancePosition(int amount = 1)
                 {
                     Position += amount;
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public void JumpTo(int position)
                 {
                     Position = position;
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public PositionInfo GetPositionInfo()
                 {
                     return GetPositionInfo(Position);
                 }
 
+                public int LineStartSearch = 0;
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public PositionInfo GetPositionInfo(int index)
                 {
                     int i;
-                    for (i = 0; i < LineStartPositions.Count - 1; i++)
+                    for (i = LineStartSearch; i < LineStartPositions.Count - 1; i++)
                     {
                         if (index >= LineStartPositions[i] && index < LineStartPositions[i + 1])
                             break;
                     }
+                    LineStartSearch = i;
                     int line = i + 1;
                     int column = index - LineStartPositions[i] + 1;
 
@@ -134,18 +145,20 @@ namespace UndertaleModLib.Compiler
 
             public static List<Token> LexString(CompileContext context, string input)
             {
-                List<Token> output = new List<Token>();
+                List<Token> output = new List<Token>(128);
                 CodeReader reader = new CodeReader(context, input);
                 Token currentToken = null;
+                bool gms2 = context.Data?.IsGameMaker2() ?? false;
                 while (currentToken?.Kind != Token.TokenKind.EOF)
                 {
-                    currentToken = ReadToken(reader);
+                    currentToken = ReadToken(reader, gms2);
                     output.Add(currentToken);
                 }
                 return output;
             }
 
-            private static Token ReadToken(CodeReader cr)
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static Token ReadToken(CodeReader cr, bool gms2)
             {
                 SkipWhitespaceAndComments(cr);
                 if (cr.EOF)
@@ -156,8 +169,10 @@ namespace UndertaleModLib.Compiler
                 if (cr.PeekChar() == '#')
                 {
                     // Skip preprocessor directive/macro/etc. Maybe support could be added later... but not yet.
-                    while (!cr.EOF && !cr.PeekChar().In('\n', '\r'))
+                    while (!cr.EOF)
                     {
+                        if (cr.PeekChar() == '\n')
+                            break;
                         cr.AdvancePosition();
                     }
                 }
@@ -176,12 +191,16 @@ namespace UndertaleModLib.Compiler
                     }
 
                     // Strings
-                    if (cr.compileContext.Data?.IsGameMaker2() ?? false)
+                    if (gms2)
                     {
-                        if (c == '@' && cr.PeekCharAhead().In('"', '\''))
+                        if (c == '@')
                         {
-                            cr.AdvancePosition();
-                            return ReadStringLiteralNoEscape(cr);
+                            char c2 = cr.PeekCharAhead();
+                            if (c2 == '"' || c2 == '\'')
+                            {
+                                cr.AdvancePosition();
+                                return ReadStringLiteralNoEscape(cr);
+                            }
                         }
                         else if (c == '"')
                         {
@@ -713,15 +732,19 @@ namespace UndertaleModLib.Compiler
                             {
                                 case '/':
                                     cr.AdvancePosition(2);
-                                    while (!cr.EOF && !cr.PeekChar().In('\n', '\r'))
+                                    while (!cr.EOF)
                                     {
+                                        if (cr.PeekChar() == '\n')
+                                            break;
                                         cr.AdvancePosition();
                                     }
                                     break;
                                 case '*':
                                     cr.AdvancePosition(2);
-                                    while (!cr.EOF && cr.PeekChar() != '*' && cr.PeekCharAhead() != '/')
+                                    while (!cr.EOF)
                                     {
+                                        if (cr.PeekChar() == '*' && cr.PeekCharAhead() == '/')
+                                            break;
                                         cr.AdvancePosition();
                                     }
                                     if (!cr.EOF)
