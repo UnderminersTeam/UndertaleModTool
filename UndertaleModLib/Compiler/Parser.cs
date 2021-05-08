@@ -947,34 +947,17 @@ namespace UndertaleModLib.Compiler
                     if (!IsNextTokenDiscard(TokenKind.Comma))
                         break;
                 }
+                if (result.Children.Count == 0)
+                    ReportCodeError("Expected local variable declaration, got nothing.", result.Token, false);
 
                 return result;
             }
 
             private static Statement ParseGlobalVarDeclare(CompileContext context)
             {
-                Statement result = new Statement(Statement.StatementKind.GlobalVarDeclare, EnsureTokenKind(TokenKind.KeywordGlobalVar).Token);
-                while (remainingStageOne.Count > 0 && IsNextToken(TokenKind.ProcVariable))
-                {
-                    Statement var = remainingStageOne.Dequeue();
+                ReportCodeError("Global variable declaration currently unsupported", remainingStageOne.Dequeue().Token, true);
 
-                    // Error checking on variable
-                    if (var.ID < 100000)
-                        ReportCodeError("Redeclaration of builtin variable.", var.Token, false);
-                    if (context.BuiltInList.Functions.ContainsKey(var.Text) || context.scripts.Contains(var.Text))
-                        ReportCodeError(string.Format("Variable name {0} cannot be used; a function or script already has the name.", var.Text), var.Token, false);
-                    if (context.assetIds.ContainsKey(var.Text))
-                        ReportCodeError(string.Format("Variable name {0} cannot be used; a resource already has the name.", var.Text), var.Token, false);
-
-                    Statement variable = new Statement(var) { Kind = Statement.StatementKind.ExprSingleVariable };
-                    result.Children.Add(variable);
-                    context.LocalVars[var.Text] = var.Text;
-
-                    if (!IsNextTokenDiscard(TokenKind.Comma))
-                        break;
-                }
-
-                return result;
+                return null;
             }
 
             private static Statement ParseFunctionCall(CompileContext context, bool expression = false)
