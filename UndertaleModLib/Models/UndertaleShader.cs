@@ -38,6 +38,8 @@ namespace UndertaleModLib.Models
         public UndertaleString HLSL9_Vertex { get; set; }
         public UndertaleString HLSL9_Fragment { get; set; }
 
+        public int Version { get; set; } = 2;
+
         public UndertaleRawShaderData HLSL11_VertexData;
         public UndertaleRawShaderData HLSL11_PixelData;
         public UndertaleRawShaderData PSSL_VertexData;
@@ -100,14 +102,18 @@ namespace UndertaleModLib.Models
 
             writer.WriteUndertaleObject(VertexShaderAttributes);
 
-            writer.Write((int)2);
+            writer.Write(Version);
 
             PSSL_VertexData.Serialize(writer);
             PSSL_PixelData.Serialize(writer);
             Cg_PSVita_VertexData.Serialize(writer);
             Cg_PSVita_PixelData.Serialize(writer);
-            Cg_PS3_VertexData.Serialize(writer);
-            Cg_PS3_PixelData.Serialize(writer);
+
+            if (Version >= 2)
+            {
+                Cg_PS3_VertexData.Serialize(writer);
+                Cg_PS3_PixelData.Serialize(writer);
+            }
 
             if (!HLSL11_VertexData.IsNull)
             {
@@ -148,17 +154,20 @@ namespace UndertaleModLib.Models
                 Cg_PSVita_PixelData.WriteData(writer);
             }
 
-            if (!Cg_PS3_VertexData.IsNull)
+            if (Version >= 2)
             {
-                WritePadding(writer, 15);
+                if (!Cg_PS3_VertexData.IsNull)
+                {
+                    WritePadding(writer, 15);
 
-                Cg_PS3_VertexData.WriteData(writer);
-            }
-            if (!Cg_PS3_PixelData.IsNull)
-            {
-                WritePadding(writer, 15);
+                    Cg_PS3_VertexData.WriteData(writer);
+                }
+                if (!Cg_PS3_PixelData.IsNull)
+                {
+                    WritePadding(writer, 15);
 
-                Cg_PS3_PixelData.WriteData(writer);
+                    Cg_PS3_PixelData.WriteData(writer);
+                }
             }
         }
 
@@ -179,15 +188,17 @@ namespace UndertaleModLib.Models
 
             VertexShaderAttributes = reader.ReadUndertaleObject<UndertaleSimpleList<VertexShaderAttribute>>();
 
-            if (reader.ReadInt32() != 2)
-                throw new UndertaleSerializationException("Value in shader should be 2 at all times");
+            Version = reader.ReadInt32();
 
             PSSL_VertexData.Unserialize(reader);
             PSSL_PixelData.Unserialize(reader);
             Cg_PSVita_VertexData.Unserialize(reader);
             Cg_PSVita_PixelData.Unserialize(reader);
-            Cg_PS3_VertexData.Unserialize(reader);
-            Cg_PS3_PixelData.Unserialize(reader);
+            if (Version >= 2)
+            {
+                Cg_PS3_VertexData.Unserialize(reader);
+                Cg_PS3_PixelData.Unserialize(reader);
+            }
 
             if (!HLSL11_VertexData.IsNull)
             {
@@ -270,27 +281,30 @@ namespace UndertaleModLib.Models
                 Cg_PSVita_PixelData.ReadData(reader, length);
             }
 
-            if (!Cg_PS3_VertexData.IsNull)
+            if (Version >= 2)
             {
-                ReadPadding(reader, 15);
+                if (!Cg_PS3_VertexData.IsNull)
+                {
+                    ReadPadding(reader, 15);
 
-                // Calculate length of data
-                uint next;
+                    // Calculate length of data
+                    uint next;
+                    if (!Cg_PS3_PixelData.IsNull)
+                        next = Cg_PS3_PixelData._Position;
+                    else
+                        next = _EntryEnd;
+                    int length = (int)(next - reader.Position);
+                    Cg_PS3_VertexData.ReadData(reader, length);
+                }
                 if (!Cg_PS3_PixelData.IsNull)
-                    next = Cg_PS3_PixelData._Position;
-                else
-                    next = _EntryEnd;
-                int length = (int)(next - reader.Position);
-                Cg_PS3_VertexData.ReadData(reader, length);
-            }
-            if (!Cg_PS3_PixelData.IsNull)
-            {
-                ReadPadding(reader, 15);
+                {
+                    ReadPadding(reader, 15);
 
-                // Calculate length of data
-                uint next = _EntryEnd; // final possible data, nothing else to check for
-                int length = (int)(next - reader.Position);
-                Cg_PS3_PixelData.ReadData(reader, length);
+                    // Calculate length of data
+                    uint next = _EntryEnd; // final possible data, nothing else to check for
+                    int length = (int)(next - reader.Position);
+                    Cg_PS3_PixelData.ReadData(reader, length);
+                }
             }
         }
 
