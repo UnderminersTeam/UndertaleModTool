@@ -249,9 +249,12 @@ namespace UndertaleModLib
     {
         public static T ByName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
         {
-            foreach (var item in list)
-                if (ignoreCase ? (item.Name.Content.Equals(name, StringComparison.OrdinalIgnoreCase)) : (item.Name.Content == name))
-                    return item;
+            if (list != null)
+            {
+                foreach (var item in list)
+                    if (ignoreCase ? (item.Name.Content.Equals(name, StringComparison.OrdinalIgnoreCase)) : (item.Name.Content == name))
+                        return item;
+            }
             return default(T);
         }
 

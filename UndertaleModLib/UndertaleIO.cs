@@ -85,7 +85,7 @@ namespace UndertaleModLib
 
         public void UnserializeById(UndertaleReader reader, int id)
         {
-            if (id < -1)
+            if (id < -1 && id != -100)
                 throw new IOException("Invalid value for resource ID (" + typeof(ChunkT).Name + "): " + id);
             CachedId = id;
             reader.RequestResourceUpdate(this);
