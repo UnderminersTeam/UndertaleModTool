@@ -283,6 +283,7 @@ to the ""File"" tab at the top and then opening the ""Settings""
 (the ""Enable profile mode"" option toggles it on or off).
 You may wish to disable it for purposes such as collaborative
 modding projects, or when performing technical operations.
+For more in depth information, please read ""About_Profile_Mode.txt"".
 
 It should be noted that this system is somewhat experimental, so
 should you encounter any problems, please let us know or leave
