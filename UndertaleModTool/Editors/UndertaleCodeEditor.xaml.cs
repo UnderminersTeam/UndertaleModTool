@@ -288,7 +288,14 @@ namespace UndertaleModTool
                 {
                     dialog = new LoaderDialog("Decompiling", "Decompiling, please wait... This can take a while on complex scripts.");
                     dialog.Owner = Window.GetWindow(this);
-                    _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.TryShowDialog(); }));
+                    try
+                    {
+                        _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.TryShowDialog(); }));
+                    } 
+                    catch
+                    {
+                        // This is still a problem in rare cases for some unknown reason
+                    }
                 }
 
                 UndertaleCode gettextCode = null;
@@ -508,7 +515,14 @@ namespace UndertaleModTool
 
             LoaderDialog dialog = new LoaderDialog("Compiling", "Compiling, please wait...");
             dialog.Owner = Window.GetWindow(this);
-            _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.TryShowDialog(); }));
+            try
+            {
+                _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.TryShowDialog(); }));
+            }
+            catch
+            {
+                // This is still a problem in rare cases for some unknown reason
+            }
 
             CompileContext compileContext = null;
             string text = DecompiledEditor.Text;
