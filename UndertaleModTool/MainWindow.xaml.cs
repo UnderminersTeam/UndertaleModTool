@@ -76,6 +76,10 @@ namespace UndertaleModTool
         private ScriptOptions scriptOptions;
         private Task scriptSetupTask;
 
+        // Version info
+        public static string Edition = "pre1";
+        public static string Version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion + (Edition != "" ? "-" + Edition : "");
+
         public MainWindow()
         {
             InitializeComponent();
@@ -83,7 +87,7 @@ namespace UndertaleModTool
             ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"));
             SelectionHistory.Clear();
 
-            TitleMain = "UndertaleModTool by krzys_h v" + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
+            TitleMain = "UndertaleModTool by krzys_h v" + Version;
 
             CanSave = false;
             CanSafelySave = false;
@@ -1196,8 +1200,7 @@ namespace UndertaleModTool
 
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
-            string version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
-            MessageBox.Show("UndertaleModTool by krzys_h\nVersion " + version, "About", MessageBoxButton.OK);
+            MessageBox.Show("UndertaleModTool by krzys_h\nVersion " + Version, "About", MessageBoxButton.OK);
         }
 
         private async void Command_Run(object sender, ExecutedRoutedEventArgs e)

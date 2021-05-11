@@ -74,7 +74,7 @@ namespace UndertaleModTool
                 if (case_sensitive)
                     passBack = decompiled_text.Replace(keyword, replacement);
                 else
-                    passBack = Regex.Replace(decompiled_text, Regex.Escape(keyword), Regex.Escape(replacement), RegexOptions.IgnoreCase);
+                    passBack = Regex.Replace(decompiled_text, Regex.Escape(keyword), replacement.Replace("$", "$$"), RegexOptions.IgnoreCase);
             }
             else
             {

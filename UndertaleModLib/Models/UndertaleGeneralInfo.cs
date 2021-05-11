@@ -157,10 +157,10 @@ namespace UndertaleModLib.Models
             writer.Write(DefaultWindowWidth);
             writer.Write(DefaultWindowHeight);
             writer.Write((uint)Info);
+            writer.Write(LicenseCRC32);
             if (LicenseMD5.Length != 16)
                 throw new IOException("LicenseMD5 has invalid length");
             writer.Write(LicenseMD5);
-            writer.Write(LicenseCRC32);
             writer.Write(Timestamp);
             writer.WriteUndertaleString(DisplayName);
 
@@ -241,8 +241,8 @@ namespace UndertaleModLib.Models
             DefaultWindowWidth = reader.ReadUInt32();
             DefaultWindowHeight = reader.ReadUInt32();
             Info = (InfoFlags)reader.ReadUInt32();
-            LicenseMD5 = reader.ReadBytes(16);
             LicenseCRC32 = reader.ReadUInt32();
+            LicenseMD5 = reader.ReadBytes(16);
             Timestamp = reader.ReadUInt64();
             DisplayName = reader.ReadUndertaleString();
             ActiveTargets = reader.ReadUInt64();
