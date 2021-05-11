@@ -515,7 +515,7 @@ namespace UndertaleModLib.Decompiler
                 { "instance_deactivate_all", new AssetIDType[] { AssetIDType.Boolean } },
                 { "instance_deactivate_object", new AssetIDType[] { AssetIDType.GameObject } },
                 { "instance_activate_region", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean } },
-                { "instance_deactivate_region", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean } },
+                { "instance_deactivate_region", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean , AssetIDType.Boolean } },
 
                 { "instance_activate_layer", new AssetIDType[] { AssetIDType.Layer } }, // GMS2
                 { "instance_deactivate_layer", new AssetIDType[] { AssetIDType.Layer } }, // GMS2
