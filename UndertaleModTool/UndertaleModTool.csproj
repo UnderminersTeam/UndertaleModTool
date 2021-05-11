@@ -3041,4 +3041,7 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <TrimmerRootAssembly Include="System.Runtime" />
+  </ItemGroup>
 </Project>

@@ -78,7 +78,7 @@ namespace UndertaleModTool
 
         // Version info
         public static string Edition = "pre1";
-        public static string Version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion + (Edition != "" ? "-" + Edition : "");
+        public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? "-" + Edition : "");
 
         public MainWindow()
         {
