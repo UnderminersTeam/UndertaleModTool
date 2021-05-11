@@ -383,7 +383,8 @@ namespace UndertaleModLib.Decompiler
                 if (arguments.Length > func_types.Length)
                     throw new Exception("Bad call to " + function_name + " with " + arguments.Length + " arguments (instead of " + func_types.Length + ")");
                 
-                if (overloaded) {
+                if (overloaded) 
+                {
                     // Copy the array to make sure we don't overwrite existing known types
                     func_types = (AssetIDType[]) func_types.Clone();
                     AssetIDType scriptArgType;
@@ -918,6 +919,9 @@ namespace UndertaleModLib.Decompiler
                 { "steam_activate_overlay", new AssetIDType[] { AssetIDType.Enum_Steam_Overlay } },
 
                 // Also big TODO: Implement Boolean type for all these functions
+
+                // Special internal functions
+                { "@@GetInstance@@", new AssetIDType[] { AssetIDType.GameObject } },
             };
 
             builtin_vars = new Dictionary<string, AssetIDType>()

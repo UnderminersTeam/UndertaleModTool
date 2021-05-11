@@ -994,8 +994,19 @@ namespace UndertaleModLib.Decompiler
                         if (a.InstType.GetType() != b.InstType.GetType())
                             return false;
                         ExpressionConstant ac = (a.InstType as ExpressionConstant), bc = (b.InstType as ExpressionConstant);
-                        return ac.Value.Equals(bc.Value) && ac.IsPushE == bc.IsPushE && ac.Type == bc.Type && ac.WasDuplicated == bc.WasDuplicated &&
-                               a.VarType == b.VarType && a.ArrayIndex1 == b.ArrayIndex1 && a.ArrayIndex2 == b.ArrayIndex2;
+                        bool res = ac.Value.Equals(bc.Value) && ac.IsPushE == bc.IsPushE && ac.Type == bc.Type && ac.WasDuplicated == bc.WasDuplicated &&
+                               a.VarType == b.VarType;
+                        res &= (a.ArrayIndices != null) == (b.ArrayIndices != null);
+                        if (a.ArrayIndices != null)
+                        {
+                            res &= a.ArrayIndices.Count == b.ArrayIndices.Count;
+                            if (res)
+                            {
+                                for (int i = 0; i < a.ArrayIndices.Count; i++)
+                                    res &= a.ArrayIndices[i] == b.ArrayIndices[i];
+                            }
+                        }
+                        return res;
                     }
                     if (Destination.InstType is ExpressionConstant)
                     {
@@ -1086,6 +1097,7 @@ namespace UndertaleModLib.Decompiler
         public class FunctionCall : Expression
         {
             internal UndertaleFunction Function;
+            internal Expression AlternateFunction;
             private UndertaleInstruction.DataType ReturnType;
             internal List<Expression> Arguments;
 
@@ -1096,16 +1108,27 @@ namespace UndertaleModLib.Decompiler
                 this.Arguments = args;
             }
 
+            public FunctionCall(Expression alternateFunction, UndertaleInstruction.DataType returnType, List<Expression> args)
+            {
+                this.AlternateFunction = alternateFunction;
+                this.ReturnType = returnType;
+                this.Arguments = args;
+            }
+
             public override string ToString(DecompileContext context)
             {
                 StringBuilder argumentString = new StringBuilder();
                 foreach (Expression exp in Arguments)
                 {
-                    context.currentFunction = this;
+                    if (AlternateFunction == null) // disable contextual asset resolving for callv
+                        context.currentFunction = this;
                     if (argumentString.Length > 0)
                         argumentString.Append(", ");
                     argumentString.Append(exp.ToString(context));
                 }
+
+                if (AlternateFunction != null)
+                    return String.Format("{0}({1})", AlternateFunction.ToString(context), argumentString.ToString());
 
                 if (Function.Name.Content == "@@NewGMLArray@@") // Special case in GMS2.
                     return "[" + argumentString.ToString() + "]";
@@ -1115,6 +1138,16 @@ namespace UndertaleModLib.Decompiler
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
             {
+                // Special case for this function which doesn't have any purpose in decompiled code
+                if (Function?.Name?.Content == "@@GetInstance@@")
+                {
+                    Statement res = Arguments[0];
+                    if (res is ExpressionCast cast)
+                        return cast.Argument;
+                    return res;
+                }
+
+                AlternateFunction?.CleanStatement(context, block);
                 for (var i = 0; i < Arguments.Count; i++)
                     Arguments[i] = Arguments[i]?.CleanExpression(context, block);
                 return this;
@@ -1122,28 +1155,38 @@ namespace UndertaleModLib.Decompiler
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
-                var script_code = context.Data?.Scripts.ByName(Function.Name.Content)?.Code;
-                if (script_code != null && !context.scriptArgs.ContainsKey(Function.Name.Content))
+                if (Function == null)
                 {
-                    context.scriptArgs.Add(Function.Name.Content, null); // stop the recursion from looping
-                    var xxx = context.assetTypes;
-                    context.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>(); // Apply a temporary dictionary which types will be applied to.
-                    Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code);
-                    Decompiler.DecompileFromBlock(context, blocks[0]);
-                    Decompiler.DoTypePropagation(context, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
-                    context.scriptArgs[Function.Name.Content] = new AssetIDType[15];
-                    for (int i = 0; i < 15; i++)
-                    {
-                        var v = context.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
-                        context.scriptArgs[Function.Name.Content][i] = v.Any() ? v.First().Value : AssetIDType.Other;
-                    }
-                    context.assetTypes = xxx; // restore original / proper map.
+                    AlternateFunction.DoTypePropagation(context, suggestedType);
+                    AssetIDType[] args = new AssetIDType[Arguments.Count];
+                    for (var i = 0; i < Arguments.Count; i++)
+                        Arguments[i].DoTypePropagation(context, args[i]);
                 }
+                else
+                {
+                    var script_code = context.Data?.Scripts.ByName(Function.Name.Content)?.Code;
+                    if (script_code != null && !context.scriptArgs.ContainsKey(Function.Name.Content))
+                    {
+                        context.scriptArgs.Add(Function.Name.Content, null); // stop the recursion from looping
+                        var xxx = context.assetTypes;
+                        context.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>(); // Apply a temporary dictionary which types will be applied to.
+                        Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code);
+                        Decompiler.DecompileFromBlock(context, blocks[0]);
+                        Decompiler.DoTypePropagation(context, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
+                        context.scriptArgs[Function.Name.Content] = new AssetIDType[15];
+                        for (int i = 0; i < 15; i++)
+                        {
+                            var v = context.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
+                            context.scriptArgs[Function.Name.Content][i] = v.Any() ? v.First().Value : AssetIDType.Other;
+                        }
+                        context.assetTypes = xxx; // restore original / proper map.
+                    }
 
-                AssetIDType[] args = new AssetIDType[Arguments.Count];
-                AssetTypeResolver.AnnotateTypesForFunctionCall(Function.Name.Content, args, context, this);
-                for (var i = 0; i < Arguments.Count; i++)
-                    Arguments[i].DoTypePropagation(context, args[i]);
+                    AssetIDType[] args = new AssetIDType[Arguments.Count];
+                    AssetTypeResolver.AnnotateTypesForFunctionCall(Function.Name.Content, args, context, this);
+                    for (var i = 0; i < Arguments.Count; i++)
+                        Arguments[i].DoTypePropagation(context, args[i]);
+                }
 
                 return suggestedType; // TODO: maybe we should handle returned values too?
             }
@@ -1161,8 +1204,7 @@ namespace UndertaleModLib.Decompiler
             public UndertaleVariable Var;
             public Expression InstType; // UndertaleInstruction.InstanceType
             public UndertaleInstruction.VariableType VarType;
-            public Expression ArrayIndex1;
-            public Expression ArrayIndex2;
+            public List<Expression> ArrayIndices = null;
             public UndertaleInstruction.Opcode Opcode;
 
             public ExpressionVar(UndertaleVariable var, Expression instType, UndertaleInstruction.VariableType varType)
@@ -1174,7 +1216,14 @@ namespace UndertaleModLib.Decompiler
 
             internal override bool IsDuplicationSafe()
             {
-                return (InstType?.IsDuplicationSafe() ?? true) && (ArrayIndex1?.IsDuplicationSafe() ?? true) && (ArrayIndex2?.IsDuplicationSafe() ?? true);
+                bool res = (InstType?.IsDuplicationSafe() ?? true);
+
+                if (ArrayIndices == null)
+                    return res;
+                foreach (Expression e in ArrayIndices)
+                    res &= (e?.IsDuplicationSafe() ?? true);
+
+                return res;
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
@@ -1186,8 +1235,10 @@ namespace UndertaleModLib.Decompiler
                 }
 
                 InstType = InstType?.CleanExpression(context, block);
-                ArrayIndex1 = ArrayIndex1?.CleanExpression(context, block);
-                ArrayIndex2 = ArrayIndex2?.CleanExpression(context, block);
+                if (ArrayIndices == null)
+                    return this;
+                foreach (Expression e in ArrayIndices)
+                    e?.CleanExpression(context, block);
                 return this;
             }
 
@@ -1216,10 +1267,21 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 string name = Var.Name.Content;
-                if (ArrayIndex1 != null && ArrayIndex2 != null)
-                    name = name + "[" + ArrayIndex1.ToString(context) + ", " + ArrayIndex2.ToString(context) + "]";
-                else if (ArrayIndex1 != null)
-                    name = name + "[" + ArrayIndex1.ToString(context) + "]";
+                if (context.Data.GMS2_3)
+                {
+                    if (ArrayIndices != null)
+                    {
+                        foreach (Expression e in ArrayIndices)
+                            name += "[" + e.ToString(context) + "]";
+                    }
+                }
+                else if (ArrayIndices != null)
+                {
+                    if (ArrayIndices.Count == 2 && ArrayIndices[0] != null && ArrayIndices[1] != null)
+                        name += "[" + ArrayIndices[0].ToString(context) + ", " + ArrayIndices[1].ToString(context) + "]";
+                    else if (ArrayIndices[0] != null)
+                        name += "[" + ArrayIndices[0].ToString(context) + "]";
+                }
 
                 // NOTE: The "var" prefix is handled in Decompiler.Decompile. 
 
@@ -1251,8 +1313,11 @@ namespace UndertaleModLib.Decompiler
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 InstType?.DoTypePropagation(context, AssetIDType.GameObject);
-                ArrayIndex1?.DoTypePropagation(context, AssetIDType.Other);
-                ArrayIndex2?.DoTypePropagation(context, AssetIDType.Other);
+                if (ArrayIndices != null)
+                {
+                    foreach (Expression e in ArrayIndices)
+                        e?.DoTypePropagation(context, AssetIDType.Other);
+                }
 
                 AssetIDType current = context.assetTypes.ContainsKey(Var) ? context.assetTypes[Var] : AssetIDType.Other;
                 if (current == AssetIDType.Other && suggestedType != AssetIDType.Other)
@@ -1261,7 +1326,7 @@ namespace UndertaleModLib.Decompiler
                 if (builtinSuggest != AssetIDType.Other)
                     current = builtinSuggest;
 
-                if ((VarType != UndertaleInstruction.VariableType.Array || (ArrayIndex1 != null && !(ArrayIndex1 is ExpressionConstant))))
+                if ((VarType != UndertaleInstruction.VariableType.Array || (ArrayIndices != null && !(ArrayIndices[0] is ExpressionConstant))))
                     context.assetTypes[Var] = current; // This is a messy fix to arrays messing up exported variable types.
                 return current;
             }
@@ -1366,6 +1431,30 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.Dup:
+                        if (instr.ComparisonKind != 0)
+                        {
+                            // This is a special instruction for moving around an instance on the stack in GMS2.3
+
+                            int weirdLength = (byte)instr.ComparisonKind & 0x7F;
+                            if (weirdLength != 8)
+                                throw new Exception("I have no idea where this shows up but it does, need to have an example first"); // TODO
+
+                            Stack<Expression> args = new Stack<Expression>();
+                            for (int j = 0; j < instr.Extra; j++)
+                                args.Push(stack.Pop());
+                            Expression instance = stack.Pop();
+                            for (int j = 0; j < args.Count; j++)
+                            {
+                                Expression e = args.Pop();
+                                e.WasDuplicated = true;
+                                stack.Push(e);
+                            }
+                            instance.WasDuplicated = true;
+                            stack.Push(instance);
+
+                            break;
+                        }
+
                         List<Expression> topExpressions1 = new List<Expression>();
                         List<Expression> topExpressions2 = new List<Expression>();
                         // This "count" is necessary because sometimes dup.i 1 is replaced with dup.l 0...
@@ -1486,70 +1575,80 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.Pop:
-                        if (instr.Destination == null)
                         {
-                            // pop.e.v 5/6, strange magic stack operation
-                            Expression e1 = stack.Pop();
-                            Expression e2 = stack.Pop();
-                            for (int j = 0; j < instr.SwapExtra - 4; j++)
-                                stack.Pop();
-                            stack.Push(e2);
-                            stack.Push(e1);
-                            break;
-                        }
-                        ExpressionVar target = new ExpressionVar(instr.Destination.Target, new ExpressionConstant(UndertaleInstruction.DataType.Int16, instr.TypeInst), instr.Destination.Type);
-                        Expression val = null;
-                        if (instr.Type1 != UndertaleInstruction.DataType.Int32 && instr.Type1 != UndertaleInstruction.DataType.Variable)
-                            throw new Exception("Unrecognized pop instruction, doesn't conform to pop.i.X, pop.v.X, or pop.e.v");
-                        if (instr.Type1 == UndertaleInstruction.DataType.Int32)
-                            val = stack.Pop();
-                        if (target.NeedsInstanceParameters)
-                            target.InstType = stack.Pop();
-                        if (target.NeedsArrayParameters)
-                        {
-                            Tuple<Expression, Expression> ind = ExpressionVar.Decompile2DArrayIndex(stack.Pop());
-                            target.ArrayIndex1 = ind.Item1;
-                            target.ArrayIndex2 = ind.Item2;
-                            target.InstType = stack.Pop();
-                        }
-                        if (instr.Type1 == UndertaleInstruction.DataType.Variable)
-                            val = stack.Pop();
-                        if (val != null)
-                        {
-                            if ((target.NeedsInstanceParameters || target.NeedsArrayParameters) && target.InstType.WasDuplicated)
+                            if (instr.Destination == null)
                             {
-                                // Almost safe to assume that this is a +=, -=, etc.
-                                // Need to confirm a few things first. It's not certain, could be ++ even.
-                                if (val is ExpressionTwo)
+                                // pop.e.v 5/6, strange magic stack operation
+                                Expression e1 = stack.Pop();
+                                Expression e2 = stack.Pop();
+                                for (int j = 0; j < instr.SwapExtra - 4; j++)
+                                    stack.Pop();
+                                stack.Push(e2);
+                                stack.Push(e1);
+                                break;
+                            }
+                            ExpressionVar target = new ExpressionVar(instr.Destination.Target, new ExpressionConstant(UndertaleInstruction.DataType.Int16, instr.TypeInst), instr.Destination.Type);
+                            Expression val = null;
+                            if (instr.Type1 != UndertaleInstruction.DataType.Int32 && instr.Type1 != UndertaleInstruction.DataType.Variable)
+                                throw new Exception("Unrecognized pop instruction, doesn't conform to pop.i.X, pop.v.X, or pop.e.v");
+                            if (instr.Type1 == UndertaleInstruction.DataType.Int32)
+                                val = stack.Pop();
+                            if (target.NeedsInstanceParameters)
+                            {
+                                target.InstType = stack.Pop();
+                                if (target.InstType is ExpressionConstant c &&
+                                    c.Type == UndertaleInstruction.DataType.Int16 && (short)c.Value == -9)
+                                    target.InstType = stack.Pop();
+                            }
+                            else if (target.NeedsArrayParameters)
+                            {
+                                Tuple<Expression, Expression> ind = ExpressionVar.Decompile2DArrayIndex(stack.Pop());
+                                target.ArrayIndices = new List<Expression> { ind.Item1 };
+                                if (ind.Item2 != null)
+                                    target.ArrayIndices.Add(ind.Item2);
+                                target.InstType = stack.Pop();
+                            }
+
+                            if (instr.Type1 == UndertaleInstruction.DataType.Variable)
+                                val = stack.Pop();
+                            if (val != null)
+                            {
+                                if ((target.NeedsInstanceParameters || target.NeedsArrayParameters) && target.InstType.WasDuplicated)
                                 {
-                                    var two = (val as ExpressionTwo);
-                                    if (two.Opcode != UndertaleInstruction.Opcode.Rem && // Not possible in GML, but possible in bytecode. Don't deal with these,
-                                        two.Opcode != UndertaleInstruction.Opcode.Shl && // frankly we don't care enough.
-                                        two.Opcode != UndertaleInstruction.Opcode.Shr)
+                                    // Almost safe to assume that this is a +=, -=, etc.
+                                    // Need to confirm a few things first. It's not certain, could be ++ even.
+                                    if (val is ExpressionTwo)
                                     {
-                                        var arg = two.Argument1;
-                                        if (arg is ExpressionVar)
+                                        var two = (val as ExpressionTwo);
+                                        if (two.Opcode != UndertaleInstruction.Opcode.Rem && // Not possible in GML, but possible in bytecode. Don't deal with these,
+                                            two.Opcode != UndertaleInstruction.Opcode.Shl && // frankly we don't care enough.
+                                            two.Opcode != UndertaleInstruction.Opcode.Shr)
                                         {
-                                            var v = arg as ExpressionVar;
-                                            if (v.Var == target.Var && v.InstType == target.InstType &&
-                                                v.ArrayIndex1 == target.ArrayIndex1 && v.ArrayIndex2 == target.ArrayIndex2 && // even if null
-                                                (!(two.Argument2 is ExpressionConstant) || // Also check to make sure it's not a ++ or --
-                                                (!((two.Argument2 as ExpressionConstant).IsPushE && ExpressionConstant.ConvertToInt((two.Argument2 as ExpressionConstant).Value) == 1))))
+                                            var arg = two.Argument1;
+                                            if (arg is ExpressionVar)
                                             {
-                                                if (!(context.Data?.GeneralInfo?.BytecodeVersion > 14 && v.Opcode != UndertaleInstruction.Opcode.Push && instr.Destination.Target.InstanceType != UndertaleInstruction.InstanceType.Self))
+                                                var v = arg as ExpressionVar;
+                                                if (v.Var == target.Var && v.InstType == target.InstType &&
+                                                    ((v.ArrayIndices == null && target.ArrayIndices == null) || 
+                                                      v.ArrayIndices?.SequenceEqual(target.ArrayIndices) == true) && // even if null
+                                                    (!(two.Argument2 is ExpressionConstant) || // Also check to make sure it's not a ++ or --
+                                                    (!((two.Argument2 as ExpressionConstant).IsPushE && ExpressionConstant.ConvertToInt((two.Argument2 as ExpressionConstant).Value) == 1))))
                                                 {
-                                                    statements.Add(new OperationEqualsStatement(target, two.Opcode, two.Argument2));
-                                                    break;
+                                                    if (!(context.Data?.GeneralInfo?.BytecodeVersion > 14 && v.Opcode != UndertaleInstruction.Opcode.Push && instr.Destination.Target.InstanceType != UndertaleInstruction.InstanceType.Self))
+                                                    {
+                                                        statements.Add(new OperationEqualsStatement(target, two.Opcode, two.Argument2));
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
                             }
+                            else
+                                Debug.Fail("Pop value is null.");
+                            statements.Add(new AssignmentStatement(target, val));
                         }
-                        else
-                            Debug.Fail("Pop value is null.");
-                        statements.Add(new AssignmentStatement(target, val));
                         break;
 
                     case UndertaleInstruction.Opcode.Push:
@@ -1561,13 +1660,42 @@ namespace UndertaleModLib.Decompiler
                         {
                             ExpressionVar pushTarget = new ExpressionVar((instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Target, new ExpressionConstant(UndertaleInstruction.DataType.Int16, instr.TypeInst), (instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Type);
                             pushTarget.Opcode = instr.Kind;
-                            if (pushTarget.NeedsInstanceParameters)
+                            if (instr.TypeInst == UndertaleInstruction.InstanceType.Builtin)
+                            {
                                 pushTarget.InstType = stack.Pop();
-                            if (pushTarget.NeedsArrayParameters)
+                                if (pushTarget.InstType is FunctionCall fc)
+                                {
+                                    if (fc.Function?.Name?.Content == "@@This@@")
+                                        pushTarget.InstType = new ExpressionConstant(UndertaleInstruction.DataType.Int16, (short)-1) { AssetType = AssetIDType.GameObject };
+                                    else if (fc.Function?.Name?.Content == "@@Other@@")
+                                        pushTarget.InstType = new ExpressionConstant(UndertaleInstruction.DataType.Int16, (short)-2) { AssetType = AssetIDType.GameObject };
+                                    else if (fc.Function?.Name?.Content == "@@Global@@")
+                                        pushTarget.InstType = new ExpressionConstant(UndertaleInstruction.DataType.Int16, (short)-5) { AssetType = AssetIDType.GameObject };
+                                }
+                            }
+                            else if (instr.TypeInst == UndertaleInstruction.InstanceType.Stacktop)
+                            {
+                                pushTarget.InstType = stack.Pop();
+                            }
+                            else if (pushTarget.NeedsInstanceParameters)
+                            {
+                                pushTarget.InstType = stack.Pop();
+                                if (pushTarget.InstType is ExpressionConstant c &&
+                                    c.Type == UndertaleInstruction.DataType.Int16 && (short)c.Value == -9)
+                                    pushTarget.InstType = stack.Pop();
+                            }
+                            else if (pushTarget.NeedsArrayParameters)
                             {
                                 Tuple<Expression, Expression> ind = ExpressionVar.Decompile2DArrayIndex(stack.Pop());
-                                pushTarget.ArrayIndex1 = ind.Item1;
-                                pushTarget.ArrayIndex2 = ind.Item2;
+                                pushTarget.ArrayIndices = new List<Expression>() { ind.Item1 };
+                                if (ind.Item2 != null)
+                                    pushTarget.ArrayIndices.Add(ind.Item2);
+                                pushTarget.InstType = stack.Pop();
+                            }
+                            else if (context.Data.GMS2_3 && pushTarget.VarType != UndertaleInstruction.VariableType.Normal)
+                            {
+                                // Special arrays
+                                pushTarget.ArrayIndices = new List<Expression>() { stack.Pop() };
                                 pushTarget.InstType = stack.Pop();
                             }
                             stack.Push(pushTarget);
@@ -1625,32 +1753,71 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.Call:
-                        List<Expression> args = new List<Expression>();
-                        for (int j = 0; j < instr.ArgumentsCount; j++)
-                            args.Add(stack.Pop());
-                        stack.Push(new FunctionCall(instr.Function.Target, instr.Type1, args));
+                        {
+                            List<Expression> args = new List<Expression>();
+                            for (int j = 0; j < instr.ArgumentsCount; j++)
+                                args.Add(stack.Pop());
+                            stack.Push(new FunctionCall(instr.Function.Target, instr.Type1, args));
+                        }
+                        break;
+
+                    case UndertaleInstruction.Opcode.CallV:
+                        {
+                            Expression func = stack.Pop();
+                            if ((func as ExpressionVar)?.InstType?.WasDuplicated == true)
+                                stack.Pop(); // instance
+                            List<Expression> args = new List<Expression>();
+                            for (int j = 0; j < instr.Extra; j++)
+                                args.Add(stack.Pop());
+                            stack.Push(new FunctionCall(func, instr.Type1, args));
+                        }
                         break;
 
                     case UndertaleInstruction.Opcode.Break:
-                        // GMS 2.3 sub-opcode.
-                        // Stop 'setowner' values from leaking into the decompiled output
-                        // as tempvars. Should be replaced with something better in the future.
-                        if (context.Data.GMS2_3 && (short)instr.Value == -5)
+                        // GMS 2.3 sub-opcodes
+                        if (context.Data.GMS2_3)
                         {
-                            if (stack.Count > 0)
+                            switch ((short)instr.Value)
                             {
-                                var statement = stack.Pop();
-                                object owner;
-                                if (statement is ExpressionConstant)
-                                    owner = (statement as ExpressionConstant).Value?.ToString();
-                                else
-                                    owner = statement.ToString(context);
-                                statements.Add(new CommentStatement("setowner: " + (owner ?? "<null>")));
+                                case -2: // pushaf
+                                    {
+                                        // TODO, work out more specifics here, like ++
+                                        Expression ind = stack.Pop();
+                                        ExpressionVar target = stack.Pop() as ExpressionVar;
+                                        target.ArrayIndices.Add(ind);
+                                        stack.Push(target);
+                                    }
+                                    break;
+                                case -3: // popaf
+                                    {
+                                        // TODO, work out more specifics here, like ++
+                                        Expression ind = stack.Pop();
+                                        ExpressionVar target = stack.Pop() as ExpressionVar;
+                                        target.ArrayIndices.Add(ind);
+                                        Expression value = stack.Pop();
+                                        statements.Add(new AssignmentStatement(target, value));
+                                    }
+                                    break;
+                                case -5: // setowner
+                                    // Stop 'setowner' values from leaking into the decompiled output
+                                    // as tempvars. Should be replaced with something better in the future.
+                                    if (stack.Count > 0)
+                                    {
+                                        var statement = stack.Pop();
+                                        object owner;
+                                        if (statement is ExpressionConstant)
+                                            owner = (statement as ExpressionConstant).Value?.ToString();
+                                        else
+                                            owner = statement.ToString(context);
+                                        statements.Add(new CommentStatement("setowner: " + (owner ?? "<null>")));
+                                    }
+                                    else
+                                        statements.Add(new CommentStatement("WARNING: attempted to setowner without an owner on the stack."));
+                                    break;
                             }
-                            else
-                                statements.Add(new CommentStatement("WARNING: attempted to setowner without an owner on the stack."));
                         }
-                        // This is used for checking bounds in 2D arrays
+
+                        // chkindex is used for checking bounds in 2D arrays
                         // I'm not sure of the specifics but I guess it causes a debug breakpoint if the top of the stack is >= 32000
                         // anyway, that's not important when decompiling to high-level code so just ignore it
                         break;

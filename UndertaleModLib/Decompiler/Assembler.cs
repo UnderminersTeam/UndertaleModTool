@@ -89,8 +89,8 @@ namespace UndertaleModLib.Decompiler
                             space = line.IndexOf(' ');
                             if (space >= 0)
                             {
-                                if (line.Substring(space + 1).Trim().ToLower() == "spec")
-                                    instr.ComparisonKind = (UndertaleInstruction.ComparisonType)0x88; // "Temporary" fix, unknown (see disassembler, used with @@GetInstance@@ seemingly)
+                                if (byte.TryParse(line.Substring(space + 1).Trim(), out byte spec))
+                                    instr.ComparisonKind = (UndertaleInstruction.ComparisonType)(spec | 0x80);
                                 line = line.Substring(0, space);
                             }
                         }

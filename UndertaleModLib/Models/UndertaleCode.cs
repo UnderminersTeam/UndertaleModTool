@@ -97,12 +97,12 @@ namespace UndertaleModLib.Models
             };
         }
 
+        // Note: this function is slightly outdated now, and has no reason to be updated
+        // since its one use case is for backwards compatibility.
         public static int CalculateStackDiff(UndertaleInstruction instr)
         {
             switch (instr.Kind)
             {
-                // TODO! Opcode.CallV
-
                 case Opcode.Neg:
                 case Opcode.Not:
                     return 0;
@@ -170,8 +170,11 @@ namespace UndertaleModLib.Models
 
                 case Opcode.Call:
                     return -instr.ArgumentsCount + 1;
+                case Opcode.CallV:
+                    return -instr.Extra + 1;
 
                 case Opcode.Break:
+                    // TODO
                     return 0;
 
                 default:
@@ -880,10 +883,11 @@ namespace UndertaleModLib.Models
                         sb.Append(Extra.ToString());
                         if (Kind == Opcode.Dup)
                         {
-                            if ((byte)ComparisonKind == 0x88)
+                            if ((byte)ComparisonKind != 0)
                             {
-                                // No idea what this is right now (seems to be used at least with @@GetInstance@@), this is the "temporary" solution
-                                sb.Append(" spec");
+                                // Special dup instruction with extra parameters
+                                sb.Append(' ');
+                                sb.Append((byte)ComparisonKind & 0x7F);
                             }
                         }
                     }
