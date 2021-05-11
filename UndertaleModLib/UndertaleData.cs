@@ -56,6 +56,7 @@ namespace UndertaleModLib
 
         public bool UnsupportedBytecodeVersion = false;
         public bool IsTPAG4ByteAligned = false;
+        public bool ShortCircuit = true;
         public bool GMS2_2_2_302 = false;
         public bool GMS2_3 = false;
         public bool GMS2_3_1 = false;

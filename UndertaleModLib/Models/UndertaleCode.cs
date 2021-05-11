@@ -599,7 +599,7 @@ namespace UndertaleModLib.Models
         public void Unserialize(UndertaleReader reader)
         {
             uint instructionStartAddress = reader.Position;
-            reader.ReadByte(); reader.ReadByte(); reader.ReadByte(); // skip for now, we'll read them later
+            reader.Position += 3; // skip for now, we'll read them later
             byte kind = reader.ReadByte();
             if (reader.Bytecode14OrLower)
             {
@@ -700,21 +700,31 @@ namespace UndertaleModLib.Models
                 case InstructionType.ComparisonInstruction:
                     {
                         Extra = reader.ReadByte();
+#if DEBUG
                         if (Extra != 0 && Kind != Opcode.Dup && Kind != Opcode.CallV)
                             throw new IOException("Invalid padding in " + Kind.ToString().ToUpper());
+#endif
                         ComparisonKind = (ComparisonType)reader.ReadByte();
                         //if (!bytecode14 && (Kind == Opcode.Cmp) != ((byte)ComparisonKind != 0))
                         //    throw new IOException("Got unexpected comparison type in " + Kind.ToString().ToUpper() + " (should be only in CMP)");
                         byte TypePair = reader.ReadByte();
                         Type1 = (DataType)(TypePair & 0xf);
                         Type2 = (DataType)(TypePair >> 4);
+#if DEBUG
                         if (GetInstructionType(Kind) == InstructionType.SingleTypeInstruction && Type2 != (byte)0)
                             throw new IOException("Second type should be 0 in " + Kind.ToString().ToUpper());
+#endif
                         //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
                         if (reader.Bytecode14OrLower && Kind == Opcode.Cmp)
                             ComparisonKind = (ComparisonType)(reader.ReadByte() - 0x10);
                         else
                             reader.ReadByte();
+
+                        if (Kind == Opcode.And || Kind == Opcode.Or)
+                        {
+                            if (Type1 == DataType.Boolean && Type2 == DataType.Boolean)
+                                reader.undertaleData.ShortCircuit = false;
+                        }
                     }
                     break;
 
@@ -735,9 +745,11 @@ namespace UndertaleModLib.Models
 
                         // The rest is int23 signed value, so make sure
                         uint r = v & 0x003FFFFF;
+#if DEBUG
                         if (JumpOffsetPopenvExitMagic && v != 0xF00000)
                             throw new Exception("Popenv magic doesn't work, call issue #90 again");
                         else
+#endif
                         {
                             if ((v & 0x00C00000) != 0)
                                 r |= 0xFFC00000;

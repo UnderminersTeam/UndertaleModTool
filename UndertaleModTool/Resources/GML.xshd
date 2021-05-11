@@ -40,6 +40,14 @@
 			<Word>exit</Word>
 			<Word>var</Word>
 			<Word>until</Word>
+			<Word>and</Word>
+			<Word>or</Word>
+			<Word>xor</Word>
+			<Word>begin</Word>
+			<Word>end</Word>
+			<Word>then</Word>
+			<Word>mod</Word>
+			<Word>div</Word>
 		</Keywords>
 
 		<!-- Some macros -->

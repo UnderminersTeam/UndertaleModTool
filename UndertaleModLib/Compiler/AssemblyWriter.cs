@@ -1130,7 +1130,8 @@ namespace UndertaleModLib.Compiler
                             AssembleExpression(cw, e.Children[0]);
                             ConvertTypeForBinaryOp(cw, e.Token.Kind);
 
-                            if (e.Token.Kind == Lexer.Token.TokenKind.LogicalAnd || e.Token.Kind == Lexer.Token.TokenKind.LogicalOr)
+                            if ((cw.compileContext?.Data?.ShortCircuit ?? true) &&
+                                (e.Token.Kind == Lexer.Token.TokenKind.LogicalAnd || e.Token.Kind == Lexer.Token.TokenKind.LogicalOr))
                             {
                                 // Short circuit
                                 Patch endPatch = Patch.Start();
@@ -1265,6 +1266,14 @@ namespace UndertaleModLib.Compiler
                                     case Lexer.Token.TokenKind.BitwiseXor:
                                     case Lexer.Token.TokenKind.LogicalXor: // doesn't do short circuit
                                         instr.Kind = Opcode.Xor;
+                                        break;
+
+                                    // For when not short circuiting
+                                    case Lexer.Token.TokenKind.LogicalAnd:
+                                        instr.Kind = Opcode.And;
+                                        break;
+                                    case Lexer.Token.TokenKind.LogicalOr:
+                                        instr.Kind = Opcode.Or;
                                         break;
                                 }
 
