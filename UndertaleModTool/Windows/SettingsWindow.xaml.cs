@@ -97,5 +97,10 @@ namespace UndertaleModTool
             this.DataContext = this;
             Settings.Load();
         }
+
+        private void AppDataButton_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow.OpenFolder(Settings.AppDataFolder);
+        }
     }
 }

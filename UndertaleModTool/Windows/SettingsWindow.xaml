@@ -20,6 +20,9 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="GraphViz path" ToolTip="Required if you want code decompile graphs"/>
@@ -34,15 +37,19 @@
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="Enable asset order swapping" ToolTip="Toggles dragging &amp; dropping assets in the asset tabs to different positions in the list. Disabled by default."/>
         <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding AssetOrderSwappingEnabled}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="3,20,3,3" TextWrapping="Wrap" Foreground="Red" FontWeight="Bold" Text="Warning: the following options are currently experimental, as the profile system is a work in progress. Usage of the system is at your own risk, and though it is relatively stable, it may not be compatible in the future."/>
+        <Separator Grid.Row="4" Grid.ColumnSpan="2" Margin="10"/>
         
-        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="Enable profile mode" ToolTip="Toggles the 'decompile once and compile many' profile mode. Enabled by default. May need to be disabled for certain operations."/>
-        <CheckBox Grid.Row="5" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding ProfileModeEnabled}"/>
+        <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" TextWrapping="Wrap" Foreground="Red" FontWeight="Bold" Text="Warning: the following options are currently experimental, as the profile system is a work in progress. Usage of the system is at your own risk, and though it is relatively stable, it may not be compatible in the future."/>
+        
+        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="Enable profile mode" ToolTip="Toggles the 'decompile once and compile many' profile mode. Enabled by default. May need to be disabled for certain operations."/>
+        <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding ProfileModeEnabled}"/>
 
-        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="Profile mode message shown" ToolTip="On first load, this will show you the profile mode loaded message. If this somehow breaks, you can manually toggle it here."/>
-        <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding ProfileMessageShown}"/>
+        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" Text="Profile mode message shown" ToolTip="On first load, this will show you the profile mode loaded message. If this somehow breaks, you can manually toggle it here."/>
+        <CheckBox Grid.Row="7" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding ProfileMessageShown}"/>
 
-        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" Text="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
-        <CheckBox Grid.Row="7" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding DeleteOldProfileOnSave}"/>
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Text="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
+        <CheckBox Grid.Row="8" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding DeleteOldProfileOnSave}"/>
+        <Separator Grid.Row="9" Grid.ColumnSpan="2" Margin="10"/>
+        <Button Grid.Row="10" Grid.Column="1" Margin="5" Click="AppDataButton_Click">Open application data folder</Button>
     </Grid>
 </Window>

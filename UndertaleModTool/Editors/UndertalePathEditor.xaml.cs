@@ -34,18 +34,6 @@ namespace UndertaleModTool
             public Point From { get; set; }
             public Point To { get; set; }
         }
-
-        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
-        {
-            try
-            {
-                Process.Start(e.Uri.ToString());
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Hyperlink_RequestNavigate error! This URL has probably returned a 404 error, or is otherwise unavailable.\nError:\n" + ex.ToString());
-            }
-        }
     }
 
     [ValueConversion(typeof(UndertalePath), typeof(List<UndertalePathEditor.LineData>))]
