@@ -2949,7 +2949,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Update="CommunityScripts\README.md">
+    <None Update="SCRIPTS.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
