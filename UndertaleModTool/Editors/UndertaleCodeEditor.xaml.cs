@@ -316,9 +316,10 @@ namespace UndertaleModTool
                         string path = Path.Combine(TempPath, code.Name.Content + ".gml");
                         if (!SettingsWindow.ProfileModeEnabled || !File.Exists(path))
                         {
-                            decompiled = Decompiler.Decompile(code, context).Replace("\r\n", "\n");
-                        } else
-                            decompiled = File.ReadAllText(path).Replace("\r\n", "\n");
+                            decompiled = Decompiler.Decompile(code, context);
+                        }
+                        else
+                            decompiled = File.ReadAllText(path);
                     }
                     catch (Exception ex)
                     {

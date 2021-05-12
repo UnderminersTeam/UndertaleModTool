@@ -54,6 +54,23 @@ namespace UndertaleModLib.Decompiler
         public int TempVarId;
         public Dictionary<string, AssetIDType[]> scriptArgs = new Dictionary<string, AssetIDType[]>();
         public FunctionCall currentFunction;
+        private int _indentationLevel = 0;
+        public int IndentationLevel
+        {
+            get { return _indentationLevel; }
+            set { _indentationLevel = value; Indentation = GetIndentation(); }
+        }
+        public const string Indent = "    ";
+        public string Indentation = "";
+        private string GetIndentation()
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < IndentationLevel; i++)
+            {
+                sb.Append(Indent);
+            }
+            return sb.ToString();
+        }
 
         public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
 
@@ -2027,8 +2044,13 @@ namespace UndertaleModLib.Decompiler
 
             public string ToString(DecompileContext context, bool canSkipBrackets = true, bool forceSkipBrackets = false)
             {
+                context.IndentationLevel++;
                 if (canSkipBrackets && CanSkipBrackets(this))
-                    return "    " + Statements[0].ToString(context).Replace("\n", "\n    ");
+                {
+                    string res = DecompileContext.Indent + Statements[0].ToString(context);
+                    context.IndentationLevel--;
+                    return res;
+                }
                 else
                 {
                     StringBuilder sb = new StringBuilder();
@@ -2036,16 +2058,13 @@ namespace UndertaleModLib.Decompiler
                         sb.Append("{\n");
                     foreach (var stmt in Statements)
                     {
+                        sb.Append(context.Indentation);
                         string resultStr = stmt.ToString(context);
-                        if (!forceSkipBrackets)
-                        {
-                            sb.Append("    ");
-                            resultStr = resultStr.Replace("\n", "\n    ");
-                        }
                         sb.Append(resultStr).Append('\n');
                     }
+                    context.IndentationLevel--;
                     if (!forceSkipBrackets)
-                        sb.Append('}');
+                        sb.Append(context.Indentation + "}");
                     return sb.ToString().Trim('\n');
                 }
             }
@@ -2195,7 +2214,7 @@ namespace UndertaleModLib.Decompiler
                 else
                     cond = condition.ToString(context);
                 sb.Append("if " + cond + "\n");
-                sb.Append(trueBlock.ToString(context));
+                sb.Append(context.Indentation + trueBlock.ToString(context));
 
                 foreach (Pair<Expression, BlockHLStatement> tuple in elseConditions)
                 {
@@ -2203,14 +2222,14 @@ namespace UndertaleModLib.Decompiler
                         cond = (tuple.Item1 as ExpressionCompare).ToStringWithParen(context);
                     else
                         cond = tuple.Item1.ToString(context);
-                    sb.Append("\nelse if " + cond + "\n");
-                    sb.Append(tuple.Item2.ToString(context));
+                    sb.Append("\n" + context.Indentation + "else if " + cond + "\n");
+                    sb.Append(context.Indentation + tuple.Item2.ToString(context));
                 }
 
                 if (HasElse)
                 {
-                    sb.Append("\nelse\n");
-                    sb.Append(falseBlock.ToString(context));
+                    sb.Append("\n" + context.Indentation + "else\n");
+                    sb.Append(context.Indentation + falseBlock.ToString(context));
                 }
                 return sb.ToString();
             }
@@ -2327,7 +2346,7 @@ namespace UndertaleModLib.Decompiler
                 if (IsRepeatLoop)
                 {
                     bool needsParen = RepeatStartValue is ExpressionConstant || RepeatStartValue is ExpressionCompare;
-                    return "repeat " + (needsParen ? "(" : "") + RepeatStartValue.ToString(context) + (needsParen ? ")" : "") + "\n" + Block.ToString(context);
+                    return "repeat " + (needsParen ? "(" : "") + RepeatStartValue.ToString(context) + (needsParen ? ")" : "") + "\n" + context.Indentation + Block.ToString(context);
                 }
 
                 if (IsForLoop)
@@ -2336,7 +2355,7 @@ namespace UndertaleModLib.Decompiler
                     if (conditionStr.StartsWith("(") && conditionStr.EndsWith(")"))
                         conditionStr = conditionStr.Substring(1, conditionStr.Length - 2);
 
-                    return "for (" + InitializeStatement.ToString(context) + "; " + conditionStr + "; " + StepStatement.ToString(context) + ")\n" + Block.ToString(context);
+                    return "for (" + InitializeStatement.ToString(context) + "; " + conditionStr + "; " + StepStatement.ToString(context) + ")\n" + context.Indentation + Block.ToString(context);
                 }
 
                 string cond;
@@ -2348,9 +2367,9 @@ namespace UndertaleModLib.Decompiler
                     cond = Condition != null ? Condition.ToString(context) : "(true)";
 
                 if (IsDoUntilLoop)
-                    return "do " + Block.ToString(context, false) + " until " + cond + ";\n";
+                    return "do\n" + context.Indentation + Block.ToString(context, false) + " until " + cond + ";";
 
-                return "while " + cond + "\n" + Block.ToString(context);
+                return "while " + cond + "\n" + context.Indentation + Block.ToString(context);
             }
         };
 
@@ -2387,7 +2406,7 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                return "with (" + NewEnv.ToString(context) + ")\n" + Block.ToString(context);
+                return "with (" + NewEnv.ToString(context) + ")\n" + context.Indentation + Block.ToString(context);
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
@@ -2422,14 +2441,15 @@ namespace UndertaleModLib.Decompiler
             {
                 StringBuilder sb = new StringBuilder();
                 sb.Append("switch " + SwitchExpression.ToString(context) + "\n");
-                sb.Append("{\n");
+                sb.Append(context.Indentation + "{\n");
+                context.IndentationLevel++;
                 foreach (var casee in Cases)
                 {
-                    sb.Append("    ");
-                    sb.Append(casee.ToString(context).Replace("\n", "\n    "));
+                    sb.Append(context.Indentation + casee.ToString(context));
                     sb.Append('\n');
                 }
-                sb.Append("}\n");
+                context.IndentationLevel--;
+                sb.Append(context.Indentation + "}\n");
                 return sb.ToString();
             }
         }
@@ -2466,8 +2486,7 @@ namespace UndertaleModLib.Decompiler
                 }
                 if (Block.Statements.Count > 0)
                 {
-                    sb.Append("    ");
-                    sb.Append(Block.ToString(context, false, true).Replace("\n", "\n    "));
+                    sb.Append(Block.ToString(context, false, true));
                 }
                 return sb.ToString();
             }

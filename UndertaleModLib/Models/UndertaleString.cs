@@ -53,7 +53,7 @@ namespace UndertaleModLib.Models
                 return "\"" + Content.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"") + "\"";
 
             // Handle GM:S 1's lack of escaping
-            string res = Content.Replace("\r\n", "\n");
+            string res = Content;
             bool front, back;
             if (res.StartsWith('"'))
             {
