@@ -2647,6 +2647,7 @@ namespace UndertaleModLib.Decompiler
             BlockHLStatement output = new BlockHLStatement();
 
             Block lastBlock = null;
+            bool popenvDrop = false;
             while (block != stopAt && block != null)
             {
                 lastBlock = block;
@@ -2816,6 +2817,9 @@ namespace UndertaleModLib.Decompiler
                     break;
                 }
 
+                if (popenvDrop)
+                    break;
+
                 if (block.conditionalExit && block.ConditionStatement != null) // If statement
                 {
                     Block meetPoint = FindFirstMeetPoint(block, reverseDominators);
@@ -2838,9 +2842,15 @@ namespace UndertaleModLib.Decompiler
                         block = block.nextBlockTrue;
                     else
                     {
-                        var lastKind = block.Instructions.Last().Kind;
-                        block = ((lastKind != UndertaleInstruction.Opcode.Ret && lastKind != UndertaleInstruction.Opcode.Exit)
-                            || (block.nextBlockTrue != null && block.nextBlockTrue.nextBlockFalse == null)) ? block.nextBlockTrue : stopAt;
+                        var last = block.Instructions.Last();
+                        var lastKind = last.Kind;
+                        if (lastKind == UndertaleInstruction.Opcode.PopEnv && last.JumpOffsetPopenvExitMagic)
+                        {
+                            block = block.nextBlockTrue;
+                            popenvDrop = true;
+                        } else
+                            block = ((lastKind != UndertaleInstruction.Opcode.Ret && lastKind != UndertaleInstruction.Opcode.Exit)
+                                || (block.nextBlockTrue != null && block.nextBlockTrue.nextBlockFalse == null)) ? block.nextBlockTrue : stopAt;
                     }
                 }
             }
