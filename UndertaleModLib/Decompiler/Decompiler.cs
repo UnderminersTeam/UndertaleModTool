@@ -3025,6 +3025,7 @@ namespace UndertaleModLib.Decompiler
             List<Statement> stmts = HLDecompile(context, blocks, blocks[0], blocks[code.Length / 4]);
 
             // Write code.
+            context.IndentationLevel = 0;
             StringBuilder sb = new StringBuilder();
             foreach (var stmt in stmts)
                 sb.Append(stmt.ToString(context) + "\n");
