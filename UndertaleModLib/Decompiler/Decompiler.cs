@@ -2477,8 +2477,11 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 StringBuilder sb = new StringBuilder();
-                foreach (Expression caseExpr in CaseExpressions)
+                for (int i = 0; i < CaseExpressions.Count; i++)
                 {
+                    Expression caseExpr = CaseExpressions[i];
+                    if (i != 0)
+                        sb.Append(context.Indentation);
                     if (caseExpr != null)
                         sb.Append("case " + caseExpr.ToString(context) + ":\n");
                     else
