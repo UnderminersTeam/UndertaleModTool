@@ -252,7 +252,14 @@ namespace UndertaleModLib
         {
             base.SerializeChunk(writer);
 
-            writer.Write(Padding);
+            if (Padding == null)
+            {
+                for (ushort i = 0; i < 0x80; i++)
+                    writer.Write(i);
+                for (ushort i = 0; i < 0x80; i++)
+                    writer.Write((ushort)0x3f);
+            } else
+                writer.Write(Padding);
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
