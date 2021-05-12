@@ -12,14 +12,23 @@
         <Span color="Comment" begin="//" />
         <Span color="Comment" multiline="true" begin="/\*" end="\*/" />
 
-        <Span color="String" multiline="true">
-            <Begin>"</Begin>
-            <End>"</End>
-            <RuleSet>
-                <!-- nested span for escape sequences -->
-                <Span begin="\\" end="." />
-            </RuleSet>
-        </Span>
+		<Span color="String" multiline="true">
+			<Begin>"</Begin>
+			<End>"</End>
+			<RuleSet>
+				<!-- nested span for escape sequences -->
+				<Span begin="\\" end="." />
+			</RuleSet>
+		</Span>
+
+		<Span color="String" multiline="true">
+			<Begin>'</Begin>
+			<End>'</End>
+			<RuleSet>
+				<!-- nested span for escape sequences -->
+				<Span begin="\\" end="." />
+			</RuleSet>
+		</Span>
 
 		<!-- Important keywords -->
 		<Keywords fontWeight="bold" foreground="#F9B46F">

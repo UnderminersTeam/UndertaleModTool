@@ -52,20 +52,46 @@ namespace UndertaleModLib.Models
             if (isGMS2)
                 return "\"" + Content.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"") + "\"";
 
-            return "\"" + Content.Replace("\r\n", "\n").Replace("\"", "\" + chr(34) + \"") + "\""; // Do chr(34) instead of chr(ord('"')), because single-quoted strings aren't supported by the syntax highlighter currently.
+            // Handle GM:S 1's lack of escaping
+            string res = Content.Replace("\r\n", "\n");
+            bool front, back;
+            if (res.StartsWith('"'))
+            {
+                front = true;
+                res = res.Remove(0, 1);
+                if (res.Length == 0)
+                    return "'\"'";
+            }
+            else
+                front = false;
+            if (res.EndsWith('"'))
+            {
+                res = res.Remove(res.Length - 1);
+                back = true;
+            }
+            else
+                back = false;
+            res = res.Replace("\"", "\" + '\"' + \"");
+            if (front)
+                res = "'\"' + \"" + res;
+            else
+                res = "\"" + res;
+            if (back)
+                res += "\" + '\"'";
+            else
+                res += "\"";
+            return res;
         }
 
         public bool SearchMatches(string filter)
         {
             return Content?.ToLower().Contains(filter.ToLower()) ?? false;
         }
-
-        public static string UnescapeText(string text, bool isGMS2 = true)
+        
+        // Unescapes text for the assembler
+        public static string UnescapeText(string text)
         {
-            if (isGMS2)
-                return text.Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\"", "\"").Replace("\\\\", "\\");
-            else 
-                return text.Replace("\" + chr(34) + \"", "\"");
+            return text.Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\"", "\"").Replace("\\\\", "\\");
         }
     }
 }
