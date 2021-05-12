@@ -22,6 +22,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
@@ -31,10 +32,13 @@
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Locals count</TextBlock>
         <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding LocalsCount}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Offset</TextBlock>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding Offset}"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Arguments count</TextBlock>
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding ArgumentsCount}"/>
 
-        <TabControl Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Offset</TextBlock>
+        <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Offset}"/>
+
+        <TabControl Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
             <TabItem Header="Decompiled" Name="DecompiledTab">
                 <Grid>
                     <avalonEdit:TextEditor
@@ -49,7 +53,8 @@
                         GotFocus="DecompiledEditor_GotFocus"
                         LostFocus="DecompiledEditor_LostFocus"
                         WordWrap="True"
-                        FontSize="10pt"/>
+                        FontSize="10pt"
+                        Padding="4"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Disassembly" Name="DisassemblyTab">
@@ -64,7 +69,8 @@
                         GotFocus="DisassemblyEditor_GotFocus"
                         LostFocus="DisassemblyEditor_LostFocus"
                         WordWrap="True"
-                        FontSize="10pt"/>
+                        FontSize="10pt"
+                        Padding="4"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Graph view" Name="GraphTab">
