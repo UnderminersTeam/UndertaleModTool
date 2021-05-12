@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -52,11 +53,11 @@ namespace UndertaleModLib.Compiler
                     {
                         if (Text.Contains("\r"))
                         {
-                            Text = Text + "\r\n";
+                            Text += "\r\n";
                         }
                         else
                         {
-                            Text = Text + "\n";
+                            Text += "\n";
                         }
                     }
 
@@ -73,6 +74,7 @@ namespace UndertaleModLib.Compiler
                     LineStartPositions.Add(i + 1);
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public char ReadChar()
                 {
                     if (EOF)
@@ -80,6 +82,7 @@ namespace UndertaleModLib.Compiler
                     return Text[Position++];
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public char PeekChar()
                 {
                     if (EOF)
@@ -87,6 +90,7 @@ namespace UndertaleModLib.Compiler
                     return Text[Position];
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public char PeekCharAhead(int lookahead = 1)
                 {
                     if (EOF)
@@ -97,29 +101,36 @@ namespace UndertaleModLib.Compiler
                     return Text[index];
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public void AdvancePosition(int amount = 1)
                 {
                     Position += amount;
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public void JumpTo(int position)
                 {
                     Position = position;
                 }
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public PositionInfo GetPositionInfo()
                 {
                     return GetPositionInfo(Position);
                 }
 
+                public int LineStartSearch = 0;
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public PositionInfo GetPositionInfo(int index)
                 {
                     int i;
-                    for (i = 0; i < LineStartPositions.Count - 1; i++)
+                    for (i = LineStartSearch; i < LineStartPositions.Count - 1; i++)
                     {
                         if (index >= LineStartPositions[i] && index < LineStartPositions[i + 1])
                             break;
                     }
+                    LineStartSearch = i;
                     int line = i + 1;
                     int column = index - LineStartPositions[i] + 1;
 
@@ -134,18 +145,20 @@ namespace UndertaleModLib.Compiler
 
             public static List<Token> LexString(CompileContext context, string input)
             {
-                List<Token> output = new List<Token>();
+                List<Token> output = new List<Token>(128);
                 CodeReader reader = new CodeReader(context, input);
                 Token currentToken = null;
+                bool gms2 = context.Data?.IsGameMaker2() ?? false;
                 while (currentToken?.Kind != Token.TokenKind.EOF)
                 {
-                    currentToken = ReadToken(reader);
+                    currentToken = ReadToken(reader, gms2);
                     output.Add(currentToken);
                 }
                 return output;
             }
 
-            private static Token ReadToken(CodeReader cr)
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static Token ReadToken(CodeReader cr, bool gms2)
             {
                 SkipWhitespaceAndComments(cr);
                 if (cr.EOF)
@@ -156,8 +169,10 @@ namespace UndertaleModLib.Compiler
                 if (cr.PeekChar() == '#')
                 {
                     // Skip preprocessor directive/macro/etc. Maybe support could be added later... but not yet.
-                    while (!cr.EOF && !cr.PeekChar().In('\n', '\r'))
+                    while (!cr.EOF)
                     {
+                        if (cr.PeekChar() == '\n')
+                            break;
                         cr.AdvancePosition();
                     }
                 }
@@ -176,12 +191,16 @@ namespace UndertaleModLib.Compiler
                     }
 
                     // Strings
-                    if (cr.compileContext.Data?.IsGameMaker2() ?? false)
+                    if (gms2)
                     {
-                        if (c == '@' && cr.PeekCharAhead().In('"', '\''))
+                        if (c == '@')
                         {
-                            cr.AdvancePosition();
-                            return ReadStringLiteralNoEscape(cr);
+                            char c2 = cr.PeekCharAhead();
+                            if (c2 == '"' || c2 == '\'')
+                            {
+                                cr.AdvancePosition();
+                                return ReadStringLiteralNoEscape(cr);
+                            }
                         }
                         else if (c == '"')
                         {
@@ -456,67 +475,38 @@ namespace UndertaleModLib.Compiler
                 }
 
                 string identifierText = sb.ToString();
-                switch (identifierText)
+                return identifierText switch
                 {
-                    default:
-                        return new Token(Token.TokenKind.Identifier, identifierText, cr.GetPositionInfo(index));
-                    case "and":
-                        return new Token(Token.TokenKind.LogicalAnd, cr.GetPositionInfo(index));
-                    case "or":
-                        return new Token(Token.TokenKind.LogicalOr, cr.GetPositionInfo(index));
-                    case "xor":
-                        return new Token(Token.TokenKind.LogicalXor, cr.GetPositionInfo(index));
-                    case "while":
-                        return new Token(Token.TokenKind.KeywordWhile, cr.GetPositionInfo(index));
-                    case "with":
-                        return new Token(Token.TokenKind.KeywordWith, cr.GetPositionInfo(index));
-                    case "if":
-                        return new Token(Token.TokenKind.KeywordIf, cr.GetPositionInfo(index));
-                    case "do":
-                        return new Token(Token.TokenKind.KeywordDo, cr.GetPositionInfo(index));
-                    case "not":
-                        return new Token(Token.TokenKind.Not, cr.GetPositionInfo(index));
-                    case "enum":
-                        return new Token(Token.TokenKind.Enum, cr.GetPositionInfo(index));
-                    case "begin":
-                        return new Token(Token.TokenKind.OpenBlock, cr.GetPositionInfo(index));
-                    case "end":
-                        return new Token(Token.TokenKind.CloseBlock, cr.GetPositionInfo(index));
-                    case "var":
-                        return new Token(Token.TokenKind.KeywordVar, cr.GetPositionInfo(index));
-                    case "globalvar":
-                        return new Token(Token.TokenKind.KeywordGlobalVar, cr.GetPositionInfo(index));
-                    case "return":
-                        return new Token(Token.TokenKind.KeywordReturn, cr.GetPositionInfo(index));
-                    case "default":
-                        return new Token(Token.TokenKind.KeywordDefault, cr.GetPositionInfo(index));
-                    case "struct":
-                        return new Token(Token.TokenKind.KeywordStruct, cr.GetPositionInfo(index));
-                    case "for":
-                        return new Token(Token.TokenKind.KeywordFor, cr.GetPositionInfo(index));
-                    case "case":
-                        return new Token(Token.TokenKind.KeywordCase, cr.GetPositionInfo(index));
-                    case "switch":
-                        return new Token(Token.TokenKind.KeywordSwitch, cr.GetPositionInfo(index));
-                    case "until":
-                        return new Token(Token.TokenKind.KeywordUntil, cr.GetPositionInfo(index));
-                    case "continue":
-                        return new Token(Token.TokenKind.KeywordContinue, cr.GetPositionInfo(index));
-                    case "break":
-                        return new Token(Token.TokenKind.KeywordBreak, cr.GetPositionInfo(index));
-                    case "else":
-                        return new Token(Token.TokenKind.KeywordElse, cr.GetPositionInfo(index));
-                    case "repeat":
-                        return new Token(Token.TokenKind.KeywordRepeat, cr.GetPositionInfo(index));
-                    case "exit":
-                        return new Token(Token.TokenKind.KeywordExit, cr.GetPositionInfo(index));
-                    case "then":
-                        return new Token(Token.TokenKind.KeywordThen, cr.GetPositionInfo(index));
-                    case "mod":
-                        return new Token(Token.TokenKind.Mod, cr.GetPositionInfo(index));
-                    case "div":
-                        return new Token(Token.TokenKind.Div, cr.GetPositionInfo(index));
-                }
+                    "and" => new Token(Token.TokenKind.LogicalAnd, cr.GetPositionInfo(index)),
+                    "or" => new Token(Token.TokenKind.LogicalOr, cr.GetPositionInfo(index)),
+                    "xor" => new Token(Token.TokenKind.LogicalXor, cr.GetPositionInfo(index)),
+                    "while" => new Token(Token.TokenKind.KeywordWhile, cr.GetPositionInfo(index)),
+                    "with" => new Token(Token.TokenKind.KeywordWith, cr.GetPositionInfo(index)),
+                    "if" => new Token(Token.TokenKind.KeywordIf, cr.GetPositionInfo(index)),
+                    "do" => new Token(Token.TokenKind.KeywordDo, cr.GetPositionInfo(index)),
+                    "not" => new Token(Token.TokenKind.Not, cr.GetPositionInfo(index)),
+                    "enum" => new Token(Token.TokenKind.Enum, cr.GetPositionInfo(index)),
+                    "begin" => new Token(Token.TokenKind.OpenBlock, cr.GetPositionInfo(index)),
+                    "end" => new Token(Token.TokenKind.CloseBlock, cr.GetPositionInfo(index)),
+                    "var" => new Token(Token.TokenKind.KeywordVar, cr.GetPositionInfo(index)),
+                    "globalvar" => new Token(Token.TokenKind.KeywordGlobalVar, cr.GetPositionInfo(index)),
+                    "return" => new Token(Token.TokenKind.KeywordReturn, cr.GetPositionInfo(index)),
+                    "default" => new Token(Token.TokenKind.KeywordDefault, cr.GetPositionInfo(index)),
+                    "struct" => new Token(Token.TokenKind.KeywordStruct, cr.GetPositionInfo(index)),
+                    "for" => new Token(Token.TokenKind.KeywordFor, cr.GetPositionInfo(index)),
+                    "case" => new Token(Token.TokenKind.KeywordCase, cr.GetPositionInfo(index)),
+                    "switch" => new Token(Token.TokenKind.KeywordSwitch, cr.GetPositionInfo(index)),
+                    "until" => new Token(Token.TokenKind.KeywordUntil, cr.GetPositionInfo(index)),
+                    "continue" => new Token(Token.TokenKind.KeywordContinue, cr.GetPositionInfo(index)),
+                    "break" => new Token(Token.TokenKind.KeywordBreak, cr.GetPositionInfo(index)),
+                    "else" => new Token(Token.TokenKind.KeywordElse, cr.GetPositionInfo(index)),
+                    "repeat" => new Token(Token.TokenKind.KeywordRepeat, cr.GetPositionInfo(index)),
+                    "exit" => new Token(Token.TokenKind.KeywordExit, cr.GetPositionInfo(index)),
+                    "then" => new Token(Token.TokenKind.KeywordThen, cr.GetPositionInfo(index)),
+                    "mod" => new Token(Token.TokenKind.Mod, cr.GetPositionInfo(index)),
+                    "div" => new Token(Token.TokenKind.Div, cr.GetPositionInfo(index)),
+                    _ => new Token(Token.TokenKind.Identifier, identifierText, cr.GetPositionInfo(index)),
+                };
             }
 
             private static bool IsHexCharacter(char c)
@@ -534,7 +524,7 @@ namespace UndertaleModLib.Compiler
                 cr.AdvancePosition();
 
                 char c = cr.PeekChar();
-                char c2 = cr.PeekCharAhead();
+                char c2;
 
                 while (!cr.EOF)
                 {
@@ -547,7 +537,6 @@ namespace UndertaleModLib.Compiler
                                 sb.Append(c);
                                 cr.AdvancePosition();
                                 c = cr.PeekChar();
-                                c2 = cr.PeekCharAhead();
                                 continue;
                             }
                             cr.AdvancePosition();
@@ -586,7 +575,6 @@ namespace UndertaleModLib.Compiler
                                             calc *= 16;
                                             calc = (!char.IsDigit(c2)) ? (calc + char.ToLower(c2) - 87) : (calc + c2 - 48);
                                             cr.AdvancePosition();
-                                            c = cr.PeekChar();
                                             c2 = cr.PeekCharAhead();
                                         }
                                         sb.Append((char)(ushort)calc);
@@ -641,7 +629,6 @@ namespace UndertaleModLib.Compiler
                             }
                             cr.AdvancePosition();
                             c = cr.PeekChar();
-                            c2 = cr.PeekCharAhead();
                             continue;
                         default:
                             if (c == type)
@@ -649,7 +636,6 @@ namespace UndertaleModLib.Compiler
                             sb.Append(c);
                             cr.AdvancePosition();
                             c = cr.PeekChar();
-                            c2 = cr.PeekCharAhead();
                             continue;
                     }
                     break;
@@ -746,15 +732,19 @@ namespace UndertaleModLib.Compiler
                             {
                                 case '/':
                                     cr.AdvancePosition(2);
-                                    while (!cr.EOF && !cr.PeekChar().In('\n', '\r'))
+                                    while (!cr.EOF)
                                     {
+                                        if (cr.PeekChar() == '\n')
+                                            break;
                                         cr.AdvancePosition();
                                     }
                                     break;
                                 case '*':
                                     cr.AdvancePosition(2);
-                                    while (!cr.EOF && cr.PeekChar() != '*' && cr.PeekCharAhead() != '/')
+                                    while (!cr.EOF)
                                     {
+                                        if (cr.PeekChar() == '*' && cr.PeekCharAhead() == '/')
+                                            break;
                                         cr.AdvancePosition();
                                     }
                                     if (!cr.EOF)

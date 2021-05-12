@@ -93,7 +93,6 @@
 
         <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2">
             <TextBlock Foreground="DarkGray" FontStyle="Italic">TODO: The preview doesn't update live, I know, just close and reopen the object for now</TextBlock>
-            <TextBlock><Hyperlink NavigateUri="https://stackoverflow.com/questions/52334480/binding-observablecollectionpoint-to-pathfigure" RequestNavigate="Hyperlink_RequestNavigate">https://stackoverflow.com/questions/52334480/binding-observablecollectionpoint-to-pathfigure</Hyperlink></TextBlock>
         </StackPanel>
 
         <Viewbox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Width="300" Height="300">

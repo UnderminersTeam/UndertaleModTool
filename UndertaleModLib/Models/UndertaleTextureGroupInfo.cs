@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleTextureGroupInfo : UndertaleNamedResource
     {
         public UndertaleString Name { get; set; }

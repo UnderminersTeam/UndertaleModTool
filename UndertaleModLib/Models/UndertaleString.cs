@@ -10,13 +10,10 @@ using UndertaleModLib.Decompiler;
 
 namespace UndertaleModLib.Models
 {
-    public class UndertaleString : UndertaleResource, INotifyPropertyChanged, ISearchable
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleString : UndertaleResource, ISearchable
     {
-        private string _Content;
-
-        public string Content { get => _Content; set { _Content = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Content")); } }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        public string Content { get; set; }
 
         public UndertaleString()
         {
@@ -29,7 +26,7 @@ namespace UndertaleModLib.Models
 
         public void Serialize(UndertaleWriter writer)
         {
-            writer.WriteGMString(_Content);
+            writer.WriteGMString(Content);
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -55,20 +52,46 @@ namespace UndertaleModLib.Models
             if (isGMS2)
                 return "\"" + Content.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"") + "\"";
 
-            return "\"" + Content.Replace("\r\n", "\n").Replace("\"", "\" + chr(34) + \"") + "\""; // Do chr(34) instead of chr(ord('"')), because single-quoted strings aren't supported by the syntax highlighter currently.
+            // Handle GM:S 1's lack of escaping
+            string res = Content;
+            bool front, back;
+            if (res.StartsWith('"'))
+            {
+                front = true;
+                res = res.Remove(0, 1);
+                if (res.Length == 0)
+                    return "'\"'";
+            }
+            else
+                front = false;
+            if (res.EndsWith('"'))
+            {
+                res = res.Remove(res.Length - 1);
+                back = true;
+            }
+            else
+                back = false;
+            res = res.Replace("\"", "\" + '\"' + \"");
+            if (front)
+                res = "'\"' + \"" + res;
+            else
+                res = "\"" + res;
+            if (back)
+                res += "\" + '\"'";
+            else
+                res += "\"";
+            return res;
         }
 
         public bool SearchMatches(string filter)
         {
             return Content?.ToLower().Contains(filter.ToLower()) ?? false;
         }
-
-        public static string UnescapeText(string text, bool isGMS2 = true)
+        
+        // Unescapes text for the assembler
+        public static string UnescapeText(string text)
         {
-            if (isGMS2)
-                return text.Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\"", "\"").Replace("\\\\", "\\");
-            else 
-                return text.Replace("\" + chr(34) + \"", "\"");
+            return text.Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\"", "\"").Replace("\\\\", "\\");
         }
     }
 }

@@ -23,7 +23,7 @@ namespace UndertaleModTool
     public partial class UndertaleExtensionEditor : UserControl
     {
         public int MyIndex { get => (Application.Current.MainWindow as MainWindow).Data.Extensions.IndexOf((UndertaleExtension)this.DataContext); }
-        //God this is so ugly, if there's a better way, please, put in a pull request
+        // God this is so ugly, if there's a better way, please, put in a pull request
         public byte[] ProductIdData { get => (((((Application.Current.MainWindow as MainWindow).Data?.GeneralInfo?.Major ?? 0) >= 2) || ((((Application.Current.MainWindow as MainWindow).Data?.GeneralInfo?.Major ?? 0) == 1) && ((((Application.Current.MainWindow as MainWindow).Data?.GeneralInfo?.Build ?? 0) >= 1773) || (((Application.Current.MainWindow as MainWindow).Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? (Application.Current.MainWindow as MainWindow).Data.FORM.EXTN.productIdData[MyIndex] : null); set => (Application.Current.MainWindow as MainWindow).Data.FORM.EXTN.productIdData[MyIndex] = value; }
 
         public UndertaleExtensionEditor()
@@ -31,9 +31,9 @@ namespace UndertaleModTool
             InitializeComponent();
         }
 
-        private void DataGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
-            int lastItem = ((sender as DataGrid).ItemsSource as IList<UndertaleExtensionFile>).Count;
+            int lastItem = ((Application.Current.MainWindow as MainWindow).Data.Extensions[MyIndex]).Files.Count;
 
             UndertaleExtensionFile obj = new UndertaleExtensionFile()
             {
@@ -42,7 +42,7 @@ namespace UndertaleModTool
                 Functions = new UndertalePointerList<UndertaleExtensionFunction>()
             };
 
-            e.NewItem = obj;
+            ((Application.Current.MainWindow as MainWindow).Data.Extensions[MyIndex]).Files.Add(obj);
         }
     }
 }

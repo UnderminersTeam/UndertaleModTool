@@ -9,12 +9,10 @@ namespace UndertaleModLib.Models
 {
     public class UndertaleScript : UndertaleNamedResource, INotifyPropertyChanged
     {
-        private UndertaleString _Name;
+        public UndertaleString Name { get; set; }
         private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _Code = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
-
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public UndertaleCode Code { get => _Code.Resource; set { _Code.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Code")); } }
-        public bool Constructor { get; set; } = false; // todo: INotifyPropertyChanged
+        public UndertaleCode Code { get => _Code.Resource; set { _Code.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Code))); } }
+        public bool Constructor { get; set; } = false;
 
         public event PropertyChangedEventHandler PropertyChanged;
 

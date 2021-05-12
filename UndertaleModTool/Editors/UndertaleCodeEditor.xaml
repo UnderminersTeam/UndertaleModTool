@@ -7,7 +7,13 @@
 		     xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleCode}" DataContextChanged="UserControl_DataContextChanged">
-    <Grid>
+    <UserControl.CommandBindings>
+        <CommandBinding Command="{x:Static local:UndertaleCodeEditor.Compile}" Executed="Command_Compile" />
+    </UserControl.CommandBindings>
+    <UserControl.InputBindings>
+        <KeyBinding Modifiers="Control" Key="K" Command="{x:Static local:UndertaleCodeEditor.Compile}"/>
+    </UserControl.InputBindings>
+    <Grid MaxHeight="{Binding ElementName=DataEditor, Path=ActualHeight}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
@@ -16,7 +22,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
@@ -27,24 +33,44 @@
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Offset</TextBlock>
         <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding Offset}"/>
-        
+
         <TabControl Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
+            <TabItem Header="Decompiled" Name="DecompiledTab">
+                <Grid>
+                    <avalonEdit:TextEditor
+                        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+                        FontFamily="Consolas"
+                        Name="DecompiledEditor" 
+                        IsReadOnly="True"
+                        Background="#222222"
+                        LineNumbersForeground="#DBDBDB"
+                        Foreground="#C0C0C0"
+                        ShowLineNumbers="True"
+                        GotFocus="DecompiledEditor_GotFocus"
+                        LostFocus="DecompiledEditor_LostFocus"
+                        WordWrap="True"
+                        FontSize="10pt"/>
+                </Grid>
+            </TabItem>
             <TabItem Header="Disassembly" Name="DisassemblyTab">
                 <Grid>
-                    <RichTextBox HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsReadOnly="True" IsDocumentEnabled="True" Name="DisassemblyView" Padding="-5,0,-5,0" MouseDoubleClick="DisassemblyView_MouseDoubleClick"/>
-                    <TextBox TextWrapping="NoWrap" Name="DisassemblyEditor" LostFocus="DisassemblyEditor_LostFocus" Visibility="Collapsed" FontFamily="Lucida Console" Padding="-2,0,-2,0" AcceptsReturn="True"/>
+                    <avalonEdit:TextEditor
+                        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+                        FontFamily="Consolas"
+                        Name="DisassemblyEditor" 
+                        IsReadOnly="True"
+                        Background="#222222"
+                        Foreground="#C0C0C0"
+                        GotFocus="DisassemblyEditor_GotFocus"
+                        LostFocus="DisassemblyEditor_LostFocus"
+                        WordWrap="True"
+                        FontSize="10pt"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Graph view" Name="GraphTab">
                 <Viewbox Stretch="UniformToFill" StretchDirection="DownOnly">
                     <Image Name="GraphView"/>
                 </Viewbox>
-            </TabItem>
-            <TabItem Header="Decompiled" Name="DecompiledTab">
-              <Grid>
-                    <RichTextBox IsReadOnly="True" IsDocumentEnabled="True" Name="DecompiledView" Padding="-5,0,-5,0" MouseDoubleClick="DecompiledView_MouseDoubleClick" SpellCheck.IsEnabled="False"/>
-                <TextBox Name="DecompiledEditor" LostFocus="DecompiledEditor_LostFocus" Visibility="Collapsed" FontFamily="Lucida Console" Padding="-2,0,-2,0" AcceptsReturn="True"/>
-              </Grid>
             </TabItem>
         </TabControl>
     </Grid>

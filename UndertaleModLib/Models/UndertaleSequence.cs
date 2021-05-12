@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
-    // TODO: INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleSequence : UndertaleNamedResource
     {
         public enum PlaybackType : uint

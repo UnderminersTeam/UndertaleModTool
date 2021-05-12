@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace UndertaleModLib.Models
 {
@@ -25,13 +26,10 @@ namespace UndertaleModLib.Models
         Double = 2
     }
 
-    public class UndertaleExtensionFunctionArg : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleExtensionFunctionArg : UndertaleObject
     {
-        private UndertaleExtensionVarType _Type;
-
-        public UndertaleExtensionVarType Type { get => _Type; set { _Type = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Type")); } }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        public UndertaleExtensionVarType Type { get; set; }
 
         public UndertaleExtensionFunctionArg()
         {
@@ -54,23 +52,15 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleExtensionFunction : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleExtensionFunction : UndertaleObject
     {
-        private UndertaleString _Name;
-        private uint _ID;
-        private uint _Kind;
-        private UndertaleExtensionVarType _RetType;
-        private UndertaleString _ExtName;
-        private UndertaleSimpleList<UndertaleExtensionFunctionArg> _Arguments = new UndertaleSimpleList<UndertaleExtensionFunctionArg>();
-
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public uint ID { get => _ID; set { _ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ID")); } }
-        public uint Kind { get => _Kind; set { _Kind = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Kind")); } }
-        public UndertaleExtensionVarType RetType { get => _RetType; set { _RetType = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("RetType")); } }
-        public UndertaleString ExtName { get => _ExtName; set { _ExtName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ExtName")); } }
-        public UndertaleSimpleList<UndertaleExtensionFunctionArg> Arguments { get => _Arguments; set { _Arguments = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Arguments")); } }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        public UndertaleString Name { get; set; }
+        public uint ID { get; set; } 
+        public uint Kind { get; set; }
+        public UndertaleExtensionVarType RetType { get; set; }
+        public UndertaleString ExtName { get; set; }
+        public UndertaleSimpleList<UndertaleExtensionFunctionArg> Arguments { get; set; } = new UndertaleSimpleList<UndertaleExtensionFunctionArg>();
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -98,21 +88,14 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public class UndertaleExtensionFile : UndertaleObject, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleExtensionFile : UndertaleObject
     {
-        private UndertaleString _Filename;
-        private UndertaleString _CleanupScript;
-        private UndertaleString _InitScript;
-        private UndertaleExtensionKind _Kind;
-        private UndertalePointerList<UndertaleExtensionFunction> _Functions = new UndertalePointerList<UndertaleExtensionFunction>();
-
-        public UndertaleString Filename { get => _Filename; set { _Filename = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Filename")); } }
-        public UndertaleString CleanupScript { get => _CleanupScript; set { _CleanupScript = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CleanupScript")); } }
-        public UndertaleString InitScript { get => _InitScript; set { _InitScript = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("InitScript")); } }
-        public UndertaleExtensionKind Kind { get => _Kind; set { _Kind = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Kind")); } }
-        public UndertalePointerList<UndertaleExtensionFunction> Functions { get => _Functions; set { _Functions = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Functions")); } }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        public UndertaleString Filename { get; set; }
+        public UndertaleString CleanupScript { get; set; }
+        public UndertaleString InitScript { get; set; }
+        public UndertaleExtensionKind Kind { get; set; }
+        public UndertalePointerList<UndertaleExtensionFunction> Functions { get; set; } = new UndertalePointerList<UndertaleExtensionFunction>();
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -134,24 +117,28 @@ namespace UndertaleModLib.Models
 
         public override string ToString()
         {
-            return Filename.Content + " (" + GetType().Name + ")";
+            try
+            {
+                return Filename.Content + " (" + GetType().Name + ")";
+            }
+            catch
+            {
+                return "(Unknown extension file)";
+            }
         }
     }
 
-    public class UndertaleExtension : UndertaleNamedResource, INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
+    public class UndertaleExtension : UndertaleNamedResource
     {
-        private UndertaleString _FolderName;
-        private UndertaleString _Name;
-        private UndertaleString _ClassName;
-        private UndertalePointerList<UndertaleExtensionFile> _Files = new UndertalePointerList<UndertaleExtensionFile>();
+        // Folder Name thing is a remnant from the legacy GM7-8.1 extension editor(aka ExtMaker).
+        // The runner reads the name but ignores it.
+        // Though you probably shouldn't change it anyways. 
+        public UndertaleString FolderName { get; set; }
+        public UndertaleString Name { get; set; }
+        public UndertaleString ClassName { get; set; }
 
-        public UndertaleString FolderName { get => _FolderName; set { _FolderName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FolderName")); } }
-        public UndertaleString Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
-        public UndertaleString ClassName { get => _ClassName; set { _ClassName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ClassName")); } }
-
-        public UndertalePointerList<UndertaleExtensionFile> Files { get => _Files; set { _Files = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Files")); } }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        public UndertalePointerList<UndertaleExtensionFile> Files { get; set; } = new UndertalePointerList<UndertaleExtensionFile>();
 
         public override string ToString()
         {

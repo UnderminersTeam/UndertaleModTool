@@ -71,7 +71,7 @@ namespace UndertaleModLib
                 lastChunk = reader.ReadChars(4);
                 reader.AllChunkNames.Add(lastChunk);
                 uint length = reader.ReadUInt32();
-                reader.SmallReadAt(reader.Position + length, 8);
+                reader.Position += length;
             }
             reader.LastChunkName = lastChunk;
             reader.Position = startPos;
@@ -120,7 +120,7 @@ namespace UndertaleModLib
             // Strange data for each extension, some kind of unique identifier based on
             // the product ID for each of them
             productIdData = new List<byte[]>();
-            //NOTE: I do not know if 1773 is the youngest version which contains product IDs.
+            // NOTE: I do not know if 1773 is the earliest version which contains product IDs.
             if (reader.undertaleData.GeneralInfo?.Major >= 2 || (reader.undertaleData.GeneralInfo?.Major == 1 && reader.undertaleData.GeneralInfo?.Build >= 1773) || (reader.undertaleData.GeneralInfo?.Major == 1 && reader.undertaleData.GeneralInfo?.Build == 1539))
             {
                 for (int i = 0; i < List.Count; i++)
@@ -246,29 +246,20 @@ namespace UndertaleModLib
     public class UndertaleChunkFONT : UndertaleListChunk<UndertaleFont>
     {
         public override string Name => "FONT";
+        public byte[] Padding;
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
             base.SerializeChunk(writer);
 
-            // padding?
-            for (ushort i = 0; i < 0x80; i++)
-                writer.Write(i);
-            for (ushort i = 0; i < 0x80; i++)
-                writer.Write((ushort)0x3f);
+            writer.Write(Padding);
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
             base.UnserializeChunk(reader);
 
-            // padding?
-            for (ushort i = 0; i < 0x80; i++)
-                if (reader.ReadUInt16() != i)
-                    throw new IOException("Incorrect padding in FONT, expected " + i);
-            for (ushort i = 0; i < 0x80; i++)
-                if (reader.ReadUInt16() != 0x3f)
-                    throw new IOException("Incorrect padding in FONT");
+            Padding = reader.ReadBytes(512);
         }
     }
 
@@ -346,15 +337,22 @@ namespace UndertaleModLib
         }
     }
 
-    // TODO: INotifyPropertyChanged
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleChunkVARI : UndertaleChunk
     {
         public override string Name => "VARI";
+        
+        public uint VarCount1 { get; set; }
 
-        public uint InstanceVarCount { get; set; }
-        public uint InstanceVarCountAgain { get; set; }
+        public uint VarCount2 { get; set; }
         public uint MaxLocalVarCount { get; set; }
+        public bool DifferentVarCounts { get; set; }
         public List<UndertaleVariable> List = new List<UndertaleVariable>();
+
+        [Obsolete]
+        public uint InstanceVarCount { get => VarCount1; set => VarCount1 = value; }
+        [Obsolete]
+        public uint InstanceVarCountAgain { get => VarCount2; set => VarCount2 = value; }
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
@@ -368,8 +366,8 @@ namespace UndertaleModLib
 
             if (!writer.Bytecode14OrLower)
             {
-                writer.Write(InstanceVarCount);
-                writer.Write(InstanceVarCountAgain);
+                writer.Write(VarCount1);
+                writer.Write(VarCount2);
                 writer.Write(MaxLocalVarCount);
             }
             foreach (UndertaleVariable var in List)
@@ -390,8 +388,9 @@ namespace UndertaleModLib
             uint varLength;
             if (!reader.Bytecode14OrLower)
             {
-                InstanceVarCount = reader.ReadUInt32();
-                InstanceVarCountAgain = reader.ReadUInt32();
+                VarCount1 = reader.ReadUInt32();
+                VarCount2 = reader.ReadUInt32();
+                DifferentVarCounts = VarCount1 != VarCount2;
                 MaxLocalVarCount = reader.ReadUInt32();
                 varLength = 20;
             }
@@ -639,13 +638,18 @@ namespace UndertaleModLib
             if (reader.undertaleData.GeneralInfo.Major < 2)
                 throw new InvalidOperationException();
 
+            // Apparently SEQN can be empty
+            if (Length == 0)
+                return;
+
             // Padding
             while (reader.Position % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
-            if (reader.ReadUInt32() != 1)
-                throw new IOException("Expected SEQN version 1");
+            uint version = reader.ReadUInt32();
+            if (version != 1)
+                throw new IOException("Expected SEQN version 1, got " + version.ToString());
 
             base.UnserializeChunk(reader);
         }
