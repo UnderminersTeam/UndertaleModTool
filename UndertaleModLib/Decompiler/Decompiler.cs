@@ -1275,7 +1275,7 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 string name = Var.Name.Content;
-                if (context.Data.GMS2_3)
+                if (context.Data?.GMS2_3 == true)
                 {
                     if (ArrayIndices != null)
                     {
@@ -1700,7 +1700,7 @@ namespace UndertaleModLib.Decompiler
                                     pushTarget.ArrayIndices.Add(ind.Item2);
                                 pushTarget.InstType = stack.Pop();
                             }
-                            else if (context.Data.GMS2_3 && pushTarget.VarType != UndertaleInstruction.VariableType.Normal)
+                            else if (context.Data?.GMS2_3 == true && pushTarget.VarType != UndertaleInstruction.VariableType.Normal)
                             {
                                 // Special arrays
                                 pushTarget.ArrayIndices = new List<Expression>() { stack.Pop() };
@@ -1783,7 +1783,7 @@ namespace UndertaleModLib.Decompiler
 
                     case UndertaleInstruction.Opcode.Break:
                         // GMS 2.3 sub-opcodes
-                        if (context.Data.GMS2_3)
+                        if (context.Data?.GMS2_3 == true)
                         {
                             switch ((short)instr.Value)
                             {
