@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -268,99 +268,106 @@ namespace UndertaleModLib.Decompiler
                     return resultStr;
                 }
 
+                // Archie: If statements are inefficient! Use a switch jump table!
                 if (AssetType == AssetIDType.GameObject && !(Value is Int64)) // When the value is Int64, an example value is 343434343434. It is unknown what it represents, but it's not an InstanceType.
                 {
                     int? val = ConvertToInt(Value);
                     if (val != null && val < 0)
                         return ((UndertaleInstruction.InstanceType)Value).ToString().ToLower();
                 }
-                // Need to put else because otherwise it gets terribly unoptimized with GameObject type
-                else if (AssetType == AssetIDType.e__VW)
-                    return "e__VW." + ConvertToEnumStr<e__VW>(Value);
-                else if (AssetType == AssetIDType.e__BG)
-                    return "e__BG." + ConvertToEnumStr<e__BG>(Value);
-
-                else if (AssetType == AssetIDType.Enum_HAlign)
-                    return ConvertToEnumStr<HAlign>(Value);
-                else if (AssetType == AssetIDType.Enum_VAlign)
-                    return ConvertToEnumStr<VAlign>(Value);
-                else if (AssetType == AssetIDType.Enum_GameSpeed)
-                    return ConvertToEnumStr<GameSpeed>(Value);
-                else if (AssetType == AssetIDType.Enum_OSType)
-                    return ConvertToEnumStr<OSType>(Value);
-                else if (AssetType == AssetIDType.Enum_GamepadButton)
-                    return ConvertToEnumStr<GamepadButton>(Value);
-                else if (AssetType == AssetIDType.MouseButton)
-                    return ConvertToEnumStr<MouseButton>(Value);
-                else if (AssetType == AssetIDType.Enum_MouseCursor)
-                    return ConvertToEnumStr<MouseCursor>(Value);
-                else if (AssetType == AssetIDType.Enum_PathEndAction)
-                    return ConvertToEnumStr<PathEndAction>(Value);
-                else if (AssetType == AssetIDType.Enum_BufferKind)
-                    return ConvertToEnumStr<BufferKind>(Value);
-                else if (AssetType == AssetIDType.Enum_BufferType)
-                    return ConvertToEnumStr<BufferType>(Value);
-                else if (AssetType == AssetIDType.Enum_BufferSeek)
-                    return ConvertToEnumStr<BufferSeek>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_UGC_FileType)
-                    return ConvertToEnumStr<Steam_UGC_FileType>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_UGC_List)
-                    return ConvertToEnumStr<Steam_UGC_List>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_UGC_MatchType)
-                    return ConvertToEnumStr<Steam_UGC_MatchType>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_UGC_QueryType)
-                    return ConvertToEnumStr<Steam_UGC_QueryType>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_UGC_SortOrder)
-                    return ConvertToEnumStr<Steam_UGC_SortOrder>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_Overlay)
-                    return ConvertToEnumStr<Steam_Overlay>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_LeaderBoard_Display)
-                    return ConvertToEnumStr<Steam_LeaderBoard_Display>(Value);
-                else if (AssetType == AssetIDType.Enum_Steam_LeaderBoard_Sort)
-                    return ConvertToEnumStr<Steam_LeaderBoard_Sort>(Value);
-                else if (AssetType == AssetIDType.Boolean)
-                    return ConvertToEnumStr<Boolean>(Value);
-                else if (AssetType == AssetIDType.EventType)
-                    return ConvertToEnumStr<Enum_EventType>(Value);
-                else if (AssetType == AssetIDType.ContextDependent)
+                else switch (AssetType) // Need to put else because otherwise it gets terribly unoptimized with GameObject type
                 {
-                    var func = context.currentFunction;
-                    if (func != null && (ContextualAssetResolver.resolvers?.ContainsKey(func.Function.Name.Content) ?? false))
-                    {
-                        List<Expression> actualArguments = new List<Expression>();
-                        foreach (var arg in func.Arguments)
+                    case AssetIDType.e__VW:
+                        return "e__VW." + ConvertToEnumStr<e__VW>(Value);
+                    case AssetIDType.e__BG:
+                        return "e__BG." + ConvertToEnumStr<e__BG>(Value);
+
+                    case AssetIDType.Enum_HAlign:
+                        return ConvertToEnumStr<HAlign>(Value);
+                    case AssetIDType.Enum_VAlign:
+                        return ConvertToEnumStr<VAlign>(Value);
+                    case AssetIDType.Enum_GameSpeed:
+                        return ConvertToEnumStr<GameSpeed>(Value);
+                    case AssetIDType.Enum_OSType:
+                        return ConvertToEnumStr<OSType>(Value);
+                    case AssetIDType.Enum_GamepadButton:
+                        return ConvertToEnumStr<GamepadButton>(Value);
+                    case AssetIDType.MouseButton:
+                        return ConvertToEnumStr<MouseButton>(Value);
+                    case AssetIDType.Enum_MouseCursor:
+                        return ConvertToEnumStr<MouseCursor>(Value);
+                    case AssetIDType.Enum_PathEndAction:
+                        return ConvertToEnumStr<PathEndAction>(Value);
+                    case AssetIDType.Enum_BufferKind:
+                        return ConvertToEnumStr<BufferKind>(Value);
+                    case AssetIDType.Enum_BufferType:
+                        return ConvertToEnumStr<BufferType>(Value);
+                    case AssetIDType.Enum_BufferSeek:
+                        return ConvertToEnumStr<BufferSeek>(Value);
+                    case AssetIDType.Enum_Steam_UGC_FileType:
+                        return ConvertToEnumStr<Steam_UGC_FileType>(Value);
+                    case AssetIDType.Enum_Steam_UGC_List:
+                        return ConvertToEnumStr<Steam_UGC_List>(Value);
+                    case AssetIDType.Enum_Steam_UGC_MatchType:
+                        return ConvertToEnumStr<Steam_UGC_MatchType>(Value);
+                    case AssetIDType.Enum_Steam_UGC_QueryType:
+                        return ConvertToEnumStr<Steam_UGC_QueryType>(Value);
+                    case AssetIDType.Enum_Steam_UGC_SortOrder:
+                        return ConvertToEnumStr<Steam_UGC_SortOrder>(Value);
+                    case AssetIDType.Enum_Steam_Overlay:
+                        return ConvertToEnumStr<Steam_Overlay>(Value);
+                    case AssetIDType.Enum_Steam_LeaderBoard_Display:
+                        return ConvertToEnumStr<Steam_LeaderBoard_Display>(Value);
+                    case AssetIDType.Enum_Steam_LeaderBoard_Sort:
+                        return ConvertToEnumStr<Steam_LeaderBoard_Sort>(Value);
+                    case AssetIDType.Boolean:
+                        return ConvertToEnumStr<Boolean>(Value);
+                    case AssetIDType.EventType:
+                        return ConvertToEnumStr<Enum_EventType>(Value);
+                    case AssetIDType.ContextDependent:
                         {
-                            if (arg is ExpressionCast)
-                                actualArguments.Add((arg as ExpressionCast).Argument);
-                            else
-                                actualArguments.Add(arg);
+                            var func = context.currentFunction;
+                            if (func != null && (ContextualAssetResolver.resolvers?.ContainsKey(func.Function.Name.Content) ?? false))
+                            {
+                                List<Expression> actualArguments = new List<Expression>();
+                                foreach (var arg in func.Arguments)
+                                {
+                                    if (arg is ExpressionCast)
+                                        actualArguments.Add((arg as ExpressionCast).Argument);
+                                    else
+                                        actualArguments.Add(arg);
+                                }
+                                string result = ContextualAssetResolver.resolvers[func.Function.Name.Content](context, func, actualArguments.IndexOf(this), this);
+                                if (result != null)
+                                    return result;
+                            }
                         }
-                        string result = ContextualAssetResolver.resolvers[func.Function.Name.Content](context, func, actualArguments.IndexOf(this), this);
-                        if (result != null)
-                            return result;
-                    }
-                }
+                        break;
 
-                else if (AssetType == AssetIDType.Color && Value is IFormattable formattable && !(Value is float) && !(Value is double) && !(Value is decimal))
-                {
-                    int vint = Convert.ToInt32(Value);
-                    if (vint < 0) // negative value.
-                        return vint.ToString();
-                    else // guaranteed to be an unsigned int.
-                    {
-                        uint vuint = (uint)vint;
-                        if (DecompileContext.ColorDictionary.ContainsKey(vuint))
-                            return DecompileContext.ColorDictionary[vuint];
-                        else
-                            return (context.isGameMaker2 ? "0x" : "$") + formattable.ToString("X6", CultureInfo.InvariantCulture); // not a known color and not negative.
-                    }
-                }
+                    case AssetIDType.Color:
+                        if (Value is IFormattable formattable && !(Value is float) && !(Value is double) && !(Value is decimal))
+                        {
+                            int vint = Convert.ToInt32(Value);
+                            if (vint < 0) // negative value.
+                                return vint.ToString();
+                            else // guaranteed to be an unsigned int.
+                            {
+                                uint vuint = (uint)vint;
+                                if (DecompileContext.ColorDictionary.ContainsKey(vuint))
+                                    return DecompileContext.ColorDictionary[vuint];
+                                else
+                                    return (context.isGameMaker2 ? "0x" : "$") + formattable.ToString("X6", CultureInfo.InvariantCulture); // not a known color and not negative.
+                            }
+                        }
+                        break;
 
-                else if (AssetType == AssetIDType.KeyboardKey)
-                {
-                    string key = GetAsKeyboard(context);
-                    if (key != null)
-                        return key;
+                    case AssetIDType.KeyboardKey:
+                        {
+                            string key = GetAsKeyboard(context);
+                            if (key != null)
+                                return key;
+                        }
+                        break;
                 }
 
                 if (context.Data != null && AssetType != AssetIDType.Other)
