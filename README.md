@@ -45,7 +45,6 @@ Additionally, included are some community-made scripts. For more information, co
 ### Bug reports, contributing
 All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is a current list of stuff that needs to be worked on:
 * Add missing chunk editors for Timelines and Extensions
-* Add support for YYC games - you won't be able to edit code, but everything else should technically work
 * Add support for latest versions of GameMaker (notably, 2.3) - decompiler cannot function in most cases currently
 
 ### Compilation Instructions
