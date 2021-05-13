@@ -949,7 +949,7 @@ namespace UndertaleModLib.Models
     {
         public UndertaleString Name { get; set; }
         public uint Length { get; set; }
-        public ushort LocalsCount { get; set; }
+        public uint LocalsCount { get; set; } // Warning: Actually a ushort, left this way for compatibility
         public ushort ArgumentsCount { get; set; }
         public bool WeirdLocalsFlag { get; set; }
         public uint Offset { get; set; }
@@ -1010,7 +1010,7 @@ namespace UndertaleModLib.Models
             else
             {
                 writer.Write(Length);
-                writer.Write(LocalsCount);
+                writer.Write((ushort)LocalsCount);
                 writer.Write(ArgumentsCount | (WeirdLocalFlag ? 0x8000 : 0));
                 int BytecodeRelativeAddress = (int)_BytecodeAbsoluteAddress - (int)writer.Position;
                 writer.Write(BytecodeRelativeAddress);

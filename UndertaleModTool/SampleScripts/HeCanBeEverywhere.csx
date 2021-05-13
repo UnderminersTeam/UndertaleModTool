@@ -243,7 +243,7 @@ for (int i = 0; i < obj_shop1_Draw.Instructions.Count; i++)
             obj_shop1_Draw.Instructions[i + 1] = Assembler.AssembleOne(@"popz.s", Data);
             obj_shop1_Draw.Instructions[i + 2] = Assembler.AssembleOne(@"push.s """"", Data);
             obj_shop1_Draw.Instructions[i + 2].Value = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>() { Resource = Data.Strings.MakeString(obj_shop1_Patches[id]) };
-            obj_shop1_Draw.Instructions[i + 5] = Assembler.AssembleOne(@"pop.v.s [array]msg", Data);
+            obj_shop1_Draw.Instructions[i + 5] = Assembler.AssembleOne(@"pop.v.s [array]global.msg", Data);
         }
     }
 }
@@ -264,14 +264,7 @@ if (room == room_cc_joker) {
     rotspeed = (instance_number(obj_joker) * instance_number(obj_joker));
 }", Data);
 
-var obj_joker_Draw = obj_joker.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals);
-var obj_joker_Draw_code = obj_joker_Draw.Disassemble(Data.Variables, Data.CodeLocals.For(obj_joker_Draw));
-// I'm getting lazy, huh
-obj_joker_Draw_code = obj_joker_Draw_code.Replace("00154: pushi.e 6", "");
-obj_joker_Draw_code = obj_joker_Draw_code.Replace("00155: pushi.e -5", "");
-obj_joker_Draw_code = obj_joker_Draw_code.Replace("00156: pushi.e 241", "");
-obj_joker_Draw_code = obj_joker_Draw_code.Replace("00157: pop.v.i [array]flag", "");
-obj_joker_Draw.Replace(Assembler.Assemble(obj_joker_Draw_code, Data));
+ReplaceTextInGML("gml_Object_obj_joker_Draw_0", "global.flag[241] = 6", "");
 
 ChangeSelection(spr_joker_enemy);
 
