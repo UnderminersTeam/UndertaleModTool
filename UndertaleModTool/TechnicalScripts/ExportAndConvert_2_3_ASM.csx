@@ -41,6 +41,7 @@ void DumpCode()
 {
     foreach (UndertaleCode code_orig in Data.Code) 
     {
+        code_orig.Offset = 0;
         if (Data.CodeLocals.ByName(code_orig.Name.Content) == null)
         {
             UndertaleCodeLocals locals = new UndertaleCodeLocals();
