@@ -44,8 +44,11 @@ Additionally, included are some community-made scripts. For more information, co
 
 ### Bug reports, contributing
 All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is a current list of stuff that needs to be worked on:
-* Add missing chunk editors for Timelines and Extensions
+* Work on the profile system
+* Decompiler improvements
+* Dark mode / theming support
 * Add support for latest versions of GameMaker (notably, 2.3) - decompiler cannot function in most cases currently
+* Eventually, making the tool cross-platform if possible
 
 ### Compilation Instructions
 In order to compile UndertaleModTool yourself, the following dependencies are needed:
