@@ -2731,6 +2731,9 @@
     <None Update="TechnicalScripts\ExtractEmbeddedDataFile.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="TechnicalScripts\GetAllChunkNames.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Unpackers\DumpSpecificCode.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
