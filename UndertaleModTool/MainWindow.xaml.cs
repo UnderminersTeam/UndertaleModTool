@@ -68,7 +68,7 @@ namespace UndertaleModTool
         public byte[] MD5CurrentlyLoaded;
         public static string AppDataFolder => Settings.AppDataFolder;
         public static string ProfilesFolder = Path.Combine(Settings.AppDataFolder, "Profiles");
-        public static string CorrectionsFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Corrections");
+        public static string CorrectionsFolder = Path.Combine(AppContext.BaseDirectory, "Corrections");
         public string ProfileHash = "Unknown";
         public bool CrashedWhileEditing = false;
 
@@ -204,7 +204,7 @@ namespace UndertaleModTool
             string key = Guid.NewGuid().ToString();
 
             string dir = Path.GetDirectoryName(FilePath);
-            Process.Start(Assembly.GetExecutingAssembly().Location, "\"" + Path.Combine(dir, filename) + "\" " + key);
+            Process.Start(Process.GetCurrentProcess().MainModule.FileName, "\"" + Path.Combine(dir, filename) + "\" " + key);
 
             var server = new NamedPipeServerStream(key);
             server.WaitForConnection();
