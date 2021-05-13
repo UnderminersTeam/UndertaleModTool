@@ -38,6 +38,8 @@ These scripts are self-explanatory from their names, but for clarification:
 - `ExportASM.csx`: Exports GML assembly.
 - `ExportAllCode.csx`: Exports GML code. It has a GMS2.3 counterpart, as code entry names can be too long.
 - `ExportMasks.csx`: For exporting sprite collision mask information.
+- `MergeImages.csx`: A script that can bulk merge images together for comparisons, from different folders.
+- `DumpSpecificCode.csx`: Used to export specific code entries should you have object names.
 
 ## Repacker scripts
 
@@ -45,6 +47,7 @@ These scripts are self-explanatory from their names, but for clarification:
 - `ImportASM.csx`: Imports GML assembly. It has a counterpart for GMS2.3 games, with longer code entry names.
 - `ImportGML.csx`: Imports GML code. It also has a 2.3 counterpart for the same reason.
 - `ImportMasks.csx`: For importing sprite collision mask information.
+- `ApplyBasicGraphicsMod.csx`: Imports graphics without a repacker, by swapping the sprite in place on its texture sheet, as long as it's the same size.
 
 ## Technical scripts
 
@@ -60,6 +63,11 @@ Your mileage with these scripts may vary drastically. Most of them are for very 
 - `FindUnknownFunctions.csx`: Used to identify improperly-defined functions in a game, which lead to a game failing to boot.
 - `ExecutionOrder.csx`: When active, displays the order that object events execute in supported games, as well as interactions with "global.interact"
 - `Profiler.csx`: Based on the execution order script, but reworked to be a profiler and stack tracer, to identify freeze locations. Performs a lot of disk operations.
+- `ExportAndConvert_2_3_ASM.csx`: Hackily processes GMS2.3 assembly, attempting to get rid of some new function constructs when possible (making it easier to edit).
+- `ImportGraphics_Full_Repack.csx`: Also known as ImportGraphics_v2, this completely repacks all sprite data in texture sheets, thoroughly.
+- `TestExportAllCode.csx`: Records instances of entire tool crashes when decompiling code.
+- `TextInputTestWinForms.csx`: Self-explanatory test script, demonstrating text input in WPF.
+- `TextInputTestWPF.csx`: Similar to above.
 
 ## Credits
 

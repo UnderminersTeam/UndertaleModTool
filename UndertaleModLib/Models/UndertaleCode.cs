@@ -1011,7 +1011,7 @@ namespace UndertaleModLib.Models
             {
                 writer.Write(Length);
                 writer.Write((ushort)LocalsCount);
-                writer.Write(ArgumentsCount | (WeirdLocalFlag ? 0x8000 : 0));
+                writer.Write((ushort)(ArgumentsCount | (WeirdLocalFlag ? (ushort)0x8000 : 0)));
                 int BytecodeRelativeAddress = (int)_BytecodeAbsoluteAddress - (int)writer.Position;
                 writer.Write(BytecodeRelativeAddress);
                 writer.Write(Offset);
