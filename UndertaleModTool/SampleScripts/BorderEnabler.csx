@@ -43,7 +43,7 @@ Data.Functions.EnsureDefined("window_set_size", Data.Strings);
 Data.Code.ByName("gml_Object_obj_time_Create_0").AppendGML("window_set_size(960, 540);", Data);
 
 // Load border textures
-string bordersPath = new Uri(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase) + "\\SampleScripts\\Borders\\").LocalPath;
+string bordersPath = Path.Combine(Path.GetDirectoryName(ScriptPath), "Borders");
 
 Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, UndertaleEmbeddedTexture>();
 if (!Directory.Exists(bordersPath))
