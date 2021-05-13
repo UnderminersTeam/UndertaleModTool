@@ -30,14 +30,23 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: win_x86
-        path: win_x86
+        path: |
+          win_x86
+          README.md
+          SCRIPTS.md
     - name: Archive win_x64
       uses: actions/upload-artifact@v2
       with:
         name: win_x64
-        path: win_x64
+        path: |
+          win_x64
+          README.md
+          SCRIPTS.md
     - name: Archive win_arm
       uses: actions/upload-artifact@v2
       with:
         name: win_arm
-        path: win_arm
+        path: |
+          win_arm
+          README.md
+          SCRIPTS.md

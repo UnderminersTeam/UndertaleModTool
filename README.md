@@ -40,7 +40,7 @@ Included are some test scripts. They are, but not limited to:
   * DeltaMILK: Replaces every non-background sprite with the K.Round healing milk. Don't ask why.
   * TheWholeWorldRevolving: The world is spinning, spinning
   
-Additionally, included are some community-made scripts. For more information, consult the SCRIPTS.md file.
+Additionally, included are some community-made scripts. For more information, consult the [SCRIPTS.md](https://github.com/krzys-h/UndertaleModTool/blob/master/SCRIPTS.md) file.
 
 ### Bug reports, contributing
 All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is a current list of stuff that needs to be worked on:
@@ -57,7 +57,8 @@ In order to compile UndertaleModTool yourself, the following dependencies are ne
 * Any recent version of Visual Studio
 
 After that, you can just open the `UndertaleModTool.sln` file in Visual Studio, Select `UndertaleModTool` as the project to build, and then compile.  
-Alternatively, you can also compile via command line, like so: `dotnet publish UndertaleModTool -p:PublishSingleFile=true -c release -r win-x86`
+Alternatively, you can also compile via command line, like so: `dotnet publish UndertaleModTool --no-self-contained -p:PublishSingleFile=true -c release -r win-x86`
+You can adjust win-x86 to other RIDs, such as win-x64 or win-arm.
 
 ### data.win file format
 Interested in the file and instruction format research I've done while working on this? Check out these:

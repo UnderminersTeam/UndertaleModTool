@@ -30,7 +30,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Update="About_Profile_Mode.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="CommunityScripts\BorderEnablerv1_11.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -2948,11 +2948,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="SampleScripts\Borders\bg_border_casino.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="SCRIPTS.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
