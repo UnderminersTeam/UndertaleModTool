@@ -26,27 +26,26 @@ jobs:
       run: dotnet publish UndertaleModTool -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true --output win_x64
     - name: Publish Windows ARM
       run: dotnet publish UndertaleModTool -c Release -r win-arm --self-contained false -p:PublishSingleFile=true --output win_arm
+    - name: Copy external files
+      run: |
+        copy /v /y README.md win_x86/README.md
+        copy /v /y README.md win_x64/README.md
+        copy /v /y README.md win_arm/README.md
+        copy /v /y SCRIPTS.md win_x86/SCRIPTS.md
+        copy /v /y SCRIPTS.md win_x64/SCRIPTS.md
+        copy /v /y SCRIPTS.md win_arm/SCRIPTS.md
     - name: Archive win_x86
       uses: actions/upload-artifact@v2
       with:
         name: win_x86
-        path: |
-          win_x86/**
-          README.md
-          SCRIPTS.md
+        path: win_x86
     - name: Archive win_x64
       uses: actions/upload-artifact@v2
       with:
         name: win_x64
-        path: |
-          win_x64/**
-          README.md
-          SCRIPTS.md
+        path: win_x64
     - name: Archive win_arm
       uses: actions/upload-artifact@v2
       with:
         name: win_arm
-        path: |
-          win_arm/**
-          README.md
-          SCRIPTS.md
+        path: win_arm
