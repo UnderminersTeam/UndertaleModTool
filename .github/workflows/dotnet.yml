@@ -23,4 +23,23 @@ jobs:
     - name: Build
       run: dotnet build UndertaleModTool --no-restore
     - name: Publish Windows x86
-      run: dotnet publish UndertaleModTool -c Release -r win-x86 --self-contained false -p:PublishSingleFile=true --output publish_win_x86
+      run: dotnet publish UndertaleModTool -c Release -r win-x86 --self-contained false -p:PublishSingleFile=true --output win_x86
+    - name: Publish Windows x64
+      run: dotnet publish UndertaleModTool -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true --output win_x64
+    - name: Publish Windows ARM
+      run: dotnet publish UndertaleModTool -c Release -r win-arm --self-contained false -p:PublishSingleFile=true --output win_arm
+    - name: Archive win_x86
+      uses: actions/upload-artifact@v2
+      with:
+        name: win_x86
+        path: win_x86
+    - name: Archive win_x64
+      uses: actions/upload-artifact@v2
+      with:
+        name: win_x64
+        path: win_x64
+    - name: Archive win_arm
+      uses: actions/upload-artifact@v2
+      with:
+        name: win_arm
+        path: win_arm
