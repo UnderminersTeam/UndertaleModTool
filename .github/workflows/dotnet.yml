@@ -21,6 +21,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build UndertaleModTool --no-restore
     - name: Publish Windows x86
       run: dotnet publish UndertaleModTool -c Release -r win-x86 --self-contained false -p:PublishSingleFile=true --output publish_win_x86
