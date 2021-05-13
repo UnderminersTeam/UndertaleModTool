@@ -29,6 +29,7 @@ Included are some test scripts. They are, but not limited to:
   * GoToRoom: Replaces the debug mode functionality of the F3 button with a dialog that lets you jump to any room by ID
   * ShowRoomName: Displays the current room name and ID on screen in debug mode
   * Search: Simple search for text in decompiled code entries
+  * Scripts to batch import and export various types of asset files.
 * Undertale only:
   * BorderEnabler: lets you import the PlayStation exclusive borders into the PC version and patches all version checks so that they display properly
   * testing: nothing important, just displays random text on the main menu - the first script I ever made
