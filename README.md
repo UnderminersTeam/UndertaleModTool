@@ -52,7 +52,7 @@ All contributions are welcome! If you find a bug, a data file that does not load
 
 ### Compilation Instructions
 In order to compile UndertaleModTool yourself, the following dependencies are needed:
-* Windows (Due to WPF being used, this won't work on any other OS)
+* Windows (Due to WPF being used currently, this won't work on any other OS)
 * .NET Core 5 SDK
 * Any recent version of Visual Studio
 
