@@ -35,21 +35,21 @@ namespace UndertaleModLib.Decompiler
 
         // TODO: Improve the error messages
 
-        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars = null, UndertaleData data = null, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null)
+        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars = null, UndertaleData data = null)
         {
             string label;
-            UndertaleInstruction instr = AssembleOne(source, funcs, vars, strg, localvars, out label, data, lookOnStack);
+            UndertaleInstruction instr = AssembleOne(source, funcs, vars, strg, localvars, out label, data);
             if (label != null)
                 throw new Exception("Cannot use labels in this context");
             return instr;
         }
 
-        public static UndertaleInstruction AssembleOne(string source, UndertaleData data, Dictionary<string, UndertaleVariable> localvars = null, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null)
+        public static UndertaleInstruction AssembleOne(string source, UndertaleData data, Dictionary<string, UndertaleVariable> localvars = null)
         {
-            return AssembleOne(source, data.Functions, data.Variables, data.Strings, localvars, data, lookOnStack);
+            return AssembleOne(source, data.Functions, data.Variables, data.Strings, localvars, data);
         }
 
-        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars, out string label, UndertaleData data = null, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null)
+        public static UndertaleInstruction AssembleOne(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, Dictionary<string, UndertaleVariable> localvars, out string label, UndertaleData data = null)
         {
             label = null;
             string line = source;
@@ -114,14 +114,16 @@ namespace UndertaleModLib.Decompiler
                     }
                     else
                     {
-                        if (line == "[drop]")
+                        if (line == "<drop>")
                         {
                             instr.JumpOffsetPopenvExitMagic = true;
                             if (data?.GeneralInfo?.BytecodeVersion <= 14)
                                 instr.JumpOffset = -1048576; // I really don't know at this point. Magic for little endian 00 00 F0
                         }
+                        else if (line[0] == '[' && line[^1] == ']')
+                            label = line.Substring(1, line.Length - 2);
                         else
-                            label = line;
+                            throw new Exception("Unknown goto target");
                     }
                     line = "";
                     break;
@@ -136,7 +138,7 @@ namespace UndertaleModLib.Decompiler
                     else
                     {
                         UndertaleInstruction.InstanceType inst = instr.TypeInst;
-                        instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, instr, data, lookOnStack);
+                        instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, instr, data);
                         instr.TypeInst = inst;
                     }
                     line = "";
@@ -176,7 +178,7 @@ namespace UndertaleModLib.Decompiler
                             break;
                         case UndertaleInstruction.DataType.Variable:
                             UndertaleInstruction.InstanceType inst2 = instr.TypeInst;
-                            instr.Value = ParseVariableReference(line, vars, localvars, ref inst2, instr, data, lookOnStack);
+                            instr.Value = ParseVariableReference(line, vars, localvars, ref inst2, instr, data);
                             instr.TypeInst = inst2;
                             break;
                         case UndertaleInstruction.DataType.String:
@@ -236,7 +238,7 @@ namespace UndertaleModLib.Decompiler
 
         public static List<UndertaleInstruction> Assemble(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, UndertaleData data = null)
         {
-            var lines = source.Split('\n');
+            var lines = source.Replace("\r", "").Split('\n');
             uint addr = 0;
             Dictionary<string, uint> labels = new Dictionary<string, uint>();
             Dictionary<UndertaleInstruction, string> labelTargets = new Dictionary<UndertaleInstruction, string>();
@@ -245,39 +247,48 @@ namespace UndertaleModLib.Decompiler
             foreach (var fullline in lines)
             {
                 string line = fullline;
-                if (line.Length > 0 && line[0] == ';')
+                if (line.Length == 0)
                     continue;
-                string label = null;
-                int labelEnd = line.IndexOf(':');
 
-                if (labelEnd > 0)
+                if (line[0] == ';')
+                    continue;
+                if (line[0] == '>')
                 {
-                    bool isLabel = true;
-                    for (var i = 0; i < labelEnd; i++)
+                    // Code entry inside of this one
+                    line = line.Substring(2, line.Length - 2).Trim();
+                    int space = line.IndexOf(' ');
+                    string codeName = line.Substring(0, space);
+                    var code = data.Code.ByName(codeName);
+                    if (code == null)
+                        throw new Exception($"Failed to find code entry with name \"{codeName}\".");
+                    string info = line.Substring(space + 1);
+
+                    Match match = Regex.Match(info, @"^\(locals=(.*)\,\s*argc=(.*)\)$");
+                    if (!match.Success)
+                        throw new Exception("Sub-code entry format error");
+                    code.LocalsCount = ushort.Parse(match.Groups[1].Value);
+                    code.ArgumentsCount = ushort.Parse(match.Groups[2].Value);
+                    code.Offset = addr * 4;
+                    continue;
+                }
+                if (line[0] == ':' && line.Length >= 3)
+                {
+                    if (line[1] == '[')
                     {
-                        if (!Char.IsLetterOrDigit(line[i]) && line[i] != '_')
+                        string label = line.Substring(2, line.IndexOf(']') - 2);
+
+                        if (!string.IsNullOrEmpty(label))
                         {
-                            isLabel = false;
-                            break;
+                            if (labels.ContainsKey(label))
+                                throw new Exception("Duplicate label: " + label);
+                            labels.Add(label, addr);
                         }
-                    }
 
-                    if (isLabel)
-                    {
-                        label = line.Substring(0, labelEnd).Trim();
-                        line = line.Substring(labelEnd + 1);
-                    }
-                }
-                line = line.Trim();
-                if (String.IsNullOrEmpty(line))
-                {
-                    if (!String.IsNullOrEmpty(label))
-                        throw new Exception("Label with no instruction");
-                    else
                         continue;
+                    }
                 }
 
-                if (line.StartsWith("."))
+                if (line[0] == '.')
                 {
                     // Assembler directive
                     // TODO: Does not update the CodeLocals block yet!!
@@ -301,54 +312,16 @@ namespace UndertaleModLib.Decompiler
                     continue;
                 }
 
-                // BACKWARDS COMPATIBILITY: Really ugly hack for compiling array variable references
-                // See https://github.com/krzys-h/UndertaleModTool/issues/27#issuecomment-426637438
-                Func<int, UndertaleInstruction.InstanceType?> lookOnStack = (int amt) => {
-                    int stackCounter = amt;
-                    foreach (var i in instructions.Cast<UndertaleInstruction>().Reverse())
-                    {
-                        if (stackCounter == 1) // This needs to be here because otherwise sth[aaa].another[bbb] doesn't work (damn this workaround is getting crazy, CHAOS, CHAOS)
-                        {
-                            if (i.Kind == UndertaleInstruction.Opcode.Push)
-                                return UndertaleInstruction.InstanceType.Self; // This is probably an instance variable then (e.g. pushi.e 1337; push.v self.someinstance; conv.v.i; pushi.e 0; pop.v.v [array]alarm)
-                            else if (i.Kind == UndertaleInstruction.Opcode.PushLoc)
-                                return UndertaleInstruction.InstanceType.Local;
-                        }
-                        //int old = stackCounter;
-                        stackCounter -= UndertaleInstruction.CalculateStackDiff(i);
-                        //Debug.WriteLine(i.ToString() + "; " + old + " -> " + stackCounter);
-                        if (stackCounter == 0)
-                        {
-                            if (i.Kind == UndertaleInstruction.Opcode.PushI)
-                                return (UndertaleInstruction.InstanceType?)(short)i.Value;
-                            else if (i.Kind == UndertaleInstruction.Opcode.Dup)
-                                stackCounter += 1 + i.Extra; // Keep looking for the value that was duplicated
-                            else
-                                throw new Exception("My workaround still sucks");
-                        }
-                    }
-                    return null;
-                };
-
                 string labelTgt;
-                UndertaleInstruction instr = AssembleOne(line, funcs, vars, strg, localvars, out labelTgt, data, lookOnStack);
+                UndertaleInstruction instr = AssembleOne(line, funcs, vars, strg, localvars, out labelTgt, data);
                 instr.Address = addr;
                 if (labelTgt != null)
                     labelTargets.Add(instr, labelTgt);
 
-                if (!String.IsNullOrEmpty(label))
-                {
-                    if (labels.ContainsKey(label))
-                        throw new Exception("Duplicate label: " + label);
-                    labels.Add(label, instr.Address);
-                }
                 instructions.Add(instr);
 
                 addr += instr.CalculateInstructionSize();
             }
-            if (labels.ContainsKey("func_end"))
-                throw new Exception("func_end is a reserved label name");
-            labels.Add("func_end", addr);
             foreach (var pair in labelTargets)
             {
                 pair.Key.JumpOffset = (int)labels[pair.Value] - (int)pair.Key.Address;
@@ -392,7 +365,7 @@ namespace UndertaleModLib.Decompiler
             return new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>() { Resource = strobj, CachedId = (int)id.Value };
         }
 
-        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance, UndertaleInstruction instr, UndertaleData data = null, Func<int, UndertaleInstruction.InstanceType?> lookOnStack = null)
+        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance, UndertaleInstruction instr, UndertaleData data = null)
         {
             string str = line;
             UndertaleInstruction.VariableType type = UndertaleInstruction.VariableType.Normal;
@@ -454,16 +427,10 @@ namespace UndertaleModLib.Decompiler
                         realinstance = (UndertaleInstruction.InstanceType)Enum.Parse(typeof(UndertaleInstruction.InstanceType), instancestr, true);
                     } else
                     {
-                        // BACKWARDS COMPATIBILITY
-
-                        // for arrays, the type is on the stack which totally breaks things
-                        // This is an ugly hack to handle that
-                        // see https://github.com/krzys-h/UndertaleModTool/issues/27#issuecomment-426637438
-                        if (type == UndertaleInstruction.VariableType.Array && lookOnStack != null)
+                        if (type == UndertaleInstruction.VariableType.Array || 
+                            type == UndertaleInstruction.VariableType.StackTop)
                         {
-                            var instTypeOnStack = lookOnStack(instr.Kind == UndertaleInstruction.Opcode.Pop && instr.Type1 == UndertaleInstruction.DataType.Int32 ? 3 : 2);
-                            if (instTypeOnStack.HasValue)
-                                realinstance = instTypeOnStack.Value;
+                            throw new Exception("Old instruction format is incompatible (missing instance type in array or stacktop)");
                         }
 
                         if (realinstance >= 0)

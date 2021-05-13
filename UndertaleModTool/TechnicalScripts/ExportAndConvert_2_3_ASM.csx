@@ -36,6 +36,16 @@ string GetFolder(string path)
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
 
+string ReplaceFirst(string text, string search, string replace)
+{
+    int pos = text.IndexOf(search);
+    if (pos < 0)
+    {
+        return text;
+    }
+    return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
+}
+
 
 void DumpCode()
 {
@@ -76,7 +86,7 @@ void DumpCode()
             Data.CodeLocals.Add(locals);
         }
         string path = Path.Combine(codeFolder, code_orig.Name.Content + ".asm");
-        if (!(code_orig.DuplicateEntry))
+        if (!code_orig.DuplicateEntry)
         {
             string x = "";
             try 
@@ -84,17 +94,19 @@ void DumpCode()
                 string disasm_code = code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig));
                 //ScriptMessage(code_orig.Name.Content);
                 //ScriptMessage("1 " + disasm_code);
-                int ix = disasm_code.IndexOf("00000: b ");
+                int ix = -1;
+                if (code_orig.Instructions.Count > 0 && code_orig.Instructions[0].Kind == UndertaleInstruction.Opcode.B)
+                    ix = disasm_code.IndexOf("b [");
                 string code = "";
-                if (ix != -1) 
+                if (ix != -1)
                 {
-                    code = disasm_code.Substring(ix + 9, 5);
+                    code = disasm_code.Substring(ix + 2, disasm_code.IndexOf(']', ix) - (ix + 1));
                     //ScriptMessage("2 " + code);
                     //Console.WriteLine(code);
-                    string toBeSearched2 = disasm_code.Replace("00000: b " + code, "");
+                    string toBeSearched2 = ReplaceFirst(disasm_code, "b " + code, "");
                     //ScriptMessage("3 " + toBeSearched2);
                     //Console.WriteLine(toBeSearched2);
-                    ix = toBeSearched2.IndexOf(code + ": ");
+                    ix = toBeSearched2.IndexOf(":" + code);
                     x = "";
                     if (ix != -1) 
                     {

@@ -4,17 +4,28 @@
     <Color name="String" foreground="Yellow" />
 	<Color name="Identifier" foreground="#C1C1C1" />
 	<Color name="AltIdentifier" foreground="#FFF899" />
+	<Color name="BranchOpcode" foreground="#80A8FF" />
+	<Color name="Opcode" foreground="#DADADA" />
 	<Color name="Function" foreground="#FFB871" fontWeight="bold" />
 	<Color name="Number" foreground="#FF6464" />
+	<Color name="Label" foreground="#FF8D0A" />
 
     <!-- This is the main ruleset. -->
     <RuleSet>
 		<Rule color="Comment">
-			;.*|(^|\n)\..*
+			^;.*|(^|\n)\..*
+		</Rule>
+
+		<Rule color="Label">
+			^(\:|\>).*|(^|\n)\..*
 		</Rule>
 
         <Rule color="String">
 			\"(\\.|[^"\\])*\"@\d+
+		</Rule>
+		
+		<Rule color="Label">
+			\[[0-9a-zA-Z_\-]+\]
 		</Rule>
 
 		<!-- Some macros -->
@@ -40,6 +51,8 @@
 			\[(?:array|stacktop)\]
 			|
 			argc\=\d+
+			|
+			&lt;drop&gt;
 		</Rule>
 
         <!-- Digits -->
@@ -62,6 +75,14 @@
 		<!-- Function calls -->
 		<Rule color="Function">
 			[_a-zA-Z][_a-zA-Z0-9]*(?=\()
+		</Rule>
+
+		<!-- Opcodes -->
+		<Rule color="BranchOpcode">
+			^(bf|bt|b|exit|ret|pushenv|popenv)
+		</Rule>
+		<Rule color="Opcode">
+			^[a-z]+(?=\.|\s)
 		</Rule>
 
 		<!-- Normal identifiers -->
