@@ -51,6 +51,8 @@
 			\[(?:array|stacktop)\]
 			|
 			argc\=\d+
+			|
+			&lt;drop&gt;
 		</Rule>
 
         <!-- Digits -->
