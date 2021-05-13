@@ -68,7 +68,7 @@ namespace UndertaleModTool
         public byte[] MD5CurrentlyLoaded;
         public static string AppDataFolder => Settings.AppDataFolder;
         public static string ProfilesFolder = Path.Combine(Settings.AppDataFolder, "Profiles");
-        public static string CorrectionsFolder = Path.Combine(AppContext.BaseDirectory, "Corrections");
+        public static string CorrectionsFolder = Path.Combine(Program.GetExecutableDirectory(), "Corrections");
         public string ProfileHash = "Unknown";
         public bool CrashedWhileEditing = false;
 
@@ -829,25 +829,12 @@ namespace UndertaleModTool
                 object result;
                 try
                 {
-                    using (var loader = new InteractiveAssemblyLoader())
-                    {
-                        loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
-                        loader.RegisterDependency(GetType().GetTypeInfo().Assembly);
-                        loader.RegisterDependency(typeof(JsonConvert).GetTypeInfo().Assembly);
+                    if (!scriptSetupTask.IsCompleted)
+                        await scriptSetupTask;
 
-                        var script = CSharpScript.Create<object>(CommandBox.Text, ScriptOptions.Default
-                            .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "UndertaleModLib.Compiler")
-                            .AddImports("UndertaleModTool", "System", "System.IO", "System.Collections.Generic", "System.Text.RegularExpressions")
-                            .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly)
-                            .AddReferences(GetType().GetTypeInfo().Assembly)
-                            .AddReferences(typeof(JsonConvert).GetTypeInfo().Assembly)
-                            .AddReferences(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly),
-                            typeof(IScriptInterface), loader);
+                    ScriptPath = null;
 
-                        ScriptPath = null;
-
-                        result = (await script.RunAsync(this)).ReturnValue;
-                    }
+                    result = await CSharpScript.EvaluateAsync(CommandBox.Text, scriptOptions, this, typeof(IScriptInterface));
                 }
                 catch (CompilationErrorException exc)
                 {
@@ -1007,7 +994,7 @@ namespace UndertaleModTool
             item.Items.Clear();
             try
             {
-                var appDir = AppContext.BaseDirectory;
+                var appDir = Program.GetExecutableDirectory();
                 foreach (var path in Directory.EnumerateFiles(Path.Combine(appDir, folderName)))
                 {
                     var filename = Path.GetFileName(path);
