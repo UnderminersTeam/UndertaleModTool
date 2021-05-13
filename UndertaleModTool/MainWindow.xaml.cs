@@ -1007,7 +1007,7 @@ namespace UndertaleModTool
             item.Items.Clear();
             try
             {
-                var appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                var appDir = AppContext.BaseDirectory;
                 foreach (var path in Directory.EnumerateFiles(Path.Combine(appDir, folderName)))
                 {
                     var filename = Path.GetFileName(path);
