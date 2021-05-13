@@ -2,7 +2,7 @@
 *(seeing such an amazing tool...<br/>
 ... fills you with DETERMINATION.)*
 
-heya. i heard you like digging deep into Undertale data so i made a tool just for you! 
+Heya. I heard you like digging deep into Undertale data so I made a tool just for you! 
 
 **Downloads** are **HERE**: :point_right::point_right::point_right: https://github.com/krzys-h/UndertaleModTool/releases :point_left::point_left::point_left:
 
@@ -11,7 +11,7 @@ heya. i heard you like digging deep into Undertale data so i made a tool just fo
 ![flowey](flowey.png)
 
 ### Main features
-* Can read every single byte from the data file for lastest version of Undertale, Deltarune, and probably other GameMaker: Studio games (GM:S 1.4 and GMS2 bytecode versions 14 to 17 are currently supported) for every platform and then recreate a byte-for-byte exact copy from the decoded data.
+* Can read every single byte from the data file for lastest version of Undertale, Deltarune, and most other GameMaker: Studio games (GM:S 1.4 and GMS2 bytecode versions 13 to 17 are currently supported) for every platform and then recreate a byte-for-byte exact copy from the decoded data.
 * Properly handles all of the pointers in the file so that if you add/remove stuff, make things longer/shorter, move them around etc. the file format won't break.
 * An editor which lets you change (almost) every single value, including unknown ones.
 * Includes a (very) simple room/level editor.
@@ -22,7 +22,7 @@ heya. i heard you like digging deep into Undertale data so i made a tool just fo
 * Can generate an .yydebug file for the GM:S debugger so that you can edit variables live! (see [here](https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-Game-Maker:-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions#yydebug-file-format))
 
 ### Included scripts
-Included are some test scripts. They are:
+Included are some test scripts. They are, but not limited to:
 * Universal:
   * EnableDebug: does just that, makes the global variable 'debug' be enabled at game start. If you don't know about Undertale's debug mode, check out https://tcrf.net/Undertale/Debug_Mode
   * DebugToggler: similar to the above, but instead toggles the debug mode on and off with F1
@@ -39,13 +39,22 @@ Included are some test scripts. They are:
   * DeltaMILK: Replaces every non-background sprite with the K.Round healing milk. Don't ask why.
   * TheWholeWorldRevolving: The world is spinning, spinning
   
-Additionally, included are some community-made scripts, "experimental scripts." For more information, consult the README file inside that directory.
+Additionally, included are some community-made scripts. For more information, consult the SCRIPTS.md file.
 
 ### Bug reports, contributing
 All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is a current list of stuff that needs to be worked on:
 * Add missing chunk editors for Timelines and Extensions
 * Add support for YYC games - you won't be able to edit code, but everything else should technically work
 * Add support for latest versions of GameMaker (notably, 2.3) - decompiler cannot function in most cases currently
+
+### Compilation Instructions
+In order to compile UndertaleModTool yourself, the following dependencies are needed:
+* Windows (Due to WPF being used, this won't work on any other OS)
+* .NET Core 5 SDK
+* Any recent version of Visual Studio
+
+After that, you can just open the `UndertaleModTool.sln` file in Visual Studio, Select `UndertaleModTool` as the project to build, and then compile.  
+Alternatively, you can also compile via command line, like so: `dotnet publish UndertaleModTool -p:PublishSingleFile=true -c release -r win-x86`
 
 ### data.win file format
 Interested in the file and instruction format research I've done while working on this? Check out these:
