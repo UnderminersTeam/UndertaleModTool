@@ -29,7 +29,7 @@ namespace UndertaleModTool
             }
             catch (Exception e)
             {
-                File.WriteAllText("crash.txt", e.ToString());
+                File.WriteAllText(Path.Combine(GetExecutableDirectory(), "crash.txt"), e.ToString());
                 MessageBox.Show(e.ToString());
             }
         }
