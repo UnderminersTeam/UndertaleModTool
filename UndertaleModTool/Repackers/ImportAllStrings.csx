@@ -23,16 +23,27 @@ string line = "";
 using (StreamReader reader = new StreamReader(importFolder + "/strings.txt"))
 {
     while ((line = reader.ReadLine()) != null)
+    {
         file_length += 1;
+    }
 }
-if (file_length < Data.Strings.Count)
+
+int validStringsCount = 0;
+foreach (var str in Data.Strings)
 {
-    ScriptError("Unexpected end of file at line: " + file_length.ToString() + ". Expected file length was: " + Data.Strings.Count.ToString() + ". No changes have been made.", "Error");
+    if (str.Content.Contains("\n") || str.Content.Contains("\r"))
+        continue;
+    validStringsCount += 1;
+}
+
+if (file_length < validStringsCount)
+{
+    ScriptError("Unexpected end of file at line: " + file_length.ToString() + ". Expected file length was: " + validStringsCount.ToString() + ". No changes have been made.", "Error");
     return;
 }
-else if (file_length > Data.Strings.Count)
+else if (file_length > validStringsCount)
 {
-    ScriptError("Line count exceeds expected count. Current count: " + file_length.ToString() + ". Expected count: " + Data.Strings.Count.ToString() + ". No changes have been made.", "Error");
+    ScriptError("Line count exceeds expected count. Current count: " + file_length.ToString() + ". Expected count: " + validStringsCount.ToString() + ". No changes have been made.", "Error");
     return;
 }
 
@@ -46,7 +57,7 @@ using (StreamReader reader = new StreamReader(importFolder + "/strings.txt"))
             continue;
         if (!((line = reader.ReadLine()) != null))
         {
-            ScriptError("Unexpected end of file at line: " + line_no.ToString() + ". Expected file length was: " + Data.Strings.Count.ToString() + ". No changes have been made.", "Error");
+            ScriptError("Unexpected end of file at line: " + line_no.ToString() + ". Expected file length was: " + validStringsCount.ToString() + ". No changes have been made.", "Error");
             return;
         }
         line_no += 1;
@@ -65,7 +76,7 @@ using (StreamReader reader = new StreamReader(importFolder + "/strings.txt"))
             str.Content = line;
         else
         {
-            ScriptError("Unexpected end of file at line: " + line_no.ToString() + ". Expected file length was: " + Data.Strings.Count.ToString() + ". All lines within the file have been applied. Please check for errors.", "Error");
+            ScriptError("Unexpected end of file at line: " + line_no.ToString() + ". Expected file length was: " + validStringsCount.ToString() + ". All lines within the file have been applied. Please check for errors.", "Error");
             return;
         }
         line_no += 1;
