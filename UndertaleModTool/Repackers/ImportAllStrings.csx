@@ -7,6 +7,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
+if (Data.ToolInfo.ProfileMode)
+{
+    ScriptMessage("This script will not modify your existing edited GML code registered in your profile. Please use GML editing for text editing, or a script like FindAndReplace, for editing strings within these code entries.");
+}
+else
+{
+    if (!(ScriptQuestion("This script will recompile all code entries in your profile (if they exist) to the default decompiled output. Continue?")))
+        return;
+    foreach (UndertaleCode c in Data.Code)
+        NukeProfileGML(c.Name.Content);
+}
+
 string importFolder = PromptChooseDirectory("Import from where");
 if (importFolder == null)
     throw new System.Exception("The import folder was not set.");
@@ -82,3 +94,5 @@ using (StreamReader reader = new StreamReader(importFolder + "/strings.txt"))
         line_no += 1;
     }
 }
+
+ReapplyProfileCode();

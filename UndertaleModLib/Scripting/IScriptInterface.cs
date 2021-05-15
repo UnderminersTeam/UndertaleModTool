@@ -28,6 +28,7 @@ namespace UndertaleModLib.Scripting
         void ScriptError(string error, string title = "Error", bool SetConsoleText = true);
         void ScriptOpenURL(string url);
         string LintAllScripts();
+        void ReapplyProfileCode();
         void NukeProfileGML(string codeName);
         string GetDecompiledText(string codeName);
         string GetDisassemblyText(string codeName);

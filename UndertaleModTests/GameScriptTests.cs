@@ -47,8 +47,12 @@ namespace UndertaleModTests
         public void UpdateCorrections(bool ImAnExpertBTW = false)
         {
         }
+        public void ReapplyProfileCode()
+        {
+        }
         public string LintAllScripts()
         {
+            return "Unimplemented";
         }
 
         public void ScriptMessage(string message)
