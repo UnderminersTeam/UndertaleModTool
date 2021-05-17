@@ -263,7 +263,7 @@ switch argument1
         if (global.inbattle == 0)
         {
             d = instance_create(x, y, obj_imageview)
-            d.sprite_index = scr_getsprite(864)
+            d.sprite_index = scr_getsprite(spr_punchcard)
             global.interact = 1
         }
         else
