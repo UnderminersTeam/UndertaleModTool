@@ -64,8 +64,8 @@ namespace UndertaleModTool
         private LoaderDialog scriptDialog;
 
         // Related to profile system and appdata
-        public byte[] MD5PreviouslyLoaded;
-        public byte[] MD5CurrentlyLoaded;
+        public byte[] MD5PreviouslyLoaded = new byte[15];
+        public byte[] MD5CurrentlyLoaded = new byte[15];
         public static string AppDataFolder => Settings.AppDataFolder;
         public static string ProfilesFolder = Path.Combine(Settings.AppDataFolder, "Profiles");
         public static string CorrectionsFolder = Path.Combine(Program.GetExecutableDirectory(), "Corrections");
