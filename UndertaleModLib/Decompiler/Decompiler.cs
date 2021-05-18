@@ -18,6 +18,7 @@ namespace UndertaleModLib.Decompiler
     {
         public UndertaleData Data;
         public UndertaleCode TargetCode;
+        public UndertaleGameObject Object;
 
         // Color dictionary for resolving.
         public static Dictionary<uint, string> ColorDictionary = new Dictionary<uint, string>
@@ -54,7 +55,11 @@ namespace UndertaleModLib.Decompiler
         public int TempVarId;
         public Dictionary<string, AssetIDType[]> scriptArgs = new Dictionary<string, AssetIDType[]>();
         public FunctionCall currentFunction;
+        public string TargetNameStripped = "";
+        public bool IsScript;
+
         private int _indentationLevel = 0;
+
         public int IndentationLevel
         {
             get { return _indentationLevel; }
@@ -96,6 +101,35 @@ namespace UndertaleModLib.Decompiler
             assetTypes.Clear();
             LocalVarDefines.Clear();
             currentFunction = null;
+
+            // Will this ever be null?
+            // Probably not unless someone made it null on purpose.
+            // Honestly that sounds like a them problem but might as well check anyway.
+            if(code.Name?.Content != null)
+            {
+                TargetNameStripped = AssetTypeResolver.StripPrefix(code.Name.Content);
+                IsScript = code.Name.Content.StartsWith("gml_Script_");
+            }
+            else
+            {
+                TargetNameStripped = "";
+                IsScript = false;
+            }
+
+            Object = null;
+
+            // TODO: This is expensive, move it somewhere else as a dictionary
+            // and have it update when events/objects are modified.
+            foreach(var obj in Data.GameObjects)
+                foreach(var event_list in obj.Events)
+                    foreach (var subevent in event_list)
+                        foreach (var ev in subevent.Actions)
+                            if (ev.CodeId == code)
+                            {
+                                Object = obj;
+                                goto LoopEnd;
+                            }
+            LoopEnd: return;
         }
 
         public TempVar NewTempVar()
@@ -137,7 +171,6 @@ namespace UndertaleModLib.Decompiler
         {
             public abstract string ToString(DecompileContext context);
             internal abstract AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType);
-
             public abstract Statement CleanStatement(DecompileContext context, BlockHLStatement block);
         }
 
@@ -368,6 +401,18 @@ namespace UndertaleModLib.Decompiler
                                 return key;
                         }
                         break;
+                    // Don't use this.
+                    // It will not recompile.
+                    case AssetIDType.Macro:
+                        throw new NotImplementedException();/*
+                        {
+                            var macros = ContextualAssetResolver.macros;
+                            var key = Value?.ToString();
+
+                            if (key != null & macros.ContainsKey(key))
+                                return macros[key];
+                        }
+                        break;*/
                 }
 
                 if (context.Data != null && AssetType != AssetIDType.Other)
@@ -378,6 +423,7 @@ namespace UndertaleModLib.Decompiler
                         case AssetIDType.Sprite:
                             assetList = (IList)context.Data.Sprites;
                             break;
+                        case AssetIDType.TileSet:
                         case AssetIDType.Background:
                             assetList = (IList)context.Data.Backgrounds;
                             break;
@@ -785,12 +831,11 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                string arg1;
+                string arg1, arg2;
                 if (Argument1 is ExpressionCompare)
                     arg1 = (Argument1 as ExpressionCompare).ToStringWithParen(context);
                 else
                     arg1 = Argument1.ToString(context);
-                string arg2;
                 if (Argument2 is ExpressionCompare)
                     arg2 = (Argument2 as ExpressionCompare).ToStringWithParen(context);
                 else
@@ -800,17 +845,7 @@ namespace UndertaleModLib.Decompiler
 
             public string ToStringWithParen(DecompileContext context)
             {
-                string arg1;
-                if (Argument1 is ExpressionCompare)
-                    arg1 = (Argument1 as ExpressionCompare).ToStringWithParen(context);
-                else
-                    arg1 = Argument1.ToString(context);
-                string arg2;
-                if (Argument2 is ExpressionCompare)
-                    arg2 = (Argument2 as ExpressionCompare).ToStringWithParen(context);
-                else
-                    arg2 = Argument2.ToString(context);
-                return String.Format("({0} {1} {2})", arg1, OperationToPrintableString(Opcode), arg2);
+                return "(" + ToString(context) + ")";
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
@@ -824,6 +859,19 @@ namespace UndertaleModLib.Decompiler
             {
                 // TODO: This should be probably able to go both ways...
                 Argument2.DoTypePropagation(context, Argument1.DoTypePropagation(context, suggestedType));
+
+                // Inequality comparisons against scripts don't really make sense?
+                if (Opcode != UndertaleInstruction.ComparisonType.EQ && Opcode != UndertaleInstruction.ComparisonType.NEQ)
+                {
+                    if (Argument1 is ExpressionConstant arg1)
+                        if (arg1.AssetType == AssetIDType.Script)
+                            arg1.AssetType = AssetIDType.Other;
+
+                    if (Argument2 is ExpressionConstant arg2)
+                        if (arg2.AssetType == AssetIDType.Script)
+                            arg2.AssetType = AssetIDType.Other;
+                }
+
                 return AssetIDType.Other;
             }
         }
@@ -959,7 +1007,12 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 if (Value != null)
+                {
+                    if (context.IsScript && AssetTypeResolver.return_types.ContainsKey(context.TargetNameStripped))
+                        Value.DoTypePropagation(context, AssetTypeResolver.return_types[context.TargetNameStripped]);
+
                     return "return " + Value.ToString(context) + ";";
+                }
                 else
                     return (context.isGameMaker2 ? "return;" : "exit");
             }
@@ -1017,7 +1070,7 @@ namespace UndertaleModLib.Decompiler
                     {
                         ExpressionConstant c = (two.Argument2 as ExpressionConstant);
                         if (c.IsPushE && ExpressionConstant.ConvertToInt(c.Value) == 1)
-                            return String.Format("{0}" + ((two.Opcode == UndertaleInstruction.Opcode.Add) ? "++" : "--"), varName);
+                            return varName + (two.Opcode == UndertaleInstruction.Opcode.Add ? "++" : "--");
                     }
 
                     // Not ++ or --, could potentially be an operation equal
@@ -1354,7 +1407,7 @@ namespace UndertaleModLib.Decompiler
                 AssetIDType current = context.assetTypes.ContainsKey(Var) ? context.assetTypes[Var] : AssetIDType.Other;
                 if (current == AssetIDType.Other && suggestedType != AssetIDType.Other)
                     current = suggestedType;
-                AssetIDType builtinSuggest = AssetTypeResolver.AnnotateTypeForVariable(Var.Name.Content);
+                AssetIDType builtinSuggest = AssetTypeResolver.AnnotateTypeForVariable(context, Var.Name.Content);
                 if (builtinSuggest != AssetIDType.Other)
                     current = builtinSuggest;
 

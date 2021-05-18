@@ -10,16 +10,30 @@ namespace UndertaleModLib.Decompiler
         // Is there a better way to do this?
         // Probably
         public static Dictionary<string, Func<DecompileContext, Decompiler.FunctionCall, int, Decompiler.ExpressionConstant, string>> resolvers;
+        public static Dictionary<string, Func<DecompileContext, string, object, string>> variable_resolvers;
 
         internal static Dictionary<Enum_EventType, Dictionary<int, string>> event_subtypes;
-        internal static Dictionary<int, string> blend_modes;
+        internal static Dictionary<int, string> blend_modes, gamepad_controls;
+        internal static Dictionary<string, string> macros;
 
         public static void Initialize(UndertaleData data)
         {
             // TODO: make this nicer by not hacking
             // into the builtin list
             event_subtypes = new Dictionary<Enum_EventType, Dictionary<int, string>>();
+            gamepad_controls = new Dictionary<int, string>();
             blend_modes = new Dictionary<int, string>();
+            macros = new Dictionary<string, string>();
+
+            // Don't use
+            if (data.GeneralInfo.BytecodeVersion <= 14) 
+            {
+                foreach (var constant in data.Options.Constants)
+                {
+                    if (!constant.Name.Content.StartsWith("@@"))
+                        macros[constant.Value.Content] = constant.Name.Content;
+                }
+            }
 
             var builtins = data.BuiltinList;
             var constants = builtins.Constants;
@@ -68,12 +82,15 @@ namespace UndertaleModLib.Decompiler
                 return event_subtypes[type];
             };
 
+            // This is going to get bulky really quickly
             foreach (string constant in constants.Keys)
             {
                 if (constant.StartsWith("vk_"))
                     GetDictForEventType(Enum_EventType.ev_keyboard)[(int)constants[constant]] = constant;
                 else if (constant.StartsWith("bm_") && !constant.Contains("colour"))
                     blend_modes[(int)constants[constant]] = constant;
+                else if (constant.StartsWith("gp_"))
+                    gamepad_controls[(int)constants[constant]] = constant;
                 else if (constant.StartsWith("ev_") && !Enum.IsDefined(typeof(Enum_EventType), constant) && !constant.Contains("joystick"))
                     GetDictForEventType(GetEventTypeFromSubtype(constant))[(int)constants[constant]] = constant;
             }
@@ -133,6 +150,17 @@ namespace UndertaleModLib.Decompiler
 
                 return null;
             };
+
+            // TODO: Finish this
+            variable_resolvers = new Dictionary<string, Func<DecompileContext, string, object, string>>()
+            {
+                { "scr_getbuttonsprite", (context, varname, value) =>
+                    {
+                        return null;
+                    }
+                }
+            };
+
             resolvers = new Dictionary<string, Func<DecompileContext, Decompiler.FunctionCall, int, Decompiler.ExpressionConstant, string>>()
             {
                 // TODO: __background* compatibility scripts
