@@ -50,12 +50,12 @@ foreach (var str in Data.Strings)
 
 if (file_length < validStringsCount)
 {
-    ScriptError("Unexpected end of file at line: " + file_length.ToString() + ". Expected file length was: " + validStringsCount.ToString() + ". No changes have been made.", "Error");
+    ScriptError("ERROR 0: Unexpected end of file at line: " + file_length.ToString() + ". Expected file length was: " + validStringsCount.ToString() + ". No changes have been made.", "Error");
     return;
 }
 else if (file_length > validStringsCount)
 {
-    ScriptError("Line count exceeds expected count. Current count: " + file_length.ToString() + ". Expected count: " + validStringsCount.ToString() + ". No changes have been made.", "Error");
+    ScriptError("ERROR 1: Line count exceeds expected count. Current count: " + file_length.ToString() + ". Expected count: " + validStringsCount.ToString() + ". No changes have been made.", "Error");
     return;
 }
 
@@ -69,7 +69,7 @@ using (StreamReader reader = new StreamReader(importFolder + "/strings.txt"))
             continue;
         if (!((line = reader.ReadLine()) != null))
         {
-            ScriptError("Unexpected end of file at line: " + line_no.ToString() + ". Expected file length was: " + validStringsCount.ToString() + ". No changes have been made.", "Error");
+            ScriptError("ERROR 2: Unexpected end of file at line: " + line_no.ToString() + ". Expected file length was: " + validStringsCount.ToString() + ". No changes have been made.", "Error");
             return;
         }
         line_no += 1;
@@ -88,7 +88,7 @@ using (StreamReader reader = new StreamReader(importFolder + "/strings.txt"))
             str.Content = line;
         else
         {
-            ScriptError("Unexpected end of file at line: " + line_no.ToString() + ". Expected file length was: " + validStringsCount.ToString() + ". All lines within the file have been applied. Please check for errors.", "Error");
+            ScriptError("ERROR 3: Unexpected end of file at line: " + line_no.ToString() + ". Expected file length was: " + validStringsCount.ToString() + ". All lines within the file have been applied. Please check for errors.", "Error");
             return;
         }
         line_no += 1;
