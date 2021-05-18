@@ -1139,12 +1139,13 @@ namespace UndertaleModLib.Decompiler
             // Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
-                // gml_Object_obj_vulkinbody_UNDERTALE_Create_0
+                // gml_Object_obj_vulkinbody_Create_0
                 // Seems to be used a lot as a regular value between the values of around 0-20. 
                 builtin_vars.Add("face", AssetIDType.Sprite);
                 builtin_vars.Add("myfont", AssetIDType.Font);
                 // Resolution of script arguments works now, make sure to look at other scripts for similar possible corrections
                 builtin_funcs["scr_bouncer"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other};
+                builtin_funcs["sprite_create_from_screen_x"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other};
                 builtin_vars.Add("currentroom", AssetIDType.Room);
                 builtin_vars.Add("dsprite", AssetIDType.Sprite);
                 builtin_vars.Add("usprite", AssetIDType.Sprite);

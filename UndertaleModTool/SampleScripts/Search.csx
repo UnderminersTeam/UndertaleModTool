@@ -14,9 +14,15 @@ UpdateProgress();
 bool case_sensitive = ScriptQuestion("Case sensitive?");
 bool regex_check = ScriptQuestion("Regex search?");
 String keyword = SimpleTextInput("Enter your search", "Search box below", "", false);
+if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
+{
+    ScriptError("Search cannot be empty or null.");
+    return;
+}
 
 await DumpCode();
 HideProgressBar();
+//GC.Collect();
 string results_message = result_count.ToString() + " results in " + code_count.ToString() + " code entries.";
 SimpleTextInput("Search results.", results_message, results_message + "\n\n" + results, true);
 
