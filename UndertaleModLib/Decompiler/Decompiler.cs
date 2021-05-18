@@ -118,17 +118,20 @@ namespace UndertaleModLib.Decompiler
 
             Object = null;
 
-            // TODO: This is expensive, move it somewhere else as a dictionary
-            // and have it update when events/objects are modified.
-            foreach(var obj in Data.GameObjects)
-                foreach(var event_list in obj.Events)
-                    foreach (var subevent in event_list)
-                        foreach (var ev in subevent.Actions)
-                            if (ev.CodeId == code)
-                            {
-                                Object = obj;
-                                goto LoopEnd;
-                            }
+            if (Data != null)
+            {
+                // TODO: This is expensive, move it somewhere else as a dictionary
+                // and have it update when events/objects are modified.
+                foreach (var obj in Data.GameObjects)
+                    foreach (var event_list in obj.Events)
+                        foreach (var subevent in event_list)
+                            foreach (var ev in subevent.Actions)
+                                if (ev.CodeId == code)
+                                {
+                                    Object = obj;
+                                    goto LoopEnd;
+                                }
+            }
             LoopEnd: return;
         }
 
