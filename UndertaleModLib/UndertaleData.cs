@@ -324,13 +324,13 @@ namespace UndertaleModLib
             bool bytecode14 = (data?.GeneralInfo?.BytecodeVersion <= 14);
             if (bytecode14)
                 inst = UndertaleInstruction.InstanceType.Undefined;
-            UndertaleVariable vari = list.Where((x) => x.Name.Content == name && x.InstanceType == inst).FirstOrDefault();
+            UndertaleVariable vari = list.Where((x) => x.Name?.Content == name && x.InstanceType == inst).FirstOrDefault();
             if (vari == null)
             {
                 var oldId = data.VarCount1;
                 if (!bytecode14)
                 {
-                    if (data.DifferentVarCounts)
+                    if (!data.DifferentVarCounts)
                     { 
                         // Bytecode 16+
                         data.VarCount1++;
