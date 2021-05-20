@@ -996,7 +996,7 @@ namespace UndertaleModLib.Models
             reader.Align(4);
             int jpeglen = reader.ReadInt32() & (~int.MinValue); // the length is ORed with int.MinValue.
             Version = reader.ReadInt32();
-            Debug.Assert(Version == 8 || Version == 7, "Invalid YYSWF version data! Expected 7 or 8, got " + Version);
+            Util.DebugUtil.Assert(Version == 8 || Version == 7, "Invalid YYSWF version data! Expected 7 or 8, got " + Version);
 
             if (jpeglen > 0)
             {
@@ -1259,7 +1259,7 @@ namespace UndertaleModLib.Models
                 writer.Write((byte)0);
                 total++;
             }
-            Debug.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count));
+            Util.DebugUtil.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count), "Invalid mask data for sprite");
         }
 
         private static byte[] DecodeSpineBlob(byte[] blob)
@@ -1337,7 +1337,7 @@ namespace UndertaleModLib.Models
                             //// ATTENTION: This code does not work all the time for some reason. ////
 
                             SWFVersion = reader.ReadInt32();
-                            Debug.Assert(SWFVersion == 8 || SWFVersion == 7, "Invalid SWF sprite format, expected 7 or 8, got " + SWFVersion);
+                            Util.DebugUtil.Assert(SWFVersion == 8 || SWFVersion == 7, "Invalid SWF sprite format, expected 7 or 8, got " + SWFVersion);
 
                             if (SWFVersion == 8)
                             {
@@ -1352,7 +1352,7 @@ namespace UndertaleModLib.Models
                             reader.Align(4);
 
                             SpineVersion = reader.ReadInt32();
-                            Debug.Assert(SpineVersion == 2 || SpineVersion == 1, "Invalid Spine format version number, expected 2 or 1, got " + SpineVersion);
+                            Util.DebugUtil.Assert(SpineVersion == 2 || SpineVersion == 1, "Invalid Spine format version number, expected 2 or 1, got " + SpineVersion);
                             int jsonLength = reader.ReadInt32();
                             int atlasLength = reader.ReadInt32();
                             int textures = reader.ReadInt32(); // count in v2 and size in bytes in v1.
@@ -1433,7 +1433,7 @@ namespace UndertaleModLib.Models
                     throw new IOException("Mask padding");
                 total++;
             }
-            Debug.Assert(total == CalculateMaskDataSize(Width, Height, MaskCount));
+            Util.DebugUtil.Assert(total == CalculateMaskDataSize(Width, Height, MaskCount));
         }
 
         public uint CalculateMaskDataSize(uint width, uint height, uint maskcount)

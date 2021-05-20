@@ -188,7 +188,7 @@ namespace UndertaleModLib
                 throw new IOException("Root chunk is " + name + " not FORM");
             uint length = ReadUInt32();
             data.FORM = new UndertaleChunkFORM();
-            Debug.Assert(data.FORM.Name == name);
+            DebugUtil.Assert(data.FORM.Name == name);
             data.FORM.Length = length;
 
             var lenReader = EnsureLengthFromHere(data.FORM.Length);
@@ -377,7 +377,7 @@ namespace UndertaleModLib
         {
             while ((Position & (alignment - 1)) != paddingbyte)
             {
-                Debug.Assert(ReadByte() == paddingbyte, "Invalid alignment padding");
+                DebugUtil.Assert(ReadByte() == paddingbyte, "Invalid alignment padding");
             }
         }
 

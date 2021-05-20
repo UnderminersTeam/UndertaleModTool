@@ -21,7 +21,7 @@ namespace UndertaleModLib
         {
             try
             {
-                Debug.Assert(Name != null);
+                Util.DebugUtil.Assert(Name != null);
                 writer.Write(Name.ToCharArray());
                 var lenWriter = writer.WriteLengthHere();
 
@@ -78,7 +78,7 @@ namespace UndertaleModLib
                 }
 
                 UndertaleChunk chunk = (UndertaleChunk)Activator.CreateInstance(type);
-                Debug.Assert(chunk.Name == name);
+                Util.DebugUtil.Assert(chunk.Name == name);
                 chunk.Length = length;
 
                 reader.SubmitMessage("Reading chunk " + chunk.Name);
