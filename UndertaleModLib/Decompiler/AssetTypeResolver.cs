@@ -389,11 +389,14 @@ namespace UndertaleModLib.Decompiler
 
             function_name = function_name.Replace("color", "colour"); // Just GameMaker things... both are valid :o
 
-            // Backgrounds don't exist in GMS2
-            for (int i = 0; i < arguments.Length; i++)
+            if(context.Data?.IsGameMaker2() ?? false)
             {
-                if (arguments[i] == AssetIDType.Background)
-                    arguments[i] = AssetIDType.Sprite;
+                // Backgrounds don't exist in GMS2
+                for (int i = 0; i < arguments.Length; i++)
+                {
+                    if (arguments[i] == AssetIDType.Background)
+                        arguments[i] = AssetIDType.Sprite;
+                }
             }
 
             if (builtin_funcs.ContainsKey(function_name))
