@@ -64,8 +64,8 @@ namespace UndertaleModTool
         private LoaderDialog scriptDialog;
 
         // Related to profile system and appdata
-        public byte[] MD5PreviouslyLoaded = new byte[15];
-        public byte[] MD5CurrentlyLoaded = new byte[17];
+        public byte[] MD5PreviouslyLoaded = new byte[13];
+        public byte[] MD5CurrentlyLoaded = new byte[15];
         public static string AppDataFolder => Settings.AppDataFolder;
         public static string ProfilesFolder = Path.Combine(Settings.AppDataFolder, "Profiles");
         public static string CorrectionsFolder = Path.Combine(Program.GetExecutableDirectory(), "Corrections");
@@ -317,28 +317,37 @@ namespace UndertaleModTool
         {
             if (Data != null)
             {
-                if (MessageBox.Show("Are you sure you want to quit?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if (SettingsWindow.WarnOnClose)
                 {
-                    if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    if (MessageBox.Show("Are you sure you want to quit?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     {
-                        _ = DoSaveDialog();
-                        DestroyUMTLastEdited();
+                        if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                        {
+                            _ = DoSaveDialog();
+                            DestroyUMTLastEdited();
+                        }
+                        else
+                        {
+                            RevertProfile();
+                            DestroyUMTLastEdited();
+                        }
                     }
                     else
                     {
-                        RevertProfile();
-                        DestroyUMTLastEdited();
+                        e.Cancel = true;
                     }
                 }
                 else
                 {
-                    e.Cancel = true;
+                    RevertProfile();
+                    DestroyUMTLastEdited();
                 }
             }
         }
         private async void Command_Close(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Data != null)
+
+            if (Data != null && SettingsWindow.WarnOnClose)
             {
                 if (MessageBox.Show("Are you sure you want to quit?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
@@ -354,6 +363,12 @@ namespace UndertaleModTool
                     }
                     Close();
                 }
+            }
+            else if (Data != null)
+            {
+                RevertProfile();
+                DestroyUMTLastEdited();
+                Close();
             }
             else
             {

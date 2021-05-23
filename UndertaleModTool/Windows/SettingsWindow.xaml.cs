@@ -90,6 +90,15 @@ namespace UndertaleModTool
                 Settings.Save();
             }
         }
+        public static bool WarnOnClose
+        {
+            get => Settings.Instance.WarnOnClose;
+            set
+            {
+                Settings.Instance.WarnOnClose = value;
+                Settings.Save();
+            }
+        }
 
         public SettingsWindow()
         {
