@@ -30,7 +30,7 @@ namespace UndertaleModLib.ModelsDebug
         {
             Clear();
             uint count = reader.ReadUInt32();
-            Debug.Assert(count % 2 == 0);
+            Util.DebugUtil.Assert(count % 2 == 0);
             count /= 2;
             for (int i = 0; i < count; i++)
                 Add(new DebugInfoPair() { BytecodeOffset = reader.ReadUInt32(), SourceCodeOffset = reader.ReadUInt32() });

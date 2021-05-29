@@ -56,14 +56,28 @@ string GetFolder(string path) {
 
 ImportGMLString("gml_Script_scr_change_language", @"");
 ImportGMLString("gml_Script_scr_84_load_map_json", @"");
-ImportGMLString("gml_Script_textdata_en", @"
-if (variable_global_exists(""text_data_en""))
-    ds_map_destroy(global.text_data_en);
-global.text_data_en = scr_84_load_map_json(program_directory + ""\lang\\"" + ""lang_en.json"");");
-ImportGMLString("gml_Script_textdata_ja", @"
-if (variable_global_exists(""text_data_ja""))
-    ds_map_destroy(global.text_data_ja);
-global.text_data_ja = scr_84_load_map_json(program_directory + ""\lang\\"" + ""lang_ja.json"");");
+if (Data.GeneralInfo.Major < 2) // Undertale PC (GMS1)
+{
+    ImportGMLString("gml_Script_textdata_en", @"
+    if (variable_global_exists(""text_data_en""))
+        ds_map_destroy(global.text_data_en);
+    global.text_data_en = scr_84_load_map_json(program_directory + ""\lang\"" + ""lang_en.json"");");
+    ImportGMLString("gml_Script_textdata_ja", @"
+    if (variable_global_exists(""text_data_ja""))
+        ds_map_destroy(global.text_data_ja);
+    global.text_data_ja = scr_84_load_map_json(program_directory + ""\lang\"" + ""lang_ja.json"");");
+}
+else
+{
+    ImportGMLString("gml_Script_textdata_en", @"
+    if (variable_global_exists(""text_data_en""))
+        ds_map_destroy(global.text_data_en);
+    global.text_data_en = scr_84_load_map_json(program_directory + ""\lang\\"" + ""lang_en.json"");");
+    ImportGMLString("gml_Script_textdata_ja", @"
+    if (variable_global_exists(""text_data_ja""))
+        ds_map_destroy(global.text_data_ja);
+    global.text_data_ja = scr_84_load_map_json(program_directory + ""\lang\\"" + ""lang_ja.json"");");
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -140,9 +154,23 @@ void MakeJSON(string language)
         replacement = @"\\";
         input = Regex.Replace(input, pattern, replacement);
 
-        pattern = @""" \+ chr\(34\) \+ """;
+        pattern = @""" \+ '""' \+ """;
         replacement = @"\""";
         input = Regex.Replace(input, pattern, replacement);
+
+        pattern = @"'""' \+ """;
+        replacement = @"""\""";
+        input = Regex.Replace(input, pattern, replacement);
+
+        pattern = @""" \+ '""'";
+        replacement = @"\""""";
+        input = Regex.Replace(input, pattern, replacement);
+        
+        pattern = @"'""'";
+        replacement = @"\""";
+        input = Regex.Replace(input, pattern, replacement);
+        
+        input = input.Replace(@"\"",", @"\"""",");
 
         pattern = @"ds_map_add\(global\.text_data_.., ("".*""), ("".*"")\)";
         replacement = @"  $1: $2,";

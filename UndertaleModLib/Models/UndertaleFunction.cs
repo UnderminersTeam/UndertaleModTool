@@ -98,7 +98,7 @@ namespace UndertaleModLib.Models
             {
                 Locals.Add(reader.ReadUndertaleObject<LocalVar>());
             }
-            Debug.Assert(Locals.Count == count);
+            Util.DebugUtil.Assert(Locals.Count == count);
         }
 
         public bool HasLocal(string varName)

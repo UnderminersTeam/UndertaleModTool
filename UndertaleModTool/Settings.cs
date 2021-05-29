@@ -37,6 +37,7 @@ namespace UndertaleModTool
         // This comment should be cleared in the event that the remedies described are implemented.
 
         public bool DeleteOldProfileOnSave { get; set; } = false;
+        public bool WarnOnClose { get; set; } = true;
 
         public static Settings Instance;
 
