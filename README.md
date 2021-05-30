@@ -62,8 +62,8 @@ You can adjust win-x86 to other RIDs, such as win-x64 or win-arm.
 
 ### data.win file format
 Interested in the file and instruction format research I've done while working on this? Check out these:
-* https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-Game-Maker:-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions
-* https://github.com/krzys-h/UndertaleModTool/wiki/Changes-in-Game-Maker:-Studio-2
+* https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-GameMaker-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions
+* https://github.com/krzys-h/UndertaleModTool/wiki/Changes-in-GameMaker-Studio-2
 * https://github.com/krzys-h/UndertaleModTool/wiki/Extensions,-Shaders,-Timelines-format
 * https://github.com/krzys-h/UndertaleModTool/wiki/Bytecode-version-differences
 * https://github.com/krzys-h/UndertaleModTool/wiki/YYC-games
