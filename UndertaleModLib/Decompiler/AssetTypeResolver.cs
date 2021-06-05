@@ -1251,6 +1251,8 @@ namespace UndertaleModLib.Decompiler
                 // Seems to be used a lot as a regular value between the values of around 0-20.
                 AddOverrideFor("obj_vulkinbody", "face", AssetIDType.Sprite);
 
+                AddOverrideFor("scr_setfont", "newfont", AssetIDType.Font);
+
                 //builtin_vars.Add("face", AssetIDType.Sprite);
 
                 builtin_vars.Add("myfont", AssetIDType.Font);
