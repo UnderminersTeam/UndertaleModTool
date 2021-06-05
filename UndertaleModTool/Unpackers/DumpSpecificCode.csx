@@ -44,14 +44,28 @@ for (var j = 0; j < splitStringsList.Count; j++)
         }
     }
 }
-foreach (UndertaleCode code in Data.Code)
+
+for (var j = 0; j < gameObjectCandidates.Count; j++)
 {
-    for (var j = 0; j < gameObjectCandidates.Count; j++)
+    try
     {
-        if (code.Name.Content.Contains(gameObjectCandidates[j]))
+        UndertaleGameObject obj = Data.GameObjects.ByName(gameObjectCandidates[j]);
+        for (var i = 0; i < obj.Events.Count; i++)
         {
-            codeToDump.Add(code.Name.Content);
+            foreach (UndertaleGameObject.Event evnt in obj.Events[i])
+            {
+                foreach (UndertaleGameObject.EventAction action in evnt.Actions)
+                {
+                    if (action.CodeId?.Name?.Content != null)
+                        codeToDump.Add(action.CodeId?.Name?.Content);
+                }
+            }
         }
+    }
+    catch
+    {
+        // Something went wrong, but probably because it's trying to check something non-existent
+        // Just keep going
     }
 }
 

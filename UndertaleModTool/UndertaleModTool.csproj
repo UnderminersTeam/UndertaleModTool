@@ -44,6 +44,9 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
+		<None Update="CommunityScripts\SimplifyBattlegroupScript.csx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_backgrounder_dock_Other_10.gml">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3518,6 +3521,9 @@
 		</None>
 		<EmbeddedResource Include="Resources\GML.xshd" />
 		<EmbeddedResource Include="Resources\VMASM.xshd" />
+		<None Update="Repackers\ReduceEmbeddedTexturePages.csx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="SampleScripts\BorderEnabler.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3626,6 +3632,9 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
+		<None Update="TechnicalScripts\16_To_17.csx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TechnicalScripts\CheckDecompiler_2_3.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3633,6 +3642,9 @@
 		<None Update="TechnicalScripts\ExtractEmbeddedDataFile.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="TechnicalScripts\FindUnusedStrings.csx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TechnicalScripts\GetAllChunkNames.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -3662,7 +3674,7 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="Unpackers\ExportAllTexturesWithPadding.csx">
+		<None Update="Unpackers\ExportAllSpritesWithPadding.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>

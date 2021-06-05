@@ -31,7 +31,7 @@ namespace UndertaleModLib.Models
         {
             uint len = reader.ReadUInt32();
             Data = reader.ReadBytes((int)len);
-            Debug.Assert(Data.Length == len);
+            Util.DebugUtil.Assert(Data.Length == len);
         }
 
         public void UnserializePadding(UndertaleReader reader)

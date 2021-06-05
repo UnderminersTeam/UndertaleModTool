@@ -2524,7 +2524,7 @@ namespace UndertaleModLib.Decompiler
 
             public HLSwitchCaseStatement(List<Expression> caseExpressions, BlockHLStatement block)
             {
-                Debug.Assert(caseExpressions.Count > 0, "Switch statement lacks any cases.");
+                DebugUtil.Assert(caseExpressions.Count > 0, "Switch statement lacks any cases.");
                 this.CaseExpressions = caseExpressions;
                 this.Block = block;
             }
@@ -2700,7 +2700,7 @@ namespace UndertaleModLib.Decompiler
 
         public static Block FindFirstMeetPoint(Block ifStart, Dictionary<Block, List<Block>> reverseDominators)
         {
-            Debug.Assert(ifStart.conditionalExit, "If start does not have a conditional exit");
+            DebugUtil.Assert(ifStart.conditionalExit, "If start does not have a conditional exit");
             var commonDominators = reverseDominators[ifStart.nextBlockTrue].Intersect(reverseDominators[ifStart.nextBlockFalse]);
 
             // Find the closest one of them
@@ -2847,7 +2847,7 @@ namespace UndertaleModLib.Decompiler
                         if (result.CaseExpressions.Contains(null))
                             defaultCase = result;
 
-                        Debug.Assert(temp == switchEnd, "temp != switchEnd");
+                        DebugUtil.Assert(temp == switchEnd, "temp != switchEnd");
                     }
 
 
@@ -2885,7 +2885,7 @@ namespace UndertaleModLib.Decompiler
 
                 if (block.Statements.Count > 0 && block.Statements.Last() is PushEnvStatement)
                 {
-                    Debug.Assert(!block.conditionalExit, "Block ending with pushenv does not have a conditional exit");
+                    DebugUtil.Assert(!block.conditionalExit, "Block ending with pushenv does not have a conditional exit");
                     PushEnvStatement stmt = (block.Statements.Last() as PushEnvStatement);
                     block = block.nextBlockTrue;
                     output.Statements.Add(new WithHLStatement()
@@ -2898,7 +2898,7 @@ namespace UndertaleModLib.Decompiler
                 }
                 else if (block.Statements.Count > 0 && block.Statements.Last() is PopEnvStatement)
                 {
-                    Debug.Assert(!block.conditionalExit, "Block ending in popenv does not have a conditional exit");
+                    DebugUtil.Assert(!block.conditionalExit, "Block ending in popenv does not have a conditional exit");
                     break;
                 }
 

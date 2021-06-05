@@ -18,9 +18,9 @@ namespace UndertaleModLib.Models
 
     public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChanged
     {
-        private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
-        private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ParentId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
-        private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _TextureMaskId = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
+        public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
+        public UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ParentId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
+        public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _TextureMaskId = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
 
         public UndertaleString Name { get; set; }
         public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sprite))); } }

@@ -73,6 +73,18 @@ namespace UndertaleModTool
                 using (XmlTextReader reader = new XmlTextReader(stream))
                 {
                     DecompiledEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                    if ((Application.Current.MainWindow as MainWindow).Data.GeneralInfo.Major < 2)
+                    {
+                        var def = DecompiledEditor.SyntaxHighlighting;
+                        foreach (var span in def.MainRuleSet.Spans)
+                        {
+                            string expr = span.StartExpression.ToString();
+                            if (expr == "\"" || expr == "'")
+                            {
+                                span.RuleSet.Spans.Clear();
+                            }
+                        }
+                    }
                 }
             }
 

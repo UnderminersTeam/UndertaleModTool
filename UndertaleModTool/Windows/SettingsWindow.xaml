@@ -49,7 +49,9 @@
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Text="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
         <CheckBox Grid.Row="8" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding DeleteOldProfileOnSave}"/>
-        <Separator Grid.Row="9" Grid.ColumnSpan="2" Margin="10"/>
-        <Button Grid.Row="10" Grid.Column="1" Margin="5" Click="AppDataButton_Click">Open application data folder</Button>
+        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3" Text="Warn about saving before closing" ToolTip="Warn about saving before closing. Enabled by default."/>
+        <CheckBox Grid.Row="9" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding WarnOnClose}"/>
+        <Separator Grid.Row="10" Grid.ColumnSpan="2" Margin="10"/>
+        <Button Grid.Row="11" Grid.Column="1" Margin="5" Click="AppDataButton_Click">Open application data folder</Button>
     </Grid>
 </Window>
