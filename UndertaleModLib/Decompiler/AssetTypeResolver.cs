@@ -512,13 +512,13 @@ namespace UndertaleModLib.Decompiler
 
         internal static Dictionary<string, AssetIDType> GetTypeOverridesFor(string code_entry_name)
         {
-            if (!builtin_var_overrides.ContainsKey(code_entry_name))
+            lock(builtin_var_overrides)
             {
-                lock(builtin_var_overrides)
+                if (!builtin_var_overrides.ContainsKey(code_entry_name))
                     builtin_var_overrides.Add(code_entry_name, new Dictionary<string, AssetIDType>());
+
+                return builtin_var_overrides[code_entry_name];
             }
-                
-            return builtin_var_overrides[code_entry_name];
         }
 
         internal static void AddOverrideFor(string code_entry_name, string variable_name, AssetIDType type)
@@ -1046,7 +1046,8 @@ namespace UndertaleModLib.Decompiler
             if (lowerName != null && (lowerName == "undertale"))
             {
 
-                AddOverrideFor("obj_wizardorb_chaser_Alarm_0", "pop", AssetIDType.Script);
+                //AddOverrideFor("obj_wizardorb_chaser_Alarm_0", "pop", AssetIDType.Script);
+
                 AddOverrideFor("obj_fakeborderdraw_Draw_0", "op", AssetIDType.GameObject);
                 AddOverrideFor("obj_vertcroissant_Step_0", "op", AssetIDType.GameObject);
 
@@ -1236,11 +1237,8 @@ namespace UndertaleModLib.Decompiler
             // Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
-                // These hold compiler constants for gamepad controls.
-                // Pass them on to the ContextualAssetResolver.
-                // TODO: Actually implement
-                //AddOverrideFor("scr_getbuttonsprite", "control", AssetIDType.ContextDependent);
-                //AddOverrideFor("scr_getbuttonsprite", "button", AssetIDType.ContextDependent);
+                AddOverrideFor("scr_getbuttonsprite", "control", AssetIDType.Enum_GamepadButton);
+                AddOverrideFor("scr_getbuttonsprite", "button", AssetIDType.Enum_GamepadButton);
 
                 // Don't use this. It will not recompile.
                 // AddOverrideFor("obj_shop3_Draw_0", "mycolor", AssetIDType.Macro);

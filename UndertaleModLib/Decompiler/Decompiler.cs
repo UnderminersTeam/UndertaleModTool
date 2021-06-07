@@ -863,7 +863,7 @@ namespace UndertaleModLib.Decompiler
                 // TODO: This should be probably able to go both ways...
                 Argument2.DoTypePropagation(context, Argument1.DoTypePropagation(context, suggestedType));
 
-                // Inequality comparisons against scripts don't really make sense?
+                /*
                 if (Opcode != UndertaleInstruction.ComparisonType.EQ && Opcode != UndertaleInstruction.ComparisonType.NEQ)
                 {
                     if (Argument1 is ExpressionConstant arg1)
@@ -873,7 +873,7 @@ namespace UndertaleModLib.Decompiler
                     if (Argument2 is ExpressionConstant arg2)
                         if (arg2.AssetType == AssetIDType.Script)
                             arg2.AssetType = AssetIDType.Other;
-                }
+                }*/
 
                 return AssetIDType.Other;
             }

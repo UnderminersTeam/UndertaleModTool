@@ -151,7 +151,7 @@ namespace UndertaleModLib.Decompiler
                 return null;
             };
 
-            // TODO: Finish this
+            // TODO: Finish context-dependent variable resolution
             variable_resolvers = new Dictionary<string, Func<DecompileContext, string, object, string>>()
             {
                 { "scr_getbuttonsprite", (context, varname, value) =>
