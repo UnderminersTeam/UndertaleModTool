@@ -1,38 +1,56 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2035
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModTool", "UndertaleModTool\UndertaleModTool.csproj", "{C703A485-DBFB-4601-8A26-42E64CCF812F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModTool", "UndertaleModTool\UndertaleModTool.csproj", "{C703A485-DBFB-4601-8A26-42E64CCF812F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModLib", "UndertaleModLib\UndertaleModLib.csproj", "{4781ADAC-9469-42C4-B357-4A0A157D7FCD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModLib", "UndertaleModLib\UndertaleModLib.csproj", "{4781ADAC-9469-42C4-B357-4A0A157D7FCD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModTests", "UndertaleModTests\UndertaleModTests.csproj", "{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModTests", "UndertaleModTests\UndertaleModTests.csproj", "{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C703A485-DBFB-4601-8A26-42E64CCF812F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C703A485-DBFB-4601-8A26-42E64CCF812F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C703A485-DBFB-4601-8A26-42E64CCF812F}.Debug|x64.ActiveCfg = Debug|x64
+		{C703A485-DBFB-4601-8A26-42E64CCF812F}.Debug|x64.Build.0 = Debug|x64
 		{C703A485-DBFB-4601-8A26-42E64CCF812F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C703A485-DBFB-4601-8A26-42E64CCF812F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C703A485-DBFB-4601-8A26-42E64CCF812F}.Release|x64.ActiveCfg = Release|x64
+		{C703A485-DBFB-4601-8A26-42E64CCF812F}.Release|x64.Build.0 = Release|x64
 		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Debug|x64.ActiveCfg = Debug|x64
+		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Debug|x64.Build.0 = Debug|x64
 		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Release|x64.ActiveCfg = Release|x64
+		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Release|x64.Build.0 = Release|x64
 		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Debug|x64.ActiveCfg = Debug|x64
+		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Debug|x64.Build.0 = Debug|x64
 		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Release|x64.ActiveCfg = Release|x64
+		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Release|x64.Build.0 = Release|x64
 		{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}.Debug|x64.ActiveCfg = Debug|x64
+		{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}.Debug|x64.Build.0 = Debug|x64
 		{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}.Release|x64.ActiveCfg = Release|x64
+		{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

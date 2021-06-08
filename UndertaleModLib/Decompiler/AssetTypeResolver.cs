@@ -46,8 +46,10 @@ namespace UndertaleModLib.Decompiler
 
         EventType, // For event_perform
 
+        Macro, // Bytecode <= 14 has macros in the Constants field of OPTN, only useful for Undertale 1.00
         ContextDependent, // Can be anything, depends on the function and/or other arguments
 
+        TileSet, // Identical to AssetIDType.Background, used internally for GMS2 to prevent tileset functions from resolving incorrectly.
         Layer // GMS2
     };
 
@@ -352,7 +354,18 @@ namespace UndertaleModLib.Decompiler
     {
         public static Dictionary<string, AssetIDType[]> builtin_funcs;
 
+        public static Dictionary<string, Dictionary<string, AssetIDType>> builtin_var_overrides;
         public static Dictionary<string, AssetIDType> builtin_vars;
+
+        public static Dictionary<string, AssetIDType> return_types;
+
+        internal static string StripPrefix(string name)
+        {
+            if (name.StartsWith("gml_Script_") || name.StartsWith("gml_Object_"))
+                name = name.Substring(11);
+
+            return name;
+        }
 
         internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, DecompileContext context) 
         {
@@ -363,8 +376,7 @@ namespace UndertaleModLib.Decompiler
         {
             Dictionary<string, AssetIDType[]> scriptArgs = context.scriptArgs;
 
-            if (function_name.StartsWith("gml_Script_"))
-                function_name = function_name.Substring(11);
+            function_name = StripPrefix(function_name);
 
             bool overloaded = false;
             // Scripts overload builtins because in GMS2 some functions are just backwards-compatibility scripts
@@ -377,11 +389,31 @@ namespace UndertaleModLib.Decompiler
 
             function_name = function_name.Replace("color", "colour"); // Just GameMaker things... both are valid :o
 
+            if(context.Data?.IsGameMaker2() ?? false)
+            {
+                // Backgrounds don't exist in GMS2
+                for (int i = 0; i < arguments.Length; i++)
+                {
+                    if (arguments[i] == AssetIDType.Background)
+                        arguments[i] = AssetIDType.Sprite;
+                }
+            }
+
             if (builtin_funcs.ContainsKey(function_name))
             {
                 AssetIDType[] func_types = builtin_funcs[function_name];
                 if (arguments.Length > func_types.Length)
                     throw new Exception("Bad call to " + function_name + " with " + arguments.Length + " arguments (instead of " + func_types.Length + ")");
+
+                if (context.Data?.IsGameMaker2() ?? false)
+                {
+                    // Backgrounds don't exist in GMS2
+                    for (int i = 0; i < func_types.Length; i++)
+                    {
+                        if (func_types[i] == AssetIDType.Background)
+                            func_types[i] = AssetIDType.Sprite;
+                    }
+                }
                 
                 if (overloaded) 
                 {
@@ -447,11 +479,52 @@ namespace UndertaleModLib.Decompiler
             return overloaded;
         }
 
-        internal static AssetIDType AnnotateTypeForVariable(string variable_name)
+        internal static AssetIDType AnnotateTypeForVariable(DecompileContext context, string variable_name)
         {
+            var overrides = GetTypeOverridesFor(context.TargetNameStripped);
+            if (overrides.ContainsKey(variable_name))
+                return overrides[variable_name];
+
+            if (context.Object != null) 
+            {
+                overrides = GetTypeOverridesFor(context.Object.Name.Content);
+                if (overrides.ContainsKey(variable_name))
+                    return overrides[variable_name];
+            }
+
+
             if (builtin_vars.ContainsKey(variable_name))
                 return builtin_vars[variable_name];
             return AssetIDType.Other;
+        }
+
+        internal static AssetIDType AnnotateTypeForScript(string script_name)
+        {
+            if (return_types.ContainsKey(script_name))
+                return return_types[script_name];
+            return AssetIDType.Other;
+        }
+
+        internal static Dictionary<string, AssetIDType> GetTypeOverridesFor(DecompileContext context)
+        {
+            return GetTypeOverridesFor(context.TargetNameStripped);
+        }
+
+        internal static Dictionary<string, AssetIDType> GetTypeOverridesFor(string code_entry_name)
+        {
+            lock(builtin_var_overrides)
+            {
+                if (!builtin_var_overrides.ContainsKey(code_entry_name))
+                    builtin_var_overrides.Add(code_entry_name, new Dictionary<string, AssetIDType>());
+
+                return builtin_var_overrides[code_entry_name];
+            }
+        }
+
+        internal static void AddOverrideFor(string code_entry_name, string variable_name, AssetIDType type)
+        {
+            var overrides = GetTypeOverridesFor(code_entry_name);
+            overrides[variable_name] = type;
         }
 
         public static int? FindConstValue(string const_name)
@@ -493,6 +566,8 @@ namespace UndertaleModLib.Decompiler
         {
 
             ContextualAssetResolver.Initialize(data);
+
+            return_types = new Dictionary<string, AssetIDType>();
 
             builtin_funcs = new Dictionary<string, AssetIDType[]>()
             {
@@ -846,6 +921,9 @@ namespace UndertaleModLib.Decompiler
                 { "gpu_set_texfilter", new AssetIDType[] { AssetIDType.Boolean } }, // GMS2 equivalent of texture_set_interpolation.
 
                 // TODO: GMS2 tilemaps
+                { "tileset_get_texture", new AssetIDType[] { AssetIDType.TileSet } },
+                { "tileset_get_uvs", new AssetIDType[] { AssetIDType.TileSet } },
+
                 // TODO: GMS2 layers
 
                 // GMS2 only equivalents of room_speed.
@@ -924,6 +1002,14 @@ namespace UndertaleModLib.Decompiler
                 { "@@GetInstance@@", new AssetIDType[] { AssetIDType.GameObject } },
             };
 
+            builtin_var_overrides = new Dictionary<string, Dictionary<string, AssetIDType>>();
+
+            if (data?.Code != null)
+            {
+                foreach (var code in data.Code)
+                    builtin_var_overrides[StripPrefix(code.Name.Content)] = new Dictionary<string, AssetIDType>();
+            }
+
             builtin_vars = new Dictionary<string, AssetIDType>()
             {
                 // only the relevant ones because I'm sick of writing this
@@ -959,6 +1045,16 @@ namespace UndertaleModLib.Decompiler
             // Just Undertale
             if (lowerName != null && (lowerName == "undertale"))
             {
+
+                //AddOverrideFor("obj_wizardorb_chaser_Alarm_0", "pop", AssetIDType.Script);
+
+                AddOverrideFor("obj_fakeborderdraw_Draw_0", "op", AssetIDType.GameObject);
+                AddOverrideFor("obj_vertcroissant_Step_0", "op", AssetIDType.GameObject);
+
+                return_types["scr_getmusindex"] = AssetIDType.Sound;
+                return_types["scr_getsprite"] = AssetIDType.Sprite;
+                return_types["caster_load"] = AssetIDType.Sound;
+
                 // Sometimes used as a bool, should not matter though and be an improvement overall.
                 builtin_vars.Add("king", AssetIDType.GameObject);
                 builtin_funcs["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
@@ -1064,6 +1160,8 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("battlemoder", AssetIDType.Boolean);
                 builtin_vars.Add("becamebattle", AssetIDType.Boolean);
                 builtin_vars.Add("seriousbattle", AssetIDType.Boolean);
+                // Deltarune console versions.
+                builtin_vars.Add("_border_image", AssetIDType.Sprite);
                 // A little bit wrong, but probably fine.
                 builtin_vars.Add("cango", AssetIDType.Boolean);
                 builtin_vars.Add("canact", AssetIDType.Boolean);
@@ -1139,13 +1237,30 @@ namespace UndertaleModLib.Decompiler
             // Both UT and DR
             if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
-                // gml_Object_obj_vulkinbody_Create_0
-                // Seems to be used a lot as a regular value between the values of around 0-20. 
-                builtin_vars.Add("face", AssetIDType.Sprite);
+                AddOverrideFor("scr_getbuttonsprite", "control", AssetIDType.Enum_GamepadButton);
+                AddOverrideFor("scr_getbuttonsprite", "button", AssetIDType.Enum_GamepadButton);
+
+                // Don't use this. It will not recompile.
+                // AddOverrideFor("obj_shop3_Draw_0", "mycolor", AssetIDType.Macro);
+
+                return_types["scr_getbuttonsprite"] = AssetIDType.Sprite;
+
+                // gml_Object_obj_vulkinbody_UNDERTALE_Create_0
+                // Seems to be used a lot as a regular value between the values of around 0-20.
+                AddOverrideFor("obj_vulkinbody", "face", AssetIDType.Sprite);
+
+                AddOverrideFor("scr_setfont", "newfont", AssetIDType.Font);
+
+                //builtin_vars.Add("face", AssetIDType.Sprite);
+
                 builtin_vars.Add("myfont", AssetIDType.Font);
-                // Resolution of script arguments works now, make sure to look at other scripts for similar possible corrections
-                builtin_funcs["scr_bouncer"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other};
-                builtin_funcs["sprite_create_from_screen_x"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other};
+                // Hope this script works!
+                builtin_funcs["scr_bouncer"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other };
+
+                // Undertale 1.05+ and Deltarune console versions.
+                builtin_funcs["scr_draw_background_ps4"] = new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other };
+                builtin_vars.Add("room_id", AssetIDType.Room);
+
                 builtin_vars.Add("currentroom", AssetIDType.Room);
                 builtin_vars.Add("dsprite", AssetIDType.Sprite);
                 builtin_vars.Add("usprite", AssetIDType.Sprite);
@@ -1258,9 +1373,6 @@ namespace UndertaleModLib.Decompiler
                 // It's not 100% accurate to resolve this way but it seems like this variable only gets directly assigned values and is used as a bool, it should be fine.
                 builtin_vars.Add("parent", AssetIDType.GameObject);
                 // These are not so consistent... ;-;
-                // op is used in Muffet's stuff but is critical in Omega flowey positioning... worse to resolve than to not.
-                // builtin_vars.Add("op", AssetIDType.GameObject);
-                // Toby messed up in "gml_Object_obj_wizardorb_chaser_Alarm_0" (should be "scr_monstersum()"), "pop" is never a script.
                 // From v1.001 Undertale via comparison
                 // A TIER quality
                 builtin_vars.Add("onionsprite", AssetIDType.Sprite);
