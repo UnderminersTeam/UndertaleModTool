@@ -3939,8 +3939,8 @@
 			<Version>6.1.2.30</Version>
 		</PackageReference>
 		<PackageReference Include="Fody" Version="6.5.1">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="GraphViz.NET" Version="1.0.0" />
 		<PackageReference Include="Microsoft-WindowsAPICodePack-Shell">
@@ -3963,7 +3963,7 @@
 		<PackageReference Include="Newtonsoft.Json">
 			<Version>13.0.1</Version>
 		</PackageReference>
-		<PackageReference Include="PropertyChanged.Fody" Version="3.4.0" />
+		<PackageReference Include="PropertyChanged.Fody" Version="3.3.3" />
 		<PackageReference Include="System.AppContext">
 			<Version>4.3.0</Version>
 		</PackageReference>
