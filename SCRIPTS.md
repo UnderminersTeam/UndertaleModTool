@@ -37,9 +37,9 @@ These scripts are self-explanatory from their names, but for clarification:
 - `ExportAllSoundsOld.csx`: This is an old version of the script to export sounds, which doesn't handle all types of sounds properly.
 - `ExportASM.csx`: Exports GML assembly.
 - `ExportAllCode.csx`: Exports GML code. It has a GMS2.3 counterpart, as code entry names can be too long.
-- `ExportAllSprites.csx`: Exports sprites with all padding removed. Creates and saves in `Export_Sprites` directory where `data.win` is opened from. Use `ExportAllTexturesWithPadding.csx` if you need to preserve the padding.
+- `ExportAllSprites.csx`: Exports sprites with all padding removed. Creates and saves in `Export_Sprites` directory where `data.win` is opened from. Use `ExportAllSpritesWithPadding.csx` if you need to preserve the padding.
 - `ExportMasks.csx`: For exporting sprite collision mask information.
-- `ExportAllTexturesWithPadding.csx`: Exports sprites preserving padding. Creates and saves in `Export_Textures` directory where `data.win` is opened from.
+- `ExportAllSpritesWithPadding.csx`: Exports sprites preserving padding. Creates and saves in `Export_Textures` directory where `data.win` is opened from.
 - `MergeImages.csx`: A script that can bulk merge images together for comparisons, from different folders.
 - `DumpSpecificCode.csx`: Used to export specific code entries should you have object names.
 
