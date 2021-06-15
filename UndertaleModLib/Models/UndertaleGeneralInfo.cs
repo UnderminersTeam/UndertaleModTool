@@ -30,7 +30,7 @@ namespace UndertaleModLib.Models
             SteamEnabled = 0x1000,      // Enable Steam
             LocalDataEnabled = 0x2000,
             BorderlessWindow = 0x4000,  // Borderless Window
-            DefaultCodeKind = 0x8000,
+            JavaScriptMode = 0x8000, // Tells the runner to run Javascript code
             LicenseExclusions = 0x10000,
         }
 
