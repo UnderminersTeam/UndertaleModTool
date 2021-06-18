@@ -31,17 +31,27 @@ static JsonSerializerOptions serializerOptions = new JsonSerializerOptions()
 {
     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
 };
-const string regexPattern = @"(?<!\\)\\u[0-9a-fA-F]{4}";
+const string
+    matchPattern = @"(?<!\\)((?:\\\\)*)\\u[0-9a-fA-F]{4}",
+    subMatchPattern = @"\\u[0-9a-fA-F]{4}";
 static string JsonifyString(string str)
 {
     string output = JsonSerializer.Serialize(str, serializerOptions);
-    Match match = Regex.Match(output, regexPattern);
+    Match match = Regex.Match(output, matchPattern);
     while (match.Success)
     {
-        output = output.Replace(
-            match.Value,
-            Char.ToString((char)Convert.ToInt32(match.Value.Substring(2), 16)));
-        match = match.NextMatch();
+        Match subMatch = Regex.Match(match.Value, subMatchPattern);
+        char replacement = (char)Convert.ToInt32(subMatch.Value.Substring(2), 16);
+        if (Char.IsControl(replacement))
+        {
+            match = match.NextMatch();
+            continue;
+        }
+        output = new Regex(Regex.Escape(subMatch.Value)).Replace(
+            output,
+            replacement.ToString(),
+            1);
+        match = Regex.Match(output, matchPattern);
     }
     return output;
 }
