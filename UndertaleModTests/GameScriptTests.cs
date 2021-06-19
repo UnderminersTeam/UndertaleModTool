@@ -24,6 +24,9 @@ namespace UndertaleModTests
         public object Selected => throw new NotImplementedException();
         public bool CanSave => throw new NotImplementedException();
         public string ScriptPath => throw new NotImplementedException();
+        public bool ScriptExecutionSuccess => throw new NotImplementedException();
+        public string ScriptErrorMessage => throw new NotImplementedException();
+        public string ScriptErrorType => throw new NotImplementedException();
 
         public void ChangeSelection(object newsel)
         {
@@ -50,9 +53,15 @@ namespace UndertaleModTests
         public void ReapplyProfileCode()
         {
         }
-        public string LintAllScripts()
+        public bool RunUMTScript(string path)
         {
-            return "Unimplemented";
+            Console.WriteLine(path);
+            return true;
+        }
+        public bool LintUMTScript(string path)
+        {
+            Console.WriteLine(path);
+            return true;
         }
 
         public void ScriptMessage(string message)
