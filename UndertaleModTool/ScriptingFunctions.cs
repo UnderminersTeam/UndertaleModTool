@@ -26,11 +26,11 @@ namespace UndertaleModTool
             // By Archie
             const int ReplySize = 132;
 
-            //Create the pipe
+            // Create the pipe
             using var pPipeServer = new NamedPipeServerStream("AUMI-IPC", PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 
-            //Wait 1/8th of a second for AUMI to connect.
-            //If it doesn't connect in time (which it should), just return false to avoid a deadlock.
+            // Wait 1/8th of a second for AUMI to connect.
+            // If it doesn't connect in time (which it should), just return false to avoid a deadlock.
             if (!pPipeServer.IsConnected)
             {
                 pPipeServer.WaitForConnectionAsync();
@@ -48,14 +48,14 @@ namespace UndertaleModTool
                 pPipeServer.Write(ipMessage.RawBytes());
                 pPipeServer.Flush();
             }
-            catch (IOException)
+            catch (Exception e)
             {
-                //Catch any errors that might arise if the connection is broken
-                ScriptError("Could not write data to the pipe!");
+                // Catch any errors that might arise if the connection is broken
+                ScriptError("Could not write data to the pipe!\nError: " + e.Message);
                 return false;
             }
 
-            //Read the reply, the length of which is always a pre-set amount of bytes.
+            // Read the reply, the length of which is always a pre-set amount of bytes.
             byte[] bBuffer = new byte[ReplySize];
             pPipeServer.Read(bBuffer, 0, ReplySize);
 
@@ -100,7 +100,7 @@ namespace UndertaleModTool
             }
             catch (Exception)
             {
-                //Using the 100 MS timer it can time out before successfully running, compilation errors are fast enough to get through.
+                // Using the 100 MS timer it can time out before successfully running, compilation errors are fast enough to get through.
                 ScriptExecutionSuccess = true;
                 ScriptErrorMessage = "";
                 ScriptErrorType = "";

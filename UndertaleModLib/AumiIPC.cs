@@ -30,7 +30,7 @@ namespace UndertaleModLib
 
     public struct IpcReply_t
     {
-        public int AUMIResult; //Always contains a value.
+        public int AUMIResult; // Always contains a value.
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
         public byte[] Buffer;
 
