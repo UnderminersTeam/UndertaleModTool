@@ -74,7 +74,10 @@ namespace UndertaleModTests
             Console.WriteLine(message);
             return true;
         }
-
+        public bool SendAUMIMessage(IpcMessage_t ipMessage, ref IpcReply_t outReply)
+        {
+            return true;
+        }
         public void ScriptOpenURL(string url)
         {
             Console.WriteLine("Open: " + url);

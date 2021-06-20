@@ -30,6 +30,7 @@ namespace UndertaleModLib.Scripting
         bool ScriptQuestion(string message);
         void ScriptError(string error, string title = "Error", bool SetConsoleText = true);
         void ScriptOpenURL(string url);
+        bool SendAUMIMessage(IpcMessage_t ipMessage, ref IpcReply_t outReply);
         bool RunUMTScript(string path);
         bool LintUMTScript(string path);
         void ReapplyProfileCode();
