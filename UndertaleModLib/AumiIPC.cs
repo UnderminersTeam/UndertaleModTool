@@ -11,18 +11,18 @@ namespace UndertaleModLib
     public struct IpcMessage_t
     {
         public short FuncID;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 510)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 512)]
         public byte[] Buffer;
 
         public byte[] RawBytes()
         {
-            var stream = new MemoryStream();
-            var writer = new BinaryWriter(stream);
+            using var stream = new MemoryStream();
+            using var writer = new BinaryWriter(stream);
 
             writer.Write(this.FuncID);
 
             if (this.Buffer != null)
-                writer.Write(this.Buffer, 0, 510);
+                writer.Write(this.Buffer, 0, 512);
 
             return stream.ToArray();
         }
@@ -31,17 +31,18 @@ namespace UndertaleModLib
     public struct IpcReply_t
     {
         public int AUMIResult; //Always contains a value.
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 124)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
         public byte[] Buffer;
 
         public static IpcReply_t FromBytes(byte[] bytes)
         {
-            var reader = new BinaryReader(new MemoryStream(bytes));
+            using var stream = new MemoryStream(bytes);
+            using var reader = new BinaryReader(stream);
 
             var s = default(IpcReply_t);
 
             s.AUMIResult = reader.ReadInt32();
-            s.Buffer = reader.ReadBytes(124);
+            s.Buffer = reader.ReadBytes(128);
 
             return s;
         }

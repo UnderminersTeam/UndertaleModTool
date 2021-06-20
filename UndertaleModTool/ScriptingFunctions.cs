@@ -24,10 +24,10 @@ namespace UndertaleModTool
         public bool SendAUMIMessage(IpcMessage_t ipMessage, ref IpcReply_t outReply)
         {
             // By Archie
-            const int ReplySize = 128;
+            const int ReplySize = 132;
 
             //Create the pipe
-            var pPipeServer = new NamedPipeServerStream("AUMI-IPC", PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+            using var pPipeServer = new NamedPipeServerStream("AUMI-IPC", PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 
             //Wait 1/8th of a second for AUMI to connect.
             //If it doesn't connect in time (which it should), just return false to avoid a deadlock.
@@ -48,20 +48,16 @@ namespace UndertaleModTool
                 pPipeServer.Write(ipMessage.RawBytes());
                 pPipeServer.Flush();
             }
-            catch (InvalidOperationException)
+            catch (IOException)
             {
                 //Catch any errors that might arise if the connection is broken
                 ScriptError("Could not write data to the pipe!");
-                pPipeServer.Disconnect();
-                pPipeServer.Dispose();
                 return false;
             }
 
             //Read the reply, the length of which is always a pre-set amount of bytes.
             byte[] bBuffer = new byte[ReplySize];
             pPipeServer.Read(bBuffer, 0, ReplySize);
-            pPipeServer.Disconnect();
-            pPipeServer.Dispose();
 
             outReply = IpcReply_t.FromBytes(bBuffer);
             return true;
