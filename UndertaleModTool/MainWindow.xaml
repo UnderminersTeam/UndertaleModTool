@@ -95,6 +95,9 @@
                     <MenuItem Header="_Run technical script" SubmenuOpened="MenuItem_RunTechnicalScript_SubmenuOpened">
                         <MenuItem Header="(...loading...)" IsEnabled="False"/>
                     </MenuItem>
+                    <MenuItem Header="_Run demo script" SubmenuOpened="MenuItem_RunDemoScript_SubmenuOpened">
+                        <MenuItem Header="(...loading...)" IsEnabled="False"/>
+                    </MenuItem>
                     <MenuItem Header="Run _other script..." Click="MenuItem_RunOtherScript_Click"/>
                 </MenuItem>
                 <MenuItem Header="_Help">

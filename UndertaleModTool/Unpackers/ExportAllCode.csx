@@ -4,6 +4,14 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
+{
+    bool x = RunUMTScript(Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "HelperScripts", "ExportAllCode2_3.csx"));
+    if (x == false)
+        ScriptError("ExportAllCode2_3.csx failed!");
+    return;
+}
+
 int progress = 0;
 string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
 ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));

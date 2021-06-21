@@ -1,4 +1,13 @@
-//Upgrade from bytecode 13 (experimental), 14, 15 to 16 - by Grossley
+﻿//Upgrade from bytecode 13 (experimental), 14, 15, 17 to 16 - by Grossley
+//13 and 14 do not work apparently due to variable issues that I don't know how to fix.
+//Need to test this, once I do then I can obsolete the other two scripts
+if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
+{
+    bool x = RunUMTScript(Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "HelperScripts", "ConvertFrom17to16_for_2.3.csx"));
+    if (x == false)
+        ScriptError("ConvertFrom17to16_for_2.3.csx failed!");
+    return;
+}
 
 EnsureDataLoaded();
 
@@ -6,6 +15,20 @@ string currentBytecodeVersion = Data?.GeneralInfo.BytecodeVersion.ToString();
 string game_name = Data.GeneralInfo.Name.Content;
 
 bool is13 = false;
+
+if (!(Data.FORM.Chunks.ContainsKey("AGRP")))
+{
+    /*    is13 = true;
+        ScriptMessage("Bytecode 13 type game detected. The upgrading of this game is experimental.");
+        currentBytecodeVersion = "13";*/
+    ScriptError("Bytecode 13 is not supported.");
+    return;
+}
+if (Data?.GeneralInfo.BytecodeVersion == 14)
+{
+    ScriptError("Bytecode 14 is not supported.");
+    return;
+}
 
 if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
 {
@@ -34,13 +57,13 @@ if ((Data?.GeneralInfo.BytecodeVersion == 14) || (Data?.GeneralInfo.BytecodeVers
         {
             UndertaleCodeLocals locals = new UndertaleCodeLocals();
             locals.Name = code.Name;
-    
+
             UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
             argsLocal.Name = Data.Strings.MakeString("arguments");
             argsLocal.Index = 0;
-    
+
             locals.Locals.Add(argsLocal);
-    
+
             code.LocalsCount = 1;
             code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
             Data.CodeLocals.Add(locals);
@@ -65,7 +88,7 @@ if ((Data?.GeneralInfo.BytecodeVersion == 14) || (Data?.GeneralInfo.BytecodeVers
                 else
                 {
                     sound.AudioID = 0;
-                    previous = 0; 
+                    previous = 0;
                     j = 1;
                 }
             }
@@ -99,7 +122,7 @@ if ((Data?.GeneralInfo.BytecodeVersion == 14) || (Data?.GeneralInfo.BytecodeVers
     Data.FORM.Chunks["LANG"] = new UndertaleChunkLANG();
     Data.FORM.LANG.Object = new UndertaleLanguage();
     Data.FORM.Chunks["GLOB"] = new UndertaleChunkGLOB();
-    String[] order = {"GEN8", "OPTN", "LANG", "EXTN", "SOND", "AGRP", "SPRT", "BGND", "PATH", "SCPT", "GLOB", "SHDR", "FONT", "TMLN", "OBJT", "ROOM", "DAFL", "TPAG", "CODE", "VARI", "FUNC", "STRG", "TXTR", "AUDO"};
+    String[] order = { "GEN8", "OPTN", "LANG", "EXTN", "SOND", "AGRP", "SPRT", "BGND", "PATH", "SCPT", "GLOB", "SHDR", "FONT", "TMLN", "OBJT", "ROOM", "DAFL", "TPAG", "CODE", "VARI", "FUNC", "STRG", "TXTR", "AUDO" };
     Dictionary<string, UndertaleChunk> newChunks = new Dictionary<string, UndertaleChunk>();
     foreach (String name in order)
         newChunks[name] = Data.FORM.Chunks[name];
@@ -127,7 +150,7 @@ else if (Data?.GeneralInfo.BytecodeVersion == 16)
 }
 else
 {
-    ScriptError(@"This game is not bytecode 13, 
+    string error = @"This game is not bytecode 13, 
 14, 15, 16, or 17, and is not made in GameMaker 2.3
 or greater. Please report this game to Grossley#2869
 on Discord and provide the name of the game, where
@@ -138,9 +161,9 @@ Current status of game '" + game_name + @"':
 GMS 2.3 == " + Data.GMS2_3.ToString() + @"
 GMS 2.3.1 == " + Data.GMS2_3_1.ToString() + @"
 GMS 2.3.2 == " + Data.GMS2_3_2.ToString() + @"
-GMS 2.3.1 == " + Data.GMS2_3_1.ToString() + @"
-", "Unknown game error");
-    ScriptMessage("Current status of game '" + game_name + "':\r\nGMS 2.3 == " + Data.GMS2_3.ToString() + "\r\n" + "GMS 2.3.1 == " + Data.GMS2_3_1.ToString() + "\r\n" + "GMS 2.3.2 == " + Data.GMS2_3_2.ToString());
-    ScriptMessage("Bytecode: " + (Data?.GeneralInfo.BytecodeVersion).ToString());
+Bytecode == " + (Data?.GeneralInfo.BytecodeVersion).ToString();
+    ScriptError(error, "Unknown game error");
+    SetUMTConsoleText(error);
+    SetFinishedMessage(false);
     return;
 }

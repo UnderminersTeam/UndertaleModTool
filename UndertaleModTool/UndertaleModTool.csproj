@@ -3638,11 +3638,11 @@
 		<None Update="TechnicalScripts\16_To_17.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="TechnicalScripts\CheckDecompiler_2_3.csx">
+		<None Update="HelperScripts\CheckDecompiler_2_3.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="TechnicalScripts\ExtractEmbeddedDataFile.csx">
+		<None Update="Unpackers\ExtractEmbeddedDataFile.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
@@ -3653,29 +3653,29 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="TechnicalScripts\LintAllScripts.csx">
+		<None Update="DemoScripts\LintAllScripts.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TechnicalScripts\RestoreMissingCodeLocals.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="TechnicalScripts\TestLintScript.csx">
+		<None Update="DemoScripts\TestLintScript.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="TechnicalScripts\ScriptTestSuccess.txt">
+		<None Update="DemoScripts\ScriptTestSuccess.txt">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="TechnicalScripts\ScriptTestFail.txt">
+		<None Update="DemoScripts\ScriptTestFail.txt">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="TechnicalScripts\TestRunScriptWithinScript.csx">
+		<None Update="DemoScripts\TestRunScriptWithinScript.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Unpackers\DumpSpecificCode.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="Unpackers\ExportAllCode2_3.csx">
+		<None Update="HelperScripts\ExportAllCode2_3.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
@@ -3695,7 +3695,7 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="Unpackers\ExportAllSpritesWithPadding.csx">
+		<None Update="HelperScripts\ExportAllSpritesWithPadding.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
@@ -3707,7 +3707,7 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="Unpackers\ExportAllSoundsOld.csx">
+		<None Update="HelperScripts\ExportAllSoundsOld.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
@@ -3779,11 +3779,11 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="TechnicalScripts\13_14_15_To_16.csx">
+		<None Update="HelperScripts\15_To_16.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="TechnicalScripts\13_to_17_To_16.csx">
+		<None Update="TechnicalScripts\15_to_17_To_16.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
@@ -3791,11 +3791,11 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="TechnicalScripts\ConvertFrom17to16.csx">
+		<None Update="HelperScripts\ConvertFrom17to16.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="TechnicalScripts\ConvertFrom17to16_for_2.3.csx">
+		<None Update="HelperScripts\ConvertFrom17to16_for_2.3.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
@@ -3811,7 +3811,7 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="TechnicalScripts\ExportAssetOrder.csx">
+		<None Update="Unpackers\ExportAssetOrder.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
@@ -3827,7 +3827,7 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="TechnicalScripts\ImportAssetOrder.csx">
+		<None Update="Repackers\ImportAssetOrder.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
@@ -3843,19 +3843,19 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="TechnicalScripts\TestExportAllCode.csx">
+		<None Update="DemoScripts\TestExportAllCode.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="TechnicalScripts\TextInputTestWinForms.csx">
+		<None Update="DemoScripts\TextInputTestWinForms.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-		<None Update="TechnicalScripts\TextInputTestWPF.csx">
+		<None Update="DemoScripts\TextInputTestWPF.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-    <None Update="TechnicalScripts\TestAUMIConnection.csx">
+    <None Update="DemoScripts\TestAUMIConnection.csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </None>
