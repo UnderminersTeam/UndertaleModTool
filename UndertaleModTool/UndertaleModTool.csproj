@@ -47,6 +47,9 @@
 		<None Update="CommunityScripts\SimplifyBattlegroupScript.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="CommunityScripts\VariableFixer.csx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_backgrounder_dock_Other_10.gml">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
