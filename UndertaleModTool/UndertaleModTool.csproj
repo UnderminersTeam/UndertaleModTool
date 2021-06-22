@@ -46,12 +46,12 @@
 		</None>
 		<None Update="CommunityScripts\SimplifyBattlegroupScript.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="CommunityScripts\VariableFixer.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_backgrounder_dock_Other_10.gml">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3528,8 +3528,8 @@
 		<EmbeddedResource Include="Resources\VMASM.xshd" />
 		<None Update="Repackers\ReduceEmbeddedTexturePages.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="SampleScripts\BorderEnabler.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3651,36 +3651,36 @@
 		</None>
 		<None Update="TechnicalScripts\FindUnusedStrings.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="TechnicalScripts\GetAllChunkNames.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="TechnicalScripts\LintAllScripts.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="TechnicalScripts\RestoreMissingCodeLocals.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="TechnicalScripts\TestLintScript.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="TechnicalScripts\ScriptTestSuccess.txt">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="TechnicalScripts\ScriptTestFail.txt">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="TechnicalScripts\TestRunScriptWithinScript.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="Unpackers\DumpSpecificCode.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3865,10 +3865,10 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
-    <None Update="TechnicalScripts\TestAUMIConnection.csx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
+		<None Update="TechnicalScripts\TestAUMIConnection.csx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="TechnicalScripts\ToggleAlignment.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
