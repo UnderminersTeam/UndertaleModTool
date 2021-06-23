@@ -54,6 +54,9 @@ namespace UndertaleModTool
         public bool CanSave { get; set; }
         public bool CanSafelySave = false;
         public bool FinishedMessageEnabled = true;
+        public bool ScriptExecutionSuccess { get; set; } = true;
+        public string ScriptErrorMessage { get; set; } = "";
+        public string ScriptErrorType { get; set; } = "";
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -1037,11 +1040,15 @@ namespace UndertaleModTool
 
         public void HideProgressBar()
         {
-            scriptDialog.TryHide();
+            if (scriptDialog != null)
+                scriptDialog.TryHide();
         }
 
         public async Task RunScript(string path)
         {
+            ScriptExecutionSuccess = true;
+            ScriptErrorMessage = "";
+            ScriptErrorType = "";
             scriptDialog = new LoaderDialog("Script in progress...", "Please wait...");
             scriptDialog.Owner = this;
             scriptDialog.PreventClose = true;
@@ -1080,12 +1087,18 @@ namespace UndertaleModTool
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
                 MessageBox.Show(exc.Message, "Script compile error", MessageBoxButton.OK, MessageBoxImage.Error);
+                ScriptExecutionSuccess = false;
+                ScriptErrorMessage = exc.Message;
+                ScriptErrorType = "CompilationErrorException";
             }
             catch (Exception exc)
             {
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
                 MessageBox.Show(exc.Message + "\n\n" + exc.ToString(), "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+                ScriptExecutionSuccess = false;
+                ScriptErrorMessage = exc.Message;
+                ScriptErrorType = "Exception";
             }
         }
 

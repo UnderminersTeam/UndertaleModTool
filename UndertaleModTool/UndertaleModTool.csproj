@@ -46,6 +46,11 @@
 		</None>
 		<None Update="CommunityScripts\SimplifyBattlegroupScript.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="CommunityScripts\VariableFixer.csx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_backgrounder_dock_Other_10.gml">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -3523,6 +3528,7 @@
 		<EmbeddedResource Include="Resources\VMASM.xshd" />
 		<None Update="Repackers\ReduceEmbeddedTexturePages.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="SampleScripts\BorderEnabler.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -3645,10 +3651,35 @@
 		</None>
 		<None Update="TechnicalScripts\FindUnusedStrings.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="TechnicalScripts\GetAllChunkNames.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="TechnicalScripts\LintAllScripts.csx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="TechnicalScripts\RestoreMissingCodeLocals.csx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="TechnicalScripts\TestLintScript.csx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="TechnicalScripts\ScriptTestSuccess.txt">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="TechnicalScripts\ScriptTestFail.txt">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="TechnicalScripts\TestRunScriptWithinScript.csx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="Unpackers\DumpSpecificCode.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -3834,6 +3865,10 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
+		<None Update="TechnicalScripts\TestAUMIConnection.csx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="TechnicalScripts\ToggleAlignment.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3933,11 +3968,11 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="AvalonEdit">
-			<Version>6.1.1</Version>
+			<Version>6.1.2.30</Version>
 		</PackageReference>
 		<PackageReference Include="Fody" Version="6.5.1">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="GraphViz.NET" Version="1.0.0" />
 		<PackageReference Include="Microsoft-WindowsAPICodePack-Shell">
@@ -3952,7 +3987,7 @@
 			<Version>3.9.0</Version>
 		</PackageReference>
 		<PackageReference Include="NAudio">
-			<Version>2.0.0</Version>
+			<Version>2.0.1</Version>
 		</PackageReference>
 		<PackageReference Include="NAudio.Vorbis">
 			<Version>1.3.1</Version>
