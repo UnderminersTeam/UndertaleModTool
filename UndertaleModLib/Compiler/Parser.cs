@@ -1372,8 +1372,8 @@ namespace UndertaleModLib.Compiler
                     }
 
                     // TODO: Remove this once support is added
-                    //if (t != TokenKind.OpenArray)
-                    //    ReportCodeError("Accessors are currently unsupported in this compiler- use the DS functions themselves instead (internally they're the same).", false);
+                    if (t != TokenKind.OpenArray)
+                        ReportCodeError("Accessors are currently unsupported in this compiler- use the DS functions themselves instead (internally they're the same).", false);
 
                     if (EnsureTokenKind(TokenKind.CloseArray) == null) return null;
                 }

@@ -285,7 +285,7 @@ namespace UndertaleModTool
             }
             return false;
         }
-        private async Task<bool> DoSaveDialog()
+        private async Task<bool> DoSaveDialog(bool suppressDebug = false)
         {
             SaveFileDialog dlg = new SaveFileDialog();
 
@@ -295,7 +295,7 @@ namespace UndertaleModTool
 
             if (dlg.ShowDialog() == true)
             {
-                await SaveFile(dlg.FileName);
+                await SaveFile(dlg.FileName, suppressDebug);
                 return true;
             }
             return false;
@@ -446,6 +446,10 @@ namespace UndertaleModTool
                         {
                             MessageBox.Show("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
+                        if (!data.GeneralInfo.DisableDebugger)
+                        {
+                            MessageBox.Show("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
                         if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
                             CloseChildFiles();
                         Data = data;
@@ -466,7 +470,7 @@ namespace UndertaleModTool
             await t;
         }
 
-        private async Task SaveFile(string filename)
+        private async Task SaveFile(string filename, bool suppressDebug = false)
         {
             if (Data == null || Data.UnsupportedBytecodeVersion)
                 return;
@@ -482,13 +486,8 @@ namespace UndertaleModTool
                 CloseChildFiles();
 
             DebugDataDialog.DebugDataMode debugMode = DebugDataDialog.DebugDataMode.NoDebug;
-            if (Data.GeneralInfo != null && !Data.GeneralInfo.DisableDebugger) // TODO: I think the game itself can also use the .yydebug file on crash reports
-            {
-                DebugDataDialog debugDialog = new DebugDataDialog();
-                debugDialog.Owner = this;
-                debugDialog.ShowDialog();
-                debugMode = debugDialog.Result;
-            }
+            if (!suppressDebug && Data.GeneralInfo != null && !Data.GeneralInfo.DisableDebugger)
+                MessageBox.Show("You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
             Task t = Task.Run(() =>
             {
                 bool SaveSucceeded = true;
@@ -1279,11 +1278,31 @@ namespace UndertaleModTool
             if (Data == null)
                 return;
 
-            bool origDbg = Data.GeneralInfo.DisableDebugger;
-            Data.GeneralInfo.DisableDebugger = true;
             bool saveOk = true;
-            if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-                saveOk = await DoSaveDialog();
+            if (!Data.GeneralInfo.DisableDebugger)
+            {
+                if (MessageBox.Show("The game has the debugger enabled. Would you like to disable it so the game will run?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+                    Data.GeneralInfo.DisableDebugger = true;
+                    if (!await DoSaveDialog())
+                    {
+                        MessageBox.Show("You must save your changes to run.", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
+                        Data.GeneralInfo.DisableDebugger = false;
+                        return;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Use the \"Run game using debugger\" option to run this game.", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+            else
+            {
+                Data.GeneralInfo.DisableDebugger = true;
+                if (MessageBox.Show("Save changes first?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    saveOk = await DoSaveDialog();
+            }
 
             if (FilePath == null)
             {
@@ -1297,8 +1316,6 @@ namespace UndertaleModTool
                 if (runtime != null)
                     Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
             }
-
-            Data.GeneralInfo.DisableDebugger = origDbg;
         }
 
         private async void Command_RunDebug(object sender, ExecutedRoutedEventArgs e)
@@ -1309,7 +1326,7 @@ namespace UndertaleModTool
             bool origDbg = Data.GeneralInfo.DisableDebugger;
             Data.GeneralInfo.DisableDebugger = false;
 
-            bool saveOk = await DoSaveDialog();
+            bool saveOk = await DoSaveDialog(true);
             if (FilePath == null)
             {
                 MessageBox.Show("The file must be saved in order to be run.", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Exclamation);
