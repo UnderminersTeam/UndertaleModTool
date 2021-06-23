@@ -74,10 +74,8 @@ jobs:
         prerelease: true
         name: UndertaleModTool Nightly
         files: |
-          UndertaleModTool-Nightly-x86.zip
-          UndertaleModTool-Nightly-x64.zip
-          UndertaleModTool-Nightly-ARM.zip
-        body: | 
-          The nightly (absolute latest) UndertaleModTool version.
+          artifact/UndertaleModTool-Nightly-x86.zip
+          artifact/UndertaleModTool-Nightly-x64.zip
+          artifact/UndertaleModTool-Nightly-ARM.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
