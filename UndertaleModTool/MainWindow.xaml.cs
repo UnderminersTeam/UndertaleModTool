@@ -446,6 +446,10 @@ namespace UndertaleModTool
                         {
                             MessageBox.Show("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
+                        if (!data.GeneralInfo.DisableDebugger)
+                        {
+                            MessageBox.Show("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
                         if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
                             CloseChildFiles();
                         Data = data;
@@ -482,13 +486,8 @@ namespace UndertaleModTool
                 CloseChildFiles();
 
             DebugDataDialog.DebugDataMode debugMode = DebugDataDialog.DebugDataMode.NoDebug;
-            if (Data.GeneralInfo != null && !Data.GeneralInfo.DisableDebugger) // TODO: I think the game itself can also use the .yydebug file on crash reports
-            {
-                DebugDataDialog debugDialog = new DebugDataDialog();
-                debugDialog.Owner = this;
-                debugDialog.ShowDialog();
-                debugMode = debugDialog.Result;
-            }
+            if (Data.GeneralInfo != null && !Data.GeneralInfo.DisableDebugger)
+                MessageBox.Show("You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
             Task t = Task.Run(() =>
             {
                 bool SaveSucceeded = true;
