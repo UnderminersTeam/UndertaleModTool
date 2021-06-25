@@ -48,25 +48,42 @@ for (var j = 0; j < splitStringsList.Count; j++)
                 nativeOBJ.Name = Data.Strings.MakeString(obj.Name.Content);
                 Data.GameObjects.Add(nativeOBJ);
             }
-            nativeOBJ.Sprite = Data.Sprites.ByName(donorOBJ.Sprite.Name.Content);
-            nativeOBJ.Visible = donorOBJ.Visible;
-            nativeOBJ.Solid = donorOBJ.Solid;
-            nativeOBJ.Depth = donorOBJ.Depth;
-            nativeOBJ.Persistent = donorOBJ.Persistent;
-            nativeOBJ.ParentId = Data.GameObjects.ByName(donorOBJ.ParentId.Name.Content);
+            if (donorOBJ.Sprite != null)
+                nativeOBJ.Sprite = Data.Sprites.ByName(donorOBJ.Sprite.Name.Content);
+            if (donorOBJ.Visible != null)
+                nativeOBJ.Visible = donorOBJ.Visible;
+            if (donorOBJ.Solid != null)
+                nativeOBJ.Solid = donorOBJ.Solid;
+            if (donorOBJ.Depth != null)
+                nativeOBJ.Depth = donorOBJ.Depth;
+            if (donorOBJ.Persistent != null)
+                nativeOBJ.Persistent = donorOBJ.Persistent;
+            if (donorOBJ.ParentId != null)
+                nativeOBJ.ParentId = Data.GameObjects.ByName(donorOBJ.ParentId.Name.Content);
             if (donorOBJ.TextureMaskId != null)
                 nativeOBJ.TextureMaskId = Data.Sprites.ByName(donorOBJ.TextureMaskId.Name.Content);
-            nativeOBJ.UsesPhysics = donorOBJ.UsesPhysics;
-            nativeOBJ.IsSensor = donorOBJ.IsSensor;
-            nativeOBJ.CollisionShape = donorOBJ.CollisionShape;
-            nativeOBJ.Density = donorOBJ.Density;
-            nativeOBJ.Restitution = donorOBJ.Restitution;
-            nativeOBJ.Group = donorOBJ.Group;
-            nativeOBJ.LinearDamping = donorOBJ.LinearDamping;
-            nativeOBJ.AngularDamping = donorOBJ.AngularDamping;
-            nativeOBJ.Friction = donorOBJ.Friction;
-            nativeOBJ.Awake = donorOBJ.Awake;
-            nativeOBJ.Kinematic = donorOBJ.Kinematic;
+            if (donorOBJ.UsesPhysics != null)
+                nativeOBJ.UsesPhysics = donorOBJ.UsesPhysics;
+            if (donorOBJ.IsSensor != null)
+                nativeOBJ.IsSensor = donorOBJ.IsSensor;
+            if (donorOBJ.CollisionShape != null)
+                nativeOBJ.CollisionShape = donorOBJ.CollisionShape;
+            if (donorOBJ.Density != null)
+                nativeOBJ.Density = donorOBJ.Density;
+            if (donorOBJ.Restitution != null)
+                nativeOBJ.Restitution = donorOBJ.Restitution;
+            if (donorOBJ.Group != null)
+                nativeOBJ.Group = donorOBJ.Group;
+            if (donorOBJ.LinearDamping != null)
+                nativeOBJ.LinearDamping = donorOBJ.LinearDamping;
+            if (donorOBJ.AngularDamping != null)
+                nativeOBJ.AngularDamping = donorOBJ.AngularDamping;
+            if (donorOBJ.Friction != null)
+                nativeOBJ.Friction = donorOBJ.Friction;
+            if (donorOBJ.Awake != null)
+                nativeOBJ.Awake = donorOBJ.Awake;
+            if (donorOBJ.Kinematic != null)
+                nativeOBJ.Kinematic = donorOBJ.Kinematic;
             nativeOBJ.PhysicsVertices.Clear();
             foreach (UndertaleGameObject.UndertalePhysicsVertex vert in donorOBJ.PhysicsVertices)
             {
@@ -80,7 +97,7 @@ for (var j = 0; j < splitStringsList.Count; j++)
                 nativeOBJ.Events.Clear();
                 for (var i = 0; i < donorOBJ.Events.Count; i++)
                 {
-					UndertalePointerList<UndertaleGameObject.Event> newEvent = new UndertalePointerList<UndertaleGameObject.Event>();
+                    UndertalePointerList<UndertaleGameObject.Event> newEvent = new UndertalePointerList<UndertaleGameObject.Event>();
                     foreach (UndertaleGameObject.Event evnt in donorOBJ.Events[i])
                     {
                         UndertaleGameObject.Event newevnt = new UndertaleGameObject.Event();
@@ -88,13 +105,20 @@ for (var j = 0; j < splitStringsList.Count; j++)
                         {
                             UndertaleGameObject.EventAction nativeACT = new UndertaleGameObject.EventAction();
                             newevnt.Actions.Add(nativeACT);
-                            nativeACT.LibID = donorACT.LibID;
-                            nativeACT.ID = donorACT.ID;
-                            nativeACT.Kind = donorACT.Kind;
-                            nativeACT.UseRelative = donorACT.UseRelative;
-                            nativeACT.IsQuestion = donorACT.IsQuestion;
-                            nativeACT.UseApplyTo = donorACT.UseApplyTo;
-                            nativeACT.ExeType = donorACT.ExeType;
+                            if (donorACT.LibID != null)
+                                nativeACT.LibID = donorACT.LibID;
+                            if (donorACT.ID != null)
+                                nativeACT.ID = donorACT.ID;
+                            if (donorACT.Kind != null)
+                                nativeACT.Kind = donorACT.Kind;
+                            if (donorACT.UseRelative != null)
+                                nativeACT.UseRelative = donorACT.UseRelative;
+                            if (donorACT.IsQuestion != null)
+                                nativeACT.IsQuestion = donorACT.IsQuestion;
+                            if (donorACT.UseApplyTo != null)
+                                nativeACT.UseApplyTo = donorACT.UseApplyTo;
+                            if (donorACT.ExeType != null)
+                                nativeACT.ExeType = donorACT.ExeType;
                             if (donorACT.ActionName != null)
                                 nativeACT.ActionName = Data.Strings.MakeString(donorACT.ActionName.Content);
                             if (donorACT.CodeId?.Name?.Content != null)
@@ -153,7 +177,7 @@ for (var j = 0; j < splitStringsList.Count; j++)
                         newevnt.EventSubtype = evnt.EventSubtype;
                         newEvent.Add(newevnt);
                     }
-					nativeOBJ.Events.Add(newEvent);
+                    nativeOBJ.Events.Add(newEvent);
                 }
             }
             catch
