@@ -34,48 +34,18 @@ jobs:
         Copy-Item "SCRIPTS.md" -Destination "./win_x86/"
         Copy-Item "SCRIPTS.md" -Destination "./win_x64/"
         Copy-Item "SCRIPTS.md" -Destination "./win_arm/"
-    - name: Archive artifacts
-      run: |
-        cd win_x86
-        7z -tzip a UndertaleModTool-Nightly-x86.zip * -mx0 | findstr ing
-        cd ..
-        cd win_x64
-        7z -tzip a UndertaleModTool-Nightly-x64.zip * -mx0 | findstr ing
-        cd ..
-        cd win_arm
-        7z -tzip a UndertaleModTool-Nightly-ARM.zip * -mx0 | findstr ing
-        cd ..
-        mv win_x86\UndertaleModTool-Nightly-x86.zip .
-        mv win_x64\UndertaleModTool-Nightly-x64.zip .
-        mv win_arm\UndertaleModTool-Nightly-ARM.zip .
-    - name: Upload UndertaleModTool-Nightly-x86.zip
+    - name: Archive win_x86
       uses: actions/upload-artifact@v2
       with:
-        path: UndertaleModTool-Nightly-x86.zip
-    - name: Upload UndertaleModTool-Nightly-x64.zip
+        name: win_x86
+        path: win_x86
+    - name: Archive win_x64
       uses: actions/upload-artifact@v2
       with:
-        path: UndertaleModTool-Nightly-x64.zip
-    - name: Upload UndertaleModTool-Nightly-ARM.zip
+        name: win_x64
+        path: win_x64
+    - name: Archive win_arm
       uses: actions/upload-artifact@v2
       with:
-        path: UndertaleModTool-Nightly-ARM.zip
-  Upload:
-    needs: [build]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Download artifacts
-      uses: actions/download-artifact@v2
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: Nightly
-        prerelease: true
-        name: UndertaleModTool Nightly
-        files: |
-          artifact/UndertaleModTool-Nightly-x86.zip
-          artifact/UndertaleModTool-Nightly-x64.zip
-          artifact/UndertaleModTool-Nightly-ARM.zip
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        name: win_arm
+        path: win_arm
