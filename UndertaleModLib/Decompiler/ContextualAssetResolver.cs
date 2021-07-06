@@ -26,12 +26,16 @@ namespace UndertaleModLib.Decompiler
             macros = new Dictionary<string, string>();
 
             // Don't use
-            if (data.GeneralInfo.BytecodeVersion <= 14) 
-            {
-                foreach (var constant in data.Options.Constants)
+            // Error because of loading audiogroup 
+            if (data.GeneralInfo != null)
+            {   
+                if (data.GeneralInfo.BytecodeVersion <= 14)
                 {
-                    if (!constant.Name.Content.StartsWith("@@"))
-                        macros[constant.Value.Content] = constant.Name.Content;
+                    foreach (var constant in data.Options.Constants)
+                    {
+                        if (!constant.Name.Content.StartsWith("@@"))
+                            macros[constant.Value.Content] = constant.Name.Content;
+                    }
                 }
             }
 
