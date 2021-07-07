@@ -39,7 +39,18 @@ namespace UndertaleModLib.Util
         private void ResizeToFit(int size)
         {
             while (size > buffer.Length)
-                Array.Resize(ref buffer, buffer.Length * 2);
+            {
+                long newSize = buffer.Length * 2;
+                if (newSize > int.MaxValue)
+                {
+                    Array.Resize(ref buffer, int.MaxValue);
+                    break;
+                }
+                else
+                {
+                    Array.Resize(ref buffer, (int)newSize);
+                }
+            }
             if (currentSize < size)
                 currentSize = size;
         }
