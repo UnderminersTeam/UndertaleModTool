@@ -54,7 +54,7 @@ bool[] SpriteSheetsCopyNeeded = new bool[DonorDataEmbeddedTexturesCount];
 bool[] SpriteSheetsUsed = new bool[(DataEmbeddedTexturesCount + DonorDataEmbeddedTexturesCount)];
 foreach (var sub in subs)
 {
-    splitStringsList.Add(sub);
+    splitStringsList.Add(sub.Trim());
 }
 for (int i = 0; i < SpriteSheetsCopyNeeded.Length; i++)
 {
