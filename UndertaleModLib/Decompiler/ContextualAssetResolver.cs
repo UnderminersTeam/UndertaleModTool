@@ -186,7 +186,32 @@ namespace UndertaleModLib.Decompiler
                         return null;
                     }
                 },
+                { "gpu_set_blendmode", (context, func, index, self) =>
+                    {
+                        int? val = Decompiler.ExpressionConstant.ConvertToInt(self.Value);
+                        if (val != null)
+                        {
+                            switch(val)
+                            {
+                                case 0: return "bm_normal";
+                                case 1: return "bm_add";
+                                case 2: return "bm_max";
+                                case 3: return "bm_subtract";
+                            }
+                        }
+                        return null;
+                    }
+                },
                 { "draw_set_blend_mode_ext", (context, func, index, self) =>
+                    {
+                        int? val = Decompiler.ExpressionConstant.ConvertToInt(self.Value);
+                        if (val == null)
+                            return null;
+
+                        return blend_modes.ContainsKey(val.Value) ? blend_modes[val.Value] : null;
+                    }
+                },
+                { "gpu_set_blendmode_ext", (context, func, index, self) =>
                     {
                         int? val = Decompiler.ExpressionConstant.ConvertToInt(self.Value);
                         if (val == null)
