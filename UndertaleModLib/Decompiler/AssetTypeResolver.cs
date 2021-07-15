@@ -589,6 +589,7 @@ namespace UndertaleModLib.Decompiler
                 { "instance_place", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
                 { "instance_position", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
                 { "instance_deactivate_all", new AssetIDType[] { AssetIDType.Boolean } },
+                { "application_surface_enable", new AssetIDType[] { AssetIDType.Boolean } },
                 { "application_surface_draw_enable", new AssetIDType[] { AssetIDType.Boolean } },
                 { "instance_deactivate_object", new AssetIDType[] { AssetIDType.GameObject } },
                 { "instance_activate_region", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean } },
