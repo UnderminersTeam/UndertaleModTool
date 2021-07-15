@@ -1226,7 +1226,11 @@ namespace UndertaleModLib.Decompiler
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
             {
-                // Special case for this function which doesn't have any purpose in decompiled code
+                // Special case for these functions which don't have any purpose in decompiled code
+                if (Function?.Name?.Content == "@@This@@")
+                {
+                    return new ExpressionConstant(UndertaleInstruction.DataType.Variable, "self");
+                }
                 if (Function?.Name?.Content == "@@GetInstance@@")
                 {
                     Statement res = Arguments[0];
