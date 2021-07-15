@@ -1231,6 +1231,10 @@ namespace UndertaleModLib.Decompiler
                 {
                     return new ExpressionConstant(UndertaleInstruction.DataType.Variable, "self");
                 }
+                if (Function?.Name?.Content == "@@Other@@")
+                {
+                    return new ExpressionConstant(UndertaleInstruction.DataType.Variable, "other");
+                }
                 if (Function?.Name?.Content == "@@GetInstance@@")
                 {
                     Statement res = Arguments[0];
