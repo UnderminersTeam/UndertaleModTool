@@ -6,9 +6,9 @@ bpoff = (((-bp) + bpy) + yy)
 if (drawchar == 1)
 {
     draw_set_color(c_black)
-    draw_rectangle((xx - 10), ((yy + 480) - bp), (xx + 650), (yy + 500), 0)
+    draw_rectangle((xx - 10), ((yy + 480) - bp), (xx + 650), (yy + 500), false)
     draw_set_color(c_black)
-    draw_rectangle((xx - 10), (yy + tp), (xx + 650), (yy - 10), 0)
+    draw_rectangle((xx - 10), (yy + tp), (xx + 650), (yy - 10), false)
     scr_charbox()
     if (global.menuno == 0)
         deschaver = 0
@@ -41,7 +41,7 @@ if (drawchar == 1)
 if (global.menuno == 5)
 {
     draw_set_color(c_black)
-    draw_rectangle((xx + 60), (yy + 90), (xx + 580), (yy + 410), 0)
+    draw_rectangle((xx + 60), (yy + 90), (xx + 580), (yy + 410), false)
     scr_darkbox((xx + 50), (yy + 80), (xx + 590), (yy + 420))
     if (global.submenu >= 30 && global.submenu <= 33)
     {
@@ -123,19 +123,19 @@ if (global.menuno == 4)
     draw_set_color(c_black)
     if (global.lang == "ja")
     {
-        draw_rectangle((xx + 60), (yy + 90), (xx + 612), (yy + 410), 0)
+        draw_rectangle((xx + 60), (yy + 90), (xx + 612), (yy + 410), false)
         scr_darkbox((xx + 50), (yy + 80), (xx + 622), (yy + 420))
     }
     else
     {
-        draw_rectangle((xx + 60), (yy + 90), (xx + 580), (yy + 410), 0)
+        draw_rectangle((xx + 60), (yy + 90), (xx + 580), (yy + 410), false)
         scr_darkbox((xx + 50), (yy + 80), (xx + 590), (yy + 420))
     }
     draw_set_color(c_white)
-    draw_rectangle((xx + 60), (yy + 216), ((xx + 60) + 520), ((yy + 216) + 5), 0)
-    draw_rectangle((xx + 294), (yy + 220), ((xx + 294) + 5), ((yy + 220) + 190), 0)
+    draw_rectangle((xx + 60), (yy + 216), ((xx + 60) + 520), ((yy + 216) + 5), false)
+    draw_rectangle((xx + 294), (yy + 220), ((xx + 294) + 5), ((yy + 220) + 190), false)
     if (global.lang == "ja")
-        draw_rectangle((xx + 60), (yy + 216), ((xx + 60) + 552), ((yy + 216) + 5), 0)
+        draw_rectangle((xx + 60), (yy + 216), ((xx + 60) + 552), ((yy + 216) + 5), false)
     draw_sprite_ext(scr_84_get_sprite("spr_dmenu_captions"), 0, (xx + 124), (yy + 84), 2, 2, 0, c_white, 1)
     draw_sprite_ext(scr_84_get_sprite("spr_dmenu_captions"), 4, (xx + 124), (yy + 210), 2, 2, 0, c_white, 1)
     draw_sprite_ext(scr_84_get_sprite("spr_dmenu_captions"), 5, (xx + 380), (yy + 210), 2, 2, 0, c_white, 1)
@@ -311,20 +311,20 @@ if (global.menuno == 2)
     if (global.lang == "ja")
     {
         ch_vspace = 28
-        draw_rectangle((xx + 60), (yy + 90), (xx + 626), (yy + 410), 0)
+        draw_rectangle((xx + 60), (yy + 90), (xx + 626), (yy + 410), false)
         scr_darkbox((xx + 50), (yy + 80), (xx + 636), (yy + 420))
     }
     else
     {
-        draw_rectangle((xx + 60), (yy + 90), (xx + 580), (yy + 410), 0)
+        draw_rectangle((xx + 60), (yy + 90), (xx + 580), (yy + 410), false)
         scr_darkbox((xx + 50), (yy + 80), (xx + 590), (yy + 420))
     }
     draw_set_color(c_white)
-    draw_rectangle((xx + 270), (yy + 91), (xx + 275), ((yy + 91) + 135), 0)
-    draw_rectangle((xx + 59), (yy + 221), ((xx + 59) + 523), ((yy + 221) + 5), 0)
+    draw_rectangle((xx + 270), (yy + 91), (xx + 275), ((yy + 91) + 135), false)
+    draw_rectangle((xx + 59), (yy + 221), ((xx + 59) + 523), ((yy + 221) + 5), false)
     if (global.lang == "ja")
-        draw_rectangle((xx + 59), (yy + 221), ((xx + 63) + 565), ((yy + 221) + 5), 0)
-    draw_rectangle((xx + 318), (yy + 221), ((xx + 318) + 5), ((yy + 221) + 190), 0)
+        draw_rectangle((xx + 59), (yy + 221), ((xx + 63) + 565), ((yy + 221) + 5), false)
+    draw_rectangle((xx + 318), (yy + 221), ((xx + 318) + 5), ((yy + 221) + 190), false)
     draw_sprite_ext(scr_84_get_sprite("spr_dmenu_captions"), 0, (xx + 118), (yy + 86), 2, 2, 0, c_white, 1)
     draw_sprite_ext(scr_84_get_sprite("spr_dmenu_captions"), 1, (xx + 376), (yy + 86), 2, 2, 0, c_white, 1)
     if (global.submenucoord[11] == 1 || global.submenucoord[11] == 2)
@@ -487,7 +487,7 @@ if (global.menuno == 2)
                 if (global.armor[i] == 0)
                     buff -= 1
             }
-            draw_rectangle((((xx + 555) - buff) + scroll_xoff), (((yy + 260) + (i * 10)) - buff), (((xx + 558) + buff) + scroll_xoff), (((yy + 263) + (i * 10)) + buff), 0)
+            draw_rectangle((((xx + 555) - buff) + scroll_xoff), (((yy + 260) + (i * 10)) - buff), (((xx + 558) + buff) + scroll_xoff), (((yy + 263) + (i * 10)) + buff), false)
         }
         if (pagemax[pm] > 0)
             draw_sprite_ext(spr_morearrow, 0, ((xx + 551) + scroll_xoff), ((yy + 250) - (sin((cur_jewel / 12)) * 3)), 1, -1, 0, c_white, 1)
@@ -698,12 +698,12 @@ if (global.menuno == 1)
     draw_set_color(c_black)
     if (global.lang == "ja")
     {
-        draw_rectangle((xx + 46), (yy + 90), (xx + 594), (yy + 360), 0)
+        draw_rectangle((xx + 46), (yy + 90), (xx + 594), (yy + 360), false)
         scr_darkbox((xx + 36), (yy + 80), (xx + 604), (yy + 370))
     }
     else
     {
-        draw_rectangle((xx + 70), (yy + 90), (xx + 570), (yy + 360), 0)
+        draw_rectangle((xx + 70), (yy + 90), (xx + 570), (yy + 360), false)
         scr_darkbox((xx + 60), (yy + 80), (xx + 580), (yy + 370))
     }
     scr_84_set_draw_font("mainbig")
