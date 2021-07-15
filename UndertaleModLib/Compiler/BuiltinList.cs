@@ -1718,11 +1718,11 @@ namespace UndertaleModLib.Compiler
                 Functions["gpu_set_ztestenable"] = new FunctionInfo(this, 1);
                 Functions["gpu_set_zfunc"] = new FunctionInfo(this, 1);
                 Functions["gpu_set_zwriteenable"] = new FunctionInfo(this, 1);
-                Functions["gpu_set_fog"] = new FunctionInfo(this, -1);
+                Functions["gpu_set_fog"] = new FunctionInfo(this, 4);
                 Functions["gpu_set_cullmode"] = new FunctionInfo(this, 1);
                 Functions["gpu_set_blendmode"] = new FunctionInfo(this, 1);
-                Functions["gpu_set_blendmode_ext"] = new FunctionInfo(this, -1);
-                Functions["gpu_set_blendmode_ext_sepalpha"] = new FunctionInfo(this, -1);
+                Functions["gpu_set_blendmode_ext"] = new FunctionInfo(this, 2);
+                Functions["gpu_set_blendmode_ext_sepalpha"] = new FunctionInfo(this, 4);
                 Functions["gpu_set_colorwriteenable"] = new FunctionInfo(this, -1);
                 Functions["gpu_set_colourwriteenable"] = new FunctionInfo(this, -1);
                 Functions["gpu_set_alphatestenable"] = new FunctionInfo(this, 1);

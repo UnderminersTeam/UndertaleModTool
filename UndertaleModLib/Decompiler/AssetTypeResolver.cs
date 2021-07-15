@@ -849,6 +849,9 @@ namespace UndertaleModLib.Decompiler
                 { "gpu_set_blendmode", new AssetIDType[] { AssetIDType.ContextDependent } },
                 { "gpu_set_blendmode_ext", new AssetIDType[] { AssetIDType.ContextDependent, AssetIDType.ContextDependent } },
 
+                { "d3d_set_fog", new AssetIDType[] { AssetIDType.Boolean, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other } },
+                { "gpu_set_fog", new AssetIDType[] { AssetIDType.Boolean, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other } },
+
                 { "draw_sprite", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
                 { "draw_sprite_ext", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
                 { "draw_sprite_general", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
