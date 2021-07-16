@@ -1008,6 +1008,10 @@ namespace UndertaleModTool
         {
             MenuItem_RunScript_SubmenuOpened(sender, e, "Repackers");
         }
+        private void MenuItem_RunDemoScript_SubmenuOpened(object sender, RoutedEventArgs e)
+        {
+            MenuItem_RunScript_SubmenuOpened(sender, e, "DemoScripts");
+        }
         private void MenuItem_RunScript_SubmenuOpened(object sender, RoutedEventArgs e, string folderName)
         {
             MenuItem item = sender as MenuItem;
