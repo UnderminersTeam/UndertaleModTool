@@ -25,7 +25,7 @@ abc123 = SimpleTextInput("Menu", "Enter object names", abc123, true);
 string[] subs = abc123.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
 foreach (var sub in subs)
 {
-    splitStringsList.Add(sub);
+    splitStringsList.Add(sub.Trim());
 }
 for (var j = 0; j < splitStringsList.Count; j++)
 {

@@ -44,11 +44,37 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
+		<None Update="CommunityScripts\ExportAllStringsBetter.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="CommunityScripts\FindObjectsInRooms.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="CommunityScripts\FontEditor.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="CommunityScripts\FontEditor_README.md">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="CommunityScripts\ImportAllStringsBetter.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="CommunityScripts\SimplifyBattlegroupScript.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="CommunityScripts\VariableFixer.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="CommunityScripts\WASDTale.csx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="Corrections\0bf582aa180983a9ffa721aa2be2f273\Main\gml_Object_obj_backgrounder_dock_Other_10.gml">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -3514,6 +3540,34 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
+		<None Update="Repackers\RemoveUnusedSounds.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="Repackers\CopySound.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="Repackers\CopySoundInternal.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="Repackers\CopySpriteBgFont.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="Repackers\CopySpriteBgFontInternal.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="Repackers\GameObjectCopy.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="Repackers\GameObjectCopyInternal.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="Repackers\ImportASM_2_3.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3526,6 +3580,7 @@
 		<EmbeddedResource Include="Resources\VMASM.xshd" />
 		<None Update="Repackers\ReduceEmbeddedTexturePages.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="SampleScripts\BorderEnabler.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -3648,6 +3703,7 @@
 		</None>
 		<None Update="TechnicalScripts\FindUnusedStrings.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="TechnicalScripts\GetAllChunkNames.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -3655,21 +3711,27 @@
 		</None>
 		<None Update="DemoScripts\LintAllScripts.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="TechnicalScripts\RestoreMissingCodeLocals.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="DemoScripts\TestLintScript.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="DemoScripts\ScriptTestSuccess.txt">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="DemoScripts\ScriptTestFail.txt">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="DemoScripts\TestRunScriptWithinScript.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="Unpackers\DumpSpecificCode.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -3977,7 +4039,7 @@
 			<Version>3.9.0</Version>
 		</PackageReference>
 		<PackageReference Include="NAudio">
-			<Version>2.0.0</Version>
+			<Version>2.0.1</Version>
 		</PackageReference>
 		<PackageReference Include="NAudio.Vorbis">
 			<Version>1.3.1</Version>

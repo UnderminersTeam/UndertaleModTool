@@ -82,6 +82,7 @@ namespace UndertaleModLib
                 Timelines.ByName(name, ignoreCase) ??
                 AnimationCurves?.ByName(name, ignoreCase) ??
                 Sequences?.ByName(name, ignoreCase) ??
+                AudioGroups?.ByName(name, ignoreCase) ??
                 (UndertaleNamedResource)null;
         }
 
@@ -119,6 +120,8 @@ namespace UndertaleModLib
                 return EmbeddedTextures.IndexOf(obj as UndertaleEmbeddedTexture);
             if (obj is UndertaleTexturePageItem)
                 return TexturePageItems.IndexOf(obj as UndertaleTexturePageItem);
+            if (obj is UndertaleAudioGroup)
+                return AudioGroups.IndexOf(obj as UndertaleAudioGroup);
 
             if (panicIfInvalid)
                 throw new InvalidOperationException();

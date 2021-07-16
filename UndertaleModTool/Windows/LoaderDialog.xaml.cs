@@ -70,10 +70,17 @@ namespace UndertaleModTool
         {
             Dispatcher.Invoke(() =>
             {
-                if (IsVisible)
+                try
                 {
-                    this.PreventClose = false;
-                    Hide();
+                    if (IsVisible)
+                    {
+                        this.PreventClose = false;
+                        Hide();
+                    }
+                }
+                catch
+                {
+                    // Silently fail...
                 }
             });
         }
@@ -83,9 +90,16 @@ namespace UndertaleModTool
             PreventClose = false;
             Dispatcher.Invoke(() =>
             {
-                if (!IsClosed)
+                try
                 {
-                    Close();
+                    if (!IsClosed)
+                    {
+                        Close();
+                    }
+                }
+                catch
+                {
+                    // Silently fail...
                 }
             });
         }
@@ -94,9 +108,16 @@ namespace UndertaleModTool
         {
             Dispatcher.Invoke(() =>
             {
-                if (!IsClosed)
+                try
                 {
-                    ShowDialog();
+                    if (!IsClosed)
+                    {
+                        ShowDialog();
+                    }
+                }
+                catch
+                {
+                    // Silently fail...
                 }
             });
         }
@@ -110,8 +131,15 @@ namespace UndertaleModTool
         {
             Dispatcher.Invoke(() =>
             {
-                ReportProgress(value + "/" + Maximum + (!String.IsNullOrEmpty(message) ? ": " + message : ""));
-                ProgressBar.Value = value;
+                try
+                {
+                    ReportProgress(value + "/" + Maximum + (!String.IsNullOrEmpty(message) ? ": " + message : ""));
+                    ProgressBar.Value = value;
+                }
+                catch
+                {
+                    // Silently fail...
+                }
             });
         }
 

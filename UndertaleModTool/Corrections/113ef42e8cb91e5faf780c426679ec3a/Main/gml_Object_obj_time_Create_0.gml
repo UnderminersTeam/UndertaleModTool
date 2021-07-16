@@ -9,8 +9,8 @@ else
 global.locale = ((os_get_language() + "_") + string_upper(os_get_region()))
 if (global.osflavor >= 3)
 {
-    application_surface_enable(1)
-    application_surface_draw_enable(0)
+    application_surface_enable(true)
+    application_surface_draw_enable(false)
 }
 if (os_type == os_switch_beta && (!variable_global_exists("switchlogin")))
 {

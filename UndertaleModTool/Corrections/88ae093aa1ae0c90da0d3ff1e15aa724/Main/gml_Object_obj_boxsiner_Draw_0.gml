@@ -11,7 +11,7 @@ repeat (2)
     {
         draw_set_alpha(alpha)
         ysin = (sin((((i * 3) + (siner / 2)) / 8)) * 20)
-        draw_rectangle((20 + (i * 100)), ((16 + yoff) + ysin), (20 + ((i + 1) * 100)), ((136 + yoff) + ysin), 1)
+        draw_rectangle((20 + (i * 100)), ((16 + yoff) + ysin), (20 + ((i + 1) * 100)), ((136 + yoff) + ysin), true)
     }
     yoff = 120
 }
