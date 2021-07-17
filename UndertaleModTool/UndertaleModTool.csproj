@@ -4027,6 +4027,7 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="GraphViz.NET" Version="1.0.0" />
+		<PackageReference Include="log4net" Version="2.0.12" />
 		<PackageReference Include="Microsoft-WindowsAPICodePack-Shell">
 			<Version>1.1.4</Version>
 		</PackageReference>
@@ -4103,5 +4104,11 @@
 	</ItemGroup>
 	<ItemGroup>
 		<TrimmerRootAssembly Include="System.Runtime" />
+		<TrimmerRootAssembly Include="System.Runtime.Extensions" />
+		<TrimmerRootAssembly Include="System.Windows" />
+		<TrimmerRootAssembly Include="System.Diagnostics.Debug" />
+		<TrimmerRootAssembly Include="System.Diagnostics.EventLog.Messages" />
+		<TrimmerRootAssembly Include="System.Diagnostics.EventLog" />
+		<TrimmerRootAssembly Include="System.Diagnostics.PerformanceCounter" />
 	</ItemGroup>
 </Project>
