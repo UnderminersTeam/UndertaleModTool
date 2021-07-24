@@ -56,6 +56,7 @@ namespace UndertaleModTool
         public bool FinishedMessageEnabled = true;
         public bool ScriptExecutionSuccess { get; set; } = true;
         public string ScriptErrorMessage { get; set; } = "";
+        public string ExePath { get; private set; } = System.Environment.CurrentDirectory;
         public string ScriptErrorType { get; set; } = "";
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -1040,8 +1041,11 @@ namespace UndertaleModTool
 
         public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
         {
-            scriptDialog.Update(message, status, progressValue, maxValue);
-            scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
+            if (scriptDialog != null)
+            {
+                scriptDialog.Update(message, status, progressValue, maxValue);
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
+            }
         }
 
         public void HideProgressBar()

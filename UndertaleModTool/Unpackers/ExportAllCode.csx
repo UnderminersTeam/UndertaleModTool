@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
 {
-    bool x = RunUMTScript(Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "HelperScripts", "ExportAllCode2_3.csx"));
+    bool x = RunUMTScript(Path.Combine(ExePath, "HelperScripts", "ExportAllCode2_3.csx"));
     if (x == false)
         ScriptError("ExportAllCode2_3.csx failed!");
     return;

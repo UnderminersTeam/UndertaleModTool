@@ -16,6 +16,7 @@ namespace UndertaleModLib.Scripting
         bool CanSave { get; }
         bool ScriptExecutionSuccess { get; }
         string ScriptErrorMessage { get; }
+        string ExePath { get; }
         string ScriptErrorType { get; }
 
         void EnsureDataLoaded();
