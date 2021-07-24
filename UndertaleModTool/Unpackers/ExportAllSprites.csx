@@ -7,7 +7,7 @@ using UndertaleModLib.Util;
 
 if (!(ScriptQuestion("Export all sprites unpadded?")))
 {
-    bool x = RunUMTScript(Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "HelperScripts", "ExportAllSpritesWithPadding.csx"));
+    bool x = RunUMTScript(Path.Combine(ExePath, "HelperScripts", "ExportAllSpritesWithPadding.csx"));
     if (x == false)
         ScriptError("ExportAllSpritesWithPadding.csx failed!");
     return;

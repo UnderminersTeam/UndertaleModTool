@@ -6,7 +6,7 @@ using UndertaleModLib.Util;
 
 int progress = 0;
 
-string UMTBaseDir = System.AppDomain.CurrentDomain.BaseDirectory;
+string UMTBaseDir = ExePath;
 string dirSampleScripts = Path.Combine(UMTBaseDir, "SampleScripts");
 string dirCommunityScripts = Path.Combine(UMTBaseDir, "CommunityScripts");
 string dirUnpackers = Path.Combine(UMTBaseDir, "Unpackers");
@@ -54,7 +54,7 @@ foreach (string dir in directories)
         }
     }
 }
-string outputLogLocation = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Lint.txt");
+string outputLogLocation = Path.Combine(ExePath, "Lint.txt");
 bool failed = false;
 try
 {

@@ -26,6 +26,7 @@ namespace UndertaleModTests
         public string ScriptPath => throw new NotImplementedException();
         public bool ScriptExecutionSuccess => throw new NotImplementedException();
         public string ScriptErrorMessage => throw new NotImplementedException();
+        public string ExePath => throw new NotImplementedException();
         public string ScriptErrorType => throw new NotImplementedException();
 
         public void ChangeSelection(object newsel)
