@@ -80,7 +80,7 @@ namespace UndertaleModTool
         private Task scriptSetupTask;
 
         // Version info
-        public static string Edition = "pre2";
+        public static string Edition = "pre3";
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? "-" + Edition : "");
 
         public MainWindow()
