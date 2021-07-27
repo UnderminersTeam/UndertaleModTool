@@ -6,20 +6,24 @@ using UndertaleModLib.Util;
 
 int progress = 0;
 
-string UMTBaseDir = System.AppDomain.CurrentDomain.BaseDirectory;
+string UMTBaseDir = ExePath;
 string dirSampleScripts = Path.Combine(UMTBaseDir, "SampleScripts");
 string dirCommunityScripts = Path.Combine(UMTBaseDir, "CommunityScripts");
 string dirUnpackers = Path.Combine(UMTBaseDir, "Unpackers");
 string dirRepackers = Path.Combine(UMTBaseDir, "Repackers");
 string dirTechnicalScripts = Path.Combine(UMTBaseDir, "TechnicalScripts");
+string dirDemoScripts = Path.Combine(UMTBaseDir, "DemoScripts");
+string dirHelperScripts = Path.Combine(UMTBaseDir, "HelperScripts");
 
 ScriptMessage("Linting all bundled scripts");
-string[] directories = new string[5];
+string[] directories = new string[7];
 directories[0] = dirSampleScripts;
 directories[1] = dirCommunityScripts;
 directories[2] = dirUnpackers;
 directories[3] = dirRepackers;
 directories[4] = dirTechnicalScripts;
+directories[5] = dirDemoScripts;
+directories[6] = dirHelperScripts;
 string output = "";
 int scriptsCount = 0;
 int successCount = 0;
@@ -50,7 +54,7 @@ foreach (string dir in directories)
         }
     }
 }
-string outputLogLocation = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Lint.txt");
+string outputLogLocation = Path.Combine(ExePath, "Lint.txt");
 bool failed = false;
 try
 {

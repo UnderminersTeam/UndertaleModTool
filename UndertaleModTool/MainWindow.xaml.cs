@@ -56,6 +56,7 @@ namespace UndertaleModTool
         public bool FinishedMessageEnabled = true;
         public bool ScriptExecutionSuccess { get; set; } = true;
         public string ScriptErrorMessage { get; set; } = "";
+        public string ExePath { get; private set; } = System.Environment.CurrentDirectory;
         public string ScriptErrorType { get; set; } = "";
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -80,7 +81,7 @@ namespace UndertaleModTool
         private Task scriptSetupTask;
 
         // Version info
-        public static string Edition = "pre2";
+        public static string Edition = "pre3";
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? "-" + Edition : "");
 
         public MainWindow()
@@ -446,9 +447,12 @@ namespace UndertaleModTool
                         {
                             MessageBox.Show("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
-                        if (!data.GeneralInfo.DisableDebugger)
+                        if (data.GeneralInfo != null)
                         {
-                            MessageBox.Show("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            if (!data.GeneralInfo.DisableDebugger)
+                            {
+                                MessageBox.Show("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            }
                         }
                         if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
                             CloseChildFiles();
@@ -1005,6 +1009,10 @@ namespace UndertaleModTool
         {
             MenuItem_RunScript_SubmenuOpened(sender, e, "Repackers");
         }
+        private void MenuItem_RunDemoScript_SubmenuOpened(object sender, RoutedEventArgs e)
+        {
+            MenuItem_RunScript_SubmenuOpened(sender, e, "DemoScripts");
+        }
         private void MenuItem_RunScript_SubmenuOpened(object sender, RoutedEventArgs e, string folderName)
         {
             MenuItem item = sender as MenuItem;
@@ -1033,8 +1041,11 @@ namespace UndertaleModTool
 
         public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
         {
-            scriptDialog.Update(message, status, progressValue, maxValue);
-            scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
+            if (scriptDialog != null)
+            {
+                scriptDialog.Update(message, status, progressValue, maxValue);
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
+            }
         }
 
         public void HideProgressBar()

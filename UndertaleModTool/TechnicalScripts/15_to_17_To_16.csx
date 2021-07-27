@@ -1,5 +1,13 @@
 ﻿//Upgrade from bytecode 13 (experimental), 14, 15, 17 to 16 - by Grossley
+//13 and 14 do not work apparently due to variable issues that I don't know how to fix.
 //Need to test this, once I do then I can obsolete the other two scripts
+if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
+{
+    bool x = RunUMTScript(Path.Combine(ExePath, "HelperScripts", "ConvertFrom17to16_for_2.3.csx"));
+    if (x == false)
+        ScriptError("ConvertFrom17to16_for_2.3.csx failed!");
+    return;
+}
 
 EnsureDataLoaded();
 
@@ -7,6 +15,20 @@ string currentBytecodeVersion = Data?.GeneralInfo.BytecodeVersion.ToString();
 string game_name = Data.GeneralInfo.Name.Content;
 
 bool is13 = false;
+
+if (!(Data.FORM.Chunks.ContainsKey("AGRP")))
+{
+    /*    is13 = true;
+        ScriptMessage("Bytecode 13 type game detected. The upgrading of this game is experimental.");
+        currentBytecodeVersion = "13";*/
+    ScriptError("Bytecode 13 is not supported.");
+    return;
+}
+if (Data?.GeneralInfo.BytecodeVersion == 14)
+{
+    ScriptError("Bytecode 14 is not supported.");
+    return;
+}
 
 if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
 {

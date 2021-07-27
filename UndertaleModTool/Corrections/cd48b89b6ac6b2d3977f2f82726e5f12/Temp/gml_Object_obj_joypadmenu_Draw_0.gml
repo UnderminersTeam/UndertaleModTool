@@ -73,7 +73,7 @@ for (i = 1; i < 4; i += 1)
 if (menu == 1 && menu_engage == 1)
 {
     draw_set_color(c_blue)
-    draw_rectangle(160, 75, 245, 90, 0)
+    draw_rectangle(160, 75, 245, 90, false)
     draw_set_color(c_white)
     o_o += 1
     if (o_o >= 16)
@@ -118,7 +118,7 @@ else
 if (menu == 2 && menu_engage == 1)
 {
     draw_set_color(c_blue)
-    draw_rectangle(160, 90, 245, 105, 0)
+    draw_rectangle(160, 90, 245, 105, false)
     draw_set_color(c_white)
     o_o += 1
     if (o_o >= 16)
@@ -165,7 +165,7 @@ else
 if (menu == 3 && menu_engage == 1)
 {
     draw_set_color(c_blue)
-    draw_rectangle(160, 105, 245, 120, 0)
+    draw_rectangle(160, 105, 245, 120, false)
     draw_set_color(c_white)
     o_o += 1
     if (o_o >= 16)
@@ -385,9 +385,9 @@ if (intro == 1)
         caster_play(harp, 1, 1)
     rectile += 4
     draw_set_color(c_black)
-    draw_rectangle((168 - rectile), -10, -1, 250, 0)
+    draw_rectangle((168 - rectile), -10, -1, 250, false)
     draw_set_color(c_black)
-    draw_rectangle((152 + rectile), -10, 330, 250, 0)
+    draw_rectangle((152 + rectile), -10, 330, 250, false)
     if (rectile >= 170)
     {
         caster_loop(weathermusic, 0.8, 1)

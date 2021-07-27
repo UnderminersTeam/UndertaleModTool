@@ -46,11 +46,14 @@ async Task ImportTilesets()
 
 void ImportTileset(UndertaleBackground tileset)
 {
-    UndertaleBackground target = tileset as UndertaleBackground;
     try
     {
-        Bitmap img = new Bitmap(subPath + "\\" + tileset.Name.Content + ".png");
-        target.Texture.ReplaceTexture((Image)img);
+        string path = subPath + "\\" + tileset.Name.Content + ".png";
+        if (File.Exists(path))
+        {
+            Bitmap img = new Bitmap(path);
+            tileset.Texture.ReplaceTexture((Image)img);
+        }
     }
     catch (Exception ex)
     {

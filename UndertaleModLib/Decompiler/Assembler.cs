@@ -20,7 +20,9 @@ namespace UndertaleModLib.Decompiler
             { -4, "pushac" },
             { -5, "setowner" },
             { -6, "isstaticok" },
-            { -7, "setstatic" }
+            { -7, "setstatic" },
+            { -8, "savearef" },
+            { -9, "restorearef" },
         };
         public static Dictionary<string, short> NameToBreakID = new Dictionary<string, short>()
         {
@@ -30,7 +32,9 @@ namespace UndertaleModLib.Decompiler
             { "pushac", -4 },
             { "setowner", -5 },
             { "isstaticok", -6 },
-            { "setstatic", -7 }
+            { "setstatic", -7 },
+            { "savearef", -8 },
+            { "restorearef", -9 },
         };
 
         // TODO: Improve the error messages

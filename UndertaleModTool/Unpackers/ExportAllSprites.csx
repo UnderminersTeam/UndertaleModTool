@@ -5,6 +5,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
+if (!(ScriptQuestion("Export all sprites unpadded?")))
+{
+    bool x = RunUMTScript(Path.Combine(ExePath, "HelperScripts", "ExportAllSpritesWithPadding.csx"));
+    if (x == false)
+        ScriptError("ExportAllSpritesWithPadding.csx failed!");
+    return;
+}
+
 int progress = 0;
 string texFolder = GetFolder(FilePath) + "Export_Sprites" + Path.DirectorySeparatorChar;
 TextureWorker worker = new TextureWorker();

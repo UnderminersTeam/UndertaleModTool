@@ -188,7 +188,9 @@ namespace UndertaleModLib.Compiler
 
                                         UndertaleVariable def = variables.EnsureDefined(patch.Name, realInstType,
                                                                  compileContext.BuiltInList.GlobalArray.ContainsKey(patch.Name) ||
-                                                                 compileContext.BuiltInList.GlobalNotArray.ContainsKey(patch.Name), 
+                                                                 compileContext.BuiltInList.GlobalNotArray.ContainsKey(patch.Name) ||
+                                                                 compileContext.BuiltInList.Instance.ContainsKey(patch.Name) ||
+                                                                 compileContext.BuiltInList.InstanceLimitedEvent.ContainsKey(patch.Name), 
                                                                  compileContext.Data.Strings, compileContext.Data);
                                         if (patch.Target.Kind == Opcode.Pop)
                                             patch.Target.Destination = new Reference<UndertaleVariable>(def, patch.VarType);

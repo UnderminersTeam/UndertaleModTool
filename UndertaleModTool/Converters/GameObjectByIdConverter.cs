@@ -16,7 +16,16 @@ namespace UndertaleModTool
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             uint val = System.Convert.ToUInt32(value);
-            return (Application.Current.MainWindow as MainWindow).Data.GameObjects[(int)val];
+            UndertaleGameObject returnObj = null;
+            if (val < (Application.Current.MainWindow as MainWindow).Data.GameObjects.Count)
+            {
+                returnObj = (Application.Current.MainWindow as MainWindow).Data.GameObjects[(int)val];
+                return returnObj;
+            }
+            else
+            {
+                return returnObj;
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

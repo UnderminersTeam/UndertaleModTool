@@ -473,9 +473,9 @@ if (battlemode == 1)
     {
         with (collision_rectangle((x + 12), (y + 40), (x + 27), (y + 49), obj_overworldbulletparent, 1, 0))
             event_user(5)
-        with (collision_line((x + 12), (y + 49), (x + 19), (y + 57), obj_overworldbulletparent, 1, 0))
+        with (collision_line((x + 12), (y + 49), (x + 19), (y + 57), obj_overworldbulletparent, true, false))
             event_user(5)
-        with (collision_line((x + 26), (y + 49), (x + 19), (y + 57), obj_overworldbulletparent, 1, 0))
+        with (collision_line((x + 26), (y + 49), (x + 19), (y + 57), obj_overworldbulletparent, true, false))
             event_user(5)
     }
 }

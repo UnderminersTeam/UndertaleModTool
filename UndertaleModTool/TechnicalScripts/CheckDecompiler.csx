@@ -10,6 +10,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
+if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
+{
+    bool x = RunUMTScript(Path.Combine(ExePath, "HelperScripts", "CheckDecompiler_2_3.csx"));
+    if (x == false)
+        ScriptError("CheckDecompiler_2_3.csx failed!");
+    return;
+}
+
 EnsureDataLoaded();
 
 if (!InitChecks())

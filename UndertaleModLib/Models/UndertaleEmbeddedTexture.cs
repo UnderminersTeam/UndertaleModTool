@@ -52,14 +52,10 @@ namespace UndertaleModLib.Models
 
         public override string ToString()
         {
-            try
-            {
+            if (Name != null)
                 return Name.Content + " (" + GetType().Name + ")";
-            }
-            catch
-            {
+            else
                 Name = new UndertaleString("Texture Unknown Index");
-            }
             return Name.Content + " (" + GetType().Name + ")";
         }
 

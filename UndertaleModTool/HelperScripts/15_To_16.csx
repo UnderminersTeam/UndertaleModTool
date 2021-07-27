@@ -1,4 +1,5 @@
-//Upgrade from bytecode 13 (experimental), 14, 15 to 16 - by Grossley
+//Upgrade from bytecode 13 (experimental), 14,
+//Upgrade from 15 to 16 - by Grossley (The other 2 didn't work apparently due to variable issues that I don't know how to fix)
 
 EnsureDataLoaded();
 
@@ -15,9 +16,16 @@ if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == fa
 
 if (!(Data.FORM.Chunks.ContainsKey("AGRP")))
 {
-    is13 = true;
-    ScriptMessage("Bytecode 13 type game detected. The upgrading of this game is experimental.");
-    currentBytecodeVersion = "13";
+    /*    is13 = true;
+        ScriptMessage("Bytecode 13 type game detected. The upgrading of this game is experimental.");
+        currentBytecodeVersion = "13";*/
+    ScriptError("Bytecode 13 is not supported.");
+    return;
+}
+if (Data?.GeneralInfo.BytecodeVersion == 14)
+{
+    ScriptError("Bytecode 14 is not supported.");
+    return;
 }
 
 

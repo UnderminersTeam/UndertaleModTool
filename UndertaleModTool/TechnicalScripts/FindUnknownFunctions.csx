@@ -90,7 +90,7 @@ if (unknownFunctions.Count > 0)
         string[] subs = abc123.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
         foreach (var sub in subs)
         {
-            unknownFunctions2.Add(sub);
+            unknownFunctions2.Add(sub.Trim());
         }
         for (var i = 0; i < unknownFunctions.Count; i++)
         {
