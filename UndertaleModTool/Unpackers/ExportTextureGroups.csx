@@ -11,8 +11,6 @@ using UndertaleModLib.Util;
 
 // By Grossley
 
-InitializeScriptDialog();
-
 EnsureDataLoaded();
 
 if (Data.TextureGroupInfo == null)
@@ -21,6 +19,7 @@ if (Data.TextureGroupInfo == null)
     return;
 }
 ScriptMessage("Exports graphics by texture group.");
+bool padding = ScriptQuestion("Use padding?");
 int progress_tgin = 0;
 TextureWorker worker = new TextureWorker();
 foreach (UndertaleTextureGroupInfo tgin in Data.TextureGroupInfo)
@@ -99,7 +98,7 @@ void DumpSprite(string output_folder, UndertaleSprite Spr)
             string exportedTexturesFolder = Path.Combine(output_folder, "Sprites");
             Directory.CreateDirectory(exportedTexturesFolder);
             UndertaleTexturePageItem tex = Spr.Textures[i].Texture;
-            worker.ExportAsPNG(tex, Path.Combine(exportedTexturesFolder, Spr.Name.Content + "_" + i + ".png"));
+            worker.ExportAsPNG(tex, Path.Combine(exportedTexturesFolder, Spr.Name.Content + "_" + i + ".png"), null, padding); // Include padding to make sprites look neat!
         }
     }
 }
