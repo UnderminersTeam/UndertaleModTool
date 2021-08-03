@@ -36,6 +36,10 @@
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
+		<None Update="CommunityScripts\BattlegroupSelector.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="CommunityScripts\BorderEnablerv1_11.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
