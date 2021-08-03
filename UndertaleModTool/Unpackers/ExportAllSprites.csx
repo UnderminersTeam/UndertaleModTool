@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
-bool padded = ScriptQuestion("Export all sprites unpadded?");
+bool padded = (!ScriptQuestion("Export all sprites unpadded?"));
 
 int progress = 0;
 string texFolder = GetFolder(FilePath) + "Export_Sprites" + Path.DirectorySeparatorChar;
