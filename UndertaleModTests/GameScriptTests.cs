@@ -54,6 +54,9 @@ namespace UndertaleModTests
         public void ReapplyProfileCode()
         {
         }
+        public void InitializeScriptDialog()
+        {
+        }
         public bool RunUMTScript(string path)
         {
             Console.WriteLine(path);
