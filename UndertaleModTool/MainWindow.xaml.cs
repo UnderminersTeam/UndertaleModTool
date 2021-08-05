@@ -1181,7 +1181,7 @@ namespace UndertaleModTool
 
         public void ScriptOpenURL(string url)
         {
-            Process.Start(url);
+            OpenBrowser(url);
         }
 
         public string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
