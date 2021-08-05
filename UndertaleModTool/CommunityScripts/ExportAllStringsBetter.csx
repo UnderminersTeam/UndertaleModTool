@@ -1,7 +1,5 @@
 using System.Linq;
 using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 using System.Windows.Forms;
 
 SaveFileDialog saveFileDialog = new SaveFileDialog()
@@ -27,31 +25,25 @@ json.Append("\r\n    ]\r\n}");
 File.WriteAllText(saveFileDialog.FileName, json.ToString());
 MessageBox.Show($"Successfully exported to\n{saveFileDialog.FileName}", "String export");
 
-static JsonSerializerOptions serializerOptions = new JsonSerializerOptions()
-{
-    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-};
-const string
-    matchPattern = @"(?<!\\)((?:\\\\)*)\\u[0-9a-fA-F]{4}",
-    subMatchPattern = @"\\u[0-9a-fA-F]{4}";
 static string JsonifyString(string str)
 {
-    string output = JsonSerializer.Serialize(str, serializerOptions);
-    Match match = Regex.Match(output, matchPattern);
-    while (match.Success)
-    {
-        Match subMatch = Regex.Match(match.Value, subMatchPattern);
-        char replacement = (char)Convert.ToInt32(subMatch.Value.Substring(2), 16);
-        if (Char.IsControl(replacement))
+    StringBuilder sb = new StringBuilder();
+    foreach (char ch in str)
+    {    // Characters that JSON requires escaping
+        if (ch == '\"') { sb.Append("\\\""); continue; }
+        if (ch == '\\') { sb.Append("\\\\"); continue; }
+        if (ch == '\b') { sb.Append("\\b"); continue; }
+        if (ch == '\f') { sb.Append("\\f"); continue; }
+        if (ch == '\n') { sb.Append("\\n"); continue; }
+        if (ch == '\r') { sb.Append("\\r"); continue; }
+        if (ch == '\t') { sb.Append("\\t"); continue; }
+        if (Char.IsControl(ch))
         {
-            match = match.NextMatch();
+            sb.Append("\\u" + Convert.ToByte(ch).ToString("x4"));
             continue;
         }
-        output = new Regex(Regex.Escape(subMatch.Value)).Replace(
-            output,
-            replacement.ToString(),
-            1);
-        match = Regex.Match(output, matchPattern);
+        
+        sb.Append(ch);
     }
-    return output;
+    return "\"" + sb.ToString() + "\"";
 }
