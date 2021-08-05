@@ -1181,7 +1181,9 @@ namespace UndertaleModTool
 
         public void ScriptOpenURL(string url)
         {
-            Process.Start(url);
+            // This special quoted syntax is needed because the URL might contain special characters
+            // And yes, this breaks if there's a '"'
+            Process.Start("explorer.exe", $"\"{url}\""); 
         }
 
         public string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
