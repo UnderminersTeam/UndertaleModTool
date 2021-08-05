@@ -32,6 +32,7 @@ namespace UndertaleModLib.Scripting
         void ScriptError(string error, string title = "Error", bool SetConsoleText = true);
         void ScriptOpenURL(string url);
         bool SendAUMIMessage(IpcMessage_t ipMessage, ref IpcReply_t outReply);
+        byte[] CreateGMLBytecode(string GMLText, bool UseAUMI = false);
         bool RunUMTScript(string path);
         bool LintUMTScript(string path);
         void InitializeScriptDialog();

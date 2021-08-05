@@ -78,6 +78,10 @@ namespace UndertaleModTests
             Console.WriteLine(message);
             return true;
         }
+        public byte[] CreateGMLBytecode(string GMLText, bool UseAUMI = false)
+        {
+            return new byte[0];
+        }
         public bool SendAUMIMessage(IpcMessage_t ipMessage, ref IpcReply_t outReply)
         {
             return true;
