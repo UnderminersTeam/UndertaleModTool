@@ -1895,10 +1895,12 @@ namespace UndertaleModLib.Decompiler
                                     }
                                     break;
                                 case -5: // setowner
-                                    // Stop 'setowner' values from leaking into the decompiled output
-                                    // as tempvars. Should be replaced with something better in the future.
+                                    // Stop 'setowner' values from leaking into the decompiled output as tempvars.
+                                    // Used in the VM to let copy-on-write functionality work, but unnecessary for decompilation
                                     if (stack.Count > 0)
                                     {
+                                        stack.Pop();
+                                        /*
                                         var statement = stack.Pop();
                                         object owner;
                                         if (statement is ExpressionConstant)
@@ -1906,6 +1908,7 @@ namespace UndertaleModLib.Decompiler
                                         else
                                             owner = statement.ToString(context);
                                         statements.Add(new CommentStatement("setowner: " + (owner ?? "<null>")));
+                                        */
                                     }
                                     else
                                         statements.Add(new CommentStatement("WARNING: attempted to setowner without an owner on the stack."));
