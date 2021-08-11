@@ -3122,7 +3122,7 @@ namespace UndertaleModLib.Decompiler
 
                 if (test == end)
                     return end;
-                if (test == meetPoint)
+                else if (test == meetPoint)
                     return meetPoint;
 
                 blocks.Enqueue(test.nextBlockTrue);

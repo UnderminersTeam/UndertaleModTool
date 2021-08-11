@@ -78,10 +78,9 @@ namespace UndertaleModLib.Decompiler
                 instr.Kind = UndertaleInstruction.Opcode.Break;
             else
                 instr.Kind = (UndertaleInstruction.Opcode)Enum.Parse(typeof(UndertaleInstruction.Opcode), kind, true);
-            if (types.Length >= 2)
-                instr.Type1 = UndertaleInstructionUtil.FromOpcodeParam(types[1]);
-            if (types.Length >= 3)
-                instr.Type2 = UndertaleInstructionUtil.FromOpcodeParam(types[2]);
+
+            instr.Type1 = types.Length > 1 ? UndertaleInstructionUtil.FromOpcodeParam(types[1]) : instr.Type1;
+            instr.Type2 = types.Length > 2 ? UndertaleInstructionUtil.FromOpcodeParam(types[2]) : instr.Type2;
 
             switch (UndertaleInstruction.GetInstructionType(instr.Kind))
             {
@@ -163,11 +162,9 @@ namespace UndertaleModLib.Decompiler
                                 instr.Value = ival;
                             else
                             {
-                                var f = data.Functions.ByName(line);
-                                if (f == null)
-                                    instr.Value = (int)ParseResourceName(line, data);
-                                else
-                                    instr.Value = new UndertaleInstruction.Reference<UndertaleFunction>(f);
+                                var Function = data.Functions.ByName(line);
+
+                                instr.Value = Function == null ? ParseResourceName(line, data) : new UndertaleInstruction.Reference<UndertaleFunction>(Function);
                             }
                             break;
                         case UndertaleInstruction.DataType.Int64:
@@ -213,10 +210,7 @@ namespace UndertaleModLib.Decompiler
                     break;
 
                 case UndertaleInstruction.InstructionType.BreakInstruction:
-                    if (breakId != 0)
-                        instr.Value = breakId;
-                    else
-                        instr.Value = Int16.Parse(line);
+                    instr.Value = breakId == 0 ? Int16.Parse(line) : breakId;
                     line = "";
                     break;
             }
@@ -403,16 +397,25 @@ namespace UndertaleModLib.Decompiler
                 }
 
                 realinstance = instance;
+
                 if (realinstance >= 0)
+                {
                     realinstance = UndertaleInstruction.InstanceType.Self;
-                else if (realinstance == UndertaleInstruction.InstanceType.Other)
-                    realinstance = UndertaleInstruction.InstanceType.Self;
-                else if (realinstance == UndertaleInstruction.InstanceType.Arg)
-                    realinstance = UndertaleInstruction.InstanceType.Builtin;
-                else if (realinstance == UndertaleInstruction.InstanceType.Builtin)
-                    realinstance = UndertaleInstruction.InstanceType.Self; // used with @@This@@
-                else if (realinstance == UndertaleInstruction.InstanceType.Stacktop)
-                    realinstance = UndertaleInstruction.InstanceType.Self; // used with @@GetInstance@@
+                }
+                else
+                {
+                    switch (realinstance)
+                    {
+                        case UndertaleInstruction.InstanceType.Other:
+                        case UndertaleInstruction.InstanceType.Builtin:
+                        case UndertaleInstruction.InstanceType.Stacktop:
+                            realinstance = UndertaleInstruction.InstanceType.Self;
+                            break;
+                        case UndertaleInstruction.InstanceType.Arg:
+                            realinstance = UndertaleInstruction.InstanceType.Builtin;
+                            break;
+                    };
+                }
             }
             else
             {
