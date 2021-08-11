@@ -129,10 +129,9 @@ namespace UndertaleModLib.Decompiler
                                 if (ev.CodeId == code)
                                 {
                                     Object = obj;
-                                    goto LoopEnd;
+                                    return;
                                 }
             }
-            LoopEnd: return;
         }
 
         public TempVar NewTempVar()
@@ -268,20 +267,16 @@ namespace UndertaleModLib.Decompiler
                 {
                     return Convert.ToInt32(val);
                 }
-                else if (val is double)
+
+                else if (val is double || val is float)
                 {
-                    var v = Convert.ToDouble(val);
-                    int res = (int)v;
-                    if (v == res)
-                        return res;
+                    // Handle float and doubles properly
+                    var Converted = (val is double) ? Convert.ToDouble(val) : Convert.ToSingle(val);
+
+                    if (Converted == (int)Converted) // Is whole and doesn't overflow
+                        return (int)Converted;
                 }
-                else if (val is float)
-                {
-                    var v = Convert.ToSingle(val);
-                    int res = (int)v;
-                    if (v == res)
-                        return res;
-                }
+
                 return null;
             }
 
