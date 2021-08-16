@@ -124,9 +124,27 @@ namespace UndertaleModTool
             foreach (var child in (MainTree.Items[0] as TreeViewItem).Items)
                 ((child as TreeViewItem).ItemsSource as ICollectionView)?.Refresh();
         }
+        private static bool IsLikelyRunFromZipFolder()
+        {
+            var path = System.Reflection.Assembly.GetEntryAssembly().Location;
+            var fileInfo = new FileInfo(path);
+            return fileInfo.Attributes.HasFlag(FileAttributes.ReadOnly);
+        }
 
+        private static bool IsRunFromTempFolder()
+        {
+            var path = System.Reflection.Assembly.GetEntryAssembly().Location;
+            var temp = Path.GetTempPath();
+            return path.IndexOf(temp, StringComparison.OrdinalIgnoreCase) == 0;
+        }
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            if (IsRunFromTempFolder() || IsLikelyRunFromZipFolder())
+            {
+                MessageBox.Show(@"This program cannot be run without extracting all files.
+Please extract all contents of the ZIP file to a folder before running the program.");
+                System.Environment.Exit(1);
+            }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 try
