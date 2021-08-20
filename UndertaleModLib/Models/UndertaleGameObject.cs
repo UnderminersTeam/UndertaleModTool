@@ -662,5 +662,6 @@ namespace UndertaleModLib.Models
         GlobalPinchEnd = 73,
         GlobalRotateStart = 74,
         GlobalRotating = 75,
+        GlobalRotateEnd = 76,
     }
 }
