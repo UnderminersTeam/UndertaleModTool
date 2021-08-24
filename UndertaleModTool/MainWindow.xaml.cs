@@ -126,14 +126,14 @@ namespace UndertaleModTool
         }
         private static bool IsLikelyRunFromZipFolder()
         {
-            var path = System.Reflection.Assembly.GetEntryAssembly().Location;
+            var path = System.Environment.CurrentDirectory;
             var fileInfo = new FileInfo(path);
             return fileInfo.Attributes.HasFlag(FileAttributes.ReadOnly);
         }
 
         private static bool IsRunFromTempFolder()
         {
-            var path = System.Reflection.Assembly.GetEntryAssembly().Location;
+            var path = System.Environment.CurrentDirectory;
             var temp = Path.GetTempPath();
             return path.IndexOf(temp, StringComparison.OrdinalIgnoreCase) == 0;
         }
