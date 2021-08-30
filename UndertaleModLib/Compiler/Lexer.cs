@@ -680,8 +680,14 @@ namespace UndertaleModLib.Compiler
                 while (!cr.EOF)
                 {
                     char current = cr.PeekChar();
-                    if (!char.IsDigit(current) && (!hasUsedDot && current != '.'))
-                        break;
+                    if (!char.IsDigit(current))
+                    {
+                        if (hasUsedDot)
+                            break;
+                        if (current != '.')
+                            break;
+                        hasUsedDot = true;
+                    }
                     sb.Append(current);
                     cr.AdvancePosition();
                 }
