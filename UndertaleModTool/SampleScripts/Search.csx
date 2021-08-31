@@ -4,6 +4,12 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+if (Data.IsYYC())
+{
+    ScriptError("You cannot do a code search on a YYC game! There is no code to search!");
+    return;
+}
+
 int progress = 0;
 string results = "";
 int result_count = 0;
@@ -11,6 +17,7 @@ int code_count = 0;
 ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
 
 UpdateProgress();
+
 bool case_sensitive = ScriptQuestion("Case sensitive?");
 bool regex_check = ScriptQuestion("Regex search?");
 String keyword = SimpleTextInput("Enter your search", "Search box below", "", false);

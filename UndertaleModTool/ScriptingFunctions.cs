@@ -76,6 +76,15 @@ namespace UndertaleModTool
                 ScriptError("An error of type \"" + ScriptErrorType + "\" occurred. The error is:\n\n" + ScriptErrorMessage, ScriptErrorType);
             return ScriptExecutionSuccess;
         }
+        public void InitializeScriptDialog()
+        {
+            if (scriptDialog == null)
+            {
+                scriptDialog = new LoaderDialog("Script in progress...", "Please wait...");
+                scriptDialog.Owner = this;
+                scriptDialog.PreventClose = true;
+            }
+        }
         public bool LintUMTScript(string path)
         {
             // By Grossley

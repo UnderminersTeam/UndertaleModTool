@@ -656,11 +656,12 @@ namespace UndertaleModLib.Models
         GlobalDragMove = 67,
         GlobalDragEnd = 68,
         GlobalFlick = 69,
-        GlobalPInchStart = 70,
-        GlobalPInchIn = 71,
-        GlobalPInchOut = 72,
-        GlobalPInchEnd = 73,
+        GlobalPinchStart = 70,
+        GlobalPinchIn = 71,
+        GlobalPinchOut = 72,
+        GlobalPinchEnd = 73,
         GlobalRotateStart = 74,
         GlobalRotating = 75,
+        GlobalRotateEnd = 76,
     }
 }

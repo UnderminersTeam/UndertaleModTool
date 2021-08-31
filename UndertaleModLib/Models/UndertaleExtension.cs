@@ -14,8 +14,7 @@ namespace UndertaleModLib.Models
         Unknown0 = 0,
         DLL = 1,
         GML = 2,
-        [Obsolete("Potentially unused before GM:S")]
-        Unknown3 = 3,
+        ActionLib = 3,
         Generic = 4,
         JS = 5
     }

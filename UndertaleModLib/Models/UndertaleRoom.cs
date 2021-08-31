@@ -477,10 +477,10 @@ namespace UndertaleModLib.Models
         // For GMS2, Backgrounds and Tiles are empty and this is used instead
         public enum LayerType
         {
-            Instances = 2,
-            Tiles = 4,
             Background = 1,
-            Assets = 3
+            Instances = 2,
+            Assets = 3,
+            Tiles = 4
         }
 
         public class Layer : UndertaleObject, INotifyPropertyChanged

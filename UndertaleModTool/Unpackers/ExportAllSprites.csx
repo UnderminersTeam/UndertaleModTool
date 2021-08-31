@@ -1,17 +1,12 @@
-﻿using System.Text;
+﻿// Modified with the help of Agentalex9
+using System.Text;
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
-if (!(ScriptQuestion("Export all sprites unpadded?")))
-{
-    bool x = RunUMTScript(Path.Combine(ExePath, "HelperScripts", "ExportAllSpritesWithPadding.csx"));
-    if (x == false)
-        ScriptError("ExportAllSpritesWithPadding.csx failed!");
-    return;
-}
+bool padded = (!ScriptQuestion("Export all sprites unpadded?"));
 
 int progress = 0;
 string texFolder = GetFolder(FilePath) + "Export_Sprites" + Path.DirectorySeparatorChar;
@@ -51,7 +46,7 @@ void DumpSprite(UndertaleSprite sprite)
 {
     for (int i = 0; i < sprite.Textures.Count; i++)
         if (sprite.Textures[i]?.Texture != null)
-            worker.ExportAsPNG(sprite.Textures[i].Texture, texFolder + sprite.Name.Content + "_" + i + ".png");
+            worker.ExportAsPNG(sprite.Textures[i].Texture, texFolder + sprite.Name.Content + "_" + i + ".png", null, padded); // Include padding to make sprites look neat!
 
     UpdateProgress();
 }

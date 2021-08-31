@@ -34,6 +34,7 @@ namespace UndertaleModLib.Scripting
         bool SendAUMIMessage(IpcMessage_t ipMessage, ref IpcReply_t outReply);
         bool RunUMTScript(string path);
         bool LintUMTScript(string path);
+        void InitializeScriptDialog();
         void ReapplyProfileCode();
         void NukeProfileGML(string codeName);
         string GetDecompiledText(string codeName);
