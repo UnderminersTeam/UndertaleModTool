@@ -57,5 +57,8 @@ namespace UndertaleModLib.Scripting
         void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false);
         void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false);
         void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false);
+        bool DummyBool();
+        void DummyVoid();
+        string DummyString();
     }
 }

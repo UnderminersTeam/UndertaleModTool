@@ -194,6 +194,18 @@ namespace UndertaleModTests
         {
             throw new NotImplementedException();
         }
+        public bool DummyBool()
+        {
+            return true;
+        }
+
+        public void DummyVoid()
+        {
+        }
+        public string DummyString()
+        {
+            return "";
+        }
     }
 
     [TestClass]
