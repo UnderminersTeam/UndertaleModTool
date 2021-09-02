@@ -36,6 +36,10 @@ namespace UndertaleModTests
         public void EnsureDataLoaded()
         {
         }
+        public bool Make_New_File()
+        {
+            return true;
+        }
         public void ReplaceTempWithMain(bool ImAnExpertBTW = false)
         {
         }

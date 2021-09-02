@@ -266,10 +266,14 @@ Please extract all contents of the ZIP file to a folder before running the progr
 
         private void Command_New(object sender, ExecutedRoutedEventArgs e)
         {
+            Make_New_File();
+        }
+        public bool Make_New_File()
+        {
             if (Data != null)
             {
                 if (MessageBox.Show("Warning: you currently have a project open.\nAre you sure you want to make a new project?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
-                    return;
+                    return false;
             }
             this.Dispatcher.Invoke(() =>
             {
@@ -288,6 +292,7 @@ Please extract all contents of the ZIP file to a folder before running the progr
 
             CanSave = true;
             CanSafelySave = true;
+            return true;
         }
 
         private async Task<bool> DoOpenDialog()

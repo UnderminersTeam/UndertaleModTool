@@ -20,6 +20,7 @@ namespace UndertaleModLib.Scripting
         string ScriptErrorType { get; }
 
         void EnsureDataLoaded();
+        bool Make_New_File();
         void ReplaceTempWithMain(bool ImAnExpertBTW = false);
         void ReplaceMainWithTemp(bool ImAnExpertBTW = false);
         void ReplaceTempWithCorrections(bool ImAnExpertBTW = false);
