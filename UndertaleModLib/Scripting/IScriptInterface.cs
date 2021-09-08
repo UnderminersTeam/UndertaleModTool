@@ -20,6 +20,7 @@ namespace UndertaleModLib.Scripting
         string ScriptErrorType { get; }
 
         void EnsureDataLoaded();
+        bool Make_New_File();
         void ReplaceTempWithMain(bool ImAnExpertBTW = false);
         void ReplaceMainWithTemp(bool ImAnExpertBTW = false);
         void ReplaceTempWithCorrections(bool ImAnExpertBTW = false);
@@ -56,5 +57,8 @@ namespace UndertaleModLib.Scripting
         void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false);
         void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false);
         void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false);
+        bool DummyBool();
+        void DummyVoid();
+        string DummyString();
     }
 }

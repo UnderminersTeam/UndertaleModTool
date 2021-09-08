@@ -36,6 +36,10 @@ namespace UndertaleModTests
         public void EnsureDataLoaded()
         {
         }
+        public bool Make_New_File()
+        {
+            return true;
+        }
         public void ReplaceTempWithMain(bool ImAnExpertBTW = false)
         {
         }
@@ -189,6 +193,18 @@ namespace UndertaleModTests
         public string PromptLoadFile(string defaultExt, string filter)
         {
             throw new NotImplementedException();
+        }
+        public bool DummyBool()
+        {
+            return true;
+        }
+
+        public void DummyVoid()
+        {
+        }
+        public string DummyString()
+        {
+            return "";
         }
     }
 

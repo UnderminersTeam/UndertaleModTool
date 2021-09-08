@@ -124,6 +124,7 @@ namespace UndertaleModTool
             foreach (var child in (MainTree.Items[0] as TreeViewItem).Items)
                 ((child as TreeViewItem).ItemsSource as ICollectionView)?.Refresh();
         }
+/*
         private static bool IsLikelyRunFromZipFolder()
         {
             var path = System.Environment.CurrentDirectory;
@@ -137,14 +138,17 @@ namespace UndertaleModTool
             var temp = Path.GetTempPath();
             return path.IndexOf(temp, StringComparison.OrdinalIgnoreCase) == 0;
         }
+*/
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
+/*
             if (IsRunFromTempFolder() || IsLikelyRunFromZipFolder())
             {
                 MessageBox.Show(@"This program cannot be run without extracting all files.
 Please extract all contents of the ZIP file to a folder before running the program.");
                 System.Environment.Exit(1);
             }
+*/
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 try
@@ -266,10 +270,14 @@ Please extract all contents of the ZIP file to a folder before running the progr
 
         private void Command_New(object sender, ExecutedRoutedEventArgs e)
         {
+            Make_New_File();
+        }
+        public bool Make_New_File()
+        {
             if (Data != null)
             {
                 if (MessageBox.Show("Warning: you currently have a project open.\nAre you sure you want to make a new project?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
-                    return;
+                    return false;
             }
             this.Dispatcher.Invoke(() =>
             {
@@ -288,6 +296,7 @@ Please extract all contents of the ZIP file to a folder before running the progr
 
             CanSave = true;
             CanSafelySave = true;
+            return true;
         }
 
         private async Task<bool> DoOpenDialog()
