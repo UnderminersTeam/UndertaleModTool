@@ -72,6 +72,10 @@
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
+		<None Update="CommunityScripts\TTFFonts_Deltarune.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="CommunityScripts\VariableFixer.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3695,10 +3699,6 @@
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="CommunityScripts\ReloadDeltaruneJSON.csx">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-		</None>
-		<None Include="CommunityScripts\TTFFonts %28Deltarune%29.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
