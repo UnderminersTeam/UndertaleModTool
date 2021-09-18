@@ -46,7 +46,6 @@ string ReplaceFirst(string text, string search, string replace)
     return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
 }
 
-
 void DumpCode()
 {
     foreach (UndertaleCode code_orig in Data.Code) 
@@ -64,6 +63,7 @@ void DumpCode()
                 {
                     UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
                     argsLocal.Name = localvar.Name;
+                    //(localvar.Name != null ? localvar.Name : Data.Strings.MakeString("arguments"));
                     argsLocal.Index = localvar.Index;
                     //localvar.Name = Data.Strings.MakeString("arguments");
                     //localvar.Index = 0;
@@ -118,7 +118,15 @@ void DumpCode()
                     }
                     code_orig.Replace(Assembler.Assemble(x, Data));
                 }
-                File.WriteAllText(((path.Length > 150) ? path.Substring(0, 150) + ".asm" : Path.Combine(codeFolder, code_orig.Name.Content + ".asm")), (code_orig != null ? code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig)) : ""));
+                string str_path_to_use = "";
+                if (path.Length > 150)
+                    str_path_to_use = path.Substring(0, 150) + ".asm";
+                else
+                    str_path_to_use = Path.Combine(codeFolder, code_orig.Name.Content + ".asm");
+                string code_output = "";
+                if (code_orig != null)
+                    code_output = code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig));
+                File.WriteAllText(str_path_to_use, code_output);
             }
             catch (Exception e) 
             {
@@ -132,17 +140,30 @@ void DumpCode()
         }
         else
         {
-            if (!(Directory.Exists(codeFolder + "/Duplicates/")))
+            if (!(Directory.Exists(Path.Combine(codeFolder, "Duplicates"))))
             {
-                Directory.CreateDirectory(codeFolder + "/Duplicates/");
+                Directory.CreateDirectory(Path.Combine(codeFolder, "Duplicates"));
             }
             try 
             {
-                File.WriteAllText(((path.Length > 150) ? path.Substring(0, 150) + ".asm" : Path.Combine(codeFolder + "/Duplicates/", code_orig.Name.Content + ".asm")), (code_orig != null ? code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig)) : ""));
+                string str_path_to_use = "";
+                if (path.Length > 150)
+                    str_path_to_use = path.Substring(0, 150) + ".asm";
+                else
+                    str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
+                string code_output = "";
+                if (code_orig != null)
+                    code_output = code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig));
+                File.WriteAllText(str_path_to_use, code_output);
             }
             catch (Exception e) 
             {
-                File.WriteAllText(((path.Length > 150) ? path.Substring(0, 150) + ".asm" : Path.Combine(codeFolder + "/Duplicates/", code_orig.Name.Content + ".asm")), "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"); // Please don't
+                string str_path_to_use = "";
+                if (path.Length > 150)
+                    str_path_to_use = path.Substring(0, 150) + ".asm";
+                else
+                    str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
+                File.WriteAllText(str_path_to_use, "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"); // Please don't
             }
             UpdateProgress();
         }
