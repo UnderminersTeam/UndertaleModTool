@@ -1810,7 +1810,8 @@ namespace UndertaleModLib.Decompiler
                         {
                             ExpressionVar pushTarget = new ExpressionVar((instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Target, new ExpressionConstant(UndertaleInstruction.DataType.Int16, instr.TypeInst), (instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Type);
                             pushTarget.Opcode = instr.Kind;
-                            /*if (instr.TypeInst == UndertaleInstruction.InstanceType.Builtin)
+                            /* TODO: This is wrong and breaks a lot of things - "pushbltn.v builtin.room" does not take anything from the stack
+                            if (instr.TypeInst == UndertaleInstruction.InstanceType.Builtin)
                             {
                                 pushTarget.InstType = stack.Pop();
                                 if (pushTarget.InstType is FunctionCall fc)
