@@ -1752,6 +1752,9 @@ namespace UndertaleModLib.Decompiler
                                 if (ind.Item2 != null)
                                     target.ArrayIndices.Add(ind.Item2);
                                 target.InstType = stack.Pop();
+                                if (target.InstType is ExpressionConstant c &&
+                                    c.Type == UndertaleInstruction.DataType.Int16 && (short)c.Value == -9)
+                                    target.InstType = stack.Pop();
                             }
 
                             if (instr.Type1 == UndertaleInstruction.DataType.Variable)
@@ -1837,6 +1840,9 @@ namespace UndertaleModLib.Decompiler
                                 if (ind.Item2 != null)
                                     pushTarget.ArrayIndices.Add(ind.Item2);
                                 pushTarget.InstType = stack.Pop();
+                                if (pushTarget.InstType is ExpressionConstant c &&
+                                    c.Type == UndertaleInstruction.DataType.Int16 && (short)c.Value == -9)
+                                    pushTarget.InstType = stack.Pop();
                             }
                             else if (context.Data?.GMS2_3 == true && pushTarget.VarType != UndertaleInstruction.VariableType.Normal)
                             {
