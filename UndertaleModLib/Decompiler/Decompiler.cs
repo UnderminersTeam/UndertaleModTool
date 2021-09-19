@@ -1497,13 +1497,11 @@ namespace UndertaleModLib.Decompiler
         {
             if (e is ExpressionVar || e is ExpressionTempVar)
                 return GetTypeSize(UndertaleInstruction.DataType.Variable);
-            if (e is ExpressionCast)
-                return GetTypeSize(e.Type); // TODO: I don't think we even store a cast to variable, which could break somewhere...?
-            if (e is ExpressionConstant)
-                return GetTypeSize(e.Type);
-            if (e is ExpressionTwo)
-                return GetTypeSize(((ExpressionTwo)e).Type2); // for add.i.v, the output is a var
-            throw new NotImplementedException("No idea what to do with " + e.GetType().ToString());
+            if (e is FunctionCall)  // function call returns an internal variable
+                return GetTypeSize(UndertaleInstruction.DataType.Variable);
+            if (e is ExpressionTwo exprTwo)
+                return GetTypeSize(exprTwo.Type2); // for add.i.v, the output is a var
+            return GetTypeSize(e.Type);
         }
 
         // The core function to decompile a specific block.
@@ -1587,22 +1585,6 @@ namespace UndertaleModLib.Decompiler
                             while (moved.Count > 0)
                                 stack.Push(moved.Pop());
 
-                            break;
-                        }
-
-                        if (instr.Type1 == UndertaleInstruction.DataType.Variable)
-                        {
-                            // This is the GMS2.3+ var duplication instruction
-                            // It creates a new temp var whose initial value is the same as the variable on top of the stack
-
-                            Expression item = stack.Peek();
-
-                            TempVar var = context.NewTempVar();
-                            var.Type = item.Type;
-                            TempVarReference varref = new TempVarReference(var);
-                            statements.Add(new TempVarAssigmentStatement(varref, item));
-
-                            stack.Push(new ExpressionTempVar(varref, var.Type));
                             break;
                         }
 
@@ -1741,6 +1723,7 @@ namespace UndertaleModLib.Decompiler
                             if (instr.Destination == null)
                             {
                                 // pop.e.v 5/6, strange magic stack operation
+                                // TODO: this is probably an older version of the GMS2.3+ swap hidden in dup, but I'm not gonna touch it if it works
                                 Expression e1 = stack.Pop();
                                 Expression e2 = stack.Pop();
                                 for (int j = 0; j < instr.SwapExtra - 4; j++)
