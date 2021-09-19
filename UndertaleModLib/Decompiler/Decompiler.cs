@@ -1480,6 +1480,32 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        static int GetTypeSize(UndertaleInstruction.DataType type)
+        {
+            switch (type)
+            {
+                case UndertaleInstruction.DataType.Int16:
+                case UndertaleInstruction.DataType.Int32:
+                    return 4;
+                case UndertaleInstruction.DataType.Variable:
+                    return 16;
+                default:
+                    throw new NotImplementedException("Unknown size for data type " + type);
+            }
+        }
+        static int GetTypeSize(Expression e)
+        {
+            if (e is ExpressionVar || e is ExpressionTempVar)
+                return GetTypeSize(UndertaleInstruction.DataType.Variable);
+            if (e is ExpressionCast)
+                return GetTypeSize(e.Type); // TODO: I don't think we even store a cast to variable, which could break somewhere...?
+            if (e is ExpressionConstant)
+                return GetTypeSize(e.Type);
+            if (e is ExpressionTwo)
+                return GetTypeSize(((ExpressionTwo)e).Type2); // for add.i.v, the output is a var
+            throw new NotImplementedException("No idea what to do with " + e.GetType().ToString());
+        }
+
         // The core function to decompile a specific block.
         internal static void DecompileFromBlock(DecompileContext context, Block block, List<TempVarReference> tempvars, Stack<Tuple<Block, List<TempVarReference>>> workQueue)
         {
@@ -1529,41 +1555,65 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.Dup:
                         if (instr.ComparisonKind != 0)
                         {
-                            // This is a special instruction for moving around an instance on the stack in GMS2.3
+                            // This is the GMS 2.3+ stack move / swap instruction
 
-                            int weirdLength = (byte)instr.ComparisonKind & 0x7F;
-                            if (weirdLength != 8)
-                                throw new Exception("I have no idea where this shows up but it does, need to have an example first"); // TODO
-
-                            Stack<Expression> args = new Stack<Expression>();
-                            for (int j = 0; j < instr.Extra; j++)
-                                args.Push(stack.Pop());
-                            Expression instance = stack.Pop();
-                            for (int j = 0; j < args.Count; j++)
+                            int bytesToTake = instr.Extra * 4;
+                            Stack<Expression> taken = new Stack<Expression>();
+                            while (bytesToTake > 0)
                             {
-                                Expression e = args.Pop();
-                                e.WasDuplicated = true;
-                                stack.Push(e);
+                                Expression e = stack.Pop();
+                                taken.Push(e);
+                                bytesToTake -= GetTypeSize(e);
+                                if (bytesToTake < 0)
+                                    throw new InvalidOperationException("The stack got misaligned?");
                             }
-                            instance.WasDuplicated = true;
-                            stack.Push(instance);
+
+                            int b2 = (byte)instr.ComparisonKind & 0x7F;
+                            if ((b2 & 0b111) != 0)
+                                throw new InvalidOperationException("Don't know what to do with this");
+                            int bytesToMove = (b2 >> 3) * 4;
+                            Stack<Expression> moved = new Stack<Expression>();
+                            while (bytesToMove > 0)
+                            {
+                                Expression e = stack.Pop();
+                                moved.Push(e);
+                                bytesToMove -= GetTypeSize(e);
+                                if (bytesToMove < 0)
+                                    throw new InvalidOperationException("The stack got misaligned?");
+                            }
+
+                            while (taken.Count > 0)
+                                stack.Push(taken.Pop());
+                            while (moved.Count > 0)
+                                stack.Push(moved.Pop());
 
                             break;
                         }
 
+                        if (instr.Type1 == UndertaleInstruction.DataType.Variable)
+                        {
+                            // This is the GMS2.3+ var duplication instruction
+                            // It creates a new temp var whose initial value is the same as the variable on top of the stack
+
+                            Expression item = stack.Peek();
+
+                            TempVar var = context.NewTempVar();
+                            var.Type = item.Type;
+                            TempVarReference varref = new TempVarReference(var);
+                            statements.Add(new TempVarAssigmentStatement(varref, item));
+
+                            stack.Push(new ExpressionTempVar(varref, var.Type));
+                            break;
+                        }
+
+                        // Normal dup instruction
+
                         List<Expression> topExpressions1 = new List<Expression>();
                         List<Expression> topExpressions2 = new List<Expression>();
-                        // This "count" is necessary because sometimes dup.i 1 is replaced with dup.l 0...
-                        // Seemingly have equivalent behavior, so treat it that way.
-                        int count = ((instr.Extra + 1) * (instr.Type1 == UndertaleInstruction.DataType.Int64 ? 2 : 1));
-                        for (int j = 0; j < count; j++)
+                        int bytesToDuplicate = (instr.Extra + 1) * GetTypeSize(instr.Type1);
+                        while (bytesToDuplicate > 0)
                         {
-                            if ((j % 2) > 0 && stack.Count == 0)
-                                continue;
-
                             var item = stack.Pop();
-                            //if ((j % 2) == 0 && item.Type != UndertaleInstruction.DataType.Int64 && instr.Type1 == UndertaleInstruction.DataType.Int64)
-                            //    j++; // Skip the next iteration in the case on dup.l 0 replacing dup.i 1
 
                             if (item.IsDuplicationSafe())
                             {
@@ -1581,6 +1631,10 @@ namespace UndertaleModLib.Decompiler
                                 topExpressions1.Add(new ExpressionTempVar(varref, varref.Var.Type) { WasDuplicated = true });
                                 topExpressions2.Add(new ExpressionTempVar(varref, instr.Type1) { WasDuplicated = true });
                             }
+
+                            bytesToDuplicate -= GetTypeSize(item);
+                            if (bytesToDuplicate < 0)
+                                throw new InvalidOperationException("The stack got misaligned?");
                         }
                         topExpressions1.Reverse();
                         topExpressions2.Reverse();
@@ -1657,7 +1711,19 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.PushEnv:
-                        statements.Add(new PushEnvStatement(stack.Pop()));
+                        if (context.Data?.GMS2_3 == true)
+                        {
+                            Expression expr = stack.Pop();
+
+                            // -9 signifies stacktop
+                            if (expr is ExpressionConstant c &&
+                                c.Type == UndertaleInstruction.DataType.Int16 && (short)c.Value == -9)
+                                expr = stack.Pop();
+
+                            statements.Add(new PushEnvStatement(expr));
+                        }
+                        else
+                            statements.Add(new PushEnvStatement(stack.Pop()));
                         end = true;
                         break;
 
@@ -1756,6 +1822,7 @@ namespace UndertaleModLib.Decompiler
                         {
                             ExpressionVar pushTarget = new ExpressionVar((instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Target, new ExpressionConstant(UndertaleInstruction.DataType.Int16, instr.TypeInst), (instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Type);
                             pushTarget.Opcode = instr.Kind;
+                            /* TODO: This is wrong and breaks a lot of things - "pushbltn.v builtin.room" does not take anything from the stack
                             if (instr.TypeInst == UndertaleInstruction.InstanceType.Builtin)
                             {
                                 pushTarget.InstType = stack.Pop();
@@ -1769,7 +1836,7 @@ namespace UndertaleModLib.Decompiler
                                         pushTarget.InstType = new ExpressionConstant(UndertaleInstruction.DataType.Int16, (short)-5) { AssetType = AssetIDType.GameObject };
                                 }
                             }
-                            else if (instr.TypeInst == UndertaleInstruction.InstanceType.Stacktop)
+                            else*/ if (instr.TypeInst == UndertaleInstruction.InstanceType.Stacktop)
                             {
                                 pushTarget.InstType = stack.Pop();
                             }
