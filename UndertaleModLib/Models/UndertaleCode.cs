@@ -815,6 +815,7 @@ namespace UndertaleModLib.Models
                                 // Special dup instruction with extra parameters
                                 sb.Append(' ');
                                 sb.Append((byte)ComparisonKind & 0x7F);
+                                sb.Append(" ; this is a weird GMS2.3+ swap instruction");
                             }
                         }
                     }
@@ -855,6 +856,7 @@ namespace UndertaleModLib.Models
                         // Special scenario - the swap instruction
                         // TODO: Figure out the proper syntax, see #129
                         sb.Append(SwapExtra.ToString());
+                        sb.Append(" ; this is a weird swap instruction, see #129");
                     }
                     else
                     {
