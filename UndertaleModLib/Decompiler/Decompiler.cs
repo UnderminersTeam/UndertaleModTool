@@ -1711,7 +1711,19 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.PushEnv:
-                        statements.Add(new PushEnvStatement(stack.Pop()));
+                        if (context.Data?.GMS2_3 == true)
+                        {
+                            Expression expr = stack.Pop();
+
+                            // -9 signifies stacktop
+                            if (expr is ExpressionConstant c &&
+                                c.Type == UndertaleInstruction.DataType.Int16 && (short)c.Value == -9)
+                                expr = stack.Pop();
+
+                            statements.Add(new PushEnvStatement(expr));
+                        }
+                        else
+                            statements.Add(new PushEnvStatement(stack.Pop()));
                         end = true;
                         break;
 
