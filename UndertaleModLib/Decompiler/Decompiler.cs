@@ -308,7 +308,7 @@ namespace UndertaleModLib.Decompiler
                 if (AssetType == AssetIDType.GameObject && !(Value is Int64)) // When the value is Int64, an example value is 343434343434. It is unknown what it represents, but it's not an InstanceType.
                 {
                     int? val = ConvertToInt(Value);
-                    if (val != null && val < 0)
+                    if (val != null && val < 0 && val >= -16)
                         return ((UndertaleInstruction.InstanceType)Value).ToString().ToLower();
                 }
                 else switch (AssetType) // Need to put else because otherwise it gets terribly unoptimized with GameObject type
