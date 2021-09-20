@@ -78,6 +78,7 @@ namespace UndertaleModLib.Decompiler
         }
 
         public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
+        public List<string> DecompilerWarnings = new List<string>();
 
         public DecompileContext(UndertaleData data, bool enableStringLabels)
         {
@@ -100,6 +101,7 @@ namespace UndertaleModLib.Decompiler
             CompilerTempVar = null;
             assetTypes.Clear();
             LocalVarDefines.Clear();
+            DecompilerWarnings.Clear();
             currentFunction = null;
 
             // Will this ever be null?
@@ -1266,14 +1268,21 @@ namespace UndertaleModLib.Decompiler
                         context.scriptArgs.Add(Function.Name.Content, null); // stop the recursion from looping
                         var xxx = context.assetTypes;
                         context.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>(); // Apply a temporary dictionary which types will be applied to.
-                        Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code);
-                        Decompiler.DecompileFromBlock(context, blocks[0]);
-                        Decompiler.DoTypePropagation(context, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
-                        context.scriptArgs[Function.Name.Content] = new AssetIDType[15];
-                        for (int i = 0; i < 15; i++)
+                        try
                         {
-                            var v = context.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
-                            context.scriptArgs[Function.Name.Content][i] = v.Any() ? v.First().Value : AssetIDType.Other;
+                            Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code);
+                            Decompiler.DecompileFromBlock(context, blocks[0]);
+                            Decompiler.DoTypePropagation(context, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
+                            context.scriptArgs[Function.Name.Content] = new AssetIDType[15];
+                            for (int i = 0; i < 15; i++)
+                            {
+                                var v = context.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
+                                context.scriptArgs[Function.Name.Content][i] = v.Any() ? v.First().Value : AssetIDType.Other;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            context.DecompilerWarnings.Add("/*\nWARNING: Recursive script decompilation (for asset type resolution) failed for " + Function.Name.Content + "\n\n" + e.ToString() + "\n*/");
                         }
                         context.assetTypes = xxx; // restore original / proper map.
                     }
@@ -3150,6 +3159,8 @@ namespace UndertaleModLib.Decompiler
             // Write code.
             context.IndentationLevel = 0;
             StringBuilder sb = new StringBuilder();
+            foreach (var warn in context.DecompilerWarnings)
+                sb.Append(warn + "\n");
             foreach (var stmt in stmts)
                 sb.Append(stmt.ToString(context) + "\n");
 
