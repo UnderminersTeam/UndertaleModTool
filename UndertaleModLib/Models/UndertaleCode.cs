@@ -134,10 +134,12 @@ namespace UndertaleModLib.Models
 
         public enum VariableType : byte
         {
-            Array,
+            Array = 0x00,
             StackTop = 0x80,
             Normal = 0xA0,
-            Unknown = 0xE0,  // room scope?
+            Instance = 0xE0, // the InstanceType is an instance ID inside the room -100000
+            ArrayPushAF = 0x10, // GMS2.3+, multidimensional array with pushaf
+            ArrayPopAF = 0x90, // GMS2.3+, multidimensional array with pushaf or popaf
         }
 
         public enum ComparisonType : byte
