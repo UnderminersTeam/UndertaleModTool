@@ -1289,8 +1289,8 @@ namespace UndertaleModLib.Decompiler
 
             internal override bool IsDuplicationSafe()
             {
-                // Not sure if this is completely correct or if it needs to check arguments. TODO?
-                return true;
+                // Function calls are never duplication safe - they can have side effects
+                return false;
             }
         }
 
