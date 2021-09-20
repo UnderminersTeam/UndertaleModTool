@@ -1647,7 +1647,7 @@ namespace UndertaleModLib.Decompiler
                         if (stack.Count > 0)
                         {
                             Expression popped = stack.Pop();
-                            if (!(popped is ExpressionTempVar))
+                            if (!popped.IsDuplicationSafe()) // <- not duplication safe = has side effects and needs to be listed in the output
                                 statements.Add(popped);
                         }
                         else
