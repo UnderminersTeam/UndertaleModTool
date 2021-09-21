@@ -374,7 +374,7 @@ namespace UndertaleModLib.Decompiler
 
         internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, DecompileContext context, Decompiler.FunctionCall function)
         {
-            Dictionary<string, AssetIDType[]> scriptArgs = context.scriptArgs;
+            Dictionary<string, AssetIDType[]> scriptArgs = context.GlobalContext.ScriptArgsCache;
 
             function_name = StripPrefix(function_name);
 
@@ -389,7 +389,7 @@ namespace UndertaleModLib.Decompiler
 
             function_name = function_name.Replace("color", "colour"); // Just GameMaker things... both are valid :o
 
-            if(context.Data?.IsGameMaker2() ?? false)
+            if(context.GlobalContext.Data?.IsGameMaker2() ?? false)
             {
                 // Backgrounds don't exist in GMS2
                 for (int i = 0; i < arguments.Length; i++)
@@ -405,7 +405,7 @@ namespace UndertaleModLib.Decompiler
                 if (arguments.Length > func_types.Length)
                     throw new Exception("Bad call to " + function_name + " with " + arguments.Length + " arguments (instead of " + func_types.Length + ")");
 
-                if (context.Data?.IsGameMaker2() ?? false)
+                if (context.GlobalContext.Data?.IsGameMaker2() ?? false)
                 {
                     // Backgrounds don't exist in GMS2
                     for (int i = 0; i < func_types.Length; i++)
@@ -458,9 +458,9 @@ namespace UndertaleModLib.Decompiler
                         if ((firstArg is Decompiler.ExpressionConstant) && firstArg.Type == UndertaleInstruction.DataType.Int16) 
                         {
                             short script_id = (short) (firstArg as Decompiler.ExpressionConstant).Value;
-                            if (script_id >= 0 && script_id < context.Data.Scripts.Count)
+                            if (script_id >= 0 && script_id < context.GlobalContext.Data.Scripts.Count)
                             {
-                                var script = context.Data.Scripts[script_id];
+                                var script = context.GlobalContext.Data.Scripts[script_id];
                                 AssetIDType[] args = new AssetIDType[arguments.Length-1];
                                 AnnotateTypesForFunctionCall(script.Name.Content, args, context);
                                 Array.Copy(args, 0, arguments, 1, args.Length);

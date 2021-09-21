@@ -14,14 +14,174 @@ using static UndertaleModLib.Decompiler.Decompiler;
 
 namespace UndertaleModLib.Decompiler
 {
-    public class DecompileContext
+    /// <summary>
+    /// The DecompileContext is global for the entire decompilation run, or possibly multiple runs. It caches the decompilation results which don't change often
+    /// to speedup decompilation.
+    /// </summary>
+    public class GlobalDecompileContext
     {
         public UndertaleData Data;
+
+        public bool EnableStringLabels;
+
+        public List<string> DecompilerWarnings = new List<string>();
+
+        /// <summary>
+        /// A cache of resolved function argument types. This is kept here because decompiling is slow, and there is no need to do it every time
+        /// unless the code has changed.
+        /// </summary>
+        public Dictionary<string, AssetIDType[]> ScriptArgsCache = new Dictionary<string, AssetIDType[]>();
+
+        /// <summary>
+        /// A cache of function to actual name mapping. GMS2.3+ sometimes (usually when dealing with global scripts) calls method functions
+        /// using the legacy call operator, passing the anonymous function directly. This dictionary contains a map from UndertaleFunction
+        /// to its actual name, obtained by decompiling the parent CodeObject and looking for the assignment to global variable with function
+        /// name.
+        /// </summary>
+        public Dictionary<UndertaleFunction, string> AnonymousFunctionNameCache = new Dictionary<UndertaleFunction, string>();
+
+        public GlobalDecompileContext(UndertaleData data, bool enableStringLabels)
+        {
+            this.Data = data;
+            this.EnableStringLabels = enableStringLabels;
+        }
+
+        public void ClearDecompilationCache()
+        {
+            // This will not be done automatically, because it would cause significant slowdown having to recalculate this each time, and there's no reason to reset it if it's decompiling a bunch at once.
+            // But, since it is possible to invalidate this data, we add this here so we'll be able to invalidate it if we need to.
+            ScriptArgsCache.Clear();
+            AnonymousFunctionNameCache.Clear();
+        }
+    }
+
+    /// <summary>
+    /// The DecompileContext is bound to the currently decompiled code block
+    /// </summary>
+    public class DecompileContext
+    {
+        public GlobalDecompileContext GlobalContext;
         public UndertaleCode TargetCode;
         public UndertaleGameObject Object;
 
+        public DecompileContext(GlobalDecompileContext globalContext, UndertaleCode code)
+        {
+            GlobalContext = globalContext;
+            TargetCode = code;
+
+            if (code.ParentEntry != null)
+                throw new InvalidOperationException("This code block represents a function nested inside " + code.ParentEntry.Name + " - decompile that instead");
+
+
+            // Will this ever be null?
+            // Probably not unless someone made it null on purpose.
+            // Honestly that sounds like a them problem but might as well check anyway.
+            if (code.Name?.Content != null)
+            {
+                TargetNameStripped = AssetTypeResolver.StripPrefix(code.Name.Content);
+                IsScript = code.Name.Content.StartsWith("gml_Script_");
+            }
+            else
+            {
+                TargetNameStripped = "";
+                IsScript = false;
+            }
+
+            if (globalContext.Data != null)
+            {
+                // TODO: This is expensive, move it somewhere else as a dictionary
+                // and have it update when events/objects are modified.
+                foreach (var obj in globalContext.Data.GameObjects)
+                    foreach (var event_list in obj.Events)
+                        foreach (var subevent in event_list)
+                            foreach (var ev in subevent.Actions)
+                                if (ev.CodeId == code)
+                                {
+                                    Object = obj;
+                                    goto LoopEnd;
+                                }
+            }
+        LoopEnd: return;
+        }
+
+        #region Indentation management
+        public const string Indent = "    ";
+        private int _indentationLevel = 0;
+        private string _indentation = "";
+
+        public int IndentationLevel
+        {
+            get
+            {
+                return _indentationLevel;
+            }
+            set
+            {
+                _indentationLevel = value;
+
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < IndentationLevel; i++)
+                {
+                    sb.Append(Indent);
+                }
+                _indentation = sb.ToString();
+            }
+        }
+        public string Indentation => _indentation;
+        #endregion
+
+        #region Temp var management
+        /// <summary>
+        /// Maps a temp var to a place where it was created
+        /// </summary>
+        public Dictionary<string, TempVarAssigmentStatement> TempVarMap = new Dictionary<string, TempVarAssigmentStatement>();
+        /// <summary>
+        /// If used for auto-naming temp vars
+        /// </summary>
+        public int TempVarId { get; private set; }
+        public AssignmentStatement CompilerTempVar;
+
+        public TempVar NewTempVar()
+        {
+            return new TempVar(++TempVarId);
+        }
+        #endregion
+
+        #region Local var management
+        public HashSet<string> LocalVarDefines = new HashSet<string>();
+        #endregion
+
+
+        #region Asset type resolution
+        /// <summary>
+        /// Contains the resolved asset type for every variable
+        /// </summary>
+        public Dictionary<UndertaleVariable, AssetIDType> assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
+
+        public DirectFunctionCall currentFunction; // TODO: may not work with methods
+        public string TargetNameStripped = ""; // TODO: may not work with methods
+        public bool IsScript; // TODO: may not work with methods
+        #endregion
+
+        #region Decompilation results
+        /// <summary>
+        /// Contains the result of decompiling this code block.
+        /// This is a map from an entry point address to a list of statements.
+        /// Needs to be here to access it in ToString for inline function definitions.
+        /// </summary>
+        public Dictionary<uint, List<Statement>> Statements { get; internal set; }
+        #endregion
+
+        /// <summary>
+        /// Allows to disable the anonymous code name resolution to prevent recursion
+        /// </summary>
+        public bool DisableAnonymousFunctionNameResolution = false;
+    }
+
+    public static class Decompiler
+    {
         // Color dictionary for resolving.
-        public static Dictionary<uint, string> ColorDictionary = new Dictionary<uint, string>
+        public static readonly Dictionary<uint, string> ColorDictionary = new Dictionary<uint, string>
         {
             [16776960] = "c_aqua",
             [0] = "c_black",
@@ -44,113 +204,6 @@ namespace UndertaleModLib.Decompiler
             [4235519] = "c_orange"
         };
 
-        // Settings
-        public bool EnableStringLabels;
-
-        // Decompilation instance data
-        public HashSet<string> LocalVarDefines = new HashSet<string>();
-        public Dictionary<string, TempVarAssigmentStatement> TempVarMap = new Dictionary<string, TempVarAssigmentStatement>();
-        public AssignmentStatement CompilerTempVar;
-        public Dictionary<UndertaleVariable, AssetIDType> assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
-        public int TempVarId;
-        public Dictionary<string, AssetIDType[]> scriptArgs = new Dictionary<string, AssetIDType[]>();
-        public DirectFunctionCall currentFunction;
-        public string TargetNameStripped = "";
-        public bool IsScript;
-
-        private int _indentationLevel = 0;
-
-        public int IndentationLevel
-        {
-            get { return _indentationLevel; }
-            set { _indentationLevel = value; Indentation = GetIndentation(); }
-        }
-        public const string Indent = "    ";
-        public string Indentation = "";
-        private string GetIndentation()
-        {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < IndentationLevel; i++)
-            {
-                sb.Append(Indent);
-            }
-            return sb.ToString();
-        }
-
-        public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
-        public Dictionary<uint, List<Statement>> Statements { get; internal set; }
-
-        public List<string> DecompilerWarnings = new List<string>();
-
-        public Dictionary<UndertaleFunction, string> anonymousFunctionNameCache = new Dictionary<UndertaleFunction, string>();
-        public bool noAnonymousCodeNames = false;
-
-        public DecompileContext(UndertaleData data, bool enableStringLabels)
-        {
-            this.Data = data;
-            this.EnableStringLabels = enableStringLabels;
-        }
-
-        public void ClearScriptArgs()
-        {
-            // This will not be done automatically, because it would cause significant slowdown having to recalculate this each time, and there's no reason to reset it if it's decompiling a bunch at once.
-            // But, since it is possible to invalidate this data, we add this here so we'll be able to invalidate it if we need to.
-            scriptArgs.Clear();
-        }
-
-        public void Setup(UndertaleCode code)
-        {
-            TempVarId = 0;
-            TargetCode = code;
-            TempVarMap.Clear();
-            CompilerTempVar = null;
-            assetTypes.Clear();
-            LocalVarDefines.Clear();
-            DecompilerWarnings.Clear();
-            anonymousFunctionNameCache.Clear();
-            currentFunction = null;
-
-            // Will this ever be null?
-            // Probably not unless someone made it null on purpose.
-            // Honestly that sounds like a them problem but might as well check anyway.
-            if(code.Name?.Content != null)
-            {
-                TargetNameStripped = AssetTypeResolver.StripPrefix(code.Name.Content);
-                IsScript = code.Name.Content.StartsWith("gml_Script_");
-            }
-            else
-            {
-                TargetNameStripped = "";
-                IsScript = false;
-            }
-
-            Object = null;
-
-            if (Data != null)
-            {
-                // TODO: This is expensive, move it somewhere else as a dictionary
-                // and have it update when events/objects are modified.
-                foreach (var obj in Data.GameObjects)
-                    foreach (var event_list in obj.Events)
-                        foreach (var subevent in event_list)
-                            foreach (var ev in subevent.Actions)
-                                if (ev.CodeId == code)
-                                {
-                                    Object = obj;
-                                    goto LoopEnd;
-                                }
-            }
-            LoopEnd: return;
-        }
-
-        public TempVar NewTempVar()
-        {
-            return new TempVar(++TempVarId);
-        }
-    }
-
-    public static class Decompiler
-    {
         // Represents a block node of instructions from GML bytecode (for control flow).
         public class Block
         {
@@ -306,8 +359,8 @@ namespace UndertaleModLib.Decompiler
             {
                 if (Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> resource) // Export string.
                 {
-                    string resultStr = resource.Resource.ToString(context);
-                    if (context.EnableStringLabels)
+                    string resultStr = resource.Resource.ToString(context.GlobalContext.Data?.IsGameMaker2() ?? false);
+                    if (context.GlobalContext.EnableStringLabels)
                         resultStr += resource.GetMarkerSuffix();
                     return resultStr;
                 }
@@ -397,10 +450,10 @@ namespace UndertaleModLib.Decompiler
                             else // guaranteed to be an unsigned int.
                             {
                                 uint vuint = (uint)vint;
-                                if (DecompileContext.ColorDictionary.ContainsKey(vuint))
-                                    return DecompileContext.ColorDictionary[vuint];
+                                if (Decompiler.ColorDictionary.ContainsKey(vuint))
+                                    return Decompiler.ColorDictionary[vuint];
                                 else
-                                    return (context.isGameMaker2 ? "0x" : "$") + formattable.ToString("X6", CultureInfo.InvariantCulture); // not a known color and not negative.
+                                    return (context.GlobalContext.Data?.IsGameMaker2() ?? false ? "0x" : "$") + formattable.ToString("X6", CultureInfo.InvariantCulture); // not a known color and not negative.
                             }
                         }
                         break;
@@ -426,41 +479,41 @@ namespace UndertaleModLib.Decompiler
                         break;*/
                 }
 
-                if (context.Data != null && AssetType != AssetIDType.Other)
+                if (context.GlobalContext.Data != null && AssetType != AssetIDType.Other)
                 {
                     IList assetList = null;
                     switch (AssetType)
                     {
                         case AssetIDType.Sprite:
-                            assetList = (IList)context.Data.Sprites;
+                            assetList = (IList)context.GlobalContext.Data.Sprites;
                             break;
                         case AssetIDType.TileSet:
                         case AssetIDType.Background:
-                            assetList = (IList)context.Data.Backgrounds;
+                            assetList = (IList)context.GlobalContext.Data.Backgrounds;
                             break;
                         case AssetIDType.Sound:
-                            assetList = (IList)context.Data.Sounds;
+                            assetList = (IList)context.GlobalContext.Data.Sounds;
                             break;
                         case AssetIDType.Font:
-                            assetList = (IList)context.Data.Fonts;
+                            assetList = (IList)context.GlobalContext.Data.Fonts;
                             break;
                         case AssetIDType.Path:
-                            assetList = (IList)context.Data.Paths;
+                            assetList = (IList)context.GlobalContext.Data.Paths;
                             break;
                         case AssetIDType.Timeline:
-                            assetList = (IList)context.Data.Timelines;
+                            assetList = (IList)context.GlobalContext.Data.Timelines;
                             break;
                         case AssetIDType.Room:
-                            assetList = (IList)context.Data.Rooms;
+                            assetList = (IList)context.GlobalContext.Data.Rooms;
                             break;
                         case AssetIDType.GameObject:
-                            assetList = (IList)context.Data.GameObjects;
+                            assetList = (IList)context.GlobalContext.Data.GameObjects;
                             break;
                         case AssetIDType.Shader:
-                            assetList = (IList)context.Data.Shaders;
+                            assetList = (IList)context.GlobalContext.Data.Shaders;
                             break;
                         case AssetIDType.Script:
-                            assetList = (IList)context.Data.Scripts;
+                            assetList = (IList)context.GlobalContext.Data.Scripts;
                             break;
                     }
 
@@ -505,8 +558,8 @@ namespace UndertaleModLib.Decompiler
                         return ((EventSubtypeKey)val).ToString(); // Either return the key enum, or the right alpha-numeric key-press.
 
                     if (!Char.IsControl((char)val) && !Char.IsLower((char)val) && val > 0) // The special keys overlay with the uppercase letters (ugh)
-                        return "ord(" + (((char)val) == '\'' ? (context.isGameMaker2 ? "\"\\\"\"" : "'\"'")
-                            : (((char)val) == '\\' ? (context.isGameMaker2 ? "\"\\\\\"" : "\"\\\"")
+                        return "ord(" + (((char)val) == '\'' ? (context.GlobalContext.Data?.IsGameMaker2() ?? false ? "\"\\\"\"" : "'\"'")
+                            : (((char)val) == '\\' ? (context.GlobalContext.Data?.IsGameMaker2() ?? false ? "\"\\\\\"" : "\"\\\"")
                             : "\"" + (char)val + "\"")) + ")";
                 }
                 return null;
@@ -933,7 +986,7 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
-                if (context.isGameMaker2 && !HasVarKeyword && context.LocalVarDefines.Add(Var.Var.Name))
+                if (context.GlobalContext.Data?.IsGameMaker2() ?? false && !HasVarKeyword && context.LocalVarDefines.Add(Var.Var.Name))
                     HasVarKeyword = true;
 
                 return String.Format("{0}{1} = {2}", (HasVarKeyword ? "var " : ""), Var.Var.Name, Value.ToString(context));
@@ -1025,7 +1078,7 @@ namespace UndertaleModLib.Decompiler
                     return "return " + Value.ToString(context) + ";";
                 }
                 else
-                    return (context.isGameMaker2 ? "return;" : "exit");
+                    return (context.GlobalContext.Data?.IsGameMaker2() ?? false ? "return;" : "exit");
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
@@ -1058,9 +1111,9 @@ namespace UndertaleModLib.Decompiler
             {
                 string varName = Destination.ToString(context);
 
-                if (context.isGameMaker2 && !HasVarKeyword)
+                if (context.GlobalContext.Data?.IsGameMaker2() ?? false && !HasVarKeyword)
                 {
-                    var data = context.Data;
+                    var data = context.GlobalContext.Data;
                     if (data != null)
                     {
                         var locals = data.CodeLocals.For(context.TargetCode);
@@ -1109,7 +1162,7 @@ namespace UndertaleModLib.Decompiler
                         ExpressionVar v1 = (ExpressionVar)two.Argument1;
                         if (checkEqual(Destination, v1) && two.Opcode != UndertaleInstruction.Opcode.Shl && two.Opcode != UndertaleInstruction.Opcode.Shr && two.Opcode != UndertaleInstruction.Opcode.Rem)
                         {
-                            if (!(context.Data?.GeneralInfo?.BytecodeVersion > 14 && v1.Opcode != UndertaleInstruction.Opcode.Push && Destination.Var.InstanceType != UndertaleInstruction.InstanceType.Self))
+                            if (!(context.GlobalContext.Data?.GeneralInfo?.BytecodeVersion > 14 && v1.Opcode != UndertaleInstruction.Opcode.Push && Destination.Var.InstanceType != UndertaleInstruction.InstanceType.Self))
                                 return String.Format("{0}{1} {2}= {3}", varPrefix, varName, Expression.OperationToPrintableString(two.Opcode), two.Argument2.ToString(context));
                         }
                     }
@@ -1311,38 +1364,38 @@ namespace UndertaleModLib.Decompiler
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
-                var script_code = context.Data?.Scripts.ByName(Function.Name.Content)?.Code;
-                if (script_code != null && !context.scriptArgs.ContainsKey(Function.Name.Content))
+                var script_code = context.GlobalContext.Data?.Scripts.ByName(Function.Name.Content)?.Code;
+                if (script_code != null && !context.GlobalContext.ScriptArgsCache.ContainsKey(Function.Name.Content))
                 {
-                    context.scriptArgs.Add(Function.Name.Content, null); // stop the recursion from looping
-                    var xxx = context.assetTypes;
-                    context.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>(); // Apply a temporary dictionary which types will be applied to.
+                    context.GlobalContext.ScriptArgsCache.Add(Function.Name.Content, null); // stop the recursion from looping
+                    DecompileContext childContext;
                     try
                     {
                         if (script_code.ParentEntry != null)
                         {
+                            childContext = new DecompileContext(context.GlobalContext, script_code.ParentEntry);
                             Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code.ParentEntry);
-                            Decompiler.DecompileFromBlock(context, blocks, blocks[script_code.Offset / 4]);
-                            Decompiler.DoTypePropagation(context, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
+                            Decompiler.DecompileFromBlock(childContext, blocks, blocks[script_code.Offset / 4]);
+                            Decompiler.DoTypePropagation(childContext, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
                         }
                         else
                         {
+                            childContext = new DecompileContext(context.GlobalContext, script_code);
                             Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code);
-                            Decompiler.DecompileFromBlock(context, blocks, blocks[0]);
-                            Decompiler.DoTypePropagation(context, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
+                            Decompiler.DecompileFromBlock(childContext, blocks, blocks[0]);
+                            Decompiler.DoTypePropagation(childContext, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
                         }
-                        context.scriptArgs[Function.Name.Content] = new AssetIDType[15];
+                        context.GlobalContext.ScriptArgsCache[Function.Name.Content] = new AssetIDType[15];
                         for (int i = 0; i < 15; i++)
                         {
-                            var v = context.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
-                            context.scriptArgs[Function.Name.Content][i] = v.Any() ? v.First().Value : AssetIDType.Other;
+                            var v = childContext.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
+                            context.GlobalContext.ScriptArgsCache[Function.Name.Content][i] = v.Any() ? v.First().Value : AssetIDType.Other;
                         }
                     }
                     catch (Exception e)
                     {
-                        context.DecompilerWarnings.Add("/*\nWARNING: Recursive script decompilation (for asset type resolution) failed for " + Function.Name.Content + "\n\n" + e.ToString() + "\n*/");
+                        context.GlobalContext.DecompilerWarnings.Add("/*\nWARNING: Recursive script decompilation (for asset type resolution) failed for " + Function.Name.Content + "\n\n" + e.ToString() + "\n*/");
                     }
-                    context.assetTypes = xxx; // restore original / proper map.
                 }
 
                 AssetIDType[] args = new AssetIDType[Arguments.Count];
@@ -1468,7 +1521,7 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 string name = Var.Name.Content;
-                if (context.Data?.GMS2_3 == true)
+                if (context.GlobalContext.Data?.GMS2_3 == true)
                 {
                     if (ArrayIndices != null)
                     {
@@ -1802,7 +1855,7 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.PushEnv:
-                        if (context.Data?.GMS2_3 == true)
+                        if (context.GlobalContext.Data?.GMS2_3 == true)
                         {
                             Expression expr = stack.Pop();
 
@@ -1893,7 +1946,7 @@ namespace UndertaleModLib.Decompiler
                                                     (!(two.Argument2 is ExpressionConstant) || // Also check to make sure it's not a ++ or --
                                                     (!((two.Argument2 as ExpressionConstant).IsPushE && ExpressionConstant.ConvertToInt((two.Argument2 as ExpressionConstant).Value) == 1))))
                                                 {
-                                                    if (!(context.Data?.GeneralInfo?.BytecodeVersion > 14 && v.Opcode != UndertaleInstruction.Opcode.Push && instr.Destination.Target.InstanceType != UndertaleInstruction.InstanceType.Self))
+                                                    if (!(context.GlobalContext.Data?.GeneralInfo?.BytecodeVersion > 14 && v.Opcode != UndertaleInstruction.Opcode.Push && instr.Destination.Target.InstanceType != UndertaleInstruction.InstanceType.Self))
                                                     {
                                                         statements.Add(new OperationEqualsStatement(target, two.Opcode, two.Argument2));
                                                         break;
@@ -2022,7 +2075,7 @@ namespace UndertaleModLib.Decompiler
                                     arg2 is ExpressionConstant argCode && argCode.Type == UndertaleInstruction.DataType.Int32 &&
                                     argCode.Value is UndertaleInstruction.Reference<UndertaleFunction> argCodeFunc)
                                 {
-                                    UndertaleCode functionBody = context.Data.Code.First(x => x.Name.Content == argCodeFunc.Target.Name.Content);
+                                    UndertaleCode functionBody = context.GlobalContext.Data.Code.First(x => x.Name.Content == argCodeFunc.Target.Name.Content);
                                     if (context.TargetCode.ChildEntries.Contains(functionBody))
                                     {
                                         // This function is somewhere inside this UndertaleCode block
@@ -2035,8 +2088,8 @@ namespace UndertaleModLib.Decompiler
                                 }
                             }
 
-                            UndertaleCode callTargetBody = context.Data?.Code.FirstOrDefault(x => x.Name.Content == instr.Function.Target.Name.Content);
-                            if (callTargetBody != null && callTargetBody.ParentEntry != null && !context.noAnonymousCodeNames)
+                            UndertaleCode callTargetBody = context.GlobalContext.Data?.Code.FirstOrDefault(x => x.Name.Content == instr.Function.Target.Name.Content);
+                            if (callTargetBody != null && callTargetBody.ParentEntry != null && !context.DisableAnonymousFunctionNameResolution)
                             {
                                 // Special case: this is a direct reference to a method variable
                                 // Figure out what it's actual name is
@@ -2044,15 +2097,13 @@ namespace UndertaleModLib.Decompiler
                                 static string FindActualNameForAnonymousCodeObject(DecompileContext context, UndertaleCode anonymousCodeObject)
                                 {
                                     // Decompile the parent object, and find the anonymous function assignment
-                                    UndertaleCode _old = context.TargetCode;
-                                    bool _old2 = context.noAnonymousCodeNames;
-                                    context.TargetCode = anonymousCodeObject.ParentEntry;
-                                    context.noAnonymousCodeNames = true; // prevent recursion
+                                    DecompileContext childContext = new DecompileContext(context.GlobalContext, anonymousCodeObject.ParentEntry);
+                                    childContext.DisableAnonymousFunctionNameResolution = true; // prevent recursion - we don't even need the names in the child block
                                     try
                                     {
                                         Dictionary<uint, Block> blocks2 = PrepareDecompileFlow(anonymousCodeObject.ParentEntry);
-                                        DecompileFromBlock(context, blocks2, blocks2[0]);
-                                        List<Statement> statements = HLDecompile(context, blocks2, blocks2[0], blocks2[anonymousCodeObject.Length / 4]);
+                                        DecompileFromBlock(childContext, blocks2, blocks2[0]);
+                                        List<Statement> statements = HLDecompile(childContext, blocks2, blocks2[0], blocks2[anonymousCodeObject.Length / 4]);
                                         foreach (Statement stmt2 in statements)
                                         {
                                             if (stmt2 is AssignmentStatement assign &&
@@ -2066,18 +2117,16 @@ namespace UndertaleModLib.Decompiler
                                     }
                                     catch (Exception e)
                                     {
-                                        context.DecompilerWarnings.Add("/*\nWARNING: Recursive script decompilation (for member variable name resolution) failed for " + anonymousCodeObject.Name.Content + "\n\n" + e.ToString() + "\n*/");
+                                        context.GlobalContext.DecompilerWarnings.Add("/*\nWARNING: Recursive script decompilation (for member variable name resolution) failed for " + anonymousCodeObject.Name.Content + "\n\n" + e.ToString() + "\n*/");
                                         return string.Empty;
                                     }
-                                    context.noAnonymousCodeNames = _old2;
-                                    context.TargetCode = _old;
                                 }
 
                                 string funcName;
-                                if (!context.anonymousFunctionNameCache.TryGetValue(instr.Function.Target, out funcName))
+                                if (!context.GlobalContext.AnonymousFunctionNameCache.TryGetValue(instr.Function.Target, out funcName))
                                 {
                                     funcName = FindActualNameForAnonymousCodeObject(context, callTargetBody);
-                                    context.anonymousFunctionNameCache.Add(instr.Function.Target, funcName);
+                                    context.GlobalContext.AnonymousFunctionNameCache.Add(instr.Function.Target, funcName);
                                 }
                                 if (funcName != string.Empty)
                                 {
@@ -2103,7 +2152,7 @@ namespace UndertaleModLib.Decompiler
 
                     case UndertaleInstruction.Opcode.Break:
                         // GMS 2.3 sub-opcodes
-                        if (context.Data?.GMS2_3 == true)
+                        if (context.GlobalContext.Data?.GMS2_3 == true)
                         {
                             switch ((short)instr.Value)
                             {
@@ -3251,7 +3300,7 @@ namespace UndertaleModLib.Decompiler
             // Mark local variables as local.
             UndertaleCode code = context.TargetCode;
             StringBuilder tempBuilder = new StringBuilder();
-            UndertaleCodeLocals locals = context.Data?.CodeLocals.For(code);
+            UndertaleCodeLocals locals = context.GlobalContext.Data?.CodeLocals.For(code);
 
             List<string> possibleVars = new List<string>();
             if (locals != null)
@@ -3310,18 +3359,16 @@ namespace UndertaleModLib.Decompiler
             return result;
         }
 
-        public static string Decompile(UndertaleCode code, DecompileContext context)
+        public static string Decompile(UndertaleCode code, GlobalDecompileContext globalContext)
         {
-            if (code.ParentEntry != null)
-                throw new InvalidOperationException("This code block represents a function nested inside " + code.ParentEntry.Name + " - decompile that instead");
-
-            context.Setup(code);
+            globalContext.DecompilerWarnings.Clear();
+            DecompileContext context = new DecompileContext(globalContext, code);
             try
             {
-                if (context.Data != null && context.Data.ToolInfo.ProfileMode)
+                if (globalContext.Data != null && globalContext.Data.ToolInfo.ProfileMode)
                 {
-                    string GMLPath = Path.Combine(context.Data.ToolInfo.AppDataProfiles,
-                                                  context.Data.ToolInfo.CurrentMD5, "Temp", code.Name.Content + ".gml");
+                    string GMLPath = Path.Combine(globalContext.Data.ToolInfo.AppDataProfiles,
+                                                  globalContext.Data.ToolInfo.CurrentMD5, "Temp", code.Name.Content + ".gml");
                     if (File.Exists(GMLPath))
                         return File.ReadAllText(GMLPath);
                 }
@@ -3342,11 +3389,12 @@ namespace UndertaleModLib.Decompiler
             // Write code.
             context.IndentationLevel = 0;
             StringBuilder sb = new StringBuilder();
-            foreach (var warn in context.DecompilerWarnings)
+            foreach (var warn in globalContext.DecompilerWarnings)
                 sb.Append(warn + "\n");
             foreach (var stmt in context.Statements[0])
                 sb.Append(stmt.ToString(context) + "\n");
 
+            globalContext.DecompilerWarnings.Clear();
             context.Statements = null;
 
             string decompiledCode = sb.ToString();

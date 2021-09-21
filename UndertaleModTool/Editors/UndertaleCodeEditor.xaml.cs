@@ -239,7 +239,7 @@ namespace UndertaleModTool
             gettext = new Dictionary<string, string>();
             string[] decompilationOutput;
             if (!SettingsWindow.ProfileModeEnabled)
-                decompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
+                decompilationOutput = Decompiler.Decompile(gettextCode, new GlobalDecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
             else
             {
                 try
@@ -248,11 +248,11 @@ namespace UndertaleModTool
                     if (File.Exists(path))
                         decompilationOutput = File.ReadAllText(path).Replace("\r\n", "\n").Split('\n');
                     else
-                        decompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
+                        decompilationOutput = Decompiler.Decompile(gettextCode, new GlobalDecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
                 }
                 catch
                 {
-                    decompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
+                    decompilationOutput = Decompiler.Decompile(gettextCode, new GlobalDecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
                 }
             }
             foreach (var line in decompilationOutput)
@@ -333,7 +333,7 @@ namespace UndertaleModTool
                 var dataa = (Application.Current.MainWindow as MainWindow).Data;
                 Task t = Task.Run(() =>
                 {
-                    DecompileContext context = new DecompileContext(dataa, false);
+                    GlobalDecompileContext context = new GlobalDecompileContext(dataa, false);
                     string decompiled = null;
                     Exception e = null;
                     try

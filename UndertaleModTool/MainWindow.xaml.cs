@@ -543,7 +543,7 @@ Please extract all contents of the ZIP file to a folder before running the progr
                         object countLock = new object();
                         string[] outputs = new string[Data.Code.Count];
                         UndertaleDebugInfo[] outputsOffsets = new UndertaleDebugInfo[Data.Code.Count];
-                        DecompileContext context = new DecompileContext(Data, false);
+                        GlobalDecompileContext context = new GlobalDecompileContext(Data, false);
                         Parallel.For(0, Data.Code.Count, (i) =>
                         {
                             var code = Data.Code[i];

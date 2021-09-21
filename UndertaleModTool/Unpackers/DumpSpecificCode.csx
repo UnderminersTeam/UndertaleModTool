@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
-ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
+ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
 int failed = 0;
 
