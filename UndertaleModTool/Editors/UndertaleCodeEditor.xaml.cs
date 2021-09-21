@@ -944,9 +944,17 @@ namespace UndertaleModTool
                     // Process the content of this identifier/function
                     if (func)
                     {
-                        val = data.Scripts.ByName(m.Value);
+                        val = null;
+                        if (!data.GMS2_3) // in GMS2.3 every custom "function" is in fact a member variable and scripts are never referenced directly
+                            val = data.Scripts.ByName(m.Value);
                         if (val == null)
+                        {
                             val = data.Functions.ByName(m.Value);
+                            if (val != null)
+                                Debug.WriteLine(val.Name.Content);
+                            if (data.GMS2_3 && val != null && data.Code.ByName(val.Name.Content) != null)
+                                val = null; // in GMS2.3 every custom "function" is in fact a member variable, and the names in functions make no sense (they have the gml_Script_ prefix)
+                        }
                         if (val == null)
                         {
                             if (data.BuiltinList.Functions.ContainsKey(m.Value))
@@ -959,7 +967,11 @@ namespace UndertaleModTool
                         }
                     }
                     else
+                    {
                         val = data.ByName(m.Value);
+                        if (data.GMS2_3 & val is UndertaleScript)
+                            val = null; // in GMS2.3 scripts are never referenced directly
+                    }
                     if (val == null)
                     {
                         if (offset >= 7)
