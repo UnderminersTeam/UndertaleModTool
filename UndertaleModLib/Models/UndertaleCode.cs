@@ -231,7 +231,7 @@ namespace UndertaleModLib.Models
                 Dictionary<T, List<UndertaleInstruction>> list = new Dictionary<T, List<UndertaleInstruction>>();
                 foreach (UndertaleCode code in codes)
                 {
-                    if (code.Offset != 0) // GMS 2.3, skip duplicates
+                    if (code.ParentEntry != null) // GMS 2.3, skip inner entries
                         continue;
                     foreach (UndertaleInstruction instr in code.Instructions)
                     {
