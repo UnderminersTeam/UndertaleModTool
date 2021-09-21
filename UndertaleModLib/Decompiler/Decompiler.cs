@@ -72,21 +72,6 @@ namespace UndertaleModLib.Decompiler
             if (code.ParentEntry != null)
                 throw new InvalidOperationException("This code block represents a function nested inside " + code.ParentEntry.Name + " - decompile that instead");
 
-
-            // Will this ever be null?
-            // Probably not unless someone made it null on purpose.
-            // Honestly that sounds like a them problem but might as well check anyway.
-            if (code.Name?.Content != null)
-            {
-                TargetNameStripped = AssetTypeResolver.StripPrefix(code.Name.Content);
-                IsScript = code.Name.Content.StartsWith("gml_Script_");
-            }
-            else
-            {
-                TargetNameStripped = "";
-                IsScript = false;
-            }
-
             if (globalContext.Data != null)
             {
                 // TODO: This is expensive, move it somewhere else as a dictionary
@@ -157,10 +142,7 @@ namespace UndertaleModLib.Decompiler
         /// Contains the resolved asset type for every variable
         /// </summary>
         public Dictionary<UndertaleVariable, AssetIDType> assetTypes = new Dictionary<UndertaleVariable, AssetIDType>();
-
-        public DirectFunctionCall currentFunction; // TODO: may not work with methods
-        public string TargetNameStripped = ""; // TODO: may not work with methods
-        public bool IsScript; // TODO: may not work with methods
+        public DirectFunctionCall currentFunction; // TODO: clean up this hack
         #endregion
 
         #region Decompilation results
@@ -1072,8 +1054,15 @@ namespace UndertaleModLib.Decompiler
             {
                 if (Value != null)
                 {
-                    if (context.IsScript && AssetTypeResolver.return_types.ContainsKey(context.TargetNameStripped))
-                        Value.DoTypePropagation(context, AssetTypeResolver.return_types[context.TargetNameStripped]);
+                    if (AssetTypeResolver.return_types.ContainsKey(context.TargetCode.Name.Content))
+                        Value.DoTypePropagation(context, AssetTypeResolver.return_types[context.TargetCode.Name.Content]);
+                    if (context.GlobalContext.Data != null && !context.GlobalContext.Data.GMS2_3)
+                    {
+                        // We might be decompiling a legacy script - resolve it's name
+                        UndertaleScript script = context.GlobalContext.Data.Scripts.FirstOrDefault(x => x.Code == context.TargetCode);
+                        if (script != null && AssetTypeResolver.return_types.ContainsKey(script.Name.Content))
+                            Value.DoTypePropagation(context, AssetTypeResolver.return_types[script.Name.Content]);
+                    }
 
                     return "return " + Value.ToString(context) + ";";
                 }
@@ -1331,6 +1320,7 @@ namespace UndertaleModLib.Decompiler
                     if (argumentString.Length > 0)
                         argumentString.Append(", ");
                     argumentString.Append(exp.ToString(context));
+                    context.currentFunction = null;
                 }
 
                 if (Function.Name.Content == "@@NewGMLArray@@") // Special case in GMS2.
@@ -1364,10 +1354,11 @@ namespace UndertaleModLib.Decompiler
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
-                var script_code = context.GlobalContext.Data?.Scripts.ByName(Function.Name.Content)?.Code;
-                if (script_code != null && !context.GlobalContext.ScriptArgsCache.ContainsKey(Function.Name.Content))
+                string funcName = OverridenName != string.Empty ? OverridenName : Function.Name.Content;
+                var script_code = context.GlobalContext.Data?.Scripts.ByName(funcName)?.Code;
+                if (script_code != null && !context.GlobalContext.ScriptArgsCache.ContainsKey(funcName))
                 {
-                    context.GlobalContext.ScriptArgsCache.Add(Function.Name.Content, null); // stop the recursion from looping
+                    context.GlobalContext.ScriptArgsCache.Add(funcName, null); // stop the recursion from looping
                     DecompileContext childContext;
                     try
                     {
@@ -1385,11 +1376,11 @@ namespace UndertaleModLib.Decompiler
                             Decompiler.DecompileFromBlock(childContext, blocks, blocks[0]);
                             Decompiler.DoTypePropagation(childContext, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
                         }
-                        context.GlobalContext.ScriptArgsCache[Function.Name.Content] = new AssetIDType[15];
+                        context.GlobalContext.ScriptArgsCache[funcName] = new AssetIDType[15];
                         for (int i = 0; i < 15; i++)
                         {
                             var v = childContext.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
-                            context.GlobalContext.ScriptArgsCache[Function.Name.Content][i] = v.Any() ? v.First().Value : AssetIDType.Other;
+                            context.GlobalContext.ScriptArgsCache[funcName][i] = v.Any() ? v.First().Value : AssetIDType.Other;
                         }
                     }
                     catch (Exception e)
@@ -1399,7 +1390,7 @@ namespace UndertaleModLib.Decompiler
                 }
 
                 AssetIDType[] args = new AssetIDType[Arguments.Count];
-                AssetTypeResolver.AnnotateTypesForFunctionCall(Function.Name.Content, args, context, this);
+                AssetTypeResolver.AnnotateTypesForFunctionCall(funcName, args, context, this);
                 for (var i = 0; i < Arguments.Count; i++)
                     Arguments[i].DoTypePropagation(context, args[i]);
 
