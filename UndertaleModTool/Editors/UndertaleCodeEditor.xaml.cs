@@ -950,8 +950,6 @@ namespace UndertaleModTool
                         if (val == null)
                         {
                             val = data.Functions.ByName(m.Value);
-                            if (val != null)
-                                Debug.WriteLine(val.Name.Content);
                             if (data.GMS2_3 && val != null && data.Code.ByName(val.Name.Content) != null)
                                 val = null; // in GMS2.3 every custom "function" is in fact a member variable, and the names in functions make no sense (they have the gml_Script_ prefix)
                         }

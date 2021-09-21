@@ -1375,14 +1375,14 @@ namespace UndertaleModLib.Decompiler
                         if (script_code.ParentEntry != null)
                         {
                             childContext = new DecompileContext(context.GlobalContext, script_code.ParentEntry);
-                            Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code.ParentEntry);
+                            Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code.ParentEntry, new List<uint>() { script_code.Offset / 4 });
                             Decompiler.DecompileFromBlock(childContext, blocks, blocks[script_code.Offset / 4]);
                             Decompiler.DoTypePropagation(childContext, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
                         }
                         else
                         {
                             childContext = new DecompileContext(context.GlobalContext, script_code);
-                            Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code);
+                            Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code, new List<uint>() { 0 });
                             Decompiler.DecompileFromBlock(childContext, blocks, blocks[0]);
                             Decompiler.DoTypePropagation(childContext, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
                         }
@@ -2102,7 +2102,7 @@ namespace UndertaleModLib.Decompiler
                                     childContext.DisableAnonymousFunctionNameResolution = true; // prevent recursion - we don't even need the names in the child block
                                     try
                                     {
-                                        Dictionary<uint, Block> blocks2 = PrepareDecompileFlow(anonymousCodeObject.ParentEntry);
+                                        Dictionary<uint, Block> blocks2 = PrepareDecompileFlow(anonymousCodeObject.ParentEntry, new List<uint>() { 0 });
                                         DecompileFromBlock(childContext, blocks2, blocks2[0]);
                                         List<Statement> statements = HLDecompile(childContext, blocks2, blocks2[0], blocks2[anonymousCodeObject.Length / 4]);
                                         foreach (Statement stmt2 in statements)
@@ -3272,7 +3272,7 @@ namespace UndertaleModLib.Decompiler
             return (statement is ExpressionConstant constant) && constant.EqualsNumber(number);
         }
 
-        private static List<Statement> HLDecompile(DecompileContext context, Dictionary<uint, Block> blocks, Block entryPoint, Block rootExitPoint)
+        public static List<Statement> HLDecompile(DecompileContext context, Dictionary<uint, Block> blocks, Block entryPoint, Block rootExitPoint)
         {
             Dictionary<Block, List<Block>> loops = ComputeNaturalLoops(blocks, entryPoint);
             var reverseDominators = ComputeReverseDominators(blocks, rootExitPoint);
@@ -3280,20 +3280,25 @@ namespace UndertaleModLib.Decompiler
             return (HLDecompileBlocks(context, ref bl, blocks, loops, reverseDominators, new List<Block>()).CleanBlockStatement(context)).Statements;
         }
 
-        private static Dictionary<uint, Block> PrepareDecompileFlow(UndertaleCode code)
+        public static Dictionary<uint, Block> PrepareDecompileFlow(UndertaleCode code, List<uint> entryPoints)
         {
             if (code.ParentEntry != null)
                 throw new InvalidOperationException("This code block represents a function nested inside " + code.ParentEntry.Name + " - decompile that instead");
             code.UpdateAddresses();
 
+            Dictionary<uint, Block> blocks = DecompileFlowGraph(code, entryPoints);
+
+            return blocks;
+        }
+
+        public static Dictionary<uint, Block> PrepareDecompileFlow(UndertaleCode code)
+        {
             List<uint> entryPoints = new List<uint>();
             entryPoints.Add(0);
             foreach (UndertaleCode duplicate in code.ChildEntries)
                 entryPoints.Add(duplicate.Offset / 4);
 
-            Dictionary<uint, Block> blocks = DecompileFlowGraph(code, entryPoints);
-
-            return blocks;
+            return PrepareDecompileFlow(code, entryPoints);
         }
 
         private static string MakeLocalVars(DecompileContext context, string decompiledCode)
