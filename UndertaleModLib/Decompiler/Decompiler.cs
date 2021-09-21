@@ -1113,6 +1113,7 @@ namespace UndertaleModLib.Decompiler
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
             {
+                Destination = (ExpressionVar)Destination.CleanExpression(context, block);
                 Value = Value.CleanExpression(context, block);
                 if (Destination.Var.Name?.Content == "$$$$temp$$$$")
                     context.CompilerTempVar = this;
