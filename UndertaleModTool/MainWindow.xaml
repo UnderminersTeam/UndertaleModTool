@@ -278,6 +278,16 @@
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Code" ItemsSource="{Binding Code, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Code, Converter={StaticResource VisibleIfNotNull}}">
+                            <TreeViewItem.ItemContainerStyle>
+                                <Style TargetType="{x:Type TreeViewItem}">
+                                    <Setter Property="Foreground" Value="Gray"></Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=ParentEntry}" Value="{x:Null}">
+                                            <Setter Property="Foreground" Value="Black"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TreeViewItem.ItemContainerStyle>
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleCode}">
                                     <TextBlock Text="{Binding Name.Content}" />
@@ -298,7 +308,7 @@
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Code locals (unused?)" ItemsSource="{Binding CodeLocals, Converter={StaticResource FilteredViewConverter}}" Foreground="Gray" Visibility="{Binding CodeLocals, Converter={StaticResource VisibleIfNotNull}}">
+                        <TreeViewItem Header="Code locals" ItemsSource="{Binding CodeLocals, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding CodeLocals, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleCodeLocals}">
                                     <TextBlock Text="{Binding Name.Content}" />
