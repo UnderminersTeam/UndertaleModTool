@@ -352,7 +352,7 @@ namespace UndertaleModLib.Decompiler
 
     public class AssetTypeResolver
     {
-        public static Dictionary<string, AssetIDType[]> builtin_funcs;
+        public static Dictionary<string, AssetIDType[]> builtin_funcs; // keys are function names
 
         public static Dictionary<string, Dictionary<string, AssetIDType>> builtin_var_overrides; // keys are code block names or object names. In the resulting dictionary keys are variable names.
         public static Dictionary<string, AssetIDType> builtin_vars; // keys are variable names
@@ -835,6 +835,7 @@ namespace UndertaleModLib.Decompiler
                 { "draw_roundrect_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
                 { "draw_roundrect_colour_ext", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
                 { "draw_healthbar", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "draw_set_alpha", new AssetIDType[] { AssetIDType.Other } },
 
                 { "draw_set_blend_mode", new AssetIDType[] { AssetIDType.ContextDependent } },
                 { "draw_set_blend_mode_ext", new AssetIDType[] { AssetIDType.ContextDependent, AssetIDType.ContextDependent } },
@@ -844,6 +845,9 @@ namespace UndertaleModLib.Decompiler
                 { "d3d_set_fog", new AssetIDType[] { AssetIDType.Boolean, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other } },
                 { "gpu_set_fog", new AssetIDType[] { AssetIDType.Boolean, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other } },
 
+                { "layer_script_begin", new AssetIDType[] { AssetIDType.Other, AssetIDType.Script } },
+                { "gpu_set_blendenable", new AssetIDType[] { AssetIDType.Boolean } },
+                { "layer_script_end", new AssetIDType[] { AssetIDType.Other, AssetIDType.Script } },
                 { "draw_sprite", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
                 { "draw_sprite_ext", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
                 { "draw_sprite_general", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
@@ -1077,7 +1081,7 @@ namespace UndertaleModLib.Decompiler
             }
 
             // Just Deltarune
-            if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
+            if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune") || lowerName == "deltarune chapter 1 & 2"))
             {
                 builtin_vars.Add("idlesprite", AssetIDType.Sprite);
                 builtin_vars.Add("actreadysprite", AssetIDType.Sprite);
@@ -1233,7 +1237,7 @@ namespace UndertaleModLib.Decompiler
             }
 
             // Both UT and DR
-            if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
+            if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune") || lowerName == "deltarune chapter 1 & 2"))
             {
                 AddOverrideFor("gml_Script_scr_getbuttonsprite", "control", AssetIDType.Enum_GamepadButton);
                 AddOverrideFor("gml_Script_scr_getbuttonsprite", "button", AssetIDType.Enum_GamepadButton);
@@ -1252,9 +1256,135 @@ namespace UndertaleModLib.Decompiler
                 //builtin_vars.Add("face", AssetIDType.Sprite);
 
                 builtin_vars.Add("myfont", AssetIDType.Font);
+
                 // Hope this script works!
                 builtin_funcs["scr_bouncer"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other };
 
+                // Deltarune Chapter 2 asset resolutions:
+                // Seems to be x, y, measure of distance (maybe)
+
+                builtin_funcs["_background_set"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["c_addxy"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color };
+                builtin_funcs["c_autowalk"] = new AssetIDType[] { AssetIDType.Boolean };
+                builtin_funcs["c_fadeout"] = new AssetIDType[] { AssetIDType.Other };
+                builtin_funcs["c_pan"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["c_pannable"] = new AssetIDType[] { AssetIDType.Boolean };
+                builtin_funcs["c_panobj"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other };
+                builtin_funcs["c_panspeed"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["c_script_instance"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Script, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["c_script_instance_stop"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Script };
+                builtin_funcs["c_setxy"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["c_soundplay"] = new AssetIDType[] { AssetIDType.Sound };
+                builtin_funcs["c_soundplay_x"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["c_sprite"] = new AssetIDType[] { AssetIDType.Sprite };
+                builtin_funcs["c_stickto"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other };
+                builtin_funcs["c_wait"] = new AssetIDType[] { AssetIDType.Other };
+                builtin_funcs["c_walkdirect"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["c_walkdirect_wait"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["d3d_set_fog_ch1"] = new AssetIDType[] { AssetIDType.Boolean, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["draw_background_ext_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["draw_background_part_ext_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["draw_background_tiled_ext_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["draw_enable_alphablend_ch1"] = new AssetIDType[] { AssetIDType.Boolean };
+                builtin_funcs["draw_monster_body_part"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["draw_monster_body_part_ext"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["draw_sprite_ext_centerscale"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["draw_sprite_ext_flash"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["draw_sprite_skew_ext_cute"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["draw_text_outline"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["i_ex"] = new AssetIDType[] { AssetIDType.GameObject };
+                builtin_funcs["instance_create_ch1"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["msgsetloc"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["mus_loop"] = new AssetIDType[] { AssetIDType.Sound };
+                builtin_funcs["mus_loop_ext"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["safe_delete"] = new AssetIDType[] { AssetIDType.GameObject };
+                builtin_funcs["scr_84_debug"] = new AssetIDType[] { AssetIDType.Boolean };
+                builtin_funcs["scr_act_charsprite"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Boolean };
+                builtin_funcs["scr_anim"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other };
+                builtin_funcs["scr_anim_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other };
+                builtin_funcs["scr_battle"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_battle_marker"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["scr_bullet_create"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["scr_bulletspawner"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["scr_caterpillar_facing_ch1"] = new AssetIDType[] { AssetIDType.Other };
+                builtin_funcs["scr_custom_afterimage"] = new AssetIDType[] { AssetIDType.Sprite };
+                builtin_funcs["scr_custom_afterimage_ext"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_dark_marker"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["scr_dark_marker_ch1"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["scr_dark_marker_depth"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["scr_debug_keycheck"] = new AssetIDType[] { AssetIDType.KeyboardKey };
+                builtin_funcs["scr_draw_background_ps4_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_draw_outline_ext"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_draw_sprite_crop_ext"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_ds_list_write"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_enemyblcon"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_following_afterimage"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.GameObject };
+                builtin_funcs["scr_forcefield"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean };
+                builtin_funcs["scr_fx_housesquare"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color };
+                builtin_funcs["scr_guardpeek"] = new AssetIDType[] { AssetIDType.GameObject };
+                builtin_funcs["scr_marker"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["scr_marker_ch1"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["scr_mercyadd"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_monster_add"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["scr_monster_change"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["scr_move_to_point_over_time"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_pan_ch1"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_pan_to_obj"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other };
+                builtin_funcs["scr_pan_to_obj_ch1"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other };
+                builtin_funcs["scr_script_delayed"] = new AssetIDType[] { AssetIDType.Script, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_textsetup"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_textsetup_ch1"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["snd_is_playing"] = new AssetIDType[] { AssetIDType.Sound };
+                builtin_funcs["snd_loop"] = new AssetIDType[] { AssetIDType.Sound };
+                builtin_funcs["snd_loop_ch1"] = new AssetIDType[] { AssetIDType.Sound };
+                builtin_funcs["snd_pitch"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other };
+                builtin_funcs["snd_play"] = new AssetIDType[] { AssetIDType.Sound };
+                builtin_funcs["snd_play_ch1"] = new AssetIDType[] { AssetIDType.Sound };
+                builtin_funcs["snd_play_pitch"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other };
+                builtin_funcs["snd_play_x"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["snd_stop"] = new AssetIDType[] { AssetIDType.Sound };
+                builtin_funcs["snd_stop_ch1"] = new AssetIDType[] { AssetIDType.Sound };
+                builtin_funcs["snd_volume"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_vars.Add("_headsprite", AssetIDType.Sprite);
+                builtin_vars.Add("ar", AssetIDType.Other);
+                builtin_vars.Add("as", AssetIDType.Other);
+                builtin_vars.Add("be", AssetIDType.Other);
+                builtin_vars.Add("canactnoe", AssetIDType.Boolean);
+                builtin_vars.Add("canactral", AssetIDType.Boolean);
+                builtin_vars.Add("canactsus", AssetIDType.Boolean);
+                builtin_vars.Add("char", AssetIDType.Other);
+                builtin_vars.Add("choice", AssetIDType.Other);
+                builtin_vars.Add("direction", AssetIDType.Other);
+                builtin_vars.Add("encounterno", AssetIDType.Other);
+                builtin_vars.Add("flag", AssetIDType.Other);
+                builtin_vars.Add("gi", AssetIDType.Other);
+                builtin_vars.Add("gold", AssetIDType.Other);
+                builtin_vars.Add("hg", AssetIDType.Other);
+                builtin_vars.Add("housecolor", AssetIDType.Color);
+                builtin_vars.Add("la", AssetIDType.Other);
+                builtin_vars.Add("lhp", AssetIDType.Other);
+                builtin_vars.Add("na", AssetIDType.Other);
+                builtin_vars.Add("nl", AssetIDType.Other);
+                builtin_vars.Add("no", AssetIDType.Other);
+                builtin_vars.Add("partblend", AssetIDType.Color);
+                builtin_vars.Add("partsprite", AssetIDType.Sprite);
+                builtin_vars.Add("plot", AssetIDType.Other);
+                builtin_vars.Add("qu", AssetIDType.Other);
+                builtin_vars.Add("sa", AssetIDType.Other);
+                builtin_vars.Add("sameattack", AssetIDType.Other);
+                builtin_vars.Add("sameattacker", AssetIDType.Other);
+                builtin_vars.Add("side", AssetIDType.Other);
+                builtin_vars.Add("skip", AssetIDType.Boolean);
+                builtin_vars.Add("st", AssetIDType.Other);
+                builtin_vars.Add("stats_amount", AssetIDType.Color);
+                builtin_vars.Add("stayVisible", AssetIDType.Boolean);
+                builtin_vars.Add("sw", AssetIDType.Other);
+                builtin_vars.Add("to", AssetIDType.Other);
+                builtin_vars.Add("un", AssetIDType.Other);
+                builtin_vars.Add("walkpoint", AssetIDType.Other);
+                builtin_vars.Add("xx", AssetIDType.Other);
+                builtin_vars.Add("yy", AssetIDType.Other);
+                
                 // Undertale 1.05+ and Deltarune console versions.
                 builtin_funcs["scr_draw_background_ps4"] = new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other };
                 builtin_vars.Add("room_id", AssetIDType.Room);
