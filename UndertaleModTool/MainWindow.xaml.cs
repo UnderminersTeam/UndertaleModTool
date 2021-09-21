@@ -119,6 +119,8 @@ namespace UndertaleModTool
         static extern void SHChangeNotify(long wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
         const long SHCNE_ASSOCCHANGED = 0x08000000;
 
+        public static readonly string[] IFF_EXTENSIONS = new string[] { ".win", ".unx", ".ios", ".droid", ".3ds", ".symbian" };
+
         private void UpdateTree()
         {
             foreach (var child in (MainTree.Items[0] as TreeViewItem).Items)
@@ -159,7 +161,7 @@ Please extract all contents of the ZIP file to a folder before running the progr
                     UndertaleModTool_app.CreateSubKey(@"shell\open\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\"", RegistryValueKind.String);
                     UndertaleModTool_app.CreateSubKey(@"shell\launch\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\" launch", RegistryValueKind.String);
                     UndertaleModTool_app.CreateSubKey(@"shell\launch").SetValue("", "Run game", RegistryValueKind.String);
-                    foreach (var extStr in new string[] { ".win", ".unx", ".ios", ".droid" })
+                    foreach (var extStr in IFF_EXTENSIONS)
                     {
                         var ext = HKCU_Classes.CreateSubKey(extStr);
                         ext.SetValue("", "UndertaleModTool", RegistryValueKind.String);
@@ -297,6 +299,32 @@ Please extract all contents of the ZIP file to a folder before running the progr
             CanSave = true;
             CanSafelySave = true;
             return true;
+        }
+
+        private async void Window_Drop(object sender, DragEventArgs e)
+        {
+            // ignore drop events inside the main window (e.g. resource tree)
+            if (sender is MainWindow)
+            {
+                // try to detect stuff, autoConvert is false because we don't want any conversion.
+                if (e.Data.GetDataPresent(DataFormats.FileDrop, false))
+                {
+                    string filepath = ((string[])e.Data.GetData(DataFormats.FileDrop))[0];
+                    string fileext = Path.GetExtension(filepath);
+
+                    if (fileext == ".csx")
+                    {
+                        if (MessageBox.Show($"Run {filepath} as a script?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
+                            await RunScript(filepath);
+                    }
+                    else if (IFF_EXTENSIONS.Contains(fileext) || fileext == ".dat" /* audiogroup */)
+                    {
+                        if (MessageBox.Show($"Open {filepath} as a data file?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
+                            await LoadFile(filepath, true);
+                    }
+                    // else, do something?
+                }
+            }
         }
 
         private async Task<bool> DoOpenDialog()
