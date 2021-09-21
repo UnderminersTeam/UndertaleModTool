@@ -86,7 +86,7 @@ for (var j = 0; j < codeToDump.Count; j++)
 void DumpCode(UndertaleCode code) 
 {
     string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
-    if (!(code.DuplicateEntry))
+    if (code.ParentEntry == null)
     {
         if (path.Length > 150)
         {

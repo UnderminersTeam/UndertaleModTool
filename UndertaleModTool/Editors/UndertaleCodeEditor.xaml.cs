@@ -207,10 +207,10 @@ namespace UndertaleModTool
             string text;
 
             DisassemblyEditor.TextArea.ClearSelection();
-            if (code.DuplicateEntry)
+            if (code.ParentEntry != null)
             {
                 DisassemblyEditor.IsReadOnly = true;
-                text = "; Duplicate code entry; cannot edit here.";
+                text = "; This code entry is a reference to an anonymous function within " + code.ParentEntry.Name.Content + ", view it there";
             }
             else
             {
@@ -295,9 +295,9 @@ namespace UndertaleModTool
         {
             DecompiledEditor.IsReadOnly = true;
             DecompiledEditor.TextArea.ClearSelection();
-            if (code.DuplicateEntry)
+            if (code.ParentEntry != null)
             {
-                DecompiledEditor.Text = "// Duplicate code entry; cannot edit here.";
+                DecompiledEditor.Text = "// This code entry is a reference to an anonymous function within " + code.ParentEntry.Name.Content + ", view it there";
                 CurrentDecompiled = code;
                 existingDialog?.TryClose();
             }
@@ -451,7 +451,7 @@ namespace UndertaleModTool
 
         private async void GraphCode(UndertaleCode code)
         {
-            if (code.DuplicateEntry)
+            if (code.ParentEntry != null)
             {
                 GraphView.Source = null;
                 CurrentGraphed = code;
@@ -466,7 +466,11 @@ namespace UndertaleModTool
                 try
                 {
                     code.UpdateAddresses();
-                    var blocks = Decompiler.DecompileFlowGraph(code);
+                    List<uint> entryPoints = new List<uint>();
+                    entryPoints.Add(0);
+                    foreach (UndertaleCode duplicate in code.ChildEntries)
+                        entryPoints.Add(duplicate.Offset / 4);
+                    var blocks = Decompiler.DecompileFlowGraph(code, entryPoints);
                     string dot = Decompiler.ExportFlowGraph(blocks);
 
                     try
@@ -475,6 +479,7 @@ namespace UndertaleModTool
                         var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
                         var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
                         var wrapper = new GraphGeneration(getStartProcessQuery, getProcessStartInfoQuery, registerLayoutPluginCommand);
+                        wrapper.GraphvizPath = Settings.Instance.GraphVizPath;
 
                         byte[] output = wrapper.GenerateGraph(dot, Enums.GraphReturnType.Png); // TODO: Use SVG instead
 
@@ -530,7 +535,7 @@ namespace UndertaleModTool
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return; // Probably loaded another data.win or something.
-            if (code.DuplicateEntry)
+            if (code.ParentEntry != null)
                 return;
 
             // Check to make sure this isn't an element inside of the textbox, or another tab
@@ -652,7 +657,7 @@ namespace UndertaleModTool
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return; // Probably loaded another data.win or something.
-            if (code.DuplicateEntry)
+            if (code.ParentEntry != null)
                 return;
 
             // Check to make sure this isn't an element inside of the textbox, or another tab

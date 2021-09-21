@@ -37,7 +37,7 @@ void DumpCode()
     foreach(UndertaleCode code in Data.Code)
     {
         string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
-        if (!(code.DuplicateEntry))
+        if (code.ParentEntry == null)
         {
             if (path.Length > 150)
             {

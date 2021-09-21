@@ -78,7 +78,12 @@ namespace UndertaleModLib.Decompiler
         }
 
         public bool isGameMaker2 { get => Data != null && Data.IsGameMaker2(); }
+        public Dictionary<uint, List<Statement>> Statements { get; internal set; }
+
         public List<string> DecompilerWarnings = new List<string>();
+
+        public Dictionary<UndertaleFunction, string> anonymousFunctionNameCache = new Dictionary<UndertaleFunction, string>();
+        public bool noAnonymousCodeNames = false;
 
         public DecompileContext(UndertaleData data, bool enableStringLabels)
         {
@@ -102,6 +107,7 @@ namespace UndertaleModLib.Decompiler
             assetTypes.Clear();
             LocalVarDefines.Clear();
             DecompilerWarnings.Clear();
+            anonymousFunctionNameCache.Clear();
             currentFunction = null;
 
             // Will this ever be null?
@@ -1183,6 +1189,51 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        // Represents an inline function definition
+        public class FunctionDefinition : Expression
+        {
+            public UndertaleFunction Function { get; private set; }
+            public Block FunctionBodyEntryBlock { get; private set; }
+
+            public FunctionDefinition(UndertaleFunction target, Block functionBodyEntryBlock)
+            {
+                Function = target;
+                FunctionBodyEntryBlock = functionBodyEntryBlock;
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                return this;
+            }
+
+            public override string ToString(DecompileContext context)
+            {
+                StringBuilder sb = new StringBuilder();
+                if (context.Statements.ContainsKey(FunctionBodyEntryBlock.Address.Value))
+                {
+                    sb.Append("function ");
+                    sb.Append(Function.Name.Content);
+                    sb.Append("() {\n");
+                    context.IndentationLevel++;
+                    foreach (Statement stmt in context.Statements[FunctionBodyEntryBlock.Address.Value])
+                        sb.Append(context.Indentation + stmt.ToString(context) + "\n");
+                    context.IndentationLevel--;
+                    sb.Append("}");
+                    sb.Append("\n");
+                }
+                else
+                {
+                    sb.Append(Function.Name.Content);
+                }
+                return sb.ToString();
+            }
+
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
+            {
+                return suggestedType;
+            }
+        }
+
         // Represents a high-level function or script call.
         public abstract class FunctionCall : Expression
         {
@@ -1204,7 +1255,14 @@ namespace UndertaleModLib.Decompiler
 
         public class DirectFunctionCall : FunctionCall
         {
+            internal string OverridenName = string.Empty;
             internal UndertaleFunction Function;
+
+            public DirectFunctionCall(string overridenName, UndertaleFunction function, UndertaleInstruction.DataType returnType, List<Expression> args) : base(returnType, args)
+            {
+                this.OverridenName = overridenName;
+                this.Function = function;
+            }
 
             public DirectFunctionCall(UndertaleFunction function, UndertaleInstruction.DataType returnType, List<Expression> args) : base(returnType, args)
             {
@@ -1225,7 +1283,7 @@ namespace UndertaleModLib.Decompiler
                 if (Function.Name.Content == "@@NewGMLArray@@") // Special case in GMS2.
                     return "[" + argumentString.ToString() + "]";
 
-                return String.Format("{0}({1})", Function.Name.Content, argumentString.ToString());
+                return String.Format("{0}({1})", OverridenName != string.Empty ? OverridenName : Function.Name.Content, argumentString.ToString());
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
@@ -1261,9 +1319,18 @@ namespace UndertaleModLib.Decompiler
                     context.assetTypes = new Dictionary<UndertaleVariable, AssetIDType>(); // Apply a temporary dictionary which types will be applied to.
                     try
                     {
-                        Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code);
-                        Decompiler.DecompileFromBlock(context, blocks[0]);
-                        Decompiler.DoTypePropagation(context, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
+                        if (script_code.ParentEntry != null)
+                        {
+                            Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code.ParentEntry);
+                            Decompiler.DecompileFromBlock(context, blocks, blocks[script_code.Offset / 4]);
+                            Decompiler.DoTypePropagation(context, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
+                        }
+                        else
+                        {
+                            Dictionary<uint, Block> blocks = Decompiler.PrepareDecompileFlow(script_code);
+                            Decompiler.DecompileFromBlock(context, blocks, blocks[0]);
+                            Decompiler.DoTypePropagation(context, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
+                        }
                         context.scriptArgs[Function.Name.Content] = new AssetIDType[15];
                         for (int i = 0; i < 15; i++)
                         {
@@ -1546,13 +1613,15 @@ namespace UndertaleModLib.Decompiler
                 return GetTypeSize(UndertaleInstruction.DataType.Variable);
             if (e is FunctionCall)  // function call returns an internal variable
                 return GetTypeSize(UndertaleInstruction.DataType.Variable);
+            if (e is FunctionDefinition)
+                return GetTypeSize(UndertaleInstruction.DataType.Variable);
             if (e is ExpressionTwo exprTwo)
                 return GetTypeSize(exprTwo.Type2); // for add.i.v, the output is a var
             return GetTypeSize(e.Type);
         }
 
         // The core function to decompile a specific block.
-        internal static void DecompileFromBlock(DecompileContext context, Block block, List<TempVarReference> tempvars, Stack<Tuple<Block, List<TempVarReference>>> workQueue)
+        internal static void DecompileFromBlock(DecompileContext context, Dictionary<uint, Block> blocks, Block block, List<TempVarReference> tempvars, Stack<Tuple<Block, List<TempVarReference>>> workQueue)
         {
             if (block.TempVarsOnEntry != null && (block.nextBlockTrue != null || block.nextBlockFalse != null))
             {
@@ -1935,6 +2004,88 @@ namespace UndertaleModLib.Decompiler
                             List<Expression> args = new List<Expression>();
                             for (int j = 0; j < instr.ArgumentsCount; j++)
                                 args.Add(stack.Pop());
+
+                            if (instr.Function.Target.Name.Content == "method" && args.Count == 2)
+                            {
+                                // Special case - method creation
+                                // See if the body should be inlined
+
+                                Expression arg1 = args[0];
+                                while (arg1 is ExpressionCast cast)
+                                    arg1 = cast.Argument;
+                                Expression arg2 = args[1];
+                                while (arg2 is ExpressionCast cast)
+                                    arg2 = cast.Argument;
+
+                                if (arg1 is ExpressionConstant argThis && argThis.Type == UndertaleInstruction.DataType.Int16 &&
+                                    (short)argThis.Value == (short)UndertaleInstruction.InstanceType.Self &&
+                                    arg2 is ExpressionConstant argCode && argCode.Type == UndertaleInstruction.DataType.Int32 &&
+                                    argCode.Value is UndertaleInstruction.Reference<UndertaleFunction> argCodeFunc)
+                                {
+                                    UndertaleCode functionBody = context.Data.Code.First(x => x.Name.Content == argCodeFunc.Target.Name.Content);
+                                    if (context.TargetCode.ChildEntries.Contains(functionBody))
+                                    {
+                                        // This function is somewhere inside this UndertaleCode block
+                                        // inline the definition
+                                        Block functionBodyEntryBlock = blocks[functionBody.Offset / 4];
+                                        stack.Push(new FunctionDefinition(argCodeFunc.Target, functionBodyEntryBlock));
+                                        workQueue.Push(new Tuple<Block, List<TempVarReference>>(functionBodyEntryBlock, new List<TempVarReference>()));
+                                        break;
+                                    }
+                                }
+                            }
+
+                            UndertaleCode callTargetBody = context.Data?.Code.FirstOrDefault(x => x.Name.Content == instr.Function.Target.Name.Content);
+                            if (callTargetBody != null && callTargetBody.ParentEntry != null && !context.noAnonymousCodeNames)
+                            {
+                                // Special case: this is a direct reference to a method variable
+                                // Figure out what it's actual name is
+
+                                static string FindActualNameForAnonymousCodeObject(DecompileContext context, UndertaleCode anonymousCodeObject)
+                                {
+                                    // Decompile the parent object, and find the anonymous function assignment
+                                    UndertaleCode _old = context.TargetCode;
+                                    bool _old2 = context.noAnonymousCodeNames;
+                                    context.TargetCode = anonymousCodeObject.ParentEntry;
+                                    context.noAnonymousCodeNames = true; // prevent recursion
+                                    try
+                                    {
+                                        Dictionary<uint, Block> blocks2 = PrepareDecompileFlow(anonymousCodeObject.ParentEntry);
+                                        DecompileFromBlock(context, blocks2, blocks2[0]);
+                                        List<Statement> statements = HLDecompile(context, blocks2, blocks2[0], blocks2[anonymousCodeObject.Length / 4]);
+                                        foreach (Statement stmt2 in statements)
+                                        {
+                                            if (stmt2 is AssignmentStatement assign &&
+                                                assign.Value is FunctionDefinition funcDef &&
+                                                funcDef.FunctionBodyEntryBlock.Address == anonymousCodeObject.Offset / 4)
+                                            {
+                                                return assign.Destination.Var.Name.Content;
+                                            }
+                                        }
+                                        throw new Exception("Unable to find the var name for anonymous code object " + anonymousCodeObject.Name.Content);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        context.DecompilerWarnings.Add("/*\nWARNING: Recursive script decompilation (for member variable name resolution) failed for " + anonymousCodeObject.Name.Content + "\n\n" + e.ToString() + "\n*/");
+                                        return string.Empty;
+                                    }
+                                    context.noAnonymousCodeNames = _old2;
+                                    context.TargetCode = _old;
+                                }
+
+                                string funcName;
+                                if (!context.anonymousFunctionNameCache.TryGetValue(instr.Function.Target, out funcName))
+                                {
+                                    funcName = FindActualNameForAnonymousCodeObject(context, callTargetBody);
+                                    context.anonymousFunctionNameCache.Add(instr.Function.Target, funcName);
+                                }
+                                if (funcName != string.Empty)
+                                {
+                                    stack.Push(new DirectFunctionCall(funcName, instr.Function.Target, instr.Type1, args));
+                                    break;
+                                }
+                            }
+
                             stack.Push(new DirectFunctionCall(instr.Function.Target, instr.Type1, args));
                         }
                         break;
@@ -2061,21 +2212,22 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
-        public static void DecompileFromBlock(DecompileContext context, Block block)
+        public static void DecompileFromBlock(DecompileContext context, Dictionary<uint, Block> blocks, Block block)
         {
             Stack<Tuple<Block, List<TempVarReference>>> workQueue = new Stack<Tuple<Block, List<TempVarReference>>>();
             workQueue.Push(new Tuple<Block, List<TempVarReference>>(block, new List<TempVarReference>()));
             while (workQueue.Count > 0)
             {
                 var item = workQueue.Pop();
-                DecompileFromBlock(context, item.Item1, item.Item2, workQueue);
+                DecompileFromBlock(context, blocks, item.Item1, item.Item2, workQueue);
             }
         }
 
-        public static Dictionary<uint, Block> DecompileFlowGraph(UndertaleCode code)
+        public static Dictionary<uint, Block> DecompileFlowGraph(UndertaleCode code, List<uint> entryPoints)
         {
             Dictionary<uint, Block> blockByAddress = new Dictionary<uint, Block>();
-            blockByAddress[0] = new Block(0);
+            foreach(uint entryPoint in entryPoints)
+                blockByAddress[entryPoint] = new Block(entryPoint);
             Block entryBlock = new Block(null);
             Block finalBlock = new Block(code.Length / 4);
             blockByAddress[code.Length / 4] = finalBlock;
@@ -3080,25 +3232,16 @@ namespace UndertaleModLib.Decompiler
 
         private static Dictionary<uint, Block> PrepareDecompileFlow(UndertaleCode code)
         {
+            if (code.ParentEntry != null)
+                throw new InvalidOperationException("This code block represents a function nested inside " + code.ParentEntry.Name + " - decompile that instead");
             code.UpdateAddresses();
-            Dictionary<uint, Block> blocks = DecompileFlowGraph(code);
 
-            // Throw away unreachable blocks
-            // I guess this is a quirk in the compiler, it still generates a path to end of script after exit/return
-            // and it's throwing off the loop detector for some reason
-            bool changed;
-            do
-            {
-                changed = false;
-                foreach (var k in blocks.Where(pair => pair.Key != 0 && pair.Value.entryPoints.Count == 0).Select(pair => pair.Key).ToList())
-                {
-                    foreach (var other in blocks.Values)
-                        if (other.entryPoints.Contains(blocks[k]))
-                            other.entryPoints.Remove(blocks[k]);
-                    blocks.Remove(k);
-                    changed = true;
-                }
-            } while (changed);
+            List<uint> entryPoints = new List<uint>();
+            entryPoints.Add(0);
+            foreach (UndertaleCode duplicate in code.ChildEntries)
+                entryPoints.Add(duplicate.Offset / 4);
+
+            Dictionary<uint, Block> blocks = DecompileFlowGraph(code, entryPoints);
 
             return blocks;
         }
@@ -3169,6 +3312,9 @@ namespace UndertaleModLib.Decompiler
 
         public static string Decompile(UndertaleCode code, DecompileContext context)
         {
+            if (code.ParentEntry != null)
+                throw new InvalidOperationException("This code block represents a function nested inside " + code.ParentEntry.Name + " - decompile that instead");
+
             context.Setup(code);
             try
             {
@@ -3186,17 +3332,22 @@ namespace UndertaleModLib.Decompiler
             }
 
             Dictionary<uint, Block> blocks = PrepareDecompileFlow(code);
-            DecompileFromBlock(context, blocks[0]);
+            DecompileFromBlock(context, blocks, blocks[0]);
             DoTypePropagation(context, blocks);
-            List<Statement> stmts = HLDecompile(context, blocks, blocks[0], blocks[code.Length / 4]);
+            context.Statements = new Dictionary<uint, List<Statement>>();
+            context.Statements.Add(0, HLDecompile(context, blocks, blocks[0], blocks[code.Length / 4]));
+            foreach (UndertaleCode duplicate in code.ChildEntries)
+                context.Statements.Add(duplicate.Offset / 4, HLDecompile(context, blocks, blocks[duplicate.Offset / 4], blocks[code.Length / 4]));
 
             // Write code.
             context.IndentationLevel = 0;
             StringBuilder sb = new StringBuilder();
             foreach (var warn in context.DecompilerWarnings)
                 sb.Append(warn + "\n");
-            foreach (var stmt in stmts)
+            foreach (var stmt in context.Statements[0])
                 sb.Append(stmt.ToString(context) + "\n");
+
+            context.Statements = null;
 
             string decompiledCode = sb.ToString();
             return MakeLocalVars(context, decompiledCode) + decompiledCode;

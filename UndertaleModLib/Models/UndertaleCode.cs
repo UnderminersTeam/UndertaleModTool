@@ -959,9 +959,9 @@ namespace UndertaleModLib.Models
         public uint Offset { get; set; }
         public List<UndertaleInstruction> Instructions { get; } = new List<UndertaleInstruction>();
         public bool WeirdLocalFlag { get; set; }
-        public bool DuplicateEntry { get; set; } = false;
 
-        public List<UndertaleCode> Duplicates { get; set; } = new List<UndertaleCode>();
+        public UndertaleCode ParentEntry { get; set; } = null;
+        public List<UndertaleCode> ChildEntries { get; set; } = new List<UndertaleCode>();
 
         internal uint _BytecodeAbsoluteAddress;
         internal byte[] _UnsupportedBuffer;
@@ -970,7 +970,7 @@ namespace UndertaleModLib.Models
         {
             if (writer.undertaleData.UnsupportedBytecodeVersion || writer.Bytecode14OrLower)
                 return;
-            if (DuplicateEntry)
+            if (ParentEntry != null)
             {
                 // In GMS 2.3, code entries repeat often
                _BytecodeAbsoluteAddress = writer.LastBytecodeAddress;
@@ -1060,8 +1060,8 @@ namespace UndertaleModLib.Models
                 reader.Position = _BytecodeAbsoluteAddress;
                 if (Length > 0 && reader.GMS2_3 && reader.GetOffsetMap().TryGetValue(_BytecodeAbsoluteAddress, out var i))
                 {
-                    DuplicateEntry = true;
-                    (i as UndertaleInstruction).Entry.Duplicates.Add(this);
+                    ParentEntry = (i as UndertaleInstruction).Entry;
+                    ParentEntry.ChildEntries.Add(this);
                 }
                 Instructions.Clear();
                 while (reader.Position < _BytecodeAbsoluteAddress + Length)
@@ -1071,7 +1071,7 @@ namespace UndertaleModLib.Models
                     instr.Address = a;
                     Instructions.Add(instr);
                 }
-                if (!DuplicateEntry && Instructions.Count != 0)
+                if (ParentEntry == null && Instructions.Count != 0)
                     Instructions[0].Entry = this;
                 reader.Position = here;
                 Offset = reader.ReadUInt32();
