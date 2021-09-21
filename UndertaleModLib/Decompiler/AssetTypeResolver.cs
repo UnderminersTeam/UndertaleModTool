@@ -352,7 +352,7 @@ namespace UndertaleModLib.Decompiler
 
     public class AssetTypeResolver
     {
-        public static Dictionary<string, AssetIDType[]> builtin_funcs;
+        public static Dictionary<string, AssetIDType[]> builtin_funcs; // keys are function names
 
         public static Dictionary<string, Dictionary<string, AssetIDType>> builtin_var_overrides; // keys are code block names or object names. In the resulting dictionary keys are variable names.
         public static Dictionary<string, AssetIDType> builtin_vars; // keys are variable names
