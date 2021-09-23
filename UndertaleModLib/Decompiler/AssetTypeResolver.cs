@@ -1095,7 +1095,6 @@ namespace UndertaleModLib.Decompiler
             // Just Deltarune
             if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune") || lowerName == "deltarune chapter 1 & 2"))
             {
-                builtin_vars.Add("idlesprite", AssetIDType.Sprite);
                 builtin_vars.Add("actreadysprite", AssetIDType.Sprite);
                 builtin_vars.Add("actsprite", AssetIDType.Sprite);
                 builtin_vars.Add("defendsprite", AssetIDType.Sprite);
@@ -1457,9 +1456,6 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["snd_volume"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
 
                 builtin_vars.Add("sourceobject", AssetIDType.GameObject);
-                builtin_vars.Add("writersnd", AssetIDType.Sound);
-                builtin_vars.Add("smcolor", AssetIDType.Color);
-                builtin_vars.Add("fadecolor", AssetIDType.Color);
                 builtin_vars.Add("new_color", AssetIDType.Color);
                 builtin_vars.Add("base_colors", AssetIDType.Color);
                 builtin_vars.Add("control", AssetIDType.Enum_GamepadButton);
@@ -1476,7 +1472,6 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("speedadjust", AssetIDType.Boolean);
                 builtin_vars.Add("fresh", AssetIDType.Boolean);
                 builtin_vars.Add("writerimg", AssetIDType.Sprite);
-                builtin_vars.Add("smsprite", AssetIDType.Sprite);
                 builtin_vars.Add("_sprite", AssetIDType.Sprite);
                 builtin_vars.Add("specialsprite", AssetIDType.Sprite);
                 builtin_vars.Add("o_boxingqueen_janky_sprite_index", AssetIDType.Sprite);
@@ -1524,9 +1519,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("shieldpiece_sprite_index", AssetIDType.Sprite);
                 builtin_vars.Add("shieldpiece_alpha", AssetIDType.Sprite);
                 builtin_vars.Add("sabersprite", AssetIDType.Sprite);
-                builtin_vars.Add("hurtsprite", AssetIDType.Sprite);
                 builtin_vars.Add("idlesprite", AssetIDType.Sprite);
-                builtin_vars.Add("sparedsprite", AssetIDType.Sprite);
                 builtin_vars.Add("puzzle_icon", AssetIDType.Sprite);
                 builtin_vars.Add("item0pic", AssetIDType.Sprite);
                 builtin_vars.Add("item1pic", AssetIDType.Sprite);
