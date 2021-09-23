@@ -856,6 +856,8 @@ namespace UndertaleModLib.Decompiler
                 { "gpu_set_fog", new AssetIDType[] { AssetIDType.Boolean, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other } },
 
                 { "layer_script_begin", new AssetIDType[] { AssetIDType.Other, AssetIDType.Script } },
+                { "layer_background_create", new AssetIDType[] { AssetIDType.Other, AssetIDType.Sprite } },
+                { "layer_sprite_change", new AssetIDType[] { AssetIDType.Other, AssetIDType.Sprite } },
                 { "gpu_set_blendenable", new AssetIDType[] { AssetIDType.Boolean } },
                 { "layer_script_end", new AssetIDType[] { AssetIDType.Other, AssetIDType.Script } },
                 { "draw_sprite", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
@@ -1355,6 +1357,22 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["gml_Script_snd_stop"] = new AssetIDType[] { AssetIDType.Sound };
                 builtin_funcs["gml_Script_snd_stop_ch1"] = new AssetIDType[] { AssetIDType.Sound };
                 builtin_funcs["gml_Script_snd_volume"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_act_charsprite"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean };
+                builtin_funcs["gml_Script_draw_sprite_part_ext_glow"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean };
+                builtin_funcs["gml_Script_scr_draw_sprite_part_ext_glow"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean };
+                builtin_funcs["gml_Script_scr_draw_sprite_tiled_area"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Boolean };
+                builtin_funcs["gml_Script_c_actorsetsprites"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
+                builtin_funcs["gml_Script_scr_marker_animated"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["gml_Script_c_jump_sprite"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Sprite };
+                builtin_funcs["gml_Script_scr_dark_marker_animated"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
+                builtin_funcs["scr_act_charsprite"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean };
+                builtin_funcs["draw_sprite_part_ext_glow"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean };
+                builtin_funcs["scr_draw_sprite_part_ext_glow"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean };
+                builtin_funcs["scr_draw_sprite_tiled_area"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Boolean };
+                builtin_funcs["c_actorsetsprites"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
+                builtin_funcs["scr_marker_animated"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["c_jump_sprite"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Sprite };
+                builtin_funcs["scr_dark_marker_animated"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
                 builtin_funcs["_background_set"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
                 builtin_funcs["c_addxy"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color };
                 builtin_funcs["c_autowalk"] = new AssetIDType[] { AssetIDType.Boolean };
@@ -1437,6 +1455,90 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["snd_stop"] = new AssetIDType[] { AssetIDType.Sound };
                 builtin_funcs["snd_stop_ch1"] = new AssetIDType[] { AssetIDType.Sound };
                 builtin_funcs["snd_volume"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+
+                builtin_vars.Add("sourceobject", AssetIDType.GameObject);
+                builtin_vars.Add("writersnd", AssetIDType.Sound);
+                builtin_vars.Add("smcolor", AssetIDType.Color);
+                builtin_vars.Add("fadecolor", AssetIDType.Color);
+                builtin_vars.Add("new_color", AssetIDType.Color);
+                builtin_vars.Add("base_colors", AssetIDType.Color);
+                builtin_vars.Add("control", AssetIDType.Enum_GamepadButton);
+                builtin_vars.Add("finished", AssetIDType.Boolean);
+                builtin_vars.Add("is_active", AssetIDType.Boolean);
+                builtin_vars.Add("spam_car", AssetIDType.Boolean);
+                builtin_vars.Add("show_queen", AssetIDType.Boolean);
+                builtin_vars.Add("queen_animate", AssetIDType.Boolean);
+                builtin_vars.Add("actor_visible", AssetIDType.Boolean);
+                builtin_vars.Add("drawcustom", AssetIDType.Boolean);
+                builtin_vars.Add("alwayswalking", AssetIDType.Boolean);
+                builtin_vars.Add("prepopulate", AssetIDType.Boolean);
+                builtin_vars.Add("walking", AssetIDType.Boolean);
+                builtin_vars.Add("speedadjust", AssetIDType.Boolean);
+                builtin_vars.Add("fresh", AssetIDType.Boolean);
+                builtin_vars.Add("writerimg", AssetIDType.Sprite);
+                builtin_vars.Add("smsprite", AssetIDType.Sprite);
+                builtin_vars.Add("_sprite", AssetIDType.Sprite);
+                builtin_vars.Add("specialsprite", AssetIDType.Sprite);
+                builtin_vars.Add("o_boxingqueen_janky_sprite_index", AssetIDType.Sprite);
+                builtin_vars.Add("character_sprite", AssetIDType.Sprite);
+                builtin_vars.Add("victorySprite", AssetIDType.Sprite);
+                builtin_vars.Add("contentsprite", AssetIDType.Sprite);
+                builtin_vars.Add("sprite_palette", AssetIDType.Sprite);
+                builtin_vars.Add("head_sprite", AssetIDType.Sprite);
+                builtin_vars.Add("pilot_sprite", AssetIDType.Sprite);
+                builtin_vars.Add("default_sprite_front", AssetIDType.Sprite);
+                builtin_vars.Add("default_sprite_back", AssetIDType.Sprite);
+                builtin_vars.Add("hurt_sprite_front", AssetIDType.Sprite);
+                builtin_vars.Add("hurt_sprite_back", AssetIDType.Sprite);
+                builtin_vars.Add("hurt_character_sprite", AssetIDType.Sprite);
+                builtin_vars.Add("raspr", AssetIDType.Sprite);
+                builtin_vars.Add("suspr", AssetIDType.Sprite);
+                builtin_vars.Add("car_sprite", AssetIDType.Sprite);
+                builtin_vars.Add("hsprite", AssetIDType.Sprite);
+                builtin_vars.Add("vsprite", AssetIDType.Sprite);
+                builtin_vars.Add("menuSprite", AssetIDType.Sprite);
+                builtin_vars.Add("actor_startsprite", AssetIDType.Sprite);
+                builtin_vars.Add("actor_endsprite", AssetIDType.Sprite);
+                builtin_vars.Add("button_sprite", AssetIDType.Sprite);
+                builtin_vars.Add("endanimation", AssetIDType.Sprite);
+                builtin_vars.Add("lastSprite", AssetIDType.Sprite);
+                builtin_vars.Add("myLastSprite", AssetIDType.Sprite);
+                builtin_vars.Add("mySprite", AssetIDType.Sprite);
+                builtin_vars.Add("current_sprites", AssetIDType.Sprite);
+                builtin_vars.Add("fireworksprite", AssetIDType.Sprite);
+                builtin_vars.Add("customSprite", AssetIDType.Sprite);
+                builtin_vars.Add("queen_sprite", AssetIDType.Sprite);
+                builtin_vars.Add("sprite", AssetIDType.Sprite);
+                builtin_vars.Add("pic", AssetIDType.Sprite);
+                builtin_vars.Add("picb", AssetIDType.Sprite);
+                builtin_vars.Add("leftTurnSprite", AssetIDType.Sprite);
+                builtin_vars.Add("rightTurnSprite", AssetIDType.Sprite);
+                builtin_vars.Add("topsprite", AssetIDType.Sprite);
+                builtin_vars.Add("frozensprite", AssetIDType.Sprite);
+                builtin_vars.Add("layersprites", AssetIDType.Sprite);
+                builtin_vars.Add("cursor_sprite", AssetIDType.Sprite);
+                builtin_vars.Add("rimsprite", AssetIDType.Sprite);
+                builtin_vars.Add("flashSprite", AssetIDType.Sprite);
+                builtin_vars.Add("spriteindex1", AssetIDType.Sprite);
+                builtin_vars.Add("spriteindex2", AssetIDType.Sprite);
+                builtin_vars.Add("shieldpiece_sprite_index", AssetIDType.Sprite);
+                builtin_vars.Add("shieldpiece_alpha", AssetIDType.Sprite);
+                builtin_vars.Add("sabersprite", AssetIDType.Sprite);
+                builtin_vars.Add("hurtsprite", AssetIDType.Sprite);
+                builtin_vars.Add("idlesprite", AssetIDType.Sprite);
+                builtin_vars.Add("sparedsprite", AssetIDType.Sprite);
+                builtin_vars.Add("puzzle_icon", AssetIDType.Sprite);
+                builtin_vars.Add("item0pic", AssetIDType.Sprite);
+                builtin_vars.Add("item1pic", AssetIDType.Sprite);
+                builtin_vars.Add("item2pic", AssetIDType.Sprite);
+                builtin_vars.Add("item3pic", AssetIDType.Sprite);
+                builtin_vars.Add("top", AssetIDType.Sprite);
+                builtin_vars.Add("sparesprite", AssetIDType.Sprite);
+                builtin_vars.Add("_rollSprites", AssetIDType.Sprite);
+                builtin_vars.Add("_sprites", AssetIDType.Sprite);
+                builtin_vars.Add("_spritesTea", AssetIDType.Sprite);
+                builtin_vars.Add("fruit", AssetIDType.Sprite);
+                builtin_vars.Add("chsprite", AssetIDType.Sprite);
                 builtin_vars.Add("_headsprite", AssetIDType.Sprite);
                 builtin_vars.Add("ar", AssetIDType.Other);
                 builtin_vars.Add("as", AssetIDType.Other);
