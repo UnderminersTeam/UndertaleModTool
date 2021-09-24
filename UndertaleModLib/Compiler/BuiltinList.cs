@@ -1219,7 +1219,7 @@ namespace UndertaleModLib.Compiler
             Functions["window_handle"] = new FunctionInfo(this, 0);
             Functions["window_device"] = new FunctionInfo(this, 0);
             Functions["logical_xor"] = new FunctionInfo(this, 2);
-            Functions["debug_get_callstack"] = new FunctionInfo(this, 0);
+            Functions["debug_get_callstack"] = new FunctionInfo(this, -1);
             Functions["show_debug_message"] = new FunctionInfo(this, 1);
             Functions["show_debug_overlay"] = new FunctionInfo(this, 1);
             Functions["debug_event"] = new FunctionInfo(this, 1);
