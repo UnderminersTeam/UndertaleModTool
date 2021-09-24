@@ -1313,7 +1313,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["gml_Script_draw_sprite_ext_centerscale"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
                 builtin_funcs["gml_Script_draw_sprite_ext_flash"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
                 builtin_funcs["gml_Script_draw_sprite_skew_ext_cute"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_draw_text_outline"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_draw_text_outline"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
                 builtin_funcs["gml_Script_i_ex"] = new AssetIDType[] { AssetIDType.GameObject };
                 builtin_funcs["gml_Script_instance_create_ch1"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
                 builtin_funcs["gml_Script_msgsetloc"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other };
