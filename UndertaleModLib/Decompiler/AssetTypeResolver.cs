@@ -1532,6 +1532,13 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("_violenced", AssetIDType.Boolean);
                 builtin_vars.Add("_frozened", AssetIDType.Boolean);
 */
+                builtin_vars.Add("nitro", AssetIDType.Boolean);
+                builtin_vars.Add("confirm", AssetIDType.Boolean);
+                builtin_vars.Add("attack_succeeded", AssetIDType.Boolean);
+                builtin_vars.Add("phase3_hit_check", AssetIDType.Boolean);
+                builtin_vars.Add("beat_phase2_no_damage_taken_check", AssetIDType.Boolean);
+                builtin_vars.Add("beat_phase1_no_damage_taken_check", AssetIDType.Boolean);
+                builtin_vars.Add("has_tutorial_kick_hit_player", AssetIDType.Boolean);
                 builtin_vars.Add("freezable", AssetIDType.Boolean);
                 builtin_vars.Add("charcan", AssetIDType.Boolean);
                 builtin_vars.Add("kktalked", AssetIDType.Boolean);
@@ -1626,7 +1633,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("spelluse", AssetIDType.Boolean);
                 builtin_vars.Add("animdone", AssetIDType.Boolean);
                 builtin_vars.Add("bigcar", AssetIDType.Boolean);
-                builtin_vars.Add("forceypos", AssetIDType.Boolean);
+                //builtin_vars.Add("forceypos", AssetIDType.Boolean);
                 builtin_vars.Add("bump", AssetIDType.Boolean);
                 builtin_vars.Add("drawpremonition", AssetIDType.Boolean);
                 builtin_vars.Add("premonition", AssetIDType.Boolean);
@@ -1681,7 +1688,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("auto_length", AssetIDType.Boolean);
                 builtin_vars.Add("simultotal_funny", AssetIDType.Boolean);
                 builtin_vars.Add("actingsingle", AssetIDType.Boolean);
-                //builtin_vars.Add("talked", AssetIDType.Boolean);
+                builtin_vars.Add("talked", AssetIDType.Boolean);
                 builtin_vars.Add("acting", AssetIDType.Boolean);
                 builtin_vars.Add("__noactors", AssetIDType.Boolean);
                 builtin_vars.Add("fatal", AssetIDType.Boolean);
