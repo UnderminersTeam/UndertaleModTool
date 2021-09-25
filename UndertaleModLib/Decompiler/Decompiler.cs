@@ -1535,6 +1535,9 @@ namespace UndertaleModLib.Decompiler
                 case UndertaleInstruction.DataType.Int16:
                 case UndertaleInstruction.DataType.Int32:
                     return 4;
+                case UndertaleInstruction.DataType.Double: // Fallthrough
+                case UndertaleInstruction.DataType.Int64:
+                    return 8;
                 case UndertaleInstruction.DataType.Variable:
                     return 16;
                 default:
