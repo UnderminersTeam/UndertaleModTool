@@ -586,7 +586,7 @@ namespace UndertaleModLib.Compiler
             Functions["load_csv"] = new FunctionInfo(this, 1);
             Functions["move_random"] = new FunctionInfo(this, 2, true);
             Functions["place_free"] = new FunctionInfo(this, 2, true);
-            Functions["place_empty"] = new FunctionInfo(this, 2, true);
+            Functions["place_empty"] = new FunctionInfo(this, -1, true);
             Functions["place_meeting"] = new FunctionInfo(this, 3, true);
             Functions["place_snapped"] = new FunctionInfo(this, 2, true);
             Functions["move_snap"] = new FunctionInfo(this, 2, true);
