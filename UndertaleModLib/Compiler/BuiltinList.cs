@@ -3730,6 +3730,11 @@ namespace UndertaleModLib.Compiler
             GlobalNotArray["pointer_invalid"] = new VariableInfo(this, true, false);
             GlobalNotArray["pointer_null"] = new VariableInfo(this, true, false);
             GlobalNotArray["undefined"] = new VariableInfo(this, true, false);
+            if (data?.GeneralInfo?.Major >= 2)
+            {
+                GlobalNotArray["infinity"] = new VariableInfo(this, true, false);
+                GlobalNotArray["NaN"] = new VariableInfo(this, true, false);
+            }
             GlobalNotArray["room"] = new VariableInfo(this, true, true, "set_current_room", "get_current_room");
             GlobalNotArray["room_first"] = new VariableInfo(this, true, false);
             GlobalNotArray["room_last"] = new VariableInfo(this, true, false);
