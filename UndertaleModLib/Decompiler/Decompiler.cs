@@ -472,6 +472,11 @@ namespace UndertaleModLib.Decompiler
                 if (Value is float f) // More accurate, larger range, double to string.
                     return RoundTrip.ToRoundTrip(f);
 
+                if (Value is Int64 i) // Decompiler accuracy improvement.
+                {
+                    return "(" + RoundTrip.ToRoundTrip(i) + " << 0)";
+                }
+
                 if (Value is double d) // More accurate, larger range, double to string.
                     return RoundTrip.ToRoundTrip(d);
 
