@@ -22,6 +22,7 @@ namespace UndertaleModTool
         public bool AssetOrderSwappingEnabled { get; set; } = false;
         public bool ProfileModeEnabled { get; set; } = false;
         public bool ProfileMessageShown { get; set; } = false;
+        public bool AutomaticFileAssociation { get; set; } = true;
 
         // The disk space impact will likely be small for the average user, it should be turned off by default for now.
         // "DeleteOldProfileOnSave" as it currently functions is dangerous to be on by default.

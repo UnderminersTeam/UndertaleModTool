@@ -81,6 +81,16 @@ namespace UndertaleModTool
             }
         }
 
+        public static bool AutomaticFileAssociation
+        {
+            get => Settings.Instance.AutomaticFileAssociation;
+            set
+            {
+                Settings.Instance.AutomaticFileAssociation = value;
+                Settings.Save();
+            }
+        }
+
         public static bool DeleteOldProfileOnSave
         {
             get => Settings.Instance.DeleteOldProfileOnSave;

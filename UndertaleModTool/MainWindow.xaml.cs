@@ -141,14 +141,7 @@ namespace UndertaleModTool
 */
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-/*
-            if (IsRunFromTempFolder() || IsLikelyRunFromZipFolder())
-            {
-                MessageBox.Show(@"This program cannot be run without extracting all files.
-Please extract all contents of the ZIP file to a folder before running the program.");
-                System.Environment.Exit(1);
-            }
-*/
+            Settings.Load();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 try
@@ -159,20 +152,21 @@ Please extract all contents of the ZIP file to a folder before running the progr
                     UndertaleModTool_app.CreateSubKey(@"shell\open\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\"", RegistryValueKind.String);
                     UndertaleModTool_app.CreateSubKey(@"shell\launch\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\" launch", RegistryValueKind.String);
                     UndertaleModTool_app.CreateSubKey(@"shell\launch").SetValue("", "Run game", RegistryValueKind.String);
-                    foreach (var extStr in new string[] { ".win", ".unx", ".ios", ".droid" })
+                    if (SettingsWindow.AutomaticFileAssociation)
                     {
-                        var ext = HKCU_Classes.CreateSubKey(extStr);
-                        ext.SetValue("", "UndertaleModTool", RegistryValueKind.String);
+                        foreach (var extStr in new string[] { ".win", ".unx", ".ios", ".droid" })
+                        {
+                            var ext = HKCU_Classes.CreateSubKey(extStr);
+                            ext.SetValue("", "UndertaleModTool", RegistryValueKind.String);
+                        }
+                        SHChangeNotify(SHCNE_ASSOCCHANGED, 0, IntPtr.Zero, IntPtr.Zero);
                     }
-                    SHChangeNotify(SHCNE_ASSOCCHANGED, 0, IntPtr.Zero, IntPtr.Zero);
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine(ex.ToString());
                 }
             }
-
-            Settings.Load();
 
             var args = Environment.GetCommandLineArgs();
             if (args.Length > 1)
