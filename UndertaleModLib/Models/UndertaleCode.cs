@@ -134,10 +134,12 @@ namespace UndertaleModLib.Models
 
         public enum VariableType : byte
         {
-            Array,
+            Array = 0x00,
             StackTop = 0x80,
             Normal = 0xA0,
-            Unknown = 0xE0,  // room scope?
+            Instance = 0xE0, // the InstanceType is an instance ID inside the room -100000
+            ArrayPushAF = 0x10, // GMS2.3+, multidimensional array with pushaf
+            ArrayPopAF = 0x90, // GMS2.3+, multidimensional array with pushaf or popaf
         }
 
         public enum ComparisonType : byte
@@ -229,7 +231,7 @@ namespace UndertaleModLib.Models
                 Dictionary<T, List<UndertaleInstruction>> list = new Dictionary<T, List<UndertaleInstruction>>();
                 foreach (UndertaleCode code in codes)
                 {
-                    if (code.Offset != 0) // GMS 2.3, skip duplicates
+                    if (code.DuplicateEntry) // GMS 2.3, skip inner entries
                         continue;
                     foreach (UndertaleInstruction instr in code.Instructions)
                     {
@@ -815,7 +817,7 @@ namespace UndertaleModLib.Models
                                 // Special dup instruction with extra parameters
                                 sb.Append(' ');
                                 sb.Append((byte)ComparisonKind & 0x7F);
-                                sb.Append(" ; this is a weird GMS2.3+ swap instruction");
+                                sb.Append(" ;;; this is a weird GMS2.3+ swap instruction");
                             }
                         }
                     }
@@ -856,7 +858,7 @@ namespace UndertaleModLib.Models
                         // Special scenario - the swap instruction
                         // TODO: Figure out the proper syntax, see #129
                         sb.Append(SwapExtra.ToString());
-                        sb.Append(" ; this is a weird swap instruction, see #129");
+                        sb.Append(" ;;; this is a weird swap instruction, see #129");
                     }
                     else
                     {

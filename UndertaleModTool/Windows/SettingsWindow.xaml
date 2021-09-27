@@ -24,6 +24,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="GraphViz path" ToolTip="Required if you want code decompile graphs"/>
@@ -39,9 +40,9 @@
         <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding AssetOrderSwappingEnabled}"/>
 
         <Separator Grid.Row="4" Grid.ColumnSpan="2" Margin="10"/>
-        
+
         <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" TextWrapping="Wrap" Foreground="Red" FontWeight="Bold" Text="Warning: the following options are currently experimental, as the profile system is a work in progress. Usage of the system is at your own risk, and though it is relatively stable, it may not be compatible in the future."/>
-        
+
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="Enable profile mode" ToolTip="Toggles the 'decompile once and compile many' profile mode. Enabled by default. May need to be disabled for certain operations."/>
         <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding ProfileModeEnabled}"/>
 
@@ -54,7 +55,9 @@
         <CheckBox Grid.Row="9" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding WarnOnClose}"/>
         <TextBlock Grid.Row="10" Grid.Column="0" Margin="3" Text="Automatically associate .win files" ToolTip="Automatic file association. Enabled by default."/>
         <CheckBox Grid.Row="10" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding AutomaticFileAssociation}"/>
-        <Separator Grid.Row="11" Grid.ColumnSpan="2" Margin="10"/>
-        <Button Grid.Row="12" Grid.Column="1" Margin="5" Click="AppDataButton_Click">Open application data folder</Button>
+        <TextBlock Grid.Row="11" Grid.Column="0" Margin="3" Text="Warn about temp running" ToolTip="Warn about temp running. Enabled by default."/>
+        <CheckBox Grid.Row="11" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding TempRunMessageShow}"/>
+        <Separator Grid.Row="12" Grid.ColumnSpan="2" Margin="10"/>
+        <Button Grid.Row="13" Grid.Column="1" Margin="5" Click="AppDataButton_Click">Open application data folder</Button>
     </Grid>
 </Window>
