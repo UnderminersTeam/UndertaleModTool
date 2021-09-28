@@ -10,6 +10,11 @@ using System.Security.Cryptography;
 using UndertaleModLib.Models;
 using UndertaleModLib.Decompiler;
 
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    ScriptError("Most likely incompatible with the new Deltarune Chapter 1 & 2 demo, run at your own risk");
+}
+
 ScriptMessage("Enter the object(s) to copy");
 
 int copiedGameObjectsCount = 0;

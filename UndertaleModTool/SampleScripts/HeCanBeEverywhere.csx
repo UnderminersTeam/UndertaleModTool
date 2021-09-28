@@ -1,5 +1,12 @@
 ﻿EnsureDataLoaded();
 
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    ScriptError("Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+
+
 ScriptMessage("HeCanBeEverywhere mod by krzys_h and Kneesnap\nVersion 3");
 
 // spr_joker_main has an offset, so we need to make our own one

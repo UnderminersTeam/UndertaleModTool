@@ -1,5 +1,11 @@
 EnsureDataLoaded();
 
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    ScriptError("Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+
 if (!Data.IsGameMaker2()) 
 {
     ScriptMessage("This is not a GMS2 game.");

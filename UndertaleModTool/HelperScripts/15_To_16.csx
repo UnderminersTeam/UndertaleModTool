@@ -3,6 +3,13 @@
 
 EnsureDataLoaded();
 
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    ScriptError("Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+
+
 string currentBytecodeVersion = Data?.GeneralInfo.BytecodeVersion.ToString();
 string game_name = Data.GeneralInfo.Name.Content;
 

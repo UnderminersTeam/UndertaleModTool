@@ -5,6 +5,13 @@
 
 EnsureDataLoaded();
 
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    ScriptError("Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+
+
 string bepisCode = "bepis";
 
 if (Data.GeneralInfo.Major < 2) // Undertale PC (GMS1)
