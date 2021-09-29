@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -203,16 +204,74 @@ namespace UndertaleModLib.Compiler
                             }
                         }
 
-                        if (compileContext.ensureFunctionsDefined)
+                        // GMS2.3 totally changed how functions work
+                        // The FUNC chunk contains references to builtin functions, and anonymous function definitions called gml_Script_...
+                        // The anonymous functions are bound to names by code in Data.GlobalInit
+                        // so to get an actual mapping from names to functions, you have to decompile all GlobalInit scripts...
+
+                        Dictionary<string, UndertaleFunction> knownFunctions = new Dictionary<string, UndertaleFunction>();
+                        foreach (UndertaleFunction func in compileContext.Data.Functions)
                         {
-                            foreach (var patch in funcPatches)
+                            if (compileContext.Data.GMS2_3 && compileContext.Data.Code.ByName(func.Name.Content) != null)
+                                continue; // ignore fake functions which are refences to anonymous functions (i.e. don't include gml_Script_...)
+                            knownFunctions.Add(func.Name.Content, func);
+                        }
+                        if (compileContext.Data.GMS2_3)
+                        {
+                            // Find all functions defined in GlobalScripts
+                            // TODO: This may be slow...
+                            Decompiler.GlobalDecompileContext globalDecompileContext = new Decompiler.GlobalDecompileContext(compileContext.Data, false);
+                            foreach (UndertaleGlobalInit globalScript in compileContext.Data.GlobalInitScripts)
                             {
-                                patch.Target.ArgumentsCount = (ushort)patch.ArgCount;
-                                UndertaleFunction def = compileContext.Data.Functions?.EnsureDefined(patch.Name, compileContext.Data.Strings);
-                                if (def != null)
+                                UndertaleCode scriptCode = globalScript.Code;
+                                try
                                 {
-                                    patch.Target.Function = new Reference<UndertaleFunction>(def);
+                                    Decompiler.DecompileContext childContext = new Decompiler.DecompileContext(globalDecompileContext, scriptCode);
+                                    childContext.DisableAnonymousFunctionNameResolution = true;
+                                    Dictionary<uint, Decompiler.Decompiler.Block> blocks2 = Decompiler.Decompiler.PrepareDecompileFlow(scriptCode, new List<uint>() { 0 });
+                                    Decompiler.Decompiler.DecompileFromBlock(childContext, blocks2, blocks2[0]);
+                                    List<Decompiler.Decompiler.Statement> statements = Decompiler.Decompiler.HLDecompile(childContext, blocks2, blocks2[0], blocks2[scriptCode.Length / 4]);
+                                    foreach (Decompiler.Decompiler.Statement stmt2 in statements)
+                                    {
+                                        if (stmt2 is Decompiler.Decompiler.AssignmentStatement assign &&
+                                            assign.Value is Decompiler.Decompiler.FunctionDefinition funcDef)
+                                        {
+                                            if (knownFunctions.ContainsKey(assign.Destination.Var.Name.Content))
+                                            {
+                                                Debug.WriteLine("Duplicate definition for " + assign.Destination.Var.Name.Content);
+                                            }
+                                            else
+                                            {
+                                                knownFunctions.Add(assign.Destination.Var.Name.Content, funcDef.Function);
+                                            }
+                                        }
+                                    }
                                 }
+                                catch (Exception e)
+                                {
+                                    Debug.WriteLine(e.ToString());
+                                }
+                            }
+                        }
+
+                        foreach (var patch in funcPatches)
+                        {
+                            patch.Target.ArgumentsCount = (ushort)patch.ArgCount;
+
+                            UndertaleFunction def = knownFunctions.GetValueOrDefault(patch.Name);
+                            if (def == null && compileContext.ensureFunctionsDefined && !compileContext.Data.GMS2_3) // TODO: ensureFunctionsDefined not supported for GMS2_3 for now to avoid accidentaly defining custom functions as builtins
+                            {
+                                def = compileContext.Data.Functions?.EnsureDefined(patch.Name, compileContext.Data.Strings);
+                                knownFunctions.Add(patch.Name, def);
+                            }
+
+                            if (def != null)
+                            {
+                                patch.Target.Function = new Reference<UndertaleFunction>(def);
+                            }
+                            else
+                            {
+                                throw new Exception("Unknown function: " + patch.Name);
                             }
                         }
 

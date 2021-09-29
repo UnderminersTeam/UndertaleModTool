@@ -13,7 +13,7 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
+ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 int progress = 0;
 int identical_count = 0;
 

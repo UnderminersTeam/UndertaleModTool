@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 int progress = 0;
 string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
-ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
+ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
 if (Directory.Exists(codeFolder)) 
 {
@@ -37,7 +37,7 @@ void DumpCode()
     foreach(UndertaleCode code in Data.Code)
     {
         string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
-        if (!(code.DuplicateEntry))
+        if (code.ParentEntry == null)
         {
             if (path.Length > 150)
             {

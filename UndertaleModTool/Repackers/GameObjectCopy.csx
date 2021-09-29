@@ -128,7 +128,7 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 nativeACT.ActionName = Data.Strings.MakeString(donorACT.ActionName.Content);
                             if (donorACT.CodeId?.Name?.Content != null)
                             {
-                                ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(DonorData, false));
+                                ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(DonorData, false));
                                 string codeToCopy = "";
                                 try
                                 {

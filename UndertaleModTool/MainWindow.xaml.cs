@@ -562,7 +562,7 @@ namespace UndertaleModTool
                         object countLock = new object();
                         string[] outputs = new string[Data.Code.Count];
                         UndertaleDebugInfo[] outputsOffsets = new UndertaleDebugInfo[Data.Code.Count];
-                        DecompileContext context = new DecompileContext(Data, false);
+                        GlobalDecompileContext context = new GlobalDecompileContext(Data, false);
                         Parallel.For(0, Data.Code.Count, (i) =>
                         {
                             var code = Data.Code[i];
@@ -704,7 +704,6 @@ namespace UndertaleModTool
                     "General info" => new GeneralInfoEditor(Data?.GeneralInfo, Data?.Options, Data?.Language),
                     "Global init" => new GlobalInitEditor(Data?.GlobalInitScripts),
                     "Game End scripts" => new GameEndEditor(Data?.GameEndScripts),
-                    "Code locals (unused?)" => new DescriptionView(item, "This seems to be unused as far as I can tell - you can remove the whole list and nothing happens"),
                     "Variables" => (object)Data.FORM.Chunks["VARI"],
                     _ => new DescriptionView(item, "Expand the list on the left to edit items"),
                 };

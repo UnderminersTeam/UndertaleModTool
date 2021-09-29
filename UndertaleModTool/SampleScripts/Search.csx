@@ -14,7 +14,7 @@ int progress = 0;
 string results = "";
 int result_count = 0;
 int code_count = 0;
-ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
+ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
 UpdateProgress();
 
