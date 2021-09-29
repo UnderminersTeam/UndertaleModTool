@@ -13,13 +13,14 @@ namespace UndertaleModLib.Decompiler
     // Implemented from https://stackoverflow.com/a/49663470
     public static class RoundTrip
     {
+        internal static readonly double M_PI = 3.141592653589793;
         private static readonly string[] zeros = new string[1000];
         public static Dictionary<double, string> PredefinedValues { get; private set; } = new Dictionary<double, string>()
         {
-            { 3.141592653589793, "pi" },
-            { 6.283185307179586, "(2 * pi)" },
-            { 12.566370614359172, "(4 * pi)" },
-            { 31.41592653589793, "(10 * pi)" },
+            { M_PI, "pi" },
+            { M_PI * 2, "(2 * pi)" },
+            { M_PI * 4, "(4 * pi)" },
+            { M_PI * 10, "(10 * pi)" },
             { 0.3333333333333333, "(1/3)" },
             { 0.6666666666666666, "(2/3)" },
             { 1.3333333333333333, "(4/3)" },
