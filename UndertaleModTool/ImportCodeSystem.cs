@@ -171,9 +171,13 @@ namespace UndertaleModTool
             catch (Exception exc)
             {
                 if (!CheckDecompiler)
+                {
                     MessageBox.Show("Import" + (IsGML ? "GML" : "ASM") + "File error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                }
                 else
-                    throw new Exception("Error!");
+                {
+                    MessageBox.Show("Import" + (IsGML ? "GML" : "ASM") + "File error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                }
             }
         }
 
@@ -422,7 +426,10 @@ namespace UndertaleModTool
                     MessageBox.Show(ErrorText, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
                 else
-                    throw new Exception("Error!");
+                {
+                    ImportASMString(codeName, "", false, true);
+                    //throw new Exception("Error!");
+                }
             }
         }
     }

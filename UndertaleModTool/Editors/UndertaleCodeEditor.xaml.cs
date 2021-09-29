@@ -564,7 +564,14 @@ namespace UndertaleModTool
             var dispatcher = Dispatcher;
             Task t = Task.Run(() =>
             {
-                compileContext = Compiler.CompileGMLText(text, data, code, (f) => { dispatcher.Invoke(() => f()); });
+                try
+                {
+                    compileContext = Compiler.CompileGMLText(text, data, code, (f) => { dispatcher.Invoke(() => f()); });
+                }
+                catch (Exception e)
+                {
+                    throw;// new Exception(e.Message);
+                }
             });
             await t;
 

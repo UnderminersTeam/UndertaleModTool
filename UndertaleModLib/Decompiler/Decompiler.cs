@@ -38,7 +38,7 @@ namespace UndertaleModLib.Decompiler
         /// to its actual name, obtained by decompiling the parent CodeObject and looking for the assignment to global variable with function
         /// name.
         /// </summary>
-        public Dictionary<UndertaleFunction, string> AnonymousFunctionNameCache = new Dictionary<UndertaleFunction, string>();
+        //public Dictionary<UndertaleFunction, string> AnonymousFunctionNameCache = new Dictionary<UndertaleFunction, string>();
 
         public GlobalDecompileContext(UndertaleData data, bool enableStringLabels)
         {
@@ -51,7 +51,7 @@ namespace UndertaleModLib.Decompiler
             // This will not be done automatically, because it would cause significant slowdown having to recalculate this each time, and there's no reason to reset it if it's decompiling a bunch at once.
             // But, since it is possible to invalidate this data, we add this here so we'll be able to invalidate it if we need to.
             ScriptArgsCache.Clear();
-            AnonymousFunctionNameCache.Clear();
+            //AnonymousFunctionNameCache.Clear();
         }
     }
 
@@ -1061,7 +1061,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     if (AssetTypeResolver.return_types.ContainsKey(context.TargetCode.Name.Content))
                         Value.DoTypePropagation(context, AssetTypeResolver.return_types[context.TargetCode.Name.Content]);
-                    if (context.GlobalContext.Data != null && !context.GlobalContext.Data.GMS2_3)
+                    if (context.GlobalContext.Data != null)// && !context.GlobalContext.Data.GMS2_3)
                     {
                         // We might be decompiling a legacy script - resolve it's name
                         UndertaleScript script = context.GlobalContext.Data.Scripts.FirstOrDefault(x => x.Code == context.TargetCode);
@@ -2132,12 +2132,13 @@ namespace UndertaleModLib.Decompiler
                                     }
                                 }
 
-                                string funcName;
-                                if (!context.GlobalContext.AnonymousFunctionNameCache.TryGetValue(instr.Function.Target, out funcName))
+                                string funcName = string.Empty;
+/*                                if (!context.GlobalContext.AnonymousFunctionNameCache.TryGetValue(instr.Function.Target, out funcName))
                                 {
                                     funcName = FindActualNameForAnonymousCodeObject(context, callTargetBody);
                                     context.GlobalContext.AnonymousFunctionNameCache.Add(instr.Function.Target, funcName);
                                 }
+*/
                                 if (funcName != string.Empty)
                                 {
                                     stack.Push(new DirectFunctionCall(funcName, instr.Function.Target, instr.Type1, args));
