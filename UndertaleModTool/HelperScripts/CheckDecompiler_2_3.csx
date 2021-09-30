@@ -104,6 +104,10 @@ void FileCompare(string asm_orig_path, string asm_new_path, string gml_orig_path
         string orig_asm_path = asm_orig_path + i.ToString() + ".asm";
         string new1_asm_path = asm_new_path + i.ToString() + ".asm";
         string orig_gml_path = gml_orig_path + i.ToString() + ".gml";
+		if (!(File.Exists(orig_asm_path) && File.Exists(new1_asm_path) && File.Exists(orig_gml_path)))
+		{
+			continue;
+		}
         if (AreFilesIdentical(orig_asm_path, new1_asm_path))
         {
             File.Delete(orig_gml_path);
@@ -167,7 +171,6 @@ void ImportCode(string importFolder, bool IsGML = true)
     {
         bool SkipPortions = false;
         UpdateProgressBar(null, "Import Files", progress++, dirFiles.Length);
-
         string fileName = Path.GetFileName(file);
         if (!(fileName.EndsWith(IsGML ? ".gml" : ".asm")))
             continue;
@@ -189,11 +192,14 @@ void ImportCode(string importFolder, bool IsGML = true)
             continue; // Restarts loop if file is not a valid code asset.
         if (fileName.EndsWith("PreCreate_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
             continue; // Restarts loop if file is not a valid code asset.
-        string gmlCode = File.ReadAllText(file);
-        if (IsGML)
-            ImportGMLString(codeName, gmlCode, true, true);
-        else
-            ImportASMString(codeName, gmlCode, true, true);
+        if (File.Exists(file))
+        {
+            string gmlCode = File.ReadAllText(file);
+            if (IsGML)
+                ImportGMLString(codeName, gmlCode, false, true);
+            else
+                ImportASMString(codeName, gmlCode, false, true);
+        }
     }
     progress = 0;
 }
@@ -208,7 +214,8 @@ void ExportCode(string path, bool IsGML = true)
     {
         UndertaleCode code = Data.Code[i];
         path = Path.Combine(old_path, i.ToString() + (IsGML ? ".gml" : ".asm"));
-        File.WriteAllText(path, (IsGML ? GetDecompiledText(code.Name.Content) : GetDisassemblyText(code.Name.Content)));
+        if (Data.Code.ByName(code.Name.Content).ParentEntry == null)
+            File.WriteAllText(path, (IsGML ? GetDecompiledText(code.Name.Content) : GetDisassemblyText(code.Name.Content)));
         UpdateProgressBar(null, "Exporting " + (IsGML ? "GML" : "Disassembly") + " Code", progress++, Data.Code.Count);
     }
     progress = 0;
