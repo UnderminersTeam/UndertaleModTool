@@ -822,7 +822,10 @@ namespace UndertaleModLib.Compiler
                             var type = cw.typeStack.Pop();
                             if (type != DataType.Int32)
                             {
-                                cw.Emit(Opcode.Conv, type, DataType.Int32);
+                                if (cw.compileContext.Data.GMS2_3 && type == DataType.Variable)
+                                    cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-9; // stacktop conversion
+                                else
+                                    cw.Emit(Opcode.Conv, type, DataType.Int32);
                             }
 
                             cw.otherContexts.Push(new OtherContext(endPatch, popEnvPatch));
@@ -1614,7 +1617,12 @@ namespace UndertaleModLib.Compiler
                     else
                     {
                         AssembleExpression(cw, e.Children[0]);
-                        if (cw.typeStack.Peek() != DataType.Int32) // apparently it converts to ints
+                        if (cw.compileContext.Data.GMS2_3 && cw.typeStack.Peek() == DataType.Variable)
+                        {
+                            cw.typeStack.Pop();
+                            cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-9; // stacktop conversion
+                        }
+                        else if (cw.typeStack.Peek() != DataType.Int32) // apparently it converts to ints
                         {
                             cw.Emit(Opcode.Conv, cw.typeStack.Pop(), DataType.Int32);
                         }
@@ -1801,7 +1809,13 @@ namespace UndertaleModLib.Compiler
                         if (!skip)
                         {
                             AssembleExpression(cw, s.Children[0]);
-                            if (cw.typeStack.Peek() != DataType.Int32) // apparently it converts to ints
+                            if (cw.compileContext.Data.GMS2_3 && cw.typeStack.Peek() == DataType.Variable)
+                            {
+                                cw.typeStack.Pop();
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-9; // stacktop conversion
+                                cw.typeStack.Push(DataType.Int32);
+                            }
+                            else if (cw.typeStack.Peek() != DataType.Int32) // apparently it converts to ints
                             {
                                 cw.Emit(Opcode.Conv, cw.typeStack.Pop(), DataType.Int32);
                                 cw.typeStack.Push(DataType.Int32);
