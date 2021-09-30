@@ -1261,9 +1261,7 @@ namespace UndertaleModLib.Decompiler
                 StringBuilder sb = new StringBuilder();
                 if (context.Statements.ContainsKey(FunctionBodyEntryBlock.Address.Value))
                 {
-                    sb.Append("function ");
-                    sb.Append(Function.Name.Content);
-                    sb.Append("(");
+                    sb.Append("function(");
                     for (int i = 0; i < FunctionBodyCodeEntry.ArgumentsCount; ++i)
                     {
                         if (i != 0)
@@ -1271,7 +1269,9 @@ namespace UndertaleModLib.Decompiler
                         sb.Append("argument");
                         sb.Append(i);
                     }
-                    sb.Append(") {\n");
+                    sb.Append(") // ");
+                    sb.Append(Function.Name.Content);
+                    sb.Append("\n{\n");
                     context.IndentationLevel++;
                     foreach (Statement stmt in context.Statements[FunctionBodyEntryBlock.Address.Value])
                         sb.Append(context.Indentation + stmt.ToString(context) + "\n");
@@ -3378,6 +3378,7 @@ namespace UndertaleModLib.Decompiler
         {
             globalContext.DecompilerWarnings.Clear();
             DecompileContext context = new DecompileContext(globalContext, code);
+            BuildSubFunctionCache(globalContext.Data);
             try
             {
                 if (globalContext.Data != null && globalContext.Data.ToolInfo.ProfileMode)
@@ -3414,6 +3415,47 @@ namespace UndertaleModLib.Decompiler
 
             string decompiledCode = sb.ToString();
             return MakeLocalVars(context, decompiledCode) + decompiledCode;
+        }
+
+        public static void BuildSubFunctionCache(UndertaleData data)
+        {
+            // Find all functions defined in GlobalScripts
+            // Use the cache so this only gets calculated once
+            if (!data.GMS2_3 || data.KnownSubFunctions != null)
+                return;
+            data.KnownSubFunctions = new Dictionary<string, UndertaleFunction>();
+            GlobalDecompileContext globalDecompileContext = new GlobalDecompileContext(data, false);
+            foreach (UndertaleGlobalInit globalScript in data.GlobalInitScripts)
+            {
+                UndertaleCode scriptCode = globalScript.Code;
+                try
+                {
+                    DecompileContext childContext = new DecompileContext(globalDecompileContext, scriptCode);
+                    childContext.DisableAnonymousFunctionNameResolution = true;
+                    Dictionary<uint, Block> blocks2 = PrepareDecompileFlow(scriptCode, new List<uint>() { 0 });
+                    DecompileFromBlock(childContext, blocks2, blocks2[0]);
+                    List<Statement> statements = HLDecompile(childContext, blocks2, blocks2[0], blocks2[scriptCode.Length / 4]);
+                    foreach (Statement stmt2 in statements)
+                    {
+                        if (stmt2 is AssignmentStatement assign &&
+                            assign.Value is FunctionDefinition funcDef)
+                        {
+                            if (data.KnownSubFunctions.ContainsKey(assign.Destination.Var.Name.Content))
+                            {
+                                Debug.WriteLine("Duplicate definition for " + assign.Destination.Var.Name.Content);
+                            }
+                            else
+                            {
+                                data.KnownSubFunctions.Add(assign.Destination.Var.Name.Content, funcDef.Function);
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e.ToString());
+                }
+            }
         }
 
         private static void DoTypePropagation(DecompileContext context, Dictionary<uint, Block> blocks)

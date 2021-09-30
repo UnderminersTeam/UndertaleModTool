@@ -65,6 +65,7 @@ namespace UndertaleModLib
         public int PaddingAlignException = -1;
 
         public BuiltinList BuiltinList;
+        public Dictionary<string, UndertaleFunction> KnownSubFunctions; // Cache for known 2.3-style function names for compiler speedups. Can be re-built by setting this to null.
 
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {
