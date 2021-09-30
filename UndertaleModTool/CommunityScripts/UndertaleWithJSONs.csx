@@ -12,8 +12,15 @@ int maxCount = 1;
 
 EnsureDataLoaded();
 
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    ScriptError("Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+
+
 string langFolder = GetFolder(FilePath) + "lang" + Path.DirectorySeparatorChar;
-ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
+ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
 if (Directory.Exists(langFolder)) 
 {

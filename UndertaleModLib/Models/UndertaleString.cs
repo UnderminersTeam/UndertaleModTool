@@ -39,11 +39,6 @@ namespace UndertaleModLib.Models
             return ToString(true);
         }
 
-        public string ToString(DecompileContext context)
-        {
-            return ToString(context.isGameMaker2);
-        }
-
         public string ToString(bool isGMS2)
         {
             if (Content == null)

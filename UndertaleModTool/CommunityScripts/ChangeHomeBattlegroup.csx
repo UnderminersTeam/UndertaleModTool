@@ -7,6 +7,13 @@ using System.Text.RegularExpressions;
 
 EnsureDataLoaded();
 
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    ScriptError("Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+
+
 UndertaleCode code = Data.Code.ByName("gml_Object_obj_mainchara_KeyPress_36");
 if (code == null)
 {

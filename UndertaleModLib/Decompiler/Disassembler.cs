@@ -44,7 +44,7 @@ namespace UndertaleModLib.Decompiler
                 sb.Append(code.GenerateLocalVarDefinitions(vars, locals));
 
             Dictionary<uint, string> fragments = new Dictionary<uint, string>();
-            foreach (var dup in code.Duplicates)
+            foreach (var dup in code.ChildEntries)
                 fragments.Add(dup.Offset / 4, (dup.Name?.Content ?? "<null>") + $" (locals={dup.LocalsCount}, argc={dup.ArgumentsCount})");
             List<uint> blocks = FindBlockAddresses(code);
 

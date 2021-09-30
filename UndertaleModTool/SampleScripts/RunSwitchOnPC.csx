@@ -2,6 +2,13 @@
 
 EnsureDataLoaded();
 
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    ScriptError("Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+
+
 if (Data.GeneralInfo.Name.Content != "NXTALE")
 {
     ScriptError("This script can only be used with\nThe Nintendo Switch version of Undertale.", "Not NXTALE");

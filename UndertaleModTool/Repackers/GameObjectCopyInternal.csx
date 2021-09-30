@@ -10,6 +10,11 @@ using System.Security.Cryptography;
 using UndertaleModLib.Models;
 using UndertaleModLib.Decompiler;
 
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    ScriptError("Most likely incompatible with the new Deltarune Chapter 1 & 2 demo, run at your own risk");
+}
+
 ScriptMessage("Enter the object(s) to copy");
 
 int copiedGameObjectsCount = 0;
@@ -83,7 +88,7 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 nativeACT.ActionName = Data.Strings.MakeString(donorACT.ActionName.Content);
                             if (donorACT.CodeId?.Name?.Content != null)
                             {
-                                ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
+                                ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
                                 string codeToCopy = "";
                                 try
                                 {
