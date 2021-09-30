@@ -427,7 +427,7 @@ namespace UndertaleModTool
                 }
                 else
                 {
-                    ImportASMString(codeName, "", false, true);
+                    ImportGMLString(codeName, "", false, true);
                     //throw new Exception("Error!");
                 }
             }
