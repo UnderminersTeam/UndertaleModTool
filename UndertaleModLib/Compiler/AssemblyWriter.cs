@@ -212,11 +212,11 @@ namespace UndertaleModLib.Compiler
                         Dictionary<string, UndertaleFunction> knownFunctions = new Dictionary<string, UndertaleFunction>();
                         foreach (UndertaleFunction func in compileContext.Data.Functions)
                         {
-                            if (compileContext.Data.GMS2_3 && compileContext.Data.Code.ByName(func.Name.Content) != null)
-                                continue; // ignore fake functions which are refences to anonymous functions (i.e. don't include gml_Script_...)
+                            //if (compileContext.Data.GMS2_3 && compileContext.Data.Code.ByName(func.Name.Content) != null)
+                            //    continue; // ignore fake functions which are refences to anonymous functions (i.e. don't include gml_Script_...)
                             knownFunctions.Add(func.Name.Content, func);
                         }
-                        if (compileContext.Data.GMS2_3)
+                        if (false)//(compileContext.Data.GMS2_3)
                         {
                             // Find all functions defined in GlobalScripts
                             // TODO: This may be slow...
