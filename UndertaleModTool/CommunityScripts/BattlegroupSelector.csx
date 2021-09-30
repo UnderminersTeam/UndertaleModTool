@@ -1,6 +1,13 @@
 EnsureDataLoaded();
 
-if(Data.GeneralInfo?.DisplayName.Content.ToLower() != "undertale") {
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    ScriptError("Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+
+
+if (Data.GeneralInfo?.DisplayName.Content.ToLower() != "undertale") {
 	ScriptError("This script can only be used on UNDERTALE.");
 	return;
 }

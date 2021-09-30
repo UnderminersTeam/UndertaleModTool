@@ -586,7 +586,7 @@ namespace UndertaleModLib.Compiler
             Functions["load_csv"] = new FunctionInfo(this, 1);
             Functions["move_random"] = new FunctionInfo(this, 2, true);
             Functions["place_free"] = new FunctionInfo(this, 2, true);
-            Functions["place_empty"] = new FunctionInfo(this, 2, true);
+            Functions["place_empty"] = new FunctionInfo(this, -1, true);
             Functions["place_meeting"] = new FunctionInfo(this, 3, true);
             Functions["place_snapped"] = new FunctionInfo(this, 2, true);
             Functions["move_snap"] = new FunctionInfo(this, 2, true);
@@ -1219,7 +1219,7 @@ namespace UndertaleModLib.Compiler
             Functions["window_handle"] = new FunctionInfo(this, 0);
             Functions["window_device"] = new FunctionInfo(this, 0);
             Functions["logical_xor"] = new FunctionInfo(this, 2);
-            Functions["debug_get_callstack"] = new FunctionInfo(this, 0);
+            Functions["debug_get_callstack"] = new FunctionInfo(this, -1);
             Functions["show_debug_message"] = new FunctionInfo(this, 1);
             Functions["show_debug_overlay"] = new FunctionInfo(this, 1);
             Functions["debug_event"] = new FunctionInfo(this, 1);
@@ -3730,6 +3730,11 @@ namespace UndertaleModLib.Compiler
             GlobalNotArray["pointer_invalid"] = new VariableInfo(this, true, false);
             GlobalNotArray["pointer_null"] = new VariableInfo(this, true, false);
             GlobalNotArray["undefined"] = new VariableInfo(this, true, false);
+            if (data?.GeneralInfo?.Major >= 2)
+            {
+                GlobalNotArray["infinity"] = new VariableInfo(this, true, false);
+                GlobalNotArray["NaN"] = new VariableInfo(this, true, false);
+            }
             GlobalNotArray["room"] = new VariableInfo(this, true, true, "set_current_room", "get_current_room");
             GlobalNotArray["room_first"] = new VariableInfo(this, true, false);
             GlobalNotArray["room_last"] = new VariableInfo(this, true, false);

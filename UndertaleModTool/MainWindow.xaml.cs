@@ -53,6 +53,7 @@ namespace UndertaleModTool
         public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
         public bool CanSave { get; set; }
         public bool CanSafelySave = false;
+        public bool WasWarnedAboutTempRun = false;
         public bool FinishedMessageEnabled = true;
         public bool ScriptExecutionSuccess { get; set; } = true;
         public string ScriptErrorMessage { get; set; } = "";
@@ -141,14 +142,7 @@ namespace UndertaleModTool
 */
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-/*
-            if (IsRunFromTempFolder() || IsLikelyRunFromZipFolder())
-            {
-                MessageBox.Show(@"This program cannot be run without extracting all files.
-Please extract all contents of the ZIP file to a folder before running the program.");
-                System.Environment.Exit(1);
-            }
-*/
+            Settings.Load();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 try
@@ -158,21 +152,24 @@ Please extract all contents of the ZIP file to a folder before running the progr
                     UndertaleModTool_app.SetValue("", "UndertaleModTool");
                     UndertaleModTool_app.CreateSubKey(@"shell\open\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\"", RegistryValueKind.String);
                     UndertaleModTool_app.CreateSubKey(@"shell\launch\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\" launch", RegistryValueKind.String);
-                    UndertaleModTool_app.CreateSubKey(@"shell\launch").SetValue("", "Run game", RegistryValueKind.String);
-                    foreach (var extStr in new string[] { ".win", ".unx", ".ios", ".droid" })
+                    UndertaleModTool_app.CreateSubKey(@"shell\launch").SetValue("", "Run game normally", RegistryValueKind.String);
+                    UndertaleModTool_app.CreateSubKey(@"shell\special_launch\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\" special_launch", RegistryValueKind.String);
+                    UndertaleModTool_app.CreateSubKey(@"shell\special_launch").SetValue("", "Run extended options", RegistryValueKind.String);
+                    if (SettingsWindow.AutomaticFileAssociation)
                     {
-                        var ext = HKCU_Classes.CreateSubKey(extStr);
-                        ext.SetValue("", "UndertaleModTool", RegistryValueKind.String);
+                        foreach (var extStr in new string[] { ".win", ".unx", ".ios", ".droid" })
+                        {
+                            var ext = HKCU_Classes.CreateSubKey(extStr);
+                            ext.SetValue("", "UndertaleModTool", RegistryValueKind.String);
+                        }
+                        SHChangeNotify(SHCNE_ASSOCCHANGED, 0, IntPtr.Zero, IntPtr.Zero);
                     }
-                    SHChangeNotify(SHCNE_ASSOCCHANGED, 0, IntPtr.Zero, IntPtr.Zero);
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine(ex.ToString());
                 }
             }
-
-            Settings.Load();
 
             var args = Environment.GetCommandLineArgs();
             if (args.Length > 1)
@@ -185,16 +182,38 @@ Please extract all contents of the ZIP file to a folder before running the progr
             }
             if (args.Length > 2)
             {
-                if (args[2] == "launch")
+                if (args[2] == "special_launch")
                 {
                     RuntimePicker picker = new RuntimePicker();
                     picker.Owner = this;
                     var runtime = picker.Pick(FilePath, Data);
                     if (runtime == null)
                         return;
-
                     Process.Start(runtime.Path, "-game \"" + FilePath + "\"");
-                    Close();
+                    Environment.Exit(0);
+                }
+                else if (args[2] == "launch")
+                {
+                    string gameExeName = Data?.GeneralInfo?.Filename?.Content;
+                    if (gameExeName == null || FilePath == null)
+                    {
+                        ScriptError("Null game executable name or location");
+                        Environment.Exit(0);
+                    }
+                    string gameExePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(FilePath), gameExeName + ".exe");
+                    if (!File.Exists(gameExePath))
+                    {
+                        ScriptError("Cannot find game executable path, expected: " + gameExePath);
+                        Environment.Exit(0);
+                    }
+                    if (!File.Exists(FilePath))
+                    {
+                        ScriptError("Cannot find data file path, expected: " + FilePath);
+                        Environment.Exit(0);
+                    }
+                    if (gameExeName != null)
+                        Process.Start(gameExePath, "-game \"" + FilePath + "\" -debugoutput \"" + Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
+                    Environment.Exit(0);
                 }
                 else
                 {
@@ -543,7 +562,7 @@ Please extract all contents of the ZIP file to a folder before running the progr
                         object countLock = new object();
                         string[] outputs = new string[Data.Code.Count];
                         UndertaleDebugInfo[] outputsOffsets = new UndertaleDebugInfo[Data.Code.Count];
-                        DecompileContext context = new DecompileContext(Data, false);
+                        GlobalDecompileContext context = new GlobalDecompileContext(Data, false);
                         Parallel.For(0, Data.Code.Count, (i) =>
                         {
                             var code = Data.Code[i];
@@ -685,7 +704,6 @@ Please extract all contents of the ZIP file to a folder before running the progr
                     "General info" => new GeneralInfoEditor(Data?.GeneralInfo, Data?.Options, Data?.Language),
                     "Global init" => new GlobalInitEditor(Data?.GlobalInitScripts),
                     "Game End scripts" => new GameEndEditor(Data?.GameEndScripts),
-                    "Code locals (unused?)" => new DescriptionView(item, "This seems to be unused as far as I can tell - you can remove the whole list and nothing happens"),
                     "Variables" => (object)Data.FORM.Chunks["VARI"],
                     _ => new DescriptionView(item, "Expand the list on the left to edit items"),
                 };
@@ -1312,6 +1330,74 @@ Please extract all contents of the ZIP file to a folder before running the progr
         }
 
         private async void Command_Run(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Data == null)
+            {
+                ScriptError("Nothing to run!");
+                return;
+            }
+            if ((!WasWarnedAboutTempRun) && (SettingsWindow.TempRunMessageShow))
+            {
+                ScriptMessage(@"WARNING:
+Temp running the game does not permanently 
+save your changes. Please ""Save"" the game
+to save your changes. Closing UndertaleModTool
+without using the ""Save"" option can
+result in loss of work.");
+                WasWarnedAboutTempRun = true;
+            }
+            bool saveOk = true;
+            string oldFilePath = FilePath;
+            bool oldDisableDebuggerState = true;
+            int oldSteamValue = 0;
+            oldDisableDebuggerState = Data.GeneralInfo.DisableDebugger;
+            oldSteamValue = Data.GeneralInfo.SteamAppID;
+            Data.GeneralInfo.SteamAppID = 0;
+            Data.GeneralInfo.DisableDebugger = true;
+            string TempFilesFolder = Path.Combine(Path.GetDirectoryName(oldFilePath), "MyMod.temp");
+            await SaveFile(TempFilesFolder, false);
+            Data.GeneralInfo.SteamAppID = oldSteamValue;
+            FilePath = oldFilePath;
+            Data.GeneralInfo.DisableDebugger = oldDisableDebuggerState;
+            if (TempFilesFolder == null)
+            {
+                MessageBox.Show("Temp folder is null.", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+            else if (saveOk)
+            {
+                string gameExeName = Data?.GeneralInfo?.Filename?.Content;
+                if (gameExeName == null || FilePath == null)
+                {
+                    ScriptError("Null game executable name or location");
+                    return;
+                }
+                string gameExePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(FilePath), gameExeName + ".exe");
+                if (!File.Exists(gameExePath))
+                {
+                    ScriptError("Cannot find game executable path, expected: " + gameExePath);
+                    return;
+                }
+                if (!File.Exists(TempFilesFolder))
+                {
+                    ScriptError("Cannot find game path, expected: " + TempFilesFolder);
+                    return;
+                }
+                if (gameExeName != null)
+                    Process.Start(gameExePath, "-game \"" + TempFilesFolder + "\" -debugoutput \"" + Path.ChangeExtension(TempFilesFolder, ".gamelog.txt") + "\"");
+            }
+            else if (!saveOk)
+            {
+                MessageBox.Show("Temp save failed, cannot run.", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+            if (File.Exists(TempFilesFolder))
+            {
+                await Task.Delay(3000);
+                File.Delete(TempFilesFolder);
+            }
+        }
+        private async void Command_RunSpecial(object sender, ExecutedRoutedEventArgs e)
         {
             if (Data == null)
                 return;

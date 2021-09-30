@@ -12,7 +12,7 @@ if (Data.ToolInfo.ProfileMode)
 
 int progress = 0;
 string codeFolder = GetFolder(FilePath) + "Export_Assembly2" + Path.DirectorySeparatorChar;
-ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
+ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
 if (Directory.Exists(codeFolder)) 
 {
@@ -72,7 +72,7 @@ void DumpCode()
                 }
                 code_orig.LocalsCount = codeLocalsCount;
                 code_orig.GenerateLocalVarDefinitions(code_orig.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
-                code_orig.DuplicateEntry = false;
+                code_orig.ParentEntry = null;
             }
             else
             {
@@ -86,7 +86,7 @@ void DumpCode()
             Data.CodeLocals.Add(locals);
         }
         string path = Path.Combine(codeFolder, code_orig.Name.Content + ".asm");
-        if (!code_orig.DuplicateEntry)
+        if (code_orig.ParentEntry == null)
         {
             string x = "";
             try 

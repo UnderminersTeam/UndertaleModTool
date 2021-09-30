@@ -1,5 +1,12 @@
 EnsureDataLoaded();
 
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    ScriptError("Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+
+
 ScriptMessage("Adds... a new room?\nJust start playing the game as usual and you'll see\nFor Undertale 1.08\nby krzys_h and Kneesnap");
 
 var room_ruins1 = Data.Rooms.ByName("room_ruins1");

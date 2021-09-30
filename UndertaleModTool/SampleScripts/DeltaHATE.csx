@@ -2,6 +2,13 @@
 
 EnsureDataLoaded();
 
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+	ScriptError("Probably incompatible with the new Deltarune Chapter 1 & 2 demo");
+	return;
+}
+
+
 static Random rng;
 rng = new Random(int.Parse(SimpleTextInput("Seed", "Enter random seed (number from -2147483648 to 2147483647)", "0", false)));
 float randomPower = float.Parse(SimpleTextInput("Power", "Enter shuffle power for sprites (from 0 to 1, 1 is strongest)", "0.6", false));

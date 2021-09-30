@@ -207,10 +207,10 @@ namespace UndertaleModTool
             string text;
 
             DisassemblyEditor.TextArea.ClearSelection();
-            if (code.DuplicateEntry)
+            if (code.ParentEntry != null)
             {
                 DisassemblyEditor.IsReadOnly = true;
-                text = "; Duplicate code entry; cannot edit here.";
+                text = "; This code entry is a reference to an anonymous function within " + code.ParentEntry.Name.Content + ", view it there";
             }
             else
             {
@@ -239,7 +239,7 @@ namespace UndertaleModTool
             gettext = new Dictionary<string, string>();
             string[] decompilationOutput;
             if (!SettingsWindow.ProfileModeEnabled)
-                decompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
+                decompilationOutput = Decompiler.Decompile(gettextCode, new GlobalDecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
             else
             {
                 try
@@ -248,11 +248,11 @@ namespace UndertaleModTool
                     if (File.Exists(path))
                         decompilationOutput = File.ReadAllText(path).Replace("\r\n", "\n").Split('\n');
                     else
-                        decompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
+                        decompilationOutput = Decompiler.Decompile(gettextCode, new GlobalDecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
                 }
                 catch
                 {
-                    decompilationOutput = Decompiler.Decompile(gettextCode, new DecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
+                    decompilationOutput = Decompiler.Decompile(gettextCode, new GlobalDecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
                 }
             }
             foreach (var line in decompilationOutput)
@@ -295,9 +295,9 @@ namespace UndertaleModTool
         {
             DecompiledEditor.IsReadOnly = true;
             DecompiledEditor.TextArea.ClearSelection();
-            if (code.DuplicateEntry)
+            if (code.ParentEntry != null)
             {
-                DecompiledEditor.Text = "// Duplicate code entry; cannot edit here.";
+                DecompiledEditor.Text = "// This code entry is a reference to an anonymous function within " + code.ParentEntry.Name.Content + ", view it there";
                 CurrentDecompiled = code;
                 existingDialog?.TryClose();
             }
@@ -333,7 +333,7 @@ namespace UndertaleModTool
                 var dataa = (Application.Current.MainWindow as MainWindow).Data;
                 Task t = Task.Run(() =>
                 {
-                    DecompileContext context = new DecompileContext(dataa, false);
+                    GlobalDecompileContext context = new GlobalDecompileContext(dataa, false);
                     string decompiled = null;
                     Exception e = null;
                     try
@@ -451,7 +451,7 @@ namespace UndertaleModTool
 
         private async void GraphCode(UndertaleCode code)
         {
-            if (code.DuplicateEntry)
+            if (code.ParentEntry != null)
             {
                 GraphView.Source = null;
                 CurrentGraphed = code;
@@ -466,7 +466,11 @@ namespace UndertaleModTool
                 try
                 {
                     code.UpdateAddresses();
-                    var blocks = Decompiler.DecompileFlowGraph(code);
+                    List<uint> entryPoints = new List<uint>();
+                    entryPoints.Add(0);
+                    foreach (UndertaleCode duplicate in code.ChildEntries)
+                        entryPoints.Add(duplicate.Offset / 4);
+                    var blocks = Decompiler.DecompileFlowGraph(code, entryPoints);
                     string dot = Decompiler.ExportFlowGraph(blocks);
 
                     try
@@ -475,6 +479,7 @@ namespace UndertaleModTool
                         var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
                         var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
                         var wrapper = new GraphGeneration(getStartProcessQuery, getProcessStartInfoQuery, registerLayoutPluginCommand);
+                        wrapper.GraphvizPath = Settings.Instance.GraphVizPath;
 
                         byte[] output = wrapper.GenerateGraph(dot, Enums.GraphReturnType.Png); // TODO: Use SVG instead
 
@@ -530,7 +535,7 @@ namespace UndertaleModTool
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return; // Probably loaded another data.win or something.
-            if (code.DuplicateEntry)
+            if (code.ParentEntry != null)
                 return;
 
             // Check to make sure this isn't an element inside of the textbox, or another tab
@@ -652,7 +657,7 @@ namespace UndertaleModTool
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return; // Probably loaded another data.win or something.
-            if (code.DuplicateEntry)
+            if (code.ParentEntry != null)
                 return;
 
             // Check to make sure this isn't an element inside of the textbox, or another tab
@@ -939,9 +944,15 @@ namespace UndertaleModTool
                     // Process the content of this identifier/function
                     if (func)
                     {
-                        val = data.Scripts.ByName(m.Value);
+                        val = null;
+                        if (!data.GMS2_3) // in GMS2.3 every custom "function" is in fact a member variable and scripts are never referenced directly
+                            val = data.Scripts.ByName(m.Value);
                         if (val == null)
+                        {
                             val = data.Functions.ByName(m.Value);
+                            if (data.GMS2_3 && val != null && data.Code.ByName(val.Name.Content) != null)
+                                val = null; // in GMS2.3 every custom "function" is in fact a member variable, and the names in functions make no sense (they have the gml_Script_ prefix)
+                        }
                         if (val == null)
                         {
                             if (data.BuiltinList.Functions.ContainsKey(m.Value))
@@ -954,7 +965,11 @@ namespace UndertaleModTool
                         }
                     }
                     else
+                    {
                         val = data.ByName(m.Value);
+                        if (data.GMS2_3 & val is UndertaleScript)
+                            val = null; // in GMS2.3 scripts are never referenced directly
+                    }
                     if (val == null)
                     {
                         if (offset >= 7)
