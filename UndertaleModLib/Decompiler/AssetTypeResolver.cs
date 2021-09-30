@@ -402,8 +402,6 @@ namespace UndertaleModLib.Decompiler
             if (builtin_funcs.ContainsKey(function_name))
             {
                 AssetIDType[] func_types = builtin_funcs[function_name];
-                if (arguments.Length > func_types.Length)
-                    throw new Exception("Bad call to " + function_name + " with " + arguments.Length + " arguments (instead of " + func_types.Length + ")");
 
                 if (context.Data?.IsGameMaker2() ?? false)
                 {
@@ -421,7 +419,7 @@ namespace UndertaleModLib.Decompiler
                     func_types = (AssetIDType[]) func_types.Clone();
                     AssetIDType scriptArgType;
 
-                    for (int i = 0; i < arguments.Length && i < scriptArgs[function_name].Length; i++) 
+                    for (int i = 0; i < arguments.Length && i < func_types.Length && i < scriptArgs[function_name].Length; i++) 
                     {
                         scriptArgType = scriptArgs[function_name][i];
 
@@ -434,7 +432,7 @@ namespace UndertaleModLib.Decompiler
                         // func_types[i] is correct, do not replace
                     }
                 }
-                for (int i = 0; i < arguments.Length; i++)
+                for (int i = 0; i < arguments.Length && i < func_types.Length; i++)
                     arguments[i] = func_types[i];
                 return true;
             }
