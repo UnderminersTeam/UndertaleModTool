@@ -31,11 +31,17 @@ if (!InitialCheck())
     return;
 
 UpdateProgress();
+progress = 0;
 ExportGML("Checked_Decompiled_Code");
+progress = 0;
 ExportASM("Original_Disassembly");
+progress = 0;
 ImportGML("Checked_Decompiled_Code");
+progress = 0;
 ExportASM("Recompiled_Disassembly");
+progress = 0;
 FileCompare("Original_Disassembly", "Recompiled_Disassembly", "Checked_Decompiled_Code");
+progress = 0;
 ImportASM("Original_Disassembly");
 
 HideProgressBar();
@@ -131,7 +137,7 @@ void FileCompare(string asm_orig_path, string asm_new_path, string gml_orig_path
     gml_orig_path = GetSpecialPath(gml_orig_path);
     for (var i = 0; i < Data.Code.Count; i++)
     {
-        UpdateProgressBar(null, "Deleting identical files", progress++, Data.Code.Count);
+        UpdateProgressBar(null, "Grouping identical and different files", progress++, Data.Code.Count);
         string DetCodeName = (Is_GMS_2_3 ? i.ToString() : Data.Code[i].Name.Content);
         string orig_asm_path = Path.Combine(asm_orig_path, DetCodeName + ".asm");
         string new1_asm_path = Path.Combine(asm_new_path, DetCodeName + ".asm");
