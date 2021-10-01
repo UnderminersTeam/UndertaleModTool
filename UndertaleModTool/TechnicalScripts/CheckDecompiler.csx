@@ -16,6 +16,7 @@ EnsureDataLoaded();
 
 int progress = 0;
 int identical_count = 0;
+int different_count = 0;
 bool Is_GMS_2_3 = (Data.GMS2_3 || Data.GMS2_3_1 || Data.GMS2_3_2);
 if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
 {
@@ -26,19 +27,44 @@ if (!InitialCheck())
     return;
 
 UpdateProgress();
-
-ExportGML("Export_Code_Orig");
-ExportASM("Export_Assembly_Orig");
-ImportGML("Export_Code_Orig");
-ExportASM("Export_Assembly_Recompiled");
-FileCompare("Export_Assembly_Orig", "Export_Assembly_Recompiled", "Export_Code_Orig");
-ImportASM("Export_Assembly_Orig");
+ExportGML("Checked_Decompiled_Code");
+ExportASM("Original_Disassembly");
+ImportGML("Checked_Decompiled_Code");
+ExportASM("Recompiled_Disassembly");
+FileCompare("Original_Disassembly", "Recompiled_Disassembly", "Checked_Decompiled_Code");
+ImportASM("Original_Disassembly");
 
 HideProgressBar();
-double percentage = ((double)identical_count / (double)Data.Code.Count) * 100;
-int non_matching = Data.Code.Count - identical_count;
-ScriptMessage("Non-matching Data Generated. Decompiler/Compiler Accuracy: " + percentage.ToString() + "% (" + identical_count.ToString() + "/" + Data.Code.Count.ToString() + "). Number of differences: " + non_matching.ToString() + ". To review these, the differing files are in the game directory.");
+double sameCount = ((double)(identical_count));
+double diffCount = ((double)(different_count));
+int totalCount = (identical_count + different_count);
+double totalCountDoub = ((double)totalCount);
+double percentage = ((sameCount / totalCountDoub) * 100);
+ScriptMessage("Non-matching Data Generated. Decompiler/Compiler Accuracy: "
++ "\r\n"
++ percentage.ToString() + "%" 
++ "\r\n" 
++ "(" + identical_count.ToString() + "/" + totalCount.ToString() + ")." 
++ "\r\n"
++ "Number of differences: " + different_count.ToString() + "."
++ "\r\n"
++ "The results can be reviewed in each folder." 
++ "\r\n"
++ "The identical files are in the \"Identical\" subfolders." 
++ "\r\n"
++ "The differing files are in the \"Different\" subfolders.");
 return;
+
+void DeleteDir(string old_path)
+{
+    old_path = GetSpecialPath(old_path);
+    Directory.Delete(old_path, true)
+}
+
+bool DirDoesExist(string special_path)
+{
+    return Directory.Exists(GetSpecialPath(special_path));
+}
 
 bool InitialCheck()
 {
@@ -47,32 +73,19 @@ bool InitialCheck()
         ScriptError("This script will not work properly on Undertale 1.0 and other bytecode < 15 games.");
         return false;
     }
-    if (Directory.Exists(GetSpecialPath("Export_Code_Orig")))
+    if (DirDoesExist("Checked_Decompiled_Code") || DirDoesExist("Original_Disassembly") || DirDoesExist("Recompiled_Disassembly"))
     {
-        ScriptError("A code export already exists. Please remove it.", "Error");
-        return false;
-    }
-    else
-    {
-        Directory.CreateDirectory(GetSpecialPath("Export_Code_Orig"));
-    }
-    if (Directory.Exists(GetSpecialPath("Export_Assembly_Orig")))
-    {
-        ScriptError("A code export already exists. Please remove it.", "Error");
-        return false;
-    }
-    else
-    {
-        Directory.CreateDirectory(GetSpecialPath("Export_Assembly_Orig"));
-    }
-    if (Directory.Exists(GetSpecialPath("Export_Assembly_Recompiled")))
-    {
-        ScriptError("A code export already exists. Please remove it.", "Error");
-        return false;
-    }
-    else
-    {
-        Directory.CreateDirectory(GetSpecialPath("Export_Assembly_Recompiled"));
+        if (ScriptQuestion("A code export already exists. Would you like to remove it now?"))
+        {
+            DeleteDir("Checked_Decompiled_Code");
+            DeleteDir("Original_Disassembly");
+            DeleteDir("Recompiled_Disassembly");
+        }
+        else
+        {
+            ScriptError("A code export already exists. Please remove it.", "Export already exists");
+            return false;
+        }
     }
     return true;
 }
@@ -116,10 +129,23 @@ void FileCompare(string asm_orig_path, string asm_new_path, string gml_orig_path
         }
         if (AreFilesIdentical(orig_asm_path, new1_asm_path))
         {
-            File.Delete(orig_gml_path);
-            File.Delete(orig_asm_path);
-            File.Delete(new1_asm_path);
+            Directory.CreateDirectory(gml_orig_path, "Identical");
+            Directory.CreateDirectory(asm_new_path, "Identical");
+            Directory.CreateDirectory(asm_orig_path, "Identical");
+            File.Move(orig_gml_path, Path.Combine(gml_orig_path, "Identical", DetCodeName + ".gml");
+            File.Move(orig_asm_path, Path.Combine(asm_new_path, "Identical", DetCodeName + ".asm");
+            File.Move(new1_asm_path, Path.Combine(asm_orig_path, "Identical", DetCodeName + ".asm");
             identical_count += 1;
+        }
+        else
+        {
+            Directory.CreateDirectory(gml_orig_path, "Different");
+            Directory.CreateDirectory(asm_new_path, "Different");
+            Directory.CreateDirectory(asm_orig_path, "Different");
+            File.Move(orig_gml_path, Path.Combine(gml_orig_path, "Different", DetCodeName + ".gml");
+            File.Move(orig_asm_path, Path.Combine(asm_new_path, "Different", DetCodeName + ".asm");
+            File.Move(new1_asm_path, Path.Combine(asm_orig_path, "Different", DetCodeName + ".asm");
+            different_count += 1;
         }
     }
     progress = 0;
@@ -242,11 +268,7 @@ void SetUpLookUpTable(string path)
     string index_path = Path.Combine(path, "LookUpTable.txt");
     string index_text = "This is zero indexed, index 0 starts at line 2.\n";
     for (var i = 0; i < Data.Code.Count; i++)
-    {
-        UndertaleCode code = Data.Code[i];
-        index_text += code.Name.Content;
-        index_text += "\n";
-    }
+        index_text += Data.Code[i].Name.Content + "\n";
     File.WriteAllText(index_path, index_text);
 }
 
