@@ -30,6 +30,7 @@ HideProgressBar();
 double percentage = ((double)identical_count / (double)Data.Code.Count) * 100;
 int non_matching = Data.Code.Count - identical_count;
 ScriptMessage("Non-matching Data Generated. Decompiler/Compiler Accuracy: " + percentage.ToString() + "% (" + identical_count.ToString() + "/" + Data.Code.Count.ToString() + "). Number of differences: " +non_matching.ToString()+ ". To review these, the differing files are in the game directory.");
+return;
 
 bool InitialCheck()
 {

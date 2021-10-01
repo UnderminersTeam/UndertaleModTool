@@ -29,6 +29,8 @@ ReplaceTextInGML(("gml_Object_obj_time_Create_0"), @"global.osflavor >= 3", "1",
 
 //Now patch out the check for the window scale, make it always be true
 ReplaceTextInGML(("gml_Object_obj_time_Draw_76"), @"global.osflavor >= 4", "1", true);
+ReplaceTextInGML(("gml_Object_obj_time_Draw_76"), @"os_type == os_switch_beta", "1", true);
+//Attempt border display fix in gml_Object_obj_time_Draw_76
 
 //Patch out the OS checks for gml_Script_scr_draw_background_ps4, make PS Vita always false, and PS4 always true, simplifying code.
 ReplaceTextInGML(("gml_Script_scr_draw_background_ps4"), @"os_type == os_psvita", "0", true);
