@@ -58,7 +58,7 @@ return;
 void DeleteDir(string old_path)
 {
     old_path = GetSpecialPath(old_path);
-    Directory.Delete(old_path, true)
+    Directory.Delete(old_path, true);
 }
 
 bool DirDoesExist(string special_path)
@@ -80,12 +80,21 @@ bool InitialCheck()
             DeleteDir("Checked_Decompiled_Code");
             DeleteDir("Original_Disassembly");
             DeleteDir("Recompiled_Disassembly");
+            Directory.CreateDirectory(GetSpecialPath("Checked_Decompiled_Code"));
+            Directory.CreateDirectory(GetSpecialPath("Original_Disassembly"));
+            Directory.CreateDirectory(GetSpecialPath("Recompiled_Disassembly"));
         }
         else
         {
             ScriptError("A code export already exists. Please remove it.", "Export already exists");
             return false;
         }
+    }
+    else
+    {
+        Directory.CreateDirectory(GetSpecialPath("Checked_Decompiled_Code"));
+        Directory.CreateDirectory(GetSpecialPath("Original_Disassembly"));
+        Directory.CreateDirectory(GetSpecialPath("Recompiled_Disassembly"));
     }
     return true;
 }
@@ -119,7 +128,7 @@ void FileCompare(string asm_orig_path, string asm_new_path, string gml_orig_path
     for (var i = 0; i < Data.Code.Count; i++)
     {
         UpdateProgressBar(null, "Deleting identical files", progress++, Data.Code.Count);
-        string DetCodeName = (Is_GMS_2_3 ? i.ToString() : code.Name.Content);
+        string DetCodeName = (Is_GMS_2_3 ? i.ToString() : Data.Code[i].Name.Content);
         string orig_asm_path = Path.Combine(asm_orig_path, DetCodeName + ".asm");
         string new1_asm_path = Path.Combine(asm_new_path, DetCodeName + ".asm");
         string orig_gml_path = Path.Combine(gml_orig_path, DetCodeName + ".gml");
@@ -129,22 +138,22 @@ void FileCompare(string asm_orig_path, string asm_new_path, string gml_orig_path
         }
         if (AreFilesIdentical(orig_asm_path, new1_asm_path))
         {
-            Directory.CreateDirectory(gml_orig_path, "Identical");
-            Directory.CreateDirectory(asm_new_path, "Identical");
-            Directory.CreateDirectory(asm_orig_path, "Identical");
-            File.Move(orig_gml_path, Path.Combine(gml_orig_path, "Identical", DetCodeName + ".gml");
-            File.Move(orig_asm_path, Path.Combine(asm_new_path, "Identical", DetCodeName + ".asm");
-            File.Move(new1_asm_path, Path.Combine(asm_orig_path, "Identical", DetCodeName + ".asm");
+            Directory.CreateDirectory(Path.Combine(gml_orig_path, "Identical"));
+            Directory.CreateDirectory(Path.Combine(asm_new_path, "Identical"));
+            Directory.CreateDirectory(Path.Combine(asm_orig_path, "Identical"));
+            File.Move(orig_gml_path, Path.Combine(gml_orig_path, "Identical", DetCodeName + ".gml"));
+            File.Move(orig_asm_path, Path.Combine(asm_new_path, "Identical", DetCodeName + ".asm"));
+            File.Move(new1_asm_path, Path.Combine(asm_orig_path, "Identical", DetCodeName + ".asm"));
             identical_count += 1;
         }
         else
         {
-            Directory.CreateDirectory(gml_orig_path, "Different");
-            Directory.CreateDirectory(asm_new_path, "Different");
-            Directory.CreateDirectory(asm_orig_path, "Different");
-            File.Move(orig_gml_path, Path.Combine(gml_orig_path, "Different", DetCodeName + ".gml");
-            File.Move(orig_asm_path, Path.Combine(asm_new_path, "Different", DetCodeName + ".asm");
-            File.Move(new1_asm_path, Path.Combine(asm_orig_path, "Different", DetCodeName + ".asm");
+            Directory.CreateDirectory(Path.Combine(gml_orig_path, "Different"));
+            Directory.CreateDirectory(Path.Combine(asm_new_path, "Different"));
+            Directory.CreateDirectory(Path.Combine(asm_orig_path, "Different"));
+            File.Move(orig_gml_path, Path.Combine(gml_orig_path, "Different", DetCodeName + ".gml"));
+            File.Move(orig_asm_path, Path.Combine(asm_new_path, "Different", DetCodeName + ".asm"));
+            File.Move(new1_asm_path, Path.Combine(asm_orig_path, "Different", DetCodeName + ".asm"));
             different_count += 1;
         }
     }
@@ -210,7 +219,7 @@ void ExportCode(string old_path, bool IsGML = true)
     old_path = GetSpecialPath(old_path);
     UpdateProgress();
     if (Is_GMS_2_3)
-        SetUpLookUpTable(path);
+        SetUpLookUpTable(old_path);
     for (var i = 0; i < Data.Code.Count; i++)
     {
         UndertaleCode code = Data.Code[i];
