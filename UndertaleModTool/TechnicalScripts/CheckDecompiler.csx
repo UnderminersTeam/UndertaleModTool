@@ -22,6 +22,10 @@ if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 
 {
     Is_GMS_2_3 = false;
 }
+else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1&2")
+{
+    Is_GMS_2_3 = false;
+}
 
 if (!InitialCheck())
     return;
