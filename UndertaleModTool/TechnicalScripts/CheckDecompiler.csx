@@ -17,6 +17,10 @@ EnsureDataLoaded();
 int progress = 0;
 int identical_count = 0;
 bool Is_GMS_2_3 = (Data.GMS2_3 || Data.GMS2_3_1 || Data.GMS2_3_2);
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    Is_GMS_2_3 = false;
+}
 
 if (!InitialCheck())
     return;
