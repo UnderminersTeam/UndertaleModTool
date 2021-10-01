@@ -422,7 +422,9 @@ namespace UndertaleModTool
                     MessageBox.Show(ErrorText, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
                 else
-                    throw new Exception("Error!");
+                {
+                    Data.Code.ByName(codeName).ReplaceGML("", Data);
+                }
             }
         }
     }
