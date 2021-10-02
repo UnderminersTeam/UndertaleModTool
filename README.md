@@ -71,7 +71,7 @@ Interested in the file and instruction format research I've done while working o
 ### Special thanks
 Special thanks to everybody who did previous research on unpacking and decompiling Undertale, it was a really huge help:
 * https://pcy.ulyssis.be/undertale/
-* https://github.com/donkeybonks/acolyte/wiki/Bytecode
+* [https://github.com/donkeybonks/acolyte/wiki/Bytecode](https://web.archive.org/web/20191126144953if_/https://github.com/donkeybonks/acolyte/wiki/Bytecode)
 * https://github.com/PoroCYon/Altar.NET
 * https://github.com/WarlockD/GMdsam
 * [@NarryG](https://github.com/NarryG) for [helping me figure out](https://github.com/krzys-h/UndertaleModTool/issues/3) the missing stuff for GMS2 and Nintendo Switch release
