@@ -3426,7 +3426,7 @@ namespace UndertaleModLib.Decompiler
         {
             // Find all functions defined in GlobalScripts
             // Use the cache so this only gets calculated once
-            if (!data.GMS2_3 || data.KnownSubFunctions != null)
+            if (data == null || !data.GMS2_3 || data.KnownSubFunctions != null)
                 return;
             foreach (var func in data.Functions)
             {
