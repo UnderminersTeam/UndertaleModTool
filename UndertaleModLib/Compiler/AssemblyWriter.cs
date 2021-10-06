@@ -1906,7 +1906,7 @@ namespace UndertaleModLib.Compiler
                 }
                 else
                 {
-                    AssemblyWriterError(cw, "Malformed variable store.", s.Token);
+                    AssemblyWriterError(cw, "Malformed variable store.\n\nPlease note that editing GMS 2.3+ scripts is not yet fully supported.\n\n", s.Token);
                 }
             }
 

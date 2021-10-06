@@ -12,7 +12,11 @@ using UndertaleModLib.Decompiler;
 
 if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
 {
-    ScriptError("Most likely incompatible with the new Deltarune Chapter 1 & 2 demo, run at your own risk");
+    ScriptError("Error 0: Most likely incompatible with the new Deltarune Chapter 1 & 2 demo, run at your own risk");
+}
+else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1&2")
+{
+    ScriptError("Error 1: Most likely incompatible with the new Deltarune Chapter 1 & 2 demo, run at your own risk");
 }
 
 ScriptMessage("Enter the object(s) to copy");

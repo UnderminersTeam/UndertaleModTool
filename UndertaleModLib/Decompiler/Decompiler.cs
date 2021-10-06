@@ -1733,6 +1733,11 @@ namespace UndertaleModLib.Decompiler
                         if (instr.ComparisonKind != 0)
                         {
                             // This is the GMS 2.3+ stack move / swap instruction
+                            if (instr.Type1 == UndertaleInstruction.DataType.Variable)
+                            {
+                                // This variant seems to do literally nothing...?
+                                break;
+                            }
 
                             int bytesToTake = instr.Extra * 4;
                             Stack<Expression> taken = new Stack<Expression>();

@@ -1238,7 +1238,7 @@ namespace UndertaleModLib.Decompiler
             }
 
             // Both UT and DR
-            if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune") || lowerName == "deltarune chapter 1 & 2"))
+            if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune") || lowerName == "deltarune chapter 1 & 2" || lowerName == "deltarune chapter 1&2"))
             {
                 AddOverrideFor("gml_Script_scr_getbuttonsprite", "control", AssetIDType.Enum_GamepadButton);
                 AddOverrideFor("gml_Script_scr_getbuttonsprite", "button", AssetIDType.Enum_GamepadButton);
