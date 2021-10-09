@@ -222,13 +222,13 @@ TPageItem dumpTexturePageItem(UndertaleTexturePageItem pageItem, TextureWorker w
 }
 
 volatile int tpageParallelIndex = 0;
-async Task<List<TPageItem>> dumpTexturePageItems()
+async Task<List<TPageItem>> dumpTexturePageItems(string dir)
 {
     var worker = new TextureWorker();
 
-    var tpageitems = await Task.Run(() => texPageItems = Data.TexturePageItems
+    var tpageitems = await Task.Run(() => Data.TexturePageItems
         .AsParallel()
-        .Select(item => dumpTexturePageItem(item, worker, $"{packagerDirectory}texture_page_{tpageParallelIndex++}.png"))
+        .Select(item => dumpTexturePageItem(item, worker, $"{dir}texture_page_{tpageParallelIndex++}.png"))
         .ToList());
 
     worker.Cleanup();
@@ -277,7 +277,7 @@ int doItemGrouping(TPageItem item)
 //     return false;
 // }
 
-List<TextureAtlas> layoutPageItemList(List<TPageItem> items)
+List<TextureAtlas> layoutPageItemList(List<TPageItem> items, int pageSize, int padding)
 {
     var atlas_list = new List<TextureAtlas>();
     while (items.Count > 0)
@@ -308,11 +308,11 @@ List<TextureAtlas> layoutPageItemList(List<TPageItem> items)
     return atlas_list;
 }
 
-async Task<List<TextureAtlas>> layoutPageItemLists<K>(ILookup<K, TPageItem> lookup)
+async Task<List<TextureAtlas>> layoutPageItemLists<K>(ILookup<K, TPageItem> lookup, int pageSize, int padding)
 {
     return await Task.Run(() => lookup
         .AsParallel()
-        .Select(list => layoutPageItemList(list.ToList()))
+        .Select(list => layoutPageItemList(list.ToList(), pageSize, padding))
         .SelectMany(list => list.Distinct())
         .ToList());
 }
@@ -343,7 +343,7 @@ string packagerDirectory = $"{dir.FullName}{Path.DirectorySeparatorChar}";
 
 // Dump all the texture page items
 ResetProgress("Existing Textures Exported");
-var texPageItems = await dumpTexturePageItems();
+var texPageItems = await dumpTexturePageItems(packagerDirectory);
 HideProgressBar();
 
 // Clear embedded textures and any stale references to them
@@ -368,9 +368,9 @@ var texPageLookup = texPageItems.OrderBy(
 
 // Layout all the texture items (grouped by doItemGrouping) into atlases
 ResetProgress("Laying out texture items");
-var atlases = await layoutPageItemLists(texPageLookup);
+var atlases = await layoutPageItemLists(texPageLookup, pageSize, padding);
 
-// Now recreate texture pages and lkink the items to the pages
+// Now recreate texture pages and link the items to the pages
 ResetProgress("Regenerating Texture Pages");
 using (var f = new StreamWriter($"{packagerDirectory}log.txt"))
 {
