@@ -346,11 +346,14 @@ ResetProgress("Existing Textures Exported");
 var texPageItems = await dumpTexturePageItems(packagerDirectory);
 HideProgressBar();
 
-// Clear embedded textures and any stale references to them
+// Clear embedded textures and any possibly stale references to them
 Data.EmbeddedTextures.Clear();
-foreach (var texInfo in Data.TextureGroupInfo)
+if (Data.TextureGroupInfo != null)
 {
-    texInfo.TexturePages.Clear();
+    foreach (var texInfo in Data.TextureGroupInfo)
+    {
+        texInfo.TexturePages.Clear();
+    }
 }
 
 // Sort and group textures that are inside the bounds defined by maxDims, maxArea
