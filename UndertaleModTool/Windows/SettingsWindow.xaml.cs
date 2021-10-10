@@ -80,6 +80,25 @@ namespace UndertaleModTool
                 Settings.Save();
             }
         }
+        public static bool TempRunMessageShow
+        {
+            get => Settings.Instance.TempRunMessageShow;
+            set
+            {
+                Settings.Instance.TempRunMessageShow = value;
+                Settings.Save();
+            }
+        }
+
+        public static bool AutomaticFileAssociation
+        {
+            get => Settings.Instance.AutomaticFileAssociation;
+            set
+            {
+                Settings.Instance.AutomaticFileAssociation = value;
+                Settings.Save();
+            }
+        }
 
         public static bool DeleteOldProfileOnSave
         {

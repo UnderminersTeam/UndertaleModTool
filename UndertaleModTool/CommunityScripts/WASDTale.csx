@@ -3,6 +3,18 @@
 
 EnsureDataLoaded();
 
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    ScriptError("Error 0: Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1&2")
+{
+    ScriptError("Error 1: Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+
+
 ScriptMessage(@"This script enables WASD controls for
 all Undertale versions.");
 

@@ -19,7 +19,7 @@ namespace UndertaleModTool
         public string GetDecompiledText(string codeName)
         {
             UndertaleCode code = Data.Code.ByName(codeName);
-            ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
+            ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
             try
             {
                 return code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "";

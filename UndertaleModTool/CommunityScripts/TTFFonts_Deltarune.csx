@@ -1,5 +1,17 @@
 EnsureDataLoaded();
 
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    ScriptError("Error 0: Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1&2")
+{
+    ScriptError("Error 1: Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+
+
 // Remove all current fonts
 // This is necessary because I need to add fonts under IDs that are normally used by these resources
 // TODO: Japanese fonts won't work at all because I didn""t add support for that

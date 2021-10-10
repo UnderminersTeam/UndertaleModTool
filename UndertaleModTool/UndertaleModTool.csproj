@@ -44,6 +44,10 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
+		<None Update="CommunityScripts\Ch2 Debug.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="CommunityScripts\ChangeHomeBattlegroup.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3548,6 +3552,10 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
+		<None Update="SampleScripts\DeltaruneClearShaderData.csx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
 		<None Update="TechnicalScripts\ConvertFrom17to16_for_2.3.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3603,6 +3611,10 @@
 		<EmbeddedResource Include="Resources\GML.xshd" />
 		<EmbeddedResource Include="Resources\VMASM.xshd" />
 		<None Update="Repackers\ReduceEmbeddedTexturePages.csx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="Repackers\NewTextureRepacker.csx">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
@@ -3723,10 +3735,6 @@
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="TechnicalScripts\16_To_17.csx">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-		</None>
-		<None Update="HelperScripts\CheckDecompiler_2_3.csx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>

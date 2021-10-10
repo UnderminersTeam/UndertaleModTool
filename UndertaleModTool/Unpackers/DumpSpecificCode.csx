@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
-ThreadLocal<DecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<DecompileContext>(() => new DecompileContext(Data, false));
+ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
 int failed = 0;
 
@@ -86,7 +86,7 @@ for (var j = 0; j < codeToDump.Count; j++)
 void DumpCode(UndertaleCode code) 
 {
     string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
-    if (!(code.DuplicateEntry))
+    if (code.ParentEntry == null)
     {
         if (path.Length > 150)
         {

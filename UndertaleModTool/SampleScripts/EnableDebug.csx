@@ -1,5 +1,17 @@
 // Enables debug mode
 EnsureDataLoaded();
+
+if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+{
+    ScriptError("Error 0: Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1&2")
+{
+    ScriptError("Error 1: Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
+}
+
 bool enable = ScriptQuestion("Debug Manager by krzys-h and Kneesnap\n\nYes = Enable Debug\nNo = Disable Debug");
 
 var scr_debug = Data.Scripts.ByName("scr_debug")?.Code;

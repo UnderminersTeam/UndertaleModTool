@@ -32,6 +32,7 @@
         <CommandBinding Command="Copy" Executed="Command_Copy" />
         <CommandBinding Command="Paste" Executed="Command_Paste" />
         <CommandBinding Command="Print" Executed="Command_Run" />
+        <CommandBinding Command="CancelPrint" Executed="Command_RunSpecial" />
         <CommandBinding Command="PrintPreview" Executed="Command_RunDebug" />
         <CommandBinding Command="Properties" Executed="Command_Settings"/>
     </Window.CommandBindings>
@@ -43,6 +44,7 @@
         <KeyBinding Modifiers="Control" Key="C" Command="Copy"/>
         <KeyBinding Modifiers="Control" Key="P" Command="Paste"/>
         <KeyBinding Key="F5" Command="Print"/>
+        <KeyBinding Modifiers="Alt" Key="F5" Command="CancelPrint"/>
         <KeyBinding Modifiers="Shift" Key="F5" Command="PrintPreview"/>
     </Window.InputBindings>
     <Grid>
@@ -59,7 +61,7 @@
                         </MenuItem.Style>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="_Run game" Command="Print" InputGestureText="F5">
+                    <MenuItem Header="_Temp run game" Command="Print" InputGestureText="F5">
                         <!-- TODO: I think I need a custom command for that... -->
                         <MenuItem.Style>
                             <Style TargetType="{x:Type MenuItem}">
@@ -68,6 +70,13 @@
                         </MenuItem.Style>
                     </MenuItem>
                     <MenuItem Header="Run game under _debugger" Command="PrintPreview" InputGestureText="Shift+F5">
+                        <MenuItem.Style>
+                            <Style TargetType="{x:Type MenuItem}">
+                                <Setter Property="IsEnabled" Value="{Binding CanSave}"/>
+                            </Style>
+                        </MenuItem.Style>
+                    </MenuItem>
+                    <MenuItem Header="Run game with other runner" Command="CancelPrint" InputGestureText="Alt+F5">
                         <MenuItem.Style>
                             <Style TargetType="{x:Type MenuItem}">
                                 <Setter Property="IsEnabled" Value="{Binding CanSave}"/>
@@ -279,6 +288,16 @@
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
                         <TreeViewItem Header="Code" ItemsSource="{Binding Code, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Code, Converter={StaticResource VisibleIfNotNull}}">
+                            <TreeViewItem.ItemContainerStyle>
+                                <Style TargetType="{x:Type TreeViewItem}">
+                                    <Setter Property="Foreground" Value="Gray"></Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=ParentEntry}" Value="{x:Null}">
+                                            <Setter Property="Foreground" Value="Black"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TreeViewItem.ItemContainerStyle>
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleCode}">
                                     <TextBlock Text="{Binding Name.Content}" />
@@ -299,7 +318,7 @@
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Code locals (unused?)" ItemsSource="{Binding CodeLocals, Converter={StaticResource FilteredViewConverter}}" Foreground="Gray" Visibility="{Binding CodeLocals, Converter={StaticResource VisibleIfNotNull}}">
+                        <TreeViewItem Header="Code locals" ItemsSource="{Binding CodeLocals, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding CodeLocals, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleCodeLocals}">
                                     <TextBlock Text="{Binding Name.Content}" />

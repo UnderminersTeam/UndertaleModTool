@@ -65,6 +65,7 @@ namespace UndertaleModLib
         public int PaddingAlignException = -1;
 
         public BuiltinList BuiltinList;
+        public Dictionary<string, UndertaleFunction> KnownSubFunctions; // Cache for known 2.3-style function names for compiler speedups. Can be re-built by setting this to null.
 
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {
@@ -253,9 +254,18 @@ namespace UndertaleModLib
     {
         public static T ByName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
         {
-            foreach (var item in list)
-                if (ignoreCase ? (item.Name.Content.Equals(name, StringComparison.OrdinalIgnoreCase)) : (item.Name.Content == name))
-                    return item;
+            if (ignoreCase)
+            {
+                foreach (var item in list)
+                    if (item.Name.Content.Equals(name, StringComparison.OrdinalIgnoreCase))
+                        return item;
+            }
+            else
+            {
+                foreach (var item in list)
+                    if (item.Name.Content == name)
+                        return item;
+            }
             return default(T);
         }
 
@@ -304,9 +314,9 @@ namespace UndertaleModLib
             return newString;
         }
 
-        public static UndertaleFunction EnsureDefined(this IList<UndertaleFunction> list, string name, IList<UndertaleString> strg)
+        public static UndertaleFunction EnsureDefined(this IList<UndertaleFunction> list, string name, IList<UndertaleString> strg, bool fast = false)
         {
-            UndertaleFunction func = list.ByName(name);
+            UndertaleFunction func = fast ? null : list.ByName(name);
             if (func == null)
             {
                 var str = strg.MakeString(name, out int id);
@@ -320,14 +330,14 @@ namespace UndertaleModLib
             return func;
         }
 
-        public static UndertaleVariable EnsureDefined(this IList<UndertaleVariable> list, string name, UndertaleInstruction.InstanceType inst, bool isBuiltin, IList<UndertaleString> strg, UndertaleData data)
+        public static UndertaleVariable EnsureDefined(this IList<UndertaleVariable> list, string name, UndertaleInstruction.InstanceType inst, bool isBuiltin, IList<UndertaleString> strg, UndertaleData data, bool fast = false)
         {
             if (inst == UndertaleInstruction.InstanceType.Local)
                 throw new InvalidOperationException("Use DefineLocal instead");
             bool bytecode14 = (data?.GeneralInfo?.BytecodeVersion <= 14);
             if (bytecode14)
                 inst = UndertaleInstruction.InstanceType.Undefined;
-            UndertaleVariable vari = list.Where((x) => x.Name?.Content == name && x.InstanceType == inst).FirstOrDefault();
+            UndertaleVariable vari = fast ? null : list.Where((x) => x.Name?.Content == name && x.InstanceType == inst).FirstOrDefault();
             if (vari == null)
             {
                 var oldId = data.VarCount1;
