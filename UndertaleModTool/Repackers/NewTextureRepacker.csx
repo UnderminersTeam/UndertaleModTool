@@ -142,7 +142,7 @@ public class TextureAtlas
         var newSplits = Splits
             .AsParallel()
             .Select(item => item.splitNode(rect))
-            .SelectMany(list => list.Distinct())
+            .SelectMany(item => item)
             .ToList();
 
         // Merge non-invalidated splits with the new splits
@@ -313,7 +313,7 @@ async Task<List<TextureAtlas>> layoutPageItemLists<K>(ILookup<K, TPageItem> look
     return await Task.Run(() => lookup
         .AsParallel()
         .Select(list => layoutPageItemList(list.ToList(), pageSize, padding))
-        .SelectMany(list => list.Distinct())
+        .SelectMany(item => item)
         .ToList());
 }
 
