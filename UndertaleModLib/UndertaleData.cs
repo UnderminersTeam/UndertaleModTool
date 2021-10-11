@@ -340,10 +340,22 @@ namespace UndertaleModLib
             UndertaleVariable vari = fast ? null : list.Where((x) => x.Name?.Content == name && x.InstanceType == inst).FirstOrDefault();
             if (vari == null)
             {
+                var str = strg.MakeString(name, out int id);
+
                 var oldId = data.VarCount1;
                 if (!bytecode14)
                 {
-                    if (!data.DifferentVarCounts)
+                    if (data.GMS2_3)
+                    {
+                        // GMS 2.3+
+                        if (!isBuiltin)
+                        {
+                            data.VarCount1 = Math.Max(data.VarCount1, (uint)id);
+                            data.VarCount2 = data.VarCount1;
+                        }
+                        oldId = (uint)id;
+                    }
+                    else if (!data.DifferentVarCounts)
                     { 
                         // Bytecode 16+
                         data.VarCount1++;
@@ -364,7 +376,6 @@ namespace UndertaleModLib
                     }
                 }
 
-                var str = strg.MakeString(name, out int id);
                 vari = new UndertaleVariable()
                 {
                     Name = str,
@@ -401,7 +412,7 @@ namespace UndertaleModLib
 
             var str = strg.MakeString(name, out int id);
             if (data?.GMS2_3 == true)
-                localId = (int)data.MaxLocalVarCount;
+                localId = id;
             UndertaleVariable vari = new UndertaleVariable()
             {
                 Name = str,
@@ -409,7 +420,7 @@ namespace UndertaleModLib
                 VarID = bytecode14 ? 0 : localId,
                 NameStringID = id
             };
-            if (!bytecode14 && list?.Count >= data.MaxLocalVarCount)
+            if (!bytecode14 && data?.GMS2_3 != true && list?.Count >= data.MaxLocalVarCount)
                 data.MaxLocalVarCount = (uint) list?.Count + 1;
             list.Add(vari);
             return vari;

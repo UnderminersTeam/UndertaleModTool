@@ -112,7 +112,7 @@ namespace UndertaleModLib.Compiler
                             defineArguments = false;
 
                             // First, remove unnecessary locals
-                            for (var i = 1; i < locals.Locals.Count; i++)
+                            for (int i = 1; i < locals.Locals.Count; i++)
                             {
                                 string localName = locals.Locals[i].Name.Content;
                                 if (compileContext.Data?.GMS2_3 != true)
@@ -154,6 +154,9 @@ namespace UndertaleModLib.Compiler
                                     }
                                 }
                                 compileContext.OriginalCode.LocalsCount = (uint)locals.Locals.Count;
+                                if (compileContext?.Data.GMS2_3 == true &&
+                                    compileContext.OriginalCode.LocalsCount > compileContext.Data.MaxLocalVarCount)
+                                    compileContext.Data.MaxLocalVarCount = compileContext.OriginalCode.LocalsCount;
                             });
                         }
                     }
