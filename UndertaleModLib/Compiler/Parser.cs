@@ -432,7 +432,8 @@ namespace UndertaleModLib.Compiler
                 remainingStageOne.Clear();
                 ErrorMessages.Clear();
                 context.LocalVars.Clear();
-                context.LocalVars["arguments"] = "arguments";
+                if ((context.Data?.GeneralInfo?.BytecodeVersion ?? 15) >= 15)
+                    context.LocalVars["arguments"] = "arguments";
                 context.GlobalVars.Clear();
                 context.Enums.Clear();
                 hasError = false;

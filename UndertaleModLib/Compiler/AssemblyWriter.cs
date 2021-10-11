@@ -102,21 +102,25 @@ namespace UndertaleModLib.Compiler
 
                 public List<UndertaleInstruction> Finish()
                 {
+                    bool defineArguments = true;
                     if (compileContext.OriginalCode != null)
                     {
                         UndertaleCodeLocals locals = compileContext.Data?.CodeLocals.For(compileContext.OriginalCode);
                         if (locals != null)
                         {
                             // Update the code locals of the UndertaleCode
+                            defineArguments = false;
 
                             // First, remove unnecessary locals
                             for (var i = 1; i < locals.Locals.Count; i++)
                             {
                                 string localName = locals.Locals[i].Name.Content;
-                                locals.Locals[i].Index = (uint)i;
+                                if (compileContext.Data?.GMS2_3 != true)
+                                    locals.Locals[i].Index = (uint)i;
                                 if (!compileContext.LocalVars.ContainsKey(localName))
                                 {
                                     locals.Locals.RemoveAt(i--);
+                                    compileContext.OriginalCode.LocalsCount--;
                                 }
                             }
 
@@ -132,15 +136,24 @@ namespace UndertaleModLib.Compiler
                             }
                             compileContext.MainThreadDelegate.Invoke(() =>
                             {
+                                var variables = compileContext.Data?.Variables;
                                 foreach (var l in compileContext.LocalVars)
                                 {
                                     string name = l.Key;
                                     if (!hasLocal(name))
                                     {
-                                        locals.Locals.Add(new UndertaleCodeLocals.LocalVar() { Index = (uint)locals.Locals.Count, Name = compileContext.Data?.Strings?.MakeString(name) });
-                                        compileContext.OriginalCode.LocalsCount++;
+                                        if (variables != null && compileContext?.Data.GMS2_3 == true)
+                                        {
+                                            UndertaleVariable def = variables.DefineLocal(compileContext.OriginalReferencedLocalVars, 0, name, compileContext.Data.Strings, compileContext.Data);
+                                            if (def != null)
+                                                compileContext.OriginalReferencedLocalVars.Add(def); // Add to the end, even if redundant (searches go from front to back anyway)
+                                            locals.Locals.Add(new UndertaleCodeLocals.LocalVar() { Index = (uint)def.VarID, Name = compileContext.Data?.Strings?.MakeString(name) });
+                                        }
+                                        else
+                                            locals.Locals.Add(new UndertaleCodeLocals.LocalVar() { Index = (uint)locals.Locals.Count, Name = compileContext.Data?.Strings?.MakeString(name) });
                                     }
                                 }
+                                compileContext.OriginalCode.LocalsCount = (uint)locals.Locals.Count;
                             });
                         }
                     }
@@ -156,7 +169,16 @@ namespace UndertaleModLib.Compiler
                             {
                                 foreach (KeyValuePair<string, string> v in compileContext.LocalVars)
                                 {
-                                    UndertaleVariable def = variables.DefineLocal(compileContext.OriginalCode, localId++, v.Key, compileContext.Data.Strings, compileContext.Data);
+                                    if (v.Key == "arguments")
+                                    {
+                                        if (!defineArguments)
+                                        {
+                                            localId++;
+                                            continue;
+                                        }
+                                    }
+
+                                    UndertaleVariable def = variables.DefineLocal(compileContext.OriginalReferencedLocalVars, localId++, v.Key, compileContext.Data.Strings, compileContext.Data);
                                     if (def != null)
                                     {
                                         foreach (var patch in localPatches.FindAll(p => p.Name == v.Key))

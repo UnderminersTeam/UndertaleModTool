@@ -377,7 +377,7 @@ namespace UndertaleModLib
             return vari;
         }
 
-        public static UndertaleVariable DefineLocal(this IList<UndertaleVariable> list, UndertaleCode originalCode, int localId, string name, IList<UndertaleString> strg, UndertaleData data)
+        public static UndertaleVariable DefineLocal(this IList<UndertaleVariable> list, IList<UndertaleVariable> originalReferencedLocalVars, int localId, string name, IList<UndertaleString> strg, UndertaleData data)
         {
             bool bytecode14 = (data?.GeneralInfo?.BytecodeVersion <= 14);
             if (bytecode14)
@@ -388,15 +388,20 @@ namespace UndertaleModLib
             }
 
             // Use existing registered variables.
-            if (originalCode != null)
+            if (originalReferencedLocalVars != null)
             {
-                var referenced = originalCode.FindReferencedLocalVars();
-                var refvar = referenced.Where((x) => x.Name.Content == name && x.VarID == localId).FirstOrDefault();
+                UndertaleVariable refvar;
+                if (data?.GMS2_3 == true)
+                    refvar = originalReferencedLocalVars.Where((x) => x.Name.Content == name).FirstOrDefault();
+                else
+                    refvar = originalReferencedLocalVars.Where((x) => x.Name.Content == name && x.VarID == localId).FirstOrDefault();
                 if (refvar != null)
                     return refvar;
             }
 
             var str = strg.MakeString(name, out int id);
+            if (data?.GMS2_3 == true)
+                localId = (int)data.MaxLocalVarCount;
             UndertaleVariable vari = new UndertaleVariable()
             {
                 Name = str,
