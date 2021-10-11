@@ -13,7 +13,7 @@ using System;
 using System.Linq;
 using System.ComponentModel;
 using System.IO;
-using System.Windows;
+using System.Windows.Forms;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -201,7 +201,7 @@ void ResetProgress(string text)
     UpdateProgress(0);
 }
 
-TPageItem dumpTexturePageItem(UndertaleTexturePageItem pageItem, TextureWorker worker, string pageItemFile)
+TPageItem dumpTexturePageItem(UndertaleTexturePageItem pageItem, TextureWorker worker, string pageItemFile, bool reuse)
 {
     TPageItem page = new TPageItem();
     page.Filename = pageItemFile;
@@ -215,20 +215,20 @@ TPageItem dumpTexturePageItem(UndertaleTexturePageItem pageItem, TextureWorker w
         Height = pageItem.SourceHeight
     };
 
-    worker.ExportAsPNG(pageItem, pageItemFile);
+    if (!reuse)
+        worker.ExportAsPNG(pageItem, pageItemFile);
     UpdateProgress(1);
 
     return page;
 }
 
-volatile int tpageParallelIndex = 0;
-async Task<List<TPageItem>> dumpTexturePageItems(string dir)
+async Task<List<TPageItem>> dumpTexturePageItems(string dir, bool reuse)
 {
     var worker = new TextureWorker();
 
     var tpageitems = await Task.Run(() => Data.TexturePageItems
         .AsParallel()
-        .Select(item => dumpTexturePageItem(item, worker, $"{dir}texture_page_{tpageParallelIndex++}.png"))
+        .Select(item => dumpTexturePageItem(item, worker, $"{dir}texture_page_{Data.TexturePageItems.IndexOf(item)}.png", reuse))
         .ToList());
 
     worker.Cleanup();
@@ -336,14 +336,24 @@ if (maxDims <= 0 || maxDims + padding * 2 >= pageSize)
 if (maxArea <= 0)
     maxArea = maxDims * maxDims;
 
+bool reuseTextures = false;
+
 // Setup work directory and packager directory
 string workDirectory = Path.GetDirectoryName(FilePath) + Path.DirectorySeparatorChar;
-System.IO.DirectoryInfo dir = System.IO.Directory.CreateDirectory(workDirectory + Path.DirectorySeparatorChar + "Packager");
-string packagerDirectory = $"{dir.FullName}{Path.DirectorySeparatorChar}";
+string packagerDirectory = $"{workDirectory}{Path.DirectorySeparatorChar}Packager{Path.DirectorySeparatorChar}";
+if (System.IO.Directory.Exists(packagerDirectory))
+{
+    DialogResult dr = MessageBox.Show("Do you want to reuse previously extracted page items?", 
+        "Texture Repacker", MessageBoxButtons.YesNo);
+
+    reuseTextures = dr == DialogResult.Yes;
+}
+
+System.IO.DirectoryInfo dir = System.IO.Directory.CreateDirectory(packagerDirectory);
 
 // Dump all the texture page items
 ResetProgress("Existing Textures Exported");
-var texPageItems = await dumpTexturePageItems(packagerDirectory);
+var texPageItems = await dumpTexturePageItems(packagerDirectory, reuseTextures);
 HideProgressBar();
 
 // Clear embedded textures and any possibly stale references to them
