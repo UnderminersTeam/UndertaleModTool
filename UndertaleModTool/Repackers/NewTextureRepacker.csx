@@ -9,6 +9,13 @@
 // Special thanks to:
 // Jukka Jylänki (2010), for "A Thousand Ways to Pack the Bin - A Practical Approach to Two-Dimensional Rectangle Bin Packing"
 
+// Notes:
+// - Sometimes shaders will require pages to have specific geometry, such as palette LUTs,
+// this script does attempt to keep that in mind by not allowing page items that don't share a page
+// with other items to get thrown into common bins. If you have graphical glitches, you might want to
+// investigate the input textures in a graphical debugger and compare.
+// - Reducing page sizes is a tradeoff, you might want to experiment with different sizes.
+
 using System;
 using System.Linq;
 using System.ComponentModel;
@@ -180,6 +187,7 @@ public class TextureAtlas
 
 public class TPageItem
 {
+    public uint Scaled;
     public string Filename;
     public Rect OriginalRect;
     public Rect NewRect;
@@ -206,6 +214,7 @@ TPageItem dumpTexturePageItem(UndertaleTexturePageItem pageItem, TextureWorker w
     TPageItem page = new TPageItem();
     page.Filename = pageItemFile;
     page.Item = pageItem;
+    page.Scaled = page.Item.TexturePage.Scaled;
 
     page.OriginalRect = new Rect()
     {
@@ -366,7 +375,11 @@ if (Data.TextureGroupInfo != null)
     }
 }
 
-// Sort and group textures that are inside the bounds defined by maxDims, maxArea
+// This query:
+// - Sorts and groups textures that are inside the bounds defined by maxDims, maxArea
+// - Eliminates from the pool any Page Item that sits alone in a Texture Page 
+//   (since there's probably a reason for that, e.g. shaders)
+// - Attempts to preserve texture page properties
 var texPageLookup = texPageItems.OrderBy(
     // Order by smallest textures first
     item => Math.Max(item.OriginalRect.Width, item.OriginalRect.Height)
@@ -374,9 +387,10 @@ var texPageLookup = texPageItems.OrderBy(
     // Select textures that are small enough to be worth get paged
     item => (item.OriginalRect.Area < maxArea)                                          // area too big
          && (item.OriginalRect.Width <= maxDims && item.OriginalRect.Height <= maxDims) // both axis too big
+         && (texPageItems.Any(item2 => (item2 != item) && (item.Item.TexturePage == item2.Item.TexturePage))) // shares a page with a different item
 ).ToLookup(
-    // Generic item grouping
-    item => doItemGrouping(item)
+    // Preserve texture page settings by grouping items with similar settings
+    item => (item.Item.TexturePage.Scaled, doItemGrouping(item))
 );
 
 // Layout all the texture items (grouped by doItemGrouping) into atlases
@@ -404,6 +418,7 @@ using (var f = new StreamWriter($"{packagerDirectory}log.txt"))
             Data.EmbeddedTextures.Add(tex);
             Image img = new Bitmap(atlas.Size, atlas.Size, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             Graphics g = Graphics.FromImage(img);
+            tex.Scaled = group.First().Scaled; // Make sure the original pane "Scaled" value is mantained.
 
             // Dump debug info regarding splits
             foreach (var split in atlas.Splits)
@@ -444,6 +459,7 @@ using (var f = new StreamWriter($"{packagerDirectory}log.txt"))
                 UndertaleEmbeddedTexture tex = new UndertaleEmbeddedTexture();
                 Data.EmbeddedTextures.Add(tex);
                 tex.TextureData.TextureBlob = File.ReadAllBytes(item.Filename);
+                tex.Scaled = item.Scaled;
 
                 item.Item.TexturePage = tex;
                 item.Item.SourceX = 0;
