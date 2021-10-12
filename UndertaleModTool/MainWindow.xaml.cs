@@ -513,7 +513,7 @@ namespace UndertaleModTool
                                 data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                             }
                         }
-                        if (data.GMS2_3)
+                        if (data.GMS2_3 && SettingsWindow.Warn_About_GMS23)
                         {
                             MessageBox.Show("This game was built using GameMaker Studio 2.3 (or above). Support for this version is a work in progress, and you will likely run into issues decompiling code or in other places.", "GMS 2.3", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }

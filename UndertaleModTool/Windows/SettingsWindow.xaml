@@ -25,6 +25,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="GraphViz path" ToolTip="Required if you want code decompile graphs"/>
@@ -57,7 +58,9 @@
         <CheckBox Grid.Row="10" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding AutomaticFileAssociation}"/>
         <TextBlock Grid.Row="11" Grid.Column="0" Margin="3" Text="Warn about temp running" ToolTip="Warn about temp running. Enabled by default."/>
         <CheckBox Grid.Row="11" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding TempRunMessageShow}"/>
-        <Separator Grid.Row="12" Grid.ColumnSpan="2" Margin="10"/>
-        <Button Grid.Row="13" Grid.Column="1" Margin="5" Click="AppDataButton_Click">Open application data folder</Button>
+        <TextBlock Grid.Row="12" Grid.Column="0" Margin="3" Text="Warn about GMS 2.3" ToolTip="Warn about GMS 2.3. Enabled by default."/>
+        <CheckBox Grid.Row="12" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding Warn_About_GMS23}"/>
+        <Separator Grid.Row="13" Grid.ColumnSpan="2" Margin="10"/>
+        <Button Grid.Row="14" Grid.Column="1" Margin="5" Click="AppDataButton_Click">Open application data folder</Button>
     </Grid>
 </Window>

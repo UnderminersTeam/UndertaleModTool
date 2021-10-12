@@ -71,6 +71,16 @@ namespace UndertaleModTool
             }
         }
 
+        public static bool Warn_About_GMS23
+        {
+            get => Settings.Instance.Warn_About_GMS23;
+            set
+            {
+                Settings.Instance.Warn_About_GMS23 = value;
+                Settings.Save();
+            }
+        }
+
         public static bool ProfileMessageShown
         {
             get => Settings.Instance.ProfileMessageShown;
