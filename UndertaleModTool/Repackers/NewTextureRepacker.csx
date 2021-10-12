@@ -9,11 +9,18 @@
 // Special thanks to:
 // Jukka Jylänki (2010), for "A Thousand Ways to Pack the Bin - A Practical Approach to Two-Dimensional Rectangle Bin Packing"
 
+// Notes:
+// - Sometimes shaders will require pages to have specific geometry, such as palette LUTs,
+// this script does attempt to keep that in mind by not allowing page items that don't share a page
+// with other items to get thrown into common bins. If you have graphical glitches, you might want to
+// investigate the input textures in a graphical debugger and compare.
+// - Reducing page sizes is a tradeoff, you might want to experiment with different sizes.
+
 using System;
 using System.Linq;
 using System.ComponentModel;
 using System.IO;
-using System.Windows;
+using System.Windows.Forms;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -142,7 +149,7 @@ public class TextureAtlas
         var newSplits = Splits
             .AsParallel()
             .Select(item => item.splitNode(rect))
-            .SelectMany(list => list.Distinct())
+            .SelectMany(item => item)
             .ToList();
 
         // Merge non-invalidated splits with the new splits
@@ -180,6 +187,7 @@ public class TextureAtlas
 
 public class TPageItem
 {
+    public uint Scaled;
     public string Filename;
     public Rect OriginalRect;
     public Rect NewRect;
@@ -201,11 +209,12 @@ void ResetProgress(string text)
     UpdateProgress(0);
 }
 
-TPageItem dumpTexturePageItem(UndertaleTexturePageItem pageItem, TextureWorker worker, string pageItemFile)
+TPageItem dumpTexturePageItem(UndertaleTexturePageItem pageItem, TextureWorker worker, string pageItemFile, bool reuse)
 {
     TPageItem page = new TPageItem();
     page.Filename = pageItemFile;
     page.Item = pageItem;
+    page.Scaled = page.Item.TexturePage.Scaled;
 
     page.OriginalRect = new Rect()
     {
@@ -215,20 +224,20 @@ TPageItem dumpTexturePageItem(UndertaleTexturePageItem pageItem, TextureWorker w
         Height = pageItem.SourceHeight
     };
 
-    worker.ExportAsPNG(pageItem, pageItemFile);
+    if (!reuse)
+        worker.ExportAsPNG(pageItem, pageItemFile);
     UpdateProgress(1);
 
     return page;
 }
 
-volatile int tpageParallelIndex = 0;
-async Task<List<TPageItem>> dumpTexturePageItems(string dir)
+async Task<List<TPageItem>> dumpTexturePageItems(string dir, bool reuse)
 {
     var worker = new TextureWorker();
 
     var tpageitems = await Task.Run(() => Data.TexturePageItems
         .AsParallel()
-        .Select(item => dumpTexturePageItem(item, worker, $"{dir}texture_page_{tpageParallelIndex++}.png"))
+        .Select(item => dumpTexturePageItem(item, worker, $"{dir}texture_page_{Data.TexturePageItems.IndexOf(item)}.png", reuse))
         .ToList());
 
     worker.Cleanup();
@@ -313,7 +322,7 @@ async Task<List<TextureAtlas>> layoutPageItemLists<K>(ILookup<K, TPageItem> look
     return await Task.Run(() => lookup
         .AsParallel()
         .Select(list => layoutPageItemList(list.ToList(), pageSize, padding))
-        .SelectMany(list => list.Distinct())
+        .SelectMany(item => item)
         .ToList());
 }
 
@@ -336,14 +345,24 @@ if (maxDims <= 0 || maxDims + padding * 2 >= pageSize)
 if (maxArea <= 0)
     maxArea = maxDims * maxDims;
 
+bool reuseTextures = false;
+
 // Setup work directory and packager directory
 string workDirectory = Path.GetDirectoryName(FilePath) + Path.DirectorySeparatorChar;
-System.IO.DirectoryInfo dir = System.IO.Directory.CreateDirectory(workDirectory + Path.DirectorySeparatorChar + "Packager");
-string packagerDirectory = $"{dir.FullName}{Path.DirectorySeparatorChar}";
+string packagerDirectory = $"{workDirectory}{Path.DirectorySeparatorChar}Packager{Path.DirectorySeparatorChar}";
+if (System.IO.Directory.Exists(packagerDirectory))
+{
+    DialogResult dr = MessageBox.Show("Do you want to reuse previously extracted page items?", 
+        "Texture Repacker", MessageBoxButtons.YesNo);
+
+    reuseTextures = dr == DialogResult.Yes;
+}
+
+System.IO.DirectoryInfo dir = System.IO.Directory.CreateDirectory(packagerDirectory);
 
 // Dump all the texture page items
 ResetProgress("Existing Textures Exported");
-var texPageItems = await dumpTexturePageItems(packagerDirectory);
+var texPageItems = await dumpTexturePageItems(packagerDirectory, reuseTextures);
 HideProgressBar();
 
 // Clear embedded textures and any possibly stale references to them
@@ -356,7 +375,11 @@ if (Data.TextureGroupInfo != null)
     }
 }
 
-// Sort and group textures that are inside the bounds defined by maxDims, maxArea
+// This query:
+// - Sorts and groups textures that are inside the bounds defined by maxDims, maxArea
+// - Eliminates from the pool any Page Item that sits alone in a Texture Page 
+//   (since there's probably a reason for that, e.g. shaders)
+// - Attempts to preserve texture page properties
 var texPageLookup = texPageItems.OrderBy(
     // Order by smallest textures first
     item => Math.Max(item.OriginalRect.Width, item.OriginalRect.Height)
@@ -364,9 +387,10 @@ var texPageLookup = texPageItems.OrderBy(
     // Select textures that are small enough to be worth get paged
     item => (item.OriginalRect.Area < maxArea)                                          // area too big
          && (item.OriginalRect.Width <= maxDims && item.OriginalRect.Height <= maxDims) // both axis too big
+         && (texPageItems.Any(item2 => (item2 != item) && (item.Item.TexturePage == item2.Item.TexturePage))) // shares a page with a different item
 ).ToLookup(
-    // Generic item grouping
-    item => doItemGrouping(item)
+    // Preserve texture page settings by grouping items with similar settings
+    item => (item.Item.TexturePage.Scaled, doItemGrouping(item))
 );
 
 // Layout all the texture items (grouped by doItemGrouping) into atlases
@@ -394,6 +418,7 @@ using (var f = new StreamWriter($"{packagerDirectory}log.txt"))
             Data.EmbeddedTextures.Add(tex);
             Image img = new Bitmap(atlas.Size, atlas.Size, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             Graphics g = Graphics.FromImage(img);
+            tex.Scaled = group.First().Scaled; // Make sure the original pane "Scaled" value is mantained.
 
             // Dump debug info regarding splits
             foreach (var split in atlas.Splits)
@@ -434,6 +459,7 @@ using (var f = new StreamWriter($"{packagerDirectory}log.txt"))
                 UndertaleEmbeddedTexture tex = new UndertaleEmbeddedTexture();
                 Data.EmbeddedTextures.Add(tex);
                 tex.TextureData.TextureBlob = File.ReadAllBytes(item.Filename);
+                tex.Scaled = item.Scaled;
 
                 item.Item.TexturePage = tex;
                 item.Item.SourceX = 0;
