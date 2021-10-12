@@ -39,10 +39,6 @@ void DumpCode()
         string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
         if (code.ParentEntry == null)
         {
-            if (path.Length > 150)
-            {
-                path = path.Substring(0, 150) + ".gml";
-            }
             try 
             {
                 File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
@@ -52,10 +48,6 @@ void DumpCode()
                 if (!(Directory.Exists(codeFolder + "/Failed/")))
                 {
                     Directory.CreateDirectory(codeFolder + "/Failed/");
-                }
-                if (path.Length > 150)
-                {
-                    path = path.Substring(0, 150) + ".gml";
                 }
                 path = Path.Combine(codeFolder + "/Failed/", code.Name.Content + ".gml");
                 File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
@@ -68,10 +60,6 @@ void DumpCode()
             {
                 Directory.CreateDirectory(codeFolder + "/Duplicates/");
             }
-            if (path.Length > 150)
-            {
-                path = path.Substring(0, 150) + ".gml";
-            }
             try 
             {
                 path = Path.Combine(codeFolder + "/Duplicates/", code.Name.Content + ".gml");
@@ -82,10 +70,6 @@ void DumpCode()
                 if (!(Directory.Exists(codeFolder + "/Duplicates/Failed/")))
                 {
                     Directory.CreateDirectory(codeFolder + "/Duplicates/Failed/");
-                }
-                if (path.Length > 150)
-                {
-                    path = path.Substring(0, 150) + ".gml";
                 }
                 path = Path.Combine(codeFolder + "/Duplicates/Failed/", code.Name.Content + ".gml");
                 File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");

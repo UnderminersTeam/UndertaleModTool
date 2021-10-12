@@ -118,11 +118,7 @@ void DumpCode()
                     }
                     code_orig.Replace(Assembler.Assemble(x, Data));
                 }
-                string str_path_to_use = "";
-                if (path.Length > 150)
-                    str_path_to_use = path.Substring(0, 150) + ".asm";
-                else
-                    str_path_to_use = Path.Combine(codeFolder, code_orig.Name.Content + ".asm");
+                string str_path_to_use = Path.Combine(codeFolder, code_orig.Name.Content + ".asm");
                 string code_output = "";
                 if (code_orig != null)
                     code_output = code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig));
@@ -146,11 +142,7 @@ void DumpCode()
             }
             try 
             {
-                string str_path_to_use = "";
-                if (path.Length > 150)
-                    str_path_to_use = path.Substring(0, 150) + ".asm";
-                else
-                    str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
+                string str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
                 string code_output = "";
                 if (code_orig != null)
                     code_output = code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig));
@@ -158,11 +150,7 @@ void DumpCode()
             }
             catch (Exception e) 
             {
-                string str_path_to_use = "";
-                if (path.Length > 150)
-                    str_path_to_use = path.Substring(0, 150) + ".asm";
-                else
-                    str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
+                string str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
                 File.WriteAllText(str_path_to_use, "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"); // Please don't
             }
             UpdateProgress();

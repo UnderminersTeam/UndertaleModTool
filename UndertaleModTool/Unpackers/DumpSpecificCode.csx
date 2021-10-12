@@ -88,28 +88,15 @@ void DumpCode(UndertaleCode code)
     string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
     if (code.ParentEntry == null)
     {
-        if (path.Length > 150)
-        {
-            path = path.Substring(0, 150) + ".gml";
-        }
         try 
         {
-            //The decompiler can't figure out GMS2_3 arrays, like, at all
-            //But the decompiler does output the tempvars, so we can reconstruct them the way they ought to be 
-            //Pretty sure
-            string DecompiledOutput = (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "");
-            string PassBack = Regex.Replace(DecompiledOutput, @"var _temp_local_var_\d+ = (.*)\nvar _temp_local_var_\d+ = (.*\..*)\nvar _temp_local_var_\d+ = (.*)\nvar _temp_local_var_\d+ = (.*)\nvar _temp_local_var_\d+ = (.*)\n", @"\2\[\3, \1\] = \5\n", RegexOptions.IgnoreCase).Replace("@@This@@()", "self/*@@This@@()*/");
-            File.WriteAllText(path, PassBack);
+            File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
         }
         catch (Exception e) 
         {
             if (!(Directory.Exists(Path.Combine(codeFolder, "Failed"))))
             {
                 Directory.CreateDirectory(Path.Combine(codeFolder, "Failed"));
-            }
-            if (path.Length > 150)
-            {
-                path = path.Substring(0, 150) + ".gml";
             }
             path = Path.Combine(codeFolder, "Failed", code.Name.Content + ".gml");
             File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
@@ -122,10 +109,6 @@ void DumpCode(UndertaleCode code)
         {
             Directory.CreateDirectory(Path.Combine(codeFolder, "Duplicates"));
         }
-        if (path.Length > 150)
-        {
-            path = path.Substring(0, 150) + ".gml";
-        }
         try 
         {
             path = Path.Combine(codeFolder, "Duplicates", code.Name.Content + ".gml");
@@ -136,10 +119,6 @@ void DumpCode(UndertaleCode code)
             if (!(Directory.Exists(Path.Combine(codeFolder, "Duplicates", "Failed"))))
             {
                 Directory.CreateDirectory(Path.Combine(codeFolder, "Duplicates", "Failed"));
-            }
-            if (path.Length > 150)
-            {
-                path = path.Substring(0, 150) + ".gml";
             }
             path = Path.Combine(codeFolder, "Duplicates", "Failed", code.Name.Content + ".gml");
             File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
