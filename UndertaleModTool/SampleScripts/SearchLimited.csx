@@ -1,4 +1,5 @@
 ﻿//Adapted from original script by Grossley
+//Repaired by VladiStep :)
 using System.Text;
 using System;
 using System.IO;
@@ -12,15 +13,13 @@ using System.Threading;
 using System.Threading.Tasks;
 
 int progress = 0;
+int codesLeft = 0;
 string results = "";
 int result_count = 0;
 int code_count = 0;
-int failed = 0;
 List<String> codeToDump = new List<String>();
 List<String> gameObjectCandidates = new List<String>();
-List<String> splitStringsList = new List<String>();
-string abc123 = "";
-string removed = "";
+string searchNames = "";
 
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
@@ -30,8 +29,6 @@ if (Data.IsYYC())
     return;
 }
 
-UpdateProgress();
-
 bool case_sensitive = ScriptQuestion("Case sensitive?");
 bool regex_check = ScriptQuestion("Regex search?");
 String keyword = SimpleTextInput("Enter your search", "Search box below", "", false);
@@ -40,26 +37,32 @@ if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
     ScriptError("Search cannot be empty or null.");
     return;
 }
-abc123 = SimpleTextInput("Menu", "Enter object/code names", abc123, true);
-string[] subs = abc123.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-foreach (var sub in subs)
+searchNames = SimpleTextInput("Menu", "Enter object/code names", searchNames, true);
+if (String.IsNullOrEmpty(searchNames) || String.IsNullOrWhiteSpace(searchNames))
 {
-    splitStringsList.Add(sub.Trim());
+    ScriptError("Names list cannot be empty or null.");
+    return;
 }
-for (var j = 0; j < splitStringsList.Count; j++)
+string[] searchNamesList = searchNames.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+for (int i = 0; i < searchNamesList.Length; i++)
+{
+    searchNamesList[i] = searchNamesList[i].Trim();
+}
+
+for (var j = 0; j < searchNamesList.Length; j++)
 {
     foreach (UndertaleGameObject obj in Data.GameObjects)
     {
-        if (splitStringsList[j].ToLower() == obj.Name.Content.ToLower())
+        if (searchNamesList[j].ToLower() == obj.Name.Content.ToLower())
         {
             gameObjectCandidates.Add(obj.Name.Content);
         }
     }
     foreach (UndertaleCode code in Data.Code)
     {
-        if (splitStringsList[j].ToLower() == code.Name.Content.ToLower())
+        if (searchNamesList[j].ToLower() == code.Name.Content.ToLower())
         {
-            gameObjectCandidates.Add(code.Name.Content);
+            codeToDump.Add(code.Name.Content);
         }
     }
 }
@@ -88,8 +91,7 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
     }
 }
 
-int progress = 0;
-int codesLeft = codeToDump.Count;
+codesLeft = codeToDump.Count;
 UpdateProgress();
 
 void UpdateProgress()
@@ -105,11 +107,6 @@ HideProgressBar();
 EnableUI();
 string results_message = result_count.ToString() + " results in " + code_count.ToString() + " code entries.";
 SimpleTextInput("Search results.", results_message, results_message + "\n\n" + results, true, false);
-
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Code Entries", progress++, Data.Code.Count);
-}
 
 string GetFolder(string path)
 {
@@ -152,5 +149,6 @@ void DumpCode(UndertaleCode code)
     catch (Exception e)
     {
     }
+
     UpdateProgress();
 }
