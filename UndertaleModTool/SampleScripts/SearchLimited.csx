@@ -20,7 +20,6 @@ List<String> codeToDump = new List<String>();
 List<String> gameObjectCandidates = new List<String>();
 List<String> splitStringsList = new List<String>();
 string abc123 = "";
-string removed = "";
 
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
