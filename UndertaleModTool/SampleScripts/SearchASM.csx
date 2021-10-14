@@ -29,8 +29,9 @@ if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
 await DumpCode();
 HideProgressBar();
 //GC.Collect();
+EnableUI();
 string results_message = result_count.ToString() + " results in " + code_count.ToString() + " code entries.";
-SimpleTextInput("Search results.", results_message, results_message + "\n\n" + results, true);
+SimpleTextInput("Search results.", results_message, results_message + "\n\n" + results, true, false);
 
 void UpdateProgress()
 {
