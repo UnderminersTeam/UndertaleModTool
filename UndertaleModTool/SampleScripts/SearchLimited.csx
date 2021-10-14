@@ -102,8 +102,9 @@ for (var j = 0; j < codeToDump.Count; j++)
     DumpCode(Data.Code.ByName(codeToDump[j]));
 }
 HideProgressBar();
+EnableUI();
 string results_message = result_count.ToString() + " results in " + code_count.ToString() + " code entries.";
-SimpleTextInput("Search results.", results_message, results_message + "\n\n" + results, true);
+SimpleTextInput("Search results.", results_message, results_message + "\n\n" + results, true, false);
 
 void UpdateProgress()
 {
