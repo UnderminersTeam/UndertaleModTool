@@ -722,7 +722,14 @@ namespace UndertaleModTool
                 var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
                 var highlighter = textArea.GetService(typeof(IHighlighter)) as IHighlighter;
                 int line = CurrentContext.Document.GetLocation(startOffset).Line;
-                HighlightedLine highlighted = highlighter.HighlightLine(line);
+                HighlightedLine highlighted = null;
+                try
+                {
+                    highlighted = highlighter.HighlightLine(line);
+                }
+                catch
+                {
+                }
 
                 while (m.Success)
                 {
@@ -890,7 +897,14 @@ namespace UndertaleModTool
                 var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
                 var highlighter = textArea.GetService(typeof(IHighlighter)) as IHighlighter;
                 int line = CurrentContext.Document.GetLocation(startOffset).Line;
-                HighlightedLine highlighted = highlighter.HighlightLine(line);
+                HighlightedLine highlighted = null;
+                try
+                {
+                    highlighted = highlighter.HighlightLine(line);
+                }
+                catch
+                {
+                }
 
                 while (m.Success)
                 {

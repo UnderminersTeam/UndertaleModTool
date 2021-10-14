@@ -26,7 +26,6 @@ List<String> codeToDump = new List<String>();
 List<String> gameObjectCandidates = new List<String>();
 List<String> splitStringsList = new List<String>();
 string abc123 = "";
-string removed = "";
 abc123 = SimpleTextInput("Menu", "Enter object names", abc123, true);
 string[] subs = abc123.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
 foreach (var sub in subs)
