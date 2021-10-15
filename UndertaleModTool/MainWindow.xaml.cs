@@ -1408,7 +1408,7 @@ result in loss of work.");
             oldSteamValue = Data.GeneralInfo.SteamAppID;
             Data.GeneralInfo.SteamAppID = 0;
             Data.GeneralInfo.DisableDebugger = true;
-            string TempFilesFolder = Path.Combine(Path.GetDirectoryName(oldFilePath), "MyMod.temp");
+            string TempFilesFolder = (oldFilePath != null ? Path.Combine(Path.GetDirectoryName(oldFilePath), "MyMod.temp") : "");
             await SaveFile(TempFilesFolder, false);
             Data.GeneralInfo.SteamAppID = oldSteamValue;
             FilePath = oldFilePath;
