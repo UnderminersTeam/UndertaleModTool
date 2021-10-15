@@ -14,6 +14,7 @@
 // this script does attempt to keep that in mind by not allowing page items that don't share a page
 // with other items to get thrown into common bins. If you have graphical glitches, you might want to
 // investigate the input textures in a graphical debugger and compare.
+// - Some GPUs will have troubles with Non Power of Two textures - check out "forcePOT" to work around that.
 // - Reducing page sizes is a tradeoff, you might want to experiment with different sizes.
 
 using System;
@@ -29,6 +30,7 @@ using System.Drawing;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using UndertaleModLib.Models;
+using System.Numerics;
 
 public class Rect
 {
@@ -326,6 +328,12 @@ async Task<List<TextureAtlas>> layoutPageItemLists<K>(ILookup<K, TPageItem> look
         .ToList());
 }
 
+// From https://stackoverflow.com/a/62366455
+private static int NearestPowerOf2(uint x)
+{
+    return 1 << (sizeof(uint) * 8 - BitOperations.LeadingZeroCount(x - 1));
+}
+
 EnsureDataLoaded();
 
 // User Configurable:: Atlas page size and item padding
@@ -335,6 +343,17 @@ var padding = 2;
 // User Configurable:: Dimension cutoffs (gets thrown off the atlas pool)
 var maxDims = 256;
 var maxArea = 256 * 128;
+
+// User Configurable:: Force Power of Two (POT) sizes. (fixes graphical artifacts on platforms like PSVita)
+// potBlacklist allows you to (manually or with heuristics) block certain textures from receiving that post-processing.
+bool forcePOT = false;
+List<TPageItem> potBlacklist = new List<TPageItem>();
+
+// Ensure pageSize is POT
+if (forcePOT)
+{
+    pageSize = NearestPowerOf2((uint)pageSize);
+}
 
 // Sanity checks
 if (maxDims <= 0 || maxDims + padding * 2 >= pageSize)
@@ -458,7 +477,31 @@ using (var f = new StreamWriter($"{packagerDirectory}log.txt"))
 
                 UndertaleEmbeddedTexture tex = new UndertaleEmbeddedTexture();
                 Data.EmbeddedTextures.Add(tex);
-                tex.TextureData.TextureBlob = File.ReadAllBytes(item.Filename);
+
+                // Create POT texture if needed
+                var itemFile = item.Filename;
+                if (forcePOT && !potBlacklist.Contains(item))
+                {
+                    int potw = NearestPowerOf2((uint)item.OriginalRect.Width),
+                        poth = NearestPowerOf2((uint)item.OriginalRect.Height);
+
+                    Image img = new Bitmap(potw, poth, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    Graphics g = Graphics.FromImage(img);
+
+                    // Load texture
+                    Image source = Image.FromFile(item.Filename);
+                    g.DrawImage(source, 0, 0);
+
+                    // DPI fix
+                    Bitmap ResolutionFix = new Bitmap(img);
+                    ResolutionFix.SetResolution(96.0F, 96.0F);
+                    Image img2 = ResolutionFix;
+
+                    itemFile = $"{packagerDirectory}pot_{texPageItems.IndexOf(item)}.png";
+                    img2.Save(itemFile, System.Drawing.Imaging.ImageFormat.Png);
+                }
+
+                tex.TextureData.TextureBlob = File.ReadAllBytes(itemFile);
                 tex.Scaled = item.Scaled;
 
                 item.Item.TexturePage = tex;
