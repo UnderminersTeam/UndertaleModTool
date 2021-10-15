@@ -986,7 +986,16 @@ namespace UndertaleModTool
 
         private void MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
-            object source = (MainTree.SelectedItem as TreeViewItem).ItemsSource;
+            object source = null;
+            try
+            {
+                source = (MainTree.SelectedItem as TreeViewItem).ItemsSource;
+            }
+            catch (Exception ex)
+            {
+                ScriptError("An error occurred while trying to add the menu item. No action has been taken.\r\n\r\nError:\r\n\r\n" + ex.ToString());
+                return;
+            }
             IList list = ((source as ICollectionView)?.SourceCollection as IList) ?? (source as IList);
             Type t = list.GetType().GetGenericArguments()[0];
             Debug.Assert(typeof(UndertaleResource).IsAssignableFrom(t));
