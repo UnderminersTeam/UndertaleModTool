@@ -437,7 +437,7 @@ namespace UndertaleModCli
             throw new NotImplementedException();
         }
 
-        public string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline)
+        public string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true)
         {
             throw new NotImplementedException();
         }
@@ -457,6 +457,11 @@ namespace UndertaleModCli
         {
             // nothing to hide..
         }
+        
+        public void EnableUI()
+		{
+            throw new NotImplementedException();
+		}
 
         public void ChangeSelection(object newsel)
         {

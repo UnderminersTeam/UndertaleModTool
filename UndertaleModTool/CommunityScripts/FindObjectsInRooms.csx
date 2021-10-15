@@ -66,6 +66,7 @@ else
     {
         used_objects_names += (str + "\r\n");
     }
+    EnableUI();
     string results_message = "Found " + unique_objects_used.ToString() + " unique objects used out of the " + splitStringsList.Count.ToString() + " objects searched. Instance results count: " + usage_count.ToString();
-    SimpleTextInput("Search results.", results_message, results_message + "\n\n" + output, true);
+    SimpleTextInput("Search results.", results_message, results_message + "\n\n" + output, true, false);
 }

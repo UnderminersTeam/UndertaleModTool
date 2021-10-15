@@ -1126,6 +1126,12 @@ namespace UndertaleModTool
             if (scriptDialog != null)
                 scriptDialog.TryHide();
         }
+        
+        public void EnableUI()
+		{
+            if (!this.IsEnabled)
+                this.IsEnabled = true;
+		}
 
         public async Task RunScript(string path)
         {
@@ -1240,16 +1246,27 @@ namespace UndertaleModTool
             return MessageBox.Show(message, "Script message", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
         }
 
-        public string SimpleTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline)
+        public string SimpleTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline, bool showDialog = true)
         {
-            using (TextInput input = new TextInput(labelText, titleText, defaultInputBoxText, isMultiline))
-            {
-                var result = input.ShowDialog();
+            TextInput input = new TextInput(labelText, titleText, defaultInputBoxText, isMultiline);
+
+            System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
+            if (showDialog)
+			{
+				result = input.ShowDialog();
+                input.Dispose();
+
                 if (result == System.Windows.Forms.DialogResult.OK)
                     return input.ReturnString;            //values preserved after close
                 else
                     return null;
             }
+            else //if we don't need to wait for result
+            {
+				input.Show(); 
+                return null;
+                //no need to call input.Dispose(), because if form wasn't shown modally, Form.Close() (or closing it with "X") also calls Dispose()
+			}
         }
 
         public void ScriptOpenURL(string url)
