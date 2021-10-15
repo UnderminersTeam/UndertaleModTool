@@ -73,7 +73,7 @@ for (var j = 0; j < splitStringsList.Count; j++)
                 nativeOBJ.Events.Clear();
                 for (var i = 0; i < donorOBJ.Events.Count; i++)
                 {
-					UndertalePointerList<UndertaleGameObject.Event> newEvent = new UndertalePointerList<UndertaleGameObject.Event>();
+                    UndertalePointerList<UndertaleGameObject.Event> newEvent = new UndertalePointerList<UndertaleGameObject.Event>();
                     foreach (UndertaleGameObject.Event evnt in donorOBJ.Events[i])
                     {
                         UndertaleGameObject.Event newevnt = new UndertaleGameObject.Event();
@@ -143,7 +143,7 @@ for (var j = 0; j < splitStringsList.Count; j++)
                         newevnt.EventSubtype = evnt.EventSubtype;
                         newEvent.Add(newevnt);
                     }
-					nativeOBJ.Events.Add(newEvent);
+                    nativeOBJ.Events.Add(newEvent);
                 }
             }
             catch

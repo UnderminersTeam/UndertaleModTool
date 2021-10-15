@@ -459,9 +459,9 @@ namespace UndertaleModCli
         }
         
         public void EnableUI()
-		{
+        {
             throw new NotImplementedException();
-		}
+        }
 
         public void ChangeSelection(object newsel)
         {

@@ -1137,10 +1137,10 @@ namespace UndertaleModTool
         }
         
         public void EnableUI()
-		{
+        {
             if (!this.IsEnabled)
                 this.IsEnabled = true;
-		}
+        }
 
         public async Task RunScript(string path)
         {
@@ -1261,8 +1261,8 @@ namespace UndertaleModTool
 
             System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
             if (showDialog)
-			{
-				result = input.ShowDialog();
+            {
+                result = input.ShowDialog();
                 input.Dispose();
 
                 if (result == System.Windows.Forms.DialogResult.OK)
@@ -1272,10 +1272,10 @@ namespace UndertaleModTool
             }
             else //if we don't need to wait for result
             {
-				input.Show(); 
+                input.Show(); 
                 return null;
                 //no need to call input.Dispose(), because if form wasn't shown modally, Form.Close() (or closing it with "X") also calls Dispose()
-			}
+            }
         }
 
         public void ScriptOpenURL(string url)

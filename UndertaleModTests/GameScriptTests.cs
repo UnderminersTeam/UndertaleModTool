@@ -147,9 +147,9 @@ namespace UndertaleModTests
         }
         
         public void EnableUI()
-		{
+        {
             Console.WriteLine("Enabling UI.");
-		}
+        }
 
         protected async Task<object> RunScript(string path)
         {

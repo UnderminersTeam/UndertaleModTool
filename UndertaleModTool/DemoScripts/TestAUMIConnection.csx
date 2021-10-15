@@ -7,6 +7,6 @@ ipMessage.Buffer = null;
 SendAUMIMessage(ipMessage, ref ipReply);
 
 if (ipReply.Buffer != null)
-	ScriptMessage(System.Text.Encoding.ASCII.GetString(ipReply.Buffer));
+    ScriptMessage(System.Text.Encoding.ASCII.GetString(ipReply.Buffer));
 else
-	ScriptMessage("Didn't get a reply. Is AUMI not running?");
+    ScriptMessage("Didn't get a reply. Is AUMI not running?");

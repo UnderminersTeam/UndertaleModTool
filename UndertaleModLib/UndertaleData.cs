@@ -366,7 +366,7 @@ namespace UndertaleModLib
                         // Bytecode 15
                         if (inst == UndertaleInstruction.InstanceType.Self && !isBuiltin)
                         {
-			                oldId = data.VarCount2;
+                            oldId = data.VarCount2;
                             data.VarCount2++;
                         }
                         else if (inst == UndertaleInstruction.InstanceType.Global)
@@ -436,7 +436,7 @@ namespace UndertaleModLib
                 Kind = kind,
                 RetType = rettype
             };
-	        foreach(var a in args)
+            foreach(var a in args)
                 func.Arguments.Add(new UndertaleExtensionFunctionArg() { Type = a });
             extfuncs.Add(func);
             funcs.EnsureDefined(name, strg);
