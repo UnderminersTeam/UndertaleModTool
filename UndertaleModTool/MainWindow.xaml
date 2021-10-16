@@ -89,20 +89,20 @@
                     <MenuItem Header="S_ettings" Command="Properties"/>
                     <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+W"/>
                 </MenuItem>
-                <MenuItem Header="_Scripts">
-                    <MenuItem Header="_Run builtin script" SubmenuOpened="MenuItem_RunBuiltinScript_SubmenuOpened">
+                <MenuItem x:Name="ScriptsMenuItem" Header="_Scripts">
+                    <MenuItem Header="_Run builtin script" SubmenuOpened="MenuItem_RunBuiltinScript_SubmenuOpened" IsEnabled="False">
                         <MenuItem Header="(...loading...)" IsEnabled="False"/>
                     </MenuItem>
-                    <MenuItem Header="_Run community script" SubmenuOpened="MenuItem_RunCommunityScript_SubmenuOpened">
+                    <MenuItem Header="_Run community script" SubmenuOpened="MenuItem_RunCommunityScript_SubmenuOpened" IsEnabled="False">
                         <MenuItem Header="(...loading...)" IsEnabled="False"/>
                     </MenuItem>
-                    <MenuItem Header="_Unpack assets" SubmenuOpened="MenuItem_RunUnpackScript_SubmenuOpened">
+                    <MenuItem Header="_Unpack assets" SubmenuOpened="MenuItem_RunUnpackScript_SubmenuOpened" IsEnabled="False">
                         <MenuItem Header="(...loading...)" IsEnabled="False"/>
                     </MenuItem>
-                    <MenuItem Header="_Repack assets" SubmenuOpened="MenuItem_RunRepackScript_SubmenuOpened">
+                    <MenuItem Header="_Repack assets" SubmenuOpened="MenuItem_RunRepackScript_SubmenuOpened" IsEnabled="False">
                         <MenuItem Header="(...loading...)" IsEnabled="False"/>
                     </MenuItem>
-                    <MenuItem Header="_Run technical script" SubmenuOpened="MenuItem_RunTechnicalScript_SubmenuOpened">
+                    <MenuItem Header="_Run technical script" SubmenuOpened="MenuItem_RunTechnicalScript_SubmenuOpened" IsEnabled="False">
                         <MenuItem Header="(...loading...)" IsEnabled="False"/>
                     </MenuItem>
                     <MenuItem Header="_Run demo script" SubmenuOpened="MenuItem_RunDemoScript_SubmenuOpened">

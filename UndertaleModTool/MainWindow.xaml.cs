@@ -55,6 +55,7 @@ namespace UndertaleModTool
         public bool CanSafelySave = false;
         public bool WasWarnedAboutTempRun = false;
         public bool FinishedMessageEnabled = true;
+        public bool IsScriptsEnabled = false;
         public bool ScriptExecutionSuccess { get; set; } = true;
         public bool DisplayLongError { get; set; } = true;
         public string ScriptErrorMessage { get; set; } = "";
@@ -541,6 +542,17 @@ namespace UndertaleModTool
                         UndertaleCodeEditor.gettextJSON = null;
                         ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"));
                         SelectionHistory.Clear();
+
+                        if (!IsScriptsEnabled)
+                        {
+                            foreach (MenuItem item in (FindName("ScriptsMenuItem") as MenuItem).Items)
+                            {
+                                if (!item.IsEnabled)
+                                    item.IsEnabled = true;
+                            }
+
+                            IsScriptsEnabled = true;
+                        }
                     }
                     dialog.Hide();
                 });
@@ -1109,6 +1121,9 @@ namespace UndertaleModTool
                     if (!filename.EndsWith(".csx"))
                         continue;
                     MenuItem subitem = new MenuItem() { Header = filename.Replace("_", "__") };
+                    if (Data == null)
+                        if (filename == "TestExportAllCode.csx")
+                            subitem.IsEnabled = false;
                     subitem.Click += MenuItem_RunBuiltinScript_Item_Click;
                     subitem.CommandParameter = path;
                     item.Items.Add(subitem);
