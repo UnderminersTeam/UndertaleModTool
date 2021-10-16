@@ -46,6 +46,7 @@ namespace UndertaleModCli
         public ScriptOptions CliScriptOptions { get; set; }
 
         public bool FinishedMessageEnabled { get; set; }
+        public bool DisplayLongError { get; set; }
 
         // need this on Windows when drag and dropping files.
         public string Dequote(string a) => a.TrimStart('"').TrimEnd('"');
@@ -445,6 +446,10 @@ namespace UndertaleModCli
         public void SetFinishedMessage(bool isFinishedMessageEnabled)
         {
             FinishedMessageEnabled = isFinishedMessageEnabled;
+        }
+        public void DoLongErrorMessages(bool isFinishedMessageEnabled)
+        {
+            DisplayLongError = isFinishedMessageEnabled;
         }
 
         public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)

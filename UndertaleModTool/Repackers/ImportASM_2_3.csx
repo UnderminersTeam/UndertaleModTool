@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using UndertaleModLib.Util;
 
+DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 bool is2_3 = false;

@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 string importFolder = PromptChooseDirectory("Select 'Import_Loc.txt' file in 'Shader_Data'");

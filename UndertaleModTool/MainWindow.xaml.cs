@@ -56,6 +56,7 @@ namespace UndertaleModTool
         public bool WasWarnedAboutTempRun = false;
         public bool FinishedMessageEnabled = true;
         public bool ScriptExecutionSuccess { get; set; } = true;
+        public bool DisplayLongError { get; set; } = true;
         public string ScriptErrorMessage { get; set; } = "";
         public string ExePath { get; private set; } = System.Environment.CurrentDirectory;
         public string ScriptErrorType { get; set; } = "";
@@ -1167,10 +1168,24 @@ namespace UndertaleModTool
             {
                 if (!scriptSetupTask.IsCompleted)
                     await scriptSetupTask;
-                
+
                 ScriptPath = path;
 
-                object result = await CSharpScript.EvaluateAsync(File.ReadAllText(path), scriptOptions, this, typeof(IScriptInterface));
+                object result = null;
+                try
+                {
+                    result = await CSharpScript.EvaluateAsync(File.ReadAllText(path), scriptOptions, this, typeof(IScriptInterface));
+                }
+                catch (NullReferenceException)
+                {
+                    if (Data == null)
+                    {
+                        ScriptError("Cannot operate on unloaded data file!");
+                        return;
+                    }
+                    else
+                        throw;
+                }
                 if (FinishedMessageEnabled)
                 {
                     Dispatcher.Invoke(() => CommandBox.Text = result != null ? result.ToString() : Path.GetFileName(path) + " finished!");
@@ -1193,11 +1208,12 @@ namespace UndertaleModTool
             {
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
-                MessageBox.Show(exc.Message + "\n\n" + exc.ToString(), "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(exc.Message + (DisplayLongError ? "\n\n" + exc.ToString() : ""), "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
                 ScriptExecutionSuccess = false;
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "Exception";
             }
+            DisplayLongError = true;
         }
 
         public string PromptLoadFile(string defaultExt, string filter)
@@ -1247,6 +1263,13 @@ namespace UndertaleModTool
             this.Dispatcher.Invoke(() =>
             {
                 FinishedMessageEnabled = isFinishedMessageEnabled;
+            });
+        }
+        public void DoLongErrorMessages(bool isFinishedMessageEnabled)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                DisplayLongError = isFinishedMessageEnabled;
             });
         }
 
@@ -1585,7 +1608,10 @@ result in loss of work.");
         public void EnsureDataLoaded()
         {
             if (Data == null)
+            {
+                DisplayLongError = false;
                 throw new Exception("Please load data.win first!");
+            }
         }
 
         private async void MenuItem_OffsetMap_Click(object sender, RoutedEventArgs e)

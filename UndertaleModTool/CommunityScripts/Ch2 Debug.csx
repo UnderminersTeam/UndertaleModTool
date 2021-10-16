@@ -1,4 +1,5 @@
 // Enables debug mode
+DoLongErrorMessages(false);
 EnsureDataLoaded();
 bool enable = ScriptQuestion("Debug Manager by krzys-h and Kneesnap\nChapter 2 fix by Agent 7\n\nYes = Enable Debug\nNo = Disable Debug");
 

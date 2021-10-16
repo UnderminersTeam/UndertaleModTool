@@ -7,6 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
+DoLongErrorMessages(false);
+EnsureDataLoaded();
+
 if (Data.ToolInfo.ProfileMode)
 {
     ScriptMessage("This script will not modify your existing edited GML code registered in your profile. Please use GML editing for text editing, or a script like FindAndReplace, for editing strings within these code entries.");

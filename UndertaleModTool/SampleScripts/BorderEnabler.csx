@@ -1,5 +1,6 @@
 // Imports and unlocks border images into PC version of the game
 
+DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")

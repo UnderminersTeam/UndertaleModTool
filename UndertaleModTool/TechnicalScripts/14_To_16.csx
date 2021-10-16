@@ -11,6 +11,7 @@ using UndertaleModLib.Decompiler;
 
 // By Grossley, with the help of Colinator and Creepersbane
 
+DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 string currentBytecodeVersion = Data?.GeneralInfo.BytecodeVersion.ToString();

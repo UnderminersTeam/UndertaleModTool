@@ -28,8 +28,10 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
-
 using UndertaleModTool;
+
+DoLongErrorMessages(false);
+EnsureDataLoaded();
 
 int progress = 0;
 int exportTotal = Data.Rooms.Count;

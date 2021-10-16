@@ -10,6 +10,7 @@ string currentDialog;
 int saveProgress = 0;
 int maxCount = 1;
 
+DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
