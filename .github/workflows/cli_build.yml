@@ -1,0 +1,51 @@
+name: Build CLI tool
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build UndertaleModCli --no-restore
+    - name: Publish Windows x86 CLI
+      run: dotnet publish UndertaleModCli -c Release -r win-x86 --self-contained false -p:PublishSingleFile=true --output cli_win_x86
+    - name: Publish Windows x64 CLI
+      run: dotnet publish UndertaleModCli -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true --output cli_win_x64
+    - name: Publish Windows ARM CLI
+      run: dotnet publish UndertaleModCli -c Release -r win-arm --self-contained false -p:PublishSingleFile=true --output cli_win_arm
+    - name: Copy external files
+      run: |
+        Copy-Item "README.md" -Destination "./cli_win_x86/"
+        Copy-Item "README.md" -Destination "./cli_win_x64/"
+        Copy-Item "README.md" -Destination "./cli_win_arm/"
+        Copy-Item "SCRIPTS.md" -Destination "./cli_win_x86/"
+        Copy-Item "SCRIPTS.md" -Destination "./cli_win_x64/"
+        Copy-Item "SCRIPTS.md" -Destination "./cli_win_arm/"
+    - name: Archive cli_win_x86
+      uses: actions/upload-artifact@v2
+      with:
+        name: cli_win_x86
+        path: cli_win_x86
+    - name: Archive cli_win_x64
+      uses: actions/upload-artifact@v2
+      with:
+        name: cli_win_x64
+        path: cli_win_x64
+    - name: Archive cli_win_arm
+      uses: actions/upload-artifact@v2
+      with:
+        name: cli_win_arm
+        path: cli_win_arm
