@@ -9,7 +9,6 @@ using System.Linq;
 using System.Text;
 using UndertaleModLib.Util;
 
-DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 // At this point, this just imports the sprites.

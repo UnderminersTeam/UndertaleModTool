@@ -9,9 +9,6 @@ using System.Linq;
 using System.Text;
 using UndertaleModLib.Util;
 
-DoLongErrorMessages(false);
-EnsureDataLoaded();
-
 string assetNamePath = PromptLoadFile("Choose asset name text file", "Text files (.txt)|*.txt|All files|*");
 if (assetNamePath == null)
     throw new Exception("The asset name text file was not chosen");

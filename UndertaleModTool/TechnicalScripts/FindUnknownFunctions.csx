@@ -6,9 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
-DoLongErrorMessages(false);
-EnsureDataLoaded();
-
 string exportFolder = PromptChooseDirectory("Export to where");
 if (exportFolder == null)
     throw new System.Exception("The export folder was not set.");

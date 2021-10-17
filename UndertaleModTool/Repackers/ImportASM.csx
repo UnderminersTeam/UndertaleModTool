@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using UndertaleModLib.Util;
 
-DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 if (Data.ToolInfo.ProfileMode)

@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 string DonorDataPath = "";
 
-DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 if ((Data.AudioGroups.ByName("audiogroup_default") == null) && Data.GeneralInfo.Major >= 2)

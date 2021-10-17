@@ -6,9 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
-DoLongErrorMessages(false);
-EnsureDataLoaded();
-
 // Initialization Start
 int progress = 0;
 

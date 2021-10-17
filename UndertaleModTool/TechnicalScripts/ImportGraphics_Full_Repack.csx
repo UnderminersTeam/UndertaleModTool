@@ -13,7 +13,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
-DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 bool recursiveCheck = ScriptQuestion(@"This script requires will import all valid sprites from all subdirectories.

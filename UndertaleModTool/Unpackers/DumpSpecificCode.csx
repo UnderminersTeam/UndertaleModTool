@@ -6,9 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
-DoLongErrorMessages(false);
-EnsureDataLoaded();
-
 if (Data.IsYYC())
 {
     ScriptError("You cannot do a code dump of a YYC game! There is no code to dump!");

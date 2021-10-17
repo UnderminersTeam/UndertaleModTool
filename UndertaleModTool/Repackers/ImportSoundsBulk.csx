@@ -12,7 +12,6 @@ using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleSound;
 using static UndertaleModLib.UndertaleData;
 
-DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 string currentDialog;

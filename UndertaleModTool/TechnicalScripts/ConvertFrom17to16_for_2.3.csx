@@ -8,7 +8,6 @@ using UndertaleModLib.Util;
 
 //For use playing the Switch version of Deltarune on PC with the regular Deltarune runner - by Grossley
 
-DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 string game_name = Data.GeneralInfo.Name.Content;

@@ -6,9 +6,6 @@ using System.Linq;
 using System.Text;
 using UndertaleModLib.Util;
 
-DoLongErrorMessages(false);
-EnsureDataLoaded();
-
 string res = "";
 string x = "";
 List<string> currentList = new List<string>();
