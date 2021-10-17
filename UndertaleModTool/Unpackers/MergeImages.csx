@@ -9,7 +9,6 @@ using System.Linq;
 using System.Text;
 using UndertaleModLib.Util;
 
-
 string importFolderA = PromptChooseDirectory("Import From Where");
 if (importFolderA == null) {
     throw new ScriptException("The import folder was not set.");

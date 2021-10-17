@@ -446,7 +446,6 @@ namespace UndertaleModCli
         {
             FinishedMessageEnabled = isFinishedMessageEnabled;
         }
-        
         public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
         {
             // i know, ugly

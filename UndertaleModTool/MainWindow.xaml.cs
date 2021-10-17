@@ -1182,7 +1182,7 @@ namespace UndertaleModTool
             {
                 if (!scriptSetupTask.IsCompleted)
                     await scriptSetupTask;
-
+                
                 ScriptPath = path;
 
                 object result = null;
@@ -1235,7 +1235,6 @@ namespace UndertaleModTool
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "Exception";
             }
-
             scriptText = null;
         }
 
