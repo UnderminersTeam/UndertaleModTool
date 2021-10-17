@@ -11,6 +11,12 @@ using UndertaleModLib.Util;
 
 // By Grossley
 
+if (!ScriptQuestion("Visual glitches are very likely to occur in game. Do you accept this?"))
+{
+    ScriptError("Aborted!");
+    return;
+}
+
 TextureWorker worker = new TextureWorker();
 double scale = -1;
 bool SelectScale = true;
