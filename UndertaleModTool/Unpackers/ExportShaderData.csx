@@ -8,7 +8,7 @@ EnsureDataLoaded();
 
 string exportFolder = PromptChooseDirectory("Export to where");
 if (exportFolder == null)
-    throw new System.Exception("The export folder was not set.");
+    throw new ScriptException("The export folder was not set.");
 
 Directory.CreateDirectory(exportFolder + "/Shader_Data/");
 File.WriteAllText(exportFolder + "/Shader_Data/" + "Import_Loc.txt", "Import location");

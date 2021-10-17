@@ -10,7 +10,7 @@ EnsureDataLoaded();
 
 string exportFolder = PromptChooseDirectory("Export to where");
 if (exportFolder == null)
-    throw new System.Exception("The export folder was not set.");
+    throw new ScriptException("The export folder was not set.");
 
 //Overwrite Check One
 if (File.Exists(exportFolder + "strings.txt"))

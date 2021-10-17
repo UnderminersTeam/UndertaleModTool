@@ -8,7 +8,7 @@ EnsureDataLoaded();
 
 string importFolder = PromptChooseDirectory("Select 'Import_Loc.txt' file in 'Shader_Data'");
 if (importFolder == null)
-    throw new System.Exception("The import folder was not set.");
+    throw new ScriptException("The import folder was not set.");
 
 string[] dirFiles = Directory.GetFiles(importFolder, "*.*", SearchOption.AllDirectories);
 List<string> shadersToModify = new List<string>();
@@ -293,7 +293,7 @@ void Reorganize<T>(IList<T> list, List<string> order) where T : UndertaleNamedRe
             asset = temp[order[i]];
         } catch (Exception e)
         {
-            throw new Exception("Missing asset with name \"" + order[i] + "\"");
+            throw new ScriptException("Missing asset with name \"" + order[i] + "\"");
         }
         addOrder.Add(asset);
     }

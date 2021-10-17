@@ -15,7 +15,7 @@ EnsureDataLoaded();
 
 if ((Data.AudioGroups.ByName("audiogroup_default") == null) && Data.GeneralInfo.Major >= 2)
 {
-    throw new Exception("Currently loaded data file has no \"audiogroup_default\" but it is GMS2 or greater. AudioGroups count: " + Data.AudioGroups.Count.ToString());
+    throw new ScriptException("Currently loaded data file has no \"audiogroup_default\" but it is GMS2 or greater. AudioGroups count: " + Data.AudioGroups.Count.ToString());
 }
 UndertaleData DonorData = LoadDonorDataFile();
 if (DonorData == null)
@@ -25,7 +25,7 @@ if (DonorData == null)
 }
 if ((DonorData.AudioGroups.ByName("audiogroup_default") == null) && DonorData.GeneralInfo.Major >= 2)
 {
-    throw new Exception("This donor data file has no \"audiogroup_default\" but it is GMS2 or greater. AudioGroups count: " + DonorData.AudioGroups.Count.ToString());
+    throw new ScriptException("This donor data file has no \"audiogroup_default\" but it is GMS2 or greater. AudioGroups count: " + DonorData.AudioGroups.Count.ToString());
 }
 List<string> splitStringsList = GetSplitStringsList("sound");
 List<UndertaleSound> soundsList = GetSoundsList(splitStringsList, DonorData);
@@ -143,7 +143,7 @@ void HandleAudioGroups(UndertaleSound donorSND, UndertaleSound nativeSND)
                 }
                 else if (Data.AudioGroups.ByName("audiogroup_default") == null)
                 {
-                    throw new Exception("Count is non-zero but audiogroup_default does not exist.");
+                    throw new ScriptException("Count is non-zero but audiogroup_default does not exist.");
                 }
                 File.WriteAllBytes(Path.Combine(GetFolder(FilePath), "audiogroup" + Data.AudioGroups.Count.ToString() + ".dat"), Convert.FromBase64String("Rk9STQwAAABBVURPBAAAAAAAAAA="));
             }
@@ -167,7 +167,7 @@ UndertaleData LoadDonorDataFile()
     UndertaleData DonorData = null;
     DonorDataPath = PromptLoadFile(null, null);
     if (DonorDataPath == null)
-        throw new System.Exception("The donor data path was not set.");
+        throw new ScriptException("The donor data path was not set.");
     using (var stream = new FileStream(DonorDataPath, FileMode.Open, FileAccess.Read))
         DonorData = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));
     return DonorData;

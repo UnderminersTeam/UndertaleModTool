@@ -23,7 +23,7 @@ else
 
 string importFolder = PromptChooseDirectory("Import from where");
 if (importFolder == null)
-    throw new System.Exception("The import folder was not set.");
+    throw new ScriptException("The import folder was not set.");
 
 //Overwrite Check One
 if (!File.Exists(importFolder + "/strings.txt"))

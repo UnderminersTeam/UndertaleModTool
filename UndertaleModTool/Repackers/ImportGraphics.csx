@@ -17,12 +17,12 @@ If you do not want this to occur, please click ""No"" to cancel the script.
 Then make sure that the sprites you wish to import are in a separate directory with no subdirectories.
 ");
 if (!recursiveCheck)
-    throw new System.Exception("Script cancelled.");
+    throw new ScriptException("Script cancelled.");
 
 // Get import folder
 string importFolder = PromptChooseDirectory("Import From Where");
 if (importFolder == null)
-    throw new System.Exception("The import folder was not set.");
+    throw new ScriptException("The import folder was not set.");
 
 //Stop the script if there's missing sprite entries or w/e.
 string[] dirFiles = Directory.GetFiles(importFolder, "*.png", SearchOption.AllDirectories);
@@ -38,7 +38,7 @@ foreach (string file in dirFiles)
     }
     catch
     {
-        throw new System.Exception("Getting the sprite name of " + FileNameWithExtension + " failed.");
+        throw new ScriptException("Getting the sprite name of " + FileNameWithExtension + " failed.");
     }
     Int32 validFrameNumber = 0;
     try
@@ -47,7 +47,7 @@ foreach (string file in dirFiles)
     }
     catch
     {
-        throw new System.Exception("The index of " + FileNameWithExtension + " could not be determined.");
+        throw new ScriptException("The index of " + FileNameWithExtension + " could not be determined.");
     }
     int frame = 0;
     try
@@ -56,7 +56,7 @@ foreach (string file in dirFiles)
     }
     catch
     {
-        throw new System.Exception(FileNameWithExtension + " is using letters instead of numbers. The script has stopped for your own protection.");
+        throw new ScriptException(FileNameWithExtension + " is using letters instead of numbers. The script has stopped for your own protection.");
     }
     int prevframe = 0;
     if (frame != 0)
@@ -65,15 +65,15 @@ foreach (string file in dirFiles)
     }
     if (frame < 0)
     {
-        throw new System.Exception(spriteName + " is using an invalid numbering scheme. The script has stopped for your own protection.");
+        throw new ScriptException(spriteName + " is using an invalid numbering scheme. The script has stopped for your own protection.");
     }
     string[] dupFiles = Directory.GetFiles(importFolder, FileNameWithExtension, SearchOption.AllDirectories);
     if (dupFiles.Length > 1)
-        throw new System.Exception("Duplicate file detected. There are " + dupFiles.Length + " files named: " + FileNameWithExtension);
+        throw new ScriptException("Duplicate file detected. There are " + dupFiles.Length + " files named: " + FileNameWithExtension);
     var prevFrameName = spriteName + "_" + prevframe.ToString() + ".png";
     string[] previousFrameFiles = Directory.GetFiles(importFolder, prevFrameName, SearchOption.AllDirectories);
     if (previousFrameFiles.Length < 1)
-        throw new System.Exception(spriteName + " is missing one or more indexes. The detected missing index is: " + prevFrameName);
+        throw new ScriptException(spriteName + " is missing one or more indexes. The detected missing index is: " + prevFrameName);
 }
 
 System.IO.Directory.CreateDirectory("Packager");

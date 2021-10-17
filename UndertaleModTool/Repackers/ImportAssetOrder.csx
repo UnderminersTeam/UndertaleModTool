@@ -13,7 +13,7 @@ EnsureDataLoaded();
 
 string assetNamePath = PromptLoadFile("Choose asset name text file", "Text files (.txt)|*.txt|All files|*");
 if (assetNamePath == null)
-    throw new Exception("The asset name text file was not chosen");
+    throw new ScriptException("The asset name text file was not chosen");
 
 string[] lines = File.ReadAllLines(assetNamePath);
 
@@ -39,7 +39,7 @@ void Reorganize<T>(IList<T> list, List<string> order) where T : UndertaleNamedRe
             asset = temp[order[i]];
         } catch (Exception e)
         {
-            throw new Exception("Missing asset with name \"" + order[i] + "\"");
+            throw new ScriptException("Missing asset with name \"" + order[i] + "\"");
         }
         addOrder.Add(asset);
     }

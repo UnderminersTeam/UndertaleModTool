@@ -107,7 +107,8 @@ namespace UndertaleModTool
                                 .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
                                                 GetType().GetTypeInfo().Assembly,
                                                 typeof(JsonConvert).GetTypeInfo().Assembly,
-                                                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly);
+                                                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly)
+                                .WithEmitDebugInformation(true); //when script throws an exception, add a exception location (line number)
             });
         }
 
@@ -1142,6 +1143,19 @@ namespace UndertaleModTool
                 this.IsEnabled = true;
         }
 
+        public int ProcessExceptionOutput(ref string excString)
+        {
+            int excLineNum = -1;
+
+            int endOfPrevStack = excString.IndexOf("--- End of stack trace from previous location ---");
+            if (endOfPrevStack != -1)
+                excString = excString[..endOfPrevStack]; //keep only stack trace of the script
+            
+            _ = int.TryParse(excString.Split(":line ").Last(), out excLineNum); //try to get a line number
+
+            return excLineNum;
+        }
+
         public async Task RunScript(string path)
         {
             ScriptExecutionSuccess = true;
@@ -1160,6 +1174,7 @@ namespace UndertaleModTool
 
         private async Task RunScriptNow(string path)
         {
+            string scriptText = File.ReadAllText(path);
             Debug.WriteLine(path);
 
             Dispatcher.Invoke(() => CommandBox.Text = "Running " + Path.GetFileName(path) + " ...");
@@ -1173,7 +1188,7 @@ namespace UndertaleModTool
                 object result = null;
                 try
                 {
-                    result = await CSharpScript.EvaluateAsync(File.ReadAllText(path), scriptOptions, this, typeof(IScriptInterface));
+                    result = await CSharpScript.EvaluateAsync(scriptText, scriptOptions, this, typeof(IScriptInterface));
                 }
                 catch (NullReferenceException)
                 {
@@ -1205,13 +1220,23 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                Console.WriteLine(exc.ToString());
+                bool isScriptException = exc.GetType().Name == "ScriptException";
+                string excString = exc.ToString();
+                string scriptLine = string.Empty;
+
+                int excLineNum = ProcessExceptionOutput(ref excString);
+                if (excLineNum != -1) //if line number is found
+                    scriptLine = $"\nThe script line what caused the exception:\n{scriptText.Split('\n')[excLineNum - 1]}";
+
+                Console.WriteLine(excString);
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
-                MessageBox.Show(exc.Message + "\n\n" + exc.ToString(), "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(exc.Message + (!isScriptException ? "\n\n" + excString : string.Empty) + scriptLine, "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
                 ScriptExecutionSuccess = false;
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "Exception";
             }
+
+            scriptText = null;
         }
 
         public string PromptLoadFile(string defaultExt, string filter)
@@ -1600,7 +1625,7 @@ result in loss of work.");
         {
             if (Data == null)
             {
-                throw new Exception("Please load data.win first!");
+                throw new ScriptException("Please load data.win first!");
             }
         }
 
