@@ -56,7 +56,6 @@ namespace UndertaleModTool
         public bool WasWarnedAboutTempRun = false;
         public bool FinishedMessageEnabled = true;
         public bool ScriptExecutionSuccess { get; set; } = true;
-        public bool DisplayLongError { get; set; } = true;
         public string ScriptErrorMessage { get; set; } = "";
         public string ExePath { get; private set; } = System.Environment.CurrentDirectory;
         public string ScriptErrorType { get; set; } = "";
@@ -1208,12 +1207,11 @@ namespace UndertaleModTool
             {
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
-                MessageBox.Show(exc.Message + (DisplayLongError ? "\n\n" + exc.ToString() : ""), "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(exc.Message + "\n\n" + exc.ToString(), "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
                 ScriptExecutionSuccess = false;
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "Exception";
             }
-            DisplayLongError = true;
         }
 
         public string PromptLoadFile(string defaultExt, string filter)
@@ -1263,13 +1261,6 @@ namespace UndertaleModTool
             this.Dispatcher.Invoke(() =>
             {
                 FinishedMessageEnabled = isFinishedMessageEnabled;
-            });
-        }
-        public void DoLongErrorMessages(bool isFinishedMessageEnabled)
-        {
-            this.Dispatcher.Invoke(() =>
-            {
-                DisplayLongError = isFinishedMessageEnabled;
             });
         }
 
@@ -1609,7 +1600,6 @@ result in loss of work.");
         {
             if (Data == null)
             {
-                DisplayLongError = false;
                 throw new Exception("Please load data.win first!");
             }
         }
