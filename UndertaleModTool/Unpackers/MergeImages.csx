@@ -9,7 +9,6 @@ using System.Linq;
 using System.Text;
 using UndertaleModLib.Util;
 
-DoLongErrorMessages(false);
 
 string importFolderA = PromptChooseDirectory("Import From Where");
 if (importFolderA == null) {

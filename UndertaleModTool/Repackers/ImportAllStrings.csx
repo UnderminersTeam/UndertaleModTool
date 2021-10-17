@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
-DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 if (Data.ToolInfo.ProfileMode)

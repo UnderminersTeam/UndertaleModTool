@@ -140,10 +140,6 @@ namespace UndertaleModTests
         {
             Console.Write("SetFinishedMessage(): " + isFinishedMessageEnabled.ToString());
         }
-        public void DoLongErrorMessages(bool isFinishedMessageEnabled)
-        {
-            Console.Write("DoLongErrorMessages(): " + isFinishedMessageEnabled.ToString());
-        }
 
         public void HideProgressBar()
         {

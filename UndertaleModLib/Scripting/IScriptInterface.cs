@@ -44,7 +44,6 @@ namespace UndertaleModLib.Scripting
         string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose);
         string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true);
         void SetFinishedMessage(bool isFinishedMessageEnabled);
-        void DoLongErrorMessages(bool isFinishedMessageEnabled);
         void UpdateProgressBar(string message, string status, double progressValue, double maxValue);
         void HideProgressBar();
         void EnableUI();

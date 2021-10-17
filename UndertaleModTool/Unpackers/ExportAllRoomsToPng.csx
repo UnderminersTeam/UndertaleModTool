@@ -30,7 +30,6 @@ using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModTool;
 
-DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 int progress = 0;

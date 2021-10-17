@@ -9,7 +9,6 @@ using UndertaleModLib.Scripting;
 using UndertaleModLib.Models;
 using System.Collections.Generic;
 
-DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 if ((Data.AudioGroups.ByName("audiogroup_default") == null) && Data.GeneralInfo.Major >= 2)

@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using UndertaleModLib.Util;
 
-DoLongErrorMessages(false);
 EnsureDataLoaded();
 
 string importFolder = PromptChooseDirectory("Import From Where");
