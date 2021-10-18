@@ -21,11 +21,11 @@ jobs:
     - name: Build
       run: dotnet build UndertaleModCli --no-restore
     - name: Publish Windows x86 CLI
-      run: dotnet publish UndertaleModCli -c Release -r win-x86 --self-contained false -p:PublishSingleFile=true --output cli_win_x86
+      run: dotnet publish UndertaleModCli -c Release -r win-x86 --self-contained false -p:PublishSingleFile=false --output cli_win_x86
     - name: Publish Windows x64 CLI
-      run: dotnet publish UndertaleModCli -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true --output cli_win_x64
+      run: dotnet publish UndertaleModCli -c Release -r win-x64 --self-contained false -p:PublishSingleFile=false --output cli_win_x64
     - name: Publish Windows ARM CLI
-      run: dotnet publish UndertaleModCli -c Release -r win-arm --self-contained false -p:PublishSingleFile=true --output cli_win_arm
+      run: dotnet publish UndertaleModCli -c Release -r win-arm --self-contained false -p:PublishSingleFile=false --output cli_win_arm
     - name: Copy external files
       run: |
         Copy-Item "README.md" -Destination "./cli_win_x86/"
