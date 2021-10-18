@@ -1210,6 +1210,7 @@ namespace UndertaleModTool
                 bool isScriptException = exc.GetType().Name == "ScriptException";
                 string excString = exc.ToString();
                 string scriptLine = string.Empty;
+                int excLineNum = -1;
 
                 if (!isScriptException) //don't truncate the exception and don't add scriptLine to the output
                 {
