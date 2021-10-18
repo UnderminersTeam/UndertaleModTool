@@ -1185,21 +1185,8 @@ namespace UndertaleModTool
                 
                 ScriptPath = path;
 
-                object result = null;
-                try
-                {
-                    result = await CSharpScript.EvaluateAsync(scriptText, scriptOptions, this, typeof(IScriptInterface));
-                }
-                catch (NullReferenceException)
-                {
-                    if (Data == null)
-                    {
-                        ScriptError("Cannot operate on unloaded data file!");
-                        return;
-                    }
-                    else
-                        throw;
-                }
+                object result = await CSharpScript.EvaluateAsync(scriptText, scriptOptions, this, typeof(IScriptInterface));
+                
                 if (FinishedMessageEnabled)
                 {
                     Dispatcher.Invoke(() => CommandBox.Text = result != null ? result.ToString() : Path.GetFileName(path) + " finished!");
@@ -1224,9 +1211,12 @@ namespace UndertaleModTool
                 string excString = exc.ToString();
                 string scriptLine = string.Empty;
 
-                int excLineNum = ProcessExceptionOutput(ref excString);
-                if (excLineNum != -1) //if line number is found
-                    scriptLine = $"\nThe script line which caused the exception:\n{scriptText.Split('\n')[excLineNum - 1]}";
+                if (!isScriptException) //don't truncate the exception and don't add scriptLine to the output
+                {
+                    excLineNum = ProcessExceptionOutput(ref excString);
+                    if (excLineNum != -1) //if line number is found
+                        scriptLine = $"\nThe script line which caused the exception:\n{scriptText.Split('\n')[excLineNum - 1]}";
+                }
 
                 Console.WriteLine(excString);
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
