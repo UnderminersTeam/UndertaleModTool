@@ -21,9 +21,9 @@ jobs:
     - name: Build
       run: dotnet build UndertaleModCli --no-restore
     - name: Publish Windows x86 NET CLI Bundled
-      run: dotnet publish UndertaleModCli -c Release -r win-x86 --self-contained true -p:PublishSingleFile=true --output cli_win_x86
+      run: dotnet publish UndertaleModCli -c Release -r win-x86 --self-contained true -p:PublishSingleFile=false --output cli_win_x86
     - name: Publish Windows x64 NET CLI Bundled
-      run: dotnet publish UndertaleModCli -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true --output cli_win_x64
+      run: dotnet publish UndertaleModCli -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false --output cli_win_x64
     - name: Copy external files
       run: |
         Copy-Item "README.md" -Destination "./cli_win_x86/"
