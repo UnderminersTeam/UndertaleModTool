@@ -1216,7 +1216,7 @@ namespace UndertaleModTool
                 if (!isScriptException) //don't truncate the exception and don't add scriptLine to the output
                 {
                     excLineNum = ProcessExceptionOutput(ref excString);
-                    if (excLineNum != -1) //if line number is found
+                    if (excLineNum > 0) //if line number is found
                         scriptLine = $"\nThe script line which caused the exception (line {excLineNum}):\n{scriptText.Split('\n')[excLineNum - 1].TrimStart(new char[] { '\t', ' ' })}";
                 }
 
