@@ -1150,8 +1150,9 @@ namespace UndertaleModTool
             int endOfPrevStack = excString.IndexOf("--- End of stack trace from previous location ---");
             if (endOfPrevStack != -1)
                 excString = excString[..endOfPrevStack]; //keep only stack trace of the script
-            
-            _ = int.TryParse(excString.Split(":line ").Last(), out excLineNum); //try to get a line number
+
+            if (!int.TryParse(excString.Split(":line ").Last().Split("\r\n")[0], out excLineNum)) //try to get a line number
+                excLineNum = -1; //":line " not found
 
             return excLineNum;
         }
@@ -1216,7 +1217,7 @@ namespace UndertaleModTool
                 {
                     excLineNum = ProcessExceptionOutput(ref excString);
                     if (excLineNum != -1) //if line number is found
-                        scriptLine = $"\nThe script line which caused the exception (line {excLineNum}):\n{scriptText.Split('\n')[excLineNum - 1]}";
+                        scriptLine = $"\nThe script line which caused the exception (line {excLineNum}):\n{scriptText.Split('\n')[excLineNum - 1].TrimStart(new char[] { '\t', ' ' })}";
                 }
 
                 Console.WriteLine(excString);
