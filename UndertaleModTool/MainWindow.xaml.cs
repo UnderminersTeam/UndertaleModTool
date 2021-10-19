@@ -1216,7 +1216,7 @@ namespace UndertaleModTool
                 {
                     excLineNum = ProcessExceptionOutput(ref excString);
                     if (excLineNum != -1) //if line number is found
-                        scriptLine = $"\nThe script line which caused the exception:\n{scriptText.Split('\n')[excLineNum - 1]}";
+                        scriptLine = $"\nThe script line which caused the exception (line {excLineNum}):\n{scriptText.Split('\n')[excLineNum - 1]}";
                 }
 
                 Console.WriteLine(excString);
