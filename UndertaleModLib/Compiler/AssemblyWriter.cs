@@ -154,8 +154,7 @@ namespace UndertaleModLib.Compiler
                                     }
                                 }
                                 compileContext.OriginalCode.LocalsCount = (uint)locals.Locals.Count;
-                                if (compileContext?.Data.GMS2_3 == true &&
-                                    compileContext.OriginalCode.LocalsCount > compileContext.Data.MaxLocalVarCount)
+                                if (compileContext.OriginalCode.LocalsCount > compileContext.Data.MaxLocalVarCount)
                                     compileContext.Data.MaxLocalVarCount = compileContext.OriginalCode.LocalsCount;
                             });
                         }

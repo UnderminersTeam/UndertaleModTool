@@ -420,8 +420,6 @@ namespace UndertaleModLib
                 VarID = bytecode14 ? 0 : localId,
                 NameStringID = id
             };
-            if (!bytecode14 && data?.GMS2_3 != true && list?.Count >= data.MaxLocalVarCount)
-                data.MaxLocalVarCount = (uint) list?.Count + 1;
             list.Add(vari);
             return vari;
         }
