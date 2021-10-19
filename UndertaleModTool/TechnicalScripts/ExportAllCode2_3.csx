@@ -51,8 +51,8 @@ void DumpCode()
     for (var i = 0; i < Data.Code.Count; i++)
     {
         UndertaleCode code = Data.Code[i];
-        index_text += code.Name.Content;
         index_text += "\n";
+        index_text += code.Name.Content;
     }
     File.WriteAllText(index_path, index_text);
     for (var i = 0; i < Data.Code.Count; i++)
