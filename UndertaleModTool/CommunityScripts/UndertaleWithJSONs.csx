@@ -145,7 +145,7 @@ void DumpJSON(string language)
     } 
     catch (Exception e) 
     {
-        throw new System.Exception("gml_Script_textdata_" + language + " has an error that prevents creation of JSONs.");
+        throw new ScriptException("gml_Script_textdata_" + language + " has an error that prevents creation of JSONs.");
     }
     UpdateProgress();
 }

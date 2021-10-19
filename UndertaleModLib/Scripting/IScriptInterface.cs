@@ -6,6 +6,17 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Scripting
 {
+    public class ScriptException : Exception
+    {
+        public ScriptException()
+        {
+        }
+
+        public ScriptException(string msg) : base(msg)
+        {
+        }
+    }
+
     public interface IScriptInterface
     {
         UndertaleData Data { get; }

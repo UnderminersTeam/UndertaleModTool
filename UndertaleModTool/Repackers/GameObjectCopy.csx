@@ -10,6 +10,8 @@ using System.Security.Cryptography;
 using UndertaleModLib.Models;
 using UndertaleModLib.Decompiler;
 
+EnsureDataLoaded();
+
 if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
 {
     ScriptError("Error 0: Most likely incompatible with the new Deltarune Chapter 1 & 2 demo, run at your own risk");
@@ -24,7 +26,7 @@ ScriptMessage("Select the file to copy from");
 UndertaleData DonorData;
 string DonorDataPath = PromptLoadFile(null, null);
 if (DonorDataPath == null)
-    throw new System.Exception("The donor data path was not set.");
+    throw new ScriptException("The donor data path was not set.");
 
 using (var stream = new FileStream(DonorDataPath, FileMode.Open, FileAccess.Read))
     DonorData = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));

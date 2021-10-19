@@ -62,10 +62,10 @@ string bordersPath = Path.Combine(Path.GetDirectoryName(ScriptPath), "Borders");
 Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, UndertaleEmbeddedTexture>();
 if (!Directory.Exists(bordersPath))
 {
-    throw new Exception("Border textures not found??");
+    throw new ScriptException("Border textures not found??");
 }
 
-// throw new Exception(bordersPath);
+// throw new ScriptException(bordersPath);
 
 foreach(var path in Directory.EnumerateFiles(bordersPath))
 {

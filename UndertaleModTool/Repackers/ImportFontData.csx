@@ -10,11 +10,11 @@ using System.Linq;
 using System.Text;
 using UndertaleModLib.Util;
 
-//EnsureDataLoaded();
+EnsureDataLoaded();
 
 string importFolder = PromptChooseDirectory("Import From Where");
 if (importFolder == null)
-    throw new System.Exception("The import folder was not set.");
+    throw new ScriptException("The import folder was not set.");
 
 System.IO.Directory.CreateDirectory("Packager");
 string sourcePath = importFolder;

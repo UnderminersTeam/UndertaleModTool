@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
+EnsureDataLoaded();
+
 if (Data.ToolInfo.ProfileMode)
 {
     ScriptMessage("This script will not modify your existing edited GML code registered in your profile. Please use GML editing for text editing, or a script like FindAndReplace, for editing strings within these code entries.");
@@ -21,7 +23,7 @@ else
 
 string importFolder = PromptChooseDirectory("Import from where");
 if (importFolder == null)
-    throw new System.Exception("The import folder was not set.");
+    throw new ScriptException("The import folder was not set.");
 
 //Overwrite Check One
 if (!File.Exists(importFolder + "/strings.txt"))

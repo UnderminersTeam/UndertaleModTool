@@ -5,9 +5,9 @@ bool enable = ScriptQuestion("Debug Manager by krzys-h and Kneesnap\nChapter 2 f
 var SCR_GAMESTART = Data.Scripts.ByName("SCR_GAMESTART", true)?.Code;
 var debugController = "gml_Object_obj_debugcontroller_ch1_Create_0";
 if (SCR_GAMESTART == null)
-    throw new System.Exception("Could not find SCR_GAMESTART.");
+    throw new ScriptException("Could not find SCR_GAMESTART.");
 if (debugController == null)
-    throw new System.Exception("Could not find Chapter 1 debug controller.");
+    throw new ScriptException("Could not find Chapter 1 debug controller.");
 
 bool patch2 = false;
 bool patch1 = false;
@@ -29,9 +29,9 @@ for(int i = 0; i < 1; i++)
 }
 
 if (!patch2) // Failed to patch Chapter 2.
-    throw new System.Exception("Chapter 2 Patch point not found?");
+    throw new ScriptException("Chapter 2 Patch point not found?");
 if (!patch1) // Failed to patch Chapter 1.
-    throw new System.Exception("Chapter 1 Patch point not found?");
+    throw new ScriptException("Chapter 1 Patch point not found?");
 
 ChangeSelection(SCR_GAMESTART); // Show.
 ScriptMessage("Debug Mode " + (enable ? "enabled" : "disabled") + ".");

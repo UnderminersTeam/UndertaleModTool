@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using UndertaleModLib.Util;
 
+EnsureDataLoaded();
+
 string res = "";
 string x = "";
 List<string> currentList = new List<string>();
@@ -42,7 +44,7 @@ void Reorganize<T>(IList<T> list, List<string> order) where T : UndertaleNamedRe
             asset = temp[order[i]];
         } catch (Exception e)
         {
-            throw new Exception("Missing asset with name \"" + order[i] + "\"");
+            throw new ScriptException("Missing asset with name \"" + order[i] + "\"");
         }
         addOrder.Add(asset);
     }

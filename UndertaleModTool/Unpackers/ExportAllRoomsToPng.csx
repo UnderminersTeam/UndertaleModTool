@@ -28,8 +28,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
-
 using UndertaleModTool;
+
+EnsureDataLoaded();
 
 int progress = 0;
 int exportTotal = Data.Rooms.Count;
@@ -40,7 +41,7 @@ System.Windows.Controls.ItemsControl RoomGraphics;
 
 string exportedTexturesFolder = PromptChooseDirectory("Choose an export folder");
 if (exportedTexturesFolder == null) {
-    throw new System.Exception("The export folder was not set, stopping script.");
+    throw new ScriptException("The export folder was not set, stopping script.");
 }
 
 DirectoryInfo dir = new DirectoryInfo(exportedTexturesFolder);

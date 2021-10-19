@@ -11,17 +11,17 @@ using UndertaleModLib.Util;
 
 string importFolderA = PromptChooseDirectory("Import From Where");
 if (importFolderA == null) {
-    throw new System.Exception("The import folder was not set.");
+    throw new ScriptException("The import folder was not set.");
 }
 
 string importFolderB = PromptChooseDirectory("Merge With Where");
 if (importFolderB == null) {
-    throw new System.Exception("The import folder was not set.");
+    throw new ScriptException("The import folder was not set.");
 }
 
 string exportFolder = PromptChooseDirectory("Export To Where");
 if (exportFolder == null) {
-    throw new System.Exception("The export folder was not set.");
+    throw new ScriptException("The export folder was not set.");
 }
 
 string searchPattern = "*.png";

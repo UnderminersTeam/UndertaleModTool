@@ -6,6 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
+EnsureDataLoaded();
+
 // Initialization Start
 int progress = 0;
 
@@ -34,7 +36,7 @@ ScriptMessage("Select the file to copy from");
 UndertaleData DonorData;
 string DonorDataPath = PromptLoadFile(null, null);
 if (DonorDataPath == null)
-    throw new System.Exception("The donor data path was not set.");
+    throw new ScriptException("The donor data path was not set.");
 
 using (var stream = new FileStream(DonorDataPath, FileMode.Open, FileAccess.Read))
     DonorData = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));

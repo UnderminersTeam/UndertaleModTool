@@ -77,7 +77,7 @@ If they do, you may file an issue on GitHub, but no warranty is given."); // War
                             stackCounter += 1 + i.Extra; // Keep looking for the value that was duplicated
                         else
                         {
-                            //throw new Exception("My workaround still sucks " + code.Name.Content + " " + j);
+                            //throw new ScriptException("My workaround still sucks " + code.Name.Content + " " + j);
                         }
                     }
                 }

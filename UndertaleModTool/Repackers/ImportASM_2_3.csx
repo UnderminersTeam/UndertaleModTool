@@ -39,7 +39,7 @@ enum EventTypes
 // Check code directory.
 string importFolder = PromptChooseDirectory("Import From Where");
 if (importFolder == null)
-    throw new System.Exception("The import folder was not set.");
+    throw new ScriptException("The import folder was not set.");
 
 List<string> CodeList = new List<string>();
 

@@ -10,7 +10,7 @@ EnsureDataLoaded();
 // Check code directory.
 string importFolder = PromptChooseDirectory("Import From Where");
 if (importFolder == null)
-    throw new System.Exception("The import folder was not set.");
+    throw new ScriptException("The import folder was not set.");
 
 // Ask whether they want to link code. If no, will only generate code entry.
 // If yes, will try to add code to objects and scripts depending upon its name

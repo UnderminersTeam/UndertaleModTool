@@ -6,6 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
+EnsureDataLoaded();
+
 if (Data.IsYYC())
 {
     ScriptError("You cannot do a code dump of a YYC game! There is no code to dump!");
@@ -18,7 +20,7 @@ int failed = 0;
 
 string codeFolder = PromptChooseDirectory("Export to where");
 if (codeFolder == null)
-    throw new System.Exception("The export folder was not set.");
+    throw new ScriptException("The export folder was not set.");
 Directory.CreateDirectory(Path.Combine(codeFolder, "Code"));
 codeFolder = Path.Combine(codeFolder, "Code");
 
