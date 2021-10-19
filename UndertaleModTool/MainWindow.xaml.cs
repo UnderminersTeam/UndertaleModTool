@@ -1150,8 +1150,9 @@ namespace UndertaleModTool
             int endOfPrevStack = excString.IndexOf("--- End of stack trace from previous location ---");
             if (endOfPrevStack != -1)
                 excString = excString[..endOfPrevStack]; //keep only stack trace of the script
-            
-            _ = int.TryParse(excString.Split(":line ").Last(), out excLineNum); //try to get a line number
+
+            if (!int.TryParse(excString.Split(":line ").Last().Split("\r\n")[0], out excLineNum)) //try to get a line number
+                excLineNum = -1; //":line " not found
 
             return excLineNum;
         }
@@ -1215,13 +1216,16 @@ namespace UndertaleModTool
                 if (!isScriptException) //don't truncate the exception and don't add scriptLine to the output
                 {
                     excLineNum = ProcessExceptionOutput(ref excString);
-                    if (excLineNum != -1) //if line number is found
-                        scriptLine = $"\nThe script line which caused the exception (line {excLineNum}):\n{scriptText.Split('\n')[excLineNum - 1]}";
+                    if (excLineNum > 0) //if line number is found
+                        scriptLine = $"\nThe script line which caused the exception (line {excLineNum}):\n{scriptText.Split('\n')[excLineNum - 1].TrimStart(new char[] { '\t', ' ' })}";
                 }
 
                 Console.WriteLine(excString);
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
-                MessageBox.Show(exc.Message + (!isScriptException ? "\n\n" + excString : string.Empty) + scriptLine, "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (isScriptException)
+                    MessageBox.Show(exc.Message, "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+                else
+                    MessageBox.Show(excString + scriptLine, "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
                 ScriptExecutionSuccess = false;
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "Exception";
