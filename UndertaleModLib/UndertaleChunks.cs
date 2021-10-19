@@ -696,4 +696,39 @@ namespace UndertaleModLib
             base.UnserializeChunk(reader);
         }
     }
+
+    // GMS2.3.6+ only
+    public class UndertaleChunkFEDS : UndertaleListChunk<UndertaleFilterEffect>
+    {
+        public override string Name => "FEDS";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            if (writer.undertaleData.GeneralInfo.Major < 2)
+                throw new InvalidOperationException();
+
+            while (writer.Position % 4 != 0)
+                writer.Write((byte)0);
+
+            writer.Write((uint)1); // Version
+
+            base.SerializeChunk(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            if (reader.undertaleData.GeneralInfo.Major < 2)
+                throw new InvalidOperationException();
+
+            // Padding
+            while (reader.Position % 4 != 0)
+                if (reader.ReadByte() != 0)
+                    throw new IOException("Padding error!");
+
+            if (reader.ReadUInt32() != 1)
+                throw new IOException("Expected FEDS version 1");
+
+            base.UnserializeChunk(reader);
+        }
+    }
 }
