@@ -78,7 +78,7 @@ void DumpFont(UndertaleFont font)
     if (font.Texture != null)
     {
         UndertaleTexturePageItem tex = font.Texture;
-        worker.ExportAsPNG(tex, Path.Combine(fntFolder, font.Name.Content + ".png"));
+        worker.ExportAsPNG(tex, Path.Combine(fntFolder, font.Name.Content + "_0.png"));
         UpdateProgress(1);
     }
 }
@@ -88,7 +88,7 @@ void DumpBackground(UndertaleBackground background)
     if (background.Texture != null)
     {
         UndertaleTexturePageItem tex = background.Texture;
-        worker.ExportAsPNG(tex, Path.Combine(bgrFolder, background.Name.Content + ".png"));
+        worker.ExportAsPNG(tex, Path.Combine(bgrFolder, background.Name.Content + "_0.png"));
         UpdateProgress(1);
     }
 }
