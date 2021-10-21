@@ -1311,6 +1311,12 @@ namespace UndertaleModTool
             }
         }
 
+        public void SimpleTextOutput(string titleText, string labelText, string defaultText, bool isMultiline)
+        {
+            TextInput textOutput = new TextInput(labelText, titleText, defaultText, isMultiline, true); //read-only mode
+            textOutput.Show();
+        }
+
         public void ScriptOpenURL(string url)
         {
             OpenBrowser(url);

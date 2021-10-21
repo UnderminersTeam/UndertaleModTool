@@ -441,6 +441,10 @@ namespace UndertaleModCli
         {
             throw new NotImplementedException();
         }
+        public void SimpleTextOutput(string title, string label, string defaultText, bool allowMultiline)
+        {
+            throw new NotImplementedException();
+        }
 
         public void SetFinishedMessage(bool isFinishedMessageEnabled)
         {

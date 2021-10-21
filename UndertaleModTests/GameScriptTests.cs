@@ -110,6 +110,10 @@ namespace UndertaleModTests
         {
             return ScriptInputDialog(titleText, labelText, defaultInputBoxText, "Cancel", "Submit", isMultiline, false);
         }
+        public void SimpleTextOutput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline)
+		{
+            Console.WriteLine($"SimpleTextOutput(\"{titleText}\", \"{labelText}\", *defaultInputBoxText* (length - {defaultInputBoxText.Length}), {isMultiline})");
+		}
 
         public void SetUMTConsoleText(string message)
         {
