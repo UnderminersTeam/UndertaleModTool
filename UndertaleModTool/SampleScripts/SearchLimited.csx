@@ -23,6 +23,8 @@ string searchNames = "";
 
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
+EnsureDataLoaded();
+
 if (Data.IsYYC())
 {
     ScriptError("You cannot do a code search on a YYC game! There is no code to search!");

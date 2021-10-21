@@ -20,6 +20,7 @@ namespace UndertaleModTool.Windows
         public TextInput(string message, string title, string defaultValue, bool allowMultiline)
         {
             InitializeComponent();
+            Icon = new Icon(App.GetResourceStream(new Uri("pack://application:,,,/icon.ico")).Stream);
             Message = message;
             Title = title;
             DefaultValue = defaultValue;
@@ -31,6 +32,7 @@ namespace UndertaleModTool.Windows
             label1.Text = message;
             richTextBox1.Text = DefaultValue;
             richTextBox1.Multiline = AllowMultiline;
+            richTextBox1.DetectUrls = false;
             label1.AutoSize = false;
         }
 

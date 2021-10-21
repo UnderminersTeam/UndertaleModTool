@@ -4,6 +4,8 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+EnsureDataLoaded();
+
 if (Data.IsYYC())
 {
     ScriptError("You cannot do a code search on a YYC game! There is no code to search!");
