@@ -29,13 +29,25 @@ namespace UndertaleModTool.Windows
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.textCommandsMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyAllMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cutMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pasteMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.button1 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.textCopyMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyAllMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.textCommandsMenu.SuspendLayout();
+            this.textCopyMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // richTextBox1
             // 
+            this.richTextBox1.ContextMenuStrip = this.textCommandsMenu;
             this.richTextBox1.HideSelection = false;
             this.richTextBox1.Location = new System.Drawing.Point(12, 57);
             this.richTextBox1.Name = "richTextBox1";
@@ -43,6 +55,50 @@ namespace UndertaleModTool.Windows
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "Input Text Here";
             this.richTextBox1.TextChanged += new System.EventHandler(this.richTextBox1_TextChanged);
+            // 
+            // textCommandsMenu
+            // 
+            this.textCommandsMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyMenuItem,
+            this.copyAllMenuItem,
+            this.cutMenuItem,
+            this.pasteMenuItem});
+            this.textCommandsMenu.Name = "textCommandsMenu";
+            this.textCommandsMenu.ShowImageMargin = false;
+            this.textCommandsMenu.Size = new System.Drawing.Size(93, 92);
+            this.textCommandsMenu.Opening += new System.ComponentModel.CancelEventHandler(this.textCommandsMenu_Opening);
+            // 
+            // copyMenuItem
+            // 
+            this.copyMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.copyMenuItem.Name = "copyMenuItem";
+            this.copyMenuItem.Size = new System.Drawing.Size(92, 22);
+            this.copyMenuItem.Text = "Copy";
+            this.copyMenuItem.Click += new System.EventHandler(this.copyMenuItem_Click);
+            // 
+            // copyAllMenuItem
+            // 
+            this.copyAllMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.copyAllMenuItem.Name = "copyAllMenuItem";
+            this.copyAllMenuItem.Size = new System.Drawing.Size(92, 22);
+            this.copyAllMenuItem.Text = "Copy all";
+            this.copyAllMenuItem.Click += new System.EventHandler(this.copyAllMenuItem_Click);
+            // 
+            // cutMenuItem
+            // 
+            this.cutMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.cutMenuItem.Name = "cutMenuItem";
+            this.cutMenuItem.Size = new System.Drawing.Size(92, 22);
+            this.cutMenuItem.Text = "Cut";
+            this.cutMenuItem.Click += new System.EventHandler(this.cutMenuItem_Click);
+            // 
+            // pasteMenuItem
+            // 
+            this.pasteMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.pasteMenuItem.Name = "pasteMenuItem";
+            this.pasteMenuItem.Size = new System.Drawing.Size(92, 22);
+            this.pasteMenuItem.Text = "Paste";
+            this.pasteMenuItem.Click += new System.EventHandler(this.pasteMenuItem_Click);
             // 
             // button1
             // 
@@ -67,6 +123,31 @@ namespace UndertaleModTool.Windows
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
+            // textCopyMenu
+            // 
+            this.textCopyMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyMenuItem1,
+            this.copyAllMenuItem1});
+            this.textCopyMenu.Name = "textCopyMenu";
+            this.textCopyMenu.Size = new System.Drawing.Size(118, 48);
+            this.textCopyMenu.Opening += new System.ComponentModel.CancelEventHandler(this.textCopyMenu_Opening);
+            // 
+            // copyMenuItem1
+            // 
+            this.copyMenuItem1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.copyMenuItem1.Name = "copyMenuItem1";
+            this.copyMenuItem1.Size = new System.Drawing.Size(117, 22);
+            this.copyMenuItem1.Text = "Copy";
+            this.copyMenuItem1.Click += new System.EventHandler(this.copyMenuItem_Click);
+            // 
+            // copyAllMenuItem1
+            // 
+            this.copyAllMenuItem1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.copyAllMenuItem1.Name = "copyAllMenuItem1";
+            this.copyAllMenuItem1.Size = new System.Drawing.Size(117, 22);
+            this.copyAllMenuItem1.Text = "Copy all";
+            this.copyAllMenuItem1.Click += new System.EventHandler(this.copyAllMenuItem_Click);
+            // 
             // TextInput
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -78,6 +159,8 @@ namespace UndertaleModTool.Windows
             this.Name = "TextInput";
             this.Text = "Default Title Message";
             this.Load += new System.EventHandler(this.TextInput_Load);
+            this.textCommandsMenu.ResumeLayout(false);
+            this.textCopyMenu.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -88,5 +171,13 @@ namespace UndertaleModTool.Windows
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ContextMenuStrip textCommandsMenu;
+        private System.Windows.Forms.ToolStripMenuItem copyMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cutMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pasteMenuItem;
+        private System.Windows.Forms.ContextMenuStrip textCopyMenu;
+        private System.Windows.Forms.ToolStripMenuItem copyMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem copyAllMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem copyAllMenuItem;
     }
 }

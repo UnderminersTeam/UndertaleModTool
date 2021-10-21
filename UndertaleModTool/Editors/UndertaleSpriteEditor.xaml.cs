@@ -108,7 +108,7 @@ namespace UndertaleModTool
                         {
                             try
                             {
-                                worker.ExportAsPNG(tex.tex.Texture, System.IO.Path.Combine(path, tex.id + ext));
+                                worker.ExportAsPNG(tex.tex.Texture, System.IO.Path.Combine(path, sprite.Name.Content + "_" + tex.id + ext));
                             }
                             catch (Exception ex)
                             {
