@@ -11,10 +11,13 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 
 int progress = 0;
 int codesLeft = 0;
-string results = "";
+StringBuilder results = new();
+Dictionary<string, List<string>> resultsDict = new();
 int result_count = 0;
 int code_count = 0;
 List<String> codeToDump = new List<String>();
@@ -45,7 +48,7 @@ if (String.IsNullOrEmpty(searchNames) || String.IsNullOrWhiteSpace(searchNames))
     ScriptError("Names list cannot be empty or null.");
     return;
 }
-string[] searchNamesList = searchNames.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+string[] searchNamesList = searchNames.Split('\n', StringSplitOptions.RemoveEmptyEntries);
 for (int i = 0; i < searchNamesList.Length; i++)
 {
     searchNamesList[i] = searchNamesList[i].Trim();
@@ -105,10 +108,20 @@ for (var j = 0; j < codeToDump.Count; j++)
 {
     DumpCode(Data.Code.ByName(codeToDump[j]));
 }
+GetSortedResults();
 HideProgressBar();
 EnableUI();
 string results_message = result_count.ToString() + " results in " + code_count.ToString() + " code entries.";
-SimpleTextInput("Search results.", results_message, results_message + "\n\n" + results, true, false);
+SimpleTextOutput("Search results.", results_message, results_message + "\n\n" + results, true);
+
+void GetSortedResults() //not sure that it's necessary to sort it, but just in case
+{
+    foreach (var result in resultsDict.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c.Key))))
+    {
+        results.Append($"Results in {result.Key}:\n==========================\n");
+        results.Append(string.Join('\n', result.Value) + "\n\n");
+    }
+}
 
 string GetFolder(string path)
 {
@@ -127,7 +140,7 @@ void DumpCode(UndertaleCode code)
     {
         var line_number = 1;
         string decompiled_text = (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "");
-        string[] splitted = decompiled_text.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        string[] splitted = decompiled_text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
         bool name_written = false;
         foreach (string lineInt in splitted)
         {
@@ -135,18 +148,15 @@ void DumpCode(UndertaleCode code)
             {
                 if (name_written == false)
                 {
-                    results += "Results in " + code.Name.Content + ": \n==========================\n";
+                    resultsDict.Add(code.Name.Content, new List<string>());
                     name_written = true;
                     code_count += 1;
                 }
-                results += "Line " + line_number.ToString() + ": " + lineInt + "\n";
+                resultsDict[code.Name.Content].Add($"Line {line_number}: {lineInt}");
                 result_count += 1;
             }
             line_number += 1;
         }
-        if (name_written == true)
-            results += "\n";
-
     }
     catch (Exception e)
     {

@@ -38,7 +38,7 @@ HideProgressBar();
 //GC.Collect();
 EnableUI();
 string results_message = $"{result_count} results in {code_count} code entries.";
-SimpleTextInput("Search results.", results_message, results_message + "\n\n" + results.ToString(), true, false);
+SimpleTextOutput("Search results.", results_message, results_message + "\n\n" + results.ToString(), true);
 
 void UpdateProgress()
 {
@@ -59,10 +59,10 @@ async Task DumpCode()
 void GetSortedResults()
 {
     foreach (var result in resultsDict.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c.Key))))
-	{
+    {
         results.Append($"Results in {result.Key}:\n==========================\n");
         results.Append(string.Join('\n', result.Value) + "\n\n");
-	}
+    }
 }
 
 bool RegexContains(string s, string sPattern, bool isCaseInsensitive)
