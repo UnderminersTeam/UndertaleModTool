@@ -16,13 +16,13 @@ using System.Linq;
 
 int progress = 0;
 int codesLeft = 0;
-StringBuilder results = new();
-Dictionary<string, List<string>> resultsDict = new();
 int result_count = 0;
-int code_count = 0;
-List<String> codeToDump = new List<String>();
-List<String> gameObjectCandidates = new List<String>();
+StringBuilder results = new();
 string searchNames = "";
+Dictionary<string, List<string>> resultsDict = new();
+List<string> failedList = new();
+List<string> codeToDump = new();
+List<string> gameObjectCandidates = new();
 
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
@@ -36,7 +36,7 @@ if (Data.IsYYC())
 
 bool case_sensitive = ScriptQuestion("Case sensitive?");
 bool regex_check = ScriptQuestion("Regex search?");
-String keyword = SimpleTextInput("Enter your search", "Search box below", "", false);
+string keyword = SimpleTextInput("Enter your search", "Search box below", "", false);
 if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
 {
     ScriptError("Search cannot be empty or null.");
@@ -99,23 +99,37 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
 codesLeft = codeToDump.Count;
 UpdateProgress();
 
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Code Entries", progress++, codesLeft);
-}
-
 for (var j = 0; j < codeToDump.Count; j++)
 {
     DumpCode(Data.Code.ByName(codeToDump[j]));
 }
 GetSortedResults();
+
 HideProgressBar();
 EnableUI();
-string results_message = result_count.ToString() + " results in " + code_count.ToString() + " code entries.";
-SimpleTextOutput("Search results.", results_message, results_message + "\n\n" + results, true);
+string results_message = $"{result_count} results in {resultsDict.Count} code entries.";
+SimpleTextOutput("Search results.", results_message, results.ToString(), true);
+
+void UpdateProgress()
+{
+    UpdateProgressBar(null, "Code Entries", progress++, codesLeft);
+}
 
 void GetSortedResults() //not sure that it's necessary to sort it, but just in case
 {
+    int failedCount = failedList.Count;
+    if (failedCount > 0)
+    {
+        if (failedCount == 1)
+            results.Append("There is 1 code entry that encountered an error while searching:");
+        else
+            results.Append($"There is {failedCount} code entries that encountered an error while searching:");
+
+        results.Append('\n' + string.Join(",\n", failedList.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c)))));
+        results.Append(".\n\n\n");
+    }
+    results.Append($"{result_count} results in {resultsDict.Count} code entries.\n\n");
+
     foreach (var result in resultsDict.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c.Key))))
     {
         results.Append($"Results in {result.Key}:\n==========================\n");
@@ -150,7 +164,6 @@ void DumpCode(UndertaleCode code)
                 {
                     resultsDict.Add(code.Name.Content, new List<string>());
                     name_written = true;
-                    code_count += 1;
                 }
                 resultsDict[code.Name.Content].Add($"Line {line_number}: {lineInt}");
                 result_count += 1;
@@ -160,6 +173,7 @@ void DumpCode(UndertaleCode code)
     }
     catch (Exception e)
     {
+        failedList.Add(code.Name.Content);
     }
 
     UpdateProgress();
