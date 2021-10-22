@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 
 EnsureDataLoaded();
@@ -16,16 +17,15 @@ if (Data.IsYYC())
 
 int progress = 0;
 StringBuilder results = new();
-Dictionary<string, List<string>> resultsDict = new();
+ConcurrentDictionary<string, List<string>> resultsDict = new();
+ConcurrentBag<string> failedList = new();
 int result_count = 0;
-int code_count = 0;
-ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
-UpdateProgress();
+ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
 bool case_sensitive = ScriptQuestion("Case sensitive?");
 bool regex_check = ScriptQuestion("Regex search?");
-String keyword = SimpleTextInput("Enter your search", "Search box below", "", false);
+string keyword = SimpleTextInput("Enter your search", "Search box below", "", false);
 if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
 {
     ScriptError("Search cannot be empty or null.");
@@ -34,15 +34,16 @@ if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
 
 await DumpCode();
 GetSortedResults();
+
 HideProgressBar();
-//GC.Collect();
 EnableUI();
-string results_message = $"{result_count} results in {code_count} code entries.";
-SimpleTextOutput("Search results.", results_message, results_message + "\n\n" + results.ToString(), true);
+string results_message = $"{result_count} results in {resultsDict.Count} code entries.";
+SimpleTextOutput("Search results.", results_message, results.ToString(), true);
 
 void UpdateProgress()
 {
-    UpdateProgressBar(null, "Code Entries", progress++, Data.Code.Count);
+    UpdateProgressBar(null, "Code Entries", progress, Data.Code.Count);
+    Interlocked.Increment(ref progress); //"thread-safe" increment
 }
 
 string GetFolder(string path)
@@ -50,14 +51,28 @@ string GetFolder(string path)
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
 
-
 async Task DumpCode()
 {
     await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
+    UpdateProgress();
+    progress--;
 }
 
 void GetSortedResults()
 {
+    int failedCount = failedList.Count;
+    if (failedCount > 0)
+    {
+        if (failedCount == 1)
+            results.Append("There is 1 code entry that encountered an error while searching:");
+        else
+            results.Append($"There is {failedCount} code entries that encountered an error while searching:");
+
+        results.Append('\n' + string.Join(",\n", failedList.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c)))));
+        results.Append(".\n\n\n");
+    }
+    results.Append($"{result_count} results in {resultsDict.Count} code entries.\n\n");
+
     foreach (var result in resultsDict.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c.Key))))
     {
         results.Append($"Results in {result.Key}:\n==========================\n");
@@ -85,18 +100,18 @@ void DumpCode(UndertaleCode code)
             {
                 if (name_written == false)
                 {
-                    resultsDict.Add(code.Name.Content, new List<string>());
+                    resultsDict[code.Name.Content] = new List<string>();
                     name_written = true;
-                    code_count += 1;
                 }
                 resultsDict[code.Name.Content].Add($"Line {line_number}: {lineInt}");
-                result_count += 1;
+                Interlocked.Increment(ref result_count);
             }
             line_number += 1;
         }
     }
     catch (Exception e)
     {
+        failedList.Add(code.Name.Content);
     }
 
     UpdateProgress();
