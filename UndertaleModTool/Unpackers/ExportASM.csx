@@ -4,6 +4,8 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+EnsureDataLoaded();
+
 int progress = 0;
 string codeFolder = GetFolder(FilePath) + "Export_Assembly" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
@@ -17,13 +19,16 @@ if (Directory.Exists(codeFolder))
 Directory.CreateDirectory(codeFolder);
 
 UpdateProgress();
+
 await DumpCode();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder);
 
+
 void UpdateProgress()
 {
-    UpdateProgressBar(null, "Code Entries", progress++, Data.Code.Count);
+    UpdateProgressBar(null, "Code Entries", progress, Data.Code.Count);
+    Interlocked.Increment(ref progress); //"thread-safe" increment
 }
 
 string GetFolder(string path) 
@@ -35,6 +40,9 @@ string GetFolder(string path)
 async Task DumpCode()
 {
     await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
+
+    UpdateProgress();
+    progress--;
 }
 
 void DumpCode(UndertaleCode code) 

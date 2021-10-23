@@ -5,13 +5,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections;
 
+EnsureDataLoaded();
+
 int progress = 0;
 string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
 Directory.CreateDirectory(codeFolder);
 
-UpdateProgress();
 string line;
 string path_error = Path.Combine(codeFolder, "Status.txt");
 string path_error2 = Path.Combine(codeFolder, "Errored_Code_Entries.txt");
@@ -24,6 +25,7 @@ bool write = true;
 bool isErrorCodeEntry = false;
 ScriptMessage("If UndertaleModTool crashes during code export, or another serious error of that nature occurs, this script will record it. Please reload the game into the tool in the event the tool crashes and re-run this script until it completes successfully without crashing. A full record of code entries with fatal decompilation problems (if they exist) will be recorded by the end in \"Errored_Code_Entries.txt\".");
 
+UpdateProgress();
 if (File.Exists(path_error))
 {
     System.IO.StreamReader file = new System.IO.StreamReader(path_error);
@@ -128,6 +130,7 @@ foreach (UndertaleCode code in Data.Code)
             File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
         }
     }
+
     UpdateProgress();
 }
 if (write)

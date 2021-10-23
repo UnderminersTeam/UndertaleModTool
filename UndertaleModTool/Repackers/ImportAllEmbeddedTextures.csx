@@ -6,6 +6,8 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+EnsureDataLoaded();
+
 // Setup root export folder.
 string winFolder = GetFolder(FilePath); // The folder data.win is located in.
 

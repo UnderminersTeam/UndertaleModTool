@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 using UndertaleModLib.Util;
 
+EnsureDataLoaded();
+
 UndertaleFont font = FontPickerResult(); //GUI dropdown selection list of fonts
 if (font == null) return; //the 'Cancel' or 'X' button is hit
 new FontEditorGUI(font).ShowDialog(); //font editor GUI

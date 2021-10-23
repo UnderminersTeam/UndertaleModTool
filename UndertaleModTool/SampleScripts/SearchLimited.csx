@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 
+EnsureDataLoaded();
+
 int progress = 0;
 int codesLeft = 0;
 int result_count = 0;
@@ -25,8 +27,6 @@ List<string> codeToDump = new();
 List<string> gameObjectCandidates = new();
 
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
-
-EnsureDataLoaded();
 
 if (Data.IsYYC())
 {
@@ -97,6 +97,7 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
 }
 
 codesLeft = codeToDump.Count;
+
 UpdateProgress();
 
 for (var j = 0; j < codeToDump.Count; j++)
@@ -152,23 +153,26 @@ void DumpCode(UndertaleCode code)
 {
     try
     {
-        var line_number = 1;
-        string decompiled_text = (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "");
-        string[] splitted = decompiled_text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-        bool name_written = false;
-        foreach (string lineInt in splitted)
+        if (code.ParentEntry is null)
         {
-            if (((regex_check && RegexContains(lineInt, keyword, case_sensitive)) || ((!regex_check && case_sensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
+            var line_number = 1;
+            string decompiled_text = (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "");
+            string[] splitted = decompiled_text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            bool name_written = false;
+            foreach (string lineInt in splitted)
             {
-                if (name_written == false)
+                if (((regex_check && RegexContains(lineInt, keyword, case_sensitive)) || ((!regex_check && case_sensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
                 {
-                    resultsDict.Add(code.Name.Content, new List<string>());
-                    name_written = true;
+                    if (name_written == false)
+                    {
+                        resultsDict.Add(code.Name.Content, new List<string>());
+                        name_written = true;
+                    }
+                    resultsDict[code.Name.Content].Add($"Line {line_number}: {lineInt}");
+                    result_count += 1;
                 }
-                resultsDict[code.Name.Content].Add($"Line {line_number}: {lineInt}");
-                result_count += 1;
+                line_number += 1;
             }
-            line_number += 1;
         }
     }
     catch (Exception e)

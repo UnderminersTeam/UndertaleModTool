@@ -32,6 +32,8 @@ if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
     return;
 }
 
+UpdateProgress();
+
 await DumpCode();
 GetSortedResults();
 
@@ -39,6 +41,7 @@ HideProgressBar();
 EnableUI();
 string results_message = $"{result_count} results in {resultsDict.Count} code entries.";
 SimpleTextOutput("Search results.", results_message, results.ToString(), true);
+
 
 void UpdateProgress()
 {
@@ -53,7 +56,12 @@ string GetFolder(string path)
 
 async Task DumpCode()
 {
+    var data = DECOMPILE_CONTEXT.Value.Data;
+    if (data?.KnownSubFunctions is null) //if we run script before opening any code
+        Decompiler.BuildSubFunctionCache(data);
+
     await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
+
     UpdateProgress();
     progress--;
 }
@@ -90,23 +98,26 @@ void DumpCode(UndertaleCode code)
 {
     try
     {
-        var line_number = 1;
-        string decompiled_text = (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "");
-        string[] splitted = decompiled_text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-        bool name_written = false;
-        foreach (string lineInt in splitted)
+        if (code.ParentEntry is null)
         {
-            if (((regex_check && RegexContains(lineInt, keyword, case_sensitive)) || ((!regex_check && case_sensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
+            var line_number = 1;
+            string decompiled_text = (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "");
+            string[] splitted = decompiled_text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            bool name_written = false;
+            foreach (string lineInt in splitted)
             {
-                if (name_written == false)
+                if (((regex_check && RegexContains(lineInt, keyword, case_sensitive)) || ((!regex_check && case_sensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
                 {
-                    resultsDict[code.Name.Content] = new List<string>();
-                    name_written = true;
+                    if (name_written == false)
+                    {
+                        resultsDict[code.Name.Content] = new List<string>();
+                        name_written = true;
+                    }
+                    resultsDict[code.Name.Content].Add($"Line {line_number}: {lineInt}");
+                    Interlocked.Increment(ref result_count);
                 }
-                resultsDict[code.Name.Content].Add($"Line {line_number}: {lineInt}");
-                Interlocked.Increment(ref result_count);
+                line_number += 1;
             }
-            line_number += 1;
         }
     }
     catch (Exception e)
