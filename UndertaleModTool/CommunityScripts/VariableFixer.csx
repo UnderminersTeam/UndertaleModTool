@@ -1,4 +1,7 @@
 // Made by Creepersbane
+
+EnsureDataLoaded();
+
 ScriptMessage(@"This script will most likely fix data files with the following symptoms:
 
 If, after loading the data file after code editing, any of the following occur:

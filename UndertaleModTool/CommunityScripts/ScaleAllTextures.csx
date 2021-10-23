@@ -11,6 +11,8 @@ using UndertaleModLib.Util;
 
 // By Grossley
 
+EnsureDataLoaded();
+
 if (!ScriptQuestion("Visual glitches are very likely to occur in game. Do you accept this?"))
 {
     ScriptError("Aborted!");

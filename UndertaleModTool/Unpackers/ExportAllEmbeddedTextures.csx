@@ -3,6 +3,8 @@ using System.Text;
 using System;
 using System.IO;
 
+EnsureDataLoaded();
+
 int progress = 0;
 string winFolder = GetFolder(FilePath); // The folder data.win is located in.
 string EmbFolder = Path.Combine(winFolder, "EmbeddedTextures"); // The folder to write the image data to.

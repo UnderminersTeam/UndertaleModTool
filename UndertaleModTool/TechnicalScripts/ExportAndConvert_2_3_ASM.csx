@@ -4,6 +4,8 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+EnsureDataLoaded();
+
 if (Data.ToolInfo.ProfileMode)
 {
     ScriptMessage("This script is incompatible with profile mode.");

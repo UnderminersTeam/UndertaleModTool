@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
+EnsureDataLoaded();
+
 int progress = 0;
 string texFolder = GetFolder(FilePath) + "Export_Tilesets" + Path.DirectorySeparatorChar;
 TextureWorker worker = new TextureWorker();
@@ -18,14 +20,18 @@ if (Directory.Exists(texFolder))
 Directory.CreateDirectory(texFolder);
 
 UpdateProgress();
+
 await DumpTilesets();
 worker.Cleanup();
+
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 
+
 void UpdateProgress()
 {
-    UpdateProgressBar(null, "Tilesets", progress++, Data.Backgrounds.Count);
+    UpdateProgressBar(null, "Tilesets", progress, Data.Backgrounds.Count);
+    Interlocked.Increment(ref progress); //"thread-safe" increment
 }
 
 string GetFolder(string path) 
@@ -37,11 +43,15 @@ string GetFolder(string path)
 async Task DumpTilesets()
 {
     await Task.Run(() => Parallel.ForEach(Data.Backgrounds, DumpTileset));
+
+    UpdateProgress();
+    progress--;
 }
 
 void DumpTileset(UndertaleBackground tileset) 
 {
     if (tileset.Texture != null)
         worker.ExportAsPNG(tileset.Texture, texFolder + tileset.Name.Content + ".png");
+
     UpdateProgress();
 }

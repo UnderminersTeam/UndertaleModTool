@@ -7,6 +7,8 @@ using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 
+EnsureDataLoaded();
+
 // Setup root export folder.
 string winFolder = GetFolder(FilePath); // The folder data.win is located in.
 
@@ -26,22 +28,27 @@ if (!Directory.Exists(winFolder + "Export_Tilesets\\"))
     return;
 }
 
-
 UpdateProgress();
+
 await ImportTilesets();
+
 HideProgressBar();
 ScriptMessage("Import Complete.");
 
 
 void UpdateProgress()
 {
-    UpdateProgressBar(null, "Tilesets", progress++, Data.Backgrounds.Count);
+    UpdateProgressBar(null, "Tilesets", progress, Data.Backgrounds.Count);
+    Interlocked.Increment(ref progress); //"thread-safe" increment
 }
 
 
 async Task ImportTilesets()
 {
     await Task.Run(() => Parallel.ForEach(Data.Backgrounds, ImportTileset));
+
+    UpdateProgress();
+    progress--;
 }
 
 void ImportTileset(UndertaleBackground tileset)
@@ -59,6 +66,8 @@ void ImportTileset(UndertaleBackground tileset)
     {
         ScriptMessage("Failed to import file number " + i + " due to: " + ex.Message);
     }
-    i++;
+
+    Interlocked.Increment(i);
+
     UpdateProgress();
 }

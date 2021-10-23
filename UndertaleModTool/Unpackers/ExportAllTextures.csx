@@ -32,17 +32,21 @@ Directory.CreateDirectory(bgrFolder);
 TextureWorker worker = new TextureWorker();
 
 UpdateProgress(0);
+
 await DumpSprites();
 await DumpFonts();
 await DumpBackgrounds();
 worker.Cleanup();
+
 HideProgressBar();
 
 ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 
+
 void UpdateProgress(int updateAmount)
 {
-    UpdateProgressBar(null, "Textures Exported", progress += updateAmount, Data.TexturePageItems.Count);
+    Interlocked.Add(ref progress, updateAmount); //"thread-safe" add operation
+    UpdateProgressBar(null, "Textures Exported", progress, Data.TexturePageItems.Count);
 }
 
 async Task DumpSprites()
@@ -70,6 +74,7 @@ void DumpSprite(UndertaleSprite sprite)
             worker.ExportAsPNG(tex, Path.Combine(sprFolder, sprite.Name.Content + "_" + i + ".png"));
         }
     }
+
     UpdateProgress(sprite.Textures.Count);
 }
 
@@ -79,6 +84,7 @@ void DumpFont(UndertaleFont font)
     {
         UndertaleTexturePageItem tex = font.Texture;
         worker.ExportAsPNG(tex, Path.Combine(fntFolder, font.Name.Content + "_0.png"));
+
         UpdateProgress(1);
     }
 }
@@ -89,6 +95,7 @@ void DumpBackground(UndertaleBackground background)
     {
         UndertaleTexturePageItem tex = background.Texture;
         worker.ExportAsPNG(tex, Path.Combine(bgrFolder, background.Name.Content + "_0.png"));
+
         UpdateProgress(1);
     }
 }

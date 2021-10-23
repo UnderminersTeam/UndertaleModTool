@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 
+EnsureDataLoaded();
+
 int progress = 0;
 int codesLeft = 0;
 int result_count = 0;
@@ -25,8 +27,6 @@ List<string> codeToDump = new();
 List<string> gameObjectCandidates = new();
 
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
-
-EnsureDataLoaded();
 
 if (Data.IsYYC())
 {
@@ -97,6 +97,7 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
 }
 
 codesLeft = codeToDump.Count;
+
 UpdateProgress();
 
 for (var j = 0; j < codeToDump.Count; j++)

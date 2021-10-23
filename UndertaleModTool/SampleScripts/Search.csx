@@ -32,6 +32,8 @@ if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
     return;
 }
 
+UpdateProgress();
+
 await DumpCode();
 GetSortedResults();
 
@@ -39,6 +41,7 @@ HideProgressBar();
 EnableUI();
 string results_message = $"{result_count} results in {resultsDict.Count} code entries.";
 SimpleTextOutput("Search results.", results_message, results.ToString(), true);
+
 
 void UpdateProgress()
 {
@@ -53,7 +56,12 @@ string GetFolder(string path)
 
 async Task DumpCode()
 {
+    var data = DECOMPILE_CONTEXT.Value.Data;
+    if (data?.KnownSubFunctions is null) //if we run script before opening any code
+        Decompiler.BuildSubFunctionCache(data);
+
     await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
+
     UpdateProgress();
     progress--;
 }

@@ -5,6 +5,8 @@ using System.Text;
 using System;
 using System.IO;
 
+EnsureDataLoaded();
+
 // Get the path, and check for overwriting
 string outputPath = Path.Combine(Path.GetDirectoryName(FilePath) + Path.DirectorySeparatorChar, "asset_names.txt");
 if (File.Exists(outputPath))

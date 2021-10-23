@@ -6,6 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
+EnsureDataLoaded();
+
 bool padded = (!ScriptQuestion("Export all sprites unpadded?"));
 
 int progress = 0;
@@ -21,14 +23,18 @@ if (Directory.Exists(texFolder))
 Directory.CreateDirectory(texFolder);
 
 UpdateProgress();
+
 await DumpSprites();
 worker.Cleanup();
+
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 
+
 void UpdateProgress()
 {
-    UpdateProgressBar(null, "Sprites", progress++, Data.Sprites.Count);
+    UpdateProgressBar(null, "Sprites", progress, Data.Sprites.Count);
+    Interlocked.Increment(ref progress); //"thread-safe" increment
 }
 
 string GetFolder(string path) 
@@ -36,10 +42,12 @@ string GetFolder(string path)
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
 
-
 async Task DumpSprites()
 {
     await Task.Run(() => Parallel.ForEach(Data.Sprites, DumpSprite));
+
+    UpdateProgress();
+    progress--;
 }
 
 void DumpSprite(UndertaleSprite sprite) 

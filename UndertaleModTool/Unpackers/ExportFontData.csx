@@ -9,6 +9,8 @@ using UndertaleModLib.Util;
 using System.Linq;
 using System.Windows.Forms;
 
+EnsureDataLoaded();
+
 int progress = 0;
 string fntFolder = GetFolder(FilePath) + "Export_Fonts" + Path.DirectorySeparatorChar;
 TextureWorker worker = new TextureWorker();
@@ -21,14 +23,18 @@ if (ShowInputDialog() == System.Windows.Forms.DialogResult.Cancel)
 string[] arrayString = input.ToArray();
 
 UpdateProgress();
+
 await DumpFonts();
 worker.Cleanup();
+
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + fntFolder);
 
+
 void UpdateProgress()
 {
-    UpdateProgressBar(null, "Fonts", progress++, Data.Fonts.Count);
+    UpdateProgressBar(null, "Fonts", progress, Data.Fonts.Count);
+    Interlocked.Increment(ref progress); //"thread-safe" increment
 }
 
 string GetFolder(string path)
@@ -39,6 +45,9 @@ string GetFolder(string path)
 async Task DumpFonts()
 {
     await Task.Run(() => Parallel.ForEach(Data.Fonts, DumpFont));
+
+    UpdateProgress();
+    progress--;
 }
 
 void DumpFont(UndertaleFont font)

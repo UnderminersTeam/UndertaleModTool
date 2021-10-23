@@ -5,13 +5,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections;
 
+EnsureDataLoaded();
+
 int progress = 0;
 string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
 Directory.CreateDirectory(codeFolder);
 
-UpdateProgress();
 string line;
 string path_error = Path.Combine(codeFolder, "Status.txt");
 string path_error2 = Path.Combine(codeFolder, "Errored_Code_Entries.txt");
@@ -128,6 +129,7 @@ foreach (UndertaleCode code in Data.Code)
             File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
         }
     }
+
     UpdateProgress();
 }
 if (write)

@@ -101,15 +101,18 @@ Dictionary<string, string> assetTypeDict = new Dictionary<string, string>();
 Directory.CreateDirectory(exportedTexturesFolder);
 
 UpdateProgress(0);
+
 await DumpSprites();
 await DumpFonts();
 await DumpBackgrounds();
 worker.Cleanup();
+
 HideProgressBar();
 
 void UpdateProgress(int updateAmount)
 {
-    UpdateProgressBar(null, "Existing Textures Exported", progress += updateAmount, Data.TexturePageItems.Count);
+    Interlocked.Add(ref progress, updateAmount); //"thread-safe" add operation
+    UpdateProgressBar(null, "Existing Textures Exported", progress, Data.TexturePageItems.Count);
 }
 
 async Task DumpSprites()
@@ -139,6 +142,7 @@ void DumpSprite(UndertaleSprite sprite)
             assetTypeDict.Add(sprite.Name.Content + "_" + i, "spr");
         }
     }
+
     UpdateProgress(sprite.Textures.Count);
 }
 
@@ -150,6 +154,7 @@ void DumpFont(UndertaleFont font)
         worker.ExportAsPNG(tex, exportedTexturesFolder + font.Name.Content + ".png");
         assetCoordinateDict.Add(font.Name.Content, new int[] { tex.TargetX, tex.TargetY, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
         assetTypeDict.Add(font.Name.Content, "fnt");
+
         UpdateProgress(1);
     }
 }
@@ -162,6 +167,7 @@ void DumpBackground(UndertaleBackground background)
         worker.ExportAsPNG(tex, exportedTexturesFolder + background.Name.Content + ".png");
         assetCoordinateDict.Add(background.Name.Content, new int[] { tex.TargetX, tex.TargetY, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
         assetTypeDict.Add(background.Name.Content, "bg");
+
         UpdateProgress(1);
     }
 }

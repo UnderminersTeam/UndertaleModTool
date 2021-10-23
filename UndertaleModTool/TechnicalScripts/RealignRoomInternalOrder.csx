@@ -1,3 +1,5 @@
+EnsureDataLoaded();
+
 Data.GeneralInfo.RoomOrder.Clear();
 for (int i = 0; i < Data.Rooms.Count; i++)
 {
