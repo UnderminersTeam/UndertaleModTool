@@ -134,7 +134,15 @@ namespace UndertaleModLib
 
     public class UndertaleReader : Util.BufferBinaryReader
     {
+        /// <summary>
+        /// function to delegate warning messages to
+        /// </summary>
+        /// <param name="warning"></param>
         public delegate void WarningHandlerDelegate(string warning);
+        /// <summary>
+        /// function to delegate informational messages to
+        /// </summary>
+        /// <param name="message"></param>
         public delegate void MessageHandlerDelegate(string message);
         private WarningHandlerDelegate WarningHandler;
         private MessageHandlerDelegate MessageHandler;
