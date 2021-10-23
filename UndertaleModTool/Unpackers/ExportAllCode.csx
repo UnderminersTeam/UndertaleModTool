@@ -54,7 +54,6 @@ async Task DumpCode()
 
     await Task.Run(() => Parallel.ForEach(toDump, DumpCode));
 
-    UpdateProgress();
     progress--;
 }
 

@@ -41,7 +41,6 @@ async Task DumpSounds()
 {
     await Task.Run(() => Parallel.ForEach(Data.Sounds, DumpSound));
 
-    UpdateProgress();
     progress--;
 }
 

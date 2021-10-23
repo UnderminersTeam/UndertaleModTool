@@ -47,7 +47,6 @@ async Task ImportTilesets()
 {
     await Task.Run(() => Parallel.ForEach(Data.Backgrounds, ImportTileset));
 
-    UpdateProgress();
     progress--;
 }
 

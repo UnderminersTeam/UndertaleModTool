@@ -46,7 +46,6 @@ async Task DumpFonts()
 {
     await Task.Run(() => Parallel.ForEach(Data.Fonts, DumpFont));
 
-    UpdateProgress();
     progress--;
 }
 
