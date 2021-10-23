@@ -54,6 +54,27 @@ namespace UndertaleModCli
 
     }
 
+    /// <summary>
+    /// cli options for the New command
+    /// </summary>
+    /// <param name="Overwrite">Save over an existing file at Dest</param>
+    public class NewOptions
+    {
+        /// <summary>
+        /// Destination for new data file
+        /// </summary>
+        public FileInfo Dest { get; set; } = new FileInfo("data.win");
+        /// <summary>
+        /// Save over an existing file at Dest
+        /// </summary>
+        public bool Overwrite { get; set; } = false;
+        /// <summary>
+        /// Whether to write the new data to stdout
+        /// </summary>
+        public bool Stdout { get; set; }
+
+    }
+
     public class Program : IScriptInterface
     {
         // taken fron the Linux programmer manual:
@@ -168,10 +189,18 @@ namespace UndertaleModCli
             };
             loadCommand.Handler = CommandHandler.Create<LoadOptions>(Program.Load);
 
+            var newCommand = new Command("new", "Generates a blank data file")
+            {
+                new Option<FileInfo>(new []{"-d", "--dest" },getDefaultValue: () => new NewOptions().Dest),
+                new Option<bool>(new []{"-f", "--overwrite"}, "Overwrite destination file if it already exists"),
+                new Option<bool>(new []{"-o", "--stdout"}, "Write new data content to stdout"),
+            };
+            newCommand.Handler = CommandHandler.Create<NewOptions>(Program.New);
 
             var rootCommand = new RootCommand {
                 infoCommand,
                 loadCommand,
+                newCommand,
                 };
 
             rootCommand.Description = "cli tool for modding, decompiling and unpacking Undertale (and other Game Maker: Studio games!";
@@ -181,6 +210,49 @@ namespace UndertaleModCli
 
             return commandLine.Invoke(args);
 
+        }
+
+        public static int New(NewOptions options)
+        {
+            var data = UndertaleData.CreateNew();
+            if (options.Stdout)
+            {
+                WriteStdout();
+            }
+            else
+            {
+                if (WriteFile() == EXIT_FAILURE)
+                {
+                    return EXIT_FAILURE;
+                }
+            }
+            return EXIT_SUCCESS;
+
+
+            int WriteFile()
+            {
+                if (options.Dest.Exists && !options.Overwrite)
+                {
+                    Console.Error.WriteLine($"{options.Dest} already exists. Pass --overwrite to overwrite");
+                    return EXIT_FAILURE;
+                }
+                using (var fs = options.Dest.OpenWrite())
+                {
+                    UndertaleIO.Write(fs, data);
+                    return EXIT_SUCCESS;
+                }
+            }
+
+            void WriteStdout()
+            {
+                using (var ms = new MemoryStream())
+                {
+                    UndertaleIO.Write(ms, data);
+                    System.Console.OpenStandardOutput().Write(ms.ToArray(), 0, (int)ms.Length);
+                    System.Console.Out.Flush();
+                }
+
+            }
         }
 
         static public int Load(LoadOptions options)
