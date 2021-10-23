@@ -143,7 +143,11 @@ namespace UndertaleModCli
                                             GetType().GetTypeInfo().Assembly,
                                             typeof(JsonConvert).GetTypeInfo().Assembly,
                                             typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
-                                            typeof(TextureWorker).GetTypeInfo().Assembly);
+                                            typeof(TextureWorker).GetTypeInfo().Assembly)
+                            // https://discord.com/channels/566861759210586112/568950566122946580/900145134480531506
+                            // ...WithEmitDebugInformation(true)" not only lets us to see a script line number which threw an exception,
+                            // but also provides other useful debug info when we run UMT in "Debug".
+                            .WithEmitDebugInformation(true);
         }
 
         public Program(FileInfo datafile, bool verbose)
