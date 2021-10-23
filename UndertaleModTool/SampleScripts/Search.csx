@@ -98,23 +98,26 @@ void DumpCode(UndertaleCode code)
 {
     try
     {
-        var line_number = 1;
-        string decompiled_text = (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "");
-        string[] splitted = decompiled_text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-        bool name_written = false;
-        foreach (string lineInt in splitted)
+        if (code.ParentEntry is null)
         {
-            if (((regex_check && RegexContains(lineInt, keyword, case_sensitive)) || ((!regex_check && case_sensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
+            var line_number = 1;
+            string decompiled_text = (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "");
+            string[] splitted = decompiled_text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            bool name_written = false;
+            foreach (string lineInt in splitted)
             {
-                if (name_written == false)
+                if (((regex_check && RegexContains(lineInt, keyword, case_sensitive)) || ((!regex_check && case_sensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
                 {
-                    resultsDict[code.Name.Content] = new List<string>();
-                    name_written = true;
+                    if (name_written == false)
+                    {
+                        resultsDict[code.Name.Content] = new List<string>();
+                        name_written = true;
+                    }
+                    resultsDict[code.Name.Content].Add($"Line {line_number}: {lineInt}");
+                    Interlocked.Increment(ref result_count);
                 }
-                resultsDict[code.Name.Content].Add($"Line {line_number}: {lineInt}");
-                Interlocked.Increment(ref result_count);
+                line_number += 1;
             }
-            line_number += 1;
         }
     }
     catch (Exception e)

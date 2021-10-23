@@ -91,38 +91,43 @@ bool RegexContains(string s, string sPattern, bool isCaseInsensitive)
 void DumpCode(UndertaleCode code)
 {
     string DISASMTEXT = "";
-    try
+
+    if (code.ParentEntry is null)
     {
-        DISASMTEXT = (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "");
-    }
-    catch (Exception e)
-    {
-        DISASMTEXT = "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"; // Please don't
-    }
-    try
-    {
-        var line_number = 1;
-        string decompiled_text = DISASMTEXT;
-        string[] splitted = decompiled_text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-        bool name_written = false;
-        foreach (string lineInt in splitted)
+        try
         {
-            if (((regex_check && RegexContains(lineInt, keyword, case_sensitive)) || ((!regex_check && case_sensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
-            {
-                if (name_written == false)
-                {
-                    resultsDict[code.Name.Content] = new List<string>();
-                    name_written = true;
-                }
-                resultsDict[code.Name.Content].Add($"Line {line_number}: {lineInt}");
-                Interlocked.Increment(ref result_count);
-            }
-            line_number += 1;
+            DISASMTEXT = (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "");
         }
-    }
-    catch (Exception e)
-    {
-        failedList.Add(code.Name.Content);
+        catch (Exception e)
+        {
+            DISASMTEXT = "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"; // Please don't
+        }
+
+        try
+        {
+            var line_number = 1;
+            string decompiled_text = DISASMTEXT;
+            string[] splitted = decompiled_text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            bool name_written = false;
+            foreach (string lineInt in splitted)
+            {
+                if (((regex_check && RegexContains(lineInt, keyword, case_sensitive)) || ((!regex_check && case_sensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
+                {
+                    if (name_written == false)
+                    {
+                        resultsDict[code.Name.Content] = new List<string>();
+                        name_written = true;
+                    }
+                    resultsDict[code.Name.Content].Add($"Line {line_number}: {lineInt}");
+                    Interlocked.Increment(ref result_count);
+                }
+                line_number += 1;
+            }
+        }
+        catch (Exception e)
+        {
+            failedList.Add(code.Name.Content);
+        }
     }
 
     UpdateProgress();
