@@ -46,7 +46,6 @@ async Task DumpSprites()
 {
     await Task.Run(() => Parallel.ForEach(Data.Sprites, DumpSprite));
 
-    UpdateProgress();
     progress--;
 }
 

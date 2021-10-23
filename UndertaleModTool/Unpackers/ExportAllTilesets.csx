@@ -44,7 +44,6 @@ async Task DumpTilesets()
 {
     await Task.Run(() => Parallel.ForEach(Data.Backgrounds, DumpTileset));
 
-    UpdateProgress();
     progress--;
 }
 
