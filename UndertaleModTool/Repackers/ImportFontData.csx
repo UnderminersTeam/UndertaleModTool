@@ -12,9 +12,21 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-string importFolder = PromptChooseDirectory("Import From Where");
-if (importFolder == null)
-    throw new ScriptException("The import folder was not set.");
+private string SelectPath()
+{
+    string path = string.Empty;
+    System.Windows.Forms.FolderBrowserDialog fbd = new System.Windows.Forms.FolderBrowserDialog();
+    if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+    {
+        path = fbd.SelectedPath + "\\";
+    }
+    if (path == null)
+    {
+        throw new System.Exception("The import folder was not set.");
+    }
+    return path;
+}
+string importFolder = SelectPath();
 
 System.IO.Directory.CreateDirectory("Packager");
 string sourcePath = importFolder;
