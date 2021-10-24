@@ -9,6 +9,8 @@ EnsureDataLoaded();
 int progress = 0;
 string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
+CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+CancellationToken token = cancelTokenSource.Token;
 
 if (Directory.Exists(codeFolder))
 {
@@ -26,10 +28,11 @@ foreach (UndertaleCode code in Data.Code)
     toDump.Add(code);
 }
 
-UpdateProgress();
+Task.Run(ProgressUpdater);
 
 await DumpCode();
 
+cancelTokenSource.Cancel(); //stop ProgressUpdater
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder);
 
@@ -37,7 +40,22 @@ ScriptMessage("Export Complete.\n\nLocation: " + codeFolder);
 void UpdateProgress()
 {
     UpdateProgressBar(null, "Code Entries", progress, toDump.Count);
+}
+void IncProgress()
+{
     Interlocked.Increment(ref progress); //"thread-safe" increment
+}
+async Task ProgressUpdater()
+{
+    while (true)
+    {
+        if (token.IsCancellationRequested)
+            return;
+
+        UpdateProgress();
+
+        await Task.Delay(100); //10 times per second
+    }
 }
 
 string GetFolder(string path)
@@ -69,5 +87,5 @@ void DumpCode(UndertaleCode code)
         File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
     }
 
-    UpdateProgress();
+    IncProgress();
 }

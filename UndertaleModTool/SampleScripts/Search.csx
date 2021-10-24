@@ -20,6 +20,8 @@ StringBuilder results = new();
 ConcurrentDictionary<string, List<string>> resultsDict = new();
 ConcurrentBag<string> failedList = new();
 int result_count = 0;
+CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+CancellationToken token = cancelTokenSource.Token;
 
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
@@ -33,10 +35,12 @@ if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
 }
 
 UpdateProgress();
+Task.Run(ProgressUpdater);
 
 await DumpCode();
 GetSortedResults();
 
+cancelTokenSource.Cancel(); //stop ProgressUpdater
 HideProgressBar();
 EnableUI();
 string results_message = $"{result_count} results in {resultsDict.Count} code entries.";
@@ -46,7 +50,22 @@ SimpleTextOutput("Search results.", results_message, results.ToString(), true);
 void UpdateProgress()
 {
     UpdateProgressBar(null, "Code Entries", progress, Data.Code.Count);
+}
+void IncProgress()
+{
     Interlocked.Increment(ref progress); //"thread-safe" increment
+}
+async Task ProgressUpdater()
+{
+    while (true)
+    {
+        if (token.IsCancellationRequested)
+            return;
+
+        UpdateProgress();
+
+        await Task.Delay(100); //10 times per second
+    }
 }
 
 string GetFolder(string path)
@@ -124,5 +143,5 @@ void DumpCode(UndertaleCode code)
         failedList.Add(code.Name.Content);
     }
 
-    UpdateProgress();
+    IncProgress();
 }

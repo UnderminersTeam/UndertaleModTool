@@ -15,6 +15,8 @@ string winFolder = GetFolder(FilePath); // The folder data.win is located in.
 int progress = 0;
 string subPath = winFolder + "Export_Tilesets";
 int i = 0;
+CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+CancellationToken token = cancelTokenSource.Token;
 
 string GetFolder(string path)
 {
@@ -28,10 +30,11 @@ if (!Directory.Exists(winFolder + "Export_Tilesets\\"))
     return;
 }
 
-UpdateProgress();
+Task.Run(ProgressUpdater);
 
 await ImportTilesets();
 
+cancelTokenSource.Cancel(); //stop ProgressUpdater
 HideProgressBar();
 ScriptMessage("Import Complete.");
 
@@ -39,9 +42,23 @@ ScriptMessage("Import Complete.");
 void UpdateProgress()
 {
     UpdateProgressBar(null, "Tilesets", progress, Data.Backgrounds.Count);
+}
+void IncProgress()
+{
     Interlocked.Increment(ref progress); //"thread-safe" increment
 }
+async Task ProgressUpdater()
+{
+    while (true)
+    {
+        if (token.IsCancellationRequested)
+            return;
 
+        UpdateProgress();
+
+        await Task.Delay(100); //10 times per second
+    }
+}
 
 async Task ImportTilesets()
 {
@@ -68,5 +85,5 @@ void ImportTileset(UndertaleBackground tileset)
 
     Interlocked.Increment(i);
 
-    UpdateProgress();
+    IncProgress();
 }

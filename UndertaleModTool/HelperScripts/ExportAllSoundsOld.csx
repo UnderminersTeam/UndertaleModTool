@@ -8,6 +8,8 @@ EnsureDataLoaded();
 
 int progress = 0;
 string sndFolder = GetFolder(FilePath) + "Export_Sounds" + Path.DirectorySeparatorChar;
+CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+CancellationToken token = cancelTokenSource.Token;
 
 if (Directory.Exists(sndFolder)) 
 {
@@ -17,10 +19,11 @@ if (Directory.Exists(sndFolder))
 
 Directory.CreateDirectory(sndFolder);
 
-UpdateProgress();
+Task.Run(ProgressUpdater);
 
 await DumpSounds();
 
+cancelTokenSource.Cancel(); //stop ProgressUpdater
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + sndFolder);
 
@@ -28,7 +31,22 @@ ScriptMessage("Export Complete.\n\nLocation: " + sndFolder);
 void UpdateProgress()
 {
     UpdateProgressBar(null, "Sounds", progress, Data.Sounds.Count);
+}
+void IncProgress()
+{
     Interlocked.Increment(ref progress); //"thread-safe" increment
+}
+async Task ProgressUpdater()
+{
+    while (true)
+    {
+        if (token.IsCancellationRequested)
+            return;
+
+        UpdateProgress();
+
+        await Task.Delay(100); //10 times per second
+    }
 }
 
 string GetFolder(string path)
@@ -49,5 +67,5 @@ void DumpSound(UndertaleSound sound)
     if (sound.AudioFile != null && !File.Exists(sndFolder + sound.File.Content))
         File.WriteAllBytes(sndFolder + sound.File.Content, sound.AudioFile.Data);
 
-    UpdateProgress();
+    IncProgress();
 }
