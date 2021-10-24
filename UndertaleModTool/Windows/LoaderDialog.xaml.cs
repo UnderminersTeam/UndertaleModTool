@@ -12,6 +12,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
@@ -134,7 +135,16 @@ namespace UndertaleModTool
                 try
                 {
                     ReportProgress(value + "/" + Maximum + (!String.IsNullOrEmpty(message) ? ": " + message : ""));
-                    ProgressBar.Value = value;
+
+                    if (Math.Abs(value - ProgressBar.Value) <= 1) //if value not changed by 0 or 1
+                    {
+                        ProgressBar.Value = value;
+                    }
+                    else
+                    {
+                        DoubleAnimation animation = new(value, TimeSpan.FromMilliseconds(100)); //time is the same as in "ProgressUpdater()"
+                        ProgressBar.BeginAnimation(ProgressBar.ValueProperty, animation);       //smooth progress change
+                    }
                 }
                 catch
                 {
