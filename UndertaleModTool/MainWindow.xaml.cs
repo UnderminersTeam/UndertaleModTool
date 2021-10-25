@@ -1144,18 +1144,91 @@ namespace UndertaleModTool
                 this.IsEnabled = true;
         }
 
-        public int ProcessExceptionOutput(ref string excString)
+        public string ProcessException(in Exception exc, in string scriptText)
         {
-            int excLineNum = -1;
+            List<int> excLineNums = new();
+            string excText = string.Empty;
+            List<string> traceLines = new();
+            Dictionary<string, int> exTypesDict = null;
+            
 
-            int endOfPrevStack = excString.IndexOf("--- End of stack trace from previous location ---");
-            if (endOfPrevStack != -1)
-                excString = excString[..endOfPrevStack]; //keep only stack trace of the script
+            if (exc is AggregateException)
+            {
+                List<string> exTypes = new();
 
-            if (!int.TryParse(excString.Split(":line ").Last().Split("\r\n")[0], out excLineNum)) //try to get a line number
-                excLineNum = -1; //":line " not found
+                foreach (Exception ex in (exc as AggregateException).InnerExceptions)
+                {
+                    traceLines.AddRange(ex.StackTrace.Split(Environment.NewLine));
+                    exTypes.Add(ex.GetType().Name);
+                }
 
-            return excLineNum;
+                if (exTypes.Count > 1)
+                {
+                    exTypesDict = exTypes.GroupBy(x => x)
+                                         .Select(x => new { Name = x.Key, Count = x.Count() })
+                                         .OrderByDescending(x => x.Count)
+                                         .ToDictionary(x => x.Name, x => x.Count);
+                }
+            }
+            else if (exc.InnerException is not null)
+            {
+                traceLines.AddRange(exc.InnerException.StackTrace.Split(Environment.NewLine));
+            }
+
+            traceLines.AddRange(exc.StackTrace.Split(Environment.NewLine));              
+
+            //for (int i = 0; i < traceLines.Length; i++)
+            try
+            {
+                foreach (string traceLine in traceLines)
+                {
+                    if (traceLine.TrimStart()[..13] == "at Submission") // only stack trace lines from the script
+                    {
+                        int linePos = traceLine.IndexOf(":line ") + 6;  // ":line ".Length = 6
+                        if (linePos != (-1 + 6))
+                        {
+                            int lineNum = Convert.ToInt32(traceLine[linePos..]);
+                            if (!excLineNums.Contains(lineNum))
+                                excLineNums.Add(lineNum);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                string excString = exc.ToString();
+
+                int endOfPrevStack = excString.IndexOf("--- End of stack trace from previous location ---");
+                if (endOfPrevStack != -1)
+                    excString = excString[..endOfPrevStack]; //keep only stack trace of the script
+
+                return $"An error occurred while processing the exception text.\nError message - \"{e.Message}\"\nThe unprocessed text is below.\n\n" + excString;
+            }
+
+            if (excLineNums.Count > 0) //if line number(s) is found
+            {
+                string[] scriptLines = scriptText.Split('\n');
+                string excLines = string.Join('\n', excLineNums.Select(n => $"Line {n}: {scriptLines[n - 1].TrimStart(new char[] { '\t', ' ' })}"));
+                if (exTypesDict is not null)
+                {
+                    string exTypesStr = string.Join(",\n", exTypesDict.Select(x => $"{x.Key}{((x.Value > 1) ? " (x" + x.Value + ")" : string.Empty)}"));
+                    excText = $"{exc.GetType().Name}: One on more errors occured:\n{exTypesStr}\n\nThe current stacktrace:\n{excLines}";
+                }
+                else
+                    excText = $"{exc.GetType().Name}: {exc.Message}\n\nThe current stacktrace:\n{excLines}";
+            }
+            else
+            {
+                string excString = exc.ToString();
+
+                int endOfPrevStack = excString.IndexOf("--- End of stack trace from previous location ---");
+                if (endOfPrevStack != -1)
+                    excString = excString[..endOfPrevStack]; //keep only stack trace of the script
+
+                excText = excString;
+            }
+
+            return excText;
         }
 
         public async Task RunScript(string path)
@@ -1211,23 +1284,14 @@ namespace UndertaleModTool
             catch (Exception exc)
             {
                 bool isScriptException = exc.GetType().Name == "ScriptException";
-                string excString = exc.ToString();
-                string scriptLine = string.Empty;
-                int excLineNum = -1;
+                string excString = string.Empty;
 
-                if (!isScriptException) //don't truncate the exception and don't add scriptLine to the output
-                {
-                    excLineNum = ProcessExceptionOutput(ref excString);
-                    if (excLineNum > 0) //if line number is found
-                        scriptLine = $"\nThe script line which caused the exception (line {excLineNum}):\n{scriptText.Split('\n')[excLineNum - 1].TrimStart(new char[] { '\t', ' ' })}";
-                }
+                if (!isScriptException)
+                    excString = ProcessException(in exc, in scriptText);
 
-                Console.WriteLine(excString);
+                Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
-                if (isScriptException)
-                    MessageBox.Show(exc.Message, "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
-                else
-                    MessageBox.Show(excString + scriptLine, "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(isScriptException ? exc.Message : excString, "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
                 ScriptExecutionSuccess = false;
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "Exception";
