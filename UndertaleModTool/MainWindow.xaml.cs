@@ -31,6 +31,7 @@ using UndertaleModTool.Windows;
 using System.IO.Pipes;
 
 using ColorConvert = System.Windows.Media.ColorConverter;
+using System.Text.RegularExpressions;
 
 namespace UndertaleModTool
 {
@@ -1186,7 +1187,8 @@ namespace UndertaleModTool
                 
                 ScriptPath = path;
 
-                object result = await CSharpScript.EvaluateAsync(scriptText, scriptOptions, this, typeof(IScriptInterface));
+                string compatScriptText = Regex.Replace(scriptText, @"\bDecompileContext\b", "GlobalDecompileContext", RegexOptions.None);
+                object result = await CSharpScript.EvaluateAsync(compatScriptText, scriptOptions, this, typeof(IScriptInterface));
                 
                 if (FinishedMessageEnabled)
                 {
