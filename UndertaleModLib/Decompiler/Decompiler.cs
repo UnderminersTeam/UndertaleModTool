@@ -1933,9 +1933,23 @@ namespace UndertaleModLib.Decompiler
                                 default:
                                     throw new NotImplementedException("Don't know how to decompile variable type " + target.VarType);
                             }
-                            if (target.InstType is ExpressionConstant c &&
-                                c.Type == UndertaleInstruction.DataType.Int16 && (short)c.Value == -9)
+
+                            // Check if instance type is "StackTop"
+                            ExpressionConstant instanceTypeConstExpr = null;
+                            if (target.InstType is ExpressionConstant c1) {
+                                instanceTypeConstExpr = c1;
+                            } else if (target.InstType is ExpressionTempVar tempVar) {
+                                TempVarAssigmentStatement assignment = context.TempVarMap[tempVar.Var.Var.Name];
+                                if (assignment != null && assignment.Value is ExpressionConstant c2) {
+                                    instanceTypeConstExpr = c2;
+                                }
+                            }
+                            if (instanceTypeConstExpr != null &&
+                                instanceTypeConstExpr.Type == UndertaleInstruction.DataType.Int16 &&
+                                (short)instanceTypeConstExpr.Value == (short)UndertaleInstruction.InstanceType.Stacktop) {
                                 target.InstType = stack.Pop();
+                            }
+
                             if (instr.Type1 == UndertaleInstruction.DataType.Variable)
                                 val = stack.Pop();
                             if (val != null)
@@ -2244,8 +2258,15 @@ namespace UndertaleModLib.Decompiler
                 if (i < tempvars.Count)
                 {
                     Expression val = stack.Pop();
-                    if (!(val is ExpressionTempVar) || (val as ExpressionTempVar).Var != tempvars[i])
-                        statements.Add(new TempVarAssigmentStatement(tempvars[i], val));
+                    if (!(val is ExpressionTempVar) || (val as ExpressionTempVar).Var != tempvars[i]) {
+                        var assignment = new TempVarAssigmentStatement(tempvars[i], val);
+                        statements.Add(assignment);
+
+                        if (val is ExpressionConstant) {
+                            context.TempVarMap[tempvars[i].Var.Name] = assignment;
+                        }
+                    }
+
                     leftovers.Add(tempvars[i]);
                 }
                 else
@@ -2254,8 +2275,13 @@ namespace UndertaleModLib.Decompiler
                     TempVar var = context.NewTempVar();
                     var.Type = val.Type;
                     TempVarReference varref = new TempVarReference(var);
-                    statements.Add(new TempVarAssigmentStatement(varref, val));
+                    var assignment = new TempVarAssigmentStatement(varref, val);
+                    statements.Add(assignment);
                     leftovers.Add(varref);
+
+                    if (val is ExpressionConstant) {
+                        context.TempVarMap[var.Name] = assignment;
+                    }
                 }
             }
             leftovers.Reverse();
