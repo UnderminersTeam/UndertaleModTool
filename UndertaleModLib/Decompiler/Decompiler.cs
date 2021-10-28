@@ -2315,134 +2315,118 @@ namespace UndertaleModLib.Decompiler
 
         public static Dictionary<uint, Block> DecompileFlowGraph(UndertaleCode code, List<uint> entryPoints)
         {
-            Dictionary<uint, Block> blockByAddress = new Dictionary<uint, Block>();
-            foreach(uint entryPoint in entryPoints)
-                blockByAddress[entryPoint] = new Block(entryPoint);
-            Block entryBlock = new Block(null);
-            Block finalBlock = new Block(code.Length / 4);
-            blockByAddress[code.Length / 4] = finalBlock;
-            Block currentBlock = entryBlock;
+            uint finalBlockAddress = code.Length / 4;
 
-            foreach (var instr in code.Instructions)
+            Dictionary<uint, Block> blocksByAddress = new Dictionary<uint, Block>();
+
+            // Identify addresses where any block starts
+            var blockStartingPoints = new List<uint>();
+            foreach (uint entryPoint in entryPoints) {
+                blockStartingPoints.Add(entryPoint);
+            }
+            blockStartingPoints.Add(finalBlockAddress);
+            foreach (var instruction in code.Instructions) {
+                switch (instruction.Kind) {
+                case UndertaleInstruction.Opcode.B:
+                case UndertaleInstruction.Opcode.Bt:
+                case UndertaleInstruction.Opcode.Bf:
+                    blockStartingPoints.Add((uint)(instruction.Address + instruction.JumpOffset));
+                    blockStartingPoints.Add(instruction.Address + 1);
+                    break;
+                case UndertaleInstruction.Opcode.PushEnv:
+                case UndertaleInstruction.Opcode.PopEnv:
+                case UndertaleInstruction.Opcode.Ret:
+                case UndertaleInstruction.Opcode.Exit:
+                    blockStartingPoints.Add(instruction.Address + 1);
+                    break;
+                }
+            }
+            blockStartingPoints = blockStartingPoints.Distinct().ToList();
+            blockStartingPoints.Sort();
+            Debug.Assert(blockStartingPoints.Last() == finalBlockAddress);
+
+            // Create blocks
+            foreach (uint address in blockStartingPoints) {
+                blocksByAddress[address] = new Block(address);
+            }
+
+            // Precompute [start, end) address ranges of each block for convienience
+            // Note: this list will exclude the final block, since it doesn't need
+            // any further processing
+            var blockBoundaries = new List<Tuple<uint, uint>>();
+            for (int i = 0; i + 1 < blockStartingPoints.Count; ++i) {
+                uint addressStart = blockStartingPoints[i];
+                uint addressEnd = blockStartingPoints[i + 1];
+                blockBoundaries.Add(Tuple.Create(addressStart, addressEnd));
+            }
+
+            // Iterate over instructions and copy them into appropriate blocks
+            int instr_i = 0;
+            for ( ; instr_i < code.Instructions.Count; ++instr_i)
             {
-                if (blockByAddress.ContainsKey(instr.Address))
-                {
-                    if (currentBlock != null)
-                    {
-                        currentBlock.conditionalExit = false;
-                        currentBlock.nextBlockTrue = blockByAddress[instr.Address];
-                        currentBlock.nextBlockFalse = blockByAddress[instr.Address];
-                        blockByAddress[instr.Address].entryPoints.Add(currentBlock);
-                    }
-                    currentBlock = blockByAddress[instr.Address];
+                if (code.Instructions[instr_i].Address >= blockStartingPoints[0])
+                    break;
+            }
+            foreach (var (addressStart, addressEnd) in blockBoundaries) {
+                Debug.Assert(code.Instructions[instr_i].Address == addressStart);
+
+                var instructions = new List<UndertaleInstruction>();
+                for ( ; instr_i < code.Instructions.Count; ++instr_i) {
+                    if (code.Instructions[instr_i].Address >= addressEnd)
+                        break;
+                    instructions.Add(code.Instructions[instr_i]);
                 }
+                Debug.Assert(instructions.Count > 0);
 
-                if (currentBlock == null)
-                {
-                    blockByAddress[instr.Address] = currentBlock = new Block(instr.Address);
-                }
+                blocksByAddress[addressStart].Instructions = instructions;
+            }
 
-                currentBlock.Instructions.Add(instr);
+            // Link blocks together
+            foreach (var (addressStart, addressEnd) in blockBoundaries) {
+                var currentBlock = blocksByAddress[addressStart];
+                var lastInstruction = currentBlock.Instructions.Last();
 
-                Func<uint, Block> GetBlock = (uint addr) =>
-                {
-                    Block nextBlock;
-                    if (!blockByAddress.TryGetValue(addr, out nextBlock))
-                    {
-                        if (addr <= instr.Address)
-                        {
-                            // We have a jump into INSIDE one of previous blocks
-                            // This is likely a loop or something
-                            // We'll have to split that block into two
-
-                            // First, find the block we have to split
-                            Block blockToSplit = null;
-                            foreach (var block in blockByAddress)
-                            {
-                                if (block.Key < addr && (blockToSplit == null || block.Key > blockToSplit.Address))
-                                    blockToSplit = block.Value;
-                            }
-
-                            // Now, split the list of instructions into two
-                            List<UndertaleInstruction> instrBefore = new List<UndertaleInstruction>();
-                            List<UndertaleInstruction> instrAfter = new List<UndertaleInstruction>();
-                            foreach (UndertaleInstruction inst in blockToSplit.Instructions)
-                            {
-                                if (inst.Address < addr)
-                                    instrBefore.Add(inst);
-                                else
-                                    instrAfter.Add(inst);
-                            }
-
-                            // Create the newly split block
-                            Block newBlock = new Block(addr);
-                            blockToSplit.Instructions = instrBefore;
-                            newBlock.Instructions = instrAfter;
-                            newBlock.conditionalExit = blockToSplit.conditionalExit;
-                            newBlock.nextBlockTrue = blockToSplit.nextBlockTrue;
-                            newBlock.nextBlockFalse = blockToSplit.nextBlockFalse;
-                            blockToSplit.conditionalExit = false;
-                            blockToSplit.nextBlockTrue = newBlock;
-                            blockToSplit.nextBlockFalse = newBlock;
-                            blockByAddress[addr] = newBlock;
-                            return newBlock;
-                        }
-                        else
-                        {
-                            blockByAddress.Add(addr, nextBlock = new Block(addr));
-                        }
-                    }
-                    return nextBlock;
-                };
-
-                if (instr.Kind == UndertaleInstruction.Opcode.B)
-                {
-                    uint addr = (uint)(instr.Address + instr.JumpOffset);
-                    Block nextBlock = GetBlock(addr);
+                switch (lastInstruction.Kind) {
+                case UndertaleInstruction.Opcode.B: {
                     currentBlock.conditionalExit = false;
+
+                    uint jumpAddress = (uint)(lastInstruction.Address + lastInstruction.JumpOffset);
+                    Block nextBlock = blocksByAddress[jumpAddress];
                     currentBlock.nextBlockTrue = nextBlock;
                     currentBlock.nextBlockFalse = nextBlock;
-                    currentBlock = null;
+
+                    nextBlock.entryPoints.Add(currentBlock);
+                    break;
                 }
-                else if (instr.Kind == UndertaleInstruction.Opcode.Bt || instr.Kind == UndertaleInstruction.Opcode.Bf)
-                {
-                    Block nextBlockIfMet = GetBlock((uint)(instr.Address + instr.JumpOffset));
-                    Block nextBlockIfNotMet = GetBlock(instr.Address + 1);
+                case UndertaleInstruction.Opcode.Bt:
+                case UndertaleInstruction.Opcode.Bf: {
                     currentBlock.conditionalExit = true;
-                    currentBlock.nextBlockTrue = instr.Kind == UndertaleInstruction.Opcode.Bt ? nextBlockIfMet : nextBlockIfNotMet;
-                    currentBlock.nextBlockFalse = instr.Kind == UndertaleInstruction.Opcode.Bt ? nextBlockIfNotMet : nextBlockIfMet;
-                    currentBlock = null;
+
+                    uint jumpAddress = (uint)(lastInstruction.Address + lastInstruction.JumpOffset);
+                    Block nextBlockIfMet = blocksByAddress[jumpAddress];
+                    Block nextBlockIfNotMet = blocksByAddress[addressEnd];
+                    currentBlock.nextBlockTrue = lastInstruction.Kind == UndertaleInstruction.Opcode.Bt ? nextBlockIfMet : nextBlockIfNotMet;
+                    currentBlock.nextBlockFalse = lastInstruction.Kind == UndertaleInstruction.Opcode.Bt ? nextBlockIfNotMet : nextBlockIfMet;
+
+                    nextBlockIfMet.entryPoints.Add(currentBlock);
+                    if (nextBlockIfMet != nextBlockIfNotMet)
+                        nextBlockIfNotMet.entryPoints.Add(currentBlock);
+                    break;
                 }
-                else if (instr.Kind == UndertaleInstruction.Opcode.PushEnv || instr.Kind == UndertaleInstruction.Opcode.PopEnv)
-                {
-                    Block nextBlock = GetBlock(instr.Address + 1);
+                default: {
                     currentBlock.conditionalExit = false;
+
+                    Block nextBlock = blocksByAddress[addressEnd];
                     currentBlock.nextBlockTrue = nextBlock;
                     currentBlock.nextBlockFalse = nextBlock;
-                    currentBlock = null;
+
+                    nextBlock.entryPoints.Add(currentBlock);
+                    break;
                 }
-                else if (instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit)
-                {
-                    Block nextBlock = GetBlock(instr.Address + 1);
-                    currentBlock.conditionalExit = false;
-                    currentBlock.nextBlockTrue = nextBlock;
-                    currentBlock.nextBlockFalse = nextBlock;
-                    currentBlock = null;
                 }
             }
-            if (currentBlock != null)
-            {
-                currentBlock.nextBlockTrue = finalBlock;
-                currentBlock.nextBlockFalse = finalBlock;
-            }
-            foreach (var block in blockByAddress.Values)
-            {
-                if (block.nextBlockTrue != null && !block.nextBlockTrue.entryPoints.Contains(block))
-                    block.nextBlockTrue.entryPoints.Add(block);
-                if (block.nextBlockFalse != null && !block.nextBlockFalse.entryPoints.Contains(block))
-                    block.nextBlockFalse.entryPoints.Add(block);
-            }
-            return blockByAddress;
+
+            return blocksByAddress;
         }
 
         public abstract class HLStatement : Statement
