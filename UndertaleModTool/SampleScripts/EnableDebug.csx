@@ -17,7 +17,7 @@ bool enable = ScriptQuestion("Debug Manager by krzys-h and Kneesnap\n\nYes = Ena
 var scr_debug = Data.Scripts.ByName("scr_debug")?.Code;
 if (scr_debug != null) // Deltarune debug check script.
 {
-    scr_debug.ReplaceGML((enable ? "return global.debug;" : "return false;"), Data);
+    scr_debug.ReplaceGML("global.debug = " + (enable ? "true" : "false") + ";" + "\r\n" + "return global.debug;", Data);
     ChangeSelection(scr_debug); // Show.
     ScriptMessage("Debug Mode " + (enable ? "enabled" : "disabled") + ".");
     return;
