@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace UndertaleModTool
 {
@@ -29,6 +30,7 @@ namespace UndertaleModTool
         public bool PreventClose { get; set; }
 
         public string StatusText { get; set; } = "Please wait...";
+        public string SavedStatusText { get; set; }
         public double? Maximum
         {
             get
@@ -123,28 +125,46 @@ namespace UndertaleModTool
             });
         }
 
-        public void ReportProgress(string message)
+        public void ReportProgress(string status)
         {
-            StatusText = message;
+            StatusText = status;
+        }
+        public void ReportProgress(double value) //update without status text changing
+        {
+            Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() =>
+            {
+                try
+                {
+                    ReportProgress(value + "/" + Maximum + (!String.IsNullOrEmpty(SavedStatusText) ? ": " + SavedStatusText : ""));
+                    UpdateValue(value);
+                }
+                catch
+                {
+                    //Silently fail...
+                }
+            }));
+        }
+        public void UpdateValue(double value)
+        {
+            if (Math.Abs(value - ProgressBar.Value) <= 1) //if value not changed or changed by 1
+            {
+                ProgressBar.Value = value;
+            }
+            else
+            {
+                DoubleAnimation animation = new(value, TimeSpan.FromMilliseconds(100)); //time is the same as in "ProgressUpdater()"
+                ProgressBar.BeginAnimation(ProgressBar.ValueProperty, animation);       //smooth progress change
+            }
         }
 
-        public void ReportProgress(string message, double value)
+        public void ReportProgress(string status, double value)
         {
             Dispatcher.Invoke(() =>
             {
                 try
                 {
-                    ReportProgress(value + "/" + Maximum + (!String.IsNullOrEmpty(message) ? ": " + message : ""));
-
-                    if (Math.Abs(value - ProgressBar.Value) <= 1) //if value not changed by 0 or 1
-                    {
-                        ProgressBar.Value = value;
-                    }
-                    else
-                    {
-                        DoubleAnimation animation = new(value, TimeSpan.FromMilliseconds(100)); //time is the same as in "ProgressUpdater()"
-                        ProgressBar.BeginAnimation(ProgressBar.ValueProperty, animation);       //smooth progress change
-                    }
+                    ReportProgress(value + "/" + Maximum + (!String.IsNullOrEmpty(status) ? ": " + status : "")); //update status
+                    UpdateValue(value);
                 }
                 catch
                 {

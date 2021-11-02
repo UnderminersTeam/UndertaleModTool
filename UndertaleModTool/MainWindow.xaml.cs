@@ -61,6 +61,11 @@ namespace UndertaleModTool
         public string ExePath { get; private set; } = System.Environment.CurrentDirectory;
         public string ScriptErrorType { get; set; } = "";
 
+        private int progressValue;
+        private Task updater;
+        private CancellationTokenSource cts;
+        private CancellationToken cToken;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         // For delivering messages to LoaderDialogs
@@ -1127,8 +1132,34 @@ namespace UndertaleModTool
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Update(message, status, progressValue, maxValue);
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() => {
+                    scriptDialog.Update(message, status, progressValue, maxValue);
+                }));
+            }
+        }
+
+        public void SetProgressBar(string message, string status, double progressValue, double maxValue)
+        {
+            if (scriptDialog != null)
+            {
+                this.progressValue = (int)progressValue;
+                scriptDialog.SavedStatusText = status;
+
+                UpdateProgressBar(message, status, progressValue, maxValue);
+            }
+        }
+        public void UpdateProgressValue(double progressValue)
+        {
+            if (scriptDialog != null)
+                scriptDialog.ReportProgress(progressValue); //already contains Invoke()
+        }
+        public void UpdateProgressStatus(string status)
+        {
+            if (scriptDialog != null)
+            {
+                scriptDialog.Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() => {
+                    scriptDialog.ReportProgress(status);
+                }));;
             }
         }
 
@@ -1137,11 +1168,88 @@ namespace UndertaleModTool
             if (scriptDialog != null)
                 scriptDialog.TryHide();
         }
+
+        public void AddProgress(int amount)
+        {
+            progressValue += amount;
+        }
+        public void IncProgress()
+        {
+            progressValue++;
+        }
+        public void AddProgressP(int amount) //P - Parallel (multithreaded)
+        {
+            Interlocked.Add(ref progressValue, amount); //thread-safe add operation (not the same as "lock ()")
+        }
+        public void IncProgressP()
+        {
+            Interlocked.Increment(ref progressValue); //thread-safe increment
+        }
+        public int GetProgress()
+        {
+            return progressValue;
+        }
+        public void SetProgress(int value)
+        {
+            progressValue = value;
+        }
         
         public void EnableUI()
         {
             if (!this.IsEnabled)
                 this.IsEnabled = true;
+        }
+
+        void ProgressUpdater()
+        {
+            DateTime prevTime = default;
+            int prevValue = 0;
+
+            while (true)
+            {
+                if (cToken.IsCancellationRequested)
+                {
+                    if (prevValue >= progressValue) //if reached maximum
+                        return;
+                    else
+                    {
+                        if (prevTime == default)
+                            prevTime = DateTime.UtcNow;                                       //begin measuring
+                        else if (DateTime.UtcNow.Subtract(prevTime).TotalMilliseconds >= 500) //timeout - 0.5 seconds
+                            return;
+                    }
+                }
+                
+                UpdateProgressValue(progressValue);
+
+                prevValue = progressValue;
+
+                Thread.Sleep(100); //10 times per second
+            }
+        }
+        public void StartUpdater()
+        {
+            if (cts is not null)
+                MessageBox.Show("Warning - there is another progress bar updater task running (hangs) in the background.\nRestart the application to prevent some unexpected behavior.", "Script warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+            cts = new CancellationTokenSource();
+            cToken = cts.Token;
+
+            updater = Task.Run(ProgressUpdater);
+        }
+        public async Task StopUpdater() //async because "Wait()" blocks UI thread
+        {
+            cts.Cancel();
+
+            if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
+                MessageBox.Show("Stopping the progress bar updater task is failed.\nIt's highly recommended to restart the application.", "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+            else
+            {
+                cts.Dispose();
+                cts = null;
+            }
+
+            updater.Dispose();
         }
 
         public string ProcessException(in Exception exc, in string scriptText)
@@ -1150,7 +1258,6 @@ namespace UndertaleModTool
             string excText = string.Empty;
             List<string> traceLines = new();
             Dictionary<string, int> exTypesDict = null;
-            
 
             if (exc is AggregateException)
             {
@@ -1177,7 +1284,6 @@ namespace UndertaleModTool
 
             traceLines.AddRange(exc.StackTrace.Split(Environment.NewLine));              
 
-            //for (int i = 0; i < traceLines.Length; i++)
             try
             {
                 foreach (string traceLine in traceLines)

@@ -15,6 +15,8 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
+using System.Threading;
+using System.Threading.Tasks;
 
 /// <summary>
 /// The supplied location of the data file did not exist
@@ -81,6 +83,14 @@ namespace UndertaleModCli
         const int EXIT_SUCCESS = 0;
         const int EXIT_FAILURE = 1;
         public bool Interactive = false;
+
+        private int progressValue;
+        private Task updater;
+        private CancellationTokenSource cts;
+        private CancellationToken cToken;
+
+        private string savedMsg, savedStatus;
+        private double savedValue, savedValueMax;
 
         public FileInfo? Dest { get; set; }
 
@@ -709,7 +719,33 @@ namespace UndertaleModCli
         public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
         {
             // i know, ugly
-            Console.WriteLine("[{0}|{1}] {2} out of {3}", message, status, progressValue, maxValue);
+            if (String.IsNullOrEmpty(message))
+                Console.WriteLine($"[{status}] {progressValue} out of {maxValue}");
+            else
+                Console.WriteLine($"[{message}|{status}] {progressValue} out of {maxValue}");
+        }
+
+        public void SetProgressBar(string message, string status, double progressValue, double maxValue)
+        {
+            savedMsg = message;
+            savedStatus = status;
+            savedValue = progressValue;
+            savedValueMax = maxValue;
+
+            UpdateProgressBar(message, status, progressValue, maxValue);
+        }
+
+        public void UpdateProgressValue(double progressValue)
+        {
+            UpdateProgressBar(savedMsg, savedStatus, progressValue, savedValueMax);
+
+            savedValue = progressValue;
+        }
+        public void UpdateProgressStatus(string status)
+        {
+            UpdateProgressBar(savedMsg, status, savedValue, savedValueMax);
+
+            savedStatus = status;
         }
 
         public void HideProgressBar()
@@ -717,11 +753,88 @@ namespace UndertaleModCli
             // nothing to hide..
         }
 
-        public void EnableUI()
+        public void AddProgress(int amount)
         {
-            throw new NotImplementedException();
+            progressValue += amount;
+        }
+        public void IncProgress()
+        {
+            progressValue++;
+        }
+        public void AddProgressP(int amount) //P - Parallel (multithreaded)
+        {
+            Interlocked.Add(ref progressValue, amount); //thread-safe add operation (not the same as "lock ()")
+        }
+        public void IncProgressP()
+        {
+            Interlocked.Increment(ref progressValue); //thread-safe increment
+        }
+        public int GetProgress()
+        {
+            return progressValue;
+        }
+        public void SetProgress(int value)
+        {
+            progressValue = value;
         }
 
+        public void EnableUI()
+        {
+            // nothing to enable...
+        }
+
+        void ProgressUpdater()
+        {
+            DateTime prevTime = default;
+            int prevValue = 0;
+
+            while (true)
+            {
+                if (cToken.IsCancellationRequested)
+                {
+                    if (prevValue >= progressValue) //if reached maximum
+                        return;
+                    else
+                    {
+                        if (prevTime == default)
+                            prevTime = DateTime.UtcNow;                                       //begin measuring
+                        else if (DateTime.UtcNow.Subtract(prevTime).TotalMilliseconds >= 500) //timeout - 0.5 seconds
+                            return;
+                    }
+                }
+
+                UpdateProgressValue(progressValue);
+
+                prevValue = progressValue;
+
+                Thread.Sleep(100); //10 times per second
+            }
+        }
+        public void StartUpdater()
+        {
+            if (cts is not null)
+                Console.WriteLine("Warning - there is another progress updater task running (hangs) in the background.");
+
+            cts = new CancellationTokenSource();
+            cToken = cts.Token;
+
+            updater = Task.Run(ProgressUpdater);
+        }
+        public async Task StopUpdater() //"async" because "Wait()" blocks UI thread
+        {
+            cts.Cancel();
+
+            if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
+                Console.WriteLine("Error - stopping the progress updater task is failed.");
+            else
+            {
+                cts.Dispose();
+                cts = null;
+            }
+
+            updater.Dispose();
+        }
+        
         public void ChangeSelection(object newsel)
         {
             Selected = newsel;

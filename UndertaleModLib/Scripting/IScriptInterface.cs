@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace UndertaleModLib.Scripting
@@ -57,8 +58,19 @@ namespace UndertaleModLib.Scripting
         void SimpleTextOutput(string title, string label, string defaultText, bool allowMultiline);
         void SetFinishedMessage(bool isFinishedMessageEnabled);
         void UpdateProgressBar(string message, string status, double progressValue, double maxValue);
+        void SetProgressBar(string message, string status, double progressValue, double maxValue);
+        void UpdateProgressValue(double progressValue);
+        void UpdateProgressStatus(string status);
+        void AddProgress(int amount);
+        void IncProgress();
+        void AddProgressP(int amount);
+        void IncProgressP();
+        int GetProgress();
+        void SetProgress(int value);
         void HideProgressBar();
         void EnableUI();
+        void StartUpdater();
+        Task StopUpdater();
 
         void ChangeSelection(object newsel);
 
