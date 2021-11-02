@@ -13,11 +13,7 @@ EnsureDataLoaded();
 
 // Start export of all existing textures
 
-int progress = 0;
 string texFolder = Path.Combine(GetFolder(FilePath), "Export_Textures");
-CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
-CancellationToken token = cancelTokenSource.Token;
-
 if (Directory.Exists(texFolder))
 {
     ScriptError("A sprites export already exists. Please remove it.", "Error");
@@ -33,38 +29,18 @@ string bgrFolder = Path.Combine(texFolder, "Backgrounds");
 Directory.CreateDirectory(bgrFolder);
 TextureWorker worker = new TextureWorker();
 
-Task.Run(ProgressUpdater);
+SetProgressBar(null, "Textures Exported", 0, Data.TexturePageItems.Count);
+StartUpdater();
 
 await DumpSprites();
 await DumpFonts();
 await DumpBackgrounds();
 worker.Cleanup();
 
-cancelTokenSource.Cancel(); //stop ProgressUpdater
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 
-
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Textures Exported", progress, Data.TexturePageItems.Count);
-}
-void AddProgress(int updateAmount)
-{
-    Interlocked.Add(ref progress, updateAmount); //"thread-safe" add operation
-}
-async Task ProgressUpdater()
-{
-    while (true)
-    {
-        if (token.IsCancellationRequested)
-            return;
-
-        UpdateProgress();
-
-        await Task.Delay(100); //10 times per second
-    }
-}
 
 async Task DumpSprites()
 {
@@ -92,7 +68,7 @@ void DumpSprite(UndertaleSprite sprite)
         }
     }
 
-    AddProgress(sprite.Textures.Count);
+    AddProgressP(sprite.Textures.Count);
 }
 
 void DumpFont(UndertaleFont font)
@@ -102,7 +78,7 @@ void DumpFont(UndertaleFont font)
         UndertaleTexturePageItem tex = font.Texture;
         worker.ExportAsPNG(tex, Path.Combine(fntFolder, font.Name.Content + "_0.png"));
 
-        AddProgress(1);
+        IncProgressP();
     }
 }
 
@@ -113,7 +89,7 @@ void DumpBackground(UndertaleBackground background)
         UndertaleTexturePageItem tex = background.Texture;
         worker.ExportAsPNG(tex, Path.Combine(bgrFolder, background.Name.Content + "_0.png"));
 
-        AddProgress(1);
+        IncProgressP();
     }
 }
 

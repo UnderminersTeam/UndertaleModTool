@@ -76,10 +76,13 @@ foreach (string file in dirFiles)
         throw new ScriptException(spriteName + " is missing one or more indexes. The detected missing index is: " + prevFrameName);
 }
 
-int progress = 0;
+SetProgressBar(null, "Files", 0, dirFiles.Length);
+StartUpdater();
+
 foreach (string file in dirFiles) 
 {
-    UpdateProgressBar(null, "Files", progress++, dirFiles.Length);
+    IncProgress();
+
     string FileNameWithExtension = Path.GetFileName(file);
     if (!FileNameWithExtension.EndsWith(".png"))
         continue; // Restarts loop if file is not a valid mask asset.
@@ -104,5 +107,6 @@ foreach (string file in dirFiles)
     }
 }
 
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Import Complete!");

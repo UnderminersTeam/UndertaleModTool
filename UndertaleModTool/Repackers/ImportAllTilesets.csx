@@ -12,11 +12,8 @@ EnsureDataLoaded();
 // Setup root export folder.
 string winFolder = GetFolder(FilePath); // The folder data.win is located in.
 
-int progress = 0;
 string subPath = winFolder + "Export_Tilesets";
 int i = 0;
-CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
-CancellationToken token = cancelTokenSource.Token;
 
 string GetFolder(string path)
 {
@@ -30,41 +27,19 @@ if (!Directory.Exists(winFolder + "Export_Tilesets\\"))
     return;
 }
 
-Task.Run(ProgressUpdater);
+SetProgressBar(null, "Tilesets", 0, Data.Backgrounds.Count);
+StartUpdater();
 
 await ImportTilesets();
 
-cancelTokenSource.Cancel(); //stop ProgressUpdater
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Import Complete.");
 
 
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Tilesets", progress, Data.Backgrounds.Count);
-}
-void IncProgress()
-{
-    Interlocked.Increment(ref progress); //"thread-safe" increment
-}
-async Task ProgressUpdater()
-{
-    while (true)
-    {
-        if (token.IsCancellationRequested)
-            return;
-
-        UpdateProgress();
-
-        await Task.Delay(100); //10 times per second
-    }
-}
-
 async Task ImportTilesets()
 {
     await Task.Run(() => Parallel.ForEach(Data.Backgrounds, ImportTileset));
-
-    progress--;
 }
 
 void ImportTileset(UndertaleBackground tileset)
@@ -80,10 +55,8 @@ void ImportTileset(UndertaleBackground tileset)
     }
     catch (Exception ex)
     {
-        ScriptMessage("Failed to import file number " + i + " due to: " + ex.Message);
+        ScriptMessage($"Failed to import file {tileset.Name} (index - {Data.Backgrounds.IndexOf(tileset)}) due to: " + ex.Message);
     }
 
-    Interlocked.Increment(i);
-
-    IncProgress();
+    IncProgressP();
 }

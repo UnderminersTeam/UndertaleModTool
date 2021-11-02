@@ -131,7 +131,7 @@ namespace UndertaleModTool
         }
         public void ReportProgress(double value) //update without status text changing
         {
-            Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() =>
+            Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
             {
                 try
                 {

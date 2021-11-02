@@ -12,7 +12,6 @@ EnsureDataLoaded();
 // Setup root export folder.
 string winFolder = GetFolder(FilePath); // The folder data.win is located in.
 
-int progress = 0;
 int sounds = 0;
 bool usesAGRPs = (Data.AudioGroups.Count > 0);
 
@@ -60,9 +59,13 @@ You will have to check the code for these functions and change it accordingly.
         groupedExport = 0;
 }
 
-UpdateProgress();
+SetProgressBar(null, "Externalizing Sounds...", 0, Data.Sounds.Count);
+StartUpdater();
+
 DumpSounds(); // This runs sync, because it has to load audio groups.
 ExternalizeSounds(); // This runs sync, because it has to load audio groups.
+
+StopUpdater();
 HideProgressBar();
 ScriptMessage("Externalization Complete.\nExternalized " + sounds.ToString() + " sounds.\n\nNOTE: You will need to convert any external WAV files into OGG files.\nThen replace the WAV file with the OGG file.\nOtherwise the sound will not play.\nA batch conversion tool such as 'LameXP' will help.\nCheck the #faq for more information or message Grossley#2869 on Discord.");
 
@@ -71,10 +74,7 @@ void ExternalizeSounds()
     foreach (UndertaleSound sound in Data.Sounds)
         ExternalizeSound(sound);
 }
-void UpdateProgress() 
-{
-    UpdateProgressBar(null, "Externalizing Sounds...", progress++, Data.Sounds.Count);
-}
+
 string GetFolder(string path) 
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
@@ -134,7 +134,7 @@ void ExternalizeSound(UndertaleSound sound)
     // if it doesn't then we shouldn't care, it's always null.
     
     sounds++;
-    UpdateProgress();
+    IncProgress();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

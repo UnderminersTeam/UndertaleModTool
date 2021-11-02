@@ -94,44 +94,21 @@ foreach (DirectoryInfo di in dir.GetDirectories())
 int progress = 0;
 string exportedTexturesFolder = dir.FullName + Path.DirectorySeparatorChar + "Textures" + Path.DirectorySeparatorChar;
 TextureWorker worker = new TextureWorker();
-CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
-CancellationToken token = cancelTokenSource.Token;
-
 Dictionary<string, int[]> assetCoordinateDict = new Dictionary<string, int[]>();
 Dictionary<string, string> assetTypeDict = new Dictionary<string, string>();
 
 Directory.CreateDirectory(exportedTexturesFolder);
 
-Task.Run(ProgressUpdater);
+SetProgressBar(null, "Existing Textures Exported", 0, Data.TexturePageItems.Count);
+StartUpdater();
 
 await DumpSprites();
 await DumpFonts();
 await DumpBackgrounds();
 worker.Cleanup();
 
-cancelTokenSource.Cancel(); //stop ProgressUpdater
+await StopUpdater();
 HideProgressBar();
-
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Existing Textures Exported", progress, Data.TexturePageItems.Count);
-}
-void AddProgress(int updateAmount)
-{
-    Interlocked.Add(ref progress, updateAmount); //"thread-safe" add operation
-}
-async Task ProgressUpdater()
-{
-    while (true)
-    {
-        if (token.IsCancellationRequested)
-            return;
-
-        UpdateProgress();
-
-        await Task.Delay(100); //10 times per second
-    }
-}
 
 async Task DumpSprites()
 {
@@ -404,6 +381,9 @@ foreach (Atlas atlas in packer.Atlasses)
     atlasCount++;
 }
 
+ScriptMessage("Import Complete!");
+
+
 void setTextureTargetBounds(UndertaleTexturePageItem tex, string textureName, Node n)
 {
     if (assetCoordinateDict.ContainsKey(textureName))
@@ -424,9 +404,6 @@ void setTextureTargetBounds(UndertaleTexturePageItem tex, string textureName, No
         tex.TargetHeight = (ushort)n.Bounds.Height;
     }
 }
-
-HideProgressBar();
-ScriptMessage("Import Complete!");
 
 public class TextureInfo
 {

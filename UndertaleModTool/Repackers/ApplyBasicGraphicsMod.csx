@@ -7,6 +7,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
 EnsureDataLoaded();
@@ -16,11 +18,15 @@ string importFolder = PromptChooseDirectory("Import From Where");
 if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 
-int progress = 0;
 string[] dirFiles = Directory.GetFiles(importFolder);
+
+SetProgressBar(null, "Files", 0, dirFiles.Length);
+StartUpdater();
+
 foreach (string file in dirFiles)
 {
-    UpdateProgressBar(null, "Files", progress++, dirFiles.Length);
+    IncProgress();
+
     string fileName = Path.GetFileName(file);
     if (!fileName.EndsWith(".png") || !fileName.Contains("_"))
         continue; // Not an image.
@@ -29,7 +35,9 @@ foreach (string file in dirFiles)
     
     int lastUnderscore = stripped.LastIndexOf('_');
     string spriteName = stripped.Substring(0, lastUnderscore);
-    int frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
+    int frame;
+    if (!Int32.TryParse(stripped.Substring(lastUnderscore + 1), out frame))
+        throw new ScriptException($"Can't import sprite \"{spriteName}\" - frame number is missing.");
     
     UndertaleSprite sprite = Data.Sprites.ByName(spriteName);
     if (spriteName == null) {
@@ -83,5 +91,6 @@ foreach (string file in dirFiles)
     }
 }
 
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Import Complete!");

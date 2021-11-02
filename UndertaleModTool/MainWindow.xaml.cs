@@ -1151,7 +1151,7 @@ namespace UndertaleModTool
         public void UpdateProgressValue(double progressValue)
         {
             if (scriptDialog != null)
-                scriptDialog.ReportProgress(progressValue); //already contains Invoke()
+                scriptDialog.ReportProgress(progressValue); //already contains BeginInvoke()
         }
         public void UpdateProgressStatus(string status)
         {
@@ -1239,17 +1239,20 @@ namespace UndertaleModTool
         }
         public async Task StopUpdater() //async because "Wait()" blocks UI thread
         {
-            cts.Cancel();
-
-            if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
-                MessageBox.Show("Stopping the progress bar updater task is failed.\nIt's highly recommended to restart the application.", "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
-            else
+            if (cts is not null)
             {
-                cts.Dispose();
-                cts = null;
-            }
+                cts.Cancel();
 
-            updater.Dispose();
+                if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
+                    MessageBox.Show("Stopping the progress bar updater task is failed.\nIt's highly recommended to restart the application.", "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+                else
+                {
+                    cts.Dispose();
+                    cts = null;
+                }
+
+                updater.Dispose();
+            }
         }
 
         public string ProcessException(in Exception exc, in string scriptText)

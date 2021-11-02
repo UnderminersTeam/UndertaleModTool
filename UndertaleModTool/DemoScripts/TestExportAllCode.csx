@@ -7,10 +7,8 @@ using System.Collections;
 
 EnsureDataLoaded();
 
-int progress = 0;
 string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
-
 Directory.CreateDirectory(codeFolder);
 
 string line;
@@ -25,7 +23,8 @@ bool write = true;
 bool isErrorCodeEntry = false;
 ScriptMessage("If UndertaleModTool crashes during code export, or another serious error of that nature occurs, this script will record it. Please reload the game into the tool in the event the tool crashes and re-run this script until it completes successfully without crashing. A full record of code entries with fatal decompilation problems (if they exist) will be recorded by the end in \"Errored_Code_Entries.txt\".");
 
-UpdateProgress();
+SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
+StartUpdater();
 if (File.Exists(path_error))
 {
     System.IO.StreamReader file = new System.IO.StreamReader(path_error);
@@ -131,7 +130,7 @@ foreach (UndertaleCode code in Data.Code)
         }
     }
 
-    UpdateProgress();
+    IncProgress();
 }
 if (write)
 {
@@ -145,6 +144,7 @@ if (write)
     }
 }
 
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder);
 if (File.Exists(path_error2))
@@ -171,13 +171,7 @@ if (File.Exists(path_error2))
     ScriptMessage("Please place the \"Error_Assembly\" folder into a zip file and send it to Grossley#2869 on Discord, along with what game you were playing, where you got it from, and any other pertinent information, so that these errors may be corrected.");
 }
 
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Code Entries", progress++, Data.Code.Count);
-}
-
 string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
-

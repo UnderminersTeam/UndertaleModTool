@@ -9,7 +9,6 @@ using UndertaleModLib.Util;
 EnsureDataLoaded();
 
 // Initialization Start
-int progress = 0;
 
 var DataEmbeddedTexturesCount = Data.EmbeddedTextures.Count;
 List<int> tex_TargetX = new List<int>();
@@ -40,9 +39,13 @@ int copiedAssetsCount = 0;
 List<String> splitStringsList = new List<String>();
 string abc123 = "";
 abc123 = SimpleTextInput("Menu", "Enter names of sprites/backgrounds/fonts", abc123, true);
-string[] subs = abc123.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+string[] subs = abc123.Split('\n', StringSplitOptions.RemoveEmptyEntries);
 bool[] SpriteSheetsCopyNeeded = new bool[DataEmbeddedTexturesCount];
 bool[] SpriteSheetsUsed = new bool[(DataEmbeddedTexturesCount + DataEmbeddedTexturesCount)];
+
+SetProgressBar(null, "Textures Exported", 0, Data.TexturePageItems.Count);
+StartUpdater();
+
 foreach (var sub in subs)
 {
     splitStringsList.Add(sub.Trim());
@@ -246,15 +249,14 @@ SpriteSheetsUsedUpdate();
 RemoveUnusedSpriteSheets();
 TexturePageItemsUsedUpdate();
 RemoveUnusedTexturePageItems();
+
+await StopUpdater();
+HideProgressBar();
 copiedAssetsCount = (copiedFontsCount + copiedBackgroundsCount + copiedSpritesCount);
 ScriptMessage(copiedAssetsCount.ToString() + " assets were copied (" + copiedSpritesCount.ToString() + " Sprites, " + copiedBackgroundsCount.ToString() + " Backgrounds, and " + copiedFontsCount.ToString() + " Fonts)");
 
 // Functions
 
-void UpdateProgress(int updateAmount = 0)
-{
-    UpdateProgressBar(null, "Textures Exported", progress += updateAmount, Data.TexturePageItems.Count);
-}
 void RemoveUnusedTexturePageItems()
 {
     for (int i = (TexturePageItemsUsed.Count - 1); i > -1; i--)
@@ -295,7 +297,7 @@ void DumpSprite(UndertaleSprite sprite)
         tex_Name.Add(sprite.Name.Content + "_Copy");
         tex_Type.Add("spr");
     }
-    UpdateProgress(sprite.Textures.Count);
+    AddProgress(sprite.Textures.Count);
 }
 void DumpFont(UndertaleFont font)
 {
@@ -306,7 +308,7 @@ void DumpFont(UndertaleFont font)
     tex_Frame.Add(0);
     tex_Name.Add(font.Name.Content + "_Copy");
     tex_Type.Add("fnt");
-    UpdateProgress(1);
+    IncProgress();
 }
 void DumpBackground(UndertaleBackground background)
 {
@@ -317,7 +319,7 @@ void DumpBackground(UndertaleBackground background)
     tex_Frame.Add(0);
     tex_Name.Add(background.Name.Content + "_Copy");
     tex_Type.Add("bg");
-    UpdateProgress(1);
+    IncProgress();
 }
 void NullHandler()
 {
@@ -364,7 +366,6 @@ void TexturePageItemsUsedUpdate()
                 TexturePageItemsUsed[Data.TexturePageItems.IndexOf(sprite.Textures[i]?.Texture)] = true;
             }
         }
-        UpdateProgress();
     }
     foreach (UndertaleBackground bg in Data.Backgrounds)
     {
@@ -372,7 +373,6 @@ void TexturePageItemsUsedUpdate()
         {
             TexturePageItemsUsed[Data.TexturePageItems.IndexOf(bg.Texture)] = true;
         }
-        UpdateProgress();
     }
     foreach (UndertaleFont fnt in Data.Fonts)
     {
@@ -380,7 +380,6 @@ void TexturePageItemsUsedUpdate()
         {
             TexturePageItemsUsed[Data.TexturePageItems.IndexOf(fnt.Texture)] = true;
         }
-        UpdateProgress();
     }
 }
 void SpriteSheetsUsedUpdate()
@@ -394,7 +393,6 @@ void SpriteSheetsUsedUpdate()
                 SpriteSheetsUsed[Data.EmbeddedTextures.IndexOf(sprite.Textures[i]?.Texture.TexturePage)] = true;
             }
         }
-        UpdateProgress();
     }
     foreach (UndertaleBackground bg in Data.Backgrounds)
     {
@@ -402,7 +400,6 @@ void SpriteSheetsUsedUpdate()
         {
             SpriteSheetsUsed[Data.EmbeddedTextures.IndexOf(bg.Texture.TexturePage)] = true;
         }
-        UpdateProgress();
     }
     foreach (UndertaleFont fnt in Data.Fonts)
     {
@@ -410,6 +407,5 @@ void SpriteSheetsUsedUpdate()
         {
             SpriteSheetsUsed[Data.EmbeddedTextures.IndexOf(fnt.Texture.TexturePage)] = true;
         }
-        UpdateProgress();
     }
 }

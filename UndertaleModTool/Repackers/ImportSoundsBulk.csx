@@ -14,8 +14,6 @@ using static UndertaleModLib.UndertaleData;
 
 EnsureDataLoaded();
 
-string currentDialog;
-int saveProgress = 0;
 int maxCount = 1;
 
 string GetFolder(string path) 
@@ -40,7 +38,6 @@ string importFolder = PromptChooseDirectory("Import From Where");
 if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 
-int progress = 0;
 string[] dirFiles = Directory.GetFiles(importFolder);
 
 bool manuallySpecifyEverySound = false;
@@ -74,11 +71,15 @@ if (manuallySpecifyEverySound == false)
     ScriptMessage("WARNING!:\nIf a sound already exists in the game, it will be replaced instead of added.");
 }
 
-SetupProgress("Importing sounds", dirFiles.Length);
+maxCount = dirFiles.Length;
+SetProgressBar(null, "Importing sounds", 0, maxCount);
+//StartUpdater();
 
 foreach (string file in dirFiles) 
 {
-    UpdateProgress();
+    IncProgressLocal();
+    UpdateProgressValue(GetProgress());
+
     string fname      = Path.GetFileName(file);
     string temp = fname.ToLower(); 
     if (((temp.EndsWith(".ogg")) || (temp.EndsWith(".wav"))) == false)
@@ -304,20 +305,12 @@ foreach (string file in dirFiles)
     }
 }
 
+//await StopUpdater();
 ScriptMessage("Sound added successfully!\nEnjoy your meowing day!");
 
 
-void UpdateProgress() 
+void IncProgressLocal()
 {
-    if (saveProgress < maxCount)
-        UpdateProgressBar(null, currentDialog, saveProgress++, maxCount);
+    if (GetProgress() < maxCount)
+        IncProgress();
 }
-
-void SetupProgress(string name, int totalCount) 
-{
-    currentDialog = name;
-    maxCount = totalCount;
-    saveProgress = 0;
-    UpdateProgressBar(null, currentDialog, saveProgress, maxCount);
-}
-

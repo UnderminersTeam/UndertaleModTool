@@ -16,8 +16,6 @@ using System.Linq;
 
 EnsureDataLoaded();
 
-int progress = 0;
-int codesLeft = 0;
 int result_count = 0;
 StringBuilder results = new();
 string searchNames = "";
@@ -27,7 +25,6 @@ List<string> codeToDump = new();
 List<string> gameObjectCandidates = new();
 
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
-
 if (Data.IsYYC())
 {
     ScriptError("You cannot do a code search on a YYC game! There is no code to search!");
@@ -96,9 +93,8 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
     }
 }
 
-codesLeft = codeToDump.Count;
-
-UpdateProgress();
+SetProgressBar(null, "Code Entries", 0, codeToDump.Count);
+StartUpdater();
 
 for (var j = 0; j < codeToDump.Count; j++)
 {
@@ -106,15 +102,12 @@ for (var j = 0; j < codeToDump.Count; j++)
 }
 GetSortedResults();
 
+await StopUpdater();
 HideProgressBar();
 EnableUI();
 string results_message = $"{result_count} results in {resultsDict.Count} code entries.";
 SimpleTextOutput("Search results.", results_message, results.ToString(), true);
 
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Code Entries", progress++, codesLeft);
-}
 
 void GetSortedResults() //not sure that it's necessary to sort it, but just in case
 {
@@ -180,5 +173,5 @@ void DumpCode(UndertaleCode code)
         failedList.Add(code.Name.Content);
     }
 
-    UpdateProgress();
+    IncProgress();
 }

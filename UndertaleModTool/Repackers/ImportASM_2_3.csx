@@ -66,13 +66,16 @@ else
 // If yes, will try to add code to objects and scripts depending upon its name
 bool doParse = ScriptQuestion("Do you want to automatically attempt to link imported code?");
 
-int progress = 0;
 string[] dirFiles = Directory.GetFiles(importFolder);
 bool skipGlobalScripts = true;
 bool skipGlobalScriptsPrompted = false;
+
+SetProgressBar(null, "Files", 0, dirFiles.Length);
+StartUpdater();
+
 foreach (string file in dirFiles)
 {
-    UpdateProgressBar(null, "Files", progress++, dirFiles.Length);
+    IncProgress();
     string fileName = Path.GetFileName(file);
     if (!(fileName.EndsWith(".asm")))
         continue;
@@ -241,5 +244,6 @@ foreach (string file in dirFiles)
     }
 }
 
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("All files successfully imported.");

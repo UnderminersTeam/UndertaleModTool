@@ -12,7 +12,6 @@ if (Data.ToolInfo.ProfileMode)
     return;
 }
 
-int progress = 0;
 string codeFolder = GetFolder(FilePath) + "Export_Assembly2" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
@@ -23,15 +22,14 @@ if (Directory.Exists(codeFolder))
 
 Directory.CreateDirectory(codeFolder);
 
-UpdateProgress();
+SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
+StartUpdater();
+
 DumpCode();
+
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Conversion Complete.\n\nLocation: " + codeFolder);
-
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Code Entries", progress++, Data.Code.Count);
-}
 
 string GetFolder(string path) 
 {
@@ -134,7 +132,7 @@ void DumpCode()
                 return;
             }
 
-            UpdateProgress();
+            IncProgress();
         }
         else
         {
@@ -155,7 +153,7 @@ void DumpCode()
                 string str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
                 File.WriteAllText(str_path_to_use, "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"); // Please don't
             }
-            UpdateProgress();
+            IncProgress();
         }
     }
 }

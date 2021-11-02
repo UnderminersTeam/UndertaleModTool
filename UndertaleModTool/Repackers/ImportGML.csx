@@ -16,13 +16,17 @@ if (importFolder == null)
 // If yes, will try to add code to objects and scripts depending upon its name
 bool doParse = ScriptQuestion("Do you want to automatically attempt to link imported code?");
 
-int progress = 0;
+SetProgressBar(null, "Files", 0, dirFiles.Length);
+StartUpdater();
+
 string[] dirFiles = Directory.GetFiles(importFolder);
 foreach (string file in dirFiles)
 {
-    UpdateProgressBar(null, "Files", progress++, dirFiles.Length);
+    IncProgress();
+
     ImportGMLFile(file, doParse);
 }
 
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("All files successfully imported.");

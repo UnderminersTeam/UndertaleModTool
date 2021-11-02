@@ -5,7 +5,6 @@ using System.IO;
 
 EnsureDataLoaded();
 
-int progress = 0;
 string winFolder = GetFolder(FilePath); // The folder data.win is located in.
 string EmbFolder = Path.Combine(winFolder, "EmbeddedTextures"); // The folder to write the image data to.
 
@@ -14,7 +13,8 @@ if (!CanOverwrite())
 
 MakeFolder("EmbeddedTextures");
 
-UpdateProgress();
+SetProgressBar(null, "Embedded textures", 0, Data.EmbeddedTextures.Count);
+StartUpdater();
 
 for (var i = 0; i < Data.EmbeddedTextures.Count; i++) 
 {
@@ -26,19 +26,16 @@ for (var i = 0; i < Data.EmbeddedTextures.Count; i++)
     {
         ScriptMessage("Failed to export file: " + ex.Message);
     }
-    UpdateProgress();
+
+    IncProgress();
 }
 
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + EmbFolder);
 
 /* Helper functions below.
 */
-
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Embedded textures", progress++, Data.EmbeddedTextures.Count);
-}
 
 string GetFolder(string path) 
 {
