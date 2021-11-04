@@ -69,6 +69,7 @@ namespace UndertaleModLib.Scripting
         void SetProgress(int value);
         void HideProgressBar();
         void EnableUI();
+        void SyncBinding(string resourceType, bool enable);
         void StartUpdater();
         Task StopUpdater();
 

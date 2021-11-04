@@ -32,6 +32,7 @@ using System.IO.Pipes;
 
 using ColorConvert = System.Windows.Media.ColorConverter;
 using System.Text.RegularExpressions;
+using System.Windows.Data;
 
 namespace UndertaleModTool
 {
@@ -65,6 +66,7 @@ namespace UndertaleModTool
         private Task updater;
         private CancellationTokenSource cts;
         private CancellationToken cToken;
+        private object bindingLock = new();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -1151,13 +1153,17 @@ namespace UndertaleModTool
         public void UpdateProgressValue(double progressValue)
         {
             if (scriptDialog != null)
-                scriptDialog.ReportProgress(progressValue); //already contains BeginInvoke()
+            {
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() => {
+                    scriptDialog.ReportProgress(progressValue);
+                }));
+            }
         }
         public void UpdateProgressStatus(string status)
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() => {
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() => {
                     scriptDialog.ReportProgress(status);
                 }));;
             }
@@ -1199,8 +1205,20 @@ namespace UndertaleModTool
             if (!this.IsEnabled)
                 this.IsEnabled = true;
         }
+        
+        public void SyncBinding(string resourceType, bool enable)
+        {
+            if (enable)
+            {
+                BindingOperations.EnableCollectionSynchronization(Data[resourceType] as IEnumerable, bindingLock);
+            }
+            else
+            {
+                BindingOperations.DisableCollectionSynchronization(Data[resourceType] as IEnumerable);
+            }
+        }
 
-        void ProgressUpdater()
+        private void ProgressUpdater()
         {
             DateTime prevTime = default;
             int prevValue = 0;
@@ -1269,7 +1287,7 @@ namespace UndertaleModTool
                 foreach (Exception ex in (exc as AggregateException).InnerExceptions)
                 {
                     traceLines.AddRange(ex.StackTrace.Split(Environment.NewLine));
-                    exTypes.Add(ex.GetType().Name);
+                    exTypes.Add(ex.GetType().FullName);
                 }
 
                 if (exTypes.Count > 1)
@@ -1321,10 +1339,10 @@ namespace UndertaleModTool
                 if (exTypesDict is not null)
                 {
                     string exTypesStr = string.Join(",\n", exTypesDict.Select(x => $"{x.Key}{((x.Value > 1) ? " (x" + x.Value + ")" : string.Empty)}"));
-                    excText = $"{exc.GetType().Name}: One on more errors occured:\n{exTypesStr}\n\nThe current stacktrace:\n{excLines}";
+                    excText = $"{exc.GetType().FullName}: One on more errors occured:\n{exTypesStr}\n\nThe current stacktrace:\n{excLines}";
                 }
                 else
-                    excText = $"{exc.GetType().Name}: {exc.Message}\n\nThe current stacktrace:\n{excLines}";
+                    excText = $"{exc.GetType().FullName}: {exc.Message}\n\nThe current stacktrace:\n{excLines}";
             }
             else
             {
@@ -1349,7 +1367,7 @@ namespace UndertaleModTool
             scriptDialog.Owner = this;
             scriptDialog.PreventClose = true;
             this.IsEnabled = false; // Prevent interaction while the script is running.
-
+            
             await RunScriptNow(path); // Runs the script now.
             HideProgressBar(); // Hide the progress bar.
             scriptDialog = null;
@@ -1397,6 +1415,8 @@ namespace UndertaleModTool
 
                 if (!isScriptException)
                     excString = ProcessException(in exc, in scriptText);
+
+                await StopUpdater();
 
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);

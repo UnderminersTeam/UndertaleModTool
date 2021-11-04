@@ -131,18 +131,15 @@ namespace UndertaleModTool
         }
         public void ReportProgress(double value) //update without status text changing
         {
-            Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
+            try
             {
-                try
-                {
-                    ReportProgress(value + "/" + Maximum + (!String.IsNullOrEmpty(SavedStatusText) ? ": " + SavedStatusText : ""));
-                    UpdateValue(value);
-                }
-                catch
-                {
-                    //Silently fail...
-                }
-            }));
+                ReportProgress(value + "/" + Maximum + (!String.IsNullOrEmpty(SavedStatusText) ? ": " + SavedStatusText : ""));
+                UpdateValue(value);
+            }
+            catch
+            {
+                //Silently fail...
+            }
         }
         public void UpdateValue(double value)
         {

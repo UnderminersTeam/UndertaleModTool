@@ -783,6 +783,11 @@ namespace UndertaleModCli
             // nothing to enable...
         }
 
+        public void SyncBinding(string resourceType, bool enable)
+        {
+            //there is no UI with any data binding
+        }
+
         void ProgressUpdater()
         {
             DateTime prevTime = default;
@@ -822,17 +827,20 @@ namespace UndertaleModCli
         }
         public async Task StopUpdater() //"async" because "Wait()" blocks UI thread
         {
-            cts.Cancel();
-
-            if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
-                Console.WriteLine("Error - stopping the progress updater task is failed.");
-            else
+            if (cts is not null)
             {
-                cts.Dispose();
-                cts = null;
-            }
+                cts.Cancel();
 
-            updater.Dispose();
+                if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
+                    Console.WriteLine("Error - stopping the progress updater task is failed.");
+                else
+                {
+                    cts.Dispose();
+                    cts = null;
+                }
+
+                updater.Dispose();
+            }
         }
         
         public void ChangeSelection(object newsel)
