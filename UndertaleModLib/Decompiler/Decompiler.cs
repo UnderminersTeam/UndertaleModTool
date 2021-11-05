@@ -339,6 +339,20 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
+                if (Value is float f) // More accurate, larger range, double to string.
+                    return RoundTrip.ToRoundTrip(f);
+
+                if (Value is Int64 i && i <= int.MaxValue && i >= int.MinValue) // Decompiler accuracy improvement.
+                {
+                    return "(" + i + " << 0)";
+                }
+
+                if (Value is double d) // More accurate, larger range, double to string.
+                    return RoundTrip.ToRoundTrip(d);
+
+                if (Value is Statement statement)
+                    return statement.ToString(context);
+
                 if (Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> resource) // Export string.
                 {
                     string resultStr = resource.Resource.ToString(context.GlobalContext.Data?.IsGameMaker2() ?? false);
@@ -511,20 +525,6 @@ namespace UndertaleModLib.Decompiler
                         }
                     }
                 }
-
-                if (Value is float f) // More accurate, larger range, double to string.
-                    return RoundTrip.ToRoundTrip(f);
-
-                if (Value is Int64 i && i <= int.MaxValue && i >= int.MinValue) // Decompiler accuracy improvement.
-                {
-                    return "(" + i + " << 0)";
-                }
-
-                if (Value is double d) // More accurate, larger range, double to string.
-                    return RoundTrip.ToRoundTrip(d);
-
-                if (Value is Statement statement)
-                    return statement.ToString(context);
 
                 return ((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
             }
