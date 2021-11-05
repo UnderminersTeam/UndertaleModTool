@@ -167,6 +167,12 @@ namespace UndertaleModTool
                     UndertaleModTool_app.CreateSubKey(@"shell\launch").SetValue("", "Run game normally", RegistryValueKind.String);
                     UndertaleModTool_app.CreateSubKey(@"shell\special_launch\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\" special_launch", RegistryValueKind.String);
                     UndertaleModTool_app.CreateSubKey(@"shell\special_launch").SetValue("", "Run extended options", RegistryValueKind.String);
+                    if (File.Exists("dna.txt"))
+                    {
+                        ScriptMessage("Opt out detected.");
+                        SettingsWindow.AutomaticFileAssociation = false;
+                        Settings.Save();
+                    }
                     if (SettingsWindow.AutomaticFileAssociation)
                     {
                         foreach (var extStr in IFF_EXTENSIONS)

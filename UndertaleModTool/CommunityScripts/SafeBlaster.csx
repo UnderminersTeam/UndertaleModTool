@@ -223,7 +223,7 @@ num = 0
 ", Data);
 
 var obj_gasterbl_gen = Data.GameObjects.ByName("obj_gasterbl_gen");
-var decomp = Decompiler.Decompile(obj_gasterbl_gen.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals), new DecompileContext(Data, false));
+var decomp = Decompiler.Decompile(obj_gasterbl_gen.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals), new GlobalDecompileContext(Data, false));
 obj_safebl_gen.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(decomp.Replace("obj_gasterblaster", "obj_safeblaster"), Data);
 
 
