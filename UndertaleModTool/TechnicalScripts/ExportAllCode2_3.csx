@@ -17,7 +17,6 @@ else
     ScriptError("Use the regular ExportAllCode please!", "Incompatible");
 }
 
-int progress = 0;
 string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
@@ -29,16 +28,15 @@ if (Directory.Exists(codeFolder))
 
 Directory.CreateDirectory(codeFolder);
 
-UpdateProgress();
+SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
+StartUpdater();
+
 int failed = 0;
-DumpCode();
+await Task.Run(DumpCode);
+
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder + " " + failed.ToString() + " failed");
-
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Code Entries", progress++, Data.Code.Count);
-}
 
 string GetFolder(string path)
 {
@@ -75,6 +73,7 @@ void DumpCode()
             File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
             failed += 1;
         }
-        UpdateProgress();
+
+        IncProgress();
     }
 }

@@ -11,10 +11,8 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-int progress = 0;
 string texFolder = GetFolder(FilePath) + "Export_Masks" + Path.DirectorySeparatorChar;
 TextureWorker worker = new TextureWorker();
-
 if (Directory.Exists(texFolder))
 {
     ScriptError("A texture export already exists. Please remove it.", "Error");
@@ -23,19 +21,16 @@ if (Directory.Exists(texFolder))
 
 Directory.CreateDirectory(texFolder);
 
-UpdateProgress();
+SetProgressBar(null, "Sprites", 0, Data.Sprites.Count);
+StartUpdater();
 
 await DumpSprites();
 worker.Cleanup();
 
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Sprites", progress, Data.Sprites.Count);
-    Interlocked.Increment(ref progress); //"thread-safe" increment
-}
 
 string GetFolder(string path) 
 {
@@ -45,8 +40,6 @@ string GetFolder(string path)
 async Task DumpSprites()
 {
     await Task.Run(() => Parallel.ForEach(Data.Sprites, DumpSprite));
-
-    progress--;
 }
 
 void DumpSprite(UndertaleSprite sprite)
@@ -59,5 +52,5 @@ void DumpSprite(UndertaleSprite sprite)
         }
     }
 
-    UpdateProgress();
+    IncProgressP();
 }

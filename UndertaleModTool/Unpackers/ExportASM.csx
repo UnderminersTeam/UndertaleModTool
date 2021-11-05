@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 EnsureDataLoaded();
 
-int progress = 0;
 string codeFolder = GetFolder(FilePath) + "Export_Assembly" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
-
 if (Directory.Exists(codeFolder)) 
 {
     ScriptError("An assembly export already exists. Please remove it.", "Error");
@@ -18,18 +16,15 @@ if (Directory.Exists(codeFolder))
 
 Directory.CreateDirectory(codeFolder);
 
-UpdateProgress();
+SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
+StartUpdater();
 
 await DumpCode();
+
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder);
 
-
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Code Entries", progress, Data.Code.Count);
-    Interlocked.Increment(ref progress); //"thread-safe" increment
-}
 
 string GetFolder(string path) 
 {
@@ -40,8 +35,6 @@ string GetFolder(string path)
 async Task DumpCode()
 {
     await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
-
-    progress--;
 }
 
 void DumpCode(UndertaleCode code) 
@@ -56,5 +49,5 @@ void DumpCode(UndertaleCode code)
         File.WriteAllText(path, "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"); // Please don't
     }
 
-    UpdateProgress();
+    IncProgressP();
 }

@@ -7,10 +7,8 @@ using System.Collections;
 
 EnsureDataLoaded();
 
-int progress = 0;
 string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
-
 Directory.CreateDirectory(codeFolder);
 
 string line;
@@ -25,7 +23,9 @@ bool write = true;
 bool isErrorCodeEntry = false;
 ScriptMessage("If UndertaleModTool crashes during code export, or another serious error of that nature occurs, this script will record it. Please reload the game into the tool in the event the tool crashes and re-run this script until it completes successfully without crashing. A full record of code entries with fatal decompilation problems (if they exist) will be recorded by the end in \"Errored_Code_Entries.txt\".");
 
-UpdateProgress();
+SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
+StartUpdater();
+
 if (File.Exists(path_error))
 {
     System.IO.StreamReader file = new System.IO.StreamReader(path_error);
@@ -82,29 +82,44 @@ if (File.Exists(path_error2))
     file.Close();
 }
 
-foreach (UndertaleCode code in Data.Code)
-{
-    if (write)
+await Task.Run(() => {
+    foreach (UndertaleCode code in Data.Code)
     {
-        try
+        if (write)
         {
-            File.WriteAllText(path_error, "An error in decompilation occurred in: \n" + code.Name.Content);
-        }
-        catch (Exception e)
-        {
-            File.WriteAllText(path_error, "Unknown.");
-        }
-    }
-    if (errored_code_arr.Count > 0)
-    {
-        for (int i = 0; i < errored_code_arr.Count; i++)
-        {
-            if (errored_code_arr[i].ToString() == code.Name.Content)
+            try
             {
-                isErrorCodeEntry = true;
+                File.WriteAllText(path_error, "An error in decompilation occurred in: \n" + code.Name.Content);
+            }
+            catch (Exception e)
+            {
+                File.WriteAllText(path_error, "Unknown.");
             }
         }
-        if ((!isErrorCodeEntry) || (!skip))
+        if (errored_code_arr.Count > 0)
+        {
+            for (int i = 0; i < errored_code_arr.Count; i++)
+            {
+                if (errored_code_arr[i].ToString() == code.Name.Content)
+                {
+                    isErrorCodeEntry = true;
+                }
+            }
+            if ((!isErrorCodeEntry) || (!skip))
+            {
+                string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
+                try
+                {
+                    File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+                }
+                catch (Exception e)
+                {
+                    File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
+                }
+            }
+            isErrorCodeEntry = false;
+        }
+        else
         {
             string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
             try
@@ -116,23 +131,10 @@ foreach (UndertaleCode code in Data.Code)
                 File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
             }
         }
-        isErrorCodeEntry = false;
-    }
-    else
-    {
-        string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
-        try
-        {
-            File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
-        }
-        catch (Exception e)
-        {
-            File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
-        }
-    }
 
-    UpdateProgress();
-}
+        IncProgress();
+    }
+});
 if (write)
 {
     try
@@ -145,6 +147,7 @@ if (write)
     }
 }
 
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder);
 if (File.Exists(path_error2))
@@ -171,13 +174,7 @@ if (File.Exists(path_error2))
     ScriptMessage("Please place the \"Error_Assembly\" folder into a zip file and send it to Grossley#2869 on Discord, along with what game you were playing, where you got it from, and any other pertinent information, so that these errors may be corrected.");
 }
 
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Code Entries", progress++, Data.Code.Count);
-}
-
 string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
-

@@ -76,19 +76,17 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
     }
 }
 
-int progress = 0;
-int codesLeft = codeToDump.Count;
-UpdateProgress();
+SetProgressBar(null, "Code Entries", 0, codeToDump.Count);
+StartUpdater();
 
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Code Entries", progress++, codesLeft);
-}
+await Task.Run(() => {
+    for (var j = 0; j < codeToDump.Count; j++)
+    {
+        DumpCode(Data.Code.ByName(codeToDump[j]));
+    }
+});
 
-for (var j = 0; j < codeToDump.Count; j++)
-{
-    DumpCode(Data.Code.ByName(codeToDump[j]));
-}
+await StopUpdater();
 
 void DumpCode(UndertaleCode code) 
 {
@@ -132,5 +130,6 @@ void DumpCode(UndertaleCode code)
             failed += 1;
         }
     }
-    UpdateProgress();
+
+    IncProgress();
 }

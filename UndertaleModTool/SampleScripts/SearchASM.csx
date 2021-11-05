@@ -15,12 +15,10 @@ if (Data.IsYYC())
     return;
 }
 
-int progress = 0;
 StringBuilder results = new();
 ConcurrentDictionary<string, List<string>> resultsDict = new();
 ConcurrentBag<string> failedList = new();
 int result_count = 0;
-
 bool case_sensitive = ScriptQuestion("Case sensitive?");
 bool regex_check = ScriptQuestion("Regex search?");
 string keyword = SimpleTextInput("Enter your search", "Search box below", "", false);
@@ -30,22 +28,18 @@ if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
     return;
 }
 
-UpdateProgress();
+SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
+StartUpdater();
 
 await DumpCode();
 GetSortedResults();
 
+await StopUpdater();
 HideProgressBar();
 EnableUI();
 string results_message = $"{result_count} results in {resultsDict.Count} code entries.";
 SimpleTextOutput("Search results.", results_message, results.ToString(), true);
 
-
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Code Entries", progress, Data.Code.Count);
-    Interlocked.Increment(ref progress); //"thread-safe" increment
-}
 
 string GetFolder(string path)
 {
@@ -55,8 +49,6 @@ string GetFolder(string path)
 async Task DumpCode()
 {
     await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
-
-    progress--;
 }
 
 void GetSortedResults()
@@ -129,5 +121,5 @@ void DumpCode(UndertaleCode code)
         }
     }
 
-    UpdateProgress();
+    IncProgressP();
 }

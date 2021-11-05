@@ -10,6 +10,26 @@ namespace UndertaleModLib
 {
     public class UndertaleData
     {
+        public object this[string resourceType] //access resource(s) by its name
+        {
+            get
+            {
+                var property = GetType().GetProperty(resourceType);
+                if (property is null)
+                    throw new MissingMemberException($"\"UndertaleData\" doesn't contain a property named \"{resourceType}\".");
+
+                return property.GetValue(this, null);
+            }
+            set
+            {
+                var property = GetType().GetProperty(resourceType);
+                if (property is null)
+                    throw new MissingMemberException($"\"UndertaleData\" doesn't contain a property named \"{resourceType}\".");
+
+                property.SetValue(this, value, null);
+            }
+        }
+
         public UndertaleChunkFORM FORM;
 
         public UndertaleGeneralInfo GeneralInfo => FORM.GEN8?.Object;

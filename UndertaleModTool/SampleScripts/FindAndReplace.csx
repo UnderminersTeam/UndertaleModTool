@@ -18,9 +18,6 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
     return;
 }
 
-int progress = 0;
-
-UpdateProgress();
 if (!ScriptQuestion("This will make changes across all of the code! Are you sure you'd like to continue?"))
 {
     return;
@@ -31,17 +28,15 @@ bool isRegex = ScriptQuestion("Is regex search?");
 String keyword = SimpleTextInput("Enter search terms", "Search box below", "", multiline);
 String replacement = SimpleTextInput("Enter replacement term", "Search box below", "", multiline);
 
-foreach(UndertaleCode code in Data.Code)
+SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
+StartUpdater();
+
+foreach (UndertaleCode code in Data.Code)
 {
     ReplaceTextInGML(code.Name.Content, keyword, replacement, case_sensitive, isRegex);
-    UpdateProgress();
+    IncProgress();
 }
 
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Completed");
-
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Code Entries", progress++, Data.Code.Count);
-}
-

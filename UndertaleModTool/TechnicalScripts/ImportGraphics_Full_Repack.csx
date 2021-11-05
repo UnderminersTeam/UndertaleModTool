@@ -94,26 +94,21 @@ foreach (DirectoryInfo di in dir.GetDirectories())
 int progress = 0;
 string exportedTexturesFolder = dir.FullName + Path.DirectorySeparatorChar + "Textures" + Path.DirectorySeparatorChar;
 TextureWorker worker = new TextureWorker();
-
 Dictionary<string, int[]> assetCoordinateDict = new Dictionary<string, int[]>();
 Dictionary<string, string> assetTypeDict = new Dictionary<string, string>();
 
 Directory.CreateDirectory(exportedTexturesFolder);
 
-UpdateProgress(0);
+SetProgressBar(null, "Existing Textures Exported", 0, Data.TexturePageItems.Count);
+StartUpdater();
 
 await DumpSprites();
 await DumpFonts();
 await DumpBackgrounds();
 worker.Cleanup();
 
+await StopUpdater();
 HideProgressBar();
-
-void UpdateProgress(int updateAmount)
-{
-    Interlocked.Add(ref progress, updateAmount); //"thread-safe" add operation
-    UpdateProgressBar(null, "Existing Textures Exported", progress, Data.TexturePageItems.Count);
-}
 
 async Task DumpSprites()
 {
@@ -143,7 +138,7 @@ void DumpSprite(UndertaleSprite sprite)
         }
     }
 
-    UpdateProgress(sprite.Textures.Count);
+    AddProgress(sprite.Textures.Count);
 }
 
 void DumpFont(UndertaleFont font)
@@ -155,7 +150,7 @@ void DumpFont(UndertaleFont font)
         assetCoordinateDict.Add(font.Name.Content, new int[] { tex.TargetX, tex.TargetY, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
         assetTypeDict.Add(font.Name.Content, "fnt");
 
-        UpdateProgress(1);
+        AddProgress(1);
     }
 }
 
@@ -168,7 +163,7 @@ void DumpBackground(UndertaleBackground background)
         assetCoordinateDict.Add(background.Name.Content, new int[] { tex.TargetX, tex.TargetY, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
         assetTypeDict.Add(background.Name.Content, "bg");
 
-        UpdateProgress(1);
+        AddProgress(1);
     }
 }
 
@@ -386,6 +381,9 @@ foreach (Atlas atlas in packer.Atlasses)
     atlasCount++;
 }
 
+ScriptMessage("Import Complete!");
+
+
 void setTextureTargetBounds(UndertaleTexturePageItem tex, string textureName, Node n)
 {
     if (assetCoordinateDict.ContainsKey(textureName))
@@ -406,9 +404,6 @@ void setTextureTargetBounds(UndertaleTexturePageItem tex, string textureName, No
         tex.TargetHeight = (ushort)n.Bounds.Height;
     }
 }
-
-HideProgressBar();
-ScriptMessage("Import Complete!");
 
 public class TextureInfo
 {

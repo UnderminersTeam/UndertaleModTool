@@ -10,10 +10,8 @@ EnsureDataLoaded();
 
 bool padded = (!ScriptQuestion("Export all sprites unpadded?"));
 
-int progress = 0;
 string texFolder = GetFolder(FilePath) + "Export_Sprites" + Path.DirectorySeparatorChar;
 TextureWorker worker = new TextureWorker();
-
 if (Directory.Exists(texFolder))
 {
     ScriptError("A sprites export already exists. Please remove it.", "Error");
@@ -22,20 +20,16 @@ if (Directory.Exists(texFolder))
 
 Directory.CreateDirectory(texFolder);
 
-UpdateProgress();
+SetProgressBar(null, "Sprites", 0, Data.Sprites.Count);
+StartUpdater();
 
 await DumpSprites();
 worker.Cleanup();
 
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 
-
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Sprites", progress, Data.Sprites.Count);
-    Interlocked.Increment(ref progress); //"thread-safe" increment
-}
 
 string GetFolder(string path) 
 {
@@ -45,8 +39,6 @@ string GetFolder(string path)
 async Task DumpSprites()
 {
     await Task.Run(() => Parallel.ForEach(Data.Sprites, DumpSprite));
-
-    progress--;
 }
 
 void DumpSprite(UndertaleSprite sprite) 
@@ -55,5 +47,5 @@ void DumpSprite(UndertaleSprite sprite)
         if (sprite.Textures[i]?.Texture != null)
             worker.ExportAsPNG(sprite.Textures[i].Texture, texFolder + sprite.Name.Content + "_" + i + ".png", null, padded); // Include padding to make sprites look neat!
 
-    UpdateProgress();
+    IncProgressP();
 }
