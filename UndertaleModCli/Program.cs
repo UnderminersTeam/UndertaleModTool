@@ -787,6 +787,10 @@ namespace UndertaleModCli
         {
             //there is no UI with any data binding
         }
+        public void SyncBinding(bool enable = false)
+        {
+            //there is no UI with any data binding
+        }
 
         void ProgressUpdater()
         {

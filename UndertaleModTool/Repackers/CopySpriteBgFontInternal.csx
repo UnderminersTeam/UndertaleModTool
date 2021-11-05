@@ -46,209 +46,213 @@ bool[] SpriteSheetsUsed = new bool[(DataEmbeddedTexturesCount + DataEmbeddedText
 SetProgressBar(null, "Textures Exported", 0, Data.TexturePageItems.Count);
 StartUpdater();
 
-foreach (var sub in subs)
-{
-    splitStringsList.Add(sub.Trim());
-}
-for (int i = 0; i < SpriteSheetsCopyNeeded.Length; i++)
-{
-    SpriteSheetsCopyNeeded[i] = false;
-}
-for (int i = 0; i < SpriteSheetsUsed.Length; i++)
-{
-    SpriteSheetsUsed[i] = false;
-}
-for (var i = 0; i < DataEmbeddedTexturesCount; i++)
-{
-    UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
-    texture.TextureData.TextureBlob = Data.EmbeddedTextures[i].TextureData.TextureBlob;
-    Data.EmbeddedTextures.Add(texture);
-    texture.Name = new UndertaleString("Texture " + Data.EmbeddedTextures.IndexOf(texture).ToString());
-}
-for (var j = 0; j < splitStringsList.Count; j++)
-{
-    int DataBackgroundsLength = Data.Backgrounds.Count;
-    for (var i = 0; i < DataBackgroundsLength; i++)
+SyncBinding("EmbeddedTextures, Strings, Backgrounds, Sprites, Fonts, TexturePageItems", true);
+await Task.Run(() => {
+    foreach (var sub in subs)
     {
-        UndertaleBackground bg = Data.Backgrounds[i];
-        if (splitStringsList[j].ToLower() == bg.Name.Content.ToLower())
-        {
-            UndertaleBackground donorBG = Data.Backgrounds.ByName(bg.Name.Content);
-            UndertaleBackground nativeBG = new UndertaleBackground();
-            nativeBG.Name = Data.Strings.MakeString(bg.Name.Content + "_Copy");
-            Data.Backgrounds.Add(nativeBG);
-            nativeBG.Transparent = donorBG.Transparent;
-            nativeBG.Smooth = donorBG.Smooth;
-            nativeBG.Preload = donorBG.Preload;
-            nativeBG.GMS2UnknownAlways2 = donorBG.GMS2UnknownAlways2;
-            nativeBG.GMS2TileWidth = donorBG.GMS2TileWidth;
-            nativeBG.GMS2TileHeight = donorBG.GMS2TileHeight;
-            nativeBG.GMS2OutputBorderX = donorBG.GMS2OutputBorderX;
-            nativeBG.GMS2OutputBorderY = donorBG.GMS2OutputBorderY;
-            nativeBG.GMS2TileColumns = donorBG.GMS2TileColumns;
-            nativeBG.GMS2ItemsPerTileCount = donorBG.GMS2ItemsPerTileCount;
-            nativeBG.GMS2TileCount = donorBG.GMS2TileCount;
-            nativeBG.GMS2UnknownAlwaysZero = donorBG.GMS2UnknownAlwaysZero;
-            nativeBG.GMS2FrameLength = donorBG.GMS2FrameLength;
-            nativeBG.GMS2TileIds = donorBG.GMS2TileIds;
-            DumpBackground(donorBG);
-            copiedBackgroundsCount += 1;
-        }
+        splitStringsList.Add(sub.Trim());
     }
-    int DataSpritesLength = Data.Sprites.Count;
-    for (var k = 0; k < DataSpritesLength; k++)
+    for (int i = 0; i < SpriteSheetsCopyNeeded.Length; i++)
     {
-        UndertaleSprite sprite = Data.Sprites[k];
-        if (splitStringsList[j].ToLower() == sprite.Name.Content.ToLower())
-        {
-            UndertaleSprite donorSPR = Data.Sprites.ByName(sprite.Name.Content);
-            UndertaleSprite nativeSPR = new UndertaleSprite();
-            nativeSPR.Name = Data.Strings.MakeString(sprite.Name.Content + "_Copy");
-            Data.Sprites.Add(nativeSPR);
-            for (var i = 0; i < donorSPR.CollisionMasks.Count; i++)
-                nativeSPR.CollisionMasks.Add(new UndertaleSprite.MaskEntry(donorSPR.CollisionMasks[i].Data));
-            nativeSPR.Width = donorSPR.Width;
-            nativeSPR.Height = donorSPR.Height;
-            nativeSPR.MarginLeft = donorSPR.MarginLeft;
-            nativeSPR.MarginRight = donorSPR.MarginRight;
-            nativeSPR.MarginBottom = donorSPR.MarginBottom;
-            nativeSPR.MarginTop = donorSPR.MarginTop;
-            nativeSPR.Transparent = donorSPR.Transparent;
-            nativeSPR.Smooth = donorSPR.Smooth;
-            nativeSPR.Preload = donorSPR.Preload;
-            nativeSPR.BBoxMode = donorSPR.BBoxMode;
-            nativeSPR.OriginX = donorSPR.OriginX;
-            nativeSPR.OriginY = donorSPR.OriginY;
-
-            // Special sprite types (always used in GMS2)
-            nativeSPR.SVersion = donorSPR.SVersion;
-            nativeSPR.GMS2PlaybackSpeed = donorSPR.GMS2PlaybackSpeed;
-            nativeSPR.IsSpecialType = donorSPR.IsSpecialType;
-            nativeSPR.SpineVersion = donorSPR.SpineVersion;
-            nativeSPR.SpineJSON = donorSPR.SpineJSON;
-            nativeSPR.SpineAtlas = donorSPR.SpineAtlas;
-            nativeSPR.SWFVersion = donorSPR.SWFVersion;
-
-            //Possibly will break
-            nativeSPR.SepMasks = donorSPR.SepMasks;
-            nativeSPR.SSpriteType = donorSPR.SSpriteType;
-            nativeSPR.GMS2PlaybackSpeedType = donorSPR.GMS2PlaybackSpeedType;
-            nativeSPR.SpineTextures = donorSPR.SpineTextures;
-            nativeSPR.YYSWF = donorSPR.YYSWF;
-            nativeSPR.V2Sequence = donorSPR.V2Sequence;
-            nativeSPR.V3NineSlice = donorSPR.V3NineSlice;
-
-            DumpSprite(donorSPR);
-            copiedSpritesCount += 1;
-        }
+        SpriteSheetsCopyNeeded[i] = false;
     }
-    int DataFontsLength = Data.Fonts.Count;
-    for (var i = 0; i < DataFontsLength; i++)
+    for (int i = 0; i < SpriteSheetsUsed.Length; i++)
     {
-        UndertaleFont fnt = Data.Fonts[i];
-        if (splitStringsList[j].ToLower() == fnt.Name.Content.ToLower())
+        SpriteSheetsUsed[i] = false;
+    }
+    for (var i = 0; i < DataEmbeddedTexturesCount; i++)
+    {
+        UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
+        texture.TextureData.TextureBlob = Data.EmbeddedTextures[i].TextureData.TextureBlob;
+        Data.EmbeddedTextures.Add(texture);
+        texture.Name = new UndertaleString("Texture " + Data.EmbeddedTextures.IndexOf(texture).ToString());
+    }
+    for (var j = 0; j < splitStringsList.Count; j++)
+    {
+        int DataBackgroundsLength = Data.Backgrounds.Count;
+        for (var i = 0; i < DataBackgroundsLength; i++)
         {
-            UndertaleFont donorFNT = Data.Fonts.ByName(fnt.Name.Content);
-            UndertaleFont nativeFNT = new UndertaleFont();
-            nativeFNT.Name = Data.Strings.MakeString(fnt.Name.Content + "_Copy");
-            Data.Fonts.Add(nativeFNT);
-            nativeFNT.Glyphs.Clear();
-            nativeFNT.RangeStart = donorFNT.RangeStart;
-            nativeFNT.DisplayName = Data.Strings.MakeString(donorFNT.DisplayName.Content + "_Copy");
-            nativeFNT.EmSize = donorFNT.EmSize;
-            nativeFNT.Bold = donorFNT.Bold;
-            nativeFNT.Italic = donorFNT.Italic;
-            nativeFNT.Charset = donorFNT.Charset;
-            nativeFNT.AntiAliasing = donorFNT.AntiAliasing;
-            nativeFNT.ScaleX = donorFNT.ScaleX;
-            nativeFNT.ScaleY = donorFNT.ScaleY;
-            foreach (UndertaleFont.Glyph glyph in donorFNT.Glyphs)
+            UndertaleBackground bg = Data.Backgrounds[i];
+            if (splitStringsList[j].ToLower() == bg.Name.Content.ToLower())
             {
-                UndertaleFont.Glyph glyph_new = new UndertaleFont.Glyph();
-                glyph_new.Character = glyph.Character;
-                glyph_new.SourceX = glyph.SourceX;
-                glyph_new.SourceY = glyph.SourceY;
-                glyph_new.SourceWidth = glyph.SourceWidth;
-                glyph_new.SourceHeight = glyph.SourceHeight;
-                glyph_new.Shift = glyph.Shift;
-                glyph_new.Offset = glyph.Offset;
-                nativeFNT.Glyphs.Add(glyph_new);
+                UndertaleBackground donorBG = Data.Backgrounds.ByName(bg.Name.Content);
+                UndertaleBackground nativeBG = new UndertaleBackground();
+                nativeBG.Name = Data.Strings.MakeString(bg.Name.Content + "_Copy");
+                Data.Backgrounds.Add(nativeBG);
+                nativeBG.Transparent = donorBG.Transparent;
+                nativeBG.Smooth = donorBG.Smooth;
+                nativeBG.Preload = donorBG.Preload;
+                nativeBG.GMS2UnknownAlways2 = donorBG.GMS2UnknownAlways2;
+                nativeBG.GMS2TileWidth = donorBG.GMS2TileWidth;
+                nativeBG.GMS2TileHeight = donorBG.GMS2TileHeight;
+                nativeBG.GMS2OutputBorderX = donorBG.GMS2OutputBorderX;
+                nativeBG.GMS2OutputBorderY = donorBG.GMS2OutputBorderY;
+                nativeBG.GMS2TileColumns = donorBG.GMS2TileColumns;
+                nativeBG.GMS2ItemsPerTileCount = donorBG.GMS2ItemsPerTileCount;
+                nativeBG.GMS2TileCount = donorBG.GMS2TileCount;
+                nativeBG.GMS2UnknownAlwaysZero = donorBG.GMS2UnknownAlwaysZero;
+                nativeBG.GMS2FrameLength = donorBG.GMS2FrameLength;
+                nativeBG.GMS2TileIds = donorBG.GMS2TileIds;
+                DumpBackground(donorBG);
+                copiedBackgroundsCount += 1;
             }
-            nativeFNT.RangeEnd = donorFNT.RangeEnd;
-            DumpFont(donorFNT);
-            copiedFontsCount += 1;
+        }
+        int DataSpritesLength = Data.Sprites.Count;
+        for (var k = 0; k < DataSpritesLength; k++)
+        {
+            UndertaleSprite sprite = Data.Sprites[k];
+            if (splitStringsList[j].ToLower() == sprite.Name.Content.ToLower())
+            {
+                UndertaleSprite donorSPR = Data.Sprites.ByName(sprite.Name.Content);
+                UndertaleSprite nativeSPR = new UndertaleSprite();
+                nativeSPR.Name = Data.Strings.MakeString(sprite.Name.Content + "_Copy");
+                Data.Sprites.Add(nativeSPR);
+                for (var i = 0; i < donorSPR.CollisionMasks.Count; i++)
+                    nativeSPR.CollisionMasks.Add(new UndertaleSprite.MaskEntry(donorSPR.CollisionMasks[i].Data));
+                nativeSPR.Width = donorSPR.Width;
+                nativeSPR.Height = donorSPR.Height;
+                nativeSPR.MarginLeft = donorSPR.MarginLeft;
+                nativeSPR.MarginRight = donorSPR.MarginRight;
+                nativeSPR.MarginBottom = donorSPR.MarginBottom;
+                nativeSPR.MarginTop = donorSPR.MarginTop;
+                nativeSPR.Transparent = donorSPR.Transparent;
+                nativeSPR.Smooth = donorSPR.Smooth;
+                nativeSPR.Preload = donorSPR.Preload;
+                nativeSPR.BBoxMode = donorSPR.BBoxMode;
+                nativeSPR.OriginX = donorSPR.OriginX;
+                nativeSPR.OriginY = donorSPR.OriginY;
+
+                // Special sprite types (always used in GMS2)
+                nativeSPR.SVersion = donorSPR.SVersion;
+                nativeSPR.GMS2PlaybackSpeed = donorSPR.GMS2PlaybackSpeed;
+                nativeSPR.IsSpecialType = donorSPR.IsSpecialType;
+                nativeSPR.SpineVersion = donorSPR.SpineVersion;
+                nativeSPR.SpineJSON = donorSPR.SpineJSON;
+                nativeSPR.SpineAtlas = donorSPR.SpineAtlas;
+                nativeSPR.SWFVersion = donorSPR.SWFVersion;
+
+                //Possibly will break
+                nativeSPR.SepMasks = donorSPR.SepMasks;
+                nativeSPR.SSpriteType = donorSPR.SSpriteType;
+                nativeSPR.GMS2PlaybackSpeedType = donorSPR.GMS2PlaybackSpeedType;
+                nativeSPR.SpineTextures = donorSPR.SpineTextures;
+                nativeSPR.YYSWF = donorSPR.YYSWF;
+                nativeSPR.V2Sequence = donorSPR.V2Sequence;
+                nativeSPR.V3NineSlice = donorSPR.V3NineSlice;
+
+                DumpSprite(donorSPR);
+                copiedSpritesCount += 1;
+            }
+        }
+        int DataFontsLength = Data.Fonts.Count;
+        for (var i = 0; i < DataFontsLength; i++)
+        {
+            UndertaleFont fnt = Data.Fonts[i];
+            if (splitStringsList[j].ToLower() == fnt.Name.Content.ToLower())
+            {
+                UndertaleFont donorFNT = Data.Fonts.ByName(fnt.Name.Content);
+                UndertaleFont nativeFNT = new UndertaleFont();
+                nativeFNT.Name = Data.Strings.MakeString(fnt.Name.Content + "_Copy");
+                Data.Fonts.Add(nativeFNT);
+                nativeFNT.Glyphs.Clear();
+                nativeFNT.RangeStart = donorFNT.RangeStart;
+                nativeFNT.DisplayName = Data.Strings.MakeString(donorFNT.DisplayName.Content + "_Copy");
+                nativeFNT.EmSize = donorFNT.EmSize;
+                nativeFNT.Bold = donorFNT.Bold;
+                nativeFNT.Italic = donorFNT.Italic;
+                nativeFNT.Charset = donorFNT.Charset;
+                nativeFNT.AntiAliasing = donorFNT.AntiAliasing;
+                nativeFNT.ScaleX = donorFNT.ScaleX;
+                nativeFNT.ScaleY = donorFNT.ScaleY;
+                foreach (UndertaleFont.Glyph glyph in donorFNT.Glyphs)
+                {
+                    UndertaleFont.Glyph glyph_new = new UndertaleFont.Glyph();
+                    glyph_new.Character = glyph.Character;
+                    glyph_new.SourceX = glyph.SourceX;
+                    glyph_new.SourceY = glyph.SourceY;
+                    glyph_new.SourceWidth = glyph.SourceWidth;
+                    glyph_new.SourceHeight = glyph.SourceHeight;
+                    glyph_new.Shift = glyph.Shift;
+                    glyph_new.Offset = glyph.Offset;
+                    nativeFNT.Glyphs.Add(glyph_new);
+                }
+                nativeFNT.RangeEnd = donorFNT.RangeEnd;
+                DumpFont(donorFNT);
+                copiedFontsCount += 1;
+            }
         }
     }
-}
-for (var i = 0; i < tex_IsNull.Count; i++)
-{
-    if (tex_IsNull[i] == false)
+    for (var i = 0; i < tex_IsNull.Count; i++)
     {
-        UndertaleTexturePageItem texturePageItem = new UndertaleTexturePageItem();
-        texturePageItem.TargetX = (ushort)tex_TargetX[i];
-        texturePageItem.TargetY = (ushort)tex_TargetY[i];
-        texturePageItem.TargetWidth = (ushort)tex_TargetWidth[i];
-        texturePageItem.TargetHeight = (ushort)tex_TargetHeight[i];
-        texturePageItem.SourceX = (ushort)tex_SourceX[i];
-        texturePageItem.SourceY = (ushort)tex_SourceY[i];
-        texturePageItem.SourceWidth = (ushort)tex_SourceWidth[i];
-        texturePageItem.SourceHeight = (ushort)tex_SourceHeight[i];
-        texturePageItem.BoundingWidth = (ushort)tex_BoundingWidth[i];
-        texturePageItem.BoundingHeight = (ushort)tex_BoundingHeight[i];
-        texturePageItem.TexturePage = Data.EmbeddedTextures[(DataEmbeddedTexturesCount + tex_EmbeddedTextureID[i])];
-        Data.TexturePageItems.Add(texturePageItem);
-        texturePageItem.Name = new UndertaleString("PageItem " + Data.TexturePageItems.IndexOf(texturePageItem).ToString());
-        if (tex_Type[i].Equals("bg"))
+        if (tex_IsNull[i] == false)
         {
-            UndertaleBackground background = Data.Backgrounds.ByName(tex_Name[i]);
-            background.Texture = texturePageItem;
-        }
-        else if (tex_Type[i].Equals("fnt"))
-        {
-            UndertaleFont font = Data.Fonts.ByName(tex_Name[i]);
-            font.Texture = texturePageItem;
-        }
-        else
-        {
-            int frame = tex_Frame[i];
-            UndertaleSprite sprite = Data.Sprites.ByName(tex_Name[i]);
-            UndertaleSprite.TextureEntry texentry = new UndertaleSprite.TextureEntry();
-            texentry.Texture = texturePageItem;
-            if (frame > sprite.Textures.Count - 1)
+            UndertaleTexturePageItem texturePageItem = new UndertaleTexturePageItem();
+            texturePageItem.TargetX = (ushort)tex_TargetX[i];
+            texturePageItem.TargetY = (ushort)tex_TargetY[i];
+            texturePageItem.TargetWidth = (ushort)tex_TargetWidth[i];
+            texturePageItem.TargetHeight = (ushort)tex_TargetHeight[i];
+            texturePageItem.SourceX = (ushort)tex_SourceX[i];
+            texturePageItem.SourceY = (ushort)tex_SourceY[i];
+            texturePageItem.SourceWidth = (ushort)tex_SourceWidth[i];
+            texturePageItem.SourceHeight = (ushort)tex_SourceHeight[i];
+            texturePageItem.BoundingWidth = (ushort)tex_BoundingWidth[i];
+            texturePageItem.BoundingHeight = (ushort)tex_BoundingHeight[i];
+            texturePageItem.TexturePage = Data.EmbeddedTextures[(DataEmbeddedTexturesCount + tex_EmbeddedTextureID[i])];
+            Data.TexturePageItems.Add(texturePageItem);
+            texturePageItem.Name = new UndertaleString("PageItem " + Data.TexturePageItems.IndexOf(texturePageItem).ToString());
+            if (tex_Type[i].Equals("bg"))
             {
-                while (frame > sprite.Textures.Count - 1)
-                {
-                    sprite.Textures.Add(texentry);
-                }
+                UndertaleBackground background = Data.Backgrounds.ByName(tex_Name[i]);
+                background.Texture = texturePageItem;
+            }
+            else if (tex_Type[i].Equals("fnt"))
+            {
+                UndertaleFont font = Data.Fonts.ByName(tex_Name[i]);
+                font.Texture = texturePageItem;
             }
             else
             {
-                sprite.Textures[frame] = texentry;
+                int frame = tex_Frame[i];
+                UndertaleSprite sprite = Data.Sprites.ByName(tex_Name[i]);
+                UndertaleSprite.TextureEntry texentry = new UndertaleSprite.TextureEntry();
+                texentry.Texture = texturePageItem;
+                if (frame > sprite.Textures.Count - 1)
+                {
+                    while (frame > sprite.Textures.Count - 1)
+                    {
+                        sprite.Textures.Add(texentry);
+                    }
+                }
+                else
+                {
+                    sprite.Textures[frame] = texentry;
+                }
+            }
+        }
+        else
+        {
+            if (tex_Type[i] == "spr")
+            {
+                UndertaleSprite.TextureEntry texentry = new UndertaleSprite.TextureEntry();
+                texentry.Texture = null;
+                Data.Sprites.ByName(tex_Name[i]).Textures.Add(texentry);
+            }
+            if (tex_Type[i] == "bg")
+            {
+                Data.Backgrounds.ByName(tex_Name[i]).Texture = null;
+            }
+            if (tex_Type[i] == "fnt")
+            {
+                Data.Fonts.ByName(tex_Name[i]).Texture = null;
             }
         }
     }
-    else
-    {
-        if (tex_Type[i] == "spr")
-        {
-            UndertaleSprite.TextureEntry texentry = new UndertaleSprite.TextureEntry();
-            texentry.Texture = null;
-            Data.Sprites.ByName(tex_Name[i]).Textures.Add(texentry);
-        }
-        if (tex_Type[i] == "bg")
-        {
-            Data.Backgrounds.ByName(tex_Name[i]).Texture = null;
-        }
-        if (tex_Type[i] == "fnt")
-        {
-            Data.Fonts.ByName(tex_Name[i]).Texture = null;
-        }
-    }
-}
-SpriteSheetsUsedUpdate();
-RemoveUnusedSpriteSheets();
-TexturePageItemsUsedUpdate();
-RemoveUnusedTexturePageItems();
+    SpriteSheetsUsedUpdate();
+    RemoveUnusedSpriteSheets();
+    TexturePageItemsUsedUpdate();
+    RemoveUnusedTexturePageItems();
+});
+SyncBinding(false);
 
 await StopUpdater();
 HideProgressBar();

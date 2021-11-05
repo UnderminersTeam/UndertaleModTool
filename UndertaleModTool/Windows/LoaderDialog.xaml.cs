@@ -143,7 +143,7 @@ namespace UndertaleModTool
         }
         public void UpdateValue(double value)
         {
-            if (Math.Abs(value - ProgressBar.Value) <= 1) //if value not changed or changed by 1
+            if (value - ProgressBar.Value <= 1) //if value not changed or changed by 1
             {
                 ProgressBar.Value = value;
             }

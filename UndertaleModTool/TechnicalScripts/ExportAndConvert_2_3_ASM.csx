@@ -25,7 +25,9 @@ Directory.CreateDirectory(codeFolder);
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
 StartUpdater();
 
-DumpCode();
+SyncBinding("Strings, CodeLocals, Variables", true); //not sure about variables
+await Task.Run(DumpCode);
+SyncBinding(false);
 
 await StopUpdater();
 HideProgressBar();
@@ -153,6 +155,7 @@ void DumpCode()
                 string str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
                 File.WriteAllText(str_path_to_use, "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"); // Please don't
             }
+
             IncProgress();
         }
     }

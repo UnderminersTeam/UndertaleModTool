@@ -29,7 +29,6 @@ namespace UndertaleModTests
         public string ScriptErrorMessage => throw new NotImplementedException();
         public string ExePath => throw new NotImplementedException();
         public string ScriptErrorType => throw new NotImplementedException();
-        public int ProgressValue { get; set; }
 
         public void ChangeSelection(object newsel)
         {
@@ -193,6 +192,14 @@ namespace UndertaleModTests
         public void EnableUI()
         {
             Console.WriteLine("Enabling UI.");
+        }
+        public void SyncBinding(string resourceType, bool enable)
+        {
+            Console.WriteLine($"SyncBinding(): \"{resourceType}\", {enable}");
+        }
+        public void SyncBinding(bool enable = false)
+        {
+            Console.WriteLine($"SyncBinding(): {enable}");
         }
         public void StartUpdater()
         {

@@ -70,6 +70,7 @@ namespace UndertaleModLib.Scripting
         void HideProgressBar();
         void EnableUI();
         void SyncBinding(string resourceType, bool enable);
+        void SyncBinding(bool enable = false);
         void StartUpdater();
         Task StopUpdater();
 

@@ -16,19 +16,21 @@ MakeFolder("EmbeddedTextures");
 SetProgressBar(null, "Embedded textures", 0, Data.EmbeddedTextures.Count);
 StartUpdater();
 
-for (var i = 0; i < Data.EmbeddedTextures.Count; i++) 
-{
-    try
+await Task.Run(() => {
+    for (var i = 0; i < Data.EmbeddedTextures.Count; i++)
     {
-        File.WriteAllBytes(Path.Combine(EmbFolder, i + ".png"), Data.EmbeddedTextures[i].TextureData.TextureBlob);
-    }
-    catch (Exception ex) 
-    {
-        ScriptMessage("Failed to export file: " + ex.Message);
-    }
+        try
+        {
+            File.WriteAllBytes(Path.Combine(EmbFolder, i + ".png"), Data.EmbeddedTextures[i].TextureData.TextureBlob);
+        }
+        catch (Exception ex)
+        {
+            ScriptMessage("Failed to export file: " + ex.Message);
+        }
 
-    IncProgress();
-}
+        IncProgress();
+    }
+});
 
 await StopUpdater();
 HideProgressBar();

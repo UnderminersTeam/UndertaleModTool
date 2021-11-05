@@ -62,12 +62,17 @@ You will have to check the code for these functions and change it accordingly.
 SetProgressBar(null, "Externalizing Sounds...", 0, Data.Sounds.Count);
 StartUpdater();
 
-DumpSounds(); // This runs sync, because it has to load audio groups.
-ExternalizeSounds(); // This runs sync, because it has to load audio groups.
+SyncBinding("Strings", true);
+await Task.Run(() => {
+    DumpSounds(); // This runs sync, because it has to load audio groups.
+    ExternalizeSounds(); // This runs sync, because it has to load audio groups.
+});
+SyncBinding(false);
 
-StopUpdater();
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Externalization Complete.\nExternalized " + sounds.ToString() + " sounds.\n\nNOTE: You will need to convert any external WAV files into OGG files.\nThen replace the WAV file with the OGG file.\nOtherwise the sound will not play.\nA batch conversion tool such as 'LameXP' will help.\nCheck the #faq for more information or message Grossley#2869 on Discord.");
+
 
 void ExternalizeSounds()
 {

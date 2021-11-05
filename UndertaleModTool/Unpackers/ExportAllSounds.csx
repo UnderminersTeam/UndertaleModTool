@@ -80,7 +80,7 @@ maxCount = Data.Sounds.Count;
 SetProgressBar(null, "Sound", 0, maxCount);
 StartUpdater();
 
-DumpSounds(); // This runs sync, because it has to load audio groups.
+await Task.Run(DumpSounds); // This runs sync, because it has to load audio groups.
 
 await StopUpdater();
 HideProgressBar();

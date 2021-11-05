@@ -66,7 +66,8 @@ namespace UndertaleModTool
         private Task updater;
         private CancellationTokenSource cts;
         private CancellationToken cToken;
-        private object bindingLock = new();
+        private readonly object bindingLock = new();
+        private HashSet<string> syncBindings = new();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -1208,13 +1209,53 @@ namespace UndertaleModTool
         
         public void SyncBinding(string resourceType, bool enable)
         {
-            if (enable)
+            if (resourceType.Contains(',')) //if several types are listed
             {
-                BindingOperations.EnableCollectionSynchronization(Data[resourceType] as IEnumerable, bindingLock);
+                string[] resTypes = resourceType.Replace(" ", "").Split(',');
+
+                if (enable)
+                {
+                    foreach (string resType in resTypes)
+                    {
+                        BindingOperations.EnableCollectionSynchronization(Data[resType] as IEnumerable, bindingLock);
+
+                        syncBindings.Add(resType);
+                    }
+                }
+                else
+                {
+                    foreach (string resType in resTypes)
+                    {
+                        BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
+
+                        syncBindings.Remove(resType);
+                    }
+                }
             }
             else
             {
-                BindingOperations.DisableCollectionSynchronization(Data[resourceType] as IEnumerable);
+                if (enable)
+                {
+                    BindingOperations.EnableCollectionSynchronization(Data[resourceType] as IEnumerable, bindingLock);
+
+                    syncBindings.Add(resourceType);
+                }
+                else
+                {
+                    BindingOperations.DisableCollectionSynchronization(Data[resourceType] as IEnumerable);
+
+                    syncBindings.Remove(resourceType);
+                }
+            }
+        }
+        public void SyncBinding(bool enable = false) //disable all sync. bindings
+        {
+            if (syncBindings.Count != 0)
+            {
+                foreach (string resType in syncBindings)
+                    BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
+
+                syncBindings.Clear();
             }
         }
 

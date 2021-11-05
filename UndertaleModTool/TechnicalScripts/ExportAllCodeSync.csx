@@ -20,7 +20,7 @@ SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
 StartUpdater();
 
 int failed = 0;
-DumpCode();
+await Task.Run(DumpCode);
 
 await StopUpdater();
 HideProgressBar();
@@ -76,6 +76,7 @@ void DumpCode()
                 failed += 1;
             }
         }
+
         IncProgress();
     }
 }

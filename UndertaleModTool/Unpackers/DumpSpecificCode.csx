@@ -79,10 +79,12 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
 SetProgressBar(null, "Code Entries", 0, codeToDump.Count);
 StartUpdater();
 
-for (var j = 0; j < codeToDump.Count; j++)
-{
-    DumpCode(Data.Code.ByName(codeToDump[j]));
-}
+await Task.Run(() => {
+    for (var j = 0; j < codeToDump.Count; j++)
+    {
+        DumpCode(Data.Code.ByName(codeToDump[j]));
+    }
+});
 
 await StopUpdater();
 

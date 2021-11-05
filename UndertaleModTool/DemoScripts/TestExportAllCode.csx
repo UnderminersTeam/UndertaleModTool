@@ -25,6 +25,7 @@ ScriptMessage("If UndertaleModTool crashes during code export, or another seriou
 
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
 StartUpdater();
+
 if (File.Exists(path_error))
 {
     System.IO.StreamReader file = new System.IO.StreamReader(path_error);
@@ -81,29 +82,44 @@ if (File.Exists(path_error2))
     file.Close();
 }
 
-foreach (UndertaleCode code in Data.Code)
-{
-    if (write)
+await Task.Run(() => {
+    foreach (UndertaleCode code in Data.Code)
     {
-        try
+        if (write)
         {
-            File.WriteAllText(path_error, "An error in decompilation occurred in: \n" + code.Name.Content);
-        }
-        catch (Exception e)
-        {
-            File.WriteAllText(path_error, "Unknown.");
-        }
-    }
-    if (errored_code_arr.Count > 0)
-    {
-        for (int i = 0; i < errored_code_arr.Count; i++)
-        {
-            if (errored_code_arr[i].ToString() == code.Name.Content)
+            try
             {
-                isErrorCodeEntry = true;
+                File.WriteAllText(path_error, "An error in decompilation occurred in: \n" + code.Name.Content);
+            }
+            catch (Exception e)
+            {
+                File.WriteAllText(path_error, "Unknown.");
             }
         }
-        if ((!isErrorCodeEntry) || (!skip))
+        if (errored_code_arr.Count > 0)
+        {
+            for (int i = 0; i < errored_code_arr.Count; i++)
+            {
+                if (errored_code_arr[i].ToString() == code.Name.Content)
+                {
+                    isErrorCodeEntry = true;
+                }
+            }
+            if ((!isErrorCodeEntry) || (!skip))
+            {
+                string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
+                try
+                {
+                    File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+                }
+                catch (Exception e)
+                {
+                    File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
+                }
+            }
+            isErrorCodeEntry = false;
+        }
+        else
         {
             string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
             try
@@ -115,23 +131,10 @@ foreach (UndertaleCode code in Data.Code)
                 File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
             }
         }
-        isErrorCodeEntry = false;
-    }
-    else
-    {
-        string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
-        try
-        {
-            File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
-        }
-        catch (Exception e)
-        {
-            File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
-        }
-    }
 
-    IncProgress();
-}
+        IncProgress();
+    }
+});
 if (write)
 {
     try

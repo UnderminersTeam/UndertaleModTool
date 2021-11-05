@@ -39,16 +39,18 @@ Reload text for curent language from JSON on command using F12.
 Note: reloading from JSON may take about 10 seconds.
 ");
 //this is one of the rare cases when it's better without "ProgressUpdater()"
-maxCount = 2;
-SetProgressBar(null, "Dumping the language files", 0, maxCount);
-DumpJSON("en");
-DumpJSON("ja");
-maxCount = 2;
-SetProgressBar(null, "Making the JSONs", 0, maxCount);
-MakeJSON("en");
-MakeJSON("ja");
-maxCount = 6;
-SetProgressBar(null, "Setting up code to JSONify Undertale Steam 1.08", 0, maxCount);
+await Task.Run(() => {
+    maxCount = 2;
+    SetProgressBar(null, "Dumping the language files", 0, maxCount);
+    DumpJSON("en");
+    DumpJSON("ja");
+    maxCount = 2;
+    SetProgressBar(null, "Making the JSONs", 0, maxCount);
+    MakeJSON("en");
+    MakeJSON("ja");
+    maxCount = 6;
+    SetProgressBar(null, "Setting up code to JSONify Undertale Steam 1.08", 0, maxCount);
+});
 
 void IncProgressLocal()
 {
