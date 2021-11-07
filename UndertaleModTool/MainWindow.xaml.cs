@@ -1558,6 +1558,18 @@ namespace UndertaleModTool
             TextInput textOutput = new TextInput(labelText, titleText, defaultText, isMultiline, true); //read-only mode
             textOutput.Show();
         }
+        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, IOrderedEnumerable<string> failedList = null)
+        {
+            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, failedList);
+            await Task.Run(textOutput.GenerateResults);
+            textOutput.Show();
+        }
+        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, IEnumerable<string> failedList = null)
+        {
+            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, failedList);
+            await Task.Run(textOutput.GenerateResults);
+            textOutput.Show();
+        }
 
         public void ScriptOpenURL(string url)
         {

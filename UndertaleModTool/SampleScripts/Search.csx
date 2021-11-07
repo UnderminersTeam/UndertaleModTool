@@ -18,6 +18,8 @@ if (Data.IsYYC())
 StringBuilder results = new();
 ConcurrentDictionary<string, List<string>> resultsDict = new();
 ConcurrentBag<string> failedList = new();
+IOrderedEnumerable<string> failedSorted;                              //failedList.OrderBy()
+IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsSorted; //resultsDict.OrderBy()
 int result_count = 0;
 
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
@@ -35,13 +37,17 @@ SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
 StartUpdater();
 
 await DumpCode();
-GetSortedResults();
 
 await StopUpdater();
+
+UpdateProgressStatus("Sorting results...");
+await Task.Run(SortResults);
+
+UpdateProgressStatus("Generating result list...");
+await ClickableTextOutput("Search results.", keyword, result_count, resultsSorted, failedSorted);
+
 HideProgressBar();
 EnableUI();
-string results_message = $"{result_count} results in {resultsDict.Count} code entries.";
-SimpleTextOutput("Search results.", results_message, results.ToString(), true);
 
 
 string GetFolder(string path)
@@ -58,26 +64,12 @@ async Task DumpCode()
     await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
 }
 
-void GetSortedResults()
+void SortResults()
 {
-    int failedCount = failedList.Count;
-    if (failedCount > 0)
-    {
-        if (failedCount == 1)
-            results.Append("There is 1 code entry that encountered an error while searching:");
-        else
-            results.Append($"There is {failedCount} code entries that encountered an error while searching:");
+    if (failedList.Count > 0)
+        failedSorted = failedList.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c)));
 
-        results.Append('\n' + string.Join(",\n", failedList.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c)))));
-        results.Append(".\n\n\n");
-    }
-    results.Append($"{result_count} results in {resultsDict.Count} code entries.\n\n");
-
-    foreach (var result in resultsDict.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c.Key))))
-    {
-        results.Append($"Results in {result.Key}:\n==========================\n");
-        results.Append(string.Join('\n', result.Value) + "\n\n");
-    }
+    resultsSorted = resultsDict.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c.Key)));
 }
 
 bool RegexContains(string s, string sPattern, bool isCaseInsensitive)

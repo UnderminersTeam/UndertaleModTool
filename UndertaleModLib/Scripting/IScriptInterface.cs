@@ -56,6 +56,8 @@ namespace UndertaleModLib.Scripting
         string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose);
         string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true);
         void SimpleTextOutput(string title, string label, string defaultText, bool allowMultiline);
+        Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, IOrderedEnumerable<string> failedList = null);
+        Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, IEnumerable<string> failedList = null);
         void SetFinishedMessage(bool isFinishedMessageEnabled);
         void UpdateProgressBar(string message, string status, double progressValue, double maxValue);
         void SetProgressBar(string message, string status, double progressValue, double maxValue);
