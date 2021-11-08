@@ -96,40 +96,30 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
 SetProgressBar(null, "Code Entries", 0, codeToDump.Count);
 StartUpdater();
 
-for (var j = 0; j < codeToDump.Count; j++)
-{
-    DumpCode(Data.Code.ByName(codeToDump[j]));
-}
-GetSortedResults();
+await Task.Run(() => {
+    for (var j = 0; j < codeToDump.Count; j++)
+    {
+        DumpCode(Data.Code.ByName(codeToDump[j]));
+    }
+});
 
 await StopUpdater();
+
+/*UpdateProgressStatus("Sorting results...");
+await Task.Run(SortResults);*/
+
+UpdateProgressStatus("Generating result list...");
+await ClickableTextOutput("Search results.", keyword, result_count, resultsDict, true, failedList);
+
 HideProgressBar();
 EnableUI();
-string results_message = $"{result_count} results in {resultsDict.Count} code entries.";
-SimpleTextOutput("Search results.", results_message, results.ToString(), true);
 
 
-void GetSortedResults() //not sure that it's necessary to sort it, but just in case
+/*void SortResults() //not sure that it's necessary to sort it, but just in case
 {
-    int failedCount = failedList.Count;
-    if (failedCount > 0)
-    {
-        if (failedCount == 1)
-            results.Append("There is 1 code entry that encountered an error while searching:");
-        else
-            results.Append($"There is {failedCount} code entries that encountered an error while searching:");
-
-        results.Append('\n' + string.Join(",\n", failedList.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c)))));
-        results.Append(".\n\n\n");
-    }
-    results.Append($"{result_count} results in {resultsDict.Count} code entries.\n\n");
-
-    foreach (var result in resultsDict.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c.Key))))
-    {
-        results.Append($"Results in {result.Key}:\n==========================\n");
-        results.Append(string.Join('\n', result.Value) + "\n\n");
-    }
-}
+    if (failedList.Count > 0)
+        failedSorted = failedList.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c)));
+}*/
 
 string GetFolder(string path)
 {

@@ -31,11 +31,15 @@ String replacement = SimpleTextInput("Enter replacement term", "Search box below
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
 StartUpdater();
 
-foreach (UndertaleCode code in Data.Code)
-{
-    ReplaceTextInGML(code.Name.Content, keyword, replacement, case_sensitive, isRegex);
-    IncProgress();
-}
+SyncBinding("Strings", true);
+await Task.Run(() =>{
+    foreach (UndertaleCode code in Data.Code)
+    {
+        ReplaceTextInGML(code.Name.Content, keyword, replacement, case_sensitive, isRegex);
+        IncProgress();
+    }
+});
+SyncBinding(false);
 
 await StopUpdater();
 HideProgressBar();
