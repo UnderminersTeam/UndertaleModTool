@@ -17,6 +17,8 @@ using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Collections.Generic;
 
 /// <summary>
 /// The supplied location of the data file did not exist
@@ -44,16 +46,12 @@ namespace UndertaleModCli
         public FileInfo? Dest { get; set; }
         public bool Interactive { get; set; } = false;
         public bool Verbose { get; set; } = false;
-
-
-
     }
 
     public class InfoOptions
     {
         public FileInfo Datafile { get; set; }
         public bool Verbose { get; set; } = false;
-
     }
 
     /// <summary>
@@ -74,7 +72,6 @@ namespace UndertaleModCli
         /// Whether to write the new data to stdout
         /// </summary>
         public bool Stdout { get; set; }
-
     }
 
     public class Program : IScriptInterface
@@ -709,6 +706,16 @@ namespace UndertaleModCli
         }
         public void SimpleTextOutput(string title, string label, string defaultText, bool allowMultiline)
         {
+            throw new NotImplementedException();
+        }
+        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+        {
+            await Task.Delay(1); //dummy await
+            throw new NotImplementedException();
+        }
+        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+        {
+            await Task.Delay(1); //dummy await
             throw new NotImplementedException();
         }
 

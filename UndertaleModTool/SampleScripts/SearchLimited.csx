@@ -105,21 +105,12 @@ await Task.Run(() => {
 
 await StopUpdater();
 
-/*UpdateProgressStatus("Sorting results...");
-await Task.Run(SortResults);*/
-
 UpdateProgressStatus("Generating result list...");
 await ClickableTextOutput("Search results.", keyword, result_count, resultsDict, true, failedList);
 
 HideProgressBar();
 EnableUI();
 
-
-/*void SortResults() //not sure that it's necessary to sort it, but just in case
-{
-    if (failedList.Count > 0)
-        failedSorted = failedList.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c)));
-}*/
 
 string GetFolder(string path)
 {
