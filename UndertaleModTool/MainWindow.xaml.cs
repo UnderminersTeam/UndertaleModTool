@@ -1353,11 +1353,6 @@ namespace UndertaleModTool
                 
                 //Highlighted = code;
                 ChangeSelection(code);
-
-                /*Stopwatch sw = Stopwatch.StartNew();
-
-                sw.Stop();
-                ScriptMessage(sw.ElapsedMilliseconds.ToString());*/
             }
         }
 
