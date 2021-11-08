@@ -61,6 +61,7 @@ namespace UndertaleModTool
         public string ScriptErrorMessage { get; set; } = "";
         public string ExePath { get; private set; } = System.Environment.CurrentDirectory;
         public string ScriptErrorType { get; set; } = "";
+        public static sbyte CodeEditorDecompile { get; set; } = -1;
 
         private int progressValue;
         private Task updater;
@@ -407,7 +408,7 @@ namespace UndertaleModTool
                 _ = DoSaveDialog();
             }
         }
-        void DataWindow_Closing(object sender, CancelEventArgs e)
+        private void DataWindow_Closing(object sender, CancelEventArgs e)
         {
             if (Data != null)
             {
@@ -436,6 +437,8 @@ namespace UndertaleModTool
                     RevertProfile();
                     DestroyUMTLastEdited();
                 }
+
+                CloseOtherWindows();
             }
         }
         private async void Command_Close(object sender, ExecutedRoutedEventArgs e)
@@ -455,6 +458,8 @@ namespace UndertaleModTool
                         RevertProfile();
                         DestroyUMTLastEdited();
                     }
+
+                    CloseOtherWindows();
                     Close();
                 }
             }
@@ -462,11 +467,22 @@ namespace UndertaleModTool
             {
                 RevertProfile();
                 DestroyUMTLastEdited();
+                CloseOtherWindows();
                 Close();
             }
             else
             {
+                CloseOtherWindows();
                 Close();
+            }
+        }
+
+        private void CloseOtherWindows() //close "standalone" windows (e.g. "ClickableTextOutput")
+        {
+            foreach (Window w in Application.Current.Windows)
+            {
+                if (w is not MainWindow && w.Owner is null) //&& is not a modal window
+                    w.Close();
             }
         }
 
@@ -1320,6 +1336,31 @@ namespace UndertaleModTool
             }
         }
 
+        public void OpenCodeFile(string name, sbyte editorDecompile)
+        {
+            UndertaleCode code = Data.Code.ByName(name);
+
+            if (code is not null)
+            {
+                Focus();
+               
+                if (!CodeItemsList.IsExpanded)
+                    CodeItemsList.IsExpanded = true;
+
+                //TODO: find the way to scroll to the code item and highlight it.
+                
+                CodeEditorDecompile = editorDecompile;
+                
+                //Highlighted = code;
+                ChangeSelection(code);
+
+                /*Stopwatch sw = Stopwatch.StartNew();
+
+                sw.Stop();
+                ScriptMessage(sw.ElapsedMilliseconds.ToString());*/
+            }
+        }
+
         public string ProcessException(in Exception exc, in string scriptText)
         {
             List<int> excLineNums = new();
@@ -1558,15 +1599,15 @@ namespace UndertaleModTool
             TextInput textOutput = new TextInput(labelText, titleText, defaultText, isMultiline, true); //read-only mode
             textOutput.Show();
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, IOrderedEnumerable<string> failedList = null)
+        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
         {
-            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, failedList);
+            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, editorDecompile, failedList);
             await Task.Run(textOutput.GenerateResults);
             textOutput.Show();
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, IEnumerable<string> failedList = null)
+        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
         {
-            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, failedList);
+            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, editorDecompile, failedList);
             await Task.Run(textOutput.GenerateResults);
             textOutput.Show();
         }

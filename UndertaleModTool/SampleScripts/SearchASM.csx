@@ -40,7 +40,7 @@ UpdateProgressStatus("Sorting results...");
 await Task.Run(SortResults);
 
 UpdateProgressStatus("Generating result list...");
-await ClickableTextOutput("Search results.", keyword, result_count, resultsSorted, failedSorted);
+await ClickableTextOutput("Search results.", keyword, result_count, resultsSorted, false, failedSorted);
 
 HideProgressBar();
 EnableUI();
@@ -72,24 +72,13 @@ bool RegexContains(string s, string sPattern, bool isCaseInsensitive)
 }
 void DumpCode(UndertaleCode code)
 {
-    string DISASMTEXT = "";
-
     if (code.ParentEntry is null)
     {
         try
         {
-            DISASMTEXT = (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "");
-        }
-        catch (Exception e)
-        {
-            DISASMTEXT = "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"; // Please don't
-        }
-
-        try
-        {
             var line_number = 1;
-            string decompiled_text = DISASMTEXT;
-            string[] splitted = decompiled_text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            string decompiled_text = (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "");
+            string[] splitted = decompiled_text.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
             bool name_written = false;
             foreach (string lineInt in splitted)
             {

@@ -109,7 +109,7 @@ await StopUpdater();
 await Task.Run(SortResults);*/
 
 UpdateProgressStatus("Generating result list...");
-await ClickableTextOutput("Search results.", keyword, result_count, resultsDict, failedList);
+await ClickableTextOutput("Search results.", keyword, result_count, resultsDict, true, failedList);
 
 HideProgressBar();
 EnableUI();

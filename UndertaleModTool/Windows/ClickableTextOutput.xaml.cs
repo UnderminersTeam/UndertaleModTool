@@ -23,8 +23,9 @@ namespace UndertaleModTool.Windows
         public int ResultsCount { get; }
         private IDictionary<string, List<string>> resultsDict;
         private IEnumerable<string> failedList;
+        private sbyte editorDecompile;
         
-        public ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, IOrderedEnumerable<string> failedList = null)
+        public ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
         {
             InitializeComponent();
 
@@ -32,9 +33,10 @@ namespace UndertaleModTool.Windows
             Query = query;
             ResultsCount = resultsCount;
             this.resultsDict = resultsDict.ToDictionary(x => x.Key, x => x.Value);
+            this.editorDecompile = (sbyte)(editorDecompile ? 1 : 0);
             this.failedList = failedList?.ToList();
         }
-        public ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, IEnumerable<string> failedList = null)
+        public ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
         {
             InitializeComponent();
 
@@ -42,6 +44,7 @@ namespace UndertaleModTool.Windows
             Query = query;
             ResultsCount = resultsCount;
             this.resultsDict = resultsDict;
+            this.editorDecompile = (sbyte)(editorDecompile ? 1 : 0);
             this.failedList = failedList;
         }
 
@@ -133,9 +136,15 @@ namespace UndertaleModTool.Windows
 
         private void Hyperlink_Click(object sender, RoutedEventArgs e)
         {
-            Inline inline = (sender as Hyperlink).Inlines.FirstInline;
-            string codeName = new TextRange(inline.ContentStart, inline.ContentEnd).Text;
-            MessageBox.Show($"Clicked {codeName}");
+            MainWindow w = Application.Current.MainWindow as MainWindow;
+
+            if (w is not null)
+            {
+                Inline inline = (sender as Hyperlink).Inlines.FirstInline;
+                string codeName = new TextRange(inline.ContentStart, inline.ContentEnd).Text;
+
+                w.OpenCodeFile(codeName, editorDecompile);
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
