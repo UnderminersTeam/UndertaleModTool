@@ -42,9 +42,8 @@ string GetFolder(string path)
 
 async Task DumpCode()
 {
-    var data = DECOMPILE_CONTEXT.Value.Data;
-    if (data?.KnownSubFunctions is null) //if we run script before opening any code
-        Decompiler.BuildSubFunctionCache(data);
+    if (Data.KnownSubFunctions is null) //if we run script before opening any code
+        Decompiler.BuildSubFunctionCache(Data);
 
     await Task.Run(() => Parallel.ForEach(toDump, DumpCode));
 }

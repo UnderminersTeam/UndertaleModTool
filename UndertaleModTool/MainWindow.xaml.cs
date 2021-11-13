@@ -1281,7 +1281,7 @@ namespace UndertaleModTool
             }
         }
 
-        private void ProgressUpdater()
+        private async Task ProgressUpdater()
         {
             DateTime prevTime = default;
             int prevValue = 0;
@@ -1305,7 +1305,7 @@ namespace UndertaleModTool
 
                 prevValue = progressValue;
 
-                Thread.Sleep(100); //10 times per second
+                await Task.Delay(100); //10 times per second
             }
         }
         public void StartUpdater()
@@ -1349,7 +1349,7 @@ namespace UndertaleModTool
 
                 //TODO: find the way to scroll to the code item and highlight it.
                 
-                CodeEditorDecompile = editorDecompile;
+                CodeEditorDecompile = editorDecompile; //-1 - unstated, 0 - don't decompile, 1 - decompile
                 
                 //Highlighted = code;
                 ChangeSelection(code);
@@ -1531,10 +1531,6 @@ namespace UndertaleModTool
             return folderBrowser.ShowDialog() == true ? Path.GetDirectoryName(folderBrowser.FileName) + Path.DirectorySeparatorChar : null;
         }
 
-        public void ScriptMessage(string message)
-        {
-            MessageBox.Show(message, "Script message", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
         public void SetUMTConsoleText(string message)
         {
             this.Dispatcher.Invoke(() =>
@@ -1543,6 +1539,23 @@ namespace UndertaleModTool
             });
         }
 
+        #pragma warning disable CA1416
+        public void PlayInformationSound()
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                System.Media.SystemSounds.Asterisk.Play();
+        }
+        #pragma warning restore CA1416
+
+        public void ScriptMessage(string message)
+        {
+            MessageBox.Show(message, "Script message", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        public bool ScriptQuestion(string message)
+        {
+            PlayInformationSound();
+            return MessageBox.Show(message, "Script message", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+        }
         public void ScriptError(string error, string title = "Error", bool SetConsoleText = true)
         {
             MessageBox.Show(error, title, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -1559,11 +1572,6 @@ namespace UndertaleModTool
             {
                 FinishedMessageEnabled = isFinishedMessageEnabled;
             });
-        }
-
-        public bool ScriptQuestion(string message)
-        {
-            return MessageBox.Show(message, "Script message", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
         }
 
         public string SimpleTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline, bool showDialog = true)
@@ -1596,15 +1604,29 @@ namespace UndertaleModTool
         }
         public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
         {
+            await Task.Delay(150); //wait until progress bar status is displayed
+            
             ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, editorDecompile, failedList);
-            await Task.Run(textOutput.GenerateResults);
+
+            await textOutput.Dispatcher.InvokeAsync(textOutput.GenerateResults);
+            _ = Task.Factory.StartNew(textOutput.FillingNotifier, TaskCreationOptions.LongRunning); //"LongRunning" = prefer creating a new thread
+            
             textOutput.Show();
+
+            PlayInformationSound();
         }
         public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
         {
+            await Task.Delay(150);
+
             ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, editorDecompile, failedList);
-            await Task.Run(textOutput.GenerateResults);
+
+            await textOutput.Dispatcher.InvokeAsync(textOutput.GenerateResults);
+            _ = Task.Factory.StartNew(textOutput.FillingNotifier, TaskCreationOptions.LongRunning);
+
             textOutput.Show();
+
+            PlayInformationSound();
         }
 
         public void ScriptOpenURL(string url)

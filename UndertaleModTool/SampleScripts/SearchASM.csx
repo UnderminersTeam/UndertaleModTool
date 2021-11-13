@@ -34,9 +34,9 @@ SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
 StartUpdater();
 
 await DumpCode();
+
 await StopUpdater();
 
-UpdateProgressStatus("Sorting results...");
 await Task.Run(SortResults);
 
 UpdateProgressStatus("Generating result list...");
