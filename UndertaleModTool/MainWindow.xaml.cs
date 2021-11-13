@@ -1356,7 +1356,7 @@ namespace UndertaleModTool
 
                 //TODO: find the way to scroll to the code item and highlight it.
                 
-                CodeEditorDecompile = editorDecompile; //-1 - unstated, 0 - don't decompile, 1 - decompile
+                CodeEditorDecompile = editorDecompile;
                 
                 //Highlighted = code;
                 ChangeSelection(code);
