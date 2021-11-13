@@ -210,5 +210,10 @@ namespace UndertaleModTool.Windows
             if (outText.Length > 0)
                 Clipboard.SetText(outText, TextDataFormat.Text);
         }
+
+        private void OnCopyCommand(object sender, ExecutedRoutedEventArgs e)
+        {
+            copyMenuItem_Click(null, null);
+        }
     }
 }

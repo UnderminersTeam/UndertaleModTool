@@ -29,6 +29,9 @@
                     <Setter Property="Margin" Value="0"/>
                 </Style>
             </RichTextBox.Resources>
+            <Control.CommandBindings>
+                <CommandBinding Command="Copy" Executed="OnCopyCommand"/>
+            </Control.CommandBindings>
             <RichTextBox.ContextMenu>
                 <ContextMenu Name="textCommandsMenu">
                     <MenuItem Name="copyMenuItem" Header="Copy" Click="copyMenuItem_Click"/>
