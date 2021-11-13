@@ -34,6 +34,7 @@ using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using static UndertaleModTool.MainWindow.CodeEditorMode;
 
 namespace UndertaleModTool
 {
@@ -171,9 +172,9 @@ namespace UndertaleModTool
             DecompiledEditor_LostFocus(sender, null);
             DisassemblyEditor_LostFocus(sender, null);
 
-            if (MainWindow.CodeEditorDecompile != -1) //if opened from the code search results "link"
+            if (MainWindow.CodeEditorDecompile != Unstated) //if opened from the code search results "link"
             {
-                if (MainWindow.CodeEditorDecompile == 0 && code != CurrentDisassembled)
+                if (MainWindow.CodeEditorDecompile == DontDecompile && code != CurrentDisassembled)
                 {
                     if (CodeModeTabs.SelectedItem != DisassemblyTab)
                         CodeModeTabs.SelectedItem = DisassemblyTab;
@@ -181,7 +182,7 @@ namespace UndertaleModTool
                         DisassembleCode(code, true);
                 }
 
-                if (MainWindow.CodeEditorDecompile == 1 && code != CurrentDecompiled)
+                if (MainWindow.CodeEditorDecompile == Decompile && code != CurrentDecompiled)
                 {
                     if (CodeModeTabs.SelectedItem != DecompiledTab)
                         CodeModeTabs.SelectedItem = DecompiledTab;
@@ -189,7 +190,7 @@ namespace UndertaleModTool
                         DecompileCode(code, true);
                 }
 
-                MainWindow.CodeEditorDecompile = -1;
+                MainWindow.CodeEditorDecompile = Unstated;
             }
             else
             {

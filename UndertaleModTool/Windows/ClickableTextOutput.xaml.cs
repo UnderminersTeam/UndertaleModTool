@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using static UndertaleModTool.MainWindow;
 
 namespace UndertaleModTool.Windows
 {
@@ -26,7 +27,7 @@ namespace UndertaleModTool.Windows
 
         private IDictionary<string, List<string>> resultsDict;
         private IEnumerable<string> failedList;
-        private sbyte editorDecompile;
+        private CodeEditorMode editorDecompile;
         
         public ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
         {
@@ -36,7 +37,7 @@ namespace UndertaleModTool.Windows
             Query = query;
             ResultsCount = resultsCount;
             this.resultsDict = resultsDict.ToDictionary(x => x.Key, x => x.Value);
-            this.editorDecompile = (sbyte)(editorDecompile ? 1 : 0);
+            this.editorDecompile = editorDecompile ? CodeEditorMode.Decompile : CodeEditorMode.DontDecompile;
             this.failedList = failedList?.ToList();
         }
         public ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
@@ -47,7 +48,7 @@ namespace UndertaleModTool.Windows
             Query = query;
             ResultsCount = resultsCount;
             this.resultsDict = resultsDict;
-            this.editorDecompile = (sbyte)(editorDecompile ? 1 : 0);
+            this.editorDecompile = editorDecompile ? CodeEditorMode.Decompile : CodeEditorMode.DontDecompile;
             this.failedList = failedList;
         }
 

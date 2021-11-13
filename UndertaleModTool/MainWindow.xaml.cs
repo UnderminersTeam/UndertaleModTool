@@ -61,7 +61,14 @@ namespace UndertaleModTool
         public string ScriptErrorMessage { get; set; } = "";
         public string ExePath { get; private set; } = System.Environment.CurrentDirectory;
         public string ScriptErrorType { get; set; } = "";
-        public static sbyte CodeEditorDecompile { get; set; } = -1;
+
+        public enum CodeEditorMode
+        {
+            Unstated,
+            DontDecompile,
+            Decompile
+        }
+        public static CodeEditorMode CodeEditorDecompile { get; set; } = CodeEditorMode.Unstated;
 
         private int progressValue;
         private Task updater;
@@ -1336,7 +1343,7 @@ namespace UndertaleModTool
             }
         }
 
-        public void OpenCodeFile(string name, sbyte editorDecompile)
+        public void OpenCodeFile(string name, CodeEditorMode editorDecompile)
         {
             UndertaleCode code = Data.Code.ByName(name);
 
