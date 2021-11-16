@@ -13,7 +13,7 @@ EnsureDataLoaded();
 
 if ((Data.AudioGroups.ByName("audiogroup_default") == null) && Data.GeneralInfo.Major >= 2)
 {
-    throw new Exception("Currently loaded data file has no \"audiogroup_default\" but it is GMS2 or greater. AudioGroups count: " + Data.AudioGroups.Count.ToString());
+    throw new ScriptException("Currently loaded data file has no \"audiogroup_default\" but it is GMS2 or greater. AudioGroups count: " + Data.AudioGroups.Count.ToString());
 }
 List<string> splitStringsList = GetSplitStringsList("sound");
 List<UndertaleSound> soundsList = GetSoundsList(splitStringsList);
@@ -130,7 +130,7 @@ void HandleAudioGroups(UndertaleSound donorSND, UndertaleSound nativeSND)
                 }
                 else if (Data.AudioGroups.ByName("audiogroup_default") == null)
                 {
-                    throw new Exception("Count is non-zero but audiogroup_default does not exist.");
+                    throw new ScriptException("Count is non-zero but audiogroup_default does not exist.");
                 }
                 File.WriteAllBytes(Path.Combine(GetFolder(FilePath), "audiogroup" + Data.AudioGroups.Count.ToString() + ".dat"), Convert.FromBase64String("Rk9STQwAAABBVURPBAAAAAAAAAA="));
             }

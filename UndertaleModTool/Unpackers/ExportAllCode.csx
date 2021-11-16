@@ -4,10 +4,10 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-int progress = 0;
+EnsureDataLoaded();
+
 string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
-
 if (Directory.Exists(codeFolder))
 {
     ScriptError("A code export already exists. Please remove it.", "Error");
@@ -24,15 +24,15 @@ foreach (UndertaleCode code in Data.Code)
     toDump.Add(code);
 }
 
-UpdateProgress();
+SetProgressBar(null, "Code Entries", 0, toDump.Count);
+StartUpdater();
+
 await DumpCode();
+
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder);
 
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Code Entries", progress++, toDump.Count);
-}
 
 string GetFolder(string path)
 {
@@ -42,6 +42,10 @@ string GetFolder(string path)
 
 async Task DumpCode()
 {
+    var data = DECOMPILE_CONTEXT.Value.Data;
+    if (data?.KnownSubFunctions is null) //if we run script before opening any code
+        Decompiler.BuildSubFunctionCache(data);
+
     await Task.Run(() => Parallel.ForEach(toDump, DumpCode));
 }
 
@@ -56,5 +60,6 @@ void DumpCode(UndertaleCode code)
     {
         File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
     }
-    UpdateProgress();
+
+    IncProgressP();
 }

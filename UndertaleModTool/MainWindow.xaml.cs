@@ -31,6 +31,8 @@ using UndertaleModTool.Windows;
 using System.IO.Pipes;
 
 using ColorConvert = System.Windows.Media.ColorConverter;
+using System.Text.RegularExpressions;
+using System.Windows.Data;
 
 namespace UndertaleModTool
 {
@@ -59,6 +61,14 @@ namespace UndertaleModTool
         public string ScriptErrorMessage { get; set; } = "";
         public string ExePath { get; private set; } = System.Environment.CurrentDirectory;
         public string ScriptErrorType { get; set; } = "";
+        public static sbyte CodeEditorDecompile { get; set; } = -1;
+
+        private int progressValue;
+        private Task updater;
+        private CancellationTokenSource cts;
+        private CancellationToken cToken;
+        private readonly object bindingLock = new();
+        private HashSet<string> syncBindings = new();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -107,7 +117,8 @@ namespace UndertaleModTool
                                 .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
                                                 GetType().GetTypeInfo().Assembly,
                                                 typeof(JsonConvert).GetTypeInfo().Assembly,
-                                                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly);
+                                                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly)
+                                .WithEmitDebugInformation(true); //when script throws an exception, add a exception location (line number)
             });
         }
 
@@ -119,6 +130,8 @@ namespace UndertaleModTool
         [DllImport("shell32.dll")]
         static extern void SHChangeNotify(long wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
         const long SHCNE_ASSOCCHANGED = 0x08000000;
+
+        public static readonly string[] IFF_EXTENSIONS = new string[] { ".win", ".unx", ".ios", ".droid", ".3ds", ".symbian" };
 
         private void UpdateTree()
         {
@@ -155,9 +168,15 @@ namespace UndertaleModTool
                     UndertaleModTool_app.CreateSubKey(@"shell\launch").SetValue("", "Run game normally", RegistryValueKind.String);
                     UndertaleModTool_app.CreateSubKey(@"shell\special_launch\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\" special_launch", RegistryValueKind.String);
                     UndertaleModTool_app.CreateSubKey(@"shell\special_launch").SetValue("", "Run extended options", RegistryValueKind.String);
+                    if (File.Exists("dna.txt"))
+                    {
+                        ScriptMessage("Opt out detected.");
+                        SettingsWindow.AutomaticFileAssociation = false;
+                        Settings.Save();
+                    }
                     if (SettingsWindow.AutomaticFileAssociation)
                     {
-                        foreach (var extStr in new string[] { ".win", ".unx", ".ios", ".droid" })
+                        foreach (var extStr in IFF_EXTENSIONS)
                         {
                             var ext = HKCU_Classes.CreateSubKey(extStr);
                             ext.SetValue("", "UndertaleModTool", RegistryValueKind.String);
@@ -318,6 +337,32 @@ namespace UndertaleModTool
             return true;
         }
 
+        private async void Window_Drop(object sender, DragEventArgs e)
+        {
+            // ignore drop events inside the main window (e.g. resource tree)
+            if (sender is MainWindow)
+            {
+                // try to detect stuff, autoConvert is false because we don't want any conversion.
+                if (e.Data.GetDataPresent(DataFormats.FileDrop, false))
+                {
+                    string filepath = ((string[])e.Data.GetData(DataFormats.FileDrop))[0];
+                    string fileext = Path.GetExtension(filepath);
+
+                    if (fileext == ".csx")
+                    {
+                        if (MessageBox.Show($"Run {filepath} as a script?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
+                            await RunScript(filepath);
+                    }
+                    else if (IFF_EXTENSIONS.Contains(fileext) || fileext == ".dat" /* audiogroup */)
+                    {
+                        if (MessageBox.Show($"Open {filepath} as a data file?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
+                            await LoadFile(filepath, true);
+                    }
+                    // else, do something?
+                }
+            }
+        }
+
         private async Task<bool> DoOpenDialog()
         {
             OpenFileDialog dlg = new OpenFileDialog();
@@ -363,7 +408,7 @@ namespace UndertaleModTool
                 _ = DoSaveDialog();
             }
         }
-        void DataWindow_Closing(object sender, CancelEventArgs e)
+        private void DataWindow_Closing(object sender, CancelEventArgs e)
         {
             if (Data != null)
             {
@@ -392,6 +437,8 @@ namespace UndertaleModTool
                     RevertProfile();
                     DestroyUMTLastEdited();
                 }
+
+                CloseOtherWindows();
             }
         }
         private async void Command_Close(object sender, ExecutedRoutedEventArgs e)
@@ -411,6 +458,8 @@ namespace UndertaleModTool
                         RevertProfile();
                         DestroyUMTLastEdited();
                     }
+
+                    CloseOtherWindows();
                     Close();
                 }
             }
@@ -418,11 +467,22 @@ namespace UndertaleModTool
             {
                 RevertProfile();
                 DestroyUMTLastEdited();
+                CloseOtherWindows();
                 Close();
             }
             else
             {
+                CloseOtherWindows();
                 Close();
+            }
+        }
+
+        private void CloseOtherWindows() //close "standalone" windows (e.g. "ClickableTextOutput")
+        {
+            foreach (Window w in Application.Current.Windows)
+            {
+                if (w is not MainWindow && w.Owner is null) //&& is not a modal window
+                    w.Close();
             }
         }
 
@@ -485,7 +545,7 @@ namespace UndertaleModTool
                                 data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                             }
                         }
-                        if (data.GMS2_3)
+                        if (data.GMS2_3 && SettingsWindow.Warn_About_GMS23)
                         {
                             MessageBox.Show("This game was built using GameMaker Studio 2.3 (or above). Support for this version is a work in progress, and you will likely run into issues decompiling code or in other places.", "GMS 2.3", MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
@@ -958,7 +1018,16 @@ namespace UndertaleModTool
 
         private void MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
-            object source = (MainTree.SelectedItem as TreeViewItem).ItemsSource;
+            object source = null;
+            try
+            {
+                source = (MainTree.SelectedItem as TreeViewItem).ItemsSource;
+            }
+            catch (Exception ex)
+            {
+                ScriptError("An error occurred while trying to add the menu item. No action has been taken.\r\n\r\nError:\r\n\r\n" + ex.ToString());
+                return;
+            }
             IList list = ((source as ICollectionView)?.SourceCollection as IList) ?? (source as IList);
             Type t = list.GetType().GetGenericArguments()[0];
             Debug.Assert(typeof(UndertaleResource).IsAssignableFrom(t));
@@ -1088,8 +1157,38 @@ namespace UndertaleModTool
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Update(message, status, progressValue, maxValue);
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() => {
+                    scriptDialog.Update(message, status, progressValue, maxValue);
+                }));
+            }
+        }
+
+        public void SetProgressBar(string message, string status, double progressValue, double maxValue)
+        {
+            if (scriptDialog != null)
+            {
+                this.progressValue = (int)progressValue;
+                scriptDialog.SavedStatusText = status;
+
+                UpdateProgressBar(message, status, progressValue, maxValue);
+            }
+        }
+        public void UpdateProgressValue(double progressValue)
+        {
+            if (scriptDialog != null)
+            {
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() => {
+                    scriptDialog.ReportProgress(progressValue);
+                }));
+            }
+        }
+        public void UpdateProgressStatus(string status)
+        {
+            if (scriptDialog != null)
+            {
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() => {
+                    scriptDialog.ReportProgress(status);
+                }));;
             }
         }
 
@@ -1097,6 +1196,249 @@ namespace UndertaleModTool
         {
             if (scriptDialog != null)
                 scriptDialog.TryHide();
+        }
+
+        public void AddProgress(int amount)
+        {
+            progressValue += amount;
+        }
+        public void IncProgress()
+        {
+            progressValue++;
+        }
+        public void AddProgressP(int amount) //P - Parallel (multithreaded)
+        {
+            Interlocked.Add(ref progressValue, amount); //thread-safe add operation (not the same as "lock ()")
+        }
+        public void IncProgressP()
+        {
+            Interlocked.Increment(ref progressValue); //thread-safe increment
+        }
+        public int GetProgress()
+        {
+            return progressValue;
+        }
+        public void SetProgress(int value)
+        {
+            progressValue = value;
+        }
+        
+        public void EnableUI()
+        {
+            if (!this.IsEnabled)
+                this.IsEnabled = true;
+        }
+        
+        public void SyncBinding(string resourceType, bool enable)
+        {
+            if (resourceType.Contains(',')) //if several types are listed
+            {
+                string[] resTypes = resourceType.Replace(" ", "").Split(',');
+
+                if (enable)
+                {
+                    foreach (string resType in resTypes)
+                    {
+                        BindingOperations.EnableCollectionSynchronization(Data[resType] as IEnumerable, bindingLock);
+
+                        syncBindings.Add(resType);
+                    }
+                }
+                else
+                {
+                    foreach (string resType in resTypes)
+                    {
+                        BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
+
+                        syncBindings.Remove(resType);
+                    }
+                }
+            }
+            else
+            {
+                if (enable)
+                {
+                    BindingOperations.EnableCollectionSynchronization(Data[resourceType] as IEnumerable, bindingLock);
+
+                    syncBindings.Add(resourceType);
+                }
+                else
+                {
+                    BindingOperations.DisableCollectionSynchronization(Data[resourceType] as IEnumerable);
+
+                    syncBindings.Remove(resourceType);
+                }
+            }
+        }
+        public void SyncBinding(bool enable = false) //disable all sync. bindings
+        {
+            if (syncBindings.Count != 0)
+            {
+                foreach (string resType in syncBindings)
+                    BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
+
+                syncBindings.Clear();
+            }
+        }
+
+        private void ProgressUpdater()
+        {
+            DateTime prevTime = default;
+            int prevValue = 0;
+
+            while (true)
+            {
+                if (cToken.IsCancellationRequested)
+                {
+                    if (prevValue >= progressValue) //if reached maximum
+                        return;
+                    else
+                    {
+                        if (prevTime == default)
+                            prevTime = DateTime.UtcNow;                                       //begin measuring
+                        else if (DateTime.UtcNow.Subtract(prevTime).TotalMilliseconds >= 500) //timeout - 0.5 seconds
+                            return;
+                    }
+                }
+                
+                UpdateProgressValue(progressValue);
+
+                prevValue = progressValue;
+
+                Thread.Sleep(100); //10 times per second
+            }
+        }
+        public void StartUpdater()
+        {
+            if (cts is not null)
+                MessageBox.Show("Warning - there is another progress bar updater task running (hangs) in the background.\nRestart the application to prevent some unexpected behavior.", "Script warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+            cts = new CancellationTokenSource();
+            cToken = cts.Token;
+
+            updater = Task.Run(ProgressUpdater);
+        }
+        public async Task StopUpdater() //async because "Wait()" blocks UI thread
+        {
+            if (cts is not null)
+            {
+                cts.Cancel();
+
+                if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
+                    MessageBox.Show("Stopping the progress bar updater task is failed.\nIt's highly recommended to restart the application.", "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+                else
+                {
+                    cts.Dispose();
+                    cts = null;
+                }
+
+                updater.Dispose();
+            }
+        }
+
+        public void OpenCodeFile(string name, sbyte editorDecompile)
+        {
+            UndertaleCode code = Data.Code.ByName(name);
+
+            if (code is not null)
+            {
+                Focus();
+               
+                if (!CodeItemsList.IsExpanded)
+                    CodeItemsList.IsExpanded = true;
+
+                //TODO: find the way to scroll to the code item and highlight it.
+                
+                CodeEditorDecompile = editorDecompile;
+                
+                //Highlighted = code;
+                ChangeSelection(code);
+            }
+        }
+
+        public string ProcessException(in Exception exc, in string scriptText)
+        {
+            List<int> excLineNums = new();
+            string excText = string.Empty;
+            List<string> traceLines = new();
+            Dictionary<string, int> exTypesDict = null;
+
+            if (exc is AggregateException)
+            {
+                List<string> exTypes = new();
+
+                foreach (Exception ex in (exc as AggregateException).InnerExceptions)
+                {
+                    traceLines.AddRange(ex.StackTrace.Split(Environment.NewLine));
+                    exTypes.Add(ex.GetType().FullName);
+                }
+
+                if (exTypes.Count > 1)
+                {
+                    exTypesDict = exTypes.GroupBy(x => x)
+                                         .Select(x => new { Name = x.Key, Count = x.Count() })
+                                         .OrderByDescending(x => x.Count)
+                                         .ToDictionary(x => x.Name, x => x.Count);
+                }
+            }
+            else if (exc.InnerException is not null)
+            {
+                traceLines.AddRange(exc.InnerException.StackTrace.Split(Environment.NewLine));
+            }
+
+            traceLines.AddRange(exc.StackTrace.Split(Environment.NewLine));              
+
+            try
+            {
+                foreach (string traceLine in traceLines)
+                {
+                    if (traceLine.TrimStart()[..13] == "at Submission") // only stack trace lines from the script
+                    {
+                        int linePos = traceLine.IndexOf(":line ") + 6;  // ":line ".Length = 6
+                        if (linePos != (-1 + 6))
+                        {
+                            int lineNum = Convert.ToInt32(traceLine[linePos..]);
+                            if (!excLineNums.Contains(lineNum))
+                                excLineNums.Add(lineNum);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                string excString = exc.ToString();
+
+                int endOfPrevStack = excString.IndexOf("--- End of stack trace from previous location ---");
+                if (endOfPrevStack != -1)
+                    excString = excString[..endOfPrevStack]; //keep only stack trace of the script
+
+                return $"An error occurred while processing the exception text.\nError message - \"{e.Message}\"\nThe unprocessed text is below.\n\n" + excString;
+            }
+
+            if (excLineNums.Count > 0) //if line number(s) is found
+            {
+                string[] scriptLines = scriptText.Split('\n');
+                string excLines = string.Join('\n', excLineNums.Select(n => $"Line {n}: {scriptLines[n - 1].TrimStart(new char[] { '\t', ' ' })}"));
+                if (exTypesDict is not null)
+                {
+                    string exTypesStr = string.Join(",\n", exTypesDict.Select(x => $"{x.Key}{((x.Value > 1) ? " (x" + x.Value + ")" : string.Empty)}"));
+                    excText = $"{exc.GetType().FullName}: One on more errors occured:\n{exTypesStr}\n\nThe current stacktrace:\n{excLines}";
+                }
+                else
+                    excText = $"{exc.GetType().FullName}: {exc.Message}\n\nThe current stacktrace:\n{excLines}";
+            }
+            else
+            {
+                string excString = exc.ToString();
+
+                int endOfPrevStack = excString.IndexOf("--- End of stack trace from previous location ---");
+                if (endOfPrevStack != -1)
+                    excString = excString[..endOfPrevStack]; //keep only stack trace of the script
+
+                excText = excString;
+            }
+
+            return excText;
         }
 
         public async Task RunScript(string path)
@@ -1108,7 +1450,7 @@ namespace UndertaleModTool
             scriptDialog.Owner = this;
             scriptDialog.PreventClose = true;
             this.IsEnabled = false; // Prevent interaction while the script is running.
-
+            
             await RunScriptNow(path); // Runs the script now.
             HideProgressBar(); // Hide the progress bar.
             scriptDialog = null;
@@ -1117,6 +1459,7 @@ namespace UndertaleModTool
 
         private async Task RunScriptNow(string path)
         {
+            string scriptText = File.ReadAllText(path);
             Debug.WriteLine(path);
 
             Dispatcher.Invoke(() => CommandBox.Text = "Running " + Path.GetFileName(path) + " ...");
@@ -1127,7 +1470,9 @@ namespace UndertaleModTool
                 
                 ScriptPath = path;
 
-                object result = await CSharpScript.EvaluateAsync(File.ReadAllText(path), scriptOptions, this, typeof(IScriptInterface));
+                string compatScriptText = Regex.Replace(scriptText, @"\bDecompileContext\b", "GlobalDecompileContext", RegexOptions.None);
+                object result = await CSharpScript.EvaluateAsync(compatScriptText, scriptOptions, this, typeof(IScriptInterface));
+                
                 if (FinishedMessageEnabled)
                 {
                     Dispatcher.Invoke(() => CommandBox.Text = result != null ? result.ToString() : Path.GetFileName(path) + " finished!");
@@ -1148,13 +1493,22 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
+                bool isScriptException = exc.GetType().Name == "ScriptException";
+                string excString = string.Empty;
+
+                if (!isScriptException)
+                    excString = ProcessException(in exc, in scriptText);
+
+                await StopUpdater();
+
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
-                MessageBox.Show(exc.Message + "\n\n" + exc.ToString(), "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(isScriptException ? exc.Message : excString, "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
                 ScriptExecutionSuccess = false;
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "Exception";
             }
+            scriptText = null;
         }
 
         public string PromptLoadFile(string defaultExt, string filter)
@@ -1212,16 +1566,45 @@ namespace UndertaleModTool
             return MessageBox.Show(message, "Script message", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
         }
 
-        public string SimpleTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline)
+        public string SimpleTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline, bool showDialog = true)
         {
-            using (TextInput input = new TextInput(labelText, titleText, defaultInputBoxText, isMultiline))
+            TextInput input = new TextInput(labelText, titleText, defaultInputBoxText, isMultiline);
+
+            System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
+            if (showDialog)
             {
-                var result = input.ShowDialog();
+                result = input.ShowDialog();
+                input.Dispose();
+
                 if (result == System.Windows.Forms.DialogResult.OK)
                     return input.ReturnString;            //values preserved after close
                 else
                     return null;
             }
+            else //if we don't need to wait for result
+            {
+                input.Show(); 
+                return null;
+                //no need to call input.Dispose(), because if form wasn't shown modally, Form.Close() (or closing it with "X") also calls Dispose()
+            }
+        }
+
+        public void SimpleTextOutput(string titleText, string labelText, string defaultText, bool isMultiline)
+        {
+            TextInput textOutput = new TextInput(labelText, titleText, defaultText, isMultiline, true); //read-only mode
+            textOutput.Show();
+        }
+        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+        {
+            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, editorDecompile, failedList);
+            await Task.Run(textOutput.GenerateResults);
+            textOutput.Show();
+        }
+        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+        {
+            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, editorDecompile, failedList);
+            await Task.Run(textOutput.GenerateResults);
+            textOutput.Show();
         }
 
         public void ScriptOpenURL(string url)
@@ -1354,7 +1737,7 @@ result in loss of work.");
             oldSteamValue = Data.GeneralInfo.SteamAppID;
             Data.GeneralInfo.SteamAppID = 0;
             Data.GeneralInfo.DisableDebugger = true;
-            string TempFilesFolder = Path.Combine(Path.GetDirectoryName(oldFilePath), "MyMod.temp");
+            string TempFilesFolder = (oldFilePath != null ? Path.Combine(Path.GetDirectoryName(oldFilePath), "MyMod.temp") : "");
             await SaveFile(TempFilesFolder, false);
             Data.GeneralInfo.SteamAppID = oldSteamValue;
             FilePath = oldFilePath;
@@ -1531,7 +1914,9 @@ result in loss of work.");
         public void EnsureDataLoaded()
         {
             if (Data == null)
-                throw new Exception("Please load data.win first!");
+            {
+                throw new ScriptException("Please load data.win first!");
+            }
         }
 
         private async void MenuItem_OffsetMap_Click(object sender, RoutedEventArgs e)

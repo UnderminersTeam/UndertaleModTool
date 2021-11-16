@@ -4,13 +4,13 @@ EnsureDataLoaded();
 
 if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
 {
-	ScriptError("Error 0: Incompatible with the new Deltarune Chapter 1 & 2 demo");
-	return;
+    ScriptError("Error 0: Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
 }
 else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1&2")
 {
-	ScriptError("Error 1: Incompatible with the new Deltarune Chapter 1 & 2 demo");
-	return;
+    ScriptError("Error 1: Incompatible with the new Deltarune Chapter 1 & 2 demo");
+    return;
 }
 
 
@@ -51,7 +51,7 @@ static void ShuffleOnlySelected<T>(this IList<T> list, IList<int> selected, Acti
 static void ShuffleOnlySelected<T>(this IList<T> list, IList<int> selected)
 {
     list.ShuffleOnlySelected(selected, (n, k) => 
-	{
+    {
         T value = list[k];
         list[k] = list[n];
         list[n] = value;
@@ -111,127 +111,127 @@ Data.Fonts.ShuffleOnlySelected(ja_fonts);
 // We have to swap the contents because UndertaleModTool is too smart :P
 void StringSwap(int n, int k)
 {
-	string value = Data.Strings[k].Content;
-	Data.Strings[k].Content = Data.Strings[n].Content;
-	Data.Strings[n].Content = value;
+    string value = Data.Strings[k].Content;
+    Data.Strings[k].Content = Data.Strings[n].Content;
+    Data.Strings[n].Content = value;
 }
 
 if (Data.GeneralInfo.Filename.Content.ToLower().Contains("undertale"))
 {
-	List<int> choicer_lines = new List<int>();
-	List<int> final_lines = new List<int>();
-	List<int> continue_lines = new List<int>();
-	List<int> waiting_lines = new List<int>();
-	List<int> waiting_final_lines = new List<int>();
-	List<int> waiting_continue_lines = new List<int>();
-	for (int i = 0; i < Data.Strings.Count; i++)
-	{
-		var str = Data.Strings[i].Content;
-		if (str.Length <= 3 || str.Any(x => x > 127))
-			continue;
-			
-		if (str.Contains("\\C"))
-			choicer_lines.Add(i);
-		else if (str.EndsWith("/%%"))
-			waiting_final_lines.Add(i);
-		else if (str.EndsWith("/%"))
-			waiting_continue_lines.Add(i);
-		else if (str.EndsWith("/"))
-			waiting_lines.Add(i);
-		else if (str.EndsWith("%%"))
-			final_lines.Add(i);
-		else if (str.EndsWith("%"))
-			continue_lines.Add(i);
-	}
-	Data.Strings.ShuffleOnlySelected(choicer_lines, StringSwap);
-	Data.Strings.ShuffleOnlySelected(waiting_final_lines, StringSwap);
-	Data.Strings.ShuffleOnlySelected(waiting_continue_lines, StringSwap);
-	Data.Strings.ShuffleOnlySelected(waiting_lines, StringSwap);
-	Data.Strings.ShuffleOnlySelected(final_lines, StringSwap);
-	Data.Strings.ShuffleOnlySelected(continue_lines, StringSwap);
+    List<int> choicer_lines = new List<int>();
+    List<int> final_lines = new List<int>();
+    List<int> continue_lines = new List<int>();
+    List<int> waiting_lines = new List<int>();
+    List<int> waiting_final_lines = new List<int>();
+    List<int> waiting_continue_lines = new List<int>();
+    for (int i = 0; i < Data.Strings.Count; i++)
+    {
+        var str = Data.Strings[i].Content;
+        if (str.Length <= 3 || str.Any(x => x > 127))
+            continue;
+            
+        if (str.Contains("\\C"))
+            choicer_lines.Add(i);
+        else if (str.EndsWith("/%%"))
+            waiting_final_lines.Add(i);
+        else if (str.EndsWith("/%"))
+            waiting_continue_lines.Add(i);
+        else if (str.EndsWith("/"))
+            waiting_lines.Add(i);
+        else if (str.EndsWith("%%"))
+            final_lines.Add(i);
+        else if (str.EndsWith("%"))
+            continue_lines.Add(i);
+    }
+    Data.Strings.ShuffleOnlySelected(choicer_lines, StringSwap);
+    Data.Strings.ShuffleOnlySelected(waiting_final_lines, StringSwap);
+    Data.Strings.ShuffleOnlySelected(waiting_continue_lines, StringSwap);
+    Data.Strings.ShuffleOnlySelected(waiting_lines, StringSwap);
+    Data.Strings.ShuffleOnlySelected(final_lines, StringSwap);
+    Data.Strings.ShuffleOnlySelected(continue_lines, StringSwap);
 }
 else
 {
-	Dictionary<string, string> translations = new Dictionary<string, string>();
-	foreach (string line in File.ReadAllLines(Path.Combine(Path.GetDirectoryName(FilePath), "lang/lang_en.json")))
-	{
-		// Yeah. No JSON support in scripts. Deal with it.
-		string[] a = line.Split(new char[] { ':' }, 2);
-		if (a.Length != 2)
-			continue;
-		a[0] = a[0].Trim();
-		a[0] = a[0].Substring(1, a[0].Length - 2);
-		a[1] = a[1].Trim();
-		a[1] = a[1].Substring(1, a[1].Length - 3);
-		if (a[0] == "date")
-			continue;
-		if (a[1] == "||") // This breaks the auto-line-break badly, why is this string even localized
-			continue;
-		translations.Add(a[0], a[1]);
-	}
-	// Splitting the strings into groups like this is necessary to prevent crashes and the game freezing because of waiting on input it can't get
-	List<int> choicer_old_lines = new List<int>();
-	List<int> choicer_neo_2_lines = new List<int>();
-	List<int> choicer_neo_3_lines = new List<int>();
-	List<int> choicer_neo_4_lines = new List<int>();
-	List<int> final_lines = new List<int>();
-	List<int> continue_lines = new List<int>();
-	List<int> waiting_lines = new List<int>();
-	List<int> waiting_final_lines = new List<int>();
-	List<int> waiting_continue_lines = new List<int>();
-	List<int> dash_whatever_that_is = new List<int>();
-	List<int> other_lines = new List<int>();
-	for (int i = 0; i < Data.Strings.Count; i++)
-	{
-		var id = Data.Strings[i].Content;
-		if (translations.ContainsKey(id))
-		{
-			var str = translations[id];
-			if (str.Contains("\\\\C1"))
-				choicer_old_lines.Add(i);
-			else if (str.Contains("\\\\C2"))
-				choicer_neo_2_lines.Add(i);
-			else if (str.Contains("\\\\C3"))
-				choicer_neo_3_lines.Add(i);
-			else if (str.Contains("\\\\C4"))
-				choicer_neo_4_lines.Add(i);
-			else if (str.EndsWith("/%%"))
-				waiting_final_lines.Add(i);
-			else if (str.EndsWith("/%"))
-				waiting_continue_lines.Add(i);
-			else if (str.EndsWith("/"))
-				waiting_lines.Add(i);
-			else if (str.EndsWith("%%"))
-				final_lines.Add(i);
-			else if (str.EndsWith("%"))
-				continue_lines.Add(i);
-			else if (str.EndsWith("-"))
-				dash_whatever_that_is.Add(i);
-			else
-				other_lines.Add(i);
-		}
-	}
-	Data.Strings.ShuffleOnlySelected(choicer_old_lines, StringSwap);
-	Data.Strings.ShuffleOnlySelected(choicer_neo_2_lines, StringSwap);
-	Data.Strings.ShuffleOnlySelected(choicer_neo_3_lines, StringSwap);
-	Data.Strings.ShuffleOnlySelected(choicer_neo_4_lines, StringSwap);
-	Data.Strings.ShuffleOnlySelected(waiting_final_lines, StringSwap);
-	Data.Strings.ShuffleOnlySelected(waiting_continue_lines, StringSwap);
-	Data.Strings.ShuffleOnlySelected(waiting_lines, StringSwap);
-	Data.Strings.ShuffleOnlySelected(final_lines, StringSwap);
-	Data.Strings.ShuffleOnlySelected(continue_lines, StringSwap);
-	Data.Strings.ShuffleOnlySelected(dash_whatever_that_is, StringSwap);
-	Data.Strings.ShuffleOnlySelected(other_lines, StringSwap);
+    Dictionary<string, string> translations = new Dictionary<string, string>();
+    foreach (string line in File.ReadAllLines(Path.Combine(Path.GetDirectoryName(FilePath), "lang/lang_en.json")))
+    {
+        // Yeah. No JSON support in scripts. Deal with it.
+        string[] a = line.Split(new char[] { ':' }, 2);
+        if (a.Length != 2)
+            continue;
+        a[0] = a[0].Trim();
+        a[0] = a[0].Substring(1, a[0].Length - 2);
+        a[1] = a[1].Trim();
+        a[1] = a[1].Substring(1, a[1].Length - 3);
+        if (a[0] == "date")
+            continue;
+        if (a[1] == "||") // This breaks the auto-line-break badly, why is this string even localized
+            continue;
+        translations.Add(a[0], a[1]);
+    }
+    // Splitting the strings into groups like this is necessary to prevent crashes and the game freezing because of waiting on input it can't get
+    List<int> choicer_old_lines = new List<int>();
+    List<int> choicer_neo_2_lines = new List<int>();
+    List<int> choicer_neo_3_lines = new List<int>();
+    List<int> choicer_neo_4_lines = new List<int>();
+    List<int> final_lines = new List<int>();
+    List<int> continue_lines = new List<int>();
+    List<int> waiting_lines = new List<int>();
+    List<int> waiting_final_lines = new List<int>();
+    List<int> waiting_continue_lines = new List<int>();
+    List<int> dash_whatever_that_is = new List<int>();
+    List<int> other_lines = new List<int>();
+    for (int i = 0; i < Data.Strings.Count; i++)
+    {
+        var id = Data.Strings[i].Content;
+        if (translations.ContainsKey(id))
+        {
+            var str = translations[id];
+            if (str.Contains("\\\\C1"))
+                choicer_old_lines.Add(i);
+            else if (str.Contains("\\\\C2"))
+                choicer_neo_2_lines.Add(i);
+            else if (str.Contains("\\\\C3"))
+                choicer_neo_3_lines.Add(i);
+            else if (str.Contains("\\\\C4"))
+                choicer_neo_4_lines.Add(i);
+            else if (str.EndsWith("/%%"))
+                waiting_final_lines.Add(i);
+            else if (str.EndsWith("/%"))
+                waiting_continue_lines.Add(i);
+            else if (str.EndsWith("/"))
+                waiting_lines.Add(i);
+            else if (str.EndsWith("%%"))
+                final_lines.Add(i);
+            else if (str.EndsWith("%"))
+                continue_lines.Add(i);
+            else if (str.EndsWith("-"))
+                dash_whatever_that_is.Add(i);
+            else
+                other_lines.Add(i);
+        }
+    }
+    Data.Strings.ShuffleOnlySelected(choicer_old_lines, StringSwap);
+    Data.Strings.ShuffleOnlySelected(choicer_neo_2_lines, StringSwap);
+    Data.Strings.ShuffleOnlySelected(choicer_neo_3_lines, StringSwap);
+    Data.Strings.ShuffleOnlySelected(choicer_neo_4_lines, StringSwap);
+    Data.Strings.ShuffleOnlySelected(waiting_final_lines, StringSwap);
+    Data.Strings.ShuffleOnlySelected(waiting_continue_lines, StringSwap);
+    Data.Strings.ShuffleOnlySelected(waiting_lines, StringSwap);
+    Data.Strings.ShuffleOnlySelected(final_lines, StringSwap);
+    Data.Strings.ShuffleOnlySelected(continue_lines, StringSwap);
+    Data.Strings.ShuffleOnlySelected(dash_whatever_that_is, StringSwap);
+    Data.Strings.ShuffleOnlySelected(other_lines, StringSwap);
 }
 
 foreach (var obj in Data.GameObjects)
 {
-	if (!obj.Visible)
-		continue;
-	if (obj._Sprite.CachedId >= 0)
-		obj.Sprite = Data.Sprites[obj._Sprite.CachedId];
-	if (obj._TextureMaskId.CachedId >= 0)
-		obj.TextureMaskId = Data.Sprites[obj._TextureMaskId.CachedId];
+    if (!obj.Visible)
+        continue;
+    if (obj._Sprite.CachedId >= 0)
+        obj.Sprite = Data.Sprites[obj._Sprite.CachedId];
+    if (obj._TextureMaskId.CachedId >= 0)
+        obj.TextureMaskId = Data.Sprites[obj._TextureMaskId.CachedId];
 }
 
 ScriptMessage("* GASTER NOISES *\n\nIT'S DONE");

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
 EnsureDataLoaded();
+
 string output = "";
 int progress = 0;
 bool clearStrings = ScriptQuestion("Clear unused strings?");

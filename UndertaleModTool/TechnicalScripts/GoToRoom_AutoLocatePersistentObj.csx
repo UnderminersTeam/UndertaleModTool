@@ -1,6 +1,7 @@
 // Replaces the debug mode "Create system_information_962" option with "Go to room"
 
 EnsureDataLoaded();
+
 ScriptMessage("Add 'Go to room' dialog under F3\nby krzys-h, Kneesnap");
 
 bool pers = false;

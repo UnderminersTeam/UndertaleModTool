@@ -6,13 +6,21 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
+EnsureDataLoaded();
+
+if (Data.IsYYC())
+{
+    ScriptError("You cannot do a code dump of a YYC game! There is no code to dump!");
+    return;
+}
+
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
 int failed = 0;
 
 string codeFolder = PromptChooseDirectory("Export to where");
 if (codeFolder == null)
-    throw new System.Exception("The export folder was not set.");
+    throw new ScriptException("The export folder was not set.");
 Directory.CreateDirectory(Path.Combine(codeFolder, "Code"));
 codeFolder = Path.Combine(codeFolder, "Code");
 
@@ -20,7 +28,6 @@ List<String> codeToDump = new List<String>();
 List<String> gameObjectCandidates = new List<String>();
 List<String> splitStringsList = new List<String>();
 string abc123 = "";
-string removed = "";
 abc123 = SimpleTextInput("Menu", "Enter object names", abc123, true);
 string[] subs = abc123.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
 foreach (var sub in subs)
@@ -69,47 +76,32 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
     }
 }
 
-int progress = 0;
-int codesLeft = codeToDump.Count;
-UpdateProgress();
+SetProgressBar(null, "Code Entries", 0, codeToDump.Count);
+StartUpdater();
 
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Code Entries", progress++, codesLeft);
-}
+await Task.Run(() => {
+    for (var j = 0; j < codeToDump.Count; j++)
+    {
+        DumpCode(Data.Code.ByName(codeToDump[j]));
+    }
+});
 
-for (var j = 0; j < codeToDump.Count; j++)
-{
-    DumpCode(Data.Code.ByName(codeToDump[j]));
-}
+await StopUpdater();
 
 void DumpCode(UndertaleCode code) 
 {
     string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
     if (code.ParentEntry == null)
     {
-        if (path.Length > 150)
-        {
-            path = path.Substring(0, 150) + ".gml";
-        }
         try 
         {
-            //The decompiler can't figure out GMS2_3 arrays, like, at all
-            //But the decompiler does output the tempvars, so we can reconstruct them the way they ought to be 
-            //Pretty sure
-            string DecompiledOutput = (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "");
-            string PassBack = Regex.Replace(DecompiledOutput, @"var _temp_local_var_\d+ = (.*)\nvar _temp_local_var_\d+ = (.*\..*)\nvar _temp_local_var_\d+ = (.*)\nvar _temp_local_var_\d+ = (.*)\nvar _temp_local_var_\d+ = (.*)\n", @"\2\[\3, \1\] = \5\n", RegexOptions.IgnoreCase).Replace("@@This@@()", "self/*@@This@@()*/");
-            File.WriteAllText(path, PassBack);
+            File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
         }
         catch (Exception e) 
         {
             if (!(Directory.Exists(Path.Combine(codeFolder, "Failed"))))
             {
                 Directory.CreateDirectory(Path.Combine(codeFolder, "Failed"));
-            }
-            if (path.Length > 150)
-            {
-                path = path.Substring(0, 150) + ".gml";
             }
             path = Path.Combine(codeFolder, "Failed", code.Name.Content + ".gml");
             File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
@@ -122,10 +114,6 @@ void DumpCode(UndertaleCode code)
         {
             Directory.CreateDirectory(Path.Combine(codeFolder, "Duplicates"));
         }
-        if (path.Length > 150)
-        {
-            path = path.Substring(0, 150) + ".gml";
-        }
         try 
         {
             path = Path.Combine(codeFolder, "Duplicates", code.Name.Content + ".gml");
@@ -137,14 +125,11 @@ void DumpCode(UndertaleCode code)
             {
                 Directory.CreateDirectory(Path.Combine(codeFolder, "Duplicates", "Failed"));
             }
-            if (path.Length > 150)
-            {
-                path = path.Substring(0, 150) + ".gml";
-            }
             path = Path.Combine(codeFolder, "Duplicates", "Failed", code.Name.Content + ".gml");
             File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
             failed += 1;
         }
     }
-    UpdateProgress();
+
+    IncProgress();
 }

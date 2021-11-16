@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 EnsureDataLoaded();
 
+int maxCount;
+
 // Setup root export folder.
 string winFolder = GetFolder(FilePath); // The folder data.win is located in.
 bool usesAGRP               = (Data.AudioGroups.Count > 0);
@@ -74,27 +76,23 @@ if (usesAGRP)
 byte[] EMPTY_WAV_FILE_BYTES = System.Convert.FromBase64String("UklGRiQAAABXQVZFZm10IBAAAAABAAIAQB8AAAB9AAAEABAAZGF0YQAAAAA=");
 string DEFAULT_AUDIOGROUP_NAME = "audiogroup_default";
 
-DumpSounds(); // This runs sync, because it has to load audio groups.
+maxCount = Data.Sounds.Count;
+SetProgressBar(null, "Sound", 0, maxCount);
+StartUpdater();
+
+await Task.Run(DumpSounds); // This runs sync, because it has to load audio groups.
+
+await StopUpdater();
 HideProgressBar();
 if (Directory.Exists(winFolder + "External_Sounds\\"))
     ScriptMessage("Sounds exported to " + winFolder + " in the 'Exported_Sounds' and 'External_Sounds' folders.");
 else
     ScriptMessage("Sounds exported to " + winFolder + " in the 'Exported_Sounds' folder.");
 
-string currentDialog;
-int saveProgress, maxCount;
-void SetupProgress(string name, int totalCount) 
+void IncProgressLocal()
 {
-    currentDialog = name;
-    maxCount = totalCount;
-    saveProgress = 0;
-    UpdateProgressBar(null, currentDialog, saveProgress, maxCount);
-}
-
-void NextFile()
-{
-    if (saveProgress < maxCount)
-        UpdateProgressBar(null, currentDialog, saveProgress++, maxCount);
+    if (GetProgress() < maxCount)
+        IncProgress();
 }
 
 void MakeFolder(String folderName)
@@ -154,7 +152,6 @@ byte[] GetSoundData(UndertaleSound sound)
 void DumpSounds() 
 {
     //MakeFolder("Exported_Sounds");
-    SetupProgress("Sound", Data.Sounds.Count);
     foreach (UndertaleSound sound in Data.Sounds)
         DumpSound(sound);
 }
@@ -204,6 +201,7 @@ void DumpSound(UndertaleSound sound)
     }
     if (process && !File.Exists(soundFilePath + audioExt))
         File.WriteAllBytes(soundFilePath + audioExt, GetSoundData(sound));
-    NextFile();
+
+    IncProgressLocal();
 }
 

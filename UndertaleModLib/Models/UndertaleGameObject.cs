@@ -520,7 +520,7 @@ namespace UndertaleModLib.Models
         vk_lalt = 164,
         vk_ralt = 165,
     }
-	
+    
     public enum EventSubtypeMouse : uint
     {
         LeftButton = 0,
@@ -571,7 +571,7 @@ namespace UndertaleModLib.Models
         MouseWheelUp = 60,
         MouseWheelDown = 61,
     }
-	
+    
     public enum EventSubtypeOther : uint
     {
         OutsideRoom = 0,

@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 //Made by Grossley with the help of Colinator
 
-string currentDialog;
-int saveProgress = 0;
 int maxCount = 1;
 
 EnsureDataLoaded();
@@ -40,24 +38,24 @@ ScriptMessage(@"Switch languages using F11.
 Reload text for curent language from JSON on command using F12.
 Note: reloading from JSON may take about 10 seconds.
 ");
-SetupProgress("Dumping the language files", 2);
-DumpJSON("en");
-DumpJSON("ja");
-SetupProgress("Making the JSONs", 2);
-MakeJSON("en");
-MakeJSON("ja");
-SetupProgress("Setting up code to JSONify Undertale Steam 1.08", 6);
+//this is one of the rare cases when it's better without "ProgressUpdater()"
+await Task.Run(() => {
+    maxCount = 2;
+    SetProgressBar(null, "Dumping the language files", 0, maxCount);
+    DumpJSON("en");
+    DumpJSON("ja");
+    maxCount = 2;
+    SetProgressBar(null, "Making the JSONs", 0, maxCount);
+    MakeJSON("en");
+    MakeJSON("ja");
+    maxCount = 6;
+    SetProgressBar(null, "Setting up code to JSONify Undertale Steam 1.08", 0, maxCount);
+});
 
-void UpdateProgress() {
-    if (saveProgress < maxCount)
-        UpdateProgressBar(null, currentDialog, saveProgress++, maxCount);
-}
-
-void SetupProgress(string name, int totalCount) {
-    currentDialog = name;
-    maxCount = totalCount;
-    saveProgress = 0;
-    UpdateProgressBar(null, currentDialog, saveProgress, maxCount);
+void IncProgressLocal()
+{
+    if (GetProgress() < maxCount)
+        IncProgress();
 }
 
 string GetFolder(string path) {
@@ -145,9 +143,11 @@ void DumpJSON(string language)
     } 
     catch (Exception e) 
     {
-        throw new System.Exception("gml_Script_textdata_" + language + " has an error that prevents creation of JSONs.");
+        throw new ScriptException("gml_Script_textdata_" + language + " has an error that prevents creation of JSONs.");
     }
-    UpdateProgress();
+
+    IncProgressLocal();
+    UpdateProgressValue(GetProgress());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -193,7 +193,9 @@ void MakeJSON(string language)
         input = Regex.Replace(input, pattern, replacement);
 
         File.WriteAllText(Path.Combine(langFolder, "lang_" + language + ".json"), input);
-        UpdateProgress();
+
+        IncProgressLocal();
+        UpdateProgressValue(GetProgress());
     }
     else // Undertale Switch/Probs other consoles (GMS2)
     {
@@ -212,6 +214,8 @@ void MakeJSON(string language)
         input = Regex.Replace(input, pattern, replacement);
 
         File.WriteAllText(Path.Combine(langFolder, "lang_" + language + ".json"), input);
-        UpdateProgress();
+
+        IncProgressLocal();
+        UpdateProgressValue(GetProgress());
     }
 }

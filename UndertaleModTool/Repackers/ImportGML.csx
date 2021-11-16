@@ -10,19 +10,27 @@ EnsureDataLoaded();
 // Check code directory.
 string importFolder = PromptChooseDirectory("Import From Where");
 if (importFolder == null)
-    throw new System.Exception("The import folder was not set.");
+    throw new ScriptException("The import folder was not set.");
 
 // Ask whether they want to link code. If no, will only generate code entry.
 // If yes, will try to add code to objects and scripts depending upon its name
 bool doParse = ScriptQuestion("Do you want to automatically attempt to link imported code?");
 
-int progress = 0;
 string[] dirFiles = Directory.GetFiles(importFolder);
-foreach (string file in dirFiles)
-{
-    UpdateProgressBar(null, "Files", progress++, dirFiles.Length);
-    ImportGMLFile(file, doParse);
-}
 
+SetProgressBar(null, "Files", 0, dirFiles.Length);
+StartUpdater();
+
+SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects", true);
+await Task.Run(() => {
+    foreach (string file in dirFiles)
+    {
+        IncProgress();
+
+        ImportGMLFile(file, doParse);
+    }
+});
+
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("All files successfully imported.");

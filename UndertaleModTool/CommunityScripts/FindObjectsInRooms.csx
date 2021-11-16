@@ -6,6 +6,8 @@ using System.ComponentModel;
 using System.Windows;
 using UndertaleModLib.Scripting;
 
+EnsureDataLoaded();
+
 string output = "";
 string used_objects_names = "";
 ScriptMessage("Enter the object(s) to find");
@@ -66,6 +68,7 @@ else
     {
         used_objects_names += (str + "\r\n");
     }
+    EnableUI();
     string results_message = "Found " + unique_objects_used.ToString() + " unique objects used out of the " + splitStringsList.Count.ToString() + " objects searched. Instance results count: " + usage_count.ToString();
-    SimpleTextInput("Search results.", results_message, results_message + "\n\n" + output, true);
+    SimpleTextOutput("Search results.", results_message, results_message + "\n\n" + output, true);
 }

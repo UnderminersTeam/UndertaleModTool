@@ -5,12 +5,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
-		xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
-		xmlns:undertalelib="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
+        xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+        xmlns:undertalelib="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
         xmlns:scol="clr-namespace:System.Collections;assembly=mscorlib" 
         xmlns:cmod="clr-namespace:System.ComponentModel;assembly=WindowsBase" 
         mc:Ignorable="d"
-        Height="450" Width="800" Loaded="Window_Loaded">
+        Height="450" Width="800" Loaded="Window_Loaded"
+        AllowDrop="True" Drop="Window_Drop">
     <Window.Title>
         <MultiBinding StringFormat="{}{0} - {1} [{2}]">
             <Binding Path="TitleMain"/>
@@ -286,7 +287,7 @@
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Code" ItemsSource="{Binding Code, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Code, Converter={StaticResource VisibleIfNotNull}}">
+                        <TreeViewItem Name="CodeItemsList" Header="Code" ItemsSource="{Binding Code, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Code, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemContainerStyle>
                                 <Style TargetType="{x:Type TreeViewItem}">
                                     <Setter Property="Foreground" Value="Gray"></Setter>

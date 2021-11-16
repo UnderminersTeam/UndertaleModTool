@@ -1,0 +1,44 @@
+﻿<Window x:Class="UndertaleModTool.Windows.ClickableTextOutput"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UndertaleModTool.Windows"
+        mc:Ignorable="d"
+        Title="ClickableTextOutput" Height="540" Width="536" MinHeight="160" MinWidth="210">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="459*"/>
+            <RowDefinition Height="65"/>
+        </Grid.RowDefinitions>
+        <Grid.Background>
+            <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
+        </Grid.Background>
+        <RichTextBox x:Name="OutTextBox" Grid.Row="0" Margin="10,22,10,0" FontSize="14" IsDocumentEnabled="True" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <RichTextBox.Background>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlLightLightColorKey}}"/>
+            </RichTextBox.Background>
+            <RichTextBox.Resources>
+                <Style TargetType="Hyperlink">
+                    <Setter Property="Foreground" Value="#FF0000EE"/>
+                    <EventSetter Event="Click" Handler="Hyperlink_Click"/>
+                </Style>
+                <Style TargetType="Paragraph">
+                    <Setter Property="Margin" Value="0"/>
+                </Style>
+            </RichTextBox.Resources>
+            <RichTextBox.ContextMenu>
+                <ContextMenu Name="textCommandsMenu">
+                    <MenuItem Name="copyMenuItem" Header="Copy" Click="copyMenuItem_Click"/>
+                    <MenuItem Name="copyAllMenuItem" Header="Copy all" Click="copyAllMenuItem_Click"/>
+                </ContextMenu>
+            </RichTextBox.ContextMenu>
+            <FlowDocument>
+                <Paragraph>
+                    <Run>Default text with hyperlinks.</Run>
+                </Paragraph>
+            </FlowDocument>
+        </RichTextBox>
+        <Button Content="Done" FontSize="16" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="35" Click="Button_Click"/>
+    </Grid>
+</Window>

@@ -1,6 +1,8 @@
 using System.Text.Json;
 using System.Windows.Forms;
 
+EnsureDataLoaded();
+
 OpenFileDialog openFileDialog = new OpenFileDialog()
 {
     InitialDirectory = FilePath,

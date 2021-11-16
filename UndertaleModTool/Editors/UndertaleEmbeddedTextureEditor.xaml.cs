@@ -48,7 +48,7 @@ namespace UndertaleModTool
                     {
                         bmp = new Bitmap(ms);
                     }
-					bmp.SetResolution(96.0F, 96.0F);
+                    bmp.SetResolution(96.0F, 96.0F);
 
                     var width = (uint)bmp.Width;
                     var height = (uint)bmp.Height;

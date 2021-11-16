@@ -4,13 +4,14 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+EnsureDataLoaded();
+
 if (Data.ToolInfo.ProfileMode)
 {
     ScriptMessage("This script is incompatible with profile mode.");
     return;
 }
 
-int progress = 0;
 string codeFolder = GetFolder(FilePath) + "Export_Assembly2" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
@@ -21,15 +22,16 @@ if (Directory.Exists(codeFolder))
 
 Directory.CreateDirectory(codeFolder);
 
-UpdateProgress();
-DumpCode();
+SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
+StartUpdater();
+
+SyncBinding("Strings, CodeLocals, Variables", true); //not sure about variables
+await Task.Run(DumpCode);
+SyncBinding(false);
+
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Conversion Complete.\n\nLocation: " + codeFolder);
-
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Code Entries", progress++, Data.Code.Count);
-}
 
 string GetFolder(string path) 
 {
@@ -118,11 +120,7 @@ void DumpCode()
                     }
                     code_orig.Replace(Assembler.Assemble(x, Data));
                 }
-                string str_path_to_use = "";
-                if (path.Length > 150)
-                    str_path_to_use = path.Substring(0, 150) + ".asm";
-                else
-                    str_path_to_use = Path.Combine(codeFolder, code_orig.Name.Content + ".asm");
+                string str_path_to_use = Path.Combine(codeFolder, code_orig.Name.Content + ".asm");
                 string code_output = "";
                 if (code_orig != null)
                     code_output = code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig));
@@ -136,7 +134,7 @@ void DumpCode()
                 return;
             }
 
-            UpdateProgress();
+            IncProgress();
         }
         else
         {
@@ -146,11 +144,7 @@ void DumpCode()
             }
             try 
             {
-                string str_path_to_use = "";
-                if (path.Length > 150)
-                    str_path_to_use = path.Substring(0, 150) + ".asm";
-                else
-                    str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
+                string str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
                 string code_output = "";
                 if (code_orig != null)
                     code_output = code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig));
@@ -158,14 +152,11 @@ void DumpCode()
             }
             catch (Exception e) 
             {
-                string str_path_to_use = "";
-                if (path.Length > 150)
-                    str_path_to_use = path.Substring(0, 150) + ".asm";
-                else
-                    str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
+                string str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
                 File.WriteAllText(str_path_to_use, "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"); // Please don't
             }
-            UpdateProgress();
+
+            IncProgress();
         }
     }
 }

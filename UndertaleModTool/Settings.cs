@@ -21,6 +21,7 @@ namespace UndertaleModTool
         public string GameMakerStudio2RuntimesPath { get; set; } = "%systemdrive%\\ProgramData\\GameMakerStudio2\\Cache\\runtimes"; /* Using %systemdrive% here fixes the runtimes not being found when the system drive is not C:\\ */
         public bool AssetOrderSwappingEnabled { get; set; } = false;
         public bool ProfileModeEnabled { get; set; } = false;
+        public bool Warn_About_GMS23 { get; set; } = true;
         public bool ProfileMessageShown { get; set; } = false;
         public bool AutomaticFileAssociation { get; set; } = true;
         public bool TempRunMessageShow { get; set; } = true;

@@ -28,10 +28,10 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
-
 using UndertaleModTool;
 
-int progress = 0;
+EnsureDataLoaded();
+
 int exportTotal = Data.Rooms.Count;
 
 List<string> outputsList = new List<string>();
@@ -40,89 +40,91 @@ System.Windows.Controls.ItemsControl RoomGraphics;
 
 string exportedTexturesFolder = PromptChooseDirectory("Choose an export folder");
 if (exportedTexturesFolder == null) {
-	throw new System.Exception("The export folder was not set, stopping script.");
+    throw new ScriptException("The export folder was not set, stopping script.");
 }
 
 DirectoryInfo dir = new DirectoryInfo(exportedTexturesFolder);
 
 TextureWorker worker = new TextureWorker();
 
-await DumpRooms();
+SetProgressBar(null, "Rooms Exported", 0, exportTotal);
+StartUpdater();
 
+await DumpRooms();
 worker.Cleanup();
+
+await StopUpdater();
 HideProgressBar();
 
-void UpdateProgress() {
-    UpdateProgressBar(null, "Rooms Exported", progress += 1, exportTotal);
-}
 
 async Task DumpRooms() {
     for (int i = 0; i < Data.Rooms.Count; i++) {
-		// Change room here
-		UndertaleModTool.MainWindow window = (UndertaleModTool.MainWindow)(Application.Current.MainWindow);
-		window.Highlighted = (Data.Rooms[i]);
-		window.ChangeSelection(Highlighted);
-		await Task.Delay(TimeSpan.FromSeconds(0.1));
-		DumpRoom(Data.Rooms[i]);
-	}
+        // Change room here
+        UndertaleModTool.MainWindow window = (UndertaleModTool.MainWindow)(Application.Current.MainWindow);
+        window.Highlighted = (Data.Rooms[i]);
+        window.ChangeSelection(Highlighted);
+        await Task.Delay(TimeSpan.FromSeconds(0.1));
+        DumpRoom(Data.Rooms[i]);
+    }
 }
 
 void DumpRoom(UndertaleRoom room) {
-	using (var file = File.OpenWrite(exportedTexturesFolder + System.IO.Path.DirectorySeparatorChar + room.Name.Content + ".png")) {
-		SaveImagePNG(file);
-	}
-	UpdateProgress();
+    using (var file = File.OpenWrite(exportedTexturesFolder + System.IO.Path.DirectorySeparatorChar + room.Name.Content + ".png")) {
+        SaveImagePNG(file);
+    }
+
+    IncProgress();
 }
 
 public void SaveImagePNG(Stream outfile) {
-	try {
-		Window window = Application.Current.MainWindow;
-		System.Windows.Controls.ItemsControl RoomGraphics = FindChild<System.Windows.Controls.ItemsControl>(window, "RoomGraphics");
-		var target = new RenderTargetBitmap((int)RoomGraphics.RenderSize.Width, (int)RoomGraphics.RenderSize.Height, 96, 96, PixelFormats.Pbgra32);
-		target.Render(RoomGraphics);
-		var encoder = new PngBitmapEncoder();
-		encoder.Frames.Add(BitmapFrame.Create(target));
-		encoder.Save(outfile);
-	} catch (Exception e) {
-		ScriptMessage(e.ToString());
-	}
+    try {
+        Window window = Application.Current.MainWindow;
+        System.Windows.Controls.ItemsControl RoomGraphics = FindChild<System.Windows.Controls.ItemsControl>(window, "RoomGraphics");
+        var target = new RenderTargetBitmap((int)RoomGraphics.RenderSize.Width, (int)RoomGraphics.RenderSize.Height, 96, 96, PixelFormats.Pbgra32);
+        target.Render(RoomGraphics);
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(target));
+        encoder.Save(outfile);
+    } catch (Exception e) {
+        ScriptMessage(e.ToString());
+    }
 }
 
 // Copied this from Stack overflow ~Sam
 public static T FindChild<T>(DependencyObject parent, string childName) where T : DependencyObject {    
-	// Confirm parent and childName are valid. 
-	if (parent == null){
-	  return null;
-	}
+    // Confirm parent and childName are valid. 
+    if (parent == null){
+      return null;
+    }
 
-	T foundChild = null;
+    T foundChild = null;
 
-	int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
-	for (int i = 0; i < childrenCount; i++) {
-		var child = VisualTreeHelper.GetChild(parent, i);
-		// If the child is not of the request child type child
-		T childType = child as T;
-		if (childType == null) {
-			// recursively drill down the tree
-			foundChild = FindChild<T>(child, childName);
+    int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+    for (int i = 0; i < childrenCount; i++) {
+        var child = VisualTreeHelper.GetChild(parent, i);
+        // If the child is not of the request child type child
+        T childType = child as T;
+        if (childType == null) {
+            // recursively drill down the tree
+            foundChild = FindChild<T>(child, childName);
 
-			// If the child is found, break so we do not overwrite the found child. 
-			if (foundChild != null) {
-				break;
-			}
-		} else if (!string.IsNullOrEmpty(childName)) {
-			var frameworkElement = child as FrameworkElement;
-			// If the child's name is set for search
-			if (frameworkElement != null && frameworkElement.Name == childName) {
-				// if the child's name is of the request name
-				foundChild = (T)child;
-				break;
-			}
-		} else {
-			// child element found.
-			foundChild = (T)child;
-			break;
-		}
-	}
-	return foundChild;
+            // If the child is found, break so we do not overwrite the found child. 
+            if (foundChild != null) {
+                break;
+            }
+        } else if (!string.IsNullOrEmpty(childName)) {
+            var frameworkElement = child as FrameworkElement;
+            // If the child's name is set for search
+            if (frameworkElement != null && frameworkElement.Name == childName) {
+                // if the child's name is of the request name
+                foundChild = (T)child;
+                break;
+            }
+        } else {
+            // child element found.
+            foundChild = (T)child;
+            break;
+        }
+    }
+    return foundChild;
 }

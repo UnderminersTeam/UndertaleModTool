@@ -260,7 +260,7 @@ void Reorganize<T>(IList<T> list, List<string> order) where T : UndertaleNamedRe
             asset = temp[order[i]];
         } catch (Exception e)
         {
-            throw new Exception("Missing asset with name \"" + order[i] + "\"");
+            throw new ScriptException("Missing asset with name \"" + order[i] + "\"");
         }
         addOrder.Add(asset);
     }

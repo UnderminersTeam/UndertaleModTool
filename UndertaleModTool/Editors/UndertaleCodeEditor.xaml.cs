@@ -170,17 +170,41 @@ namespace UndertaleModTool
                 return;
             DecompiledEditor_LostFocus(sender, null);
             DisassemblyEditor_LostFocus(sender, null);
-            if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
+
+            if (MainWindow.CodeEditorDecompile != -1) //if opened from the code search results "link"
             {
-                DisassembleCode(code, true);
+                if (MainWindow.CodeEditorDecompile == 0 && code != CurrentDisassembled)
+                {
+                    if (CodeModeTabs.SelectedItem != DisassemblyTab)
+                        CodeModeTabs.SelectedItem = DisassemblyTab;
+                    else
+                        DisassembleCode(code, true);
+                }
+
+                if (MainWindow.CodeEditorDecompile == 1 && code != CurrentDecompiled)
+                {
+                    if (CodeModeTabs.SelectedItem != DecompiledTab)
+                        CodeModeTabs.SelectedItem = DecompiledTab;
+                    else
+                        DecompileCode(code, true);
+                }
+
+                MainWindow.CodeEditorDecompile = -1;
             }
-            if (DecompiledTab.IsSelected && code != CurrentDecompiled)
+            else
             {
-                DecompileCode(code, true);
-            }
-            if (GraphTab.IsSelected && code != CurrentGraphed)
-            {
-                GraphCode(code);
+                if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
+                {
+                    DisassembleCode(code, true);
+                }
+                if (DecompiledTab.IsSelected && code != CurrentDecompiled)
+                {
+                    DecompileCode(code, true);
+                }
+                if (GraphTab.IsSelected && code != CurrentGraphed)
+                {
+                    GraphCode(code);
+                }
             }
         }
 
@@ -722,7 +746,14 @@ namespace UndertaleModTool
                 var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
                 var highlighter = textArea.GetService(typeof(IHighlighter)) as IHighlighter;
                 int line = CurrentContext.Document.GetLocation(startOffset).Line;
-                HighlightedLine highlighted = highlighter.HighlightLine(line);
+                HighlightedLine highlighted = null;
+                try
+                {
+                    highlighted = highlighter.HighlightLine(line);
+                }
+                catch
+                {
+                }
 
                 while (m.Success)
                 {
@@ -890,7 +921,14 @@ namespace UndertaleModTool
                 var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
                 var highlighter = textArea.GetService(typeof(IHighlighter)) as IHighlighter;
                 int line = CurrentContext.Document.GetLocation(startOffset).Line;
-                HighlightedLine highlighted = highlighter.HighlightLine(line);
+                HighlightedLine highlighted = null;
+                try
+                {
+                    highlighted = highlighter.HighlightLine(line);
+                }
+                catch
+                {
+                }
 
                 while (m.Success)
                 {
