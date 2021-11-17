@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
 EnsureDataLoaded();
@@ -30,6 +31,7 @@ await Task.Run(() => {
         ImportGMLFile(file, doParse);
     }
 });
+SyncBinding(false);
 
 await StopUpdater();
 HideProgressBar();
