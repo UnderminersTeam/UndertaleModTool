@@ -10,6 +10,8 @@ using System.Security.Cryptography;
 using UndertaleModLib.Models;
 using UndertaleModLib.Decompiler;
 
+EnsureDataLoaded();
+
 if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
 {
     ScriptError("Error 0: Most likely incompatible with the new Deltarune Chapter 1 & 2 demo, run at your own risk");

@@ -17,7 +17,7 @@ bool enable = ScriptQuestion("Debug Manager by krzys-h and Kneesnap\n\nYes = Ena
 var scr_debug = Data.Scripts.ByName("scr_debug")?.Code;
 if (scr_debug != null) // Deltarune debug check script.
 {
-    scr_debug.ReplaceGML(@"return global.debug;", Data);
+    scr_debug.ReplaceGML("global.debug = " + (enable ? "true" : "false") + ";" + "\r\n" + "return global.debug;", Data);
     ChangeSelection(scr_debug); // Show.
     ScriptMessage("Debug Mode " + (enable ? "enabled" : "disabled") + ".");
     return;
@@ -25,7 +25,7 @@ if (scr_debug != null) // Deltarune debug check script.
 var SCR_GAMESTART = Data.Scripts.ByName("SCR_GAMESTART", true)?.Code;
 if (SCR_GAMESTART != null) // Undertale debug check script.
 {
-    ReplaceTextInGML("gml_Script_SCR_GAMESTART", "global.debug = 0", "global.debug = 1");
+    ReplaceTextInGML("gml_Script_SCR_GAMESTART", "global.debug = ", "global.debug = " + (enable ? "true;" : "false;") + "//");
     ChangeSelection(SCR_GAMESTART); // Show.
     ScriptMessage("Debug Mode " + (enable ? "enabled" : "disabled") + ".");
     return;

@@ -2,6 +2,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+EnsureDataLoaded();
+
 SaveFileDialog saveFileDialog = new SaveFileDialog()
 {
     InitialDirectory = FilePath,

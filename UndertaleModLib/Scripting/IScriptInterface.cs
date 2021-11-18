@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace UndertaleModLib.Scripting
@@ -55,10 +56,25 @@ namespace UndertaleModLib.Scripting
         string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose);
         string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true);
         void SimpleTextOutput(string title, string label, string defaultText, bool allowMultiline);
+        Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null);
+        Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null);
         void SetFinishedMessage(bool isFinishedMessageEnabled);
         void UpdateProgressBar(string message, string status, double progressValue, double maxValue);
+        void SetProgressBar(string message, string status, double progressValue, double maxValue);
+        void UpdateProgressValue(double progressValue);
+        void UpdateProgressStatus(string status);
+        void AddProgress(int amount);
+        void IncProgress();
+        void AddProgressP(int amount);
+        void IncProgressP();
+        int GetProgress();
+        void SetProgress(int value);
         void HideProgressBar();
         void EnableUI();
+        void SyncBinding(string resourceType, bool enable);
+        void SyncBinding(bool enable = false);
+        void StartUpdater();
+        Task StopUpdater();
 
         void ChangeSelection(object newsel);
 

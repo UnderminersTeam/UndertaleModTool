@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
 EnsureDataLoaded();
@@ -16,13 +17,22 @@ if (importFolder == null)
 // If yes, will try to add code to objects and scripts depending upon its name
 bool doParse = ScriptQuestion("Do you want to automatically attempt to link imported code?");
 
-int progress = 0;
 string[] dirFiles = Directory.GetFiles(importFolder);
-foreach (string file in dirFiles)
-{
-    UpdateProgressBar(null, "Files", progress++, dirFiles.Length);
-    ImportGMLFile(file, doParse);
-}
 
+SetProgressBar(null, "Files", 0, dirFiles.Length);
+StartUpdater();
+
+SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects", true);
+await Task.Run(() => {
+    foreach (string file in dirFiles)
+    {
+        IncProgress();
+
+        ImportGMLFile(file, doParse);
+    }
+});
+SyncBinding(false);
+
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("All files successfully imported.");

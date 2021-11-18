@@ -9,10 +9,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
-int progress = 0;
+EnsureDataLoaded();
+
 string texFolder = GetFolder(FilePath) + "Export_Masks" + Path.DirectorySeparatorChar;
 TextureWorker worker = new TextureWorker();
-
 if (Directory.Exists(texFolder))
 {
     ScriptError("A texture export already exists. Please remove it.", "Error");
@@ -21,16 +21,16 @@ if (Directory.Exists(texFolder))
 
 Directory.CreateDirectory(texFolder);
 
-UpdateProgress();
+SetProgressBar(null, "Sprites", 0, Data.Sprites.Count);
+StartUpdater();
+
 await DumpSprites();
 worker.Cleanup();
+
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 
-void UpdateProgress()
-{
-    UpdateProgressBar(null, "Sprites", progress++, Data.Sprites.Count);
-}
 
 string GetFolder(string path) 
 {
@@ -51,5 +51,6 @@ void DumpSprite(UndertaleSprite sprite)
             TextureWorker.ExportCollisionMaskPNG(sprite, sprite.CollisionMasks[i], texFolder + sprite.Name.Content + "_" + i + ".png");
         }
     }
-    UpdateProgress();
+
+    IncProgressP();
 }

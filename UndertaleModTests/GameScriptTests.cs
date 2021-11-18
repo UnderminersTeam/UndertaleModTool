@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -96,7 +97,45 @@ namespace UndertaleModTests
         }
         public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
         {
-            Console.WriteLine("Update Progress: " + progressValue + " / " + maxValue + ", Message: " + message + ", Status: " + status);
+            Console.WriteLine("UpdateProgressBar(): " + progressValue + " / " + maxValue + ", Message: " + message + ", Status: " + status);
+        }
+        public void SetProgressBar(string message, string status, double progressValue, double maxValue)
+        {
+            Console.WriteLine("SetProgressBar(): " + progressValue + " / " + maxValue + ", Message: " + message + ", Status: " + status);
+        }
+        public void UpdateProgressValue(double progressValue)
+        {
+            Console.WriteLine($"UpdateProgressValue(): {progressValue}");
+        }
+        public void UpdateProgressStatus(string status)
+        {
+            Console.WriteLine($"UpdateProgressStatus(): {status}");
+        }
+
+        public void AddProgress(int amount)
+        {
+            Console.WriteLine($"AddProgress(): {amount}");
+        }
+        public void IncProgress()
+        {
+            Console.WriteLine("IncProgress()");
+        }
+        public void AddProgressP(int amount)
+        {
+            Console.WriteLine($"AddProgressP(): {amount}");
+        }
+        public void IncProgressP()
+        {
+            Console.WriteLine("IncProgressP()");
+        }
+        public int GetProgress()
+        {
+            Console.WriteLine("GetProgress()");
+            return -1;
+        }
+        public void SetProgress(int value)
+        {
+            Console.WriteLine($"SetProgress(): {value}");
         }
 
         public string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
@@ -111,9 +150,9 @@ namespace UndertaleModTests
             return ScriptInputDialog(titleText, labelText, defaultInputBoxText, "Cancel", "Submit", isMultiline, false);
         }
         public void SimpleTextOutput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline)
-		{
-            Console.WriteLine($"SimpleTextOutput(\"{titleText}\", \"{labelText}\", *defaultInputBoxText* (length - {defaultInputBoxText.Length}), {isMultiline})");
-		}
+        {
+            Console.WriteLine($"SimpleTextOutput(): \"{titleText}\", \"{labelText}\", *defaultInputBoxText* (length - {defaultInputBoxText.Length}), {isMultiline}");
+        }
 
         public void SetUMTConsoleText(string message)
         {
@@ -153,6 +192,23 @@ namespace UndertaleModTests
         public void EnableUI()
         {
             Console.WriteLine("Enabling UI.");
+        }
+        public void SyncBinding(string resourceType, bool enable)
+        {
+            Console.WriteLine($"SyncBinding(): \"{resourceType}\", {enable}");
+        }
+        public void SyncBinding(bool enable = false)
+        {
+            Console.WriteLine($"SyncBinding(): {enable}");
+        }
+        public void StartUpdater()
+        {
+            Console.WriteLine("Starting progress bar updater...");
+        }
+        public async Task StopUpdater()
+        {
+            Console.WriteLine("Stopping progress bar updater...");
+            await Task.Delay(1); //dummy await
         }
 
         protected async Task<object> RunScript(string path)

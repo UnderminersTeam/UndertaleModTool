@@ -44,6 +44,10 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
+        <None Update="CommunityScripts\SafeBlaster.csx">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
         <None Update="CommunityScripts\ScaleAllTextures.csx">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
           <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3579,6 +3583,10 @@
         <None Update="TechnicalScripts\ExportAllCode2_3.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="README.txt">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="TechnicalScripts\RealignRoomInternalOrder.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

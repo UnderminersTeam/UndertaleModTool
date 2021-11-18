@@ -6,6 +6,8 @@ using System.ComponentModel;
 using System.Windows;
 using UndertaleModLib.Scripting;
 
+EnsureDataLoaded();
+
 string output = "";
 string used_objects_names = "";
 ScriptMessage("Enter the object(s) to find");

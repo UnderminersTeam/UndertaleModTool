@@ -32,7 +32,6 @@ using UndertaleModTool;
 
 EnsureDataLoaded();
 
-int progress = 0;
 int exportTotal = Data.Rooms.Count;
 
 List<string> outputsList = new List<string>();
@@ -48,14 +47,15 @@ DirectoryInfo dir = new DirectoryInfo(exportedTexturesFolder);
 
 TextureWorker worker = new TextureWorker();
 
-await DumpRooms();
+SetProgressBar(null, "Rooms Exported", 0, exportTotal);
+StartUpdater();
 
+await DumpRooms();
 worker.Cleanup();
+
+await StopUpdater();
 HideProgressBar();
 
-void UpdateProgress() {
-    UpdateProgressBar(null, "Rooms Exported", progress += 1, exportTotal);
-}
 
 async Task DumpRooms() {
     for (int i = 0; i < Data.Rooms.Count; i++) {
@@ -72,7 +72,8 @@ void DumpRoom(UndertaleRoom room) {
     using (var file = File.OpenWrite(exportedTexturesFolder + System.IO.Path.DirectorySeparatorChar + room.Name.Content + ".png")) {
         SaveImagePNG(file);
     }
-    UpdateProgress();
+
+    IncProgress();
 }
 
 public void SaveImagePNG(Stream outfile) {

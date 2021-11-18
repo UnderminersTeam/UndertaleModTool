@@ -13,9 +13,7 @@ EnsureDataLoaded();
 
 // Start export of all existing textures
 
-int progress = 0;
 string texFolder = Path.Combine(GetFolder(FilePath), "Export_Textures");
-
 if (Directory.Exists(texFolder))
 {
     ScriptError("A sprites export already exists. Please remove it.", "Error");
@@ -31,19 +29,18 @@ string bgrFolder = Path.Combine(texFolder, "Backgrounds");
 Directory.CreateDirectory(bgrFolder);
 TextureWorker worker = new TextureWorker();
 
-UpdateProgress(0);
+SetProgressBar(null, "Textures Exported", 0, Data.TexturePageItems.Count);
+StartUpdater();
+
 await DumpSprites();
 await DumpFonts();
 await DumpBackgrounds();
 worker.Cleanup();
-HideProgressBar();
 
+await StopUpdater();
+HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 
-void UpdateProgress(int updateAmount)
-{
-    UpdateProgressBar(null, "Textures Exported", progress += updateAmount, Data.TexturePageItems.Count);
-}
 
 async Task DumpSprites()
 {
@@ -70,7 +67,8 @@ void DumpSprite(UndertaleSprite sprite)
             worker.ExportAsPNG(tex, Path.Combine(sprFolder, sprite.Name.Content + "_" + i + ".png"));
         }
     }
-    UpdateProgress(sprite.Textures.Count);
+
+    AddProgressP(sprite.Textures.Count);
 }
 
 void DumpFont(UndertaleFont font)
@@ -79,7 +77,8 @@ void DumpFont(UndertaleFont font)
     {
         UndertaleTexturePageItem tex = font.Texture;
         worker.ExportAsPNG(tex, Path.Combine(fntFolder, font.Name.Content + "_0.png"));
-        UpdateProgress(1);
+
+        IncProgressP();
     }
 }
 
@@ -89,7 +88,8 @@ void DumpBackground(UndertaleBackground background)
     {
         UndertaleTexturePageItem tex = background.Texture;
         worker.ExportAsPNG(tex, Path.Combine(bgrFolder, background.Name.Content + "_0.png"));
-        UpdateProgress(1);
+
+        IncProgressP();
     }
 }
 
