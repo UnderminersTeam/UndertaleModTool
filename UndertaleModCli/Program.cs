@@ -171,12 +171,11 @@ namespace UndertaleModCli
 
         public static int Main(string[] args)
         {
-            var verboseOption = new Option<bool>("--verbose", "Detailed logs");
-            verboseOption.AddAlias("-v");
+            var verboseOption = new Option<bool>(new[]{"-v", "--verbose"}, "Detailed logs");
 
             var dataFileOption = new Argument<FileInfo>("datafile")
             {
-                Description = "path to the data.win/.ios/.droid/.unx file"
+                Description = "Path to the data.win/.ios/.droid/.unx file"
             };
 
             var infoCommand = new Command("info", "Show info about game data file")
@@ -186,15 +185,13 @@ namespace UndertaleModCli
             };
             infoCommand.Handler = CommandHandler.Create<InfoOptions>(Program.Info);
 
-            var scriptRunnerOption = new Option<FileInfo[]>("--scripts", "Scripts to apply to the <datafile>. ex. a.csx b.csx");
-            scriptRunnerOption.AddAlias("-s");
-            scriptRunnerOption.AddAlias("--applyscripts");
+            var scriptRunnerOption = new Option<FileInfo[]>(new []{"-s", "--scripts", "--applyscripts"}, "Scripts to apply to the <datafile>. ex. a.csx b.csx");
             var loadCommand = new Command("load", "Load data file and perform actions on it") {
                 dataFileOption,
                 scriptRunnerOption,
                 verboseOption,
-                new Option<FileInfo>("--dest", "Where to save the modified data file"),
-                new Option<string>("--line", "run c# string. Runs AFTER everything else"),
+                new Option<FileInfo>(new[]{"-o", "--output"}, "Where to save the modified data file"),
+                new Option<string>("--line", "Run c# string. Runs AFTER everything else"),
                 new Option<bool>("--interactive", "Interactive menu launch"),
 
             };
@@ -202,9 +199,9 @@ namespace UndertaleModCli
 
             var newCommand = new Command("new", "Generates a blank data file")
             {
-                new Option<FileInfo>(new []{"-d", "--dest" },getDefaultValue: () => new NewOptions().Dest),
+                new Option<FileInfo>(new []{"-o", "--output" },getDefaultValue: () => new NewOptions().Dest),
                 new Option<bool>(new []{"-f", "--overwrite"}, "Overwrite destination file if it already exists"),
-                new Option<bool>(new []{"-o", "--stdout"}, "Write new data content to stdout"),
+                new Option<bool>(new []{"-", "--stdout"}, "Write new data content to stdout"),  // "-" is often used in *nix land as a replacement for stdout
             };
             newCommand.Handler = CommandHandler.Create<NewOptions>(Program.New);
 
@@ -214,7 +211,7 @@ namespace UndertaleModCli
                 newCommand,
                 };
 
-            rootCommand.Description = "cli tool for modding, decompiling and unpacking Undertale (and other Game Maker: Studio games!";
+            rootCommand.Description = "CLI tool for modding, decompiling and unpacking Undertale (and other Game Maker: Studio games)!";
             var commandLine = new CommandLineBuilder(rootCommand)
                                     .UseDefaults() // automatically configures dotnet-suggest
                                     .Build();
@@ -467,7 +464,7 @@ namespace UndertaleModCli
             {
                 case ConsoleKey.D1:
                     {
-                        Console.Write("File path (you can drag and drop on Windows)?: ");
+                        Console.Write("File path (you can drag and drop)? ");
                         string path = Dequote(Console.ReadLine());
                         Console.WriteLine("Trying to run script {0}", path);
                         RunCodeFile(path);
@@ -476,7 +473,7 @@ namespace UndertaleModCli
 
                 case ConsoleKey.D2:
                     {
-                        Console.Write("C# code line?: ");
+                        Console.Write("C# code line? ");
                         string line = Console.ReadLine();
                         ScriptPath = null;
                         RunCodeLine(line);
@@ -491,7 +488,7 @@ namespace UndertaleModCli
 
                 case ConsoleKey.D4:
                     {
-                        Console.Write("Where to save?: ");
+                        Console.Write("Where to save? ");
                         string path = Dequote(Console.ReadLine());
                         CliSave(path);
                         break;
@@ -507,7 +504,7 @@ namespace UndertaleModCli
                 case ConsoleKey.D6:
                     {
                         Console.WriteLine("Are you SURE? You can press 'n' and save before the changes are gone forever!!");
-                        Console.WriteLine("(Y/N)?: ");
+                        Console.WriteLine("(Y/N)? ");
                         var yes = Console.ReadKey(false).Key == ConsoleKey.Y;
                         Console.WriteLine();
                         if (yes) return false;
@@ -577,7 +574,7 @@ namespace UndertaleModCli
         public bool ScriptQuestion(string message)
         {
             Console.WriteLine(message);
-            Console.Write("Input (Y/N)?: ");
+            Console.Write("Input (Y/N)? ");
             var yes = Console.ReadKey(false).Key == ConsoleKey.Y;
             Console.WriteLine();
             return yes;
@@ -861,7 +858,7 @@ namespace UndertaleModCli
 
         public string PromptChooseDirectory(string prompt)
         {
-            Console.WriteLine("Please type a path (or drag and drop on Windows) to a directory:");
+            Console.WriteLine("Please type a path (or drag and drop) to a directory:");
             Console.Write("Path: ");
             string p = Console.ReadLine();
             return p;
