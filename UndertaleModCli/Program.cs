@@ -43,7 +43,7 @@ namespace UndertaleModCli
         public string? Line { get; set; }
 
 
-        public FileInfo? Dest { get; set; }
+        public FileInfo? Output { get; set; }
         public bool Interactive { get; set; } = false;
         public bool Verbose { get; set; } = false;
     }
@@ -55,21 +55,21 @@ namespace UndertaleModCli
     }
 
     /// <summary>
-    /// cli options for the New command
+    /// Cli options for the New command
     /// </summary>
-    /// <param name="Overwrite">Save over an existing file at Dest</param>
+    /// <param name="Overwrite">Save over an existing file at Output</param>
     public class NewOptions
     {
         /// <summary>
         /// Destination for new data file
         /// </summary>
-        public FileInfo Dest { get; set; } = new FileInfo("data.win");
+        public FileInfo Output { get; set; } = new FileInfo("data.win");
         /// <summary>
-        /// Save over an existing file at Dest
+        /// Save over an existing file at Output
         /// </summary>
         public bool Overwrite { get; set; } = false;
         /// <summary>
-        /// Whether to write the new data to stdout
+        /// Whether to write the new data to Stdout
         /// </summary>
         public bool Stdout { get; set; }
     }
@@ -89,7 +89,7 @@ namespace UndertaleModCli
         private string savedMsg, savedStatus;
         private double savedValue, savedValueMax;
 
-        public FileInfo? Dest { get; set; }
+        public FileInfo? Output { get; set; }
 
         /// <summary>
         /// Read supplied filename and return the data file
@@ -116,7 +116,7 @@ namespace UndertaleModCli
         }
         public bool Verbose { get; set; }
 
-        public Program(FileInfo datafile, FileInfo[]? scripts, FileInfo? dest, bool verbose = false, bool interactive = false)
+        public Program(FileInfo datafile, FileInfo[]? scripts, FileInfo? output, bool verbose = false, bool interactive = false)
         {
             Verbose = verbose;
             Interactive = interactive;
@@ -130,15 +130,9 @@ namespace UndertaleModCli
 
             this.FilePath = datafile.FullName;
             this.ExePath = Environment.CurrentDirectory;
-            this.Dest = dest;
-            if (Verbose)
-            {
-                this.Data = ReadDataFile(datafile, OnWarning, OnMessage);
-            }
-            else
-            {
-                this.Data = ReadDataFile(datafile);
-            }
+            this.Output = output;
+
+            this.Data = ReadDataFile(datafile, Verbose ? OnWarning : null, Verbose ? OnMessage : null);
 
             FinishedMessageEnabled = true;
             this.CliScriptOptions = ScriptOptions.Default
@@ -185,21 +179,21 @@ namespace UndertaleModCli
             };
             infoCommand.Handler = CommandHandler.Create<InfoOptions>(Program.Info);
 
-            var scriptRunnerOption = new Option<FileInfo[]>(new []{"-s", "--scripts", "--applyscripts"}, "Scripts to apply to the <datafile>. ex. a.csx b.csx");
+            var scriptRunnerOption = new Option<FileInfo[]>(new[] { "-s", "--scripts"}, "Scripts to apply to the <datafile>. ex. a.csx b.csx");
             var loadCommand = new Command("load", "Load data file and perform actions on it") {
                 dataFileOption,
                 scriptRunnerOption,
                 verboseOption,
-                new Option<FileInfo>(new[]{"-o", "--output"}, "Where to save the modified data file"),
-                new Option<string>("--line", "Run c# string. Runs AFTER everything else"),
-                new Option<bool>("--interactive", "Interactive menu launch"),
+                new Option<FileInfo>(new []{"-o", "--output"}, "Where to save the modified data file"),
+                new Option<string>(new []{"-l","--line"}, "Run C# string. Runs AFTER everything else"),
+                new Option<bool>(new []{"-i", "--interactive"}, "Interactive menu launch"),
 
             };
             loadCommand.Handler = CommandHandler.Create<LoadOptions>(Program.Load);
 
             var newCommand = new Command("new", "Generates a blank data file")
             {
-                new Option<FileInfo>(new []{"-o", "--output" },getDefaultValue: () => new NewOptions().Dest),
+                new Option<FileInfo>(new []{"-o", "--output"},getDefaultValue: () => new NewOptions().Output),
                 new Option<bool>(new []{"-f", "--overwrite"}, "Overwrite destination file if it already exists"),
                 new Option<bool>(new []{"-", "--stdout"}, "Write new data content to stdout"),  // "-" is often used in *nix land as a replacement for stdout
             };
@@ -239,12 +233,12 @@ namespace UndertaleModCli
 
             int WriteFile()
             {
-                if (options.Dest.Exists && !options.Overwrite)
+                if (options.Output.Exists && !options.Overwrite)
                 {
-                    Console.Error.WriteLine($"{options.Dest} already exists. Pass --overwrite to overwrite");
+                    Console.Error.WriteLine($"{options.Output} already exists. Pass --overwrite to overwrite");
                     return EXIT_FAILURE;
                 }
-                using (var fs = options.Dest.OpenWrite())
+                using (var fs = options.Output.OpenWrite())
                 {
                     UndertaleIO.Write(fs, data);
                     return EXIT_SUCCESS;
@@ -269,7 +263,7 @@ namespace UndertaleModCli
             Program program;
             try
             {
-                program = new Program(options.Datafile, options.Scripts, options.Dest, options.Verbose, options.Interactive);
+                program = new Program(options.Datafile, options.Scripts, options.Output, options.Verbose, options.Interactive);
             }
             catch (DataFileNotFoundException e)
             {
@@ -296,9 +290,9 @@ namespace UndertaleModCli
                 program.RunCodeLine(options.Line);
             }
 
-            if (options.Dest != null)
+            if (options.Output != null)
             {
-                program.CliSave(options.Dest.FullName);
+                program.CliSave(options.Output.FullName);
             }
 
             return EXIT_SUCCESS;
@@ -366,7 +360,7 @@ namespace UndertaleModCli
             {
                 if (ScriptExecutionSuccess)
                 {
-                    string msg = $"Finished executing {ScriptPath ?? "c# line"}";
+                    string msg = $"Finished executing {ScriptPath ?? "C# line"}";
                     if (Verbose)
                         Console.WriteLine(msg);
                 }
@@ -407,7 +401,7 @@ namespace UndertaleModCli
         {
             if (Verbose)
             {
-                Console.WriteLine($"Saving new data file to {this.Dest.FullName}");
+                Console.WriteLine($"Saving new data file to {this.Output.FullName}");
             }
 
             using (var fs = new FileInfo(to).OpenWrite())
@@ -415,7 +409,7 @@ namespace UndertaleModCli
                 UndertaleIO.Write(fs, Data, OnMessage);
                 if (Verbose)
                 {
-                    Console.WriteLine($"Saved data file to {this.Dest.FullName}");
+                    Console.WriteLine($"Saved data file to {this.Output.FullName}");
                 }
             }
         }
