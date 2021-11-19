@@ -165,7 +165,7 @@ namespace UndertaleModCli
 
         public static int Main(string[] args)
         {
-            var verboseOption = new Option<bool>(new[]{"-v", "--verbose"}, "Detailed logs");
+            var verboseOption = new Option<bool>(new []{"-v", "--verbose"}, "Detailed logs");
 
             var dataFileOption = new Argument<FileInfo>("datafile")
             {
@@ -179,7 +179,7 @@ namespace UndertaleModCli
             };
             infoCommand.Handler = CommandHandler.Create<InfoOptions>(Program.Info);
 
-            var scriptRunnerOption = new Option<FileInfo[]>(new[] { "-s", "--scripts"}, "Scripts to apply to the <datafile>. ex. a.csx b.csx");
+            var scriptRunnerOption = new Option<FileInfo[]>(new []{ "-s", "--scripts"}, "Scripts to apply to the <datafile>. ex. a.csx b.csx");
             var loadCommand = new Command("load", "Load data file and perform actions on it") {
                 dataFileOption,
                 scriptRunnerOption,
