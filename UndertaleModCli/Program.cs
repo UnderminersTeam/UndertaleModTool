@@ -525,7 +525,7 @@ namespace UndertaleModCli
         public bool Make_New_File()
         {
             Data = UndertaleData.CreateNew();
-            Console.WriteLine("Don't you have anything better to do?");
+            Console.WriteLine("New file created.");
             return true;
         }
 
@@ -860,32 +860,32 @@ namespace UndertaleModCli
 
         public string PromptLoadFile(string defaultExt, string filter)
         {
-            throw new NotImplementedException("don't you have ANYTHING better to do?");
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false)
         {
-            throw new NotImplementedException("don't you have ANYTHING better to do?");
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
         {
-            throw new NotImplementedException("don't you have ANYTHING better to do?");
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false)
         {
-            throw new NotImplementedException("don't you have ANYTHING better to do?");
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
         {
-            throw new NotImplementedException("don't you have ANYTHING better to do?");
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false)
         {
-            throw new NotImplementedException("don't you have ANYTHING better to do?");
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public bool DummyBool()
