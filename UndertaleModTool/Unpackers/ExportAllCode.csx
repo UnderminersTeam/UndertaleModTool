@@ -51,14 +51,17 @@ async Task DumpCode()
 
 void DumpCode(UndertaleCode code)
 {
-    string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
-    try
+    if (code is not null)
     {
-        File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
-    }
-    catch (Exception e)
-    {
-        File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
+        string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
+        try
+        {
+            File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+        }
+        catch (Exception e)
+        {
+            File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
+        }
     }
 
     IncProgressP();

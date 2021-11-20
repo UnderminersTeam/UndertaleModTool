@@ -8,10 +8,11 @@
         Title="Settings" Height="Auto" Width="800" SizeToContent="Height" WindowStartupLocation="CenterOwner">
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -60,7 +61,9 @@
         <CheckBox Grid.Row="11" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding TempRunMessageShow}"/>
         <TextBlock Grid.Row="12" Grid.Column="0" Margin="3" Text="Warn about GMS 2.3" ToolTip="Warn about GMS 2.3. Enabled by default."/>
         <CheckBox Grid.Row="12" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding Warn_About_GMS23}"/>
-        <Separator Grid.Row="13" Grid.ColumnSpan="2" Margin="10"/>
-        <Button Grid.Row="14" Grid.Column="1" Margin="5" Click="AppDataButton_Click">Open application data folder</Button>
+        <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" Text="Use decompiled code cache (experimental)" ToolTip="Used by some scripts for acceleration. Disabled by default."/>
+        <CheckBox Grid.Row="13" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding UseGMLCache}"/>
+        <Separator Grid.Row="14" Grid.ColumnSpan="2" Margin="10"/>
+        <Button Grid.Row="15" Grid.Column="1" Margin="5" Click="AppDataButton_Click">Open application data folder</Button>
     </Grid>
 </Window>

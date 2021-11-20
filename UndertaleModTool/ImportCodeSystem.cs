@@ -419,7 +419,7 @@ namespace UndertaleModTool
                 if (!CheckDecompiler)
                 {
                     string ErrorText = "Error at " + (IsGML ? "GML code: " : "ASM code: ") + codeName + @"': " + gmlCode + "\nError: " + ex.ToString();
-                    MessageBox.Show(ErrorText, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ShowWarning(ErrorText);
                 }
                 else
                 {

@@ -1147,6 +1147,8 @@ namespace UndertaleModLib.Models
 
             Append(context.ResultAssembly);
 
+            data.GMLCacheChanged?.Add(Name.Content);
+
             try
             {
                 // Attempt to write text in all modes, because this is a special case.
@@ -1173,6 +1175,8 @@ namespace UndertaleModLib.Models
             }
 
             Replace(context.ResultAssembly);
+
+            data.GMLCacheChanged?.Add(Name.Content);
 
             try
             {

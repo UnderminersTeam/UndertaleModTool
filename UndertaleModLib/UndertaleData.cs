@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -86,6 +87,12 @@ namespace UndertaleModLib
 
         public BuiltinList BuiltinList;
         public Dictionary<string, UndertaleFunction> KnownSubFunctions; // Cache for known 2.3-style function names for compiler speedups. Can be re-built by setting this to null.
+
+        public ConcurrentDictionary<string, string> GMLCache { get; set; }
+        public List<string> GMLCacheFailed { get; set; }
+        public ConcurrentBag<string> GMLCacheChanged { get; set; }
+        public bool GMLCacheWasSaved { get; set; }
+        
 
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {

@@ -57,16 +57,24 @@ string GetFolder(string path)
 
 async Task DumpCode()
 {
-    var data = DECOMPILE_CONTEXT.Value.Data;
-    if (data?.KnownSubFunctions is null) //if we run script before opening any code
-        Decompiler.BuildSubFunctionCache(data);
+    if (Data.GMLCache?.Count > 0)
+    {
+        await Task.Run(() => Parallel.ForEach(Data.GMLCache, ScanCode));
+    }
+    else
+    {
+        if (Data.KnownSubFunctions is null) //if we run script before opening any code
+            Decompiler.BuildSubFunctionCache(Data);
 
-    await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
+        await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
+    }
 }
 
 void SortResults()
 {
-    if (failedList.Count > 0)
+    if (Data.GMLCacheFailed?.Count > 0)
+        failedSorted = failedList.Concat(Data.GMLCacheFailed).OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c)));
+    else if (failedList.Count > 0)
         failedSorted = failedList.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c)));
 
     resultsSorted = resultsDict.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c.Key)));
@@ -82,7 +90,7 @@ void DumpCode(UndertaleCode code)
 {
     try
     {
-        if (code.ParentEntry is null)
+        if (code is not null && code.ParentEntry is null)
         {
             var line_number = 1;
             string decompiled_text = (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "");
@@ -107,6 +115,36 @@ void DumpCode(UndertaleCode code)
     catch (Exception e)
     {
         failedList.Add(code.Name.Content);
+    }
+
+    IncProgressP();
+}
+void ScanCode(KeyValuePair<string, string> code)
+{
+    try
+    {
+        var line_number = 1;
+        string decompiled_text = code.Value;
+        string[] splitted = decompiled_text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        bool name_written = false;
+        foreach (string lineInt in splitted)
+        {
+            if (((regex_check && RegexContains(lineInt, keyword, case_sensitive)) || ((!regex_check && case_sensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
+            {
+                if (name_written == false)
+                {
+                    resultsDict[code.Key] = new List<string>();
+                    name_written = true;
+                }
+                resultsDict[code.Key].Add($"Line {line_number}: {lineInt}");
+                Interlocked.Increment(ref result_count);
+            }
+            line_number += 1;
+        }
+    }
+    catch (Exception e)
+    {
+        failedList.Add(code.Key);
     }
 
     IncProgressP();

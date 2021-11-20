@@ -81,6 +81,16 @@ namespace UndertaleModTool
             }
         }
 
+        public static bool UseGMLCache
+        {
+            get => Settings.Instance.UseGMLCache;
+            set
+            {
+                Settings.Instance.UseGMLCache = value;
+                Settings.Save();
+            }
+        }
+
         public static bool ProfileMessageShown
         {
             get => Settings.Instance.ProfileMessageShown;
