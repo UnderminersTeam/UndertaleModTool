@@ -799,7 +799,7 @@ namespace UndertaleModCli
             //there is no UI with any data binding
         }
 
-        private async Task ProgressUpdater()
+        private void ProgressUpdater()
         {
             DateTime prevTime = default;
             int prevValue = 0;
@@ -823,7 +823,7 @@ namespace UndertaleModCli
 
                 prevValue = progressValue;
 
-                await Task.Delay(100); //10 times per second
+                Thread.Sleep(100); //10 times per second
             }
         }
         public void StartUpdater()

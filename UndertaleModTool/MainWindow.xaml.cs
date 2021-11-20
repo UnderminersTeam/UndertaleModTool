@@ -1288,7 +1288,7 @@ namespace UndertaleModTool
             }
         }
 
-        private async Task ProgressUpdater()
+        private void ProgressUpdater()
         {
             DateTime prevTime = default;
             int prevValue = 0;
@@ -1312,7 +1312,7 @@ namespace UndertaleModTool
 
                 prevValue = progressValue;
 
-                await Task.Delay(100); //10 times per second
+                Thread.Sleep(100); //10 times per second
             }
         }
         public void StartUpdater()
