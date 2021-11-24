@@ -47,7 +47,7 @@ for (var j = 0; j < splitStringsList.Count; j++)
     {
         if (scr.Code == null)
             continue;
-        if (splitStringsList[j].ToLower() == scr.Code.Name.Content.ToLower())
+        if (splitStringsList[j].ToLower() == scr.Name.Content.ToLower())
         {
             codeToDump.Add(scr.Code.Name.Content);
         }

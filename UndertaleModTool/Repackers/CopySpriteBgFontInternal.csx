@@ -23,23 +23,18 @@ List<int> tex_BoundingWidth = new List<int>();
 List<int> tex_BoundingHeight = new List<int>();
 List<int> tex_Frame = new List<int>();
 List<int> tex_EmbeddedTextureID = new List<int>();
-List<String> tex_Name = new List<String>();
-List<String> tex_Type = new List<String>();
+List<string> tex_Name = new List<string>();
+List<string> tex_Type = new List<string>();
 List<bool> tex_IsNull = new List<bool>();
 List<bool> TexturePageItemsUsed = new List<bool>();
 
 // Initialization End
 
-ScriptMessage("Enter the sprite(s)/background(s)/font(s) to copy");
-
 int copiedSpritesCount = 0;
 int copiedBackgroundsCount = 0;
 int copiedFontsCount = 0;
 int copiedAssetsCount = 0;
-List<String> splitStringsList = new List<String>();
-string abc123 = "";
-abc123 = SimpleTextInput("Menu", "Enter names of sprites/backgrounds/fonts", abc123, true);
-string[] subs = abc123.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+List<string> splitStringsList = GetSplitStringsList("sprite(s)/background(s)/font");
 bool[] SpriteSheetsCopyNeeded = new bool[DataEmbeddedTexturesCount];
 bool[] SpriteSheetsUsed = new bool[(DataEmbeddedTexturesCount + DataEmbeddedTexturesCount)];
 
@@ -48,10 +43,6 @@ StartUpdater();
 
 SyncBinding("EmbeddedTextures, Strings, Backgrounds, Sprites, Fonts, TexturePageItems", true);
 await Task.Run(() => {
-    foreach (var sub in subs)
-    {
-        splitStringsList.Add(sub.Trim());
-    }
     for (int i = 0; i < SpriteSheetsCopyNeeded.Length; i++)
     {
         SpriteSheetsCopyNeeded[i] = false;
@@ -412,4 +403,18 @@ void SpriteSheetsUsedUpdate()
             SpriteSheetsUsed[Data.EmbeddedTextures.IndexOf(fnt.Texture.TexturePage)] = true;
         }
     }
+}
+
+List<string> GetSplitStringsList(string assetType)
+{
+    ScriptMessage("Enter the " + assetType + "(s) to copy");
+    List<string> splitStringsList = new List<string>();
+    string InputtedText = "";
+    InputtedText = SimpleTextInput("Menu", "Enter the name(s) of the " + assetType + "(s)", InputtedText, true);
+    string[] IndividualLineArray = InputtedText.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+    foreach (var OneLine in IndividualLineArray)
+    {
+        splitStringsList.Add(OneLine.Trim());
+    }
+    return splitStringsList;
 }
