@@ -2241,6 +2241,25 @@ namespace UndertaleModLib.Decompiler
                                     statements.Add(new CommentStatement("setowner: " + (owner ?? "<null>")));
                                     */
                                     break;
+                                case -10: // GMS2.3+, chknullish
+
+                                    // TODO: Implement nullish operator in decompiled output.
+                                    // Appearance in assembly is:
+
+                                    /* <push var>
+                                     * chknullish
+                                     * bf [block2]
+                                     * 
+                                     * :[block1]
+                                     * popz.v
+                                     * <var is nullish, evaluate new value>
+                                     * 
+                                     * :[block2]
+                                     * <use value>
+                                     */
+
+                                    // Note that this operator peeks from the stack, it does not pop directly.
+                                    break;
                             }
                         }
 
