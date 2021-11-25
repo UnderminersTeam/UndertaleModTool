@@ -27,12 +27,12 @@ codeFolder = Path.Combine(codeFolder, "Code");
 List<String> codeToDump = new List<String>();
 List<String> gameObjectCandidates = new List<String>();
 List<String> splitStringsList = new List<String>();
-string abc123 = "";
-abc123 = SimpleTextInput("Menu", "Enter object names", abc123, true);
-string[] subs = abc123.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-foreach (var sub in subs)
+string InputtedText = "";
+InputtedText = SimpleTextInput("Menu", "Enter object, script, or code entry names", InputtedText, true);
+string[] IndividualLineArray = InputtedText.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+foreach (var OneLine in IndividualLineArray)
 {
-    splitStringsList.Add(sub.Trim());
+    splitStringsList.Add(OneLine.Trim());
 }
 for (var j = 0; j < splitStringsList.Count; j++)
 {
@@ -43,11 +43,29 @@ for (var j = 0; j < splitStringsList.Count; j++)
             gameObjectCandidates.Add(obj.Name.Content);
         }
     }
+    foreach (UndertaleScript scr in Data.Scripts)
+    {
+        if (scr.Code == null)
+            continue;
+        if (splitStringsList[j].ToLower() == scr.Name.Content.ToLower())
+        {
+            codeToDump.Add(scr.Code.Name.Content);
+        }
+    }
+    foreach (UndertaleGlobalInit globalInit in Data.GlobalInitScripts)
+    {
+        if (globalInit.Code == null)
+            continue;
+        if (splitStringsList[j].ToLower() == globalInit.Code.Name.Content.ToLower())
+        {
+            codeToDump.Add(globalInit.Code.Name.Content);
+        }
+     }
     foreach (UndertaleCode code in Data.Code)
     {
         if (splitStringsList[j].ToLower() == code.Name.Content.ToLower())
         {
-            gameObjectCandidates.Add(code.Name.Content);
+            codeToDump.Add(code.Name.Content);
         }
     }
 }
@@ -130,6 +148,5 @@ void DumpCode(UndertaleCode code)
             failed += 1;
         }
     }
-
     IncProgress();
 }

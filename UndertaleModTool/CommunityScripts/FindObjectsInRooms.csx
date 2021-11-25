@@ -14,14 +14,14 @@ ScriptMessage("Enter the object(s) to find");
 
 List<string> splitStringsList = new List<string>();
 List<string> gameObjectsUsedList = new List<string>();
-string abc123 = "";
-abc123 = SimpleTextInput("Menu", "Enter name(s) of game object(s)", abc123, true);
-string[] subs = abc123.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+string InputtedText = "";
+InputtedText = SimpleTextInput("Menu", "Enter name(s) of game object(s)", InputtedText, true);
+string[] IndividualLineArray = InputtedText.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 int usage_count = 0;
 int unique_objects_used = 0;
-foreach (var sub in subs)
+foreach (var OneLine in IndividualLineArray)
 {
-    string query = sub.Trim();
+    string query = OneLine.Trim();
     if (query != "")
         splitStringsList.Add(query);
 }
@@ -59,7 +59,7 @@ for (var k = 0; k < splitStringsList.Count; k++)
 }
 if (gameObjectsUsedList.Count < 1)
 {
-    SimpleTextInput("No results for your query below", "No results for your query below", abc123, true);
+    SimpleTextInput("No results for your query below", "No results for your query below", InputtedText, true);
     return;
 }
 else

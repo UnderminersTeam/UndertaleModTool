@@ -286,7 +286,7 @@ void ProfileModeOperations()
         UpdateProgressBar(null, "Code entries processed", progress++, Data.Code.Count);
         string gmlCode = GetDecompiledText(c.Name.Content);
         gmlCode = gmlCode.Replace("\r\n", "\n");
-        gmlCode = Regex.Replace(gmlCode, "global\\.interact = (\\d+)", "__scr_setinteract__\\(\\1\\)");
+        gmlCode = Regex.Replace(gmlCode, "global\\.interact = (\\d+)", "__scr_setinteract__($1)");
         gmlCode = gmlCode.Replace("global.interact", "__scr_getinteract__()");
         if (c.Name.Content.StartsWith("gml_Object"))
         {

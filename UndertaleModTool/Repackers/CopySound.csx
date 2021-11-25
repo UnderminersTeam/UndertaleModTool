@@ -177,12 +177,12 @@ List<string> GetSplitStringsList(string assetType)
 {
     ScriptMessage("Enter the " + assetType + "(s) to copy");
     List<string> splitStringsList = new List<string>();
-    string abc123 = "";
-    abc123 = SimpleTextInput("Menu", "Enter the name(s) of the " + assetType + "(s)", abc123, true);
-    string[] subs = abc123.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-    foreach (var sub in subs)
+    string InputtedText = "";
+    InputtedText = SimpleTextInput("Menu", "Enter the name(s) of the " + assetType + "(s)", InputtedText, true);
+    string[] IndividualLineArray = InputtedText.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+    foreach (var OneLine in IndividualLineArray)
     {
-        splitStringsList.Add(sub.Trim());
+        splitStringsList.Add(OneLine.Trim());
     }
     return splitStringsList;
 }
