@@ -99,16 +99,13 @@ namespace UndertaleModTool
 
         public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false)
         {
-            UndertaleCode code;
-            string passBack = "";
             EnsureDataLoaded();
-            if (Data.Code.ByName(codeName) != null)
-                code = Data.Code.ByName(codeName);
-            else
-            {
-                ScriptError("No code named " + codeName + " was found!");
-                return;
-            }
+
+            string passBack = "";
+            UndertaleCode code = Data.Code.ByName(codeName);
+            if (code is null)
+                throw new ScriptException($"No code named \"{codeName}\" was found!");
+
             if (Data.ToolInfo.ProfileMode == false || Data.GMS2_3)
             {
                 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
