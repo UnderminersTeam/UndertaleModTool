@@ -24,14 +24,7 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 ScriptMessage("Enter the object(s) to copy");
 
 int copiedGameObjectsCount = 0;
-List<String> splitStringsList = new List<String>();
-string abc123 = "";
-abc123 = SimpleTextInput("Menu", "Enter name(s) of game objects", abc123, true);
-string[] subs = abc123.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-foreach (var sub in subs)
-{
-    splitStringsList.Add(sub.Trim());
-}
+List<string> splitStringsList = GetSplitStringsList("game object");
 for (var j = 0; j < splitStringsList.Count; j++)
 {
     for (var k = 0; k < Data.GameObjects.Count; k++)
@@ -156,4 +149,18 @@ for (var j = 0; j < splitStringsList.Count; j++)
             copiedGameObjectsCount += 1;
         }
     }
+}
+
+List<string> GetSplitStringsList(string assetType)
+{
+    ScriptMessage("Enter the " + assetType + "(s) to copy");
+    List<string> splitStringsList = new List<string>();
+    string InputtedText = "";
+    InputtedText = SimpleTextInput("Menu", "Enter the name(s) of the " + assetType + "(s)", InputtedText, true);
+    string[] IndividualLineArray = InputtedText.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+    foreach (var OneLine in IndividualLineArray)
+    {
+        splitStringsList.Add(OneLine.Trim());
+    }
+    return splitStringsList;
 }

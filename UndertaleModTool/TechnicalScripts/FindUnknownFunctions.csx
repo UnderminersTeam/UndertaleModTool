@@ -82,17 +82,17 @@ if (unknownFunctions.Count > 0)
 {
     if (ScriptQuestion("'unknown_functions.txt' generated. Remove unknown functions now?"))
     {
-        string abc123 = "";
         string removed = "";
+        string resultsToDisplay = "";
         for (var i = 0; i < unknownFunctions.Count; i++)
         {
-            abc123 += (unknownFunctions[i] + "\r\n");
+            resultsToDisplay += (unknownFunctions[i] + "\r\n");
         }
-        abc123 = SimpleTextInput("Prune Menu", "Delete one or more lines to remove those entries", abc123, true);
-        string[] subs = abc123.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-        foreach (var sub in subs)
+        resultsToDisplay = SimpleTextInput("Prune Menu", "Delete one or more lines to remove those entries", resultsToDisplay, true);
+        string[] IndividualLineArray = resultsToDisplay.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        foreach (var OneLine in IndividualLineArray)
         {
-            unknownFunctions2.Add(sub.Trim());
+            unknownFunctions2.Add(OneLine.Trim());
         }
         for (var i = 0; i < unknownFunctions.Count; i++)
         {
