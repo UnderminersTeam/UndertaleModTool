@@ -166,7 +166,7 @@ namespace UndertaleModLib.Compiler
             if (Parser.ErrorMessages.Count > 0)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("Error{0} parsing code when trying to modify \"{1}\":", Parser.ErrorMessages.Count == 1 ? "" : "s", context.OriginalCode?.Name?.Content);
+                sb.AppendFormat("Error{0} parsing code when trying to compile modified \"{1}\":", Parser.ErrorMessages.Count == 1 ? "" : "s", context.OriginalCode?.Name?.Content);
                 sb.AppendLine();
                 sb.AppendLine();
                 foreach (string msg in Parser.ErrorMessages)
@@ -181,7 +181,7 @@ namespace UndertaleModLib.Compiler
             if (codeWriter.ErrorMessages.Count > 0)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("Error{0} writing assembly code when trying to modify \"{1}\":", codeWriter.ErrorMessages.Count == 1 ? "" : "s", context.OriginalCode?.Name?.Content);
+                sb.AppendFormat("Error{0} writing assembly code when trying to compile modified \"{1}\":", codeWriter.ErrorMessages.Count == 1 ? "" : "s", context.OriginalCode?.Name?.Content);
                 sb.AppendLine();
                 sb.AppendLine();
                 foreach (string msg in codeWriter.ErrorMessages)
