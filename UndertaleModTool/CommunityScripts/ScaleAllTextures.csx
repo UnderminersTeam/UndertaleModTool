@@ -80,11 +80,11 @@ foreach (UndertaleFont fnt in Data.Fonts)
 }
 foreach (UndertaleRoom room in Data.Rooms)
 {
-    foreach (UndertaleRoom.Background abc123 in room.Backgrounds)
+    foreach (UndertaleRoom.Background background in room.Backgrounds)
     {
-        if (abc123.Enabled)
+        if (background.Enabled)
         {
-            abc123.Stretch = true;
+            background.Stretch = true;
         }
     }
     //room.Width = (uint)((double)(room.Width) * ((double)scale));
@@ -93,36 +93,36 @@ foreach (UndertaleRoom room in Data.Rooms)
     //room.Left = (uint)((double)(room.Left) * ((double)scale));
     //room.Right = (uint)((double)(room.Right) * ((double)scale));
     //room.Bottom = (uint)((double)(room.Bottom) * ((double)scale));
-    //foreach (UndertaleRoom.View abc123 in room.Views)
+    //foreach (UndertaleRoom.View myView in room.Views)
     //{
-    //abc123.ViewX = (int)((double)(abc123.ViewX) * ((double)scale));
-    //abc123.ViewY = (int)((double)(abc123.ViewY) * ((double)scale));
-    //abc123.ViewWidth = (int)((double)(abc123.ViewWidth) * ((double)scale));
-    //abc123.ViewHeight = (int)((double)(abc123.ViewHeight) * ((double)scale));
-    //abc123.PortX = (int)((double)(abc123.PortX) * ((double)scale));
-    //abc123.PortY = (int)((double)(abc123.PortY) * ((double)scale));
-    //abc123.PortWidth = (int)((double)(abc123.PortWidth) * ((double)scale));
-    //abc123.PortHeight = (int)((double)(abc123.PortHeight) * ((double)scale));
-    //abc123.BorderX = (uint)((double)(abc123.BorderX) * ((double)scale));
-    //abc123.BorderY = (uint)((double)(abc123.BorderY) * ((double)scale));
+    //myView.ViewX = (int)((double)(myView.ViewX) * ((double)scale));
+    //myView.ViewY = (int)((double)(myView.ViewY) * ((double)scale));
+    //myView.ViewWidth = (int)((double)(myView.ViewWidth) * ((double)scale));
+    //myView.ViewHeight = (int)((double)(myView.ViewHeight) * ((double)scale));
+    //myView.PortX = (int)((double)(myView.PortX) * ((double)scale));
+    //myView.PortY = (int)((double)(myView.PortY) * ((double)scale));
+    //myView.PortWidth = (int)((double)(myView.PortWidth) * ((double)scale));
+    //myView.PortHeight = (int)((double)(myView.PortHeight) * ((double)scale));
+    //myView.BorderX = (uint)((double)(myView.BorderX) * ((double)scale));
+    //myView.BorderY = (uint)((double)(myView.BorderY) * ((double)scale));
     //}
-    foreach (UndertaleRoom.GameObject abc123 in room.GameObjects)
+    foreach (UndertaleRoom.GameObject myGameObject in room.GameObjects)
     {
-        //abc123.X = (int)((double)(abc123.X) / ((double)scale));
-        //abc123.Y = (int)((double)(abc123.Y) / ((double)scale));
-        //abc123.ScaleX = (float)((double)(abc123.ScaleX) / ((double)scale));
-        //abc123.ScaleY = (float)((double)(abc123.ScaleY) / ((double)scale));
+        //myGameObject.X = (int)((double)(myGameObject.X) / ((double)scale));
+        //myGameObject.Y = (int)((double)(myGameObject.Y) / ((double)scale));
+        //myGameObject.ScaleX = (float)((double)(myGameObject.ScaleX) / ((double)scale));
+        //myGameObject.ScaleY = (float)((double)(myGameObject.ScaleY) / ((double)scale));
     }
-    foreach (UndertaleRoom.Tile abc123 in room.Tiles)
+    foreach (UndertaleRoom.Tile myTile in room.Tiles)
     {
-        //abc123.X = (int)((double)(abc123.X) * ((double)scale));
-        //abc123.Y = (int)((double)(abc123.Y) * ((double)scale));
-        abc123.SourceX = (uint)((double)(abc123.SourceX) * ((double)scale));
-        abc123.SourceY = (uint)((double)(abc123.SourceY) * ((double)scale));
-        abc123.Width = (uint)((double)(abc123.Width) * ((double)scale));
-        abc123.Height = (uint)((double)(abc123.Height) * ((double)scale));
-        abc123.ScaleX = (float)((double)(abc123.ScaleX) / ((double)scale)); ;
-        abc123.ScaleY = (float)((double)(abc123.ScaleY) / ((double)scale)); ;
+        //myTile.X = (int)((double)(myTile.X) * ((double)scale));
+        //myTile.Y = (int)((double)(myTile.Y) * ((double)scale));
+        myTile.SourceX = (uint)((double)(myTile.SourceX) * ((double)scale));
+        myTile.SourceY = (uint)((double)(myTile.SourceY) * ((double)scale));
+        myTile.Width = (uint)((double)(myTile.Width) * ((double)scale));
+        myTile.Height = (uint)((double)(myTile.Height) * ((double)scale));
+        myTile.ScaleX = (float)((double)(myTile.ScaleX) / ((double)scale)); ;
+        myTile.ScaleY = (float)((double)(myTile.ScaleY) / ((double)scale)); ;
     }
 }
 
