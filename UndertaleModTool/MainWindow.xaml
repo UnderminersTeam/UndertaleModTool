@@ -364,7 +364,9 @@
                 </TreeView>
 
                 <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
-                <TabControl Grid.Column="2" Grid.RowSpan="1" Name="TabController" SelectionChanged="TabController_SelectionChanged" TabStripPlacement="Top"/>
+                <ScrollViewer Name="TabScrollViewer" Grid.Column="2" Grid.RowSpan="1" HorizontalScrollBarVisibility="Hidden" PreviewMouseWheel="TabScrollViewer_PreviewMouseWheel">
+                    <TabControl Name="TabController" SelectionChanged="TabController_SelectionChanged" TabStripPlacement="Top"/>
+                </ScrollViewer>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="2">
                     <ContentControl Margin="10" Content="{Binding CurrentTab.Selected,Mode=OneWay}" Name="DataEditor">
                         <ContentControl.Resources>
