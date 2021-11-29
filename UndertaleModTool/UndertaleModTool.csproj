@@ -32,6 +32,10 @@
         <ApplicationIcon>icon.ico</ApplicationIcon>
     </PropertyGroup>
     <ItemGroup>
+      <None Remove="Resources\X_Down.png" />
+      <None Remove="X.png" />
+    </ItemGroup>
+    <ItemGroup>
         <None Update="About_Profile_Mode.txt">
             <CopyToOutputDirectory>Never</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3600,22 +3604,6 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
-        <None Update="Repackers\ImportRoom.csx">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </None>
-        <None Update="Repackers\ImportGameObject.csx">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </None>
-        <None Update="Unpackers\ExportRoom.csx">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </None>
-        <None Update="Unpackers\ExportGameObjects.csx">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </None>
         <None Update="Repackers\CopySound.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3650,6 +3638,8 @@
         </None>
         <EmbeddedResource Include="Resources\GML.xshd" />
         <EmbeddedResource Include="Resources\VMASM.xshd" />
+        <Resource Include="Resources\X.png" />
+        <Resource Include="Resources\X_Down.png" />
         <None Update="Repackers\ReduceEmbeddedTexturePages.csx">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
           <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
