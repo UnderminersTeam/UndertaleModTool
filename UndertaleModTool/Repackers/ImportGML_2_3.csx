@@ -74,7 +74,7 @@ bool skipGlobalScriptsPrompted = false;
 SetProgressBar(null, "Files", 0, dirFiles.Length);
 StartUpdater();
 
-SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects", true); //not sure about GlobalInitScripts
+SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects, Functions, Variables", true);
 await Task.Run(() => {
     foreach (string file in dirFiles)
     {
@@ -111,7 +111,7 @@ await Task.Run(() => {
                 continue;
         }
         UndertaleCode code = Data.Code.ByName(codeName);
-        if (Data.Code.ByName(codeName) == null) // Should keep from adding duplicate scripts; haven't tested
+        if (code == null) // Should keep from adding duplicate scripts; haven't tested
         {
             code = new UndertaleCode();
             code.Name = Data.Strings.MakeString(codeName);
@@ -191,7 +191,7 @@ await Task.Run(() => {
                     {
                         try
                         {
-                            Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
+                            code.ReplaceGML(gmlCode, Data);
                         }
                         catch (Exception ex)
                         {
@@ -245,7 +245,7 @@ await Task.Run(() => {
         {
             try
             {
-                Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
+                code.ReplaceGML(gmlCode, Data);
             }
             catch (Exception ex)
             {

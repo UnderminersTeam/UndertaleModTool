@@ -58,10 +58,12 @@ async Task DumpCode()
 
 void SortResults()
 {
-    if (failedList.Count > 0)
-        failedSorted = failedList.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c)));
+    string[] codeNames = Data.Code.Select(x => x.Name.Content).ToArray();
 
-    resultsSorted = resultsDict.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c.Key)));
+    if (failedList.Count > 0)
+        failedSorted = failedList.OrderBy(c => Array.IndexOf(codeNames, c));
+
+    resultsSorted = resultsDict.OrderBy(c => Array.IndexOf(codeNames, c.Key));
 }
 
 bool RegexContains(string s, string sPattern, bool isCaseInsensitive)

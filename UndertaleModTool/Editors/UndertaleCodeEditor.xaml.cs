@@ -460,11 +460,10 @@ namespace UndertaleModTool
                                     CurrentLocals.Add(local.Name.Content);
                             }
 
-                            if (SettingsWindow.UseGMLCache && existingDialog is not null) //if code was edited (and compiles after it)
+                            if (existingDialog is not null)                      //if code was edited (and compiles after it)
                             {
-                                dataa.GMLCache[code.Name.Content] = decompiled;
-
-                                dataa.GMLCacheFailed.Remove(code.Name.Content);           //remove that code name, since that code compiles now
+                                dataa.GMLCacheChanged.Add(code.Name.Content);
+                                dataa.GMLCacheFailed?.Remove(code.Name.Content); //remove that code name, since that code compiles now
                             }
                         }
                         DecompiledEditor.Document.EndUpdate();
@@ -667,6 +666,8 @@ namespace UndertaleModTool
 
             // Decompile new code
             DecompileCode(code, false, dialog);
+            
+            //GMLCacheChanged.Add() is inside DecompileCode()
         }
 
         private void DisassemblyEditor_GotFocus(object sender, RoutedEventArgs e)
@@ -725,6 +726,9 @@ namespace UndertaleModTool
 
             // Disassemble new code
             DisassembleCode(code, false);
+
+            if (!DisassemblyEditor.IsReadOnly)
+                data.GMLCacheChanged.Add(code.Name.Content);
         }
 
         // Based on https://stackoverflow.com/questions/28379206/custom-hyperlinks-using-avalonedit

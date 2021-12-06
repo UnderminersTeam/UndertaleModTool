@@ -90,9 +90,11 @@ namespace UndertaleModLib
 
         public ConcurrentDictionary<string, string> GMLCache { get; set; }
         public List<string> GMLCacheFailed { get; set; }
-        public ConcurrentBag<string> GMLCacheChanged { get; set; }
+        public ConcurrentBag<string> GMLCacheChanged { get; set; } = new();
+        public List<string> GMLEditedBefore { get; set; }
         public bool GMLCacheWasSaved { get; set; }
-        
+        public bool GMLCacheIsReady { get; set; } = true;
+
 
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {

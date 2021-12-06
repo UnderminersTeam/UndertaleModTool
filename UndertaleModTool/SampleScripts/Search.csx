@@ -33,8 +33,12 @@ if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
     return;
 }
 
+bool cacheGenerated = await GenerateGMLCache(DECOMPILE_CONTEXT);
+
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
-StartUpdater();
+
+if (!cacheGenerated)
+    StartUpdater();
 
 await DumpCode();
 
@@ -72,12 +76,14 @@ async Task DumpCode()
 
 void SortResults()
 {
-    if (Data.GMLCacheFailed?.Count > 0)
-        failedSorted = failedList.Concat(Data.GMLCacheFailed).OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c)));
-    else if (failedList.Count > 0)
-        failedSorted = failedList.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c)));
+    string[] codeNames = Data.Code.Select(x => x.Name.Content).ToArray();
 
-    resultsSorted = resultsDict.OrderBy(c => Data.Code.IndexOf(Data.Code.ByName(c.Key)));
+    if (Data.GMLCacheFailed?.Count > 0)
+        failedSorted = failedList.Concat(Data.GMLCacheFailed).OrderBy(c => Array.IndexOf(codeNames, c));
+    else if (failedList.Count > 0)
+        failedSorted = failedList.OrderBy(c => Array.IndexOf(codeNames, c));
+
+    resultsSorted = resultsDict.OrderBy(c => Array.IndexOf(codeNames, c.Key));
 }
 
 bool RegexContains(string s, string sPattern, bool isCaseInsensitive)

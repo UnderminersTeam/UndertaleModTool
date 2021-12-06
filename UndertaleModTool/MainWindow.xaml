@@ -11,7 +11,7 @@
         xmlns:cmod="clr-namespace:System.ComponentModel;assembly=WindowsBase" 
         mc:Ignorable="d"
         Height="450" Width="800" Loaded="Window_Loaded"
-        AllowDrop="True" Drop="Window_Drop" KeyUp="Window_KeyUp">
+        AllowDrop="True" Drop="Window_Drop">
     <Window.Title>
         <MultiBinding StringFormat="{}{0} - {1} [{2}]">
             <Binding Path="TitleMain"/>
@@ -290,10 +290,11 @@
                         <TreeViewItem Name="CodeItemsList" Header="Code" ItemsSource="{Binding Code, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Code, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemContainerStyle>
                                 <Style TargetType="{x:Type TreeViewItem}">
-                                    <Setter Property="Foreground" Value="Gray"></Setter>
+                                    <Setter Property="ContextMenu" Value="{StaticResource DeleteMenu}"/>
+                                    <Setter Property="Foreground" Value="Gray"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Path=ParentEntry}" Value="{x:Null}">
-                                            <Setter Property="Foreground" Value="Black"></Setter>
+                                            <Setter Property="Foreground" Value="Black"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
