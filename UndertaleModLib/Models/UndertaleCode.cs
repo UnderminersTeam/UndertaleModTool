@@ -798,11 +798,7 @@ namespace UndertaleModLib.Models
             bool unknownBreak = false;
             if (type == InstructionType.BreakInstruction)
             {
-                try
-                {
-                    kind = Assembler.BreakIDToName[(short)Value];
-                }
-                catch(KeyNotFoundException)
+                if (!Assembler.BreakIDToName.TryGetValue((short)Value, out kind))
                 {
                     kind = kind.ToLower();
                     unknownBreak = true;
@@ -904,7 +900,7 @@ namespace UndertaleModLib.Models
 
                 case InstructionType.BreakInstruction:
                     sb.Append("." + Type1.ToOpcodeParam());
-                    if(unknownBreak)
+                    if (unknownBreak)
                     {
                         sb.Append(" ");
                         sb.Append(Value.ToString());
