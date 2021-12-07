@@ -53,11 +53,13 @@ namespace UndertaleModTool
         public bool DecompiledFocused = false;
         public bool DecompiledChanged = false;
         public bool DecompiledYet = false;
+        public bool DecompiledSkipped = false;
         public SearchPanel DecompiledSearchPanel;
 
         public bool DisassemblyFocused = false;
         public bool DisassemblyChanged = false;
         public bool DisassembledYet = false;
+        public bool DisassemblySkipped = false;
         public SearchPanel DisassemblySearchPanel;
 
         public static RoutedUICommand Compile = new RoutedUICommand("Compile code", "Compile", typeof(UndertaleCodeEditor));
@@ -168,6 +170,21 @@ namespace UndertaleModTool
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return;
+
+            // compile/disassemble previously edited code (save changes)
+            if (DecompiledTab.IsSelected && DecompiledFocused && DecompiledChanged &&
+                CurrentDecompiled is not null && CurrentDecompiled != code)
+            {
+                DecompiledSkipped = true;
+                DecompiledEditor_LostFocus(sender, null);
+            }
+            else if (DisassemblyTab.IsSelected && DisassemblyFocused && DisassemblyChanged &&
+                     CurrentDisassembled is not null && CurrentDisassembled != code)
+            {
+                DisassemblySkipped = true;
+                DisassemblyEditor_LostFocus(sender, null);
+            }
+
             DecompiledEditor_LostFocus(sender, null);
             DisassemblyEditor_LostFocus(sender, null);
 
@@ -556,7 +573,15 @@ namespace UndertaleModTool
             if (!DecompiledChanged)
                 return;
 
-            UndertaleCode code = this.DataContext as UndertaleCode;
+            UndertaleCode code;
+            if (DecompiledSkipped)
+            {
+                code = CurrentDecompiled;
+                DecompiledSkipped = false;
+            }
+            else
+                code = this.DataContext as UndertaleCode;
+
             if (code == null)
                 return; // Probably loaded another data.win or something.
             if (code.ParentEntry != null)
@@ -594,22 +619,22 @@ namespace UndertaleModTool
 
             if (compileContext == null)
             {
-                MessageBox.Show("Compile context was null for some reason...", "This shouldn't happen", MessageBoxButton.OK, MessageBoxImage.Error);
                 dialog.TryClose();
+                MessageBox.Show("Compile context was null for some reason...", "This shouldn't happen", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             if (compileContext.HasError)
             {
-                MessageBox.Show(Truncate(compileContext.ResultError, 512), "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 dialog.TryClose();
+                MessageBox.Show(Truncate(compileContext.ResultError, 512), "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             if (!compileContext.SuccessfulCompile)
             {
-                MessageBox.Show("(unknown error message)", "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 dialog.TryClose();
+                MessageBox.Show("(unknown error message)", "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -678,7 +703,15 @@ namespace UndertaleModTool
             if (!DisassemblyChanged)
                 return;
 
-            UndertaleCode code = this.DataContext as UndertaleCode;
+            UndertaleCode code;
+            if (DisassemblySkipped)
+            {
+                code = CurrentDisassembled;
+                DisassemblySkipped = false;
+            }
+            else
+                code = this.DataContext as UndertaleCode;
+
             if (code == null)
                 return; // Probably loaded another data.win or something.
             if (code.ParentEntry != null)
