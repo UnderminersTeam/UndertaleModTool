@@ -211,6 +211,15 @@ namespace UndertaleModLib.Compiler
                                         else if (realInstType == InstanceType.Stacktop)
                                             realInstType = InstanceType.Self; // used with @@GetInstance@@
 
+                                        // 2.3 variable fix
+                                        // Definitely needs at least some change when ++/-- support is added,
+                                        // since that does use instance type global
+                                        if (compileContext.Data.GMS2_3 && 
+                                            (patch.Target.Kind == Opcode.Pop || patch.Target.Kind == Opcode.Push) &&
+                                            patch.VarType == VariableType.Array &&
+                                            realInstType == InstanceType.Global)
+                                            realInstType = InstanceType.Self;
+
                                         UndertaleVariable def = variables.EnsureDefined(patch.Name, realInstType,
                                                                  compileContext.BuiltInList.GlobalArray.ContainsKey(patch.Name) ||
                                                                  compileContext.BuiltInList.GlobalNotArray.ContainsKey(patch.Name) ||
@@ -1797,6 +1806,12 @@ namespace UndertaleModLib.Compiler
                             // Special array set- instance type needs to be pushed beforehand
                             if (!skip)
                             {
+                                // Convert to variable in 2.3
+                                if (cw.compileContext.Data.GMS2_3 && typeToStore == DataType.Int32)
+                                {
+                                    cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
+                                    typeToStore = DataType.Variable;
+                                }
                                 cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)s.Children[0].ID;
                                 AssembleArrayPush(cw, s.Children[0]);
                             }
