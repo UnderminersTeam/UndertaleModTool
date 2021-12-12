@@ -1562,7 +1562,8 @@ namespace UndertaleModLib.Compiler
 
                             // Special array access- instance type needs to be pushed beforehand
                             cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)e.Children[0].ID;
-                            AssembleArrayPush(cw, e.Children[0]);
+                            // Pushing array (incl. 2D) but not popping
+                            AssembleArrayPush(cw, e.Children[0], true);
                             if (duplicate)
                             {
                                 if (useLongDupForArray)
@@ -1570,13 +1571,16 @@ namespace UndertaleModLib.Compiler
                                 else
                                     cw.Emit(Opcode.Dup, DataType.Int32).Extra = 1;
                             }
-                            cw.varPatches.Add(new VariablePatch()
+                            if (!cw.compileContext.Data.GMS2_3 || e.Children[0].Children.Count == 1)
                             {
-                                Target = cw.EmitRef(Opcode.Push, DataType.Variable),
-                                Name = e.Children[0].Text,
-                                InstType = GetIDPrefixSpecial(e.Children[0].ID),
-                                VarType = VariableType.Array
-                            });
+                                cw.varPatches.Add(new VariablePatch()
+                                {
+                                    Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                                    Name = e.Children[0].Text,
+                                    InstType = GetIDPrefixSpecial(e.Children[0].ID),
+                                    VarType = VariableType.Array
+                                });
+                            }
                             cw.typeStack.Push(DataType.Variable);
                             isArray = true;
                             return;
@@ -1731,7 +1735,7 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static void AssembleArrayPush(CodeWriter cw, Parser.Statement a)
+            private static void AssembleArrayPush(CodeWriter cw, Parser.Statement a, bool arraypushaf = false)
             {
                 // 1D index
                 Parser.Statement index1d = a.Children[0];
@@ -1754,9 +1758,35 @@ namespace UndertaleModLib.Compiler
                     // These instructions are hardcoded. Honestly it seems pretty
                     // inefficient because these could be easily combined into
                     // one small instruction.
-                    cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-1; // chkindex
-                    cw.Emit(Opcode.Push, DataType.Int32).Value = 32000; 
-                    cw.Emit(Opcode.Mul, DataType.Int32, DataType.Int32); 
+                    // And they were, in 2.3.
+                    if (cw.compileContext.Data.GMS2_3) {
+                        if (arraypushaf)
+                        {
+                            cw.varPatches.Add(new VariablePatch()
+                            {
+                                Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                                Name = a.Text,
+                                InstType = InstanceType.Self,
+                                VarType = VariableType.ArrayPushAF
+                            });
+                        }
+                        else
+                        {
+                            cw.varPatches.Add(new VariablePatch()
+                            {
+                                Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                                Name = a.Text,
+                                InstType = InstanceType.Self,
+                                VarType = VariableType.ArrayPopAF
+                            });
+                        }
+                    }
+                    else
+                    {
+                        cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-1; // chkindex
+                        cw.Emit(Opcode.Push, DataType.Int32).Value = 32000;
+                        cw.Emit(Opcode.Mul, DataType.Int32, DataType.Int32);
+                    }
 
                     Parser.Statement index2d = a.Children[1];
                     if (index2d.Kind == Parser.Statement.StatementKind.ExprConstant &&
@@ -1772,8 +1802,18 @@ namespace UndertaleModLib.Compiler
                         cw.typeStack.Push(DataType.Int32);
                     }
 
-                    cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-1; // chkindex
-                    cw.Emit(Opcode.Add, DataType.Int32, DataType.Int32);
+                    if (cw.compileContext.Data.GMS2_3)
+                    {
+                        if (arraypushaf)
+                            cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-2; // pushaf
+                        else
+                            cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-3; // popaf
+                    }
+                    else
+                    {
+                        cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-1; // chkindex
+                        cw.Emit(Opcode.Add, DataType.Int32, DataType.Int32);
+                    }
 
                     cw.typeStack.Pop();
                 }
@@ -1815,13 +1855,16 @@ namespace UndertaleModLib.Compiler
                                 cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)s.Children[0].ID;
                                 AssembleArrayPush(cw, s.Children[0]);
                             }
-                            cw.varPatches.Add(new VariablePatch()
+                            if (!cw.compileContext.Data.GMS2_3 || s.Children[0].Children.Count == 1)
                             {
-                                Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
-                                Name = s.Children[0].Text,
-                                InstType = GetIDPrefixSpecial(s.Children[0].ID),
-                                VarType = VariableType.Array
-                            });
+                                cw.varPatches.Add(new VariablePatch()
+                                {
+                                    Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
+                                    Name = s.Children[0].Text,
+                                    InstType = GetIDPrefixSpecial(s.Children[0].ID),
+                                    VarType = VariableType.Array
+                                });
+                            }
                             return;
                         }
 
