@@ -6,6 +6,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	<Nullable>annotations</Nullable>
+	<RollForward>LatestMajor</RollForward>
   </PropertyGroup>
 
   <ItemGroup>
