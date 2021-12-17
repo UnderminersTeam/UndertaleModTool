@@ -31,6 +31,8 @@ namespace UndertaleModLib.Scripting
         string ExePath { get; }
         string ScriptErrorType { get; }
 
+        bool GMLCacheEnabled { get; }
+
         void EnsureDataLoaded();
         Task<bool> Make_New_File();
         void ReplaceTempWithMain(bool ImAnExpertBTW = false);

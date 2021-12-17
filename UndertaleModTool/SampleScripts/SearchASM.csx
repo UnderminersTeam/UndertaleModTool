@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 EnsureDataLoaded();
 
@@ -28,6 +29,15 @@ if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
 {
     ScriptError("Search cannot be empty or null.");
     return;
+}
+
+Regex keywordRegex;
+if (regex_check)
+{
+    if (case_sensitive)
+        keywordRegex = new(keyword, RegexOptions.Compiled);
+    else
+        keywordRegex = new(keyword, RegexOptions.Compiled | RegexOptions.IgnoreCase);
 }
 
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
@@ -66,11 +76,9 @@ void SortResults()
     resultsSorted = resultsDict.OrderBy(c => Array.IndexOf(codeNames, c.Key));
 }
 
-bool RegexContains(string s, string sPattern, bool isCaseInsensitive)
+bool RegexContains(in string s)
 {
-    if (isCaseInsensitive)
-        return System.Text.RegularExpressions.Regex.IsMatch(s, sPattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-    return System.Text.RegularExpressions.Regex.IsMatch(s, sPattern);
+    return keywordRegex.Match(s).Success;
 }
 void DumpCode(UndertaleCode code)
 {
@@ -79,12 +87,15 @@ void DumpCode(UndertaleCode code)
         try
         {
             var line_number = 1;
-            string decompiled_text = (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "");
-            string[] splitted = decompiled_text.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+            StringReader assemblyText = new(code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "");
             bool name_written = false;
-            foreach (string lineInt in splitted)
+            string lineInt;
+            while ((lineInt = assemblyText.ReadLine()) is not null)
             {
-                if (((regex_check && RegexContains(lineInt, keyword, case_sensitive)) || ((!regex_check && case_sensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
+                if (lineInt == string.Empty)
+                    continue;
+
+                if (((regex_check && RegexContains(in lineInt)) || ((!regex_check && case_sensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
                 {
                     if (name_written == false)
                     {

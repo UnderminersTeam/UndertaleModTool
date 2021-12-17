@@ -90,6 +90,8 @@ namespace UndertaleModCli
         private string savedMsg, savedStatus;
         private double savedValue, savedValueMax;
 
+        public bool GMLCacheEnabled => false; //not implemented yet
+
         public FileInfo? Dest { get; set; }
 
         /// <summary>

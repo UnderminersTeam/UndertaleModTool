@@ -32,6 +32,7 @@ namespace UndertaleModTests
         public string ScriptErrorMessage => throw new NotImplementedException();
         public string ExePath => throw new NotImplementedException();
         public string ScriptErrorType => throw new NotImplementedException();
+        public bool GMLCacheEnabled => throw new NotImplementedException();
 
         public void ChangeSelection(object newsel)
         {

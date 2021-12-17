@@ -74,6 +74,8 @@ namespace UndertaleModTool
         private readonly object bindingLock = new();
         private HashSet<string> syncBindings = new();
 
+        public bool GMLCacheEnabled => SettingsWindow.UseGMLCache;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         // For delivering messages to LoaderDialogs
@@ -613,8 +615,11 @@ namespace UndertaleModTool
                         if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
                             CloseChildFiles();
 
-                        await SaveGMLCache(FilePath, false, dialog);
+                        if (FilePath != filename)
+                            await SaveGMLCache(FilePath, false, dialog);
+
                         Data = data;
+
                         await LoadGMLCache(filename, dialog);
 
                         Data.ToolInfo.AppDataProfiles = ProfilesFolder;
