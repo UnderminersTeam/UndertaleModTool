@@ -1716,7 +1716,10 @@ namespace UndertaleModLib.Compiler
                             {
                                 if (duplicate && next + 1 >= e.Children.Count)
                                 {
-                                    cw.Emit(Opcode.Dup, DataType.Int32).Extra = 0;
+                                    if (cw.compileContext.Data.GMS2_3)
+                                        cw.Emit(Opcode.Dup, DataType.Int32).Extra = 4;
+                                    else
+                                        cw.Emit(Opcode.Dup, DataType.Int32).Extra = 0;
                                 }
                                 cw.varPatches.Add(new VariablePatch()
                                 {
@@ -2013,7 +2016,7 @@ namespace UndertaleModLib.Compiler
                         }
                     }
                     fix.Children.Add(fix2);
-                    AssembleStoreVariable(cw, fix, typeToStore, skip);
+                    AssembleStoreVariable(cw, fix, typeToStore, skip, duplicate);
                 }
                 else
                 {
