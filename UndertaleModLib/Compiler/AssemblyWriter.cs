@@ -189,9 +189,10 @@ namespace UndertaleModLib.Compiler
                                                 patch.Target.Destination = new Reference<UndertaleVariable>(def, patch.VarType);
                                             else
                                                 patch.Target.Value = new Reference<UndertaleVariable>(def, patch.VarType);
+                                            
                                             if (patch.VarType == VariableType.Normal)
                                                 patch.Target.TypeInst = InstanceType.Local;
-                                            else
+                                            else if (compileContext.Data.GMS2_3)
                                                 patch.InstType = InstanceType.Self;
                                         }
                                     }
@@ -851,9 +852,9 @@ namespace UndertaleModLib.Compiler
                                (s.Children[0].Kind == Parser.Statement.StatementKind.ExprConstant &&
                                (InstanceType)s.Children[0].Constant.valueNumber == InstanceType.Other))
                             {
-                                cw.Emit(Opcode.Call, DataType.Int32).Function = new Reference<UndertaleFunction>(new UndertaleFunction() {
-                                    Name = new UndertaleString("@@Other@@")
-                                });
+                                cw.Emit(Opcode.Call, DataType.Int32).Function = new Reference<UndertaleFunction>(
+                                    cw.compileContext.Data.Functions.ByName("@@Other@@")
+                                );
                                 cw.typeStack.Push(DataType.Variable);
                             }
                             else
@@ -1786,27 +1787,15 @@ namespace UndertaleModLib.Compiler
                     // inefficient because these could be easily combined into
                     // one small instruction.
                     // And they were, in 2.3.
-                    if (cw.compileContext.Data.GMS2_3) {
-                        if (arraypushaf)
+                    if (cw.compileContext.Data.GMS2_3)
+                    {
+                        cw.varPatches.Add(new VariablePatch()
                         {
-                            cw.varPatches.Add(new VariablePatch()
-                            {
-                                Target = cw.EmitRef(Opcode.Push, DataType.Variable),
-                                Name = a.Text,
-                                InstType = InstanceType.Self,
-                                VarType = VariableType.ArrayPushAF
-                            });
-                        }
-                        else
-                        {
-                            cw.varPatches.Add(new VariablePatch()
-                            {
-                                Target = cw.EmitRef(Opcode.Push, DataType.Variable),
-                                Name = a.Text,
-                                InstType = InstanceType.Self,
-                                VarType = VariableType.ArrayPopAF
-                            });
-                        }
+                            Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                            Name = a.Text,
+                            InstType = InstanceType.Self,
+                            VarType = arraypushaf ? VariableType.ArrayPushAF : VariableType.ArrayPopAF
+                        });
                     }
                     else
                     {
