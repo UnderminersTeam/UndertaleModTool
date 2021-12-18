@@ -28,7 +28,7 @@ string[] dirFiles = Directory.GetFiles(importFolder);
 SetProgressBar(null, "Files", 0, dirFiles.Length);
 StartUpdater();
 
-SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects", true);
+SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects, Functions, Variables", true);
 await Task.Run(() => {
     foreach (string file in dirFiles)
     {
