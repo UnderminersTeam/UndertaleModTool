@@ -795,7 +795,7 @@ namespace UndertaleModCli
             //there is no UI with any data binding
         }
 
-        void ProgressUpdater()
+        private void ProgressUpdater()
         {
             DateTime prevTime = default;
             int prevValue = 0;
