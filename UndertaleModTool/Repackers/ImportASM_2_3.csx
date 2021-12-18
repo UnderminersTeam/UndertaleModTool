@@ -250,6 +250,6 @@ await Task.Run(() => {
 });
 SyncBinding(false);
 
-//await StopUpdater();
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("All files successfully imported.");

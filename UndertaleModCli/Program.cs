@@ -19,6 +19,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
+using UndertaleModLib.Decompiler;
 
 /// <summary>
 /// The supplied location of the data file did not exist
@@ -88,6 +89,8 @@ namespace UndertaleModCli
 
         private string savedMsg, savedStatus;
         private double savedValue, savedValueMax;
+
+        public bool GMLCacheEnabled => false; //not implemented yet
 
         public FileInfo? Output { get; set; }
 
@@ -522,8 +525,10 @@ namespace UndertaleModCli
                 throw new Exception("No data file is loaded.");
         }
 
-        public bool Make_New_File()
+        public async Task<bool> Make_New_File()
         {
+            await Task.Delay(1); //dummy await
+
             Data = UndertaleData.CreateNew();
             Console.WriteLine("New file created.");
             return true;
@@ -844,7 +849,17 @@ namespace UndertaleModCli
                 updater.Dispose();
             }
         }
-        
+
+        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
+        {
+            await Task.Delay(1); //dummy await
+
+            //not implemented yet
+
+            return false;
+        }
+
+
         public void ChangeSelection(object newsel)
         {
             Selected = newsel;
@@ -873,12 +888,12 @@ namespace UndertaleModCli
             throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
-        public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false)
+        public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
             throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
-        public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
+        public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
             throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
