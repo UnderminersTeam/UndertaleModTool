@@ -1532,20 +1532,23 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 string name = Var.Name.Content;
-                if (context.GlobalContext.Data?.GMS2_3 == true)
+                if (ArrayIndices != null)
                 {
-                    if (ArrayIndices != null)
+                    if (context.GlobalContext.Data?.GMS2_3 == true)
                     {
+                        name += "[";
                         foreach (Expression e in ArrayIndices)
-                            name += "[" + e.ToString(context) + "]";
+                            name += e.ToString(context) + ", ";
+                        name = name[0..^2];
+                        name += "]";
                     }
-                }
-                else if (ArrayIndices != null)
-                {
-                    if (ArrayIndices.Count == 2 && ArrayIndices[0] != null && ArrayIndices[1] != null)
-                        name += "[" + ArrayIndices[0].ToString(context) + ", " + ArrayIndices[1].ToString(context) + "]";
-                    else if (ArrayIndices[0] != null)
-                        name += "[" + ArrayIndices[0].ToString(context) + "]";
+                    else
+                    {
+                        if (ArrayIndices.Count == 2 && ArrayIndices[0] != null && ArrayIndices[1] != null)
+                            name += "[" + ArrayIndices[0].ToString(context) + ", " + ArrayIndices[1].ToString(context) + "]";
+                        else if (ArrayIndices[0] != null)
+                            name += "[" + ArrayIndices[0].ToString(context) + "]";
+                    }
                 }
 
                 // NOTE: The "var" prefix is handled in Decompiler.Decompile. 
