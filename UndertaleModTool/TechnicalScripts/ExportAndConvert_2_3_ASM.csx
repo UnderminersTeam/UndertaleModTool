@@ -25,7 +25,7 @@ Directory.CreateDirectory(codeFolder);
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
 StartUpdater();
 
-SyncBinding("Strings, CodeLocals, Variables", true); //not sure about variables
+SyncBinding("Strings, CodeLocals, Variables, Functions", true);
 await Task.Run(DumpCode);
 SyncBinding(false);
 

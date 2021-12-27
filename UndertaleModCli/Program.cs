@@ -19,6 +19,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
+using UndertaleModLib.Decompiler;
 
 /// <summary>
 /// The supplied location of the data file did not exist
@@ -43,7 +44,7 @@ namespace UndertaleModCli
         public string? Line { get; set; }
 
 
-        public FileInfo? Dest { get; set; }
+        public FileInfo? Output { get; set; }
         public bool Interactive { get; set; } = false;
         public bool Verbose { get; set; } = false;
     }
@@ -55,21 +56,21 @@ namespace UndertaleModCli
     }
 
     /// <summary>
-    /// cli options for the New command
+    /// Cli options for the New command
     /// </summary>
-    /// <param name="Overwrite">Save over an existing file at Dest</param>
+    /// <param name="Overwrite">Save over an existing file at Output</param>
     public class NewOptions
     {
         /// <summary>
         /// Destination for new data file
         /// </summary>
-        public FileInfo Dest { get; set; } = new FileInfo("data.win");
+        public FileInfo Output { get; set; } = new FileInfo("data.win");
         /// <summary>
-        /// Save over an existing file at Dest
+        /// Save over an existing file at Output
         /// </summary>
         public bool Overwrite { get; set; } = false;
         /// <summary>
-        /// Whether to write the new data to stdout
+        /// Whether to write the new data to Stdout
         /// </summary>
         public bool Stdout { get; set; }
     }
@@ -89,7 +90,9 @@ namespace UndertaleModCli
         private string savedMsg, savedStatus;
         private double savedValue, savedValueMax;
 
-        public FileInfo? Dest { get; set; }
+        public bool GMLCacheEnabled => false; //not implemented yet
+
+        public FileInfo? Output { get; set; }
 
         /// <summary>
         /// Read supplied filename and return the data file
@@ -116,7 +119,7 @@ namespace UndertaleModCli
         }
         public bool Verbose { get; set; }
 
-        public Program(FileInfo datafile, FileInfo[]? scripts, FileInfo? dest, bool verbose = false, bool interactive = false)
+        public Program(FileInfo datafile, FileInfo[]? scripts, FileInfo? output, bool verbose = false, bool interactive = false)
         {
             Verbose = verbose;
             Interactive = interactive;
@@ -130,15 +133,9 @@ namespace UndertaleModCli
 
             this.FilePath = datafile.FullName;
             this.ExePath = Environment.CurrentDirectory;
-            this.Dest = dest;
-            if (Verbose)
-            {
-                this.Data = ReadDataFile(datafile, OnWarning, OnMessage);
-            }
-            else
-            {
-                this.Data = ReadDataFile(datafile);
-            }
+            this.Output = output;
+
+            this.Data = ReadDataFile(datafile, Verbose ? OnWarning : null, Verbose ? OnMessage : null);
 
             FinishedMessageEnabled = true;
             this.CliScriptOptions = ScriptOptions.Default
@@ -171,12 +168,11 @@ namespace UndertaleModCli
 
         public static int Main(string[] args)
         {
-            var verboseOption = new Option<bool>("--verbose", "Detailed logs");
-            verboseOption.AddAlias("-v");
+            var verboseOption = new Option<bool>(new []{"-v", "--verbose"}, "Detailed logs");
 
             var dataFileOption = new Argument<FileInfo>("datafile")
             {
-                Description = "path to the data.win/.ios/.droid/.unx file"
+                Description = "Path to the data.win/.ios/.droid/.unx file"
             };
 
             var infoCommand = new Command("info", "Show info about game data file")
@@ -186,25 +182,23 @@ namespace UndertaleModCli
             };
             infoCommand.Handler = CommandHandler.Create<InfoOptions>(Program.Info);
 
-            var scriptRunnerOption = new Option<FileInfo[]>("--scripts", "Scripts to apply to the <datafile>. ex. a.csx b.csx");
-            scriptRunnerOption.AddAlias("-s");
-            scriptRunnerOption.AddAlias("--applyscripts");
+            var scriptRunnerOption = new Option<FileInfo[]>(new []{ "-s", "--scripts"}, "Scripts to apply to the <datafile>. ex. a.csx b.csx");
             var loadCommand = new Command("load", "Load data file and perform actions on it") {
                 dataFileOption,
                 scriptRunnerOption,
                 verboseOption,
-                new Option<FileInfo>("--dest", "Where to save the modified data file"),
-                new Option<string>("--line", "run c# string. Runs AFTER everything else"),
-                new Option<bool>("--interactive", "Interactive menu launch"),
+                new Option<FileInfo>(new []{"-o", "--output"}, "Where to save the modified data file"),
+                new Option<string>(new []{"-l","--line"}, "Run C# string. Runs AFTER everything else"),
+                new Option<bool>(new []{"-i", "--interactive"}, "Interactive menu launch"),
 
             };
             loadCommand.Handler = CommandHandler.Create<LoadOptions>(Program.Load);
 
             var newCommand = new Command("new", "Generates a blank data file")
             {
-                new Option<FileInfo>(new []{"-d", "--dest" },getDefaultValue: () => new NewOptions().Dest),
+                new Option<FileInfo>(new []{"-o", "--output"},getDefaultValue: () => new NewOptions().Output),
                 new Option<bool>(new []{"-f", "--overwrite"}, "Overwrite destination file if it already exists"),
-                new Option<bool>(new []{"-o", "--stdout"}, "Write new data content to stdout"),
+                new Option<bool>(new []{"-", "--stdout"}, "Write new data content to stdout"),  // "-" is often used in *nix land as a replacement for stdout
             };
             newCommand.Handler = CommandHandler.Create<NewOptions>(Program.New);
 
@@ -214,7 +208,7 @@ namespace UndertaleModCli
                 newCommand,
                 };
 
-            rootCommand.Description = "cli tool for modding, decompiling and unpacking Undertale (and other Game Maker: Studio games!";
+            rootCommand.Description = "CLI tool for modding, decompiling and unpacking Undertale (and other Game Maker: Studio games)!";
             var commandLine = new CommandLineBuilder(rootCommand)
                                     .UseDefaults() // automatically configures dotnet-suggest
                                     .Build();
@@ -242,12 +236,12 @@ namespace UndertaleModCli
 
             int WriteFile()
             {
-                if (options.Dest.Exists && !options.Overwrite)
+                if (options.Output.Exists && !options.Overwrite)
                 {
-                    Console.Error.WriteLine($"{options.Dest} already exists. Pass --overwrite to overwrite");
+                    Console.Error.WriteLine($"{options.Output} already exists. Pass --overwrite to overwrite");
                     return EXIT_FAILURE;
                 }
-                using (var fs = options.Dest.OpenWrite())
+                using (var fs = options.Output.OpenWrite())
                 {
                     UndertaleIO.Write(fs, data);
                     return EXIT_SUCCESS;
@@ -272,7 +266,7 @@ namespace UndertaleModCli
             Program program;
             try
             {
-                program = new Program(options.Datafile, options.Scripts, options.Dest, options.Verbose, options.Interactive);
+                program = new Program(options.Datafile, options.Scripts, options.Output, options.Verbose, options.Interactive);
             }
             catch (DataFileNotFoundException e)
             {
@@ -299,9 +293,9 @@ namespace UndertaleModCli
                 program.RunCodeLine(options.Line);
             }
 
-            if (options.Dest != null)
+            if (options.Output != null)
             {
-                program.CliSave(options.Dest.FullName);
+                program.CliSave(options.Output.FullName);
             }
 
             return EXIT_SUCCESS;
@@ -369,7 +363,7 @@ namespace UndertaleModCli
             {
                 if (ScriptExecutionSuccess)
                 {
-                    string msg = $"Finished executing {ScriptPath ?? "c# line"}";
+                    string msg = $"Finished executing {ScriptPath ?? "C# line"}";
                     if (Verbose)
                         Console.WriteLine(msg);
                 }
@@ -410,7 +404,7 @@ namespace UndertaleModCli
         {
             if (Verbose)
             {
-                Console.WriteLine($"Saving new data file to {this.Dest.FullName}");
+                Console.WriteLine($"Saving new data file to {this.Output.FullName}");
             }
 
             using (var fs = new FileInfo(to).OpenWrite())
@@ -418,7 +412,7 @@ namespace UndertaleModCli
                 UndertaleIO.Write(fs, Data, OnMessage);
                 if (Verbose)
                 {
-                    Console.WriteLine($"Saved data file to {this.Dest.FullName}");
+                    Console.WriteLine($"Saved data file to {this.Output.FullName}");
                 }
             }
         }
@@ -467,7 +461,7 @@ namespace UndertaleModCli
             {
                 case ConsoleKey.D1:
                     {
-                        Console.Write("File path (you can drag and drop on Windows)?: ");
+                        Console.Write("File path (you can drag and drop)? ");
                         string path = Dequote(Console.ReadLine());
                         Console.WriteLine("Trying to run script {0}", path);
                         RunCodeFile(path);
@@ -476,7 +470,7 @@ namespace UndertaleModCli
 
                 case ConsoleKey.D2:
                     {
-                        Console.Write("C# code line?: ");
+                        Console.Write("C# code line? ");
                         string line = Console.ReadLine();
                         ScriptPath = null;
                         RunCodeLine(line);
@@ -491,7 +485,7 @@ namespace UndertaleModCli
 
                 case ConsoleKey.D4:
                     {
-                        Console.Write("Where to save?: ");
+                        Console.Write("Where to save? ");
                         string path = Dequote(Console.ReadLine());
                         CliSave(path);
                         break;
@@ -507,7 +501,7 @@ namespace UndertaleModCli
                 case ConsoleKey.D6:
                     {
                         Console.WriteLine("Are you SURE? You can press 'n' and save before the changes are gone forever!!");
-                        Console.WriteLine("(Y/N)?: ");
+                        Console.WriteLine("(Y/N)? ");
                         var yes = Console.ReadKey(false).Key == ConsoleKey.Y;
                         Console.WriteLine();
                         if (yes) return false;
@@ -531,10 +525,12 @@ namespace UndertaleModCli
                 throw new Exception("No data file is loaded.");
         }
 
-        public bool Make_New_File()
+        public async Task<bool> Make_New_File()
         {
+            await Task.Delay(1); //dummy await
+
             Data = UndertaleData.CreateNew();
-            Console.WriteLine("Don't you have anything better to do?");
+            Console.WriteLine("New file created.");
             return true;
         }
 
@@ -577,7 +573,7 @@ namespace UndertaleModCli
         public bool ScriptQuestion(string message)
         {
             Console.WriteLine(message);
-            Console.Write("Input (Y/N)?: ");
+            Console.Write("Input (Y/N)? ");
             var yes = Console.ReadKey(false).Key == ConsoleKey.Y;
             Console.WriteLine();
             return yes;
@@ -799,7 +795,7 @@ namespace UndertaleModCli
             //there is no UI with any data binding
         }
 
-        void ProgressUpdater()
+        private void ProgressUpdater()
         {
             DateTime prevTime = default;
             int prevValue = 0;
@@ -853,7 +849,17 @@ namespace UndertaleModCli
                 updater.Dispose();
             }
         }
-        
+
+        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
+        {
+            await Task.Delay(1); //dummy await
+
+            //not implemented yet
+
+            return false;
+        }
+
+
         public void ChangeSelection(object newsel)
         {
             Selected = newsel;
@@ -861,7 +867,7 @@ namespace UndertaleModCli
 
         public string PromptChooseDirectory(string prompt)
         {
-            Console.WriteLine("Please type a path (or drag and drop on Windows) to a directory:");
+            Console.WriteLine("Please type a path (or drag and drop) to a directory:");
             Console.Write("Path: ");
             string p = Console.ReadLine();
             return p;
@@ -869,32 +875,32 @@ namespace UndertaleModCli
 
         public string PromptLoadFile(string defaultExt, string filter)
         {
-            throw new NotImplementedException("don't you have ANYTHING better to do?");
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false)
         {
-            throw new NotImplementedException("don't you have ANYTHING better to do?");
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
         {
-            throw new NotImplementedException("don't you have ANYTHING better to do?");
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
-        public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false)
+        public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
-            throw new NotImplementedException("don't you have ANYTHING better to do?");
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
-        public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
+        public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
-            throw new NotImplementedException("don't you have ANYTHING better to do?");
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false)
         {
-            throw new NotImplementedException("don't you have ANYTHING better to do?");
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public bool DummyBool()

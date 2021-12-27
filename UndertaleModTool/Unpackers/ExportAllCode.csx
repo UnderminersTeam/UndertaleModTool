@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 EnsureDataLoaded();
 
@@ -16,15 +17,30 @@ if (Directory.Exists(codeFolder))
 
 Directory.CreateDirectory(codeFolder);
 
-var toDump = new List<UndertaleCode>();
-foreach (UndertaleCode code in Data.Code)
+bool exportFromCache = false;
+if (GMLCacheEnabled && Data.GMLCache is not null)
+    exportFromCache = ScriptQuestion("Export from the cache?");
+
+List<UndertaleCode> toDump;
+if (!exportFromCache)
 {
-    if (code.ParentEntry != null)
-        continue;
-    toDump.Add(code);
+    toDump = new();
+    foreach (UndertaleCode code in Data.Code)
+    {
+        if (code.ParentEntry != null)
+            continue;
+        toDump.Add(code);
+    }
 }
 
-SetProgressBar(null, "Code Entries", 0, toDump.Count);
+bool cacheGenerated = false;
+if (exportFromCache)
+{
+    cacheGenerated = await GenerateGMLCache(DECOMPILE_CONTEXT);
+    await StopUpdater();
+}
+
+SetProgressBar(null, "Code Entries", 0, exportFromCache ? Data.GMLCache.Count + Data.GMLCacheFailed.Count : toDump.Count);
 StartUpdater();
 
 await DumpCode();
@@ -42,24 +58,49 @@ string GetFolder(string path)
 
 async Task DumpCode()
 {
-    var data = DECOMPILE_CONTEXT.Value.Data;
-    if (data?.KnownSubFunctions is null) //if we run script before opening any code
-        Decompiler.BuildSubFunctionCache(data);
+    if (cacheGenerated)
+    {
+        await Task.Run(() => Parallel.ForEach(Data.GMLCache, DumpCachedCode));
 
-    await Task.Run(() => Parallel.ForEach(toDump, DumpCode));
+        if (Data.GMLCacheFailed.Count > 0)
+        {
+            if (Data.KnownSubFunctions is null) //if we run script before opening any code
+                Decompiler.BuildSubFunctionCache(Data);
+
+            await Task.Run(() => Parallel.ForEach(Data.GMLCacheFailed, (codeName) => DumpCode(Data.Code.ByName(codeName))));
+        }
+    }
+    else
+    {
+        if (Data.KnownSubFunctions is null) //if we run script before opening any code
+            Decompiler.BuildSubFunctionCache(Data);
+
+        await Task.Run(() => Parallel.ForEach(toDump, DumpCode));
+    }
 }
 
 void DumpCode(UndertaleCode code)
 {
-    string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
-    try
+    if (code is not null)
     {
-        File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+        string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
+        try
+        {
+            File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+        }
+        catch (Exception e)
+        {
+            File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
+        }
     }
-    catch (Exception e)
-    {
-        File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
-    }
+
+    IncProgressP();
+}
+void DumpCachedCode(KeyValuePair<string, string> code)
+{
+    string path = Path.Combine(codeFolder, code.Key + ".gml");
+
+    File.WriteAllText(path, code.Value);
 
     IncProgressP();
 }

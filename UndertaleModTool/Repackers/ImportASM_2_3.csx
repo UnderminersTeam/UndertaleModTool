@@ -74,7 +74,7 @@ bool skipGlobalScriptsPrompted = false;
 SetProgressBar(null, "Files", 0, dirFiles.Length);
 StartUpdater();
 
-SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects", true); //not sure about GlobalInitScripts
+SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects, Functions, Variables", true);
 await Task.Run(() => {
     foreach (string file in dirFiles)
     {
@@ -111,7 +111,7 @@ await Task.Run(() => {
                 continue;
         }
         UndertaleCode code = Data.Code.ByName(codeName);
-        if (Data.Code.ByName(codeName) == null) // Should keep from adding duplicate scripts; haven't tested
+        if (code == null) // Should keep from adding duplicate scripts; haven't tested
         {
             code = new UndertaleCode();
             code.Name = Data.Strings.MakeString(codeName);
@@ -188,7 +188,7 @@ await Task.Run(() => {
                         try
                         {
                             var instructions = Assembler.Assemble(asmCode, Data);
-                            Data.Code.ByName(codeName).Replace(instructions);
+                            code.Replace(instructions);
                         }
                         catch (Exception ex)
                         {
@@ -238,7 +238,7 @@ await Task.Run(() => {
             try
             {
                 var instructions = Assembler.Assemble(asmCode, Data);
-                Data.Code.ByName(codeName).Replace(instructions);
+                code.Replace(instructions);
             }
             catch (Exception ex)
             {
@@ -250,6 +250,6 @@ await Task.Run(() => {
 });
 SyncBinding(false);
 
-//await StopUpdater();
+await StopUpdater();
 HideProgressBar();
 ScriptMessage("All files successfully imported.");

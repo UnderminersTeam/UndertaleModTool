@@ -1166,7 +1166,11 @@ namespace UndertaleModLib.Decompiler
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
             {
-                Destination = (ExpressionVar)Destination.CleanExpression(context, block);
+                Expression expr = Destination.CleanExpression(context, block);
+
+                if (expr is ExpressionVar expvar)
+                    Destination = expvar;
+
                 Value = Value.CleanExpression(context, block);
                 if (Destination.Var.Name?.Content == "$$$$temp$$$$")
                     context.CompilerTempVar = this;
@@ -1528,20 +1532,23 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 string name = Var.Name.Content;
-                if (context.GlobalContext.Data?.GMS2_3 == true)
+                if (ArrayIndices != null)
                 {
-                    if (ArrayIndices != null)
+                    if (context.GlobalContext.Data?.GMS2_3 == true)
                     {
+                        name += "[";
                         foreach (Expression e in ArrayIndices)
-                            name += "[" + e.ToString(context) + "]";
+                            name += e.ToString(context) + ", ";
+                        name = name[0..^2];
+                        name += "]";
                     }
-                }
-                else if (ArrayIndices != null)
-                {
-                    if (ArrayIndices.Count == 2 && ArrayIndices[0] != null && ArrayIndices[1] != null)
-                        name += "[" + ArrayIndices[0].ToString(context) + ", " + ArrayIndices[1].ToString(context) + "]";
-                    else if (ArrayIndices[0] != null)
-                        name += "[" + ArrayIndices[0].ToString(context) + "]";
+                    else
+                    {
+                        if (ArrayIndices.Count == 2 && ArrayIndices[0] != null && ArrayIndices[1] != null)
+                            name += "[" + ArrayIndices[0].ToString(context) + ", " + ArrayIndices[1].ToString(context) + "]";
+                        else if (ArrayIndices[0] != null)
+                            name += "[" + ArrayIndices[0].ToString(context) + "]";
+                    }
                 }
 
                 // NOTE: The "var" prefix is handled in Decompiler.Decompile. 
@@ -2240,6 +2247,25 @@ namespace UndertaleModLib.Decompiler
                                         owner = statement.ToString(context);
                                     statements.Add(new CommentStatement("setowner: " + (owner ?? "<null>")));
                                     */
+                                    break;
+                                case -10: // GMS2.3+, chknullish
+
+                                    // TODO: Implement nullish operator in decompiled output.
+                                    // Appearance in assembly is:
+
+                                    /* <push var>
+                                     * chknullish
+                                     * bf [block2]
+                                     * 
+                                     * :[block1]
+                                     * popz.v
+                                     * <var is nullish, evaluate new value>
+                                     * 
+                                     * :[block2]
+                                     * <use value>
+                                     */
+
+                                    // Note that this operator peeks from the stack, it does not pop directly.
                                     break;
                             }
                         }

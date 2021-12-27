@@ -34,6 +34,7 @@ using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using static UndertaleModTool.MainWindow.CodeEditorMode;
 
 namespace UndertaleModTool
 {
@@ -42,22 +43,26 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleCodeEditor : UserControl
     {
+        private static MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         public UndertaleCode CurrentDisassembled = null;
         public UndertaleCode CurrentDecompiled = null;
         public List<string> CurrentLocals = null;
         public UndertaleCode CurrentGraphed = null;
-        public string ProfileHash = (Application.Current.MainWindow as MainWindow).ProfileHash;
-        public string MainPath = Path.Combine(Settings.ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Main");
-        public string TempPath = Path.Combine(Settings.ProfilesFolder, (Application.Current.MainWindow as MainWindow).ProfileHash, "Temp");
+        public string ProfileHash = mainWindow.ProfileHash;
+        public string MainPath = Path.Combine(Settings.ProfilesFolder, mainWindow.ProfileHash, "Main");
+        public string TempPath = Path.Combine(Settings.ProfilesFolder, mainWindow.ProfileHash, "Temp");
 
         public bool DecompiledFocused = false;
         public bool DecompiledChanged = false;
         public bool DecompiledYet = false;
+        public bool DecompiledSkipped = false;
         public SearchPanel DecompiledSearchPanel;
 
         public bool DisassemblyFocused = false;
         public bool DisassemblyChanged = false;
         public bool DisassembledYet = false;
+        public bool DisassemblySkipped = false;
         public SearchPanel DisassemblySearchPanel;
 
         public static RoutedUICommand Compile = new RoutedUICommand("Compile code", "Compile", typeof(UndertaleCodeEditor));
@@ -75,7 +80,7 @@ namespace UndertaleModTool
                 using (XmlTextReader reader = new XmlTextReader(stream))
                 {
                     DecompiledEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
-                    if ((Application.Current.MainWindow as MainWindow).Data.GeneralInfo.Major < 2)
+                    if (mainWindow.Data.GeneralInfo.Major < 2)
                     {
                         var def = DecompiledEditor.SyntaxHighlighting;
                         foreach (var span in def.MainRuleSet.Spans)
@@ -168,12 +173,27 @@ namespace UndertaleModTool
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return;
+
+            // compile/disassemble previously edited code (save changes)
+            if (DecompiledTab.IsSelected && DecompiledFocused && DecompiledChanged &&
+                CurrentDecompiled is not null && CurrentDecompiled != code)
+            {
+                DecompiledSkipped = true;
+                DecompiledEditor_LostFocus(sender, null);
+            }
+            else if (DisassemblyTab.IsSelected && DisassemblyFocused && DisassemblyChanged &&
+                     CurrentDisassembled is not null && CurrentDisassembled != code)
+            {
+                DisassemblySkipped = true;
+                DisassemblyEditor_LostFocus(sender, null);
+            }
+
             DecompiledEditor_LostFocus(sender, null);
             DisassemblyEditor_LostFocus(sender, null);
 
-            if (MainWindow.CodeEditorDecompile != -1) //if opened from the code search results "link"
+            if (MainWindow.CodeEditorDecompile != Unstated) //if opened from the code search results "link"
             {
-                if (MainWindow.CodeEditorDecompile == 0 && code != CurrentDisassembled)
+                if (MainWindow.CodeEditorDecompile == DontDecompile && code != CurrentDisassembled)
                 {
                     if (CodeModeTabs.SelectedItem != DisassemblyTab)
                         CodeModeTabs.SelectedItem = DisassemblyTab;
@@ -181,7 +201,7 @@ namespace UndertaleModTool
                         DisassembleCode(code, true);
                 }
 
-                if (MainWindow.CodeEditorDecompile == 1 && code != CurrentDecompiled)
+                if (MainWindow.CodeEditorDecompile == Decompile && code != CurrentDecompiled)
                 {
                     if (CodeModeTabs.SelectedItem != DecompiledTab)
                         CodeModeTabs.SelectedItem = DecompiledTab;
@@ -189,7 +209,7 @@ namespace UndertaleModTool
                         DecompileCode(code, true);
                 }
 
-                MainWindow.CodeEditorDecompile = -1;
+                MainWindow.CodeEditorDecompile = Unstated;
             }
             else
             {
@@ -240,7 +260,7 @@ namespace UndertaleModTool
             {
                 DisassemblyEditor.IsReadOnly = false;
 
-                var data = (Application.Current.MainWindow as MainWindow).Data;
+                var data = mainWindow.Data;
                 text = code.Disassemble(data.Variables, data.CodeLocals.For(code));
 
                 CurrentLocals = new List<string>();
@@ -349,12 +369,12 @@ namespace UndertaleModTool
 
                 UndertaleCode gettextCode = null;
                 if (gettext == null)
-                    gettextCode = (Application.Current.MainWindow as MainWindow).Data.Code.ByName("gml_Script_textdata_en");
+                    gettextCode = mainWindow.Data.Code.ByName("gml_Script_textdata_en");
 
-                string dataPath = Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
+                string dataPath = Path.GetDirectoryName(mainWindow.FilePath);
                 string gettextJsonPath = (dataPath != null) ? Path.Combine(dataPath, "lang", "lang_en.json") : null;
 
-                var dataa = (Application.Current.MainWindow as MainWindow).Data;
+                var dataa = mainWindow.Data;
                 Task t = Task.Run(() =>
                 {
                     GlobalDecompileContext context = new GlobalDecompileContext(dataa, false);
@@ -457,6 +477,12 @@ namespace UndertaleModTool
                                 foreach (var local in locals.Locals)
                                     CurrentLocals.Add(local.Name.Content);
                             }
+
+                            if (existingDialog is not null)                      //if code was edited (and compiles after it)
+                            {
+                                dataa.GMLCacheChanged.Add(code.Name.Content);
+                                dataa.GMLCacheFailed?.Remove(code.Name.Content); //remove that code name, since that code compiles now
+                            }
                         }
                         DecompiledEditor.Document.EndUpdate();
                         DecompiledEditor.IsReadOnly = false;
@@ -556,7 +582,15 @@ namespace UndertaleModTool
             if (!DecompiledChanged)
                 return;
 
-            UndertaleCode code = this.DataContext as UndertaleCode;
+            UndertaleCode code;
+            if (DecompiledSkipped)
+            {
+                code = CurrentDecompiled;
+                DecompiledSkipped = false;
+            }
+            else
+                code = this.DataContext as UndertaleCode;
+
             if (code == null)
                 return; // Probably loaded another data.win or something.
             if (code.ParentEntry != null)
@@ -570,7 +604,7 @@ namespace UndertaleModTool
                     return;
             }
 
-            UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
+            UndertaleData data = mainWindow.Data;
 
             LoaderDialog dialog = new LoaderDialog("Compiling", "Compiling, please wait...");
             dialog.Owner = Window.GetWindow(this);
@@ -594,28 +628,28 @@ namespace UndertaleModTool
 
             if (compileContext == null)
             {
-                MessageBox.Show("Compile context was null for some reason...", "This shouldn't happen", MessageBoxButton.OK, MessageBoxImage.Error);
                 dialog.TryClose();
+                MessageBox.Show("Compile context was null for some reason...", "This shouldn't happen", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             if (compileContext.HasError)
             {
-                MessageBox.Show(Truncate(compileContext.ResultError, 512), "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 dialog.TryClose();
+                MessageBox.Show(Truncate(compileContext.ResultError, 512), "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             if (!compileContext.SuccessfulCompile)
             {
-                MessageBox.Show("(unknown error message)", "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 dialog.TryClose();
+                MessageBox.Show("(unknown error message)", "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             code.Replace(compileContext.ResultAssembly);
 
-            if (!(Application.Current.MainWindow as MainWindow).Data.GMS2_3)
+            if (!mainWindow.Data.GMS2_3)
             {
                 try
                 {
@@ -658,6 +692,8 @@ namespace UndertaleModTool
 
             // Decompile new code
             DecompileCode(code, false, dialog);
+            
+            //GMLCacheChanged.Add() is inside DecompileCode()
         }
 
         private void DisassemblyEditor_GotFocus(object sender, RoutedEventArgs e)
@@ -678,7 +714,15 @@ namespace UndertaleModTool
             if (!DisassemblyChanged)
                 return;
 
-            UndertaleCode code = this.DataContext as UndertaleCode;
+            UndertaleCode code;
+            if (DisassemblySkipped)
+            {
+                code = CurrentDisassembled;
+                DisassemblySkipped = false;
+            }
+            else
+                code = this.DataContext as UndertaleCode;
+
             if (code == null)
                 return; // Probably loaded another data.win or something.
             if (code.ParentEntry != null)
@@ -692,12 +736,12 @@ namespace UndertaleModTool
                     return;
             }
 
-            UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
+            UndertaleData data = mainWindow.Data;
             try
             {
                 var instructions = Assembler.Assemble(DisassemblyEditor.Text, data);
                 code.Replace(instructions);
-                (Application.Current.MainWindow as MainWindow).NukeProfileGML(code.Name.Content);
+                mainWindow.NukeProfileGML(code.Name.Content);
             }
             catch (Exception ex)
             {
@@ -716,6 +760,9 @@ namespace UndertaleModTool
 
             // Disassemble new code
             DisassembleCode(code, false);
+
+            if (!DisassemblyEditor.IsReadOnly)
+                data.GMLCacheChanged.Add(code.Name.Content);
         }
 
         // Based on https://stackoverflow.com/questions/28379206/custom-hyperlinks-using-avalonedit
@@ -805,7 +852,7 @@ namespace UndertaleModTool
                         if (int.TryParse(text, out int id))
                         {
                             (parent as UndertaleCodeEditor).DecompiledFocused = true;
-                            UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
+                            UndertaleData data = mainWindow.Data;
 
                             List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
                             if (id >= 0)
@@ -840,7 +887,7 @@ namespace UndertaleModTool
                                 item.Click += (sender2, ev2) =>
                                 {
                                     if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
-                                        (Application.Current.MainWindow as MainWindow).ChangeSelection(obj);
+                                        mainWindow.ChangeSelection(obj);
                                     else
                                     {
                                         doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
@@ -865,7 +912,7 @@ namespace UndertaleModTool
                                 };
                                 contextMenu.Items.Add(item);
                             }
-                            BuiltinList list = (Application.Current.MainWindow as MainWindow).Data.BuiltinList;
+                            BuiltinList list = mainWindow.Data.BuiltinList;
                             var myKey = list.Constants.FirstOrDefault(x => x.Value == (double)id).Key;
                             if (myKey != null)
                             {
@@ -963,7 +1010,7 @@ namespace UndertaleModTool
 
                 if (m.Success && m.Index == 0)
                 {
-                    UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
+                    UndertaleData data = mainWindow.Data;
                     bool func = (offset + m.Length + 1 < CurrentContext.VisualLine.LastDocumentLine.EndOffset) &&
                                 (CurrentContext.Document.GetCharAt(offset + m.Length) == '(');
                     UndertaleNamedResource val = null;
@@ -1052,7 +1099,7 @@ namespace UndertaleModTool
                         line.Bold = true;
                     line.Clicked += (text) =>
                     {
-                        (Application.Current.MainWindow as MainWindow).ChangeSelection(val);
+                        mainWindow.ChangeSelection(val);
                     };
 
                     return line;

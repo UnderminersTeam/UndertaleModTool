@@ -189,8 +189,11 @@ namespace UndertaleModLib.Compiler
                                                 patch.Target.Destination = new Reference<UndertaleVariable>(def, patch.VarType);
                                             else
                                                 patch.Target.Value = new Reference<UndertaleVariable>(def, patch.VarType);
+                                            
                                             if (patch.VarType == VariableType.Normal)
                                                 patch.Target.TypeInst = InstanceType.Local;
+                                            else if (compileContext.Data.GMS2_3)
+                                                patch.InstType = InstanceType.Self;
                                         }
                                     }
                                 }
@@ -210,6 +213,14 @@ namespace UndertaleModLib.Compiler
                                             realInstType = InstanceType.Self; // used with @@This@@
                                         else if (realInstType == InstanceType.Stacktop)
                                             realInstType = InstanceType.Self; // used with @@GetInstance@@
+
+                                        // 2.3 variable fix
+                                        // Definitely needs at least some change when ++/-- support is added,
+                                        // since that does use instance type global
+                                        if (compileContext.Data.GMS2_3 &&
+                                            patch.VarType == VariableType.Array &&
+                                            realInstType == InstanceType.Global)
+                                            realInstType = InstanceType.Self;
 
                                         UndertaleVariable def = variables.EnsureDefined(patch.Name, realInstType,
                                                                  compileContext.BuiltInList.GlobalArray.ContainsKey(patch.Name) ||
@@ -835,8 +846,19 @@ namespace UndertaleModLib.Compiler
                         {
                             Patch endPatch = Patch.Start();
                             Patch popEnvPatch = Patch.Start();
-
-                            AssembleExpression(cw, s.Children[0]); // new object/context
+                            // Hacky override for @@Other@@ usage- will likely expand to whatever other cases it turns out the compiler uses.
+                            // (instance_exists appears to be one of them, but that might actually be an overzealous decompiler conversion.
+                            if (cw.compileContext.Data.GMS2_3 &&
+                               (s.Children[0].Kind == Parser.Statement.StatementKind.ExprConstant &&
+                               (InstanceType)s.Children[0].Constant.valueNumber == InstanceType.Other))
+                            {
+                                cw.Emit(Opcode.Call, DataType.Int32).Function = new Reference<UndertaleFunction>(
+                                    cw.compileContext.Data.Functions.ByName("@@Other@@")
+                                );
+                                cw.typeStack.Push(DataType.Variable);
+                            }
+                            else
+                                AssembleExpression(cw, s.Children[0]); // new object/context
                             var type = cw.typeStack.Pop();
                             if (type != DataType.Int32)
                             {
@@ -1004,7 +1026,7 @@ namespace UndertaleModLib.Compiler
                 cw.Emit(op, type, DataType.Variable);
                 
                 // Store back, using duplicate reference if necessary
-                AssembleStoreVariable(cw, s.Children[0], DataType.Variable, !isSingle);
+                AssembleStoreVariable(cw, s.Children[0], DataType.Variable, !isSingle, true);
             }
 
             private static void AssemblePostOrPre(CodeWriter cw, Parser.Statement s, bool isPost, bool isExpression)
@@ -1553,21 +1575,37 @@ namespace UndertaleModLib.Compiler
 
                             // Special array access- instance type needs to be pushed beforehand
                             cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)e.Children[0].ID;
-                            AssembleArrayPush(cw, e.Children[0]);
+                            // Pushing array (incl. 2D) but not popping
+                            AssembleArrayPush(cw, e.Children[0], !duplicate);
                             if (duplicate)
                             {
-                                if (useLongDupForArray)
-                                    cw.Emit(Opcode.Dup, DataType.Int64).Extra = 0;
+                                if (cw.compileContext.Data.GMS2_3 && e.Children[0].Children.Count != 1)
+                                {
+                                    cw.Emit(Opcode.Dup, DataType.Int32).Extra = 4;
+                                    cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-8; // savearef
+                                }
                                 else
-                                    cw.Emit(Opcode.Dup, DataType.Int32).Extra = 1;
+                                {
+                                    if (useLongDupForArray)
+                                        cw.Emit(Opcode.Dup, DataType.Int64).Extra = 0;
+                                    else
+                                        cw.Emit(Opcode.Dup, DataType.Int32).Extra = 1;
+                                }
                             }
-                            cw.varPatches.Add(new VariablePatch()
+                            if (cw.compileContext.Data.GMS2_3 && e.Children[0].Children.Count != 1)
                             {
-                                Target = cw.EmitRef(Opcode.Push, DataType.Variable),
-                                Name = e.Children[0].Text,
-                                InstType = GetIDPrefixSpecial(e.Children[0].ID),
-                                VarType = VariableType.Array
-                            });
+                                cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-2; // pushaf
+                            }
+                            else
+                            {
+                                cw.varPatches.Add(new VariablePatch()
+                                {
+                                    Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                                    Name = e.Children[0].Text,
+                                    InstType = GetIDPrefixSpecial(e.Children[0].ID),
+                                    VarType = VariableType.Array
+                                });
+                            }
                             cw.typeStack.Push(DataType.Variable);
                             isArray = true;
                             return;
@@ -1587,7 +1625,7 @@ namespace UndertaleModLib.Compiler
                                     {
                                         Target = cw.EmitRef(useNoSpecificType ? Opcode.Push : Opcode.PushBltn, DataType.Variable),
                                         Name = name,
-                                        InstType = InstanceType.Self,
+                                        InstType = (cw.compileContext.Data.GMS2_3 && !useNoSpecificType) ? InstanceType.Builtin : InstanceType.Self,
                                         VarType = VariableType.Normal
                                     });
                                 }
@@ -1679,7 +1717,10 @@ namespace UndertaleModLib.Compiler
                             {
                                 if (duplicate && next + 1 >= e.Children.Count)
                                 {
-                                    cw.Emit(Opcode.Dup, DataType.Int32).Extra = 0;
+                                    if (cw.compileContext.Data.GMS2_3)
+                                        cw.Emit(Opcode.Dup, DataType.Int32).Extra = 4;
+                                    else
+                                        cw.Emit(Opcode.Dup, DataType.Int32).Extra = 0;
                                 }
                                 cw.varPatches.Add(new VariablePatch()
                                 {
@@ -1722,7 +1763,7 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static void AssembleArrayPush(CodeWriter cw, Parser.Statement a)
+            private static void AssembleArrayPush(CodeWriter cw, Parser.Statement a, bool arraypushaf = false)
             {
                 // 1D index
                 Parser.Statement index1d = a.Children[0];
@@ -1745,9 +1786,23 @@ namespace UndertaleModLib.Compiler
                     // These instructions are hardcoded. Honestly it seems pretty
                     // inefficient because these could be easily combined into
                     // one small instruction.
-                    cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-1; // chkindex
-                    cw.Emit(Opcode.Push, DataType.Int32).Value = 32000; 
-                    cw.Emit(Opcode.Mul, DataType.Int32, DataType.Int32); 
+                    // And they were, in 2.3.
+                    if (cw.compileContext.Data.GMS2_3)
+                    {
+                        cw.varPatches.Add(new VariablePatch()
+                        {
+                            Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                            Name = a.Text,
+                            InstType = InstanceType.Self,
+                            VarType = arraypushaf ? VariableType.ArrayPushAF : VariableType.ArrayPopAF
+                        });
+                    }
+                    else
+                    {
+                        cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-1; // chkindex
+                        cw.Emit(Opcode.Push, DataType.Int32).Value = 32000;
+                        cw.Emit(Opcode.Mul, DataType.Int32, DataType.Int32);
+                    }
 
                     Parser.Statement index2d = a.Children[1];
                     if (index2d.Kind == Parser.Statement.StatementKind.ExprConstant &&
@@ -1763,8 +1818,11 @@ namespace UndertaleModLib.Compiler
                         cw.typeStack.Push(DataType.Int32);
                     }
 
-                    cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-1; // chkindex
-                    cw.Emit(Opcode.Add, DataType.Int32, DataType.Int32);
+                    if (!cw.compileContext.Data.GMS2_3)
+                    {
+                        cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-1; // chkindex
+                        cw.Emit(Opcode.Add, DataType.Int32, DataType.Int32);
+                    }
 
                     cw.typeStack.Pop();
                 }
@@ -1782,7 +1840,7 @@ namespace UndertaleModLib.Compiler
                 };
             }
 
-            private static void AssembleStoreVariable(CodeWriter cw, Parser.Statement s, DataType typeToStore, bool skip = false)
+            private static void AssembleStoreVariable(CodeWriter cw, Parser.Statement s, DataType typeToStore, bool skip = false, bool duplicate = false)
             {
                 if (s.Kind == Parser.Statement.StatementKind.ExprVariableRef)
                 {
@@ -1797,16 +1855,37 @@ namespace UndertaleModLib.Compiler
                             // Special array set- instance type needs to be pushed beforehand
                             if (!skip)
                             {
+                                // Convert to variable in 2.3
+                                if (cw.compileContext.Data.GMS2_3 && typeToStore != DataType.Variable)
+                                {
+                                    cw.Emit(Opcode.Conv, typeToStore, DataType.Variable);
+                                    typeToStore = DataType.Variable;
+                                }
                                 cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)s.Children[0].ID;
                                 AssembleArrayPush(cw, s.Children[0]);
                             }
-                            cw.varPatches.Add(new VariablePatch()
+
+                            if (cw.compileContext.Data.GMS2_3 && s.Children[0].Children.Count != 1)
                             {
-                                Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
-                                Name = s.Children[0].Text,
-                                InstType = GetIDPrefixSpecial(s.Children[0].ID),
-                                VarType = VariableType.Array
-                            });
+                                if (duplicate)
+                                {
+                                    cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-9; // restorearef
+                                    UndertaleInstruction dupInst = cw.Emit(Opcode.Dup, DataType.Int32);
+                                    dupInst.Extra = 4;
+                                    dupInst.ComparisonKind = (ComparisonType)168; // idek what this is but it disassembles as 40
+                                }
+                                cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-3; // popaf
+                            }
+                            else
+                            {
+                                cw.varPatches.Add(new VariablePatch()
+                                {
+                                    Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
+                                    Name = s.Children[0].Text,
+                                    InstType = GetIDPrefixSpecial(s.Children[0].ID),
+                                    VarType = VariableType.Array
+                                });
+                            }
                             return;
                         }
 
@@ -1926,7 +2005,7 @@ namespace UndertaleModLib.Compiler
                         }
                     }
                     fix.Children.Add(fix2);
-                    AssembleStoreVariable(cw, fix, typeToStore, skip);
+                    AssembleStoreVariable(cw, fix, typeToStore, skip, duplicate);
                 }
                 else
                 {

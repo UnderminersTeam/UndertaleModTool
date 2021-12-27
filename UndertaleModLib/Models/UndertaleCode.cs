@@ -795,8 +795,15 @@ namespace UndertaleModLib.Models
 
             string kind = Kind.ToString();
             var type = GetInstructionType(Kind);
+            bool unknownBreak = false;
             if (type == InstructionType.BreakInstruction)
-                kind = Assembler.BreakIDToName[(short)Value];
+            {
+                if (!Assembler.BreakIDToName.TryGetValue((short)Value, out kind))
+                {
+                    kind = kind.ToLower();
+                    unknownBreak = true;
+                }
+            }
             else
                 kind = kind.ToLower();
             sb.Append(kind);
@@ -893,8 +900,11 @@ namespace UndertaleModLib.Models
 
                 case InstructionType.BreakInstruction:
                     sb.Append("." + Type1.ToOpcodeParam());
-                    //sb.Append(" ");
-                    //sb.Append(Value.ToString());
+                    if (unknownBreak)
+                    {
+                        sb.Append(" ");
+                        sb.Append(Value.ToString());
+                    }
                     break;
             }
             return sb.ToString();
@@ -1147,6 +1157,8 @@ namespace UndertaleModLib.Models
 
             Append(context.ResultAssembly);
 
+            data.GMLCacheChanged?.Add(Name.Content);
+
             try
             {
                 // Attempt to write text in all modes, because this is a special case.
@@ -1173,6 +1185,8 @@ namespace UndertaleModLib.Models
             }
 
             Replace(context.ResultAssembly);
+
+            data.GMLCacheChanged?.Add(Name.Content);
 
             try
             {

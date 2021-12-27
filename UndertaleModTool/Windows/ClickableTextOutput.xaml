@@ -8,13 +8,15 @@
         Title="ClickableTextOutput" Height="540" Width="536" MinHeight="160" MinWidth="210">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="459*"/>
+            <RowDefinition Height="25*"/>
+            <RowDefinition Height="434*"/>
             <RowDefinition Height="65"/>
         </Grid.RowDefinitions>
         <Grid.Background>
             <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
         </Grid.Background>
-        <RichTextBox x:Name="OutTextBox" Grid.Row="0" Margin="10,22,10,0" FontSize="14" IsDocumentEnabled="True" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <Label x:Name="FillingLabel" Content="Displaying the results, please wait..." HorizontalAlignment="Center" VerticalAlignment="Top" Visibility="Hidden" FontSize="14" FontStyle="Normal" Margin="0,-3,0,0" Grid.RowSpan="2"/>
+        <RichTextBox x:Name="OutTextBox" Margin="10,25,10,0" FontSize="14" IsDocumentEnabled="True" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.RowSpan="2">
             <RichTextBox.Background>
                 <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlLightLightColorKey}}"/>
             </RichTextBox.Background>
@@ -27,6 +29,9 @@
                     <Setter Property="Margin" Value="0"/>
                 </Style>
             </RichTextBox.Resources>
+            <Control.CommandBindings>
+                <CommandBinding Command="Copy" Executed="OnCopyCommand"/>
+            </Control.CommandBindings>
             <RichTextBox.ContextMenu>
                 <ContextMenu Name="textCommandsMenu">
                     <MenuItem Name="copyMenuItem" Header="Copy" Click="copyMenuItem_Click"/>
@@ -39,6 +44,6 @@
                 </Paragraph>
             </FlowDocument>
         </RichTextBox>
-        <Button Content="Done" FontSize="16" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="35" Click="Button_Click"/>
+        <Button Content="Done" FontSize="16" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="35" Click="Button_Click"/>
     </Grid>
 </Window>
