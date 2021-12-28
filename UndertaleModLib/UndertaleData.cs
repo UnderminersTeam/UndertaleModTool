@@ -82,6 +82,7 @@ namespace UndertaleModLib
         public bool GMS2_3 = false;
         public bool GMS2_3_1 = false;
         public bool GMS2_3_2 = false;
+        public bool UseQoiFormat = false;
         public ToolInfo ToolInfo = new ToolInfo();
         public int PaddingAlignException = -1;
 
