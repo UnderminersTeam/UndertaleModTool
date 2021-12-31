@@ -2199,7 +2199,7 @@ result in loss of work.");
             if (File.Exists(TempFilesFolder))
             {
                 await Task.Delay(3000);
-                File.Delete(TempFilesFolder);
+                //File.Delete(TempFilesFolder);
             }
         }
         private async void Command_RunSpecial(object sender, ExecutedRoutedEventArgs e)
