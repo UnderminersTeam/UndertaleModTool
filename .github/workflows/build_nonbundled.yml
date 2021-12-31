@@ -1,4 +1,4 @@
-name: Build tool
+name: Build tool non single file
 
 on:
   push:

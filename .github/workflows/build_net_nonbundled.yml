@@ -1,4 +1,4 @@
-name: Build tool NET Bundled
+name: Build tool NET Bundled non-single file
 
 on:
   push:
