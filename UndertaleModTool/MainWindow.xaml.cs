@@ -1904,7 +1904,7 @@ namespace UndertaleModTool
         public string PromptChooseDirectory(string prompt)
         {
             VistaFolderBrowserDialog folderBrowser = new VistaFolderBrowserDialog();
-            return folderBrowser.ShowDialog() == true ? Path.GetDirectoryName(folderBrowser.SelectedPath) + Path.DirectorySeparatorChar : null;
+            return folderBrowser.ShowDialog() == true ? folderBrowser.SelectedPath : null;
         }
         
         #pragma warning disable CA1416
