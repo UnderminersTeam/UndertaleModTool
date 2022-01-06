@@ -40,12 +40,15 @@ namespace UndertaleModTool
             set { SetValue(PreviewPathProperty, value); }
         }
 
+        private Stack<UndertaleObject> undoStack;
+
         public UndertaleRoomEditor()
         {
             InitializeComponent();
 
             Loaded += UndertaleRoomEditor_Loaded;
             DataContextChanged += UndertaleRoomEditor_DataContextChanged;
+            undoStack = new Stack<UndertaleObject>();
         }
 
         public void SaveImagePNG(Stream outfile)
@@ -111,48 +114,199 @@ namespace UndertaleModTool
         }
 
         private UndertaleObject movingObj;
-        private double hotpointX, hotpointY;
+        private UndertaleRoom.Tile movingTile;
+        private double hotpointX, hotpointY, hotpointTileX, hotpointTileY;
+        private ScaleTransform canvasSt = new ScaleTransform();
 
         private void Rectangle_MouseDown(object sender, MouseButtonEventArgs e)
         {
             UndertaleObject clickedObj = (sender as Rectangle).DataContext as UndertaleObject;
-            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+            UndertaleRoom.Layer layer = ObjectEditor.Content as UndertaleRoom.Layer;
+            if (clickedObj is UndertaleRoom.GameObject && Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
+            {
+                if (layer != null && layer.InstancesData == null)
+                {
+                    MessageBox.Show("Must be on an instances layer", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                var other = clickedObj as UndertaleRoom.GameObject;
+                var newObj = new UndertaleRoom.GameObject
+                {
+                    X = other.X,
+                    Y = other.Y,
+                    ObjectDefinition = other.ObjectDefinition,
+                    InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj++,
+                    CreationCode = other.CreationCode,
+                    ScaleX = other.ScaleX,
+                    ScaleY = other.ScaleY,
+                    Color = other.Color,
+                    Rotation = other.Rotation,
+                    PreCreateCode = other.PreCreateCode
+                };
+                var index = room.GameObjects.IndexOf(other);
+                room.GameObjects.Insert(index + 1, newObj);
+                clickedObj = newObj;
+            }
+            if (clickedObj is UndertaleRoom.Tile && Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
+            {
+                if (layer != null && layer.AssetsData == null)
+                {
+                    MessageBox.Show("Must be on an assets layer", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                var other = clickedObj as UndertaleRoom.Tile;
+                var newObj = new UndertaleRoom.Tile
+                {
+                    X = other.X,
+                    Y = other.Y,
+                    _SpriteMode = other._SpriteMode,
+                    ObjectDefinition = other.ObjectDefinition,
+                    SourceX = other.SourceX,
+                    SourceY = other.SourceY,
+                    Width = other.Width,
+                    Height = other.Height,
+                    TileDepth = other.TileDepth,
+                    InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastTile++,
+                    ScaleX = other.ScaleX,
+                    ScaleY = other.ScaleY,
+                    Color = other.Color
+                };
+                var index = room.Tiles.IndexOf(other);
+                room.Tiles.Insert(index + 1, newObj);
+                clickedObj = newObj;
+            }
 
             SelectObject(clickedObj);
 
             var mousePos = e.GetPosition(RoomGraphics);
-            if (selectedObj is UndertaleRoom.GameObject || selectedObj is UndertaleRoom.Tile)
+            if (clickedObj is UndertaleRoom.GameObject || clickedObj is UndertaleRoom.Tile)
             {
                 movingObj = clickedObj;
                 if (movingObj is UndertaleRoom.GameObject)
                 {
+                    var other = movingObj as UndertaleRoom.GameObject;
+                    var undoObj = new UndertaleRoom.GameObject()
+                    {
+                        X = other.X,
+                        Y = other.Y,
+                        ObjectDefinition = other.ObjectDefinition,
+                        InstanceID = other.InstanceID,
+                        CreationCode = other.CreationCode,
+                        ScaleX = other.ScaleX,
+                        ScaleY = other.ScaleY,
+                        Color = other.Color,
+                        Rotation = other.Rotation,
+                        PreCreateCode = other.PreCreateCode
+                    };
+                    undoStack.Push(undoObj);
                     hotpointX = mousePos.X - (movingObj as UndertaleRoom.GameObject).X;
                     hotpointY = mousePos.Y - (movingObj as UndertaleRoom.GameObject).Y;
                 }
                 else if (movingObj is UndertaleRoom.Tile)
                 {
+                    var other = movingObj as UndertaleRoom.Tile;
+                    var undoObj = new UndertaleRoom.Tile()
+                    {
+                        X = other.X,
+                        Y = other.Y,
+                        _SpriteMode = other._SpriteMode,
+                        ObjectDefinition = other.ObjectDefinition,
+                        SourceX = other.SourceX,
+                        SourceY = other.SourceY,
+                        Width = other.Width,
+                        Height = other.Height,
+                        TileDepth = other.TileDepth,
+                        InstanceID = other.InstanceID,
+                        ScaleX = other.ScaleX,
+                        ScaleY = other.ScaleY,
+                        Color = other.Color
+                    };
+                    undoStack.Push(undoObj);
                     hotpointX = mousePos.X - (movingObj as UndertaleRoom.Tile).X;
                     hotpointY = mousePos.Y - (movingObj as UndertaleRoom.Tile).Y;
                 }
             }
         }
 
+        private void RectangleTile_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var element = sender as Rectangle;
+            UndertaleRoom.Tile clickedObj = (sender as Rectangle).DataContext as UndertaleRoom.Tile;
+            var mousePos = e.GetPosition(element.Parent as UIElement);
+            movingTile = clickedObj;
+            hotpointTileX = mousePos.X - movingTile.SourceX;
+            hotpointTileY = mousePos.Y - movingTile.SourceY;
+        }
+
+        private void RectangleTile_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (movingTile != null)
+            {
+                var element = sender as UIElement;
+                UndertaleRoom room = this.DataContext as UndertaleRoom;
+
+                var maxX = movingTile.Tpag.BoundingWidth;
+                var maxY = movingTile.Tpag.BoundingHeight;
+
+                var mousePos = e.GetPosition(element);
+
+                int tgtX = (int)Math.Clamp(mousePos.X - hotpointTileX, 0, maxX - movingTile.Width);
+                int tgtY = (int)Math.Clamp(mousePos.Y - hotpointTileY, 0, maxY - movingTile.Height);
+
+                int scaleX = (int)Math.Clamp(mousePos.X - movingTile.SourceX, 0, maxX);
+                int scaleY = (int)Math.Clamp(mousePos.Y - movingTile.SourceY, 0, maxY);
+
+                int gridSize = Convert.ToInt32(room.Grid);
+                if (gridSize <= 0)
+                    gridSize = 1;
+                else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+                    gridSize = gridSize / 2;
+                else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+                    gridSize = gridSize * 2;
+
+                // Snap to grid
+                tgtX = (tgtX + gridSize / 2) / gridSize * gridSize;
+                tgtY = (tgtY + gridSize / 2) / gridSize * gridSize;
+
+                scaleX = (scaleX + gridSize / 2) / gridSize * gridSize;
+                scaleY = (scaleY + gridSize / 2) / gridSize * gridSize;
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
+                {
+                    movingTile.Width = (uint)scaleX;
+                    movingTile.Height = (uint)scaleY;
+                }
+                else
+                {
+                    movingTile.SourceX = (uint)tgtX;
+                    movingTile.SourceY = (uint)tgtY;
+                }
+            }
+        }
+
+        private void RectangleTile_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            movingTile = null;
+        }
+
         private void Rectangle_MouseMove(object sender, MouseEventArgs e)
         {
             if (movingObj != null)
             {
+                UndertaleRoom room = this.DataContext as UndertaleRoom;
+
                 var mousePos = e.GetPosition(RoomGraphics);
 
                 int tgtX = (int)(mousePos.X - hotpointX);
                 int tgtY = (int)(mousePos.Y - hotpointY);
 
-                int gridSize = 5;
-                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
-                    gridSize = 20;
-                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
-                    gridSize = 10;
-                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+                int gridSize = Convert.ToInt32(room.Grid);
+                if (gridSize <= 0)
                     gridSize = 1;
+                else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+                    gridSize = gridSize/2;
+                else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+                    gridSize = gridSize*2;
 
                 // Snap to grid
                 tgtX = ((tgtX + gridSize / 2) / gridSize) * gridSize;
@@ -168,6 +322,48 @@ namespace UndertaleModTool
                     (movingObj as UndertaleRoom.Tile).X = tgtX;
                     (movingObj as UndertaleRoom.Tile).Y = tgtY;
                 }
+            }
+        }
+
+        private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            e.Handled = true;
+            var element = sender as System.Windows.Controls.ItemsControl;
+            var mousePos = e.GetPosition(RoomGraphics);
+            var transform = element.LayoutTransform as MatrixTransform;
+            var matrix = transform.Matrix;
+            var scale = e.Delta >= 0 ? 1.1 : (1.0 / 1.1); // choose appropriate scaling factor
+
+            if ((matrix.M11 > 0.2 || (matrix.M11 <= 0.2 && scale > 1)) && (matrix.M11 < 3 || (matrix.M11 >= 3 && scale < 1)))
+            {
+                matrix.ScaleAtPrepend(scale, scale, mousePos.X, mousePos.Y);
+            }
+            element.LayoutTransform = new MatrixTransform(matrix);
+        }
+
+        private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            ScrollViewer scrollViewer = sender as ScrollViewer;
+
+            if (e.ExtentHeightChange != 0 || e.ExtentWidthChange != 0)
+            {
+                double xMousePositionOnScrollViewer = Mouse.GetPosition(scrollViewer).X;
+                double yMousePositionOnScrollViewer = Mouse.GetPosition(scrollViewer).Y;
+                double offsetX = e.HorizontalOffset + xMousePositionOnScrollViewer;
+                double offsetY = e.VerticalOffset + yMousePositionOnScrollViewer;
+
+                double oldExtentWidth = e.ExtentWidth - e.ExtentWidthChange;
+                double oldExtentHeight = e.ExtentHeight - e.ExtentHeightChange;
+
+                double relx = offsetX / oldExtentWidth;
+                double rely = offsetY / oldExtentHeight;
+
+                offsetX = Math.Max(relx * e.ExtentWidth - xMousePositionOnScrollViewer, 0);
+                offsetY = Math.Max(rely * e.ExtentHeight - yMousePositionOnScrollViewer, 0);
+
+                ScrollViewer scrollViewerTemp = sender as ScrollViewer;
+                scrollViewerTemp.ScrollToHorizontalOffset(offsetX);
+                scrollViewerTemp.ScrollToVerticalOffset(offsetY);
             }
         }
 
@@ -221,14 +417,15 @@ namespace UndertaleModTool
         private void Canvas_Drop(object sender, DragEventArgs e)
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[e.Data.GetFormats().Length - 1]) as UndertaleObject;
-            
+
             e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && (sourceItem is UndertaleGameObject || sourceItem is UndertalePath) ? DragDropEffects.Link : DragDropEffects.None;
             if (e.Effects == DragDropEffects.Link)
             {
                 if (sourceItem is UndertaleBackground)
                 {
 
-                } else if (sourceItem is UndertaleGameObject)
+                }
+                else if (sourceItem is UndertaleGameObject)
                 {
                     UndertaleGameObject droppedObject = sourceItem as UndertaleGameObject;
                     var mousePos = e.GetPosition(RoomGraphics);
@@ -276,7 +473,7 @@ namespace UndertaleModTool
             {
                 UndertaleRoom room = this.DataContext as UndertaleRoom;
                 UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-                
+
                 if (selectedObj is UndertaleRoom.Background)
                 {
                     UndertaleRoom.Background bg = selectedObj as UndertaleRoom.Background;
@@ -320,6 +517,70 @@ namespace UndertaleModTool
                     ObjectEditor.Content = null;
                 }
             }
+            if (e.Key == Key.OemMinus)
+            {
+                UndertaleRoom room = this.DataContext as UndertaleRoom;
+                UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+
+                if (selectedObj is UndertaleRoom.Tile)
+                {
+                    UndertaleRoom.Tile tile = selectedObj as UndertaleRoom.Tile;
+                    var index = room.Tiles.IndexOf(tile);
+                    if (index > 0)
+                    {
+                        var prevIndex = index - 1;
+                        var prevIndexObj = room.Tiles[prevIndex];
+                        room.Tiles[prevIndex] = tile;
+                        room.Tiles[index] = prevIndexObj;
+                        SelectObject(tile);
+                    }
+                }
+                else if (selectedObj is UndertaleRoom.GameObject)
+                {
+                    UndertaleRoom.GameObject gameObj = selectedObj as UndertaleRoom.GameObject;
+                    var index = room.GameObjects.IndexOf(gameObj);
+                    if (index > 0)
+                    {
+                        var prevIndex = index - 1;
+                        var prevIndexObj = room.GameObjects[prevIndex];
+                        room.GameObjects[prevIndex] = gameObj;
+                        room.GameObjects[index] = prevIndexObj;
+                        SelectObject(gameObj);
+                    }
+                }
+            }
+            if (e.Key == Key.OemPlus)
+            {
+                UndertaleRoom room = this.DataContext as UndertaleRoom;
+                UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+
+                if (selectedObj is UndertaleRoom.Tile)
+                {
+                    UndertaleRoom.Tile tile = selectedObj as UndertaleRoom.Tile;
+                    var index = room.Tiles.IndexOf(tile);
+                    if (index < room.Tiles.Count - 1)
+                    {
+                        var prevIndex = index + 1;
+                        var prevIndexObj = room.Tiles[prevIndex];
+                        room.Tiles[prevIndex] = tile;
+                        room.Tiles[index] = prevIndexObj;
+                        SelectObject(tile);
+                    }
+                }
+                else if (selectedObj is UndertaleRoom.GameObject)
+                {
+                    UndertaleRoom.GameObject gameObj = selectedObj as UndertaleRoom.GameObject;
+                    var index = room.GameObjects.IndexOf(gameObj);
+                    if (index < room.GameObjects.Count - 1)
+                    {
+                        var prevIndex = index + 1;
+                        var prevIndexObj = room.GameObjects[prevIndex];
+                        room.GameObjects[prevIndex] = gameObj;
+                        room.GameObjects[index] = prevIndexObj;
+                        SelectObject(gameObj);
+                    }
+                }
+            }
         }
 
         private void RoomObjectsTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -342,10 +603,39 @@ namespace UndertaleModTool
             UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
             if (selectedObj != null)
             {
-                Debug.WriteLine("Copy");
                 /*Clipboard.Clear();
                 Clipboard.SetDataObject(new DataObject(selectedObj));*/
                 copied = selectedObj;
+            }
+        }
+
+        public void Command_Undo(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (undoStack.Any())
+            {
+                UndertaleRoom room = this.DataContext as UndertaleRoom;
+                var undoObject = undoStack.Pop();
+                if (undoObject is UndertaleRoom.GameObject && ObjectEditor.Content is UndertaleRoom.GameObject)
+                {
+                    var toChange = ObjectEditor.Content as UndertaleRoom.GameObject;
+                    var undoGameObject = undoObject as UndertaleRoom.GameObject;
+                    if (toChange.InstanceID == undoGameObject.InstanceID)
+                    {
+                        toChange.X = undoGameObject.X;
+                        toChange.Y = undoGameObject.Y;
+                    }
+                }
+                if (undoObject is UndertaleRoom.Tile && ObjectEditor.Content is UndertaleRoom.Tile)
+                {
+                    var toChange = ObjectEditor.Content as UndertaleRoom.Tile;
+                    var undoGameObject = undoObject as UndertaleRoom.Tile;
+                    if (toChange.InstanceID == undoGameObject.InstanceID)
+                    {
+                        toChange.X = undoGameObject.X;
+                        toChange.Y = undoGameObject.Y;
+                    }
+                }
+                (this.DataContext as UndertaleRoom)?.SetupRoom();
             }
         }
 
@@ -369,7 +659,7 @@ namespace UndertaleModTool
                     MessageBox.Show("Must paste onto a layer", "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                
+
                 if (copied is UndertaleRoom.GameObject)
                 {
                     if (layer != null && layer.InstancesData == null)
@@ -403,8 +693,8 @@ namespace UndertaleModTool
                     }
                     var other = copied as UndertaleRoom.Tile;
                     var obj = new UndertaleRoom.Tile();
-                    obj.X = -(int)other.Height; //other.X;
-                    obj.Y = -(int) other.Height; //other.Y;
+                    obj.X = other.X;
+                    obj.Y = other.Y;
                     obj._SpriteMode = other._SpriteMode;
                     obj.ObjectDefinition = other.ObjectDefinition;
                     obj.SourceX = other.SourceX;
@@ -436,11 +726,11 @@ namespace UndertaleModTool
 
             // Find the largest layer id
             // See #355
-            foreach (UndertaleRoom Room in data.Rooms) 
+            foreach (UndertaleRoom Room in data.Rooms)
             {
-                foreach (UndertaleRoom.Layer Layer in Room.Layers) 
+                foreach (UndertaleRoom.Layer Layer in Room.Layers)
                 {
-                    if (Layer.LayerId > largest_layerid) 
+                    if (Layer.LayerId > largest_layerid)
                         largest_layerid = Layer.LayerId;
                 }
             }
@@ -599,6 +889,25 @@ namespace UndertaleModTool
     }
 
     [ValueConversion(typeof(ObservableCollection<UndertaleRoom.GameObject>), typeof(int))]
+    public class ObjXOffsetConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            UndertaleRoom.GameObject obj = value as UndertaleRoom.GameObject;
+            if (obj == null)
+                return 0;
+            if (obj.ObjectDefinition == null || obj.ObjectDefinition.Sprite == null)
+                return obj.X;
+            return obj.X + obj.ObjectDefinition.Sprite.OriginX;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    [ValueConversion(typeof(ObservableCollection<UndertaleRoom.GameObject>), typeof(int))]
     public class ObjCenterYConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -631,8 +940,8 @@ namespace UndertaleModTool
             if (element != null && item != null && item is UndertaleRoom.Layer)
             {
                 UndertaleRoom.Layer layer = item as UndertaleRoom.Layer;
-                
-                switch(layer.LayerType)
+
+                switch (layer.LayerType)
                 {
                     case UndertaleRoom.LayerType.Instances:
                         return InstancesDataTemplate;
@@ -654,7 +963,7 @@ namespace UndertaleModTool
         public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             CompositeCollection collection = new CompositeCollection();
-            foreach(var v in values)
+            foreach (var v in values)
                 if (v is IEnumerable)
                     collection.Add(new CollectionContainer() { Collection = (IEnumerable)v });
             return collection;
@@ -665,7 +974,7 @@ namespace UndertaleModTool
             throw new NotSupportedException();
         }
     }
-    
+
     public class LayerFlattenerConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

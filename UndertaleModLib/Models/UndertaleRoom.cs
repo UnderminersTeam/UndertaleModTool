@@ -42,6 +42,8 @@ namespace UndertaleModLib.Models
         public float GravityX { get; set; } = 0;
         public float GravityY { get; set; } = 10;
         public float MetersPerPixel { get; set; } = 0.1f;
+        public double Grid { get; set; } = 16d;
+        public double GridThicknessPx { get; set; } = 1d;
         public UndertalePointerList<Background> Backgrounds { get; private set; } = new UndertalePointerList<Background>();
         public UndertalePointerList<View> Views { get; private set; } = new UndertalePointerList<View>();
         public UndertalePointerListLenCheck<GameObject> GameObjects { get; private set; } = new UndertalePointerListLenCheck<GameObject>();
@@ -349,6 +351,8 @@ namespace UndertaleModLib.Models
 
             public event PropertyChangedEventHandler PropertyChanged;
             public float OppositeRotation => 360F - Rotation;
+            public int XOffset => ObjectDefinition.Sprite != null ? X - ObjectDefinition.Sprite.OriginX : X;
+            public int YOffset => ObjectDefinition.Sprite != null ? Y - ObjectDefinition.Sprite.OriginY : Y;
 
             public void Serialize(UndertaleWriter writer)
             {
