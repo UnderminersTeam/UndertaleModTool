@@ -512,8 +512,7 @@ string CheckValidity()
     bool recursiveCheck = ScriptQuestion(@"This script imports all sprites in all subdirectories recursively.
 If an image file is in a folder named ""Backgrounds"", then the image will be imported as a background.
 Otherwise, the image will be imported as a sprite.
-Do you want to continue?
-");
+Do you want to continue?");
     if (!recursiveCheck)
         throw new ScriptException("Script cancelled.");
 
