@@ -299,9 +299,10 @@ namespace UndertaleModTool
                     decompilationOutput = Decompiler.Decompile(gettextCode, new GlobalDecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
                 }
             }
+            Regex textdataRegex = new Regex("^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", \\\"(.*)\\\"\\)");
             foreach (var line in decompilationOutput)
             {
-                Match m = Regex.Match(line, "^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", \\\"(.*)\\\"\\)");
+                Match m = textdataRegex.Match(line);
                 if (m.Success)
                 {
                     try
@@ -310,7 +311,7 @@ namespace UndertaleModTool
                     }
                     catch (ArgumentException)
                     {
-                        MessageBox.Show("There is a duplicate key in textdata_en. This may cause errors in the comment display of text.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("There is a duplicate key in textdata_en, being " + m.Groups[1].Value + ". This may cause errors in the comment display of text.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                     catch
                     {
