@@ -509,9 +509,11 @@ SpriteType GetSpriteType(string path)
 
 string CheckValidity()
 {
-    bool recursiveCheck = ScriptQuestion(@"This script requires will import all valid sprites from all subdirectories.
-If you do not want this to occur, please click ""No"" to cancel the script.
-Then make sure that the sprites you wish to import are in a separate directory with no subdirectories.");
+    bool recursiveCheck = ScriptQuestion(@"This script imports all sprites in all subdirectories recursively.
+If an image file is in a folder named ""Backgrounds"", then the image will be imported as a background.
+Otherwise, the image will be imported as a sprite.
+Do you want to continue?
+");
     if (!recursiveCheck)
         throw new ScriptException("Script cancelled.");
 
@@ -521,6 +523,8 @@ Then make sure that the sprites you wish to import are in a separate directory w
         throw new ScriptException("The import folder was not set.");
 
     //Stop the script if there's missing sprite entries or w/e.
+    bool hadMessage = false;
+    bool importAsSprite = false;
     string[] dirFiles = Directory.GetFiles(importFolder, "*.png", SearchOption.AllDirectories);
     foreach (string file in dirFiles)
     {
@@ -531,13 +535,23 @@ Then make sure that the sprites you wish to import are in a separate directory w
 
         SpriteType spriteType = GetSpriteType(file);
 
-        if (spriteType == SpriteType.Unknown)
+        if ((spriteType != SpriteType.Sprite) && (spriteType != SpriteType.Background))
         {
-            throw new ScriptException(FileNameWithExtension + " is in an incorrectly-named folder.");
-        }
-        else if (spriteType == SpriteType.Font)
-        {
-            throw new ScriptException("This script does not support importing fonts.");
+            if (!hadMessage)
+            {
+                hadMessage = true;
+                importAsSprite = ScriptQuestion(FileNameWithExtension + @" is in an incorrectly-named folder (valid names being ""Sprites"" and ""Backgrounds""). Would you like to import these images as sprites?
+Pressing ""No"" will cause the program to ignore these images.");
+            }
+
+            if (!importAsSprite)
+            {
+                continue;
+            }
+            else
+            {
+                spriteType = SpriteType.Sprite;
+            }
         }
 
         // Check for duplicate filenames
