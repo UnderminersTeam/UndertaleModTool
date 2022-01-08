@@ -282,7 +282,8 @@ namespace UndertaleModLib.Compiler
                                 {
                                     patch.Target.Value = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>(
                                                                         compileContext.Data.Strings[ind], ind);
-                                } else
+                                } 
+                                else
                                 {
                                     UndertaleString newString = new UndertaleString(patch.Content);
                                     patch.Target.Value = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>(
@@ -591,7 +592,8 @@ namespace UndertaleModLib.Compiler
                                 conditionPatch.Finish(cw);
                                 AssembleStatement(cw, s.Children[2]); // else statement
                                 elsePatch.Finish(cw);
-                            } else
+                            } 
+                            else
                             {
                                 conditionPatch.Finish(cw);
                             }
@@ -891,7 +893,8 @@ namespace UndertaleModLib.Compiler
                                     dropPopenv.JumpOffset = -1048576; // magic for older versions
 
                                 cleanUpEndPatch.Finish(cw);
-                            } else
+                            }
+                            else
                             {
                                 endPatch.Finish(cw);
                             }
@@ -965,7 +968,8 @@ namespace UndertaleModLib.Compiler
                                 if (oc.Kind == OtherContext.ContextKind.Switch)
                                 {
                                     cw.Emit(Opcode.Popz, oc.TypeToPop);
-                                } else
+                                } 
+                                else
                                 {
                                     // With
                                     var dropPopenv = cw.Emit(Opcode.PopEnv);
@@ -985,7 +989,8 @@ namespace UndertaleModLib.Compiler
                                 });
                             }
                             cw.Emit(Opcode.Ret, DataType.Variable);
-                        } else
+                        } 
+                        else
                         {
                             // Returns nothing, basically the same as exit
                             AssembleExit(cw);
@@ -1218,7 +1223,8 @@ namespace UndertaleModLib.Compiler
                                     if (isAnd)
                                     {
                                         branchPatch.Add(cw.Emit(Opcode.Bf));
-                                    } else
+                                    } 
+                                    else
                                     {
                                         branchPatch.Add(cw.Emit(Opcode.Bt));
                                     }
@@ -1237,7 +1243,8 @@ namespace UndertaleModLib.Compiler
                                 if (isAnd)
                                 {
                                     cw.Emit(Opcode.Push, DataType.Int16).Value = (short)0;
-                                } else
+                                } 
+                                else
                                 {
                                     cw.Emit(Opcode.Push, DataType.Int16).Value = (short)1;
                                 }
@@ -1620,14 +1627,32 @@ namespace UndertaleModLib.Compiler
                             case -1:
                                 if (cw.compileContext.BuiltInList.GlobalArray.ContainsKey(name) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(name))
                                 {
-                                    // Builtin global
-                                    cw.varPatches.Add(new VariablePatch()
+                                    if (cw.compileContext.Data.GMS2_3 &&
+                                        (name == "argument0" || name == "argument1" || name == "argument2" || name == "argument3" ||
+                                         name == "argument4" || name == "argument5" || name == "argument6" || name == "argument7" ||
+                                         name == "argument8" || name == "argument9" || name == "argument10" || name == "argument11" ||
+                                         name == "argument12" || name == "argument13" || name == "argument14" || name == "argument15"))
                                     {
-                                        Target = cw.EmitRef(useNoSpecificType ? Opcode.Push : Opcode.PushBltn, DataType.Variable),
-                                        Name = name,
-                                        InstType = (cw.compileContext.Data.GMS2_3 && !useNoSpecificType) ? InstanceType.Builtin : InstanceType.Self,
-                                        VarType = VariableType.Normal
-                                    });
+                                        // 2.3 argument (excuse the condition... the ID seems to be lost, so this is the easiest way to check)
+                                        cw.varPatches.Add(new VariablePatch()
+                                        {
+                                            Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                                            Name = name,
+                                            InstType = InstanceType.Arg,
+                                            VarType = VariableType.Normal
+                                        });
+                                    }
+                                    else
+                                    {
+                                        // Builtin global
+                                        cw.varPatches.Add(new VariablePatch()
+                                        {
+                                            Target = cw.EmitRef(useNoSpecificType ? Opcode.Push : Opcode.PushBltn, DataType.Variable),
+                                            Name = name,
+                                            InstType = (cw.compileContext.Data.GMS2_3 && !useNoSpecificType) ? InstanceType.Builtin : InstanceType.Self,
+                                            VarType = VariableType.Normal
+                                        });
+                                    }
                                 }
                                 else
                                 {
@@ -1738,7 +1763,8 @@ namespace UndertaleModLib.Compiler
                             }
                         }
                     }
-                } else if (e.Kind == Parser.Statement.StatementKind.ExprSingleVariable)
+                } 
+                else if (e.Kind == Parser.Statement.StatementKind.ExprSingleVariable)
                 {
                     // Assume local or self if necessary. Global doesn't apply here
                     Parser.Statement fix = new Parser.Statement(Parser.Statement.StatementKind.ExprVariableRef);
@@ -1757,7 +1783,8 @@ namespace UndertaleModLib.Compiler
                     }
                     fix.Children.Add(fix2);
                     AssembleVariablePush(cw, fix, out isSingle, out isArray, duplicate, useLongDupForArray, useNoSpecificType);
-                } else
+                }
+                else
                 {
                     AssemblyWriterError(cw, "Malformed variable push.", e.Token);
                 }
@@ -1995,7 +2022,8 @@ namespace UndertaleModLib.Compiler
                         if (cw.compileContext.LocalVars.ContainsKey(variableName))
                         {
                             fix2.ID = -7; // local
-                        } else if (cw.compileContext.GlobalVars.ContainsKey(variableName))
+                        } 
+                        else if (cw.compileContext.GlobalVars.ContainsKey(variableName))
                         {
                             fix2.ID = -5; // global
                         }
