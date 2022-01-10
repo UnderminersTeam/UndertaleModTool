@@ -2221,7 +2221,26 @@ namespace UndertaleModTool
             dialog.ShowDialog();
             await t;
 
-            MessageBox.Show("Finished downloading, it's stored in %temp%/UndertaleModTool/Update.zip\nThis feature is unfinished so you'll have to extract and replace UTMT manually.");
+            if (!File.Exists(AppContext.BaseDirectory + "UndertaleModToolUpdater.exe"))
+            {
+                MessageBox.Show("Updater not found! Aborting update; try manually updating?");
+                return;
+            }
+
+            MessageBox.Show("UndertaleModTool will now close to finish the update.");
+
+            Process p = new Process
+            {
+                StartInfo = new ProcessStartInfo(AppContext.BaseDirectory + "UndertaleModToolUpdater.exe")
+            };
+            p.Start();
+
+            CloseOtherWindows();
+
+            Closing -= DataWindow_Closing; //disable "on window closed" event handler
+            Close();
+
+
         }
         public static async Task<HttpResponseMessage> DoGithubApiCall(string url)
         {

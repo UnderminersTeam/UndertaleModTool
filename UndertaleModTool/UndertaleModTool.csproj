@@ -4009,6 +4009,7 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\UndertaleModLib\UndertaleModLib.csproj" />
+        <ProjectReference Include="..\UndertaleModToolUpdater\UndertaleModToolUpdater.csproj" />
     </ItemGroup>
     <ItemGroup>
         <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">

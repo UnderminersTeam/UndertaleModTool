@@ -44,7 +44,9 @@ namespace UndertaleModToolUpdater
             Console.WriteLine("Deleting Update.zip...");
             File.Delete(basePath + "Update.zip");
 
-            // No need to delete the updater, from my tests it can replace itself fine (which is odd...)
+            // No need for these, the MoveDirectory function will ignore any IOExceptions while
+            // attempting to delete or move files. So if a file is in use, the function will ignore
+            // it and continue anyway.
 
             //Console.WriteLine("Deleting UndertaleModToolUpdater.exe from update...");
             //File.Delete(basePath + "Update\\UndertaleModToolUpdater.exe");
@@ -76,8 +78,15 @@ namespace UndertaleModToolUpdater
                 foreach (var file in folder)
                 {
                     var targetFile = Path.Combine(targetFolder, Path.GetFileName(file));
-                    if (File.Exists(targetFile)) File.Delete(targetFile);
-                    File.Move(file, targetFile);
+                    try
+                    {
+                        if (File.Exists(targetFile)) File.Delete(targetFile);
+                        File.Move(file, targetFile);
+                    }
+                    catch (IOException)
+                    {
+                        continue;
+                    }
                 }
             }
             Directory.Delete(source, true);
