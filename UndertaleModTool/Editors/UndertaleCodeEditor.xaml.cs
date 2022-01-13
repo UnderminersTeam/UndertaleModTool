@@ -17,6 +17,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -38,6 +39,7 @@ using static UndertaleModTool.MainWindow.CodeEditorMode;
 
 namespace UndertaleModTool
 {
+    [SupportedOSPlatform("windows7.0")]
     /// <summary>
     /// Logika interakcji dla klasy UndertaleCodeEditor.xaml
     /// </summary>
@@ -159,7 +161,7 @@ namespace UndertaleModTool
             }
             if (DecompiledTab.IsSelected && code != CurrentDecompiled)
             {
-                DecompileCode(code, !DecompiledYet);
+                _ = DecompileCode(code, !DecompiledYet);
                 DecompiledYet = true;
             }
             if (GraphTab.IsSelected && code != CurrentGraphed)
@@ -206,7 +208,7 @@ namespace UndertaleModTool
                     if (CodeModeTabs.SelectedItem != DecompiledTab)
                         CodeModeTabs.SelectedItem = DecompiledTab;
                     else
-                        DecompileCode(code, true);
+                        _ = DecompileCode(code, true);
                 }
 
                 MainWindow.CodeEditorDecompile = Unstated;
@@ -219,7 +221,7 @@ namespace UndertaleModTool
                 }
                 if (DecompiledTab.IsSelected && code != CurrentDecompiled)
                 {
-                    DecompileCode(code, true);
+                    _ = DecompileCode(code, true);
                 }
                 if (GraphTab.IsSelected && code != CurrentGraphed)
                 {
@@ -231,17 +233,27 @@ namespace UndertaleModTool
         public static readonly RoutedEvent CtrlKEvent = EventManager.RegisterRoutedEvent(
             "CtrlK", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(UndertaleCodeEditor));
 
-        private void Command_Compile(object sender, EventArgs e)
+        private async Task CompileCommandBody(object sender, EventArgs e)
         {
             if (DecompiledFocused)
             {
-                DecompiledEditor_LostFocus(sender, new RoutedEventArgs(CtrlKEvent));
+                await DecompiledLostFocusBody(sender, new RoutedEventArgs(CtrlKEvent));
             }
             else if (DisassemblyFocused)
             {
                 DisassemblyEditor_LostFocus(sender, new RoutedEventArgs(CtrlKEvent));
                 DisassemblyEditor_GotFocus(sender, null);
             }
+
+            await Task.Delay(1); //dummy await
+        }
+        private void Command_Compile(object sender, EventArgs e)
+        {
+            _ = CompileCommandBody(sender, e);
+        }
+        public async Task SaveChanges()
+        {
+            await CompileCommandBody(null, null);
         }
 
         private void DisassembleCode(UndertaleCode code, bool first)
@@ -335,7 +347,7 @@ namespace UndertaleModTool
             return null;
         }
 
-        private async void DecompileCode(UndertaleCode code, bool first, LoaderDialog existingDialog = null)
+        private async Task DecompileCode(UndertaleCode code, bool first, LoaderDialog existingDialog = null)
         {
             DecompiledEditor.IsReadOnly = true;
             DecompiledEditor.TextArea.ClearSelection();
@@ -367,12 +379,20 @@ namespace UndertaleModTool
                     }
                 }
 
+                bool openSaveDialog = false;
+
                 UndertaleCode gettextCode = null;
                 if (gettext == null)
                     gettextCode = mainWindow.Data.Code.ByName("gml_Script_textdata_en");
 
                 string dataPath = Path.GetDirectoryName(mainWindow.FilePath);
-                string gettextJsonPath = (dataPath != null) ? Path.Combine(dataPath, "lang", "lang_en.json") : null;
+                string gettextJsonPath = null;
+                if (dataPath is not null)
+                {
+                    gettextJsonPath = Path.Combine(dataPath, "lang", "lang_en.json");
+                    if (!File.Exists(gettextJsonPath))
+                        gettextJsonPath = Path.Combine(dataPath, "lang", "lang_en_ch1.json");
+                }
 
                 var dataa = mainWindow.Data;
                 Task t = Task.Run(() =>
@@ -412,13 +432,6 @@ namespace UndertaleModTool
                         MessageBox.Show(exc.ToString());
                     }
 
-                    if (gettextJSON == null && gettextJsonPath != null && File.Exists(gettextJsonPath))
-                    {
-                        string err = UpdateGettextJSON(File.ReadAllText(gettextJsonPath));
-                        if (err != null)
-                            e = new Exception(err);
-                    }
-
                     if (decompiled != null)
                     {
                         string[] decompiledLines;
@@ -444,12 +457,12 @@ namespace UndertaleModTool
                             decompiledLines = decompiled.Split('\n');
                             for (int i = 0; i < decompiledLines.Length; i++)
                             {
-                                var matches = Regex.Matches(decompiledLines[i], "scr_84_get_lang_string\\(\\\"(\\w*)\\\"\\)");
+                                var matches = Regex.Matches(decompiledLines[i], "scr_84_get_lang_string(\\w*)\\(\\\"(\\w*)\\\"\\)");
                                 foreach (Match match in matches)
                                 {
                                     if (match.Success)
                                     {
-                                        if (gettextJSON.TryGetValue(match.Groups[1].Value, out string text))
+                                        if (gettextJSON.TryGetValue(match.Groups[^1].Value, out string text))
                                             decompiledLines[i] += $" // {text}";
                                     }
                                 }
@@ -482,6 +495,8 @@ namespace UndertaleModTool
                             {
                                 dataa.GMLCacheChanged.Add(code.Name.Content);
                                 dataa.GMLCacheFailed?.Remove(code.Name.Content); //remove that code name, since that code compiles now
+
+                                openSaveDialog = mainWindow.IsSaving;
                             }
                         }
                         DecompiledEditor.Document.EndUpdate();
@@ -496,6 +511,11 @@ namespace UndertaleModTool
                 });
                 await t;
                 dialog.Close();
+
+                mainWindow.IsSaving = false;
+
+                if (openSaveDialog)
+                    await mainWindow.DoSaveDialog();
             }
         }
 
@@ -539,7 +559,7 @@ namespace UndertaleModTool
                     {
                         Debug.WriteLine(e.ToString());
                         if (MessageBox.Show("Unable to execute GraphViz: " + e.Message + "\nMake sure you have downloaded it and set the path in settings.\nDo you want to open the download page now?", "Graph generation failed", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.Yes)
-                            Process.Start("https://graphviz.gitlab.io/_pages/Download/Download_windows.html");
+                            MainWindow.OpenBrowser("https://graphviz.gitlab.io/_pages/Download/Download_windows.html");
                     }
                 }
                 catch (Exception e)
@@ -571,7 +591,7 @@ namespace UndertaleModTool
             return value.Length <= maxChars ? value : value.Substring(0, maxChars) + "...";
         }
 
-        private async void DecompiledEditor_LostFocus(object sender, RoutedEventArgs e)
+        private async Task DecompiledLostFocusBody(object sender, RoutedEventArgs e)
         {
             if (!DecompiledFocused)
                 return;
@@ -691,9 +711,13 @@ namespace UndertaleModTool
             }
 
             // Decompile new code
-            DecompileCode(code, false, dialog);
-            
+            await DecompileCode(code, false, dialog);
+
             //GMLCacheChanged.Add() is inside DecompileCode()
+        }
+        private void DecompiledEditor_LostFocus(object sender, RoutedEventArgs e)
+        {
+            _ = DecompiledLostFocusBody(sender, e);
         }
 
         private void DisassemblyEditor_GotFocus(object sender, RoutedEventArgs e)
@@ -762,7 +786,16 @@ namespace UndertaleModTool
             DisassembleCode(code, false);
 
             if (!DisassemblyEditor.IsReadOnly)
+            {
                 data.GMLCacheChanged.Add(code.Name.Content);
+
+                if (mainWindow.IsSaving)
+                {
+                    mainWindow.IsSaving = false;
+
+                    _ = mainWindow.DoSaveDialog();
+                }
+            }
         }
 
         // Based on https://stackoverflow.com/questions/28379206/custom-hyperlinks-using-avalonedit

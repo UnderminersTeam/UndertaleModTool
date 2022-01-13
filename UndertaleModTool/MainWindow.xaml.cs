@@ -62,6 +62,7 @@ namespace UndertaleModTool
         public bool WasWarnedAboutTempRun = false;
         public bool FinishedMessageEnabled = true;
         public bool ScriptExecutionSuccess { get; set; } = true;
+        public bool IsSaving { get; set; }
         public string ScriptErrorMessage { get; set; } = "";
         public string ExePath { get; private set; } = System.Environment.CurrentDirectory;
         public string ScriptErrorType { get; set; } = "";
@@ -71,6 +72,12 @@ namespace UndertaleModTool
             Unstated,
             DontDecompile,
             Decompile
+        }
+        public enum SaveResult
+        {
+            NotSaved,
+            Saved,
+            Error
         }
         public static CodeEditorMode CodeEditorDecompile { get; set; } = CodeEditorMode.Unstated;
 
@@ -381,21 +388,21 @@ namespace UndertaleModTool
             }
         }
 
-        private async Task<bool> DoOpenDialog()
+        public async Task<bool> DoOpenDialog()
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.DefaultExt = "win";
             dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
 
-            if (dlg.ShowDialog() == true)
+            if (dlg.ShowDialog(this) == true)
             {
                 await LoadFile(dlg.FileName, true);
                 return true;
             }
             return false;
         }
-        private async Task<bool> DoSaveDialog(bool suppressDebug = false)
+        public async Task<bool> DoSaveDialog(bool suppressDebug = false)
         {
             SaveFileDialog dlg = new SaveFileDialog();
 
@@ -403,7 +410,7 @@ namespace UndertaleModTool
             dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
             dlg.FileName = FilePath;
 
-            if (dlg.ShowDialog() == true)
+            if (dlg.ShowDialog(this) == true)
             {
                 await SaveFile(dlg.FileName, suppressDebug);
                 return true;
@@ -411,25 +418,52 @@ namespace UndertaleModTool
             return false;
         }
 
+        public async Task<SaveResult> SaveCodeChanges()
+        {
+            SaveResult result = SaveResult.NotSaved;
+
+            DependencyObject child = VisualTreeHelper.GetChild(DataEditor, 0);
+            if (child is not null && VisualTreeHelper.GetChild(child, 0) is UndertaleCodeEditor codeEditor)
+            {
+                #pragma warning disable CA1416
+                if (codeEditor.DecompiledChanged || codeEditor.DisassemblyChanged)
+                {
+                    IsSaving = true;
+
+                    await codeEditor.SaveChanges();
+                    //"IsSaving" should became false on success
+
+                    result = IsSaving ? SaveResult.Error : SaveResult.Saved;
+                    IsSaving = false;
+                }
+                #pragma warning restore CA1416
+            }
+
+            return result;
+        }
+
         private void Command_Open(object sender, ExecutedRoutedEventArgs e)
         {
             _ = DoOpenDialog();
         }
 
-        private void Command_Save(object sender, ExecutedRoutedEventArgs e)
+        private async void Command_Save(object sender, ExecutedRoutedEventArgs e)
         {
             if (CanSave)
             {
                 if (!CanSafelySave)
                     ShowWarning("Errors occurred during loading. High chance of data loss! Proceed at your own risk.");
 
-                _ = DoSaveDialog();
+                if (await SaveCodeChanges() == SaveResult.NotSaved)
+                    _ = DoSaveDialog();
             }
         }
         private async void DataWindow_Closing(object sender, CancelEventArgs e)
         {
             if (Data != null)
             {
+                e.Cancel = true;
+
                 bool save = false;
 
                 if (SettingsWindow.WarnOnClose)
@@ -447,7 +481,14 @@ namespace UndertaleModTool
                                 save = true;
 
                             if (save)
-                                _ = DoSaveDialog();
+                            {
+                                SaveResult saveRes = await SaveCodeChanges();
+
+                                if (saveRes == SaveResult.NotSaved)
+                                    _ = DoSaveDialog();
+                                else if (saveRes == SaveResult.Error)
+                                    return;
+                            }
                         }
                         else
                             RevertProfile();
@@ -455,10 +496,7 @@ namespace UndertaleModTool
                         DestroyUMTLastEdited();
                     }
                     else
-                    {
-                        e.Cancel = true;
                         return;
-                    }
                 }
                 else
                 {
@@ -467,75 +505,19 @@ namespace UndertaleModTool
                 }
 
                 if (SettingsWindow.UseGMLCache && Data?.GMLCache?.Count > 0 && !Data.GMLCacheWasSaved && Data.GMLCacheIsReady)
-                {
                     if (ShowQuestion("Save unedited code cache?") == MessageBoxResult.Yes)
-                    {
-                        e.Cancel = true;
-
-                        await Task.Yield();            //without it, the next "await" (and what follows) will not be executed properly
-                                                       //it's needed only for events like that
                         await SaveGMLCache(FilePath, save);
-
-                        CloseOtherWindows();
-
-                        Closing -= DataWindow_Closing; //disable "on window closed" event handler
-                        Close();
-
-                        return;
-                    }
-                }
 
                 CloseOtherWindows();
+
+                Closing -= DataWindow_Closing; //disable "on window closed" event handler (prevent recursion)
+                _ = Task.Run(() => Dispatcher.Invoke(Close));
             }
         }
-        private async void Command_Close(object sender, ExecutedRoutedEventArgs e)
+        private void Command_Close(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Data != null)
-            {
-                bool save = false;
-
-                if (SettingsWindow.WarnOnClose)
-                {
-                    if (ShowQuestion("Are you sure you want to quit?") == MessageBoxResult.Yes)
-                    {
-                        if (ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
-                        {
-                            if (scriptDialog is not null) //probably, impossible, because UI is blocked while script runs
-                            {
-                                if (ShowQuestion("Script still runs. Save anyway?\nIt can corrupt the data file that you'll save.") == MessageBoxResult.Yes)
-                                    save = true;
-                            }
-                            else
-                                save = true;
-
-                            if (save)
-                                await DoSaveDialog();
-                        }
-                        else
-                            RevertProfile();
-
-                        DestroyUMTLastEdited();
-                    }
-                    else
-                        return;
-                }
-                else
-                {
-                    RevertProfile();
-                    DestroyUMTLastEdited();
-                }
-
-                if (SettingsWindow.UseGMLCache && Data?.GMLCache?.Count > 0 && !Data.GMLCacheWasSaved && Data.GMLCacheIsReady)
-                    if (ShowQuestion("Save unedited code cache?") == MessageBoxResult.Yes)
-                        await SaveGMLCache(FilePath, save);
-            }
-
-            CloseOtherWindows();
-
-            Closing -= DataWindow_Closing;
             Close();
         }
-
         private void CloseOtherWindows() //close "standalone" windows (e.g. "ClickableTextOutput")
         {
             foreach (Window w in Application.Current.Windows)
@@ -634,8 +616,12 @@ namespace UndertaleModTool
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Data)));
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilePath)));
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGMS2)));
+
+                        #pragma warning disable CA1416
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
+                        #pragma warning restore CA1416
+
                         ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"));
                         SelectionHistory.Clear();
                     }
@@ -672,6 +658,7 @@ namespace UndertaleModTool
             Task t = Task.Run(async () =>
             {
                 bool SaveSucceeded = true;
+
                 try
                 {
                     using (var stream = new FileStream(filename + "temp", FileMode.Create, FileAccess.Write))
@@ -803,7 +790,9 @@ namespace UndertaleModTool
                     Data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                 }
 
+                #pragma warning disable CA1416
                 UndertaleCodeEditor.gettextJSON = null;
+                #pragma warning restore CA1416
 
                 Dispatcher.Invoke(() =>
                 {
@@ -940,7 +929,10 @@ namespace UndertaleModTool
                     }
 
                     if (updateCache)
+                    {
                         await GenerateGMLCache(null, dialog, true);
+                        await StopUpdater();
+                    }
 
                     string[] codeNames = Data.Code.Where(x => x.ParentEntry is null).Select(x => x.Name.Content).ToArray();
                     Dictionary<string, string> sortedCache = new(Data.GMLCache.OrderBy(x => Array.IndexOf(codeNames, x.Key)));
@@ -979,6 +971,7 @@ namespace UndertaleModTool
                 return false;
 
             bool createdDialog = false;
+            bool existedDialog = false;
             Data.GMLCacheIsReady = false;
 
             if (Data.GMLCache is null)
@@ -990,7 +983,8 @@ namespace UndertaleModTool
             {
                 if (dialog is null)
                 {
-                    Dispatcher.Invoke(() => {
+                    Dispatcher.Invoke(() =>
+                    {
                         scriptDialog = new LoaderDialog("Script in progress...", "Please wait...")
                         {
                             Owner = this,
@@ -1003,6 +997,8 @@ namespace UndertaleModTool
                 else
                     scriptDialog = dialog as LoaderDialog;
             }
+            else
+                existedDialog = true;
 
             if (decompileContext is null)
                 decompileContext = new(() => new GlobalDecompileContext(Data, false));
@@ -1094,11 +1090,13 @@ namespace UndertaleModTool
                 else if (isSaving)
                     Data.GMLEditedBefore.Clear();
 
+                if (!existedDialog)
+                    scriptDialog = null;
+
                 if (createdDialog)
                 {
                     await StopUpdater();
                     HideProgressBar();
-                    scriptDialog = null;
                 }
             }
 
