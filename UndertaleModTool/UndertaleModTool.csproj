@@ -24,6 +24,7 @@
         <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
         <DebugType>embedded</DebugType>
         <Platforms>AnyCPU;x64</Platforms>
+        <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
     </PropertyGroup>
     <PropertyGroup>
         <StartupObject>UndertaleModTool.Program</StartupObject>
