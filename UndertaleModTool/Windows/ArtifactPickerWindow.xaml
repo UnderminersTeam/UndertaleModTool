@@ -1,0 +1,18 @@
+﻿<Window x:Class="UndertaleModTool.Windows.ArtifactPickerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UndertaleModTool.Windows"
+        mc:Ignorable="d"
+        Title="Version Selector" Height="auto" Width="auto" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="5" Text="Which version would you like to download?"/>
+        <UniformGrid Grid.Row="1" Margin="5" x:Name="ButtonUniformGrid">
+        </UniformGrid>
+    </Grid>
+</Window>

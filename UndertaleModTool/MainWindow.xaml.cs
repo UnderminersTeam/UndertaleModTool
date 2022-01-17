@@ -38,6 +38,9 @@ using System.Security.Cryptography;
 using System.Collections.Concurrent;
 using System.Runtime;
 using SystemJson = System.Text.Json;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Newtonsoft.Json.Linq;
 
 namespace UndertaleModTool
 {
@@ -2128,6 +2131,123 @@ namespace UndertaleModTool
             }
         }
 
+        public async void UpdateApp(SettingsWindow window)
+        {
+            string baseUrl = "https://api.github.com/repos/krzys-h/UndertaleModTool/actions/";
+            // Fetch the latest workflow run
+            var result = await DoGithubApiCall(baseUrl + "runs?branch=master&status=success&per_page=1");
+            if (!result.IsSuccessStatusCode)
+            {
+                MessageBox.Show("Failed to fetch latest build!\n" + result.ReasonPhrase);
+                return;
+            }
+            // Parse it as JSON
+            var actionInfo = JObject.Parse((await result.Content.ReadAsStringAsync()));
+            var action = (JObject) ((JArray) actionInfo["workflow_runs"])[0];
+
+            // Grab information about the artifacts
+            var result2 = await DoGithubApiCall(baseUrl + "runs/" + action["id"].ToString() + "/artifacts");
+            // And now parse them as JSON
+            var artifactInfo = JObject.Parse((await result2.Content.ReadAsStringAsync()));
+            // Grab the array of artifacts
+            var artifactList = (JArray) artifactInfo["artifacts"];
+
+            // So now at this point we have 3 or so artifacts; which one do we choose?
+            // For now let's just ask the user, but this could be turned into some sort of auto detection
+
+
+            var newWindow = new ArtifactPickerWindow();
+
+            for (int index = 0; index < artifactList.Count; index++) {
+                var currentArtifact = (JObject) artifactList[index];
+                Button button = new Button()
+                {
+                    Content = currentArtifact["name"].ToString(),
+                    Tag = index
+                };
+                button.Click += new RoutedEventHandler(newWindow.ArtifactButton_Click);
+                newWindow.ButtonUniformGrid.Children.Add(button);
+            }
+
+            var dialogResult = newWindow.ShowDialog();
+            if ((dialogResult == null) || (dialogResult == false))
+            {
+                MessageBox.Show("Cancelled.");
+                return;
+            }
+
+            var artifact = (JObject)artifactList[newWindow.ArtifactId];
+
+            // Github doesn't let anonymous users download artifacts, so let's use nightly.link
+
+            string baseDownloadUrl = artifact["archive_download_url"].ToString();
+            string downloadUrl = baseDownloadUrl.Replace("api.github.com/repos", "nightly.link").Replace("/zip", ".zip");
+
+            // We're about to download, so make sure the download dir actually exists
+            Directory.CreateDirectory(Path.GetTempPath() + "UndertaleModTool\\");
+
+            // It's time to download; let's use a cool progress bar
+            LoaderDialog dialog = new LoaderDialog("Downloading", "Downloading new version...");
+            dialog.PreventClose = true;
+            IProgress<Tuple<int, string>> progress = new Progress<Tuple<int, string>>(i => { dialog.ReportProgress(i.Item2, i.Item1); });
+            IProgress<double?> setMax = new Progress<double?>(i => { dialog.Maximum = i; });
+            dialog.Owner = this;
+            Task t = Task.Run(async () =>
+            {
+                var uri = new Uri(downloadUrl);
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Accept.Clear();
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
+                    httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("UndertaleModTool", Version));
+                    var response = await httpClient.GetAsync(uri);
+                    using (var fs = new FileStream(Path.GetTempPath() + "UndertaleModTool\\Update.zip", FileMode.Create))
+                    {
+                        await response.Content.CopyToAsync(fs);
+                    }
+                }
+
+                Dispatcher.Invoke(() =>
+                {
+                    dialog.Hide();
+                });
+            });
+            dialog.ShowDialog();
+            await t;
+
+            if (!File.Exists(AppContext.BaseDirectory + "UndertaleModToolUpdater.exe"))
+            {
+                MessageBox.Show("Updater not found! Aborting update; try manually updating?");
+                return;
+            }
+
+            MessageBox.Show("UndertaleModTool will now close to finish the update.");
+
+            Process p = new Process
+            {
+                StartInfo = new ProcessStartInfo(AppContext.BaseDirectory + "UndertaleModToolUpdater.exe")
+            };
+            p.Start();
+
+            CloseOtherWindows();
+
+            Closing -= DataWindow_Closing; //disable "on window closed" event handler
+            Close();
+
+
+        }
+        public static async Task<HttpResponseMessage> DoGithubApiCall(string url)
+        {
+            var uri = new Uri(url);
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Accept.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
+                httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("UndertaleModTool", Version));
+                var result = await httpClient.GetAsync(uri);
+                return result;
+            }
+        }
         private async void Command_Run(object sender, ExecutedRoutedEventArgs e)
         {
             if (Data == null)

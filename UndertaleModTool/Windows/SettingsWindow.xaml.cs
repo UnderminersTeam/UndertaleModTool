@@ -150,5 +150,10 @@ namespace UndertaleModTool
         {
             MainWindow.OpenFolder(Settings.AppDataFolder);
         }
+
+        private void UpdateAppButton_Click(object sender, RoutedEventArgs e)
+        {
+            ((MainWindow) Owner).UpdateApp(this);
+        }
     }
 }
