@@ -2135,7 +2135,7 @@ namespace UndertaleModTool
         {
             string baseUrl = "https://api.github.com/repos/krzys-h/UndertaleModTool/actions/";
             // Fetch the latest workflow run
-            var result = await DoGithubApiCall(baseUrl + "runs?branch=master&status=success&per_page=1");
+            var result = await DoGithubApiCall(baseUrl + "runs?branch=master&status=success&per_page=20");
             if (!result.IsSuccessStatusCode)
             {
                 MessageBox.Show("Failed to fetch latest build!\n" + result.ReasonPhrase);
@@ -2143,7 +2143,27 @@ namespace UndertaleModTool
             }
             // Parse it as JSON
             var actionInfo = JObject.Parse((await result.Content.ReadAsStringAsync()));
-            var action = (JObject) ((JArray) actionInfo["workflow_runs"])[0];
+            var actionList = (JArray)actionInfo["workflow_runs"];
+            JObject action = null;
+
+            for (int index = 0; index < actionList.Count; index++)
+            {
+                var currentAction = (JObject)actionList[index];
+                // Hardcode NET Bundled non-single file for now
+                // This ensures that we don't accidentally download a CLI build...
+                // In the future, auto-detect which one to download instead of always
+                // downloading the NET Bundled non-single file version.
+                if (currentAction["name"].ToString() == "Build tool NET Bundled non-single file")
+                {
+                    action = currentAction;
+                    break;
+                }
+            }
+            if (action == null)
+            {
+                MessageBox.Show("Failed to find latest build!\n" + result.ReasonPhrase);
+                return;
+            }
 
             // Grab information about the artifacts
             var result2 = await DoGithubApiCall(baseUrl + "runs/" + action["id"].ToString() + "/artifacts");
