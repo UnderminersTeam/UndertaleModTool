@@ -4121,6 +4121,7 @@
         <PackageReference Include="Newtonsoft.Json">
             <Version>13.0.1</Version>
         </PackageReference>
+        <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
         <PackageReference Include="PropertyChanged.Fody" Version="3.3.3" />
         <PackageReference Include="System.AppContext">
             <Version>4.3.0</Version>

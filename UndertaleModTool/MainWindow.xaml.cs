@@ -29,6 +29,7 @@ using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
 using UndertaleModTool.Windows;
 using System.IO.Pipes;
+using Ookii.Dialogs.Wpf;
 
 using ColorConvert = System.Windows.Media.ColorConverter;
 using System.Text.RegularExpressions;
@@ -1897,16 +1898,11 @@ namespace UndertaleModTool
             return dlg.ShowDialog() == true ? dlg.FileName : null;
         }
 
+        #pragma warning disable CA1416
         public string PromptChooseDirectory(string prompt)
         {
-            OpenFileDialog folderBrowser = new OpenFileDialog();
-            // Set validate names and check file exists to false otherwise windows will
-            // not let you select "Folder Selection."
-            folderBrowser.ValidateNames = false;
-            folderBrowser.CheckFileExists = false;
-            folderBrowser.CheckPathExists = true;
-            folderBrowser.FileName = prompt != null ? prompt + "." : "Folder Selection."; // Adding the . at the end makes sure it will accept the folder.
-            return folderBrowser.ShowDialog() == true ? Path.GetDirectoryName(folderBrowser.FileName) + Path.DirectorySeparatorChar : null;
+            VistaFolderBrowserDialog folderBrowser = new VistaFolderBrowserDialog();
+            return folderBrowser.ShowDialog() == true ? folderBrowser.SelectedPath : null;
         }
         
         #pragma warning disable CA1416
