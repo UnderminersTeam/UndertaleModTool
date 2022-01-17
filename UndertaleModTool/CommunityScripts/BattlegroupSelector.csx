@@ -12,7 +12,7 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 }
 
 
-if (Data.GeneralInfo?.DisplayName.Content.ToLower() != "undertale") {
+if (!Data.GeneralInfo?.DisplayName.Content.ToLower().StartsWith("undertale")) {
     ScriptError("This script can only be used on UNDERTALE.");
     return;
 }
