@@ -1047,7 +1047,7 @@ namespace UndertaleModLib.Decompiler
             string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower();
 
             // Just Undertale
-            if (lowerName != null && (lowerName == "undertale"))
+            if (lowerName != null && lowerName.StartsWith("undertale"))
             {
 
                 //AddOverrideFor("gml_Object_obj_wizardorb_chaser_Alarm_0", "pop", AssetIDType.Script);
@@ -1238,7 +1238,7 @@ namespace UndertaleModLib.Decompiler
             }
 
             // Both UT and DR
-            if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune") || lowerName == "deltarune chapter 1 & 2" || lowerName == "deltarune chapter 1&2"))
+            if (lowerName != null && (lowerName.StartsWith("undertale") || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
                 AddOverrideFor("gml_Script_scr_getbuttonsprite", "control", AssetIDType.Enum_GamepadButton);
                 AddOverrideFor("gml_Script_scr_getbuttonsprite", "button", AssetIDType.Enum_GamepadButton);

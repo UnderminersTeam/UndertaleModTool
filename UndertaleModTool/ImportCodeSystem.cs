@@ -155,11 +155,11 @@ namespace UndertaleModTool
         {
             try
             {
-                if (!(Path.GetFileName(file).EndsWith(IsGML ? ".gml" : ".asm")))
+                if (!Path.GetFileName(file).ToLower().EndsWith(IsGML ? ".gml" : ".asm"))
                     return;
-                if (Path.GetFileName(file).EndsWith("CleanUp_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
+                if (Path.GetFileName(file).ToLower().EndsWith("cleanup_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
                     return;
-                if (Path.GetFileName(file).EndsWith("PreCreate_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
+                if (Path.GetFileName(file).ToLower().EndsWith("precreate_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
                     return;
                 string codeName = Path.GetFileNameWithoutExtension(file);
                 string gmlCode = File.ReadAllText(file);
