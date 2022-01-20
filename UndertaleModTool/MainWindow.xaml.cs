@@ -2180,13 +2180,16 @@ namespace UndertaleModTool
 
             for (int index = 0; index < artifactList.Count; index++) {
                 var currentArtifact = (JObject) artifactList[index];
-                Button button = new Button()
+                if (currentArtifact["name"].ToString() != "win_x86")
                 {
-                    Content = currentArtifact["name"].ToString(),
-                    Tag = index
-                };
-                button.Click += new RoutedEventHandler(newWindow.ArtifactButton_Click);
-                newWindow.ButtonUniformGrid.Children.Add(button);
+                    Button button = new Button()
+                    {
+                        Content = currentArtifact["name"].ToString(),
+                        Tag = index
+                    };
+                    button.Click += new RoutedEventHandler(newWindow.ArtifactButton_Click);
+                    newWindow.ButtonUniformGrid.Children.Add(button);
+                }
             }
 
             var dialogResult = newWindow.ShowDialog();
