@@ -915,7 +915,7 @@ if (help == 0)
                         break
                     else
                     {
-                        ossafe_file_text_write_string(myfile, (((((""global.msg["" + string(i)) + ""] = "") + '""') + string(mystr[i])) + '""'))
+                        ossafe_file_text_write_string(myfile, (""global.msg["" + string(i) + ""] = "" + '""' + string_replace_all(string(mystr[i]), '""', "" + '"" + '""' + ""' + "") + '""'))
                         ossafe_file_text_writeln(myfile)
                         i++
                         continue
