@@ -1536,11 +1536,8 @@ namespace UndertaleModLib.Decompiler
                 {
                     if (context.GlobalContext.Data?.GMS2_3 == true)
                     {
-                        name += "[";
                         foreach (Expression e in ArrayIndices)
-                            name += e.ToString(context) + ", ";
-                        name = name[0..^2];
-                        name += "]";
+                            name += "[" + e.ToString(context) + "]";
                     }
                     else
                     {
@@ -1754,7 +1751,7 @@ namespace UndertaleModLib.Decompiler
                                 taken.Push(e);
                                 bytesToTake -= GetTypeSize(e);
                                 if (bytesToTake < 0)
-                                    throw new InvalidOperationException("The stack got misaligned?");
+                                    throw new InvalidOperationException("The stack got misaligned? Error 0");
                             }
 
                             int b2 = (byte)instr.ComparisonKind & 0x7F;
@@ -1768,7 +1765,7 @@ namespace UndertaleModLib.Decompiler
                                 moved.Push(e);
                                 bytesToMove -= GetTypeSize(e);
                                 if (bytesToMove < 0)
-                                    throw new InvalidOperationException("The stack got misaligned?");
+                                    throw new InvalidOperationException("The stack got misaligned? Error 1");
                             }
 
                             while (taken.Count > 0)
@@ -1783,6 +1780,9 @@ namespace UndertaleModLib.Decompiler
 
                         List<Expression> topExpressions1 = new List<Expression>();
                         List<Expression> topExpressions2 = new List<Expression>();
+                        // Good afternoon/evening. You need to figure out how the hell this works with 3D.
+                        // Insert debug code, it ends up throwing an error anyway so get it to spit some useful info while it does.
+                        // well, "relevant empirical data"
                         int bytesToDuplicate = (instr.Extra + 1) * GetTypeSize(instr.Type1);
                         while (bytesToDuplicate > 0)
                         {
@@ -1807,7 +1807,10 @@ namespace UndertaleModLib.Decompiler
 
                             bytesToDuplicate -= GetTypeSize(item);
                             if (bytesToDuplicate < 0)
-                                throw new InvalidOperationException("The stack got misaligned?");
+                                throw new InvalidOperationException("The stack got misaligned? Error 2: Attempted to duplicate " 
+                                    + GetTypeSize(item) 
+                                    + " bytes, only found "
+                                    + (bytesToDuplicate + GetTypeSize(item)));
                         }
                         topExpressions1.Reverse();
                         topExpressions2.Reverse();
@@ -2232,6 +2235,25 @@ namespace UndertaleModLib.Decompiler
                                         }
                                         else
                                             throw new InvalidOperationException("Tried to popaf on something that is not a var");
+                                    }
+                                    break;
+                                case -4: // GMS2.3+, pushac
+                                    {
+                                        Expression ind = stack.Pop();
+                                        Expression target = stack.Pop();
+                                        if (target is ExpressionVar targetVar)
+                                        {
+                                            if (targetVar.VarType != UndertaleInstruction.VariableType.ArrayPushAF && targetVar.VarType != UndertaleInstruction.VariableType.ArrayPopAF)
+                                                throw new InvalidOperationException("Tried to pushac on var of type " + targetVar.VarType);
+
+                                            ExpressionVar newVar = new ExpressionVar(targetVar.Var, targetVar.InstType, targetVar.VarType);
+                                            newVar.Opcode = instr.Kind;
+                                            newVar.ArrayIndices = new List<Expression>(targetVar.ArrayIndices);
+                                            newVar.ArrayIndices.Add(ind);
+                                            stack.Push(newVar);
+                                        }
+                                        else
+                                            throw new InvalidOperationException("Tried to pushac on something that is not a var");
                                     }
                                     break;
                                 case -5: // GMS2.3+, setowner
