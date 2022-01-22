@@ -19,3 +19,4 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build UndertaleModTool --no-restore
+      run: dotnet build UndertaleModToolUpdater --no-restore
