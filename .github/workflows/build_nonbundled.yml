@@ -19,17 +19,21 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build UndertaleModTool --no-restore
-      run: dotnet build UndertaleModToolUpdater --no-restore
+      run: |
+        dotnet build UndertaleModTool --no-restore
+        dotnet build UndertaleModToolUpdater --no-restore
     - name: Publish Windows x86
-      run: dotnet publish UndertaleModTool -c Release -r win-x86 --self-contained false -p:PublishSingleFile=false --output win_x86
-      run: dotnet publish UndertaleModToolUpdater -c Release -r win-x86 --self-contained false -p:PublishSingleFile=false -p:PublishTrimmed=True -p:TrimMode=CopyUsed --output win_x86\Updater
+      run: |
+        dotnet publish UndertaleModTool -c Release -r win-x86 --self-contained false -p:PublishSingleFile=false --output win_x86
+        dotnet publish UndertaleModToolUpdater -c Release -r win-x86 --self-contained false -p:PublishSingleFile=false -p:PublishTrimmed=True -p:TrimMode=CopyUsed --output win_x86\Updater
     - name: Publish Windows x64
-      run: dotnet publish UndertaleModTool -c Release -r win-x64 --self-contained false -p:PublishSingleFile=false --output win_x64
-      run: dotnet publish UndertaleModToolUpdater -c Release -r win-x64 --self-contained false -p:PublishSingleFile=false -p:PublishTrimmed=True -p:TrimMode=CopyUsed --output win_x64\Updater
+      run: |
+        dotnet publish UndertaleModTool -c Release -r win-x64 --self-contained false -p:PublishSingleFile=false --output win_x64
+        dotnet publish UndertaleModToolUpdater -c Release -r win-x64 --self-contained false -p:PublishSingleFile=false -p:PublishTrimmed=True -p:TrimMode=CopyUsed --output win_x64\Updater
     - name: Publish Windows ARM
-      run: dotnet publish UndertaleModTool -c Release -r win-arm --self-contained false -p:PublishSingleFile=false --output win_arm
-      run: dotnet publish UndertaleModToolUpdater -c Release -r win-arm --self-contained false -p:PublishSingleFile=false -p:PublishTrimmed=True -p:TrimMode=CopyUsed --output win_arm\Updater
+      run: |
+        dotnet publish UndertaleModTool -c Release -r win-arm --self-contained false -p:PublishSingleFile=false --output win_arm
+        dotnet publish UndertaleModToolUpdater -c Release -r win-arm --self-contained false -p:PublishSingleFile=false -p:PublishTrimmed=True -p:TrimMode=CopyUsed --output win_arm\Updater
     - name: Copy external files
       run: |
         Copy-Item "README.md" -Destination "./win_x86/"
