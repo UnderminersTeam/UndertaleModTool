@@ -18,8 +18,9 @@ namespace UndertaleModTool
             if (values.Length < 2)
                 return false;
 
-            return values[0] == values[1];
+            bool invert = parameter is string par && par == "True";
 
+            return (values[0] == values[1]) ^ invert;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

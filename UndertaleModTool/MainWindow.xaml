@@ -448,7 +448,10 @@
                             <DataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
                                 <local:UndertaleGameObjectEditor/>
                             </DataTemplate>
-
+                            
+                            <DataTemplate x:Key="roomRendererTemplate">
+                                <local:UndertaleRoomRenderer/>
+                            </DataTemplate>
                             <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
                                 <local:UndertaleRoomEditor/>
                             </DataTemplate>

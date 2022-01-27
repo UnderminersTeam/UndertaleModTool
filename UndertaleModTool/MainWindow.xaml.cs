@@ -91,8 +91,29 @@ namespace UndertaleModTool
         private CancellationToken cToken;
         private readonly object bindingLock = new();
         private HashSet<string> syncBindings = new();
+        private bool _roomRendererEnabled;
 
         public bool GMLCacheEnabled => SettingsWindow.UseGMLCache;
+        public bool RoomRendererEnabled
+        {
+            get => _roomRendererEnabled;
+            set
+            {
+                if (UndertaleRoomRenderer.RoomRendererTemplate is null)
+                    UndertaleRoomRenderer.RoomRendererTemplate = (DataTemplate)DataEditor.FindResource("roomRendererTemplate");
+
+                if (value)
+                    DataEditor.ContentTemplate = UndertaleRoomRenderer.RoomRendererTemplate;
+                else
+                {
+                    DataEditor.ContentTemplate = null;
+                    Selected = new DescriptionView("Welcome to UndertaleModTool!",
+                                                   "Open data.win file to get started, then double click on the items on the left to view them");
+                }
+
+                _roomRendererEnabled = value;
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -184,14 +205,17 @@ namespace UndertaleModTool
             {
                 try
                 {
+                    string procFileName = Process.GetCurrentProcess().MainModule.FileName;
                     var HKCU_Classes = Registry.CurrentUser.OpenSubKey(@"Software\Classes", true);
                     var UndertaleModTool_app = HKCU_Classes.CreateSubKey(@"UndertaleModTool");
+
                     UndertaleModTool_app.SetValue("", "UndertaleModTool");
-                    UndertaleModTool_app.CreateSubKey(@"shell\open\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\"", RegistryValueKind.String);
-                    UndertaleModTool_app.CreateSubKey(@"shell\launch\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\" launch", RegistryValueKind.String);
+                    UndertaleModTool_app.CreateSubKey(@"shell\open\command").SetValue("", "\"" + procFileName + "\" \"%1\"", RegistryValueKind.String);
+                    UndertaleModTool_app.CreateSubKey(@"shell\launch\command").SetValue("", "\"" + procFileName + "\" \"%1\" launch", RegistryValueKind.String);
                     UndertaleModTool_app.CreateSubKey(@"shell\launch").SetValue("", "Run game normally", RegistryValueKind.String);
-                    UndertaleModTool_app.CreateSubKey(@"shell\special_launch\command").SetValue("", "\"" + Process.GetCurrentProcess().MainModule.FileName + "\" \"%1\" special_launch", RegistryValueKind.String);
+                    UndertaleModTool_app.CreateSubKey(@"shell\special_launch\command").SetValue("", "\"" + procFileName + "\" \"%1\" special_launch", RegistryValueKind.String);
                     UndertaleModTool_app.CreateSubKey(@"shell\special_launch").SetValue("", "Run extended options", RegistryValueKind.String);
+
                     if (File.Exists("dna.txt"))
                     {
                         ScriptMessage("Opt out detected.");
@@ -243,7 +267,7 @@ namespace UndertaleModTool
                         ScriptError("Null game executable name or location");
                         Environment.Exit(0);
                     }
-                    string gameExePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(FilePath), gameExeName + ".exe");
+                    string gameExePath = Path.Combine(Path.GetDirectoryName(FilePath), gameExeName + ".exe");
                     if (!File.Exists(gameExePath))
                     {
                         ScriptError("Cannot find game executable path, expected: " + gameExePath);
@@ -1535,7 +1559,7 @@ namespace UndertaleModTool
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() => {
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
                     scriptDialog.Update(message, status, progressValue, maxValue);
                 }));
             }
@@ -1555,7 +1579,7 @@ namespace UndertaleModTool
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() => {
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
                     scriptDialog.ReportProgress(progressValue);
                 }));
             }
@@ -1564,7 +1588,7 @@ namespace UndertaleModTool
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() => {
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
                     scriptDialog.ReportProgress(status);
                 }));;
             }
@@ -1939,19 +1963,19 @@ namespace UndertaleModTool
             }
         }
 
-        public void ShowMessage(string message)
+        public static void ShowMessage(string message)
         {
             MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Information);
         }
-        public MessageBoxResult ShowQuestion(string message)
+        public static MessageBoxResult ShowQuestion(string message)
         {
             return MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question);
         }
-        public void ShowWarning(string message)
+        public static void ShowWarning(string message)
         {
             MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
-        public void ShowError(string message)
+        public static void ShowError(string message)
         {
             MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
         }
@@ -2450,7 +2474,7 @@ result in loss of work.");
             UpdateTree();
         }
 
-        private void UpdateObjectLabel(object obj)
+        public void UpdateObjectLabel(object obj)
         {
             int foundIndex = obj is UndertaleNamedResource ? Data.IndexOf(obj as UndertaleNamedResource, false) : -1;
             SetIDString(foundIndex == -1 ? "None" : (foundIndex == -2 ? "N/A" : Convert.ToString(foundIndex)));

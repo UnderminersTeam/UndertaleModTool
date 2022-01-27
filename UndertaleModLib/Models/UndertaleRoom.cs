@@ -85,7 +85,7 @@ namespace UndertaleModLib.Models
             writer.Write(Height);
             writer.Write(Speed);
             writer.Write(Persistent);
-            writer.Write(BackgroundColor);
+            writer.Write(BackgroundColor ^ 0xFF000000); // remove alpha (background color doesn't have alpha)
             writer.Write(DrawBackgroundColor);
             writer.WriteUndertaleObject(_CreationCodeId);
             writer.Write((uint)Flags);
@@ -130,7 +130,7 @@ namespace UndertaleModLib.Models
             Height = reader.ReadUInt32();
             Speed = reader.ReadUInt32();
             Persistent = reader.ReadBoolean();
-            BackgroundColor = reader.ReadUInt32();
+            BackgroundColor = 0xFF000000 | reader.ReadUInt32(); // make alpha 255 (background color doesn't have alpha)
             DrawBackgroundColor = reader.ReadBoolean();
             _CreationCodeId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
             Flags = (RoomEntryFlags)reader.ReadUInt32();

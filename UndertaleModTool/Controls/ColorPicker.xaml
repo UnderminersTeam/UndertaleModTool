@@ -24,6 +24,7 @@
             </Border>
         </Viewbox>
 
-        <TextBox Grid.Column="1" Text="{Binding Color, Converter={StaticResource ColorTextConverter}, RelativeSource={RelativeSource AncestorType={x:Type local:ColorPicker}}, UpdateSourceTrigger=PropertyChanged}" ToolTip="A, B, G, R"/>
+        <TextBox Name="ColorText" Grid.Column="1" MaxLength="9" ToolTip="A, B, G, R"/>
+        <!-- "Text" binding is in the code of "ColorPicker" -->
     </Grid>
 </UserControl>
