@@ -945,16 +945,16 @@
                     </Storyboard>
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Background}">
-                        <ContentControl Content="{Binding BackgroundDefinition}" ContentTemplateSelector="{StaticResource RoomObjectTemplateSelector}"/>
+                        <ContentControl Content="{Binding BackgroundDefinition, Mode=OneTime}" ContentTemplateSelector="{StaticResource RoomObjectTemplateSelector}"/>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
-                        <ContentControl Content="{Binding ObjectDefinition}" ContentTemplateSelector="{StaticResource RoomObjectTemplateSelector}"/>
+                        <ContentControl Content="{Binding ObjectDefinition, Mode=OneTime}" ContentTemplateSelector="{StaticResource RoomObjectTemplateSelector}"/>
                     </DataTemplate>
                     
                     <DataTemplate x:Key="BGTemplate">
                         <Rectangle Width="{Binding BackgroundDefinition.Texture.SourceWidth}" Height="{Binding BackgroundDefinition.Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
                             <Rectangle.DataContext>
-                                <Binding Path="DataContext" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentControl}"/>
+                                <Binding Path="DataContext" Mode="OneTime" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentControl}"/>
                             </Rectangle.DataContext>
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
@@ -1010,7 +1010,7 @@
                     <DataTemplate x:Key="ObjTemplate">
                         <Rectangle Width="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth}" Height="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
                             <Rectangle.DataContext>
-                                <Binding Path="DataContext" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentControl}"/>
+                                <Binding Path="DataContext" Mode="OneTime" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentControl}"/>
                             </Rectangle.DataContext>
                             <Rectangle.Style>
                                 <Style TargetType="Rectangle">

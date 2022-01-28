@@ -39,16 +39,16 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Border Background="{x:Static SystemColors.WindowBrush}" Grid.Row="0" Grid.Column="0" Panel.ZIndex="1">
-            <TextBlock HorizontalAlignment="Center" Text="{Binding ., Converter={StaticResource RoomCaptionConverter}}" FontSize="14" FontStyle="Italic" Margin="5"/>
+            <TextBlock HorizontalAlignment="Center" Text="{Binding ., Mode=OneTime, Converter={StaticResource RoomCaptionConverter}}" FontSize="14" FontStyle="Italic" Margin="5"/>
         </Border>
         <ItemsControl Grid.Column="0" Grid.Row="1" Panel.ZIndex="0" Name="RoomGraphics" Background="Black">
             <ItemsControl.Style>
                 <Style TargetType="ItemsControl">
-                    <Setter Property="ItemsSource" Value="{Binding Source={StaticResource AllObjectsGMS1}}"/>
+                    <Setter Property="ItemsSource" Value="{Binding Mode=OneTime, Source={StaticResource AllObjectsGMS1}}"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
+                        <DataTrigger Binding="{Binding IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
                             <DataTrigger.Setters>
-                                <Setter Property="ItemsSource" Value="{Binding Layers, Converter={StaticResource LayerFlattenerConverter}}"/>
+                                <Setter Property="ItemsSource" Value="{Binding Layers, Mode=OneTime, Converter={StaticResource LayerFlattenerConverter}}"/>
                             </DataTrigger.Setters>
                         </DataTrigger>
                     </Style.Triggers>
@@ -56,19 +56,19 @@
             </ItemsControl.Style>
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <Canvas Name="RoomCanvas" Width="{Binding Width}" Height="{Binding Height}" IsItemsHost="True" AllowDrop="True">
+                    <Canvas Name="RoomCanvas" Width="{Binding Width, Mode=OneTime}" Height="{Binding Height, Mode=OneTime}" IsItemsHost="True" AllowDrop="True">
                         <Canvas.Background>
-                            <DrawingBrush TileMode="Tile" Viewport="{Binding Grid, Converter={StaticResource GridConverter}}" ViewportUnits="Absolute">
+                            <DrawingBrush TileMode="Tile" Viewport="{Binding Grid, Mode=OneTime, Converter={StaticResource GridConverter}}" ViewportUnits="Absolute">
                                 <DrawingBrush.Drawing>
                                     <GeometryDrawing>
                                         <GeometryDrawing.Geometry>
-                                            <RectangleGeometry Rect="{Binding Grid, Converter={StaticResource GridConverter}}"/>
+                                            <RectangleGeometry Rect="{Binding Grid, Mode=OneTime, Converter={StaticResource GridConverter}}"/>
                                         </GeometryDrawing.Geometry>
                                         <GeometryDrawing.Brush>
-                                            <SolidColorBrush Color="{Binding BackgroundColor, Converter={StaticResource ColorConverter}}"/>
+                                            <SolidColorBrush Color="{Binding BackgroundColor, Mode=OneTime, Converter={StaticResource ColorConverter}}"/>
                                         </GeometryDrawing.Brush>
                                         <GeometryDrawing.Pen>
-                                            <Pen Brush="Gray" Thickness="{Binding GridThicknessPx}"/>
+                                            <Pen Brush="Gray" Thickness="{Binding GridThicknessPx, Mode=OneTime}"/>
                                         </GeometryDrawing.Pen>
                                     </GeometryDrawing>
                                 </DrawingBrush.Drawing>

@@ -974,18 +974,30 @@ namespace UndertaleModTool
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
             if (item is null)
-                return null;
-
-            string resName = item switch
             {
-                UndertaleGameObject => "Obj",
-                UndertaleBackground => "BG",
-                _ => null,
-            };
-            if (resName is not null)
-                return (DataTemplate)(container as FrameworkElement).FindResource(resName + "Template");
-            else
+                (container as ContentPresenter).Content = null;
                 return null;
+            }
+
+            string resName = null;
+            switch (item)
+            {
+                case UndertaleGameObject obj:
+                    if (obj.Sprite is not null)
+                        resName = "Obj";
+                    break;
+
+                case UndertaleBackground:
+                    resName = "BG";
+                    break;
+            }
+            if (resName is null)
+            {
+                (container as ContentPresenter).Content = null;
+                return null;
+            }
+
+            return (DataTemplate)(container as FrameworkElement).FindResource(resName + "Template");
         }
     }
 
