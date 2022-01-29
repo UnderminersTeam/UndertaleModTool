@@ -228,13 +228,32 @@ namespace UndertaleModTool
                 }
                 else if (arg == "deleteTempFolder") // if was launched from UndertaleModToolUpdater
                 {
-                    try
+                    Process[] updaterInstances = Process.GetProcessesByName("UndertaleModToolUpdater");
+                    bool updaterClosed = false;
+
+                    if (updaterInstances.Length > 0)
                     {
-                        Directory.Delete(Path.Combine(Path.GetTempPath(), "UndertaleModTool"), true);
+                        foreach (Process instance in updaterInstances)
+                        {
+                            if (!instance.WaitForExit(2000))
+                                ShowWarning("UndertaleModToolUpdater app didn't exit.\nCan't delete its temp folder.");
+                            else
+                                updaterClosed = true;
+                        }
                     }
-                    catch (Exception ex)
+                    else
+                        updaterClosed = true;
+
+                    if (updaterClosed)
                     {
-                        ShowWarning($"Can't delete the updater temp folder.\nError - {ex.Message}.");
+                        try
+                        {
+                            Directory.Delete(Path.Combine(Path.GetTempPath(), "UndertaleModTool"), true);
+                        }
+                        catch (Exception ex)
+                        {
+                            ShowWarning($"Can't delete the updater temp folder.\nError - {ex.Message}.");
+                        }
                     }
                 }
             }
@@ -2268,8 +2287,11 @@ namespace UndertaleModTool
                 var currentArtifact = (JObject) artifactList[index];
                 string artifactName = (string)currentArtifact["name"];
 
-                if (Environment.Is64BitOperatingSystem && artifactName.Contains("x64"))
-                    artifact = currentArtifact;
+                if (Environment.Is64BitOperatingSystem)
+                {
+                    if (artifactName.Contains("x64"))
+                        artifact = currentArtifact;
+                }
                 else if (artifactName.Contains("x86"))
                     artifact = currentArtifact;
             }
@@ -2369,6 +2391,9 @@ namespace UndertaleModTool
                     string updaterFolderTemp = Path.Combine(tempFolder, "Updater");
                     try
                     {
+                        if (Directory.Exists(updaterFolderTemp))
+                            Directory.Delete(updaterFolderTemp, true);
+
                         Directory.CreateDirectory(updaterFolderTemp);
                         foreach (string file in Directory.GetFiles(updaterFolder))
                         {
