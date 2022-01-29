@@ -139,6 +139,12 @@ namespace UndertaleModTool
             }
         }
 
+        public bool UpdateButtonEnabled
+        {
+            get => UpdateAppButton.IsEnabled;
+            set => UpdateAppButton.IsEnabled = value;
+        }
+
         public SettingsWindow()
         {
             InitializeComponent();
@@ -153,7 +159,7 @@ namespace UndertaleModTool
 
         private void UpdateAppButton_Click(object sender, RoutedEventArgs e)
         {
-            ((MainWindow) Owner).UpdateApp(this);
+            ((MainWindow)Owner).UpdateApp(this);
         }
     }
 }

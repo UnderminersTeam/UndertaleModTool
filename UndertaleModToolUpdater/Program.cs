@@ -10,6 +10,8 @@ namespace UndertaleModToolUpdater
     {
         static void Main(string[] args)
         {
+            Console.Title = "UndertaleModTool updater";
+
             // Get all processes named UndertaleModTool
             Process[] utmtInstances = Process.GetProcessesByName("UndertaleModTool");
             
@@ -23,72 +25,77 @@ namespace UndertaleModToolUpdater
                 }
             }
 
-            string basePath = Path.GetTempPath() + "UndertaleModTool\\";
+            string basePath = Path.Combine(Path.GetTempPath(), "UndertaleModTool") + Path.DirectorySeparatorChar;
+            string appPath = null;
 
             // Check if Update.zip actually exists
             if (!File.Exists(basePath + "Update.zip")) {
                 Console.WriteLine("Update.zip is missing! This program is not meant to be ran by itself, please update through UndertaleModTool.");
+                Console.WriteLine("Press any key to exit...");
+                Console.Read();
                 Environment.Exit(1);
             }
 
             // If this exists from a failed update or something, then remove it
-            if (Directory.Exists(basePath + "Update\\"))
+            if (Directory.Exists(basePath + "Update"))
             {
                 Console.WriteLine("Removing Update folder...");
-                Directory.Delete(basePath + "Update\\", true);
+                Directory.Delete(basePath + "Update", true);
+            }
+
+            if (!File.Exists("actualAppFolder"))
+            {
+                Console.WriteLine("\"actualAppFolder\" file is missing!");
+                Console.WriteLine("Press any key to exit...");
+                Console.Read();
+                Environment.Exit(1);
+            }
+            else
+            {
+                appPath = File.ReadAllText("actualAppFolder");
+                File.Delete("actualAppFolder");
             }
 
             // Extract the update ZIP
             Console.WriteLine("Extracting Update.zip...");
-            ZipFile.ExtractToDirectory(basePath + "Update.zip", basePath + "Update\\", true);
+            ZipFile.ExtractToDirectory(basePath + "Update.zip", basePath + "Update", true);
             Console.WriteLine("Deleting Update.zip...");
             File.Delete(basePath + "Update.zip");
 
-            // No need for these, the MoveDirectory function will ignore any IOExceptions while
-            // attempting to delete or move files. So if a file is in use, the function will ignore
-            // it and continue anyway.
-
-            //Console.WriteLine("Deleting UndertaleModToolUpdater.exe from update...");
-            //File.Delete(basePath + "Update\\UndertaleModToolUpdater.exe");
-
             Console.WriteLine("Replacing files with update...");
-            MoveDirectory(basePath + "Update\\", AppContext.BaseDirectory);
+            MoveDirectory(basePath + "Update", appPath);
 
             Console.WriteLine("Finished updating, launching UTMT...");
 
-            Process p = new Process
+            Process.Start(new ProcessStartInfo(Path.Combine(appPath, "UndertaleModTool.exe"))
             {
-                StartInfo = new ProcessStartInfo("UndertaleModTool.exe")
-            };
-            p.Start();
-
+                Arguments = "deleteTempFolder"
+            });
+            
             Environment.Exit(0);
         }
 
-        public static void MoveDirectory(string source, string target)
+        // source - https://stackoverflow.com/a/2553245/12136394
+        static void MoveDirectory(string source, string target)
         {
-            var sourcePath = source.TrimEnd('\\', ' ');
-            var targetPath = target.TrimEnd('\\', ' ');
-            var files = Directory.EnumerateFiles(sourcePath, "*", SearchOption.AllDirectories)
+            var files = Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories)
                                  .GroupBy(s => Path.GetDirectoryName(s));
+
             foreach (var folder in files)
             {
-                var targetFolder = folder.Key.Replace(sourcePath, targetPath);
+                var targetFolder = folder.Key.Replace(source, target);
                 Directory.CreateDirectory(targetFolder);
+
                 foreach (var file in folder)
                 {
                     var targetFile = Path.Combine(targetFolder, Path.GetFileName(file));
-                    try
-                    {
-                        if (File.Exists(targetFile)) File.Delete(targetFile);
-                        File.Move(file, targetFile);
-                    }
-                    catch (IOException)
-                    {
-                        continue;
-                    }
+                    if (File.Exists(targetFile))
+                        File.Delete(targetFile);
+                    
+                    File.Move(file, targetFile);
                 }
             }
+
             Directory.Delete(source, true);
         }
     }

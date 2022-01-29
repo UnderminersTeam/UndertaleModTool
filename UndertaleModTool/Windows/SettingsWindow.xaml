@@ -68,6 +68,6 @@
 
         <Separator Grid.Row="14" Grid.ColumnSpan="2" Margin="10"/>
         <Button Grid.Row="15" Grid.Column="0" Margin="5" Click="AppDataButton_Click">Open application data folder</Button>
-        <Button Grid.Row="15" Grid.Column="1" Margin="319,5,0,5" Click="UpdateAppButton_Click" Content="Update app to latest commit" HorizontalAlignment="Left" Width="223"/>
+        <Button Grid.Row="15" Grid.Column="1" Margin="5" Click="UpdateAppButton_Click" Name="UpdateAppButton" HorizontalAlignment="Right" Width="223">Update app to latest commit</Button>
     </Grid>
 </Window>
