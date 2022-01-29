@@ -25,15 +25,15 @@ jobs:
     - name: Publish Windows x86
       run: |
         dotnet publish UndertaleModTool -c Release -r win-x86 --self-contained false -p:PublishSingleFile=false --output win_x86
-        dotnet publish UndertaleModToolUpdater -c Release -r win-x86 --self-contained false -p:PublishSingleFile=false -p:PublishTrimmed=True -p:TrimMode=CopyUsed --output win_x86\Updater
+        dotnet publish UndertaleModToolUpdater -c Release -r win-x86 --self-contained false -p:PublishSingleFile=false --output win_x86\Updater
     - name: Publish Windows x64
       run: |
         dotnet publish UndertaleModTool -c Release -r win-x64 --self-contained false -p:PublishSingleFile=false --output win_x64
-        dotnet publish UndertaleModToolUpdater -c Release -r win-x64 --self-contained false -p:PublishSingleFile=false -p:PublishTrimmed=True -p:TrimMode=CopyUsed --output win_x64\Updater
+        dotnet publish UndertaleModToolUpdater -c Release -r win-x64 --self-contained false -p:PublishSingleFile=false --output win_x64\Updater
     - name: Publish Windows ARM
       run: |
         dotnet publish UndertaleModTool -c Release -r win-arm --self-contained false -p:PublishSingleFile=false --output win_arm
-        dotnet publish UndertaleModToolUpdater -c Release -r win-arm --self-contained false -p:PublishSingleFile=false -p:PublishTrimmed=True -p:TrimMode=CopyUsed --output win_arm\Updater
+        dotnet publish UndertaleModToolUpdater -c Release -r win-arm --self-contained false -p:PublishSingleFile=false --output win_arm\Updater
     - name: Copy external files
       run: |
         Copy-Item "README.md" -Destination "./win_x86/"
