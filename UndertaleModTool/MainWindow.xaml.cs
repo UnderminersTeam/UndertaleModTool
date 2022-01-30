@@ -242,7 +242,10 @@ namespace UndertaleModTool
                         }
                     }
                     else
+                    {
+                        await Task.Delay(500);
                         updaterClosed = true;
+                    }
 
                     if (updaterClosed)
                     {
