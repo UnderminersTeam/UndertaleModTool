@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Controls;
+using System.Runtime;
 
 using UndertaleModLib;
 using UndertaleModLib.Util;
@@ -49,10 +50,18 @@ worker.Cleanup();
 await StopUpdater();
 HideProgressBar();
 
+GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; // force full garbage collection
+GC.Collect();
+
+ScriptMessage("Exported successfully.");
+
 
 async Task DumpRooms()
 {
     for (int i = 0; i < roomCount; i++) {
+        if (IsAppClosed)
+            break;
+
         UndertaleRoom room = Data.Rooms[i];
 
         mainWindow.Selected = room; 
@@ -86,7 +95,7 @@ void DumpRoom(string roomName, bool last)
         }
         catch (Exception e)
         {
-            ScriptError(e.ToString());
+            throw new ScriptException($"An error occurred while exporting room \"{roomName}\".\n{e}");
         }
     }
 

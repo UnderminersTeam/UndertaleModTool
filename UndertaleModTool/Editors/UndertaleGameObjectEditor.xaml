@@ -41,6 +41,7 @@
         </ObjectDataProvider>
         <local:EventNameConverter x:Key="EventNameConverter"/>
         <local:GameObjectByIdConverter x:Key="GameObjectByIdConverter"/>
+        <local:IsGMS2Converter x:Key="IsGMS2Converter" />
 
         <!--
         Leaving this here for now, I might want to add it back for 'advanced' editor
@@ -222,8 +223,8 @@
             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Solid</TextBlock>
             <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Solid}"/>
 
-            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Depth</TextBlock>
-            <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding Depth}"/>
+            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2Converter}}">Depth</TextBlock>
+            <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2Converter}}" Text="{Binding Depth}"/>
 
             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Persistent</TextBlock>
             <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Persistent}"/>

@@ -115,6 +115,8 @@ namespace UndertaleModTool
             }
         }
 
+        public bool IsAppClosed { get; set; }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         // For delivering messages to LoaderDialogs
@@ -538,6 +540,8 @@ namespace UndertaleModTool
 
                 CloseOtherWindows();
 
+                IsAppClosed = true;
+
                 Closing -= DataWindow_Closing; //disable "on window closed" event handler (prevent recursion)
                 _ = Task.Run(() => Dispatcher.Invoke(Close));
             }
@@ -658,7 +662,7 @@ namespace UndertaleModTool
             });
             dialog.ShowDialog();
             await t;
-
+            
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; //clean "GC holes" left in the memory by previous game data 
             GC.Collect();                                                                           //https://docs.microsoft.com/en-us/dotnet/api/system.runtime.gcsettings.largeobjectheapcompactionmode?view=net-5.0
         }

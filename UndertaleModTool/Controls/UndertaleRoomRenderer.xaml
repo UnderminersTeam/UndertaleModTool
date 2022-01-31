@@ -46,7 +46,7 @@
                 <Style TargetType="ItemsControl">
                     <Setter Property="ItemsSource" Value="{Binding Mode=OneTime, Source={StaticResource AllObjectsGMS1}}"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
+                        <DataTrigger Binding="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" Value="False">
                             <DataTrigger.Setters>
                                 <Setter Property="ItemsSource" Value="{Binding Layers, Mode=OneTime, Converter={StaticResource LayerFlattenerConverter}}"/>
                             </DataTrigger.Setters>
@@ -56,7 +56,7 @@
             </ItemsControl.Style>
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <Canvas Name="RoomCanvas" Width="{Binding Width, Mode=OneTime}" Height="{Binding Height, Mode=OneTime}" IsItemsHost="True" AllowDrop="True">
+                    <Canvas Name="RoomCanvas" Width="{Binding Width, Mode=OneTime}" Height="{Binding Height, Mode=OneTime}" IsItemsHost="True" AllowDrop="True" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
                         <Canvas.Background>
                             <DrawingBrush TileMode="Tile" Viewport="{Binding Grid, Mode=OneTime, Converter={StaticResource GridConverter}}" ViewportUnits="Absolute">
                                 <DrawingBrush.Drawing>
@@ -86,7 +86,7 @@
                 </DataTemplate>
 
                 <DataTemplate x:Key="BGTemplate">
-                    <Rectangle Width="{Binding BackgroundDefinition.Texture.SourceWidth, Mode=OneTime}" Height="{Binding BackgroundDefinition.Texture.SourceHeight, Mode=OneTime}" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                    <Rectangle Width="{Binding BackgroundDefinition.Texture.SourceWidth, Mode=OneTime}" Height="{Binding BackgroundDefinition.Texture.SourceHeight, Mode=OneTime}">
                         <Rectangle.DataContext>
                             <Binding Path="DataContext" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentControl}"/>
                         </Rectangle.DataContext>
@@ -117,8 +117,9 @@
                         </Rectangle.Fill>
                     </Rectangle>
                 </DataTemplate>
+                
                 <DataTemplate x:Key="ObjTemplate">
-                    <Rectangle Width="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth, Mode=OneTime}" Height="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight, Mode=OneTime}" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                    <Rectangle Width="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth, Mode=OneTime}" Height="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight, Mode=OneTime}">
                         <Rectangle.DataContext>
                             <Binding Path="DataContext" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentControl}"/>
                         </Rectangle.DataContext>
@@ -153,7 +154,7 @@
                 </DataTemplate>
 
                 <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Tile}">
-                    <Rectangle Width="{Binding Width, Mode=OneTime}" Height="{Binding Height, Mode=OneTime}" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                    <Rectangle Width="{Binding Width, Mode=OneTime}" Height="{Binding Height, Mode=OneTime}">
                         <Rectangle.RenderTransform>
                             <TranslateTransform X="{Binding X, Mode=OneTime}" Y="{Binding Y, Mode=OneTime}"/>
                         </Rectangle.RenderTransform>
@@ -182,12 +183,10 @@
                 </DataTemplate>
 
                 <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
-                    <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth, Mode=OneTime}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight, Mode=OneTime}" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
-
+                    <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth, Mode=OneTime}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight, Mode=OneTime}">
                         <Rectangle.RenderTransform>
                             <ScaleTransform ScaleX="{Binding CalcScaleX, Mode=OneTime}" ScaleY="{Binding CalcScaleY, Mode=OneTime}" CenterX="0" CenterY="0"/>
                         </Rectangle.RenderTransform>
-
                         <Rectangle.Fill>
                             <ImageBrush
                                 ImageSource="{Binding Sprite.Textures[0].Texture.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}, Mode=OneTime}" 
@@ -195,7 +194,7 @@
                                 TileMode="None"
                                 Stretch="Fill">
                                 <ImageBrush.Viewbox>
-                                    <MultiBinding>
+                                    <MultiBinding ConverterParameter="returnEmptyOnNull">
                                         <MultiBinding.Converter>
                                             <local:RectConverter/>
                                         </MultiBinding.Converter>

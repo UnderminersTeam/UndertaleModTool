@@ -19,6 +19,7 @@
         <local:LayerFlattenerConverter x:Key="LayerFlattenerConverter" />
         <local:IsGMS2Converter x:Key="IsGMS2Converter" />
         <local:RoomObjectTemplateSelector x:Key="RoomObjectTemplateSelector"/>
+        <local:LayerBGSpriteConverter x:Key="LayerBGSpriteConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Tiles}"/>
@@ -66,7 +67,7 @@
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
                         <TextBlock>
                             <TextBlock.Text>
-                                <MultiBinding StringFormat="{}Instance {0} of {1} (UndertaleRoom+GameObject)">
+                                <MultiBinding Mode="OneWay" StringFormat="{}Instance {0} of {1} (UndertaleRoom+GameObject)">
                                     <Binding Path="InstanceID"/>
                                     <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?" FallbackValue="EmptyInstance"/>
                                 </MultiBinding>
@@ -76,7 +77,7 @@
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Tile}">
                         <TextBlock>
                             <TextBlock.Text>
-                                <MultiBinding StringFormat="{}Tile {0} of {1} (UndertaleRoom+Tile)">
+                                <MultiBinding Mode="OneWay" StringFormat="{}Tile {0} of {1} (UndertaleRoom+Tile)">
                                     <Binding Path="InstanceID"/>
                                     <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?" FallbackValue="EmptyTile"/>
                                 </MultiBinding>
@@ -86,7 +87,7 @@
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+SpriteInstance}">
                         <TextBlock>
                             <TextBlock.Text>
-                                <MultiBinding StringFormat="{}{0} (UndertaleRoom+SpriteInstance)">
+                                <MultiBinding Mode="OneWay" StringFormat="{}{0} (UndertaleRoom+SpriteInstance)">
                                     <Binding Path="Name.Content" TargetNullValue="?" FallbackValue="EmptySprite"/>
                                 </MultiBinding>
                             </TextBlock.Text>
@@ -95,14 +96,14 @@
                 </TreeView.Resources>
 
                 <TreeViewItem Header="{Binding Name.Content}" Name="RoomRootItem" IsExpanded="True">
-                    <TreeViewItem Header="Backgrounds" ItemsSource="{Binding Backgrounds}" Visibility="{Binding Flags, Converter={StaticResource IsGMS2Converter}}" IsExpanded="True">
+                    <TreeViewItem Header="Backgrounds" ItemsSource="{Binding Backgrounds, Mode=OneWay}" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" IsExpanded="True">
                         <TreeViewItem.ItemTemplate>
                             <HierarchicalDataTemplate>
-                                <TextBlock Text="{Binding BackgroundDefinition, TargetNullValue='(no name)'}">
+                                <TextBlock Text="{Binding BackgroundDefinition, Mode=OneWay, TargetNullValue='(no name)'}">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Enabled}" Value="False">
+                                                <DataTrigger Binding="{Binding Enabled, Mode=OneWay}" Value="False">
                                                     <Setter Property="Foreground"  Value="LightGray"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -112,14 +113,14 @@
                             </HierarchicalDataTemplate>
                         </TreeViewItem.ItemTemplate>
                     </TreeViewItem>
-                    <TreeViewItem Header="Views" ItemsSource="{Binding Views}" IsExpanded="True">
+                    <TreeViewItem Header="Views" ItemsSource="{Binding Views, Mode=OneWay}" IsExpanded="True">
                         <TreeViewItem.ItemTemplate>
                             <HierarchicalDataTemplate>
                                 <TextBlock Text="View">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Enabled}" Value="False">
+                                                <DataTrigger Binding="{Binding Enabled, Mode=OneWay}" Value="False">
                                                     <Setter Property="Foreground"  Value="LightGray"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -129,7 +130,7 @@
                             </HierarchicalDataTemplate>
                         </TreeViewItem.ItemTemplate>
                     </TreeViewItem>
-                    <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects}">
+                    <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects, Mode=OneWay}" IsExpanded="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}">
                         <TreeViewItem.Resources>
                             <ContextMenu x:Key="cm">
                                 <MenuItem Header="New Object Instance" Click="MenuItem_NewObjectInstance_Click"/>
@@ -139,39 +140,22 @@
                             <Style TargetType="{x:Type TreeViewItem}">
                                 <Setter Property="ContextMenu" Value="{StaticResource cm}" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
+                                    <DataTrigger Binding="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" Value="False">
                                         <DataTrigger.Setters>
-                                            <Setter Property="IsExpanded" Value="False"/>
                                             <Setter Property="Foreground"  Value="LightGray"/>
                                             <Setter Property="ContextMenu" Value="{x:Null}"/>
-                                        </DataTrigger.Setters>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Collapsed">
-                                        <DataTrigger.Setters>
-                                            <Setter Property="IsExpanded" Value="True"/>
                                         </DataTrigger.Setters>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </TreeViewItem.Style>
                     </TreeViewItem>
-                    <TreeViewItem Header="Tiles" ItemsSource="{Binding Tiles}" IsExpanded="True">
-                        <TreeViewItem.Style>
-                            <Style TargetType="{x:Type TreeViewItem}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
-                                        <DataTrigger.Setters>
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger.Setters>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TreeViewItem.Style>
+                    <TreeViewItem Header="Tiles" ItemsSource="{Binding Tiles, Mode=OneWay}" IsExpanded="True" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}">
                         <TreeViewItem.ItemTemplate>
                             <HierarchicalDataTemplate>
                                 <TextBlock>
                                     <TextBlock.Text>
-                                        <MultiBinding StringFormat="{}Tile {0} of {1} (UndertaleRoom+Tile)">
+                                        <MultiBinding Mode="OneWay" StringFormat="{}Tile {0} of {1} (UndertaleRoom+Tile)">
                                             <Binding Path="InstanceID"/>
                                             <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?" FallbackValue="EmptyTile"/>
                                         </MultiBinding>
@@ -185,18 +169,7 @@
                             </ContextMenu>
                         </TreeViewItem.ContextMenu>
                     </TreeViewItem>
-                    <TreeViewItem Header="Layers" ItemsSource="{Binding Layers}" IsExpanded="True">
-                        <TreeViewItem.Style>
-                            <Style TargetType="{x:Type TreeViewItem}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Collapsed">
-                                        <DataTrigger.Setters>
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger.Setters>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TreeViewItem.Style>
+                    <TreeViewItem Header="Layers" ItemsSource="{Binding Layers, Mode=OneWay}" IsExpanded="True" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}, ConverterParameter=invert}">
                         <TreeViewItem.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="New Instances layer" Click="MenuItem_NewLayerInstances_Click"/>
@@ -208,8 +181,8 @@
                         <TreeViewItem.ItemTemplateSelector>
                             <local:LayerDataTemplateSelector>
                                 <local:LayerDataTemplateSelector.InstancesDataTemplate>
-                                    <HierarchicalDataTemplate ItemsSource="{Binding InstancesData.Instances}" ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content}">
+                                    <HierarchicalDataTemplate ItemsSource="{Binding InstancesData.Instances, Mode=OneWay}" ItemTemplateSelector="{x:Null}">
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}">
                                             <TextBlock.ContextMenu>
                                                 <ContextMenu>
                                                     <MenuItem Header="New Object Instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
@@ -220,13 +193,13 @@
                                 </local:LayerDataTemplateSelector.InstancesDataTemplate>
                                 <local:LayerDataTemplateSelector.TilesDataTemplate>
                                     <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content}"/>
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}"/>
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.TilesDataTemplate>
                                 <local:LayerDataTemplateSelector.AssetsDataTemplate>
                                     <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
                                         <HierarchicalDataTemplate.ItemsSource>
-                                            <MultiBinding>
+                                            <MultiBinding Mode="OneWay">
                                                 <MultiBinding.Converter>
                                                     <local:MultiCollectionBinding/>
                                                     <!-- TODO: hack, may break updates -->
@@ -235,7 +208,7 @@
                                                 <Binding Path="AssetsData.Sprites"/>
                                             </MultiBinding>
                                         </HierarchicalDataTemplate.ItemsSource>
-                                        <TextBlock Text="{Binding LayerName.Content}">
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}">
                                             <TextBlock.ContextMenu>
                                                 <ContextMenu>
                                                     <MenuItem Header="New Legacy Tile" Click="MenuItem_NewLegacyTile_Click"/>
@@ -247,7 +220,7 @@
                                 </local:LayerDataTemplateSelector.AssetsDataTemplate>
                                 <local:LayerDataTemplateSelector.BackgroundDataTemplate>
                                     <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" />
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.BackgroundDataTemplate>
                             </local:LayerDataTemplateSelector>
@@ -304,11 +277,11 @@
                             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Persistent</TextBlock>
                             <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Persistent}"/>
 
-                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Visibility="{Binding Flags, Converter={StaticResource IsGMS2Converter}}">Background color</TextBlock>
-                            <local:ColorPicker HasAlpha="False" Grid.Row="5" Grid.Column="1" Margin="3" Color="{Binding BackgroundColor}" Visibility="{Binding Flags, Converter={StaticResource IsGMS2Converter}}"/>
+                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}">Background color</TextBlock>
+                            <local:ColorPicker HasAlpha="False" Grid.Row="5" Grid.Column="1" Margin="3" Color="{Binding BackgroundColor}" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}"/>
 
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Visibility="{Binding Flags, Converter={StaticResource IsGMS2Converter}}">Draw background color</TextBlock>
-                            <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding DrawBackgroundColor}" Visibility="{Binding Flags, Converter={StaticResource IsGMS2Converter}}"/>
+                            <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding DrawBackgroundColor}" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}"/>
 
                             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Creation Code</TextBlock>
                             <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding CreationCodeId}" ObjectType="{x:Type undertale:UndertaleCode}"/>
@@ -572,12 +545,12 @@
                                 <local:UndertaleObjectReference.Style>
                                     <Style TargetType="{x:Type local:UndertaleObjectReference}">
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
+                                            <DataTrigger Binding="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" Value="False">
                                                 <DataTrigger.Setters>
                                                     <Setter Property="ObjectType" Value="{x:Type undertale:UndertaleSprite}"/>
                                                 </DataTrigger.Setters>
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Collapsed">
+                                            <DataTrigger Binding="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" Value="True">
                                                 <DataTrigger.Setters>
                                                     <Setter Property="ObjectType" Value="{x:Type undertale:UndertaleBackground}"/>
                                                 </DataTrigger.Setters>
@@ -700,7 +673,7 @@
 
                             <Separator Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"/>
 
-                            <ContentControl Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Content="{Binding Data}">
+                            <ContentControl Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Content="{Binding Data, Mode=OneTime}">
                                 <ContentControl.Resources>
                                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerInstancesData}">
                                         <TextBlock Margin="3" Text="Contains GameObject instances, listed in the tree on the left"/>
@@ -899,11 +872,11 @@
             <ItemsControl Name="RoomGraphics" Background="Black" MouseMove="Rectangle_MouseMove" MouseWheel="Canvas_MouseWheel">
                 <ItemsControl.Style>
                     <Style TargetType="ItemsControl">
-                        <Setter Property="ItemsSource" Value="{Binding Source={StaticResource AllObjectsGMS1}}"/>
+                        <Setter Property="ItemsSource" Value="{Binding Source={StaticResource AllObjectsGMS1}, Mode=OneTime}"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="Visible">
+                            <DataTrigger Binding="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" Value="False">
                                 <DataTrigger.Setters>
-                                    <Setter Property="ItemsSource" Value="{Binding Layers, Converter={StaticResource LayerFlattenerConverter}}"/>
+                                    <Setter Property="ItemsSource" Value="{Binding Layers, Mode=OneTime, Converter={StaticResource LayerFlattenerConverter}}"/>
                                 </DataTrigger.Setters>
                             </DataTrigger>
                         </Style.Triggers>
@@ -911,22 +884,22 @@
                 </ItemsControl.Style>
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Canvas Name="RoomCanvas" Width="{Binding Width}" Height="{Binding Height}" IsItemsHost="True" AllowDrop="True" DragOver="Canvas_DragOver" Drop="Canvas_Drop">
+                        <Canvas Name="RoomCanvas" Width="{Binding Width, Mode=OneWay}" Height="{Binding Height, Mode=OneWay}" IsItemsHost="True" AllowDrop="True" DragOver="Canvas_DragOver" Drop="Canvas_Drop" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
                             <!--<Canvas.RenderTransform>
                                 <ScaleTransform ScaleX="2" ScaleY="2"></ScaleTransform>
                             </Canvas.RenderTransform>-->
                             <Canvas.Background>
-                                <DrawingBrush TileMode="Tile" Viewport="{Binding Grid, Converter={StaticResource GridConverter}}" ViewportUnits="Absolute">
+                                <DrawingBrush TileMode="Tile" Viewport="{Binding Grid, Mode=OneWay, Converter={StaticResource GridConverter}}" ViewportUnits="Absolute">
                                     <DrawingBrush.Drawing>
                                         <GeometryDrawing>
                                             <GeometryDrawing.Geometry>
-                                                <RectangleGeometry Rect="{Binding Grid, Converter={StaticResource GridConverter}}"/>
+                                                <RectangleGeometry Rect="{Binding Grid, Mode=OneWay, Converter={StaticResource GridConverter}}"/>
                                             </GeometryDrawing.Geometry>
                                             <GeometryDrawing.Brush>
-                                                <SolidColorBrush Color="{Binding BackgroundColor, Converter={StaticResource ColorConverter}}"/>
+                                                <SolidColorBrush Color="{Binding BackgroundColor, Mode=OneWay, Converter={StaticResource ColorConverter}}"/>
                                             </GeometryDrawing.Brush>
                                             <GeometryDrawing.Pen>
-                                                <Pen Brush="Gray" Thickness="{Binding GridThicknessPx}"/>
+                                                <Pen Brush="Gray" Thickness="{Binding GridThicknessPx, Mode=OneWay}"/>
                                             </GeometryDrawing.Pen>
                                         </GeometryDrawing>
                                     </DrawingBrush.Drawing>
@@ -945,21 +918,19 @@
                     </Storyboard>
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Background}">
-                        <ContentControl Content="{Binding BackgroundDefinition, Mode=OneTime}" ContentTemplateSelector="{StaticResource RoomObjectTemplateSelector}"/>
+                        <ContentControl Content="{Binding ., Mode=OneTime}" ContentTemplateSelector="{StaticResource RoomObjectTemplateSelector}"/>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
-                        <ContentControl Content="{Binding ObjectDefinition, Mode=OneTime}" ContentTemplateSelector="{StaticResource RoomObjectTemplateSelector}"/>
+                        <ContentControl Content="{Binding ., Mode=OneTime}" ContentTemplateSelector="{StaticResource RoomObjectTemplateSelector}"/>
                     </DataTemplate>
-                    
+
                     <DataTemplate x:Key="BGTemplate">
-                        <Rectangle Width="{Binding BackgroundDefinition.Texture.SourceWidth}" Height="{Binding BackgroundDefinition.Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
-                            <Rectangle.DataContext>
-                                <Binding Path="DataContext" Mode="OneTime" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentControl}"/>
-                            </Rectangle.DataContext>
+                        <Rectangle Width="{Binding BackgroundDefinition.Texture.SourceWidth, Mode=OneWay}" Height="{Binding BackgroundDefinition.Texture.SourceHeight, Mode=OneWay}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
-                                    <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
-                                    <ScaleTransform ScaleX="{Binding CalcScaleX}" ScaleY="{Binding CalcScaleY}"  CenterX="{Binding X}" CenterY="{Binding Y}"/>
+                                    <!-- Giving names to transform elements prevents random "Cannot find governing FrameworkElement or FrameworkContentElement for target element." errors -->
+                                    <TranslateTransform x:Name="transform0_0" X="{Binding X, Mode=OneWay}" Y="{Binding Y, Mode=OneWay}"/>
+                                    <ScaleTransform x:Name="transform0_1" ScaleX="{Binding CalcScaleX, Mode=OneWay}" ScaleY="{Binding CalcScaleY, Mode=OneWay}"  CenterX="{Binding X, Mode=OneWay}" CenterY="{Binding Y, Mode=OneWay}"/>
                                 </TransformGroup>
                             </Rectangle.RenderTransform>
                             <Rectangle.Style>
@@ -971,8 +942,8 @@
                                                     <MultiBinding.Converter>
                                                         <local:EqualityConverter />
                                                     </MultiBinding.Converter>
-                                                    <Binding Path="SelectedItem" ElementName="RoomObjectsTree" />
-                                                    <Binding Path="." />
+                                                    <Binding Path="SelectedItem" ElementName="RoomObjectsTree" Mode="OneWay"/>
+                                                    <Binding Path="." Mode="OneWay"/>
                                                 </MultiBinding>
                                             </DataTrigger.Binding>
                                             <DataTrigger.EnterActions>
@@ -987,7 +958,7 @@
                             </Rectangle.Style>
                             <Rectangle.Fill>
                                 <ImageBrush
-                                ImageSource="{Binding BackgroundDefinition.Texture.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
+                                ImageSource="{Binding BackgroundDefinition.Texture.TexturePage.TextureData.TextureBlob, Mode=OneWay, Converter={StaticResource UndertaleCachedImageLoader}}" 
                                 ViewboxUnits="Absolute"
                                 TileMode="None"
                                 Stretch="Fill">
@@ -996,26 +967,23 @@
                                             <MultiBinding.Converter>
                                                 <local:RectConverter/>
                                             </MultiBinding.Converter>
-                                            <Binding Path="BackgroundDefinition.Texture.SourceX"/>
-                                            <Binding Path="BackgroundDefinition.Texture.SourceY"/>
-                                            <Binding Path="BackgroundDefinition.Texture.SourceWidth"/>
-                                            <Binding Path="BackgroundDefinition.Texture.SourceHeight"/>
+                                            <Binding Path="BackgroundDefinition.Texture.SourceX" Mode="OneWay"/>
+                                            <Binding Path="BackgroundDefinition.Texture.SourceY" Mode="OneWay"/>
+                                            <Binding Path="BackgroundDefinition.Texture.SourceWidth" Mode="OneWay"/>
+                                            <Binding Path="BackgroundDefinition.Texture.SourceHeight" Mode="OneWay"/>
                                         </MultiBinding>
                                     </ImageBrush.Viewbox>
                                 </ImageBrush>
                             </Rectangle.Fill>
                         </Rectangle>
                     </DataTemplate>
-                    
+
                     <DataTemplate x:Key="ObjTemplate">
-                        <Rectangle Width="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth}" Height="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
-                            <Rectangle.DataContext>
-                                <Binding Path="DataContext" Mode="OneTime" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentControl}"/>
-                            </Rectangle.DataContext>
+                        <Rectangle Width="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth, Mode=OneWay}" Height="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight, Mode=OneWay}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
                             <Rectangle.Style>
                                 <Style TargetType="Rectangle">
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ObjectDefinition.Visible}" Value="False">
+                                        <DataTrigger Binding="{Binding ObjectDefinition.Visible, Mode=OneWay}" Value="False">
                                             <Setter Property="Opacity"  Value="1"/>
                                         </DataTrigger>
 
@@ -1025,8 +993,8 @@
                                                     <MultiBinding.Converter>
                                                         <local:EqualityConverter />
                                                     </MultiBinding.Converter>
-                                                    <Binding Path="SelectedItem" ElementName="RoomObjectsTree" />
-                                                    <Binding Path="." />
+                                                    <Binding Path="SelectedItem" ElementName="RoomObjectsTree" Mode="OneWay"/>
+                                                    <Binding Path="." Mode="OneWay"/>
                                                 </MultiBinding>
                                             </DataTrigger.Binding>
                                             <DataTrigger.EnterActions>
@@ -1041,15 +1009,15 @@
                             </Rectangle.Style>
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
-                                    <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}"/>
-                                    <RotateTransform CenterX="{Binding X}" CenterY="{Binding Y}" Angle="{Binding OppositeRotation}"/>
-                                    <TranslateTransform X="{Binding XOffset}" Y="{Binding YOffset}"/>
+                                    <ScaleTransform x:Name="transform1_0" ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"/>
+                                    <RotateTransform x:Name="transform1_1" CenterX="{Binding X, Mode=OneWay}" CenterY="{Binding Y, Mode=OneWay}" Angle="{Binding OppositeRotation, Mode=OneWay}"/>
+                                    <TranslateTransform x:Name="transform1_2" X="{Binding XOffset, Mode=OneWay}" Y="{Binding YOffset, Mode=OneWay}"/>
                                 </TransformGroup>
                                 <!-- TODO: X + TargetX? -->
                             </Rectangle.RenderTransform>
                             <Rectangle.Fill>
                                 <ImageBrush
-                                ImageSource="{Binding ObjectDefinition.Sprite.Textures[0].Texture.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
+                                ImageSource="{Binding ObjectDefinition.Sprite.Textures[0].Texture.TexturePage.TextureData.TextureBlob, Mode=OneWay, Converter={StaticResource UndertaleCachedImageLoader}}" 
                                 ViewboxUnits="Absolute"
                                 TileMode="None"
                                 Stretch="UniformToFill">
@@ -1058,21 +1026,21 @@
                                             <MultiBinding.Converter>
                                                 <local:RectConverter/>
                                             </MultiBinding.Converter>
-                                            <Binding Path="ObjectDefinition.Sprite.Textures[0].Texture.SourceX"/>
-                                            <Binding Path="ObjectDefinition.Sprite.Textures[0].Texture.SourceY"/>
-                                            <Binding Path="ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth"/>
-                                            <Binding Path="ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight"/>
+                                            <Binding Path="ObjectDefinition.Sprite.Textures[0].Texture.SourceX" Mode="OneWay"/>
+                                            <Binding Path="ObjectDefinition.Sprite.Textures[0].Texture.SourceY" Mode="OneWay"/>
+                                            <Binding Path="ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth" Mode="OneWay"/>
+                                            <Binding Path="ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight" Mode="OneWay"/>
                                         </MultiBinding>
                                     </ImageBrush.Viewbox>
                                 </ImageBrush>
                             </Rectangle.Fill>
                         </Rectangle>
                     </DataTemplate>
-                    
+
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Tile}">
-                        <Rectangle Width="{Binding Width}" Height="{Binding Height}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                        <Rectangle Width="{Binding Width, Mode=OneWay}" Height="{Binding Height, Mode=OneWay}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
                             <Rectangle.RenderTransform>
-                                <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
+                                <TranslateTransform X="{Binding X, Mode=OneWay}" Y="{Binding Y, Mode=OneWay}"/>
                             </Rectangle.RenderTransform>
                             <Rectangle.Style>
                                 <Style>
@@ -1083,8 +1051,8 @@
                                                     <MultiBinding.Converter>
                                                         <local:EqualityConverter />
                                                     </MultiBinding.Converter>
-                                                    <Binding Path="SelectedItem" ElementName="RoomObjectsTree" />
-                                                    <Binding Path="." />
+                                                    <Binding Path="SelectedItem" ElementName="RoomObjectsTree" Mode="OneWay"/>
+                                                    <Binding Path="." Mode="OneWay"/>
                                                 </MultiBinding>
                                             </DataTrigger.Binding>
                                             <DataTrigger.EnterActions>
@@ -1099,7 +1067,7 @@
                             </Rectangle.Style>
                             <Rectangle.Fill>
                                 <ImageBrush
-                                ImageSource="{Binding Tpag.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
+                                ImageSource="{Binding Tpag.TexturePage.TextureData.TextureBlob, Mode=OneWay, Converter={StaticResource UndertaleCachedImageLoader}}" 
                                 ViewboxUnits="Absolute"
                                 TileMode="None"
                                 Stretch="UniformToFill">
@@ -1108,12 +1076,12 @@
                                             <MultiBinding.Converter>
                                                 <local:SumRectConverter/>
                                             </MultiBinding.Converter>
-                                            <Binding Path="Tpag.SourceX"/>
-                                            <Binding Path="SourceX"/>
-                                            <Binding Path="Tpag.SourceY"/>
-                                            <Binding Path="SourceY"/>
-                                            <Binding Path="Width"/>
-                                            <Binding Path="Height"/>
+                                            <Binding Path="Tpag.SourceX" Mode="OneWay"/>
+                                            <Binding Path="SourceX" Mode="OneWay"/>
+                                            <Binding Path="Tpag.SourceY" Mode="OneWay"/>
+                                            <Binding Path="SourceY" Mode="OneWay"/>
+                                            <Binding Path="Width" Mode="OneWay"/>
+                                            <Binding Path="Height" Mode="OneWay"/>
                                         </MultiBinding>
                                     </ImageBrush.Viewbox>
                                 </ImageBrush>
@@ -1122,27 +1090,25 @@
                     </DataTemplate>
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
-                        <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
-
+                        <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth, Mode=OneWay}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight, Mode=OneWay}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
                             <Rectangle.RenderTransform>
-                                <ScaleTransform ScaleX="{Binding CalcScaleX}" ScaleY="{Binding CalcScaleY}" CenterX="0" CenterY="0"/>
+                                <ScaleTransform x:Name="transform2_0" ScaleX="{Binding CalcScaleX, Mode=OneWay}" ScaleY="{Binding CalcScaleY, Mode=OneWay}" CenterX="0" CenterY="0"/>
                             </Rectangle.RenderTransform>
-
                             <Rectangle.Fill>
                                 <ImageBrush
-                                ImageSource="{Binding Sprite.Textures[0].Texture.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
-                                ViewboxUnits="Absolute"
-                                TileMode="None"
-                                Stretch="Fill">
+                                    ImageSource="{Binding Sprite.Textures[0].Texture.TexturePage.TextureData.TextureBlob, Mode=OneTime, Converter={StaticResource UndertaleCachedImageLoader}}" 
+                                    ViewboxUnits="Absolute"
+                                    TileMode="None"
+                                    Stretch="Fill">
                                     <ImageBrush.Viewbox>
-                                        <MultiBinding>
+                                        <MultiBinding ConverterParameter="returnEmptyOnNull">
                                             <MultiBinding.Converter>
                                                 <local:RectConverter/>
                                             </MultiBinding.Converter>
-                                            <Binding Path="Sprite.Textures[0].Texture.SourceX"/>
-                                            <Binding Path="Sprite.Textures[0].Texture.SourceY"/>
-                                            <Binding Path="Sprite.Textures[0].Texture.SourceWidth"/>
-                                            <Binding Path="Sprite.Textures[0].Texture.SourceHeight"/>
+                                            <Binding Path="Sprite.Textures[0].Texture.SourceX" Mode="OneWay"/>
+                                            <Binding Path="Sprite.Textures[0].Texture.SourceY" Mode="OneWay"/>
+                                            <Binding Path="Sprite.Textures[0].Texture.SourceWidth" Mode="OneWay"/>
+                                            <Binding Path="Sprite.Textures[0].Texture.SourceHeight" Mode="OneWay"/>
                                         </MultiBinding>
                                     </ImageBrush.Viewbox>
                                 </ImageBrush>
@@ -1151,7 +1117,7 @@
                     </DataTemplate>
 
                     <DataTemplate DataType="{x:Type local:UndertalePathEditor+LineData}">
-                        <Line X1="{Binding From.X}" Y1="{Binding From.Y}" X2="{Binding To.X}" Y2="{Binding To.Y}" Stroke="Green" StrokeThickness="2"/>
+                        <Line X1="{Binding From.X, Mode=OneWay}" Y1="{Binding From.Y, Mode=OneWay}" X2="{Binding To.X, Mode=OneWay}" Y2="{Binding To.Y, Mode=OneWay}" Stroke="Green" StrokeThickness="2"/>
                     </DataTemplate>
                 </ItemsControl.Resources>
             </ItemsControl>

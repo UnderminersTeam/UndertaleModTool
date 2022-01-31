@@ -18,8 +18,7 @@ namespace UndertaleModTool
             if (values.Length < 2)
                 return false;
 
-            bool invert = parameter is string par && par == "True";
-
+            bool invert = parameter is string par && par == "invert";
             return (values[0] == values[1]) ^ invert;
         }
 

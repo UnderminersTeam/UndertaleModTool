@@ -884,6 +884,26 @@ namespace UndertaleModTool
         }
     }
 
+    public class FixedItemsControl : ItemsControl
+    {
+        private Canvas RoomCanvas;
+        private PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
+        public FixedItemsControl()
+        {
+            
+        }
+
+        protected override void OnRender(DrawingContext dc)
+        {
+            if (RoomCanvas is null)
+                RoomCanvas = GetVisualChild(0) as Canvas;
+
+            Vector offset = (Vector)visualOffProp.GetValue(RoomCanvas);
+            base.OnRender(dc);
+        }
+    }
+
+
     [ValueConversion(typeof(ObservableCollection<UndertaleRoom.GameObject>), typeof(int))]
     public class ObjCenterXConverter : IValueConverter
     {
@@ -973,6 +993,13 @@ namespace UndertaleModTool
     {
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
+            item = item switch
+            {
+                Background bg => bg.BackgroundDefinition,
+                GameObject obj => obj.ObjectDefinition,
+                _ => null
+            };
+
             if (item is null)
             {
                 (container as ContentPresenter).Content = null;
@@ -998,6 +1025,32 @@ namespace UndertaleModTool
             }
 
             return (DataTemplate)(container as FrameworkElement).FindResource(resName + "Template");
+        }
+    }
+
+    public class LayerBGSpriteConverter : IMultiValueConverter
+    {
+        private static readonly ColorConverter colorConv = new();
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values[0] is UndertaleSprite)
+            {
+                ((values[2] as DrawingBrush).Drawing as GeometryDrawing).Brush = new SolidColorBrush(Colors.Black);
+
+                return true;
+            }
+            else
+            {
+                uint colorRaw = (values[1] as Layer.LayerBackgroundData).Color;
+                ((values[2] as DrawingBrush).Drawing as GeometryDrawing).Brush = new SolidColorBrush((Color)colorConv.Convert(colorRaw, null, null, null));
+
+                return false;
+            }
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
         }
     }
 
@@ -1059,11 +1112,18 @@ namespace UndertaleModTool
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool isGMS2 = ((RoomEntryFlags)value).HasFlag(RoomEntryFlags.IsGMS2);
+            bool invert = parameter is string par && par == "invert";
+            bool isGMS2 = false;
+
+            if (value is RoomEntryFlags flags)
+                isGMS2 = flags.HasFlag(RoomEntryFlags.IsGMS2) ^ invert;
+            else if (value is Visibility vis)
+                return vis == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
 
             return targetType.Name switch
             {
                 "Boolean" => !isGMS2,
+                "Object" => !isGMS2,
                 "Visibility" => isGMS2 ? Visibility.Collapsed : Visibility.Visible,
                 _ => null,
             };

@@ -18,13 +18,14 @@ namespace UndertaleModTool
     public class UndertaleCachedImageLoader : IValueConverter
     {
         public static Dictionary<byte[], ImageSource> cache = new Dictionary<byte[], ImageSource>(); // TODO: weakref?
+        private static readonly ImageSourceConverter imgSrcConverter = new();
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             byte[] data = (byte[])value;
             if (!cache.ContainsKey(data))
             {
-                cache.Add(data, new ImageSourceConverter().ConvertFrom(data) as ImageSource);
+                cache.Add(data, imgSrcConverter.ConvertFrom(data) as ImageSource);
             }
             return cache[data];
         }

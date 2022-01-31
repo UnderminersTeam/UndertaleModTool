@@ -33,6 +33,8 @@ namespace UndertaleModLib.Scripting
 
         bool GMLCacheEnabled { get; }
 
+        bool IsAppClosed { get; }
+
         void EnsureDataLoaded();
         Task<bool> Make_New_File();
         void ReplaceTempWithMain(bool ImAnExpertBTW = false);
