@@ -1693,6 +1693,10 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("armorchar2temp", AssetIDType.Boolean);
                 builtin_vars.Add("armorchar3temp", AssetIDType.Boolean);
                 builtin_vars.Add("armorchar4temp", AssetIDType.Boolean);
+                builtin_vars.Add("weaponchar1temp", AssetIDType.Boolean);
+                builtin_vars.Add("weaponchar2temp", AssetIDType.Boolean);
+                builtin_vars.Add("weaponchar3temp", AssetIDType.Boolean);
+                builtin_vars.Add("weaponchar4temp", AssetIDType.Boolean);
                 builtin_vars.Add("legacy", AssetIDType.Boolean);
                 builtin_vars.Add("jp_data_loaded", AssetIDType.Boolean);
                 builtin_vars.Add("ingame", AssetIDType.Boolean);
