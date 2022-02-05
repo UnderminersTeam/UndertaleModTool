@@ -45,8 +45,7 @@ foreach (string mod_dir in Directory.GetDirectories(mods_dir))
 		//
 		// for each embedded texture file found on disk, import it
 		foreach (string file_path in Directory.GetFiles(mod_embedded_textures, @"*.png")
-			.Where(path => embedded_texture_file_regex.IsMatch(path))
-			.ToList())
+			.Where(path => embedded_texture_file_regex.IsMatch(path)).ToList())
 		{
 			try
 			{
@@ -62,11 +61,11 @@ foreach (string mod_dir in Directory.GetDirectories(mods_dir))
 				// import into UMT
 				target.TextureData.TextureBlob = data;
 				//
-				embedded_texture_successes.Add(file_path);
+				embedded_texture_successes.Add(file_path.Substring(mods_dir.Length));
 			}
 			catch (Exception ex)
 			{
-				embedded_texture_failures.Add(file_path);
+				embedded_texture_failures.Add(file_path.Substring(mods_dir.Length));
 			}
 		}
 	}
@@ -81,7 +80,8 @@ foreach (string mod_dir in Directory.GetDirectories(mods_dir))
 		Regex sprite_file_regex = new Regex(@"^.+\\([^\\]+)_(\d+)\.png$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		//
 		// for each sprite file in the Sprites folder, import it
-		foreach (string file_path in Directory.GetFiles(mod_sprites, @"*.png").Where(path => sprite_file_regex.IsMatch(path)).ToList())
+		foreach (string file_path in Directory.GetFiles(mod_sprites, @"*.png")
+			.Where(path => sprite_file_regex.IsMatch(path)).ToList())
 		{
 			try
 			{
@@ -106,11 +106,11 @@ foreach (string mod_dir in Directory.GetDirectories(mods_dir))
 				tex_page_item.ReplaceTexture(new_img); // warning; sprite
 				//
 				//
-				sprite_successes.Add(file_path);
+				sprite_successes.Add(file_path.Substring(mods_dir.Length));
 			}
 			catch(Exception ex)
 			{
-				sprite_failures.Add(file_path);
+				sprite_failures.Add(file_path.Substring(mods_dir.Length));
 			}
 		}
 	}
@@ -118,8 +118,8 @@ foreach (string mod_dir in Directory.GetDirectories(mods_dir))
 	// simple file copy
 	string mod_audio_static = Path.Combine(mod_dir, @"audio\static");
 	string mod_audio_streaming = Path.Combine(mod_dir, @"audio\streaming");
-	string audio_static_dest = Path.Combine(game_dir, @"data\audio\static\");
-	string audio_streaming_dest = Path.Combine(game_dir, @"data\audio\streaming\");
+	string audio_static_dest = Path.Combine(game_dir, @"data\audio\static");
+	string audio_streaming_dest = Path.Combine(game_dir, @"data\audio\streaming");
 	//
 	// for each audio file, copy into game audio folder (overwrite file)
 	if (Directory.Exists(mod_audio_static))
@@ -129,14 +129,14 @@ foreach (string mod_dir in Directory.GetDirectories(mods_dir))
 			try
 			{
 				string fname = Path.GetFileName(file_path);
-				string dest = audio_static_dest + fname;
+				string dest = Path.Combine(audio_static_dest, fname);
 				File.Copy(file_path, dest, true);
 				//
-				audio_successes.Add(file_path);
+				audio_successes.Add(file_path.Substring(mods_dir.Length));
 			}
 			catch(Exception ex)
 			{
-				audio_failures.Add(file_path);
+				audio_failures.Add(file_path.Substring(mods_dir.Length));
 			}
 		}
 	}
@@ -147,25 +147,36 @@ foreach (string mod_dir in Directory.GetDirectories(mods_dir))
 			try
 			{
 				string fname = Path.GetFileName(file_path);
-				string dest = audio_streaming_dest + fname;
+				string dest = Path.Combine(audio_streaming_dest, fname);
 				File.Copy(file_path, dest, true);
 				//
-				audio_successes.Add(file_path);
+				audio_successes.Add(file_path.Substring(mods_dir.Length));
 			}
 			catch(Exception ex)
 			{
-				audio_failures.Add(file_path);
+				audio_failures.Add(file_path.Substring(mods_dir.Length));
 			}
 		}
 	}
 }
 // report
-string report = "Succeeded:\n"
-	+ String.Join("\n",embedded_texture_successes)
-	+ String.Join("\n",sprite_successes)
-	+ String.Join("\n",audio_successes)
-	+         "\n\nFailed:\n"
-	+ String.Join("\n",embedded_texture_failures)
-	+ String.Join("\n",sprite_failures)
-	+ String.Join("\n",audio_failures);
+string report = "";
+
+int success_count = embedded_texture_successes.Count + sprite_successes.Count + audio_successes.Count;
+int failure_count = embedded_texture_failures.Count + sprite_failures.Count + audio_failures.Count;
+if (success_count > 0)
+{
+	report += "Succeeded ("+success_count+"):"
+	+ "\n" + String.Join("\n",embedded_texture_successes)
+	+ "\n" + String.Join("\n",sprite_successes)
+	+ "\n" + String.Join("\n",audio_successes);
+}
+if (failure_count > 0)
+{
+	report += "\n\nFailed ("+failure_count+"):"
+	+ "\n" + String.Join("\n",embedded_texture_failures)
+	+ "\n" + String.Join("\n",sprite_failures)
+	+ "\n" + String.Join("\n",audio_failures);
+}
 ScriptMessage(report);
+
