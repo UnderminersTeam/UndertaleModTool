@@ -212,3 +212,16 @@ foreach (string mod_dir in Directory.GetDirectories(mods_dir))
 		}
 	}
 }
+
+// report
+string report = "Succeeded:\n"
+	+ String.Join("\n",embedded_texture_successes)
+	+ String.Join("\n",sprite_successes)
+	+ String.Join("\n",audio_successes)
+	+         "\n\nFailed:\n"
+	+ String.Join("\n",embedded_texture_failures)
+	+ String.Join("\n",sprite_failures)
+	+ String.Join("\n",audio_failures);
+
+ScriptMessage(report);
+
