@@ -228,36 +228,51 @@ namespace UndertaleModTool
                 }
                 else if (arg == "deleteTempFolder") // if was launched from UndertaleModToolUpdater
                 {
-                    Process[] updaterInstances = Process.GetProcessesByName("UndertaleModToolUpdater");
-                    bool updaterClosed = false;
+                    _ = Task.Run(() =>
+                    {
+                        Process[] updaterInstances = Process.GetProcessesByName("UndertaleModToolUpdater");
+                        bool updaterClosed = false;
 
-                    if (updaterInstances.Length > 0)
-                    {
-                        foreach (Process instance in updaterInstances)
+                        if (updaterInstances.Length > 0)
                         {
-                            if (!instance.WaitForExit(2000))
-                                ShowWarning("UndertaleModToolUpdater app didn't exit.\nCan't delete its temp folder.");
-                            else
-                                updaterClosed = true;
+                            foreach (Process instance in updaterInstances)
+                            {
+                                if (!instance.WaitForExit(5000))
+                                    ShowWarning("UndertaleModToolUpdater app didn't exit.\nCan't delete its temp folder.");
+                                else
+                                    updaterClosed = true;
+                            }
                         }
-                    }
-                    else
-                    {
-                        await Task.Delay(500);
-                        updaterClosed = true;
-                    }
+                        else
+                            updaterClosed = true;
 
-                    if (updaterClosed)
-                    {
-                        try
+                        if (updaterClosed)
                         {
-                            Directory.Delete(Path.Combine(Path.GetTempPath(), "UndertaleModTool"), true);
+                            bool deleted = false;
+                            string exMessage = "(error message is missing)";
+                            string tempFolder = Path.Combine(Path.GetTempPath(), "UndertaleModTool");
+
+                            for (int i = 0; i <= 5; i++)
+                            {
+                                try
+                                {
+                                    Directory.Delete(tempFolder, true);
+
+                                    deleted = true;
+                                    break;
+                                }
+                                catch (Exception ex)
+                                {
+                                    exMessage = ex.Message;
+                                }
+
+                                Thread.Sleep(1000);
+                            }
+                            
+                            if (!deleted)
+                                ShowWarning($"The updater temp folder can't be deleted.\nError - {exMessage}.");
                         }
-                        catch (Exception ex)
-                        {
-                            ShowWarning($"Can't delete the updater temp folder.\nError - {ex.Message}.");
-                        }
-                    }
+                    });
                 }
             }
             if (args.Length > 2)
@@ -2319,24 +2334,19 @@ namespace UndertaleModTool
             {
                 PreventClose = true,
                 Owner = this,
-                StatusText = "Downloaded MB: 0.0"
+                StatusText = "Downloaded MB: 0.00"
             };
             SetProgressBar();
 
             using (WebClient webClient = new())
             {
                 bool end = false;
+                string downloaded = "0.00";
 
                 webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler((sender, e) =>
                 {
                     if (!end)
-                    {
-                        try
-                        {
-                            UpdateProgressStatus($"Downloaded MB: {Math.Round(e.BytesReceived / bytesToMB, 2).ToString(CultureInfo.InvariantCulture)}");
-                        }
-                        catch {}
-                    }
+                        downloaded = (e.BytesReceived / bytesToMB).ToString("F2", CultureInfo.InvariantCulture);
                 });
                 webClient.DownloadFileCompleted += new AsyncCompletedEventHandler((sender, e) =>
                 {
@@ -2424,6 +2434,20 @@ namespace UndertaleModTool
 
                     Closing -= DataWindow_Closing; // disable "on window closed" event handler
                     Close();
+                });
+
+                _ = Task.Run(() =>
+                {
+                    while (!end)
+                    {
+                        try
+                        {
+                            UpdateProgressStatus($"Downloaded MB: {downloaded}");
+                        }
+                        catch {}
+
+                        Thread.Sleep(100);
+                    }
                 });
 
                 webClient.DownloadFileAsync(new Uri(downloadUrl), Path.GetTempPath() + "UndertaleModTool\\Update.zip");
