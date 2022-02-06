@@ -69,6 +69,7 @@ namespace UndertaleModToolUpdater
 
             Process.Start(new ProcessStartInfo(Path.Combine(appPath, "UndertaleModTool.exe"))
             {
+                WorkingDirectory = appPath,
                 Arguments = "deleteTempFolder"
             });
             
