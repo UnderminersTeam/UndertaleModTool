@@ -2664,19 +2664,18 @@ namespace UndertaleModLib.Decompiler
                             loopCheckStatement = loopCode[loopCode.Count - 1] as IfHLStatement;
                         }
 
-                        if (repeatAssignment == null || loopCheckStatement == null) // single-level break detection
+                        if ((repeatAssignment == null || loopCheckStatement == null) &&
+                            loopCode[loopCode.Count - 1] is IfHLStatement wrapperIfStatement &&
+                            wrapperIfStatement.HasElse
+                           ) // single-level break detection
                         {
-                            IfHLStatement wrapperIfStatement = loopCode[loopCode.Count - 1] as IfHLStatement;
-                            if (wrapperIfStatement != null && wrapperIfStatement.HasElse)
+                            insideElseBlock = wrapperIfStatement.falseBlock.Statements;
+                            wrapperIfStatement.trueBlock.Statements.Add(new BreakHLStatement());
+                            if (insideElseBlock.Count > 2)
                             {
-                                insideElseBlock = wrapperIfStatement.falseBlock.Statements;
-                                wrapperIfStatement.trueBlock.Statements.Add(new BreakHLStatement());
-                                if (insideElseBlock.Count > 2)
-                                {
-                                    repeatAssignment = insideElseBlock[insideElseBlock.Count - 2] as TempVarAssignmentStatement;
-                                    loopCheckStatement = insideElseBlock[insideElseBlock.Count - 1] as IfHLStatement;
-                                    hasBreak = true;
-                                }
+                                repeatAssignment = insideElseBlock[insideElseBlock.Count - 2] as TempVarAssignmentStatement;
+                                loopCheckStatement = insideElseBlock[insideElseBlock.Count - 1] as IfHLStatement;
+                                hasBreak = true;
                             }
                         }
 
