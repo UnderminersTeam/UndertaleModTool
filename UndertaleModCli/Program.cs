@@ -739,6 +739,10 @@ namespace UndertaleModCli
 
             UpdateProgressBar(message, status, progressValue, maxValue);
         }
+        public void SetProgressBar()
+        {
+            //no dialog to show
+        }
 
         public void UpdateProgressValue(double progressValue)
         {

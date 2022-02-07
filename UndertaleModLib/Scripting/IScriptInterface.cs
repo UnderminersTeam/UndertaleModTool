@@ -65,6 +65,7 @@ namespace UndertaleModLib.Scripting
         void SetFinishedMessage(bool isFinishedMessageEnabled);
         void UpdateProgressBar(string message, string status, double progressValue, double maxValue);
         void SetProgressBar(string message, string status, double progressValue, double maxValue);
+        void SetProgressBar();
         void UpdateProgressValue(double progressValue);
         void UpdateProgressStatus(string status);
         void AddProgress(int amount);

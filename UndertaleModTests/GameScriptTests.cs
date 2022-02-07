@@ -110,6 +110,10 @@ namespace UndertaleModTests
         {
             Console.WriteLine("SetProgressBar(): " + progressValue + " / " + maxValue + ", Message: " + message + ", Status: " + status);
         }
+        public void SetProgressBar()
+        {
+            Console.WriteLine("SetProgressBar()");
+        }
         public void UpdateProgressValue(double progressValue)
         {
             Console.WriteLine($"UpdateProgressValue(): {progressValue}");

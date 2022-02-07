@@ -1584,6 +1584,15 @@ namespace UndertaleModLib.Compiler
                             cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)e.Children[0].ID;
                             // Pushing array (incl. 2D) but not popping
                             AssembleArrayPush(cw, e.Children[0], !duplicate);
+
+                            if (cw.compileContext.Data.GMS2_3 && e.Children[0].Children.Count > 2)
+                            {
+                                for (int i = 2; i < e.Children[0].Children.Count; i++)
+                                {
+                                    cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-4; // pushac
+                                    AssembleExpression(cw, e.Children[0].Children[i]); // this needs error handling
+                                }
+                            }
                             if (duplicate)
                             {
                                 if (cw.compileContext.Data.GMS2_3 && e.Children[0].Children.Count != 1)
@@ -1599,7 +1608,7 @@ namespace UndertaleModLib.Compiler
                                         cw.Emit(Opcode.Dup, DataType.Int32).Extra = 1;
                                 }
                             }
-                            if (cw.compileContext.Data.GMS2_3 && e.Children[0].Children.Count != 1)
+                            if (cw.compileContext.Data.GMS2_3 && e.Children[0].Children.Count > 1)
                             {
                                 cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-2; // pushaf
                             }
@@ -1900,6 +1909,14 @@ namespace UndertaleModLib.Compiler
                                     UndertaleInstruction dupInst = cw.Emit(Opcode.Dup, DataType.Int32);
                                     dupInst.Extra = 4;
                                     dupInst.ComparisonKind = (ComparisonType)168; // idek what this is but it disassembles as 40
+                                }
+                                else if (s.Children[0].Children.Count > 2)
+                                {
+                                    for (int i = 2; i < s.Children[0].Children.Count; i++)
+                                    {
+                                        cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-4; // pushac
+                                        AssembleExpression(cw, s.Children[0].Children[i]); // this needs error handling
+                                    }
                                 }
                                 cw.Emit(Opcode.Break, DataType.Int16).Value = (short)-3; // popaf
                             }
