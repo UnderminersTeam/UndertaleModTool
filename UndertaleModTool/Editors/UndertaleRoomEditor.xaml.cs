@@ -42,8 +42,8 @@ namespace UndertaleModTool
 
         public UndertalePath PreviewPath
         {
-            get { return (UndertalePath)GetValue(PreviewPathProperty); }
-            set { SetValue(PreviewPathProperty, value); }
+            get => (UndertalePath)GetValue(PreviewPathProperty);
+            set => SetValue(PreviewPathProperty, value);
         }
 
         private Stack<UndertaleObject> undoStack;
@@ -117,6 +117,7 @@ namespace UndertaleModTool
             RoomRootItem.IsSelected = false;
             RoomRootItem.IsSelected = true;
             (this.DataContext as UndertaleRoom)?.SetupRoom();
+            UndertaleCachedImageLoader.ImageCache.Clear();
         }
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -535,7 +536,9 @@ namespace UndertaleModTool
                         foreach (var go in layer.InstancesData.Instances)
                             room.GameObjects.Remove(go);
                     room.Layers.Remove(layer);
+                    (RoomGraphics.ItemsSource as CompositeCollection).Remove(layer.BackgroundData);
                     ObjectEditor.Content = null;
+                    room.UpdateBGColorLayer();
                 }
             }
             if (e.Key == Key.OemMinus)
@@ -761,6 +764,7 @@ namespace UndertaleModTool
             layer.LayerType = type;
             layer.Data = new T();
             room.Layers.Add(layer);
+            room.UpdateBGColorLayer();
 
             if (layer.LayerType == UndertaleRoom.LayerType.Assets)
             {
@@ -884,25 +888,6 @@ namespace UndertaleModTool
         }
     }
 
-    public class FixedItemsControl : ItemsControl
-    {
-        private Canvas RoomCanvas;
-        private PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
-        public FixedItemsControl()
-        {
-            
-        }
-
-        protected override void OnRender(DrawingContext dc)
-        {
-            if (RoomCanvas is null)
-                RoomCanvas = GetVisualChild(0) as Canvas;
-
-            Vector offset = (Vector)visualOffProp.GetValue(RoomCanvas);
-            base.OnRender(dc);
-        }
-    }
-
 
     [ValueConversion(typeof(ObservableCollection<UndertaleRoom.GameObject>), typeof(int))]
     public class ObjCenterXConverter : IValueConverter
@@ -997,6 +982,7 @@ namespace UndertaleModTool
             {
                 Background bg => bg.BackgroundDefinition,
                 GameObject obj => obj.ObjectDefinition,
+                Tile tile => tile,
                 _ => null
             };
 
@@ -1017,6 +1003,11 @@ namespace UndertaleModTool
                 case UndertaleBackground:
                     resName = "BG";
                     break;
+
+                case Tile tile:
+                    if (tile.Tpag is not null)
+                        resName = "Tile";
+                    break;
             }
             if (resName is null)
             {
@@ -1028,24 +1019,25 @@ namespace UndertaleModTool
         }
     }
 
-    public class LayerBGSpriteConverter : IMultiValueConverter
+    public class BGColorConverter : IMultiValueConverter
     {
         private static readonly ColorConverter colorConv = new();
+
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values[0] is UndertaleSprite)
-            {
-                ((values[2] as DrawingBrush).Drawing as GeometryDrawing).Brush = new SolidColorBrush(Colors.Black);
+            if (values.Any(x => x is null))
+                return null;
 
-                return true;
-            }
-            else
-            {
-                uint colorRaw = (values[1] as Layer.LayerBackgroundData).Color;
-                ((values[2] as DrawingBrush).Drawing as GeometryDrawing).Brush = new SolidColorBrush((Color)colorConv.Convert(colorRaw, null, null, null));
+            bool isGMS2 = ((RoomEntryFlags)values[1]).HasFlag(RoomEntryFlags.IsGMS2);
 
-                return false;
-            }
+            (values[0] as GeometryDrawing).Brush = new SolidColorBrush(Colors.Black);
+            BindingOperations.SetBinding((values[0] as GeometryDrawing).Brush, SolidColorBrush.ColorProperty, new Binding(isGMS2 ? "BGColorLayer.BackgroundData.Color" : "BackgroundColor")
+            {
+                Converter = colorConv,
+                Mode = BindingMode.OneWay
+            });
+
+            return null;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
@@ -1085,7 +1077,7 @@ namespace UndertaleModTool
                 switch (layer.LayerType)
                 {
                     case UndertaleRoom.LayerType.Background:
-                        collection.Add(new CollectionContainer() { Collection = new UndertaleRoom.Layer.LayerBackgroundData[] { layer.BackgroundData } });
+                        collection.Add(layer.BackgroundData);
                         break;
                     case UndertaleRoom.LayerType.Instances:
                         collection.Add(new CollectionContainer() { Collection = layer.InstancesData.Instances });
@@ -1112,11 +1104,37 @@ namespace UndertaleModTool
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool invert = parameter is string par && par == "invert";
+            string par = null;
+            if (parameter is string)
+                par = parameter as string;
+
+            bool invert = par == "invert";
             bool isGMS2 = false;
 
             if (value is RoomEntryFlags flags)
-                isGMS2 = flags.HasFlag(RoomEntryFlags.IsGMS2) ^ invert;
+            {
+                if (par == "flags")
+                {
+                    if ((Application.Current.MainWindow as MainWindow).IsGMS2 == Visibility.Visible)
+                    {
+                        if (!flags.HasFlag(RoomEntryFlags.IsGMS2))
+                        {
+                            try
+                            {
+                                MessageBox.Show("Room flags of the GMS 2+ games must contain \"IsGMS2\" flag, else game would crash on that room.",
+                                            "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                            catch {}
+                        }
+
+                        flags |= RoomEntryFlags.IsGMS2 | RoomEntryFlags.IsGMS2_3;
+                    }
+
+                    return flags;
+                }
+                else
+                    isGMS2 = flags.HasFlag(RoomEntryFlags.IsGMS2) ^ invert;
+            }
             else if (value is Visibility vis)
                 return vis == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
 
@@ -1130,7 +1148,117 @@ namespace UndertaleModTool
         }
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotSupportedException();
+            if (parameter is string par && par == "flags")
+                return value;
+            else
+                throw new NotSupportedException();
+        }
+    }
+
+    public class BGViewportConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            Rectangle rect = values[0] as Rectangle;
+            bool tiledV = (bool)values[1];
+            bool tiledH = (bool)values[2];
+            bool stretch = (bool)values[3];
+
+            if (tiledV || tiledH)
+                (rect.Fill as ImageBrush).TileMode = TileMode.Tile;
+            else
+                (rect.Fill as ImageBrush).TileMode = TileMode.None;
+
+            TranslateTransform translateT = (rect.RenderTransform as TransformGroup).Children.FirstOrDefault(t => t is TranslateTransform) as TranslateTransform;
+
+            UndertaleTexturePageItem texture = null;
+            double offsetV = 0;
+            double offsetH = 0;
+            double roomWidth = 0;
+            double roomHeight = 0;
+            double xOffset = 0;
+            double yOffset = 0;
+
+            if (rect.DataContext is Background bg)
+            {
+                if (bg.BackgroundDefinition?.Texture is null)
+                    return new Rect(0, 0, 0, 0);
+
+                texture = bg.BackgroundDefinition.Texture;
+
+                bg.UpdateStretch();
+                offsetV = bg.Y * (1 / bg.CalcScaleY);
+                offsetH = bg.X * (1 / bg.CalcScaleX);
+                xOffset = bg.X;
+                yOffset = bg.Y;
+                roomWidth = System.Convert.ToDouble(bg.ParentRoom.Width);
+                roomHeight = System.Convert.ToDouble(bg.ParentRoom.Height);
+            }
+            else if (rect.DataContext is Layer.LayerBackgroundData bgData)
+            {
+                if (bgData.Sprite is null)
+                    return new Rect(0, 0, 0, 0);
+
+                Layer bgLayer = bgData.ParentLayer;
+                texture = bgLayer.BackgroundData.Sprite.Textures[0].Texture;
+
+                bgData.UpdateScale();
+                offsetV = bgLayer.YOffset * (1 / bgData.CalcScaleY);
+                offsetH = bgLayer.XOffset * (1 / bgData.CalcScaleX);
+                xOffset = bgLayer.XOffset;
+                yOffset = bgLayer.YOffset;
+                roomWidth = System.Convert.ToDouble(bgLayer.ParentRoom.Width);
+                roomHeight = System.Convert.ToDouble(bgLayer.ParentRoom.Height);
+            }
+            else
+                return new Rect(0, 0, 0, 0);
+
+            if (tiledV)
+            {
+                if (!stretch)
+                    rect.SetCurrentValue(Rectangle.HeightProperty, roomHeight);         // changing value without losing its binding
+                else
+                    rect.GetBindingExpression(Rectangle.HeightProperty).UpdateTarget(); // restoring value from its source
+
+                translateT.SetCurrentValue(TranslateTransform.YProperty, (double)0);
+            }
+            else
+            {
+                if (!stretch)
+                    rect.GetBindingExpression(Rectangle.HeightProperty).UpdateTarget();
+                else
+                    rect.SetCurrentValue(Rectangle.HeightProperty, texture.SourceHeight - offsetV);
+
+                BindingOperations.GetBindingExpression(translateT, TranslateTransform.YProperty).UpdateTarget();
+            }
+
+            if (tiledH)
+            {
+                if (!stretch)
+                    rect.SetCurrentValue(Rectangle.WidthProperty, roomWidth);
+                else
+                    rect.GetBindingExpression(Rectangle.WidthProperty).UpdateTarget();
+
+                translateT.SetCurrentValue(TranslateTransform.XProperty, (double)0);
+            }
+            else
+            {
+                if (!stretch)
+                    rect.GetBindingExpression(Rectangle.WidthProperty).UpdateTarget();
+                else
+                    rect.SetCurrentValue(Rectangle.WidthProperty, texture.SourceWidth - offsetH);
+
+                BindingOperations.GetBindingExpression(translateT, TranslateTransform.XProperty).UpdateTarget();
+            }
+
+            return new Rect(tiledH ? (stretch ? offsetH : xOffset) : 0,
+                            tiledV ? (stretch ? offsetV : yOffset) : 0,
+                            texture.SourceWidth, texture.SourceHeight);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

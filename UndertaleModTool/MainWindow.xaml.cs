@@ -109,6 +109,7 @@ namespace UndertaleModTool
                     DataEditor.ContentTemplate = null;
                     Selected = new DescriptionView("Welcome to UndertaleModTool!",
                                                    "Open data.win file to get started, then double click on the items on the left to view them");
+                    UndertaleCachedImageLoader.ImageCache.Clear();
                 }
 
                 _roomRendererEnabled = value;
@@ -642,6 +643,7 @@ namespace UndertaleModTool
                         Data = data;
 
                         await LoadGMLCache(filename, dialog);
+                        UndertaleCachedImageLoader.ImageCache.Clear();
 
                         Data.ToolInfo.AppDataProfiles = ProfilesFolder;
                         FilePath = filename;
@@ -1253,7 +1255,7 @@ namespace UndertaleModTool
             T container = element as T;
             while (container == null && element != null)
             {
-                element = VisualTreeHelper.GetParent(element) as DependencyObject;
+                element = VisualTreeHelper.GetParent(element);
                 container = element as T;
             }
             return container;
@@ -1262,7 +1264,7 @@ namespace UndertaleModTool
         private static T GetNearestParent<T>(DependencyObject item) where T : class
         {
             DependencyObject parent = VisualTreeHelper.GetParent(item);
-            while (!(parent is T))
+            while (parent is not T)
             {
                 parent = VisualTreeHelper.GetParent(parent);
             }
@@ -1440,13 +1442,13 @@ namespace UndertaleModTool
             UndertaleResource obj = Activator.CreateInstance(t) as UndertaleResource;
             if (obj is UndertaleNamedResource)
             {
-                bool doMakeString = !((obj is UndertaleTexturePageItem) || (obj is UndertaleEmbeddedAudio) || (obj is UndertaleEmbeddedTexture));
+                bool doMakeString = obj is not (UndertaleTexturePageItem or UndertaleEmbeddedAudio or UndertaleEmbeddedTexture);
                 string notDataNewName = null;
                 if (obj is UndertaleTexturePageItem)
                 {
                     notDataNewName = "PageItem " + list.Count;
                 }
-                if ((obj is UndertaleExtension) && (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && (((Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((Data?.GeneralInfo?.Build ?? 0) == 1539)))))
+                if ((obj is UndertaleExtension) && (IsExtProductIDEligible == Visibility.Visible))
                 {
                     var newProductID = new byte[] { 0xBA, 0x5E, 0xBA, 0x11, 0xBA, 0xDD, 0x06, 0x60, 0xBE, 0xEF, 0xED, 0xBA, 0x0B, 0xAB, 0xBA, 0xBE };
                     Data.FORM.EXTN.productIdData.Add(newProductID);
@@ -1465,7 +1467,13 @@ namespace UndertaleModTool
                     string newname = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
                     (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newname);
                     if (obj is UndertaleRoom)
+                    {
                         (obj as UndertaleRoom).Caption = Data.Strings.MakeString("");
+
+                        if (IsGMS2 == Visibility.Visible)
+                            (obj as UndertaleRoom).Flags |= UndertaleRoom.RoomEntryFlags.IsGMS2; 
+                    }
+
                     if (obj is UndertaleScript)
                     {
                         UndertaleCode code = new UndertaleCode();
@@ -1504,8 +1512,8 @@ namespace UndertaleModTool
                 }
             }
             list.Add(obj);
-            // TODO: change highlighted too
             UpdateTree();
+            HighlightObject(obj);
             ChangeSelection(obj);
         }
 
@@ -1749,15 +1757,10 @@ namespace UndertaleModTool
             if (code is not null)
             {
                 Focus();
-               
-                if (!CodeItemsList.IsExpanded)
-                    CodeItemsList.IsExpanded = true;
-
-                //TODO: find the way to scroll to the code item and highlight it.
                 
                 CodeEditorDecompile = editorDecompile;
-                
-                //Highlighted = code;
+
+                HighlightObject(code);
                 ChangeSelection(code);
             }
             else
@@ -2489,6 +2492,88 @@ result in loss of work.");
             SelectionHistory.Add(Selected);
             Selected = newsel;
             UpdateObjectLabel(newsel);
+        }
+        public void HighlightObject(object obj, bool silent = true)
+        {
+            UndertaleResource res = obj as UndertaleResource;
+            if (res is null)
+            {
+                if (!silent)
+                    ShowWarning($"Can't highlight the object - it's null or isn't a UndertaleResource.");
+
+                return;
+            }
+
+            string objName = null;
+            if (obj is not UndertaleNamedResource)
+            {
+                if (obj is UndertaleVariable var)
+                    objName = var.Name?.Content;
+            }
+            else
+                objName = (res as UndertaleNamedResource).Name?.Content;
+
+            ScrollViewer mainTreeViewer = FindVisualChild<ScrollViewer>(MainTree);
+            Type objType = res.GetType();
+            
+            TreeViewItem resListView = (MainTree.Items[0] as TreeViewItem).Items.Cast<TreeViewItem>()
+                                                                                .FirstOrDefault(x => (x.ItemTemplate?.DataType as Type) == objType);
+            IList resList;
+            try
+            {
+                resList = Data[res.GetType()] as IList;
+            }
+            catch (Exception ex)
+            {
+                if (!silent)
+                    ShowWarning($"Can't highlight the object \"{objName}\".\nError - {ex.Message}");
+
+                return;
+            }
+
+            if (resListView is null)
+            {
+                if (!silent)
+                    ShowWarning($"Can't highlight the object \"{objName}\" - element with object list not found.");
+
+                return;
+            }
+
+            double initOffsetV = mainTreeViewer.VerticalOffset;
+            double initOffsetH = mainTreeViewer.HorizontalOffset;
+            bool initExpanded = resListView.IsExpanded;
+
+            resListView.IsExpanded = true;
+            resListView.BringIntoView();
+            resListView.UpdateLayout();
+
+            VirtualizingStackPanel resPanel = FindVisualChild<VirtualizingStackPanel>(resListView);
+            (resPanel.Children[0] as TreeViewItem).BringIntoView();
+            mainTreeViewer.UpdateLayout();
+
+            double firstElemOffset = mainTreeViewer.VerticalOffset + (resPanel.Children[0] as TreeViewItem).TransformToAncestor(mainTreeViewer).Transform(new Point(0, 0)).Y;
+
+            mainTreeViewer.ScrollToVerticalOffset(firstElemOffset + ((resList.IndexOf(obj) + 1) * 16) - (mainTreeViewer.ViewportHeight / 2));
+            mainTreeViewer.UpdateLayout();
+
+            TreeViewItem resItem;
+            if ((resItem = resListView.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem) is not null)
+            {
+                Highlighted = resItem.DataContext;
+                resItem.IsSelected = true;
+
+                mainTreeViewer.UpdateLayout();
+                mainTreeViewer.ScrollToHorizontalOffset(0);
+            }
+            else
+            {
+                // revert visual changes
+                resListView.IsExpanded = initExpanded;
+                resListView.UpdateLayout();
+                mainTreeViewer.ScrollToVerticalOffset(initOffsetV);
+                mainTreeViewer.ScrollToHorizontalOffset(initOffsetH);
+                resListView.UpdateLayout();
+            }
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)

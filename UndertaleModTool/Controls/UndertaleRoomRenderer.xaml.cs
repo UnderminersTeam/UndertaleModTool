@@ -26,11 +26,21 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleRoomRenderer : UserControl
     {
+        public static DependencyProperty PreviewPathProperty =
+            DependencyProperty.Register("PreviewPath", typeof(UndertalePath),
+                typeof(UndertaleRoomRenderer),
+                new FrameworkPropertyMetadata(null));
+
         public static readonly PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
 
         public static DataTemplate RoomRendererTemplate { get; set; }
 
         public Canvas RoomCanvas { get; set; }
+        public UndertalePath PreviewPath
+        {
+            get => (UndertalePath)GetValue(PreviewPathProperty);
+            set => SetValue(PreviewPathProperty, value);
+        }
 
         private bool bgGridDisabled;
         private Pen gridPen;
@@ -39,6 +49,15 @@ namespace UndertaleModTool
         public UndertaleRoomRenderer()
         {
             InitializeComponent();
+        }
+
+        private void RoomRenderer_Loaded(object sender, RoutedEventArgs e)
+        {
+            (DataContext as UndertaleRoom)?.SetupRoom();
+        }
+        private void RoomRenderer_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            (DataContext as UndertaleRoom)?.SetupRoom();
         }
 
         public void SaveImagePNG(Stream outfile, bool displayGrid = false, bool last = false)
