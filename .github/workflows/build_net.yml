@@ -19,11 +19,17 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build UndertaleModTool --no-restore
+      run: |
+        dotnet build UndertaleModTool --no-restore
+        dotnet build UndertaleModToolUpdater --no-restore
     - name: Publish Windows x86 NET Bundled
-      run: dotnet publish UndertaleModTool -c Release -r win-x86 --self-contained true -p:PublishSingleFile=true --output win_x86
+      run: |
+        dotnet publish UndertaleModTool -c Release -r win-x86 --self-contained true -p:PublishSingleFile=true --output win_x86
+        dotnet publish UndertaleModToolUpdater -c Release -r win-x86 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=True -p:TrimMode=CopyUsed --output win_x86\Updater
     - name: Publish Windows x64 NET Bundled
-      run: dotnet publish UndertaleModTool -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true --output win_x64
+      run: |
+        dotnet publish UndertaleModTool -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true --output win_x64
+        dotnet publish UndertaleModToolUpdater -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=True -p:TrimMode=CopyUsed --output win_x64\Updater
     - name: Copy external files
       run: |
         Copy-Item "README.md" -Destination "./win_x86/"

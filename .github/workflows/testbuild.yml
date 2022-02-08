@@ -18,4 +18,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build UndertaleModTool --no-restore
+      run: |
+        dotnet build UndertaleModTool --no-restore
+        dotnet build UndertaleModToolUpdater --no-restore
