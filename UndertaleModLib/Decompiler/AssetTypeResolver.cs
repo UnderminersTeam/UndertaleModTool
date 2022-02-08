@@ -731,7 +731,7 @@ namespace UndertaleModLib.Decompiler
                 { "path_get_x", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
                 { "path_get_y", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other} },
 
-                { "path_add",Array.Empty<AssetIDType>() },
+                { "path_add", Array.Empty<AssetIDType>() },
                 { "path_add_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
                 { "path_change_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
                 { "path_insert_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },

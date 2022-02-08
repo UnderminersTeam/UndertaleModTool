@@ -1123,16 +1123,11 @@ namespace UndertaleModLib.Decompiler
                 string varPrefix = (HasVarKeyword ? "var " : "");
 
                 // Check for possible ++, --, or operation equal (for single vars)
-                if (Value is ExpressionTwo && ((Value as ExpressionTwo).Argument1 is ExpressionVar) &&
-                    ((Value as ExpressionTwo).Argument1 as ExpressionVar).Var == Destination.Var)
+                if (Value is ExpressionTwo two && (two.Argument1 is ExpressionVar) &&
+                    (two.Argument1 as ExpressionVar).Var == Destination.Var)
                 {
-                    ExpressionTwo two = (Value as ExpressionTwo);
-                    if (two.Argument2 is ExpressionConstant)
-                    {
-                        ExpressionConstant c = (two.Argument2 as ExpressionConstant);
-                        if (c.IsPushE && ExpressionConstant.ConvertToInt(c.Value) == 1)
-                            return varName + (two.Opcode == UndertaleInstruction.Opcode.Add ? "++" : "--");
-                    }
+                    if (two.Argument2 is ExpressionConstant c && c.IsPushE && ExpressionConstant.ConvertToInt(c.Value) == 1)
+                        return varName + (two.Opcode == UndertaleInstruction.Opcode.Add ? "++" : "--");
 
                     // Not ++ or --, could potentially be an operation equal
                     bool checkEqual(ExpressionVar a, ExpressionVar b)
