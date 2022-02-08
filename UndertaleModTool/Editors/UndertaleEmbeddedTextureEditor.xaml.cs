@@ -23,7 +23,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertaleEmbeddedTextureEditor.xaml
     /// </summary>
-    public partial class UndertaleEmbeddedTextureEditor : UserControl
+    public partial class UndertaleEmbeddedTextureEditor : DataUserControl
     {
         public UndertaleEmbeddedTextureEditor()
         {

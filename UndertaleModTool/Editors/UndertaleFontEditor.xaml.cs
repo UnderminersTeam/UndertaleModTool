@@ -19,7 +19,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertaleFontEditor.xaml
     /// </summary>
-    public partial class UndertaleFontEditor : UserControl
+    public partial class UndertaleFontEditor : DataUserControl
     {
         public UndertaleFontEditor()
         {

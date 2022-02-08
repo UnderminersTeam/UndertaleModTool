@@ -30,7 +30,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertaleRoomEditor.xaml
     /// </summary>
-    public partial class UndertaleRoomEditor : UserControl
+    public partial class UndertaleRoomEditor : DataUserControl
     {
         public static DependencyProperty PreviewPathProperty =
             DependencyProperty.Register("PreviewPath", typeof(UndertalePath),

@@ -22,7 +22,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertalePathEditor.xaml
     /// </summary>
-    public partial class UndertalePathEditor : UserControl
+    public partial class UndertalePathEditor : DataUserControl
     {
         public UndertalePathEditor()
         {

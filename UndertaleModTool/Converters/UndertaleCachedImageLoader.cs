@@ -28,6 +28,9 @@ namespace UndertaleModTool
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value is null)
+                return null;
+
             bool isTile = false;
             bool cacheEnabled = true;
 

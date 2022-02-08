@@ -24,7 +24,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Interaction logic for UndertaleRoomRenderer.xaml
     /// </summary>
-    public partial class UndertaleRoomRenderer : UserControl
+    public partial class UndertaleRoomRenderer : DataUserControl
     {
         public static DependencyProperty PreviewPathProperty =
             DependencyProperty.Register("PreviewPath", typeof(UndertalePath),
