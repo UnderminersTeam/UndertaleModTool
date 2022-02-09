@@ -1581,7 +1581,10 @@ namespace UndertaleModLib.Compiler
                             }
 
                             // Special array access- instance type needs to be pushed beforehand
-                            cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)e.Children[0].ID;
+                            if (cw.compileContext.Data.GMS2_3 && (cw.compileContext.BuiltInList.GlobalArray.ContainsKey(e.Children[0].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(e.Children[0].Text)))
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)InstanceType.Builtin; // hack
+                            else
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)e.Children[0].ID;
                             // Pushing array (incl. 2D) but not popping
                             AssembleArrayPush(cw, e.Children[0], !duplicate);
 
@@ -1937,13 +1940,26 @@ namespace UndertaleModLib.Compiler
                         int id = s.Children[0].ID;
                         if (id >= 100000)
                             id -= 100000;
-                        cw.varPatches.Add(new VariablePatch()
+                        if (cw.compileContext.Data.GMS2_3 && (cw.compileContext.BuiltInList.GlobalArray.ContainsKey(s.Children[0].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(s.Children[0].Text)))
                         {
-                            Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
-                            Name = s.Children[0].Text,
-                            InstType = (InstanceType)id,
-                            VarType = VariableType.Normal
-                        });
+                            cw.varPatches.Add(new VariablePatch()
+                            {
+                                Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
+                                Name = s.Children[0].Text,
+                                InstType = InstanceType.Builtin,
+                                VarType = VariableType.Normal
+                            });
+                        }
+                        else
+                        {
+                            cw.varPatches.Add(new VariablePatch()
+                            {
+                                Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
+                                Name = s.Children[0].Text,
+                                InstType = (InstanceType)id,
+                                VarType = VariableType.Normal
+                            });
+                        }
                     }
                     else
                     {

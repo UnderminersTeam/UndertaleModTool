@@ -380,7 +380,7 @@ namespace UndertaleModLib
                         // GMS 2.3+
                         if (!isBuiltin)
                         {
-                            data.VarCount1 = Math.Max(data.VarCount1, (uint)id);
+                            data.VarCount1++;
                             data.VarCount2 = data.VarCount1;
                         }
                         oldId = (uint)id;

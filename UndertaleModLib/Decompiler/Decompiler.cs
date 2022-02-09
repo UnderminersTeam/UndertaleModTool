@@ -1123,16 +1123,11 @@ namespace UndertaleModLib.Decompiler
                 string varPrefix = (HasVarKeyword ? "var " : "");
 
                 // Check for possible ++, --, or operation equal (for single vars)
-                if (Value is ExpressionTwo && ((Value as ExpressionTwo).Argument1 is ExpressionVar) &&
-                    ((Value as ExpressionTwo).Argument1 as ExpressionVar).Var == Destination.Var)
+                if (Value is ExpressionTwo two && (two.Argument1 is ExpressionVar) &&
+                    (two.Argument1 as ExpressionVar).Var == Destination.Var)
                 {
-                    ExpressionTwo two = (Value as ExpressionTwo);
-                    if (two.Argument2 is ExpressionConstant)
-                    {
-                        ExpressionConstant c = (two.Argument2 as ExpressionConstant);
-                        if (c.IsPushE && ExpressionConstant.ConvertToInt(c.Value) == 1)
-                            return varName + (two.Opcode == UndertaleInstruction.Opcode.Add ? "++" : "--");
-                    }
+                    if (two.Argument2 is ExpressionConstant c && c.IsPushE && ExpressionConstant.ConvertToInt(c.Value) == 1)
+                        return varName + (two.Opcode == UndertaleInstruction.Opcode.Add ? "++" : "--");
 
                     // Not ++ or --, could potentially be an operation equal
                     bool checkEqual(ExpressionVar a, ExpressionVar b)
@@ -2664,19 +2659,18 @@ namespace UndertaleModLib.Decompiler
                             loopCheckStatement = loopCode[loopCode.Count - 1] as IfHLStatement;
                         }
 
-                        if (repeatAssignment == null || loopCheckStatement == null) // single-level break detection
+                        if ((repeatAssignment == null || loopCheckStatement == null) &&
+                            loopCode[loopCode.Count - 1] is IfHLStatement wrapperIfStatement &&
+                            wrapperIfStatement.HasElse
+                           ) // single-level break detection
                         {
-                            IfHLStatement wrapperIfStatement = loopCode[loopCode.Count - 1] as IfHLStatement;
-                            if (wrapperIfStatement != null && wrapperIfStatement.HasElse)
+                            insideElseBlock = wrapperIfStatement.falseBlock.Statements;
+                            wrapperIfStatement.trueBlock.Statements.Add(new BreakHLStatement());
+                            if (insideElseBlock.Count > 2)
                             {
-                                insideElseBlock = wrapperIfStatement.falseBlock.Statements;
-                                wrapperIfStatement.trueBlock.Statements.Add(new BreakHLStatement());
-                                if (insideElseBlock.Count > 2)
-                                {
-                                    repeatAssignment = insideElseBlock[insideElseBlock.Count - 2] as TempVarAssignmentStatement;
-                                    loopCheckStatement = insideElseBlock[insideElseBlock.Count - 1] as IfHLStatement;
-                                    hasBreak = true;
-                                }
+                                repeatAssignment = insideElseBlock[insideElseBlock.Count - 2] as TempVarAssignmentStatement;
+                                loopCheckStatement = insideElseBlock[insideElseBlock.Count - 1] as IfHLStatement;
+                                hasBreak = true;
                             }
                         }
 
