@@ -51,6 +51,10 @@ namespace UndertaleModTool
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
+        /// Note for those who don't know what is "PropertyChanged.Fody" -
+        /// it automatically adds "OnPropertyChanged()" to every property (or modify existing) of the class that implements INotifyPropertyChanged.
+        /// It does that on code compilation.
+        
         public UndertaleData Data { get; set; }
         public string FilePath { get; set; }
         public string ScriptPath { get; set; } // For the scripting interface specifically
@@ -70,7 +74,7 @@ namespace UndertaleModTool
         public bool ScriptExecutionSuccess { get; set; } = true;
         public bool IsSaving { get; set; }
         public string ScriptErrorMessage { get; set; } = "";
-        public string ExePath { get; private set; } = System.Environment.CurrentDirectory;
+        public string ExePath { get; private set; } = Environment.CurrentDirectory;
         public string ScriptErrorType { get; set; } = "";
 
         public enum CodeEditorMode

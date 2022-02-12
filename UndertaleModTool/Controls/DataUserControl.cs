@@ -1,17 +1,20 @@
-﻿namespace UndertaleModTool
+﻿using System.Windows;
+
+namespace UndertaleModTool
 {
     public partial class DataUserControl : System.Windows.Controls.UserControl
     {
-        public DataUserControl()
+        public DataUserControl() 
         {
-            DataContextChanged += DataUserControl_DataContextChanged;
         }
 
-        private void DataUserControl_DataContextChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
+        protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
         {
-            // prevent WPF binding errors when switching to incompatible data type
-            if (e.NewValue is null)
-                DataContext = e.OldValue;
+            // prevent WPF binding errors (and unnessecary "DataContextChanged" firing) when switching to incompatible data type
+            if (e.NewValue is null && e.Property == DataContextProperty)
+                return;
+
+            base.OnPropertyChanged(e);
         }
     }
 }

@@ -371,8 +371,12 @@ namespace UndertaleModLib.Models
             }
 
             public float OppositeRotation => 360F - Rotation;
-            public int XOffset => ObjectDefinition.Sprite != null ? X - ObjectDefinition.Sprite.OriginX : X;
-            public int YOffset => ObjectDefinition.Sprite != null ? Y - ObjectDefinition.Sprite.OriginY : Y;
+            public int XOffset => ObjectDefinition.Sprite != null
+                                  ? X - ObjectDefinition.Sprite.OriginX + (ObjectDefinition.Sprite.Textures.FirstOrDefault()?.Texture?.TargetX ?? 0)
+                                  : X;
+            public int YOffset => ObjectDefinition.Sprite != null
+                                  ? Y - ObjectDefinition.Sprite.OriginY + (ObjectDefinition.Sprite.Textures.FirstOrDefault()?.Texture?.TargetY ?? 0)
+                                  : Y;
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -847,6 +851,9 @@ namespace UndertaleModLib.Models
             public AnimationSpeedType AnimationSpeedType { get; set; }
             public float FrameIndex { get; set; }
             public float Rotation { get; set; }
+            public float OppositeRotation => 360F - Rotation;
+            public int XOffset => Sprite is not null ? X - Sprite.OriginX : X;
+            public int YOffset => Sprite is not null ? Y - Sprite.OriginY : Y;
 
             public event PropertyChangedEventHandler PropertyChanged;
 

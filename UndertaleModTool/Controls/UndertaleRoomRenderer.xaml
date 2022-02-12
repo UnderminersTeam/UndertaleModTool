@@ -44,7 +44,7 @@
         <Border Background="{x:Static SystemColors.WindowBrush}" Grid.Row="0" Grid.Column="0" Panel.ZIndex="1">
             <TextBlock HorizontalAlignment="Center" Text="{Binding ., Mode=OneTime, Converter={StaticResource RoomCaptionConverter}}" FontSize="14" FontStyle="Italic" Margin="5"/>
         </Border>
-        <ItemsControl Grid.Column="0" Grid.Row="1" Panel.ZIndex="0" Name="RoomGraphics" Background="Black">
+        <ItemsControl Grid.Column="0" Grid.Row="1" Panel.ZIndex="0" Name="RoomGraphics" Background="Black" ClipToBounds="True">
             <ItemsControl.Style>
                 <Style TargetType="ItemsControl">
                     <Setter Property="ItemsSource" Value="{Binding Mode=OneTime, Source={StaticResource AllObjectsGMS1}}"/>
@@ -94,6 +94,9 @@
                 <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Tile}">
                     <ContentControl Content="{Binding ., Mode=OneTime}" ContentTemplateSelector="{StaticResource RoomObjectTemplateSelector}"/>
                 </DataTemplate>
+                <DataTemplate DataType="{x:Type undertale:UndertaleRoom+SpriteInstance}">
+                    <ContentControl Content="{Binding ., Mode=OneTime}" ContentTemplateSelector="{StaticResource RoomObjectTemplateSelector}"/>
+                </DataTemplate>
 
                 <DataTemplate x:Key="BGTemplate">
                     <Rectangle Width="{Binding BackgroundDefinition.Texture.SourceWidth, Mode=OneTime}" Height="{Binding BackgroundDefinition.Texture.SourceHeight, Mode=OneTime}">
@@ -132,11 +135,10 @@
                                 <RotateTransform x:Name="transform1_1" CenterX="{Binding X, Mode=OneTime}" CenterY="{Binding Y, Mode=OneTime}" Angle="{Binding OppositeRotation, Mode=OneTime}"/>
                                 <TranslateTransform x:Name="transform1_2" X="{Binding XOffset, Mode=OneTime}" Y="{Binding YOffset, Mode=OneTime}"/>
                             </TransformGroup>
-                            <!-- TODO: X + TargetX? -->
                         </Rectangle.RenderTransform>
                         <Rectangle.Fill>
                             <ImageBrush
-                                ImageSource="{Binding ObjectDefinition.Sprite.Textures[0].Texture, Converter={StaticResource UndertaleCachedImageLoader}, Mode=OneTime}" 
+                                ImageSource="{Binding ObjectDefinition.Sprite.Textures[0].Texture, Converter={StaticResource UndertaleCachedImageLoader}, Mode=OneTime}"
                                 TileMode="None"
                                 Stretch="UniformToFill">
                             </ImageBrush>
@@ -151,7 +153,7 @@
                         </Rectangle.RenderTransform>
                         <Rectangle.Fill>
                             <ImageBrush
-                                ImageSource="{Binding ., Converter={StaticResource UndertaleCachedImageLoader}, ConverterParameter=tile, Mode=OneTime}" 
+                                ImageSource="{Binding ., Converter={StaticResource UndertaleCachedImageLoader}, ConverterParameter=tile, Mode=OneTime}"
                                 TileMode="None"
                                 Stretch="UniformToFill">
                             </ImageBrush>
@@ -182,6 +184,25 @@
                                         <Binding Path="Stretch" Mode="OneTime"/>
                                     </MultiBinding>
                                 </ImageBrush.Viewport>
+                            </ImageBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </DataTemplate>
+
+                <DataTemplate x:Key="SprTemplate">
+                    <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth, Mode=OneTime}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight, Mode=OneTime}">
+                        <Rectangle.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform x:Name="transform4_0" ScaleX="{Binding ScaleX, Mode=OneTime}" ScaleY="{Binding ScaleY, Mode=OneTime}"/>
+                                <RotateTransform x:Name="transform4_1" CenterX="{Binding X, Mode=OneTime}" CenterY="{Binding Y, Mode=OneTime}" Angle="{Binding OppositeRotation, Mode=OneTime}"/>
+                                <TranslateTransform x:Name="transform4_2" X="{Binding XOffset, Mode=OneTime}" Y="{Binding YOffset, Mode=OneTime}"/>
+                            </TransformGroup>
+                        </Rectangle.RenderTransform>
+                        <Rectangle.Fill>
+                            <ImageBrush
+                                ImageSource="{Binding Sprite.Textures[0].Texture, Mode=OneTime, Converter={StaticResource UndertaleCachedImageLoader}}"
+                                TileMode="None"
+                                Stretch="UniformToFill">
                             </ImageBrush>
                         </Rectangle.Fill>
                     </Rectangle>

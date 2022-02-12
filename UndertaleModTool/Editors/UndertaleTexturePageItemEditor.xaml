@@ -117,7 +117,7 @@
                     <Image.Clip>
                         <RectangleGeometry>
                             <RectangleGeometry.Rect>
-                                <MultiBinding>
+                                <MultiBinding ConverterParameter="returnEmptyOnNull">
                                     <MultiBinding.Converter>
                                         <local:RectConverter/>
                                     </MultiBinding.Converter>

@@ -58,6 +58,7 @@ namespace UndertaleModTool
         private void RoomRenderer_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             (DataContext as UndertaleRoom)?.SetupRoom();
+            UndertaleRoomEditor.GenerateSpriteCache(DataContext as UndertaleRoom, true);
         }
 
         public void SaveImagePNG(Stream outfile, bool displayGrid = false, bool last = false)

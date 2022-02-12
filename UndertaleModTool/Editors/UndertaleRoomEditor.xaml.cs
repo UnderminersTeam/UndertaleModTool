@@ -1,6 +1,7 @@
 using Microsoft.Win32;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -10,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -109,15 +111,22 @@ namespace UndertaleModTool
         private void UndertaleRoomEditor_Loaded(object sender, RoutedEventArgs e)
         {
             RoomRootItem.IsSelected = true;
-            (this.DataContext as UndertaleRoom)?.SetupRoom();
+            (DataContext as UndertaleRoom)?.SetupRoom();
         }
 
         private void UndertaleRoomEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             RoomRootItem.IsSelected = false;
             RoomRootItem.IsSelected = true;
-            (this.DataContext as UndertaleRoom)?.SetupRoom();
+
             UndertaleCachedImageLoader.ImageCache.Clear();
+
+            if (DataContext is UndertaleRoom room)
+            {
+                room.SetupRoom();
+                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                    GenerateSpriteCache(DataContext as UndertaleRoom);
+            }
         }
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -886,6 +895,107 @@ namespace UndertaleModTool
         {
             AddObjectInstance(this.DataContext as UndertaleRoom);
         }
+
+
+        public static void GenerateSpriteCache(UndertaleRoom room, bool keepTileCache = false)
+        {
+            // text. page name - text. page item name, tile rectangle (if is tile)
+            ConcurrentDictionary<string, ConcurrentBag<Tuple<string, Tuple<uint, uint, uint, uint>>>> textPages = new();
+
+            _ = Parallel.ForEach(room.Layers, (layer) =>
+            {
+                string textPageName;
+                Tuple<string, Tuple<uint, uint, uint, uint>> textPageItem;
+                Tuple<uint, uint, uint, uint> tileRect = null;
+                switch (layer.LayerType)
+                {
+                    case LayerType.Assets:
+                        foreach (Tile tile in layer.AssetsData.LegacyTiles)
+                        {
+                            UndertaleTexturePageItem texture = tile.Tpag;
+                            if (texture is not null)
+                            {
+                                textPageName = texture.TexturePage.Name.Content;
+                                tileRect = new(tile.SourceX, tile.SourceY, tile.Width, tile.Height);
+                                textPageItem = new(texture.Name.Content, tileRect);
+
+                                _ = textPages.AddOrUpdate(textPageName, new ConcurrentBag<Tuple<string, Tuple<uint, uint, uint, uint>>>() { textPageItem }, (_, list) =>
+                                {
+                                    list.Add(textPageItem);
+                                    return list;
+                                }); ;
+                            }
+                        }
+                        foreach (UndertaleTexturePageItem texture in layer.AssetsData.Sprites.Select(x => x.Sprite?.Textures[0].Texture))
+                        {
+                            if (texture is not null)
+                            {
+                                textPageName = texture.TexturePage.Name.Content;
+                                textPageItem = new(texture.Name.Content, tileRect);
+                                _ = textPages.AddOrUpdate(textPageName, new ConcurrentBag<Tuple<string, Tuple<uint, uint, uint, uint>>>() { textPageItem }, (_, list) =>
+                                {
+                                    list.Add(textPageItem);
+                                    return list;
+                                });
+                            }
+                        }
+                        break;
+
+                    case LayerType.Background:
+                        UndertaleTexturePageItem texture1 = layer.BackgroundData.Sprite?.Textures[0].Texture;
+                        if (texture1 is not null)
+                        {
+                            textPageName = texture1.TexturePage.Name.Content;
+                            textPageItem = new(texture1.Name.Content, tileRect);
+                            _ = textPages.AddOrUpdate(textPageName, new ConcurrentBag<Tuple<string, Tuple<uint, uint, uint, uint>>>() { textPageItem }, (_, list) =>
+                            {
+                                list.Add(textPageItem);
+                                return list;
+                            });
+                        }
+                        break;
+
+                    case LayerType.Instances:
+                        foreach (UndertaleTexturePageItem texture in layer.InstancesData.Instances.Select(x => x.ObjectDefinition?.Sprite?.Textures[0].Texture))
+                        {
+                            if (texture is not null)
+                            {
+                                textPageName = texture.TexturePage.Name.Content;
+                                textPageItem = new(texture.Name.Content, tileRect);
+                                _ = textPages.AddOrUpdate(textPageName, new ConcurrentBag<Tuple<string, Tuple<uint, uint, uint, uint>>>() { textPageItem }, (_, list) =>
+                                {
+                                    list.Add(textPageItem);
+                                    return list;
+                                });
+                            }
+                        }
+                        break;
+
+                    case LayerType.Tiles:
+                        // TODO
+                        break;
+                }
+            });
+            foreach (string key in textPages.Keys)
+            {
+                ConcurrentBag<Tuple<string, Tuple<uint, uint, uint, uint>>> bag = textPages[key];
+                textPages[key] = new(bag.Distinct());
+            }
+
+            UndertaleCachedImageLoader loader = new();
+            UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
+
+            Parallel.ForEach(textPages.Values, (textList) =>
+            {
+                foreach (Tuple<string, Tuple<uint, uint, uint, uint>> textPageItem in textList)
+                {
+                    loader.Convert(data.TexturePageItems[Int32.Parse(textPageItem.Item1.Split(' ')[1])], null, textPageItem.Item2, null);
+                }
+            });
+
+            if (!keepTileCache)
+                UndertaleCachedImageLoader.TilePageCache.Clear();
+        }
     }
 
 
@@ -983,6 +1093,7 @@ namespace UndertaleModTool
                 Background bg => bg.BackgroundDefinition,
                 GameObject obj => obj.ObjectDefinition,
                 Tile tile => tile,
+                SpriteInstance spr => spr,
                 _ => null
             };
 
@@ -1007,6 +1118,11 @@ namespace UndertaleModTool
                 case Tile tile:
                     if (tile.Tpag is not null)
                         resName = "Tile";
+                    break;
+
+                case SpriteInstance spr:
+                    if (spr.Sprite is not null)
+                        resName = "Spr";
                     break;
             }
             if (resName is null)
@@ -1084,7 +1200,7 @@ namespace UndertaleModTool
                         break;
                     case UndertaleRoom.LayerType.Assets:
                         collection.Add(new CollectionContainer() { Collection = layer.AssetsData.LegacyTiles });
-                        collection.Add(new CollectionContainer() { Collection = layer.AssetsData.Sprites }); // TODO: add rendering
+                        collection.Add(new CollectionContainer() { Collection = layer.AssetsData.Sprites });
                         break;
                     case UndertaleRoom.LayerType.Tiles:
                         // TODO
@@ -1213,6 +1329,9 @@ namespace UndertaleModTool
             else
                 return new Rect(0, 0, 0, 0);
 
+            if (texture is null)
+                return new Rect(0, 0, 0, 0);
+
             if (tiledV)
             {
                 if (!stretch)
@@ -1254,6 +1373,74 @@ namespace UndertaleModTool
             return new Rect(tiledH ? (stretch ? offsetH : xOffset) : 0,
                             tiledV ? (stretch ? offsetV : yOffset) : 0,
                             texture.SourceWidth, texture.SourceHeight);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    [ValueConversion(typeof(LayerType), typeof(Visibility))]
+    public class LayerTypeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value is LayerType.Instances ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    [ValueConversion(typeof(RoomEntryFlags), typeof(string))]
+    public class GridSizeGroupConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool invert = false;
+            if (parameter is string par)
+                invert = par == "invert";
+
+            bool res = value switch
+            {
+                RoomEntryFlags flags => !flags.HasFlag(RoomEntryFlags.IsGMS2),
+                LayerType type => type is not LayerType.Instances,
+                _ => false
+            };
+            return (res ^ invert) ? "s22" : "s00";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    [ValueConversion(typeof(ContentControl), typeof(GridLength))]
+    public class GridColumnSizeConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values[0] is ContentControl cont)
+            {
+                cont.UpdateLayout(); // calculate content elements size
+
+                DependencyObject obj = VisualTreeHelper.GetChild(cont, 0);
+                if (obj is not null && VisualTreeHelper.GetChild(obj, 0) is Grid childGrid)
+                {
+                    double columnMaxWidth = (cont.Parent as Grid).Children.Cast<FrameworkElement>()
+                                                                          .Where(x => x is TextBlock && Grid.GetColumn(x) == 0)
+                                                                          .Select(x => x.DesiredSize.Width)
+                                                                          .Max();
+
+                    return new GridLength(Math.Max(columnMaxWidth, childGrid.ColumnDefinitions[0].ActualWidth));
+                }
+            }
+
+            return GridLength.Auto;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
