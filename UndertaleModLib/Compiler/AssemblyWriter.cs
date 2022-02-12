@@ -873,7 +873,6 @@ namespace UndertaleModLib.Compiler
                         {
                             Patch endPatch = Patch.Start();
                             Patch popEnvPatch = Patch.Start();
-                            AssembleExpression(cw, s.Children[0]); // new object/context
                             // Hacky override for @@Other@@ usage- will likely expand to whatever other cases it turns out the compiler uses.
                             // (instance_exists appears to be one of them, but that might actually be an overzealous decompiler conversion.)
                             if (cw.compileContext.Data.GMS2_3 &&
