@@ -116,16 +116,26 @@ namespace UndertaleModTool
 
         private void UndertaleRoomEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            RoomRootItem.IsSelected = false;
-            RoomRootItem.IsSelected = true;
+            if (IsLoaded)
+            {
+                RoomRootItem.IsSelected = false;
+                RoomRootItem.IsSelected = true;
 
+                ScrollViewer viewer = MainWindow.FindVisualChild<ScrollViewer>(RoomObjectsTree);
+                viewer.ScrollToVerticalOffset(0);
+                viewer.ScrollToHorizontalOffset(0);
+            }
+
+            UndertaleCachedImageLoader.TileCache.Clear();
             UndertaleCachedImageLoader.ImageCache.Clear();
 
             if (DataContext is UndertaleRoom room)
             {
+                GameObjItems.Header = room.Flags.HasFlag(RoomEntryFlags.IsGMS2) 
+                                      ? "Game objects (from all layers)"
+                                      : "Game objects";
                 room.SetupRoom();
-                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
-                    GenerateSpriteCache(DataContext as UndertaleRoom);
+                GenerateSpriteCache(DataContext as UndertaleRoom);
             }
         }
 
@@ -147,7 +157,6 @@ namespace UndertaleModTool
         private UndertaleObject movingObj;
         private UndertaleRoom.Tile movingTile;
         private double hotpointX, hotpointY, hotpointTileX, hotpointTileY;
-        private ScaleTransform canvasSt = new ScaleTransform();
 
         private void Rectangle_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -405,35 +414,100 @@ namespace UndertaleModTool
 
         private void SelectObject(UndertaleObject obj)
         {
-            // TODO: This sometimes fails to open objects in non-expanded tree
-            // Note that this prefers to select the object inside a layer than the 'floating' one in GameObjects
+            // TODO: enable virtualizing of RoomObjectsTree and make this method work with it
 
-            foreach (var child in (RoomObjectsTree.Items[0] as TreeViewItem).Items)
+            ScrollViewer mainTreeViewer = MainWindow.FindVisualChild<ScrollViewer>(RoomObjectsTree);
+            UndertaleRoom room = DataContext as UndertaleRoom;
+            IList resList = null;
+            TreeViewItem resListView = null;
+            Layer resLayer = null;
+            switch (obj)
             {
-                foreach (var layer in (child as TreeViewItem).Items)
-                {
-                    var layer_twi = (child as TreeViewItem).ItemContainerGenerator.ContainerFromItem(layer) as TreeViewItem;
-                    if (layer_twi == null)
-                        continue;
-                    var obj_twi = layer_twi.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
-                    if (obj_twi != null)
+                case UndertaleRoom.Background:
+                    resList = room.Backgrounds;
+                    resListView = BGItems;
+                    break;
+
+                case View:
+                    resList = room.Views;
+                    resListView = ViewItems;
+                    break;
+
+                case GameObject gameObj:
+                    if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
                     {
-                        obj_twi.BringIntoView();
-                        obj_twi.Focus();
-                        return;
+                        resLayer = room.Layers.AsParallel()
+                                              .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
+                                              .FirstOrDefault(l => l.LayerType is LayerType.Instances
+                                                  && (l.InstancesData.Instances?.Any(x => x.InstanceID == gameObj.InstanceID) ?? false));
+                        resList = resLayer.InstancesData.Instances;
+                        resListView = LayerItems.ItemContainerGenerator.ContainerFromItem(resLayer) as TreeViewItem;
                     }
-                }
+                    else
+                    {
+                        resList = room.GameObjects;
+                        resListView = GameObjItems;
+                    }
+
+                    break;
+
+                case Tile tile:
+                    if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                    {
+                        resLayer = room.Layers.AsParallel()
+                                              .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
+                                              .FirstOrDefault(l => l.LayerType is LayerType.Assets
+                                                  && (l.AssetsData.LegacyTiles?.Any(x => x.InstanceID == tile.InstanceID) ?? false));
+                        resList = resLayer.AssetsData.LegacyTiles;
+                        resListView = LayerItems.ItemContainerGenerator.ContainerFromItem(resLayer) as TreeViewItem;
+                    }
+                    else
+                    {
+                        resList = room.Tiles;
+                        resListView = TileItems;
+                    }
+
+                    break;
+
+                case Layer:
+                case Layer.LayerBackgroundData:
+                    resList = room.Layers;
+                    resListView = LayerItems;
+                    break;
+
+                case SpriteInstance spr:
+                    resLayer = room.Layers.AsParallel()
+                                          .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
+                                          .FirstOrDefault(l => l.LayerType is LayerType.Assets
+                                              && (l.AssetsData.Sprites?.Any(x => x.Name == spr.Name) ?? false));
+                    resList = resLayer.AssetsData.Sprites;
+                    resListView = LayerItems.ItemContainerGenerator.ContainerFromItem(resLayer) as TreeViewItem;
+                    break;
             }
 
-            foreach (var child in (RoomObjectsTree.Items[0] as TreeViewItem).Items)
+            if (resList is null || resListView is null)
+                return;
+
+            resListView.IsExpanded = true;
+            resListView.BringIntoView();
+            resListView.UpdateLayout();
+
+            StackPanel resPanel = MainWindow.FindVisualChild<StackPanel>(resListView);
+            (resPanel.Children[0] as TreeViewItem).BringIntoView();
+            mainTreeViewer.UpdateLayout();
+
+            double firstElemOffset = mainTreeViewer.VerticalOffset + (resPanel.Children[0] as TreeViewItem).TransformToAncestor(mainTreeViewer).Transform(new Point(0, 0)).Y;
+
+            mainTreeViewer.ScrollToVerticalOffset(firstElemOffset + ((resList.IndexOf(obj) + 1) * 16) - (mainTreeViewer.ViewportHeight / 2));
+            mainTreeViewer.UpdateLayout();
+
+            UndertaleObject obj1 = obj is Layer.LayerBackgroundData bgData ? bgData.ParentLayer : obj;
+            if (resListView.ItemContainerGenerator.ContainerFromItem(obj1) is TreeViewItem resItem)
             {
-                var twi = (child as TreeViewItem).ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
-                if (twi != null)
-                {
-                    twi.BringIntoView();
-                    twi.Focus();
-                    return;
-                }
+                resItem.IsSelected = true;
+
+                mainTreeViewer.UpdateLayout();
+                mainTreeViewer.ScrollToHorizontalOffset(0);
             }
         }
 
@@ -897,104 +971,108 @@ namespace UndertaleModTool
         }
 
 
-        public static void GenerateSpriteCache(UndertaleRoom room, bool keepTileCache = false)
+        public static void GenerateSpriteCache(UndertaleRoom room)
         {
-            // text. page name - text. page item name, tile rectangle (if is tile)
-            ConcurrentDictionary<string, ConcurrentBag<Tuple<string, Tuple<uint, uint, uint, uint>>>> textPages = new();
+            // text. page name - text. page item list
+            ConcurrentDictionary<string, ConcurrentBag<UndertaleTexturePageItem>> textPages = new();
+            UndertaleCachedImageLoader loader = new();
 
-            _ = Parallel.ForEach(room.Layers, (layer) =>
+            List<Tile> tiles = null;
+            List<Tuple<UndertaleTexturePageItem, List<Tuple<uint, uint, uint, uint>>>> tileTextures = null;
+            List<object> allObjects = new();
+            if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
             {
-                string textPageName;
-                Tuple<string, Tuple<uint, uint, uint, uint>> textPageItem;
-                Tuple<uint, uint, uint, uint> tileRect = null;
-                switch (layer.LayerType)
+                foreach (Layer layer in room.Layers)
                 {
-                    case LayerType.Assets:
-                        foreach (Tile tile in layer.AssetsData.LegacyTiles)
-                        {
-                            UndertaleTexturePageItem texture = tile.Tpag;
-                            if (texture is not null)
-                            {
-                                textPageName = texture.TexturePage.Name.Content;
-                                tileRect = new(tile.SourceX, tile.SourceY, tile.Width, tile.Height);
-                                textPageItem = new(texture.Name.Content, tileRect);
+                    switch (layer.LayerType)
+                    {
+                        case LayerType.Assets:
+                            if (tiles is null)
+                                tiles = layer.AssetsData.LegacyTiles.ToList();
+                            else
+                                tiles.AddRange(layer.AssetsData.LegacyTiles);
 
-                                _ = textPages.AddOrUpdate(textPageName, new ConcurrentBag<Tuple<string, Tuple<uint, uint, uint, uint>>>() { textPageItem }, (_, list) =>
-                                {
-                                    list.Add(textPageItem);
-                                    return list;
-                                }); ;
-                            }
-                        }
-                        foreach (UndertaleTexturePageItem texture in layer.AssetsData.Sprites.Select(x => x.Sprite?.Textures[0].Texture))
-                        {
-                            if (texture is not null)
-                            {
-                                textPageName = texture.TexturePage.Name.Content;
-                                textPageItem = new(texture.Name.Content, tileRect);
-                                _ = textPages.AddOrUpdate(textPageName, new ConcurrentBag<Tuple<string, Tuple<uint, uint, uint, uint>>>() { textPageItem }, (_, list) =>
-                                {
-                                    list.Add(textPageItem);
-                                    return list;
-                                });
-                            }
-                        }
-                        break;
+                            allObjects.AddRange(layer.AssetsData.Sprites);
+                            break;
 
-                    case LayerType.Background:
-                        UndertaleTexturePageItem texture1 = layer.BackgroundData.Sprite?.Textures[0].Texture;
-                        if (texture1 is not null)
-                        {
-                            textPageName = texture1.TexturePage.Name.Content;
-                            textPageItem = new(texture1.Name.Content, tileRect);
-                            _ = textPages.AddOrUpdate(textPageName, new ConcurrentBag<Tuple<string, Tuple<uint, uint, uint, uint>>>() { textPageItem }, (_, list) =>
-                            {
-                                list.Add(textPageItem);
-                                return list;
-                            });
-                        }
-                        break;
+                        case LayerType.Background:
+                            allObjects.Add(layer.BackgroundData);
+                            break;
 
-                    case LayerType.Instances:
-                        foreach (UndertaleTexturePageItem texture in layer.InstancesData.Instances.Select(x => x.ObjectDefinition?.Sprite?.Textures[0].Texture))
-                        {
-                            if (texture is not null)
-                            {
-                                textPageName = texture.TexturePage.Name.Content;
-                                textPageItem = new(texture.Name.Content, tileRect);
-                                _ = textPages.AddOrUpdate(textPageName, new ConcurrentBag<Tuple<string, Tuple<uint, uint, uint, uint>>>() { textPageItem }, (_, list) =>
-                                {
-                                    list.Add(textPageItem);
-                                    return list;
-                                });
-                            }
-                        }
-                        break;
+                        case LayerType.Instances:
+                            allObjects.AddRange(layer.InstancesData.Instances);
+                            break;
 
-                    case LayerType.Tiles:
-                        // TODO
-                        break;
+                        case LayerType.Tiles:
+                            // TODO
+                            break;
+                    }
+                }
+            }
+            else
+            {
+                tiles = room.Tiles.ToList();
+
+                allObjects.AddRange(room.Backgrounds);
+                allObjects.AddRange(room.GameObjects);
+            }
+
+            tileTextures = tiles?.AsParallel()
+                                 .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
+                                 .GroupBy(x => x.Tpag?.Name)
+                                 .Select(x =>
+                                 {
+                                     return new Tuple<UndertaleTexturePageItem, List<Tuple<uint, uint, uint, uint>>>(
+                                         x.First().Tpag, 
+                                         x.Select(tile => new Tuple<uint, uint, uint, uint>(tile.SourceX, tile.SourceY, tile.Width, tile.Height))
+                                          .Distinct()
+                                          .ToList());
+                                 })
+                                 .ToList();
+
+            _ = Parallel.ForEach(allObjects, (obj) =>
+            {
+                UndertaleTexturePageItem texture = obj switch
+                {
+                    Background bg => bg.BackgroundDefinition?.Texture,
+                    GameObject gameObj => gameObj.ObjectDefinition?.Sprite?.Textures[0].Texture,
+
+                    // GMS 2+
+                    Layer.LayerBackgroundData bgData => bgData.Sprite?.Textures[0].Texture,
+                    SpriteInstance sprite => sprite.Sprite?.Textures[0].Texture,
+                    _ => null
+                };
+
+                if (texture is not null)
+                {
+                    string textPageName = texture.TexturePage.Name.Content;
+                    _ = textPages.AddOrUpdate(textPageName, new ConcurrentBag<UndertaleTexturePageItem>() { texture }, (_, list) =>
+                    {
+                        list.Add(texture);
+                        return list;
+                    });
                 }
             });
+
             foreach (string key in textPages.Keys)
             {
-                ConcurrentBag<Tuple<string, Tuple<uint, uint, uint, uint>>> bag = textPages[key];
+                ConcurrentBag<UndertaleTexturePageItem> bag = textPages[key];
                 textPages[key] = new(bag.Distinct());
             }
 
-            UndertaleCachedImageLoader loader = new();
-            UndertaleData data = (Application.Current.MainWindow as MainWindow).Data;
+            List<UndertaleTexturePageItem> list = new();
+            foreach (var text in textPages.Values)
+                list.AddRange(text);
 
-            Parallel.ForEach(textPages.Values, (textList) =>
-            {
-                foreach (Tuple<string, Tuple<uint, uint, uint, uint>> textPageItem in textList)
+            if (tileTextures is not null)
+                foreach (var tileTexture in tileTextures)
                 {
-                    loader.Convert(data.TexturePageItems[Int32.Parse(textPageItem.Item1.Split(' ')[1])], null, textPageItem.Item2, null);
+                    loader.Convert(tileTexture.Item1, null, tileTexture.Item2, null); // it's parallel itself
                 }
+            _ = Parallel.ForEach(list, (texture) =>
+            {
+                loader.Convert(texture, null, "generate", null);
             });
-
-            if (!keepTileCache)
-                UndertaleCachedImageLoader.TilePageCache.Clear();
         }
     }
 

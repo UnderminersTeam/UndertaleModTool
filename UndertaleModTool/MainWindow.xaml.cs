@@ -115,6 +115,7 @@ namespace UndertaleModTool
                     DataEditor.ContentTemplate = null;
                     Selected = new DescriptionView("Welcome to UndertaleModTool!",
                                                    "Open data.win file to get started, then double click on the items on the left to view them");
+                    UndertaleCachedImageLoader.TileCache.Clear();
                     UndertaleCachedImageLoader.ImageCache.Clear();
                 }
 
@@ -2743,8 +2744,7 @@ result in loss of work.");
             mainTreeViewer.ScrollToVerticalOffset(firstElemOffset + ((resList.IndexOf(obj) + 1) * 16) - (mainTreeViewer.ViewportHeight / 2));
             mainTreeViewer.UpdateLayout();
 
-            TreeViewItem resItem;
-            if ((resItem = resListView.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem) is not null)
+            if (resListView.ItemContainerGenerator.ContainerFromItem(obj) is TreeViewItem resItem)
             {
                 Highlighted = resItem.DataContext;
                 resItem.IsSelected = true;

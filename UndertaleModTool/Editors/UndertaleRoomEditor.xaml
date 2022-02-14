@@ -100,10 +100,11 @@
                             </TextBlock.Text>
                         </TextBlock>
                     </DataTemplate>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#D4D4D4"/>
                 </TreeView.Resources>
 
                 <TreeViewItem Header="{Binding Name.Content}" Name="RoomRootItem" IsExpanded="True">
-                    <TreeViewItem Header="Backgrounds" ItemsSource="{Binding Backgrounds, Mode=OneWay}" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" IsExpanded="True">
+                    <TreeViewItem Name="BGItems" Header="Backgrounds" ItemsSource="{Binding Backgrounds, Mode=OneWay}" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" IsExpanded="True">
                         <TreeViewItem.ItemTemplate>
                             <HierarchicalDataTemplate>
                                 <TextBlock Text="{Binding BackgroundDefinition, Mode=OneWay, TargetNullValue='(no name)'}">
@@ -120,7 +121,7 @@
                             </HierarchicalDataTemplate>
                         </TreeViewItem.ItemTemplate>
                     </TreeViewItem>
-                    <TreeViewItem Header="Views" ItemsSource="{Binding Views, Mode=OneWay}" IsExpanded="True">
+                    <TreeViewItem Name="ViewItems" Header="Views" ItemsSource="{Binding Views, Mode=OneWay}" IsExpanded="True">
                         <TreeViewItem.ItemTemplate>
                             <HierarchicalDataTemplate>
                                 <TextBlock Text="View">
@@ -137,7 +138,8 @@
                             </HierarchicalDataTemplate>
                         </TreeViewItem.ItemTemplate>
                     </TreeViewItem>
-                    <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects, Mode=OneWay}" IsExpanded="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}">
+                    <!-- GameObjItems header changes depending on GMS version -->
+                    <TreeViewItem Name="GameObjItems" Header="Game objects" ItemsSource="{Binding GameObjects, Mode=OneWay}" IsExpanded="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}">
                         <TreeViewItem.Resources>
                             <ContextMenu x:Key="cm">
                                 <MenuItem Header="New Object Instance" Click="MenuItem_NewObjectInstance_Click"/>
@@ -157,7 +159,7 @@
                             </Style>
                         </TreeViewItem.Style>
                     </TreeViewItem>
-                    <TreeViewItem Header="Tiles" ItemsSource="{Binding Tiles, Mode=OneWay}" IsExpanded="True" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}">
+                    <TreeViewItem Name="TileItems" Header="Tiles" ItemsSource="{Binding Tiles, Mode=OneWay}" IsExpanded="True" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}">
                         <TreeViewItem.ItemTemplate>
                             <HierarchicalDataTemplate>
                                 <TextBlock>
@@ -176,7 +178,7 @@
                             </ContextMenu>
                         </TreeViewItem.ContextMenu>
                     </TreeViewItem>
-                    <TreeViewItem Header="Layers" ItemsSource="{Binding Layers, Mode=OneWay}" IsExpanded="True" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}, ConverterParameter=invert}">
+                    <TreeViewItem Name="LayerItems"  Header="Layers" ItemsSource="{Binding Layers, Mode=OneWay}" IsExpanded="True" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}, ConverterParameter=invert}">
                         <TreeViewItem.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="New Instances layer" Click="MenuItem_NewLayerInstances_Click"/>
@@ -561,6 +563,7 @@
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
@@ -618,7 +621,11 @@
                                 <TextBox Grid.Column="3" Margin="3" Text="{Binding Height}" ToolTip="Height"/>
                             </Grid>
 
-                            <Viewbox Grid.Row="3" Grid.Column="2" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
+                            <TextBlock Grid.Row="3" Grid.Column="2" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap">
+                                Hint: You can move and resize (with&#160;Alt) the <Run FontWeight="DemiBold" Foreground="#FFB23131">red</Run> tile selection border around.<LineBreak/>
+                                Reopen the room to see changes.
+                            </TextBlock>
+                            <Viewbox Grid.Row="4" Grid.Column="2" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
                                 <Canvas Width="{Binding Tpag.BoundingWidth, Mode=OneWay}" Height="{Binding Tpag.BoundingHeight, Mode=OneWay}" SnapsToDevicePixels="True" MouseMove="RectangleTile_MouseMove" MouseUp="RectangleTile_MouseUp">
                                     <Border>
                                         <Border.Background>
@@ -641,14 +648,14 @@
                                 </Canvas>
                             </Viewbox>
 
-                            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Depth</TextBlock>
-                            <TextBox Grid.Row="4" Grid.Column="2" Margin="3" Text="{Binding TileDepth}"/>
+                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Depth</TextBlock>
+                            <TextBox Grid.Row="5" Grid.Column="2" Margin="3" Text="{Binding TileDepth}"/>
 
-                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Instance ID</TextBlock>
-                            <TextBox Grid.Row="5" Grid.Column="2" Margin="3" Text="{Binding InstanceID}"/>
+                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Instance ID</TextBlock>
+                            <TextBox Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding InstanceID}"/>
 
-                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Scale</TextBlock>
-                            <Grid Grid.Row="6" Grid.Column="2">
+                            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Scale</TextBlock>
+                            <Grid Grid.Row="7" Grid.Column="2">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
@@ -657,8 +664,8 @@
                                 <TextBox Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Color</TextBlock>
-                            <local:ColorPicker Grid.Row="7" Grid.Column="2" Margin="3" Color="{Binding Color}"/>
+                            <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Color</TextBlock>
+                            <local:ColorPicker Grid.Row="8" Grid.Column="2" Margin="3" Color="{Binding Color}"/>
                         </Grid>
                     </DataTemplate>
 

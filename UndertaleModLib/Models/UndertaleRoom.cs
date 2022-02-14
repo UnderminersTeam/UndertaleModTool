@@ -617,7 +617,7 @@ namespace UndertaleModLib.Models
             public class LayerInstancesData : LayerData
             {
                 internal uint[] _InstanceIds { get; private set; } // 100000, 100001, 100002, 100003 - instance ids from GameObjects list in the room
-                public ObservableCollection<UndertaleRoom.GameObject> Instances { get; private set; } = new ObservableCollection<UndertaleRoom.GameObject>();
+                public ObservableCollection<UndertaleRoom.GameObject> Instances { get; private set; } = new();
 
                 public void Serialize(UndertaleWriter writer)
                 {
