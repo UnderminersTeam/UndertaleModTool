@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -81,11 +82,20 @@ namespace UndertaleModLib
         public bool GMS2_3 = false;
         public bool GMS2_3_1 = false;
         public bool GMS2_3_2 = false;
+        public bool UseQoiFormat = false;
         public ToolInfo ToolInfo = new ToolInfo();
         public int PaddingAlignException = -1;
 
         public BuiltinList BuiltinList;
         public Dictionary<string, UndertaleFunction> KnownSubFunctions; // Cache for known 2.3-style function names for compiler speedups. Can be re-built by setting this to null.
+
+        public ConcurrentDictionary<string, string> GMLCache { get; set; }
+        public List<string> GMLCacheFailed { get; set; }
+        public ConcurrentBag<string> GMLCacheChanged { get; set; } = new();
+        public List<string> GMLEditedBefore { get; set; }
+        public bool GMLCacheWasSaved { get; set; }
+        public bool GMLCacheIsReady { get; set; } = true;
+
 
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {
@@ -370,7 +380,7 @@ namespace UndertaleModLib
                         // GMS 2.3+
                         if (!isBuiltin)
                         {
-                            data.VarCount1 = Math.Max(data.VarCount1, (uint)id);
+                            data.VarCount1++;
                             data.VarCount2 = data.VarCount1;
                         }
                         oldId = (uint)id;

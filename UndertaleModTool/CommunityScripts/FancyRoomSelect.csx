@@ -22,7 +22,7 @@ if(obj == null) {
     Data.GameObjects.Add(obj);
 }
 
-if(Data.GeneralInfo.Name.Content == "UNDERTALE") {
+if(Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE")) {
     // Remove existing F3 handler to avoid accidentally 
     // creating system_information_962
     Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);

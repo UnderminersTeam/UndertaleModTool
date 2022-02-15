@@ -44,16 +44,22 @@ namespace UndertaleModTool
                     return possible_values[0];
 
                 // Nothing found, pick new one
-                while (true)
+                bool obj_found = false;
+                uint obj_index = 0;
+                while (!obj_found)
                 {
                     string object_index = SimpleTextInput("Object could not be found. Please enter it below:",
                                                             "Object enter box.", "", false).ToLower();
                     for (var i = 0; i < Data.GameObjects.Count; i++)
                     {
                         if (Data.GameObjects[i].Name.Content.ToLower() == object_index)
-                            return (uint)i;
+                        {
+                            obj_found = true;
+                            obj_index = (uint)i;
+                        }
                     }
                 }
+                return obj_index;
             }
             
             if (possible_values.Count != 0)
@@ -64,16 +70,22 @@ namespace UndertaleModTool
                 foreach (uint objID in possible_values)
                     gameObjectNames += Data.GameObjects[(int)objID].Name.Content + "\n";
 
-                while (true)
+                bool obj_found = false;
+                uint obj_index = 0;
+                while (!obj_found)
                 {
-                    string object_index = SimpleTextInput("Multiple object were found. Select only one object below from the set, or, if none below match, some other object name:",
+                    string object_index = SimpleTextInput("Multiple objects were found. Select only one object below from the set, or, if none below match, some other object name:",
                                                           "Object enter box.", gameObjectNames, true).ToLower();
                     for (var i = 0; i < Data.GameObjects.Count; i++)
                     {
                         if (Data.GameObjects[i].Name.Content.ToLower() == object_index)
-                            return (uint)i;
+                        {
+                            obj_found = true;
+                            obj_index = (uint)i;
+                        }
                     }
                 }
+                return obj_index;
             }
 
             return 0;

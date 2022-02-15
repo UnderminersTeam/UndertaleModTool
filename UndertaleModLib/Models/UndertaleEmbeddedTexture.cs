@@ -1,10 +1,14 @@
-﻿using System;
+﻿using ICSharpCode.SharpZipLib.BZip2;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models
 {
@@ -69,17 +73,61 @@ namespace UndertaleModLib.Models
 
             public void Serialize(UndertaleWriter writer)
             {
-                writer.Write(TextureBlob);
+                if (writer.undertaleData.UseQoiFormat)
+                {
+                    writer.Write(new byte[] { 50, 122, 111, 113 });
+
+                    // Encode the PNG data back to QOI+BZip2
+                    Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
+                    writer.Write((short)bmp.Width);
+                    writer.Write((short)bmp.Height);
+                    byte[] data = QoiConverter.GetArrayFromImage(bmp);
+                    using MemoryStream input = new MemoryStream(data);
+                    using MemoryStream output = new MemoryStream(1024);
+                    BZip2.Compress(input, output, false, 9);
+                    writer.Write(output.ToArray());
+                    bmp.Dispose();
+                }
+                else
+                    writer.Write(TextureBlob);
             }
 
             public void Unserialize(UndertaleReader reader)
             {
                 uint startAddress = reader.Position;
 
-                // There is no length anywhere as far as I can see
+                byte[] header = reader.ReadBytes(8);
+                if (!header.SequenceEqual(new byte[8] { 137, 80, 78, 71, 13, 10, 26, 10 }))
+                {
+                    reader.Position = startAddress;
+
+                    if (header.Take(4).SequenceEqual(new byte[4] { 50, 122, 111, 113 }))
+                    {
+                        reader.undertaleData.UseQoiFormat = true;
+
+                        // Don't really care about the width/height, so skip them, as well as header
+                        reader.Position += 8;
+
+                        // Need to fully decompress and convert the QOI data to PNG for compatibility purposes (at least for now)
+                        using MemoryStream bufferWrapper = new MemoryStream(reader.Buffer);
+                        bufferWrapper.Seek(reader.Offset, SeekOrigin.Begin);
+                        using MemoryStream result = new MemoryStream(1024);
+                        BZip2.Decompress(bufferWrapper, result, false);
+                        reader.Position = (uint)bufferWrapper.Position;
+                        result.Seek(0, SeekOrigin.Begin);
+                        Bitmap bmp = QoiConverter.GetImageFromStream(result);
+                        using MemoryStream final = new MemoryStream();
+                        bmp.Save(final, ImageFormat.Png);
+                        TextureBlob = final.ToArray();
+                        bmp.Dispose();
+                        return;
+                    }
+                    else
+                        throw new IOException("Didn't find PNG or QOI+BZip2 header");
+                }
+
+                // There is no length for the PNG anywhere as far as I can see
                 // The only thing we can do is parse the image to find the end
-                if (!reader.ReadBytes(8).SequenceEqual(new byte[8] { 137, 80, 78, 71, 13, 10, 26, 10 }))
-                    throw new IOException("PNG header error");
                 while (true)
                 {
                     // PNG is big endian and BinaryRead can't handle that (damn)

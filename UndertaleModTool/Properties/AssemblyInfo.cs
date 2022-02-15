@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("UndertaleModTool")]
-[assembly: AssemblyCopyright("Copyright ©  2018-2021")]
+[assembly: AssemblyCopyright("Copyright ©  2018-2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -51,5 +51,5 @@ using System.Windows;
 // Możesz określić wszystkie wartości lub użyć domyślnych numerów kompilacji i poprawki
 // przy użyciu symbolu „*”, tak jak pokazano poniżej:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.4.0.2")]
-[assembly: AssemblyFileVersion("0.4.0.2")]
+[assembly: AssemblyVersion("0.4.0.3")]
+[assembly: AssemblyFileVersion("0.4.0.3")]

@@ -76,7 +76,7 @@ maxCount = dirFiles.Length;
 SetProgressBar(null, "Importing sounds", 0, maxCount);
 StartUpdater();
 
-SyncBinding("AudioGroups, EmbeddedAudio, Sounds", true);
+SyncBinding("AudioGroups, EmbeddedAudio, Sounds, Strings", true);
 await Task.Run(() => {
     foreach (string file in dirFiles)
     {

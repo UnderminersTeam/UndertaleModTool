@@ -31,8 +31,10 @@ namespace UndertaleModLib.Scripting
         string ExePath { get; }
         string ScriptErrorType { get; }
 
+        bool GMLCacheEnabled { get; }
+
         void EnsureDataLoaded();
-        bool Make_New_File();
+        Task<bool> Make_New_File();
         void ReplaceTempWithMain(bool ImAnExpertBTW = false);
         void ReplaceMainWithTemp(bool ImAnExpertBTW = false);
         void ReplaceTempWithCorrections(bool ImAnExpertBTW = false);
@@ -61,6 +63,7 @@ namespace UndertaleModLib.Scripting
         void SetFinishedMessage(bool isFinishedMessageEnabled);
         void UpdateProgressBar(string message, string status, double progressValue, double maxValue);
         void SetProgressBar(string message, string status, double progressValue, double maxValue);
+        void SetProgressBar();
         void UpdateProgressValue(double progressValue);
         void UpdateProgressStatus(string status);
         void AddProgress(int amount);
@@ -76,6 +79,8 @@ namespace UndertaleModLib.Scripting
         void StartUpdater();
         Task StopUpdater();
 
+        Task<bool> GenerateGMLCache(ThreadLocal<Decompiler.GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false);
+
         void ChangeSelection(object newsel);
 
         string PromptChooseDirectory(string prompt);
@@ -83,8 +88,8 @@ namespace UndertaleModLib.Scripting
         string PromptLoadFile(string defaultExt, string filter);
         void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false);
         void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false);
-        void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false);
-        void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false);
+        void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false, bool throwOnError = false);
+        void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false);
         void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false);
         bool DummyBool();
         void DummyVoid();

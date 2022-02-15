@@ -139,21 +139,21 @@ void FileCompare(string asm_orig_path, string asm_new_path, string gml_orig_path
     {
         UpdateProgressBar(null, "Grouping identical and different files", progress++, Data.Code.Count);
         string DetCodeName = (Is_GMS_2_3 ? i.ToString() : Data.Code[i].Name.Content);
-        string orig_asm_path = Path.Combine(asm_orig_path, DetCodeName + ".asm");
-        string new1_asm_path = Path.Combine(asm_new_path, DetCodeName + ".asm");
-        string orig_gml_path = Path.Combine(gml_orig_path, DetCodeName + ".gml");
-        if (!(File.Exists(orig_asm_path) && File.Exists(new1_asm_path) && File.Exists(orig_gml_path)))
+        string asm_orig_fullpath = Path.Combine(asm_orig_path, DetCodeName + ".asm");
+        string asm_new_fullpath = Path.Combine(asm_new_path, DetCodeName + ".asm");
+        string gml_orig_fullpath = Path.Combine(gml_orig_path, DetCodeName + ".gml");
+        if (!(File.Exists(asm_orig_fullpath) && File.Exists(asm_new_fullpath) && File.Exists(gml_orig_fullpath)))
         {
             continue;
         }
-        if (AreFilesIdentical(orig_asm_path, new1_asm_path))
+        if (AreFilesIdentical(asm_orig_fullpath, asm_new_fullpath))
         {
             Directory.CreateDirectory(Path.Combine(gml_orig_path, "Identical"));
             Directory.CreateDirectory(Path.Combine(asm_new_path, "Identical"));
             Directory.CreateDirectory(Path.Combine(asm_orig_path, "Identical"));
-            File.Move(orig_gml_path, Path.Combine(gml_orig_path, "Identical", DetCodeName + ".gml"));
-            File.Move(orig_asm_path, Path.Combine(asm_new_path, "Identical", DetCodeName + ".asm"));
-            File.Move(new1_asm_path, Path.Combine(asm_orig_path, "Identical", DetCodeName + ".asm"));
+            File.Move(gml_orig_fullpath, Path.Combine(gml_orig_path, "Identical", DetCodeName + ".gml"));
+            File.Move(asm_orig_fullpath, Path.Combine(asm_orig_path, "Identical", DetCodeName + ".asm"));
+            File.Move(asm_new_fullpath, Path.Combine(asm_new_path, "Identical", DetCodeName + ".asm"));
             identical_count += 1;
         }
         else
@@ -161,9 +161,9 @@ void FileCompare(string asm_orig_path, string asm_new_path, string gml_orig_path
             Directory.CreateDirectory(Path.Combine(gml_orig_path, "Different"));
             Directory.CreateDirectory(Path.Combine(asm_new_path, "Different"));
             Directory.CreateDirectory(Path.Combine(asm_orig_path, "Different"));
-            File.Move(orig_gml_path, Path.Combine(gml_orig_path, "Different", DetCodeName + ".gml"));
-            File.Move(orig_asm_path, Path.Combine(asm_new_path, "Different", DetCodeName + ".asm"));
-            File.Move(new1_asm_path, Path.Combine(asm_orig_path, "Different", DetCodeName + ".asm"));
+            File.Move(gml_orig_fullpath, Path.Combine(gml_orig_path, "Different", DetCodeName + ".gml"));
+            File.Move(asm_orig_fullpath, Path.Combine(asm_orig_path, "Different", DetCodeName + ".asm"));
+            File.Move(asm_new_fullpath, Path.Combine(asm_new_path, "Different", DetCodeName + ".asm"));
             different_count += 1;
         }
     }

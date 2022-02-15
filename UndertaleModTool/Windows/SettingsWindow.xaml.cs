@@ -81,6 +81,16 @@ namespace UndertaleModTool
             }
         }
 
+        public static bool UseGMLCache
+        {
+            get => Settings.Instance.UseGMLCache;
+            set
+            {
+                Settings.Instance.UseGMLCache = value;
+                Settings.Save();
+            }
+        }
+
         public static bool ProfileMessageShown
         {
             get => Settings.Instance.ProfileMessageShown;
@@ -129,6 +139,12 @@ namespace UndertaleModTool
             }
         }
 
+        public bool UpdateButtonEnabled
+        {
+            get => UpdateAppButton.IsEnabled;
+            set => UpdateAppButton.IsEnabled = value;
+        }
+
         public SettingsWindow()
         {
             InitializeComponent();
@@ -139,6 +155,11 @@ namespace UndertaleModTool
         private void AppDataButton_Click(object sender, RoutedEventArgs e)
         {
             MainWindow.OpenFolder(Settings.AppDataFolder);
+        }
+
+        private void UpdateAppButton_Click(object sender, RoutedEventArgs e)
+        {
+            ((MainWindow)Owner).UpdateApp(this);
         }
     }
 }
