@@ -140,10 +140,6 @@ namespace UndertaleModLib.Compiler
                                 foreach (var l in compileContext.LocalVars)
                                 {
                                     string name = l.Key;
-                                    if (false)
-                                    {
-                                        name = "For some reason, putting an if statement here fixes a crash on the next line. IDK.";
-                                    }
                                     if (!hasLocal(name))
                                     {
                                         if (variables != null && compileContext?.Data.GMS2_3 == true)
@@ -251,11 +247,10 @@ namespace UndertaleModLib.Compiler
                         foreach (var patch in funcPatches)
                         {
                             UndertaleFunction def;
-                            // Exceptions do occur.
+                            // Exceptions do occur, but for the moment only in 2.3.
                             if (patch.ArgCount >= 0)
                             {
                                 patch.Target.ArgumentsCount = (ushort)patch.ArgCount;
-
                                 def = compileContext.Data.Functions.ByName(patch.Name);
                                 if (compileContext.Data.GMS2_3)
                                 {
@@ -279,7 +274,8 @@ namespace UndertaleModLib.Compiler
                             else
                             {
                                 def = compileContext.Data.Functions.ByName(patch.Name);
-
+                                // This is locked by the 2.3 block above, but this code is only reachable using a 2.3 function definition.
+                                def ??= compileContext.Data.KnownSubFunctions.GetValueOrDefault(patch.Name);
                                 if (compileContext.ensureFunctionsDefined)
                                     def ??= compileContext.Data.Functions.EnsureDefined(patch.Name, compileContext.Data.Strings, true);
 
@@ -1146,7 +1142,7 @@ namespace UndertaleModLib.Compiler
                 cw.typeStack.Push(DataType.Variable);
             }
 
-            private static void AssembleExpression(CodeWriter cw, Parser.Statement e, Parser.Statement hackyjacky = null)
+            private static void AssembleExpression(CodeWriter cw, Parser.Statement e, Parser.Statement funcDefName = null)
             {
                 switch (e.Kind)
                 {
@@ -1234,9 +1230,7 @@ namespace UndertaleModLib.Compiler
                                 AssemblyWriterError(cw, "Malformed function assignment.", e.Token);
                                 break;
                             }
-
-                            int argc = e.Children[0].Children.Count;
-
+                            
                             Patch startPatch = Patch.StartHere(cw);
                             Patch endPatch = Patch.Start();
                             endPatch.Add(cw.Emit(Opcode.B));
@@ -1249,9 +1243,10 @@ namespace UndertaleModLib.Compiler
                             cw.funcPatches.Add(new FunctionPatch()
                             {
                                 Target = cw.EmitRef(Opcode.Push, DataType.Int32),
-                                Name = "gml_Script_" + hackyjacky.Text,
+                                Name = funcDefName.Text,
                                 ArgCount = -1
                             });
+                            //cw.compileContext.Data.Code.ByName("gml_GlobalScript_" + funcDefName.Text).ArgumentsCount = (ushort)e.Children[0].Children.Count; // Figure this out in non-convoluted and working way
                             cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
                             cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1;
                             cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
