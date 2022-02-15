@@ -367,7 +367,7 @@
                 <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
 
                 <ScrollViewer Grid.Column="2" Grid.RowSpan="2" VerticalScrollBarVisibility="Auto">
-                    <ContentControl Margin="10" Content="{Binding Selected}" Name="DataEditor">
+                    <ContentControl Margin="8,0" Content="{Binding Selected}" Name="DataEditor">
                         <ContentControl.Resources>
                             <DataTemplate DataType="{x:Type local:DescriptionView}">
                                 <StackPanel>

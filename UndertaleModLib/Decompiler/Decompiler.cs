@@ -622,7 +622,10 @@ namespace UndertaleModLib.Decompiler
                 string op = OperationToPrintableString(Opcode);
                 if (Opcode == UndertaleInstruction.Opcode.Not && Type == UndertaleInstruction.DataType.Boolean)
                     op = "!"; // This is a logical negation instead, see #93
-                return String.Format("({0}{1})", op, Argument.ToString(context));
+                string arg = Argument.ToString(context);
+                if (arg.Contains(" "))
+                    return String.Format("({0}({1}))", op, arg);
+                return String.Format("({0}{1})", op, arg);
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -1120,16 +1123,11 @@ namespace UndertaleModLib.Decompiler
                 string varPrefix = (HasVarKeyword ? "var " : "");
 
                 // Check for possible ++, --, or operation equal (for single vars)
-                if (Value is ExpressionTwo && ((Value as ExpressionTwo).Argument1 is ExpressionVar) &&
-                    ((Value as ExpressionTwo).Argument1 as ExpressionVar).Var == Destination.Var)
+                if (Value is ExpressionTwo two && (two.Argument1 is ExpressionVar) &&
+                    (two.Argument1 as ExpressionVar).Var == Destination.Var)
                 {
-                    ExpressionTwo two = (Value as ExpressionTwo);
-                    if (two.Argument2 is ExpressionConstant)
-                    {
-                        ExpressionConstant c = (two.Argument2 as ExpressionConstant);
-                        if (c.IsPushE && ExpressionConstant.ConvertToInt(c.Value) == 1)
-                            return varName + (two.Opcode == UndertaleInstruction.Opcode.Add ? "++" : "--");
-                    }
+                    if (two.Argument2 is ExpressionConstant c && c.IsPushE && ExpressionConstant.ConvertToInt(c.Value) == 1)
+                        return varName + (two.Opcode == UndertaleInstruction.Opcode.Add ? "++" : "--");
 
                     // Not ++ or --, could potentially be an operation equal
                     bool checkEqual(ExpressionVar a, ExpressionVar b)
@@ -1275,13 +1273,26 @@ namespace UndertaleModLib.Decompiler
                     }
                     sb.Append(") // ");
                     sb.Append(Function.Name.Content);
-                    sb.Append("\n{\n");
-                    context.IndentationLevel++;
-                    foreach (Statement stmt in context.Statements[FunctionBodyEntryBlock.Address.Value])
-                        sb.Append(context.Indentation + stmt.ToString(context) + "\n");
-                    context.IndentationLevel--;
-                    sb.Append("}");
                     sb.Append("\n");
+                    sb.Append(context.Indentation);
+                    if (context.IndentationLevel == 0) // See #614
+                    {
+                        sb.Append("{\n");
+                        context.IndentationLevel++;
+                        foreach (Statement stmt in context.Statements[FunctionBodyEntryBlock.Address.Value])
+                        {
+                            sb.Append(context.Indentation);
+                            sb.Append(stmt.ToString(context));
+                            sb.Append("\n");
+                        }
+                        context.IndentationLevel--;
+                        sb.Append(context.Indentation);
+                        sb.Append("}\n");
+                    }
+                    else
+                    {
+                        sb.Append("{} // Nested function decompilation is not currently supported.\n");
+                    }
                 }
                 else
                 {
@@ -1536,11 +1547,8 @@ namespace UndertaleModLib.Decompiler
                 {
                     if (context.GlobalContext.Data?.GMS2_3 == true)
                     {
-                        name += "[";
                         foreach (Expression e in ArrayIndices)
-                            name += e.ToString(context) + ", ";
-                        name = name[0..^2];
-                        name += "]";
+                            name += "[" + e.ToString(context) + "]";
                     }
                     else
                     {
@@ -1754,7 +1762,7 @@ namespace UndertaleModLib.Decompiler
                                 taken.Push(e);
                                 bytesToTake -= GetTypeSize(e);
                                 if (bytesToTake < 0)
-                                    throw new InvalidOperationException("The stack got misaligned?");
+                                    throw new InvalidOperationException("The stack got misaligned? Error 0");
                             }
 
                             int b2 = (byte)instr.ComparisonKind & 0x7F;
@@ -1768,7 +1776,7 @@ namespace UndertaleModLib.Decompiler
                                 moved.Push(e);
                                 bytesToMove -= GetTypeSize(e);
                                 if (bytesToMove < 0)
-                                    throw new InvalidOperationException("The stack got misaligned?");
+                                    throw new InvalidOperationException("The stack got misaligned? Error 1");
                             }
 
                             while (taken.Count > 0)
@@ -1807,7 +1815,10 @@ namespace UndertaleModLib.Decompiler
 
                             bytesToDuplicate -= GetTypeSize(item);
                             if (bytesToDuplicate < 0)
-                                throw new InvalidOperationException("The stack got misaligned?");
+                                throw new InvalidOperationException("The stack got misaligned? Error 2: Attempted to duplicate " 
+                                    + GetTypeSize(item) 
+                                    + " bytes, only found "
+                                    + (bytesToDuplicate + GetTypeSize(item)));
                         }
                         topExpressions1.Reverse();
                         topExpressions2.Reverse();
@@ -2234,6 +2245,25 @@ namespace UndertaleModLib.Decompiler
                                             throw new InvalidOperationException("Tried to popaf on something that is not a var");
                                     }
                                     break;
+                                case -4: // GMS2.3+, pushac
+                                    {
+                                        Expression ind = stack.Pop();
+                                        Expression target = stack.Pop();
+                                        if (target is ExpressionVar targetVar)
+                                        {
+                                            if (targetVar.VarType != UndertaleInstruction.VariableType.ArrayPushAF && targetVar.VarType != UndertaleInstruction.VariableType.ArrayPopAF)
+                                                throw new InvalidOperationException("Tried to pushac on var of type " + targetVar.VarType);
+
+                                            ExpressionVar newVar = new ExpressionVar(targetVar.Var, targetVar.InstType, targetVar.VarType);
+                                            newVar.Opcode = instr.Kind;
+                                            newVar.ArrayIndices = new List<Expression>(targetVar.ArrayIndices);
+                                            newVar.ArrayIndices.Add(ind);
+                                            stack.Push(newVar);
+                                        }
+                                        else
+                                            throw new InvalidOperationException("Tried to pushac on something that is not a var");
+                                    }
+                                    break;
                                 case -5: // GMS2.3+, setowner
                                     // Stop 'setowner' values from leaking into the decompiled output as tempvars.
                                     // Used in the VM to let copy-on-write functionality work, but unnecessary for decompilation
@@ -2610,23 +2640,53 @@ namespace UndertaleModLib.Decompiler
                     Expression startValue = priorAssignment.Value;
 
                     List<Statement> loopCode = loop.Block.Statements;
-                    if (priorAssignment != null && loop.IsWhileLoop && loop.Condition == null && loopCode.Count > 2 && compareCondition.Opcode == UndertaleInstruction.ComparisonType.LTE && TestNumber(compareCondition.Argument2, 0) && compareCondition.Argument1.ToString(context) == startValue.ToString(context))
+                    if (priorAssignment != null &&
+                        loop.IsWhileLoop &&
+                        loop.Condition == null &&
+                        //loopCode.Count > 2 &&
+                        compareCondition.Opcode == UndertaleInstruction.ComparisonType.LTE &&
+                        TestNumber(compareCondition.Argument2, 0) &&
+                        compareCondition.Argument1.ToString(context) == startValue.ToString(context))
                     {
-                        TempVarAssignmentStatement repeatAssignment = loopCode[loopCode.Count - 2] as TempVarAssignmentStatement;
-                        IfHLStatement loopCheckStatement = loopCode[loopCode.Count - 1] as IfHLStatement;
+                        TempVarAssignmentStatement repeatAssignment = null;
+                        IfHLStatement loopCheckStatement = null;
+                        bool hasBreak = false;
+                        List<Statement> insideElseBlock = null;
+                        
+                        if (loopCode.Count > 2)
+                        {
+                            repeatAssignment = loopCode[loopCode.Count - 2] as TempVarAssignmentStatement;
+                            loopCheckStatement = loopCode[loopCode.Count - 1] as IfHLStatement;
+                        }
+
+                        if ((repeatAssignment == null || loopCheckStatement == null) &&
+                            loopCode[loopCode.Count - 1] is IfHLStatement wrapperIfStatement &&
+                            wrapperIfStatement.HasElse
+                           ) // single-level break detection
+                        {
+                            insideElseBlock = wrapperIfStatement.falseBlock.Statements;
+                            wrapperIfStatement.trueBlock.Statements.Add(new BreakHLStatement());
+                            if (insideElseBlock.Count > 2)
+                            {
+                                repeatAssignment = insideElseBlock[insideElseBlock.Count - 2] as TempVarAssignmentStatement;
+                                loopCheckStatement = insideElseBlock[insideElseBlock.Count - 1] as IfHLStatement;
+                                hasBreak = true;
+                            }
+                        }
 
                         if (repeatAssignment != null && loopCheckStatement != null)
                         { // tempVar = (tempVar -1); -> if (tempVar) continue -> break
 
                             // if (tempVar) {continue} else {empty}
-                            bool ifPass = loopCheckStatement.trueBlock.Statements.Count == 1 && !loopCheckStatement.HasElse && !loopCheckStatement.HasElseIf
-                                && loopCheckStatement.trueBlock.Statements[0] is ContinueHLStatement
-                                && loopCheckStatement.condition.ToString(context) == repeatAssignment.Value.ToString(context);
 
-                            if (ifPass)
+                            if (loopCheckStatement.trueBlock.Statements.Count == 1
+                                && !loopCheckStatement.HasElse
+                                && !loopCheckStatement.HasElseIf
+                                && loopCheckStatement.trueBlock.Statements[0] is ContinueHLStatement
+                                && loopCheckStatement.condition.ToString(context) == repeatAssignment.Value.ToString(context))
                             {
-                                loopCode.Remove(repeatAssignment);
-                                loopCode.Remove(loopCheckStatement);
+                                (hasBreak ? insideElseBlock : loopCode).Remove(repeatAssignment);
+                                (hasBreak ? insideElseBlock : loopCode).Remove(loopCheckStatement);
                                 block.Statements.Remove(priorAssignment);
 
                                 loop.RepeatStartValue = startValue;

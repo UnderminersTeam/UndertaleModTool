@@ -362,9 +362,14 @@ namespace UndertaleModLib.Decompiler
                     throw new Exception("Bad string format");
                 str = UndertaleString.UnescapeText(str.Substring(1, str.Length - 2));
             }
+            else
+                str = null;
             UndertaleString strobj = id.HasValue ? strg[(int)id.Value] : null;
             if (strobj != null)
-                strobj.Content = str;
+            {
+                if (str != null) // Retain original value if empty string passed (push.s @300)
+                    strobj.Content = str;
+            }
             else
                 strobj = strg.MakeString(str);
             if (!id.HasValue)

@@ -9,10 +9,12 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleRoom}" x:Name="RoomEditor">
     <UserControl.Resources>
+        <local:GridConverter x:Key="GridConverter"/>
         <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
         <local:ColorConverter x:Key="ColorConverter"/>
         <local:SimplePointsDisplayConverter x:Key="SimplePointsDisplayConverter"/>
         <local:ObjCenterXConverter x:Key="ObjCenterXConverter" />
+        <local:ObjXOffsetConverter x:Key="ObjXOffsetConverter" />
         <local:ObjCenterYConverter x:Key="ObjCenterYConverter" />
         <local:LayerFlattenerConverter x:Key="LayerFlattenerConverter" />
         <CompositeCollection x:Key="AllObjectsGMS1">
@@ -31,20 +33,32 @@
     <UserControl.CommandBindings>
         <CommandBinding Command="Copy" Executed="Command_Copy" />
         <CommandBinding Command="Paste" Executed="Command_Paste" />
+        <CommandBinding Command="Undo" Executed="Command_Undo" />
     </UserControl.CommandBindings>
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Control" Key="C" Command="Copy"/>
         <KeyBinding Modifiers="Control" Key="P" Command="Paste"/>
+        <KeyBinding Modifiers="Control" Key="Z" Command="Undo"/>
     </UserControl.InputBindings>
 
-    <StackPanel>
-        <Grid Height="500">
+    <Grid Height="{Binding RelativeSource={RelativeSource FindAncestor,
+                           AncestorType={x:Type ScrollViewer}},
+                           Path=ActualHeight}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="342px"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Column="0" Grid.Row="0" Margin="0,0,0,8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TreeView Grid.Column="0" Margin="3" SelectedItemChanged="TreeView_SelectedItemChanged" Name="RoomObjectsTree" KeyDown="RoomObjectsTree_KeyDown" MouseDoubleClick="RoomObjectsTree_MouseDoubleClick">
+            <TreeView Grid.Column="0" Margin="0,0,3,0" SelectedItemChanged="TreeView_SelectedItemChanged" Name="RoomObjectsTree" KeyDown="RoomObjectsTree_KeyDown" MouseDoubleClick="RoomObjectsTree_MouseDoubleClick">
                 <TreeView.Resources>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
                         <TextBlock>
@@ -250,7 +264,7 @@
                 </TreeViewItem>
             </TreeView>
 
-            <ScrollViewer Grid.Column="1" Margin="3" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer Grid.Column="1" Margin="3,0,0,0" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
                 <ContentControl.Resources>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
                         <Grid>
@@ -259,6 +273,8 @@
                                 <ColumnDefinition Width="3*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
@@ -335,8 +351,11 @@
                                 <TextBox Grid.Column="1" Margin="3" Text="{Binding GravityY}" ToolTip="Y"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Meters per pixel</TextBlock>
-                            <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding MetersPerPixel}"/>
+                            <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Grid</TextBlock>
+                            <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding Grid}"/>
+
+                            <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Grid Thickness</TextBlock>
+                            <TextBox Grid.Row="13" Grid.Column="1" Margin="3" Text="{Binding GridThicknessPx}"/>
                         </Grid>
                     </DataTemplate>
 
@@ -543,6 +562,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Position</TextBlock>
@@ -589,14 +609,37 @@
                                 <TextBox Grid.Column="3" Margin="3" Text="{Binding Height}" ToolTip="Height"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Depth</TextBlock>
-                            <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding TileDepth}"/>
+                            <Viewbox Grid.Row="3" Grid.Column="1" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
+                                <Canvas Width="{Binding Tpag.BoundingWidth}" Height="{Binding Tpag.BoundingHeight}" SnapsToDevicePixels="True" MouseMove="RectangleTile_MouseMove" MouseUp="RectangleTile_MouseUp">
+                                    <Border>
+                                        <Border.Background>
+                                            <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
+                                                <DrawingBrush.Drawing>
+                                                    <DrawingGroup>
+                                                        <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
+                                                        <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
+                                                    </DrawingGroup>
+                                                </DrawingBrush.Drawing>
+                                            </DrawingBrush>
+                                        </Border.Background>
+                                        <local:UndertaleTexturePageItemDisplay DataContext="{Binding Tpag}"/>
+                                    </Border>
+                                    <Rectangle Canvas.Left="{Binding SourceX}" Canvas.Top="{Binding SourceY}" Width="{Binding Width}" Height="{Binding Height}" Stroke="#FFB23131" Panel.ZIndex="50" StrokeThickness="2" MouseDown="RectangleTile_MouseDown" SnapsToDevicePixels="True">
+                                        <Rectangle.Fill>
+                                            <SolidColorBrush Color="Red" Opacity=".1"/>
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                </Canvas>
+                            </Viewbox>
 
-                            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Instance ID</TextBlock>
-                            <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding InstanceID}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Depth</TextBlock>
+                            <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding TileDepth}"/>
 
-                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Scale</TextBlock>
-                            <Grid Grid.Row="5" Grid.Column="1">
+                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Instance ID</TextBlock>
+                            <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding InstanceID}"/>
+
+                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Scale</TextBlock>
+                            <Grid Grid.Row="6" Grid.Column="1">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
@@ -605,8 +648,8 @@
                                 <TextBox Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Color</TextBlock>
-                            <local:ColorPicker Grid.Row="6" Grid.Column="1" Margin="3" Color="{Binding Color}"/>
+                            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Color</TextBlock>
+                            <local:ColorPicker Grid.Row="7" Grid.Column="1" Margin="3" Color="{Binding Color}"/>
                         </Grid>
                     </DataTemplate>
 
@@ -858,8 +901,10 @@
             </ScrollViewer>
         </Grid>
 
-        <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
-            <ItemsControl Name="RoomGraphics" Background="Black">
+        <GridSplitter Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" ShowsPreview="True" Width="Auto" Height="3"/>
+
+        <ScrollViewer Margin="0,8,0,0" Grid.Column="0" Grid.Row="2" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" ScrollChanged="ScrollViewer_ScrollChanged">
+            <ItemsControl Name="RoomGraphics" Background="Black" MouseMove="Rectangle_MouseMove" MouseWheel="Canvas_MouseWheel">
                 <ItemsControl.Style>
                     <Style TargetType="ItemsControl">
                         <Setter Property="ItemsSource" Value="{Binding Source={StaticResource AllObjectsGMS1}}"/>
@@ -874,14 +919,23 @@
                 </ItemsControl.Style>
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Canvas Width="{Binding Width}" Height="{Binding Height}" IsItemsHost="True" UseLayoutRounding="True" AllowDrop="True" DragOver="Canvas_DragOver" Drop="Canvas_Drop">
-                            <Canvas.CacheMode>
-                                <BitmapCache EnableClearType="False" 
-                                     RenderAtScale="1" 
-                                     SnapsToDevicePixels="True"  />
-                            </Canvas.CacheMode>
+                        <Canvas Width="{Binding Width}" Height="{Binding Height}" IsItemsHost="True" AllowDrop="True" DragOver="Canvas_DragOver" Drop="Canvas_Drop">
+                            <!--<Canvas.RenderTransform>
+                                <ScaleTransform ScaleX="2" ScaleY="2"></ScaleTransform>
+                            </Canvas.RenderTransform>-->
                             <Canvas.Background>
-                                <SolidColorBrush Color="{Binding BackgroundColor, Converter={StaticResource ColorConverter}}"/>
+                                <DrawingBrush TileMode="Tile" Viewport="{Binding Grid, Converter={StaticResource GridConverter}}" ViewportUnits="Absolute">
+                                    <DrawingBrush.Drawing>
+                                        <GeometryDrawing>
+                                            <GeometryDrawing.Geometry>
+                                                <RectangleGeometry Rect="{Binding Grid, Converter={StaticResource GridConverter}}"/>
+                                            </GeometryDrawing.Geometry>
+                                            <GeometryDrawing.Pen>
+                                                <Pen Brush="Gray" Thickness="{Binding GridThicknessPx}"/>
+                                            </GeometryDrawing.Pen>
+                                        </GeometryDrawing>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
                             </Canvas.Background>
                         </Canvas>
                     </ItemsPanelTemplate>
@@ -899,8 +953,8 @@
                         <Rectangle Width="{Binding BackgroundDefinition.Texture.SourceWidth}" Height="{Binding BackgroundDefinition.Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
-                                  <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
-                                  <ScaleTransform ScaleX="{Binding CalcScaleX}" ScaleY="{Binding CalcScaleY}"  CenterX="{Binding X}" CenterY="{Binding Y}"/>
+                                    <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
+                                    <ScaleTransform ScaleX="{Binding CalcScaleX}" ScaleY="{Binding CalcScaleY}"  CenterX="{Binding X}" CenterY="{Binding Y}"/>
                                 </TransformGroup>
                             </Rectangle.RenderTransform>
                             <Rectangle.Style>
@@ -1029,9 +1083,9 @@
                             </Rectangle.Style>
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
-                                    <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
-                                    <RotateTransform CenterX="{Binding Converter={StaticResource ObjCenterXConverter}}" CenterY="{Binding Converter={StaticResource ObjCenterYConverter}}" Angle="{Binding OppositeRotation}"/>
-                                    <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}" CenterX="{Binding Converter={StaticResource ObjCenterXConverter}}" CenterY="{Binding Converter={StaticResource ObjCenterYConverter}}"/>
+                                    <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}"/>
+                                    <RotateTransform CenterX="{Binding X}" CenterY="{Binding Y}" Angle="{Binding OppositeRotation}"/>
+                                    <TranslateTransform X="{Binding XOffset}" Y="{Binding YOffset}"/>
                                 </TransformGroup>
                                 <!-- TODO: X + TargetX? -->
                             </Rectangle.RenderTransform>
@@ -1059,13 +1113,13 @@
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
                         <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight}" MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
-                          
-                          <Rectangle.RenderTransform>
-                            <ScaleTransform ScaleX="{Binding CalcScaleX}" ScaleY="{Binding CalcScaleY}" CenterX="0" CenterY="0"/>
-                          </Rectangle.RenderTransform>
-                          
-                          <Rectangle.Fill>
-                              <ImageBrush
+
+                            <Rectangle.RenderTransform>
+                                <ScaleTransform ScaleX="{Binding CalcScaleX}" ScaleY="{Binding CalcScaleY}" CenterX="0" CenterY="0"/>
+                            </Rectangle.RenderTransform>
+
+                            <Rectangle.Fill>
+                                <ImageBrush
                                 ImageSource="{Binding Sprite.Textures[0].Texture.TexturePage.TextureData.TextureBlob, Converter={StaticResource UndertaleCachedImageLoader}}" 
                                 ViewboxUnits="Absolute"
                                 TileMode="None"
@@ -1081,8 +1135,8 @@
                                             <Binding Path="Sprite.Textures[0].Texture.SourceHeight"/>
                                         </MultiBinding>
                                     </ImageBrush.Viewbox>
-                              </ImageBrush>
-                          </Rectangle.Fill>
+                                </ImageBrush>
+                            </Rectangle.Fill>
                         </Rectangle>
                     </DataTemplate>
 
@@ -1091,8 +1145,6 @@
                     </DataTemplate>
                 </ItemsControl.Resources>
             </ItemsControl>
-        </Viewbox>
-
-        <Button Content="Save as PNG" Click="ExportAsPNG_Click"/>
-    </StackPanel>
+        </ScrollViewer>
+    </Grid>
 </UserControl>
