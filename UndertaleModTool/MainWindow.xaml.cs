@@ -2170,7 +2170,7 @@ result in loss of work.");
         {
             Tab newTab = new Tab(tabTitle, this);
             newTab.TabTitle = tabTitle;
-            TabControl tabControl = ((TabControl)this.FindName("TabController"));
+            TabControl tabControl = (TabControl)this.FindName("TabController");
             if (Tabs.Count > 0 && CurrentTabIndex >= 0 && ((Tab)CurrentTab).AutoClose)
             {
                 Tabs.RemoveAt(CurrentTabIndex);
@@ -2230,7 +2230,8 @@ result in loss of work.");
         private void TabController_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
-            TabControl tabControl = ((TabControl)this.FindName("TabController"));
+            TabControl tabControl = (TabControl)this.FindName("TabController");
+            
             if (tabControl.SelectedIndex >= 0)
             {
                 CurrentTabIndex = tabControl.SelectedIndex;
