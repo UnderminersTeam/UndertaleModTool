@@ -150,6 +150,53 @@ namespace UndertaleModLib.Models
             bool sequences = false;
             if (reader.undertaleData.GeneralInfo.Major >= 2)
             {
+                // First, need to do a length check on one of the layers to see if this is 2022.1 or higher
+                if (!reader.undertaleData.GMS2022_1)
+                {
+                    int returnTo = reader.Offset;
+                    reader.Offset = reader.ReadInt32();
+                    int layerCount = reader.ReadInt32();
+                    if (layerCount >= 1)
+                    {
+                        int jumpOffset = reader.ReadInt32() + 8;
+                        int nextOffset = reader.ReadInt32();
+                        reader.Offset = jumpOffset;
+                        switch ((LayerType)reader.ReadInt32())
+                        {
+                            case LayerType.Background:
+                                if (nextOffset - reader.Offset > 16 * 4)
+                                    reader.undertaleData.GMS2022_1 = true;
+                                break;
+                            case LayerType.Instances:
+                                reader.Offset += 6 * 4;
+                                int instanceCount = reader.ReadInt32();
+                                if (nextOffset - reader.Offset != (instanceCount * 4))
+                                    reader.undertaleData.GMS2022_1 = true;
+                                break;
+                            case LayerType.Assets:
+                                reader.Offset += 6 * 4;
+                                int tileOffset = reader.ReadInt32();
+                                if (tileOffset != reader.Position + (reader.undertaleData.GMS2_3 ? 8 : 4))
+                                    reader.undertaleData.GMS2022_1 = true;
+                                break;
+                            case LayerType.Tiles:
+                                reader.Offset += 7 * 4;
+                                int tileMapWidth = reader.ReadInt32();
+                                int tileMapHeight = reader.ReadInt32();
+                                if (nextOffset - reader.Offset != (tileMapWidth * tileMapHeight * 4))
+                                    reader.undertaleData.GMS2022_1 = true;
+                                break;
+                            case LayerType.Effect:
+                                reader.Offset += 7 * 4;
+                                int propertyCount = reader.ReadInt32();
+                                if (nextOffset - reader.Offset != (propertyCount * 3 * 4))
+                                    reader.undertaleData.GMS2022_1 = true;
+                                break;
+                        }
+                    }
+                    reader.Offset = returnTo;
+                }
+
                 Layers = reader.ReadUndertaleObjectPointer<UndertalePointerList<Layer>>();
                 sequences = reader.GMS2_3;
                 if (sequences)
@@ -484,7 +531,8 @@ namespace UndertaleModLib.Models
             Background = 1,
             Instances = 2,
             Assets = 3,
-            Tiles = 4
+            Tiles = 4,
+            Effect = 6
         }
 
         public class Layer : UndertaleObject, INotifyPropertyChanged
@@ -510,8 +558,14 @@ namespace UndertaleModLib.Models
             public LayerTilesData TilesData => Data as LayerTilesData;
             public LayerBackgroundData BackgroundData => Data as LayerBackgroundData;
             public LayerAssetsData AssetsData => Data as LayerAssetsData;
+            public LayerEffectData EffectData => Data as LayerEffectData;
 
             public event PropertyChangedEventHandler PropertyChanged;
+
+            // GMS 2022.1+
+            public bool EffectEnabled { get; set; }
+            public UndertaleString EffectType { get; set; }
+            public UndertaleSimpleList<EffectProperty> EffectProperties { get; set; }
 
             public void UpdateParentRoom()
             {
@@ -530,6 +584,14 @@ namespace UndertaleModLib.Models
                 writer.Write(HSpeed);
                 writer.Write(VSpeed);
                 writer.Write(IsVisible);
+
+                if (writer.undertaleData.GMS2022_1)
+                {
+                    writer.Write(EffectEnabled);
+                    writer.WriteUndertaleString(EffectType);
+                    writer.WriteUndertaleObject(EffectProperties);
+                }
+
                 if (LayerType == LayerType.Instances)
                 {
                     writer.WriteUndertaleObject(InstancesData);
@@ -545,6 +607,10 @@ namespace UndertaleModLib.Models
                 else if (LayerType == LayerType.Assets)
                 {
                     writer.WriteUndertaleObject(AssetsData);
+                }
+                else if (LayerType == LayerType.Effect)
+                {
+                    writer.WriteUndertaleObject(EffectData);
                 }
                 else
                 {
@@ -563,6 +629,14 @@ namespace UndertaleModLib.Models
                 HSpeed = reader.ReadSingle();
                 VSpeed = reader.ReadSingle();
                 IsVisible = reader.ReadBoolean();
+
+                if (reader.undertaleData.GMS2022_1)
+                {
+                    EffectEnabled = reader.ReadBoolean();
+                    EffectType = reader.ReadUndertaleString();
+                    EffectProperties = reader.ReadUndertaleObject<UndertaleSimpleList<EffectProperty>>();
+                }
+
                 if (LayerType == LayerType.Instances)
                 {
                     Data = reader.ReadUndertaleObject<LayerInstancesData>();
@@ -578,6 +652,10 @@ namespace UndertaleModLib.Models
                 else if (LayerType == LayerType.Assets)
                 {
                     Data = reader.ReadUndertaleObject<LayerAssetsData>();
+                }
+                else if (LayerType == LayerType.Effect)
+                {
+                    Data = reader.ReadUndertaleObject<LayerEffectData>();
                 }
                 else
                 {
@@ -796,6 +874,58 @@ namespace UndertaleModLib.Models
                             reader.ReadUndertaleObject(NineSlices);
                     }
                 }
+            }
+
+            [PropertyChanged.AddINotifyPropertyChangedInterface]
+            public class LayerEffectData : LayerData
+            {
+                public UndertaleString EffectType;
+                public UndertaleSimpleList<EffectProperty> Properties;
+
+                public void Serialize(UndertaleWriter writer)
+                {
+                    if (writer.undertaleData.GMS2022_1)
+                        return;
+                    writer.WriteUndertaleString(EffectType);
+                    writer.WriteUndertaleObject(Properties);
+                }
+
+                public void Unserialize(UndertaleReader reader)
+                {
+                    if (reader.undertaleData.GMS2022_1)
+                        return;
+                    EffectType = reader.ReadUndertaleString();
+                    Properties = reader.ReadUndertaleObject<UndertaleSimpleList<EffectProperty>>();
+                }
+            }
+        }
+
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class EffectProperty : UndertaleObject
+        {
+            public enum PropertyType
+            {
+                Real = 0,
+                Color = 1,
+                Sampler = 2
+            }
+
+            public PropertyType Kind { get; set; }
+            public UndertaleString Name { get; set; }
+            public UndertaleString Value { get; set; }
+
+            public void Serialize(UndertaleWriter writer)
+            {
+                writer.Write((int)Kind);
+                writer.WriteUndertaleString(Name);
+                writer.WriteUndertaleString(Value);
+            }
+
+            public void Unserialize(UndertaleReader reader)
+            {
+                Kind = (PropertyType)reader.ReadInt32();
+                Name = reader.ReadUndertaleString();
+                Value = reader.ReadUndertaleString();
             }
         }
 
