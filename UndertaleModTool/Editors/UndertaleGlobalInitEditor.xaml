@@ -8,10 +8,13 @@
              xmlns:undertaleModels="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance local:GlobalInitEditor}">
-    <StackPanel>
-        <TextBlock Text="Global initialization scripts" FontWeight="Bold"/>
-        <Separator/>
-        <DataGrid Grid.Row="20" Grid.Column="1" Margin="3" ItemsSource="{Binding GlobalInits}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
+    <DockPanel MaxHeight="{Binding ViewportHeight, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+        <TextBlock Text="Global initialization scripts" FontWeight="Bold" DockPanel.Dock="Top"/>
+        <Separator DockPanel.Dock="Top"/>
+        <DataGrid DockPanel.Dock="Top" Margin="3" ItemsSource="{Binding GlobalInits}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                  ScrollViewer.CanContentScroll="True"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -47,5 +50,5 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-    </StackPanel>
+    </DockPanel>
 </local:DataUserControl>

@@ -24,6 +24,7 @@
         <local:LayerTypeConverter x:Key="LayerTypeConverter"/>
         <local:GridSizeGroupConverter x:Key="GridSizeGroupConverter"/>
         <local:GridColumnSizeConverter x:Key="GridColumnSizeConverter"/>
+        <local:TileCellConverter x:Key="TileCellConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Tiles}"/>
@@ -139,7 +140,7 @@
                         </TreeViewItem.ItemTemplate>
                     </TreeViewItem>
                     <!-- GameObjItems header changes depending on GMS version -->
-                    <TreeViewItem Name="GameObjItems" Header="Game objects" ItemsSource="{Binding GameObjects, Mode=OneWay}" IsExpanded="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}">
+                    <TreeViewItem Name="GameObjItems" Header="Game objects" ItemsSource="{Binding GameObjects, Mode=OneWay}">
                         <TreeViewItem.Resources>
                             <ContextMenu x:Key="cm">
                                 <MenuItem Header="New Object Instance" Click="MenuItem_NewObjectInstance_Click"/>
@@ -159,7 +160,7 @@
                             </Style>
                         </TreeViewItem.Style>
                     </TreeViewItem>
-                    <TreeViewItem Name="TileItems" Header="Tiles" ItemsSource="{Binding Tiles, Mode=OneWay}" IsExpanded="True" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}">
+                    <TreeViewItem Name="TileItems" Header="Tiles" ItemsSource="{Binding Tiles, Mode=OneWay}" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}">
                         <TreeViewItem.ItemTemplate>
                             <HierarchicalDataTemplate>
                                 <TextBlock>
@@ -178,7 +179,7 @@
                             </ContextMenu>
                         </TreeViewItem.ContextMenu>
                     </TreeViewItem>
-                    <TreeViewItem Name="LayerItems"  Header="Layers" ItemsSource="{Binding Layers, Mode=OneWay}" IsExpanded="True" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}, ConverterParameter=invert}">
+                    <TreeViewItem Name="LayerItems" Header="Layers" ItemsSource="{Binding Layers, Mode=OneWay}" IsExpanded="True" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}, ConverterParameter=invert}">
                         <TreeViewItem.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="New Instances layer" Click="MenuItem_NewLayerInstances_Click"/>
@@ -738,7 +739,7 @@
 
                             <Separator Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3"/>
 
-                            <ContentControl Name="LayerDataContent" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3" Content="{Binding Data, Mode=OneTime}">
+                            <ContentControl Name="LayerDataContent" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3" Content="{Binding Data, Mode=OneTime}" Loaded="LayerDataContent_Loaded" DataContextChanged="LayerDataContent_DataContextChanged">
                                 <ContentControl.Resources>
                                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerInstancesData}">
                                         <TextBlock Margin="3" Text="Contains GameObject instances, listed in the tree on the left"/>
@@ -752,7 +753,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                                <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="Auto"/>
                                             </Grid.RowDefinitions>
                                             <Grid.Resources>
@@ -770,8 +771,10 @@
                                                 <TextBox Grid.Column="1" Margin="3" Text="{Binding TilesY}" ToolTip="Vertical"/>
                                             </Grid>
 
-                                            <Expander Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Header="Tile data">
-                                                <ScrollViewer HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
+                                            <Expander Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Header="Tile data">
+                                                <ScrollViewer MaxWidth="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
+                                                              HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled"
+                                                              CanContentScroll="True">
                                                     <ItemsControl ItemsSource="{Binding TileData}">
                                                         <ItemsControl.ItemsPanel>
                                                             <ItemsPanelTemplate>
@@ -780,7 +783,7 @@
                                                         </ItemsControl.ItemsPanel>
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
-                                                                <ItemsControl ItemsSource="{Binding .}">
+                                                                <ItemsControl ItemsSource="{Binding ., Mode=OneTime}">
                                                                     <ItemsControl.ItemsPanel>
                                                                         <ItemsPanelTemplate>
                                                                             <StackPanel Orientation="Horizontal" />
@@ -788,7 +791,7 @@
                                                                     </ItemsControl.ItemsPanel>
                                                                     <ItemsControl.ItemTemplate>
                                                                         <DataTemplate>
-                                                                            <TextBox Text="{Binding .}" Width="30" Height="30"/>
+                                                                            <TextBox Tag="{Binding Mode=OneTime, Converter={StaticResource TileCellConverter}}" Text="{Binding ., Mode=OneTime}" Width="30" Height="30" LostFocus="TileCellTextBox_LostFocus"/>
                                                                             <!-- TODO: this is crazy slow -->
                                                                         </DataTemplate>
                                                                     </ItemsControl.ItemTemplate>

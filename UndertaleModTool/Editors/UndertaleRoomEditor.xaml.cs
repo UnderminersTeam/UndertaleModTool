@@ -960,6 +960,57 @@ namespace UndertaleModTool
             AddSprite(menuitem.DataContext as UndertaleRoom.Layer);
         }
 
+        private void TileCellTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            BindingExpression binding = textBox.GetBindingExpression(TextBox.TextProperty);
+            int x = ((int[])textBox.Tag)[0];
+            int y = ((int[])textBox.Tag)[1];
+
+            uint tileID;
+            if (UInt32.TryParse(textBox.Text, out tileID))
+            {
+                TileCellConverter.CurrentLayer.TilesData.TileData[y][x] = tileID;
+                Validation.ClearInvalid(binding);
+            }
+            else
+            {
+                // change value without losing its binding
+                textBox.SetCurrentValue(TextBox.TextProperty, TileCellConverter.CurrentLayer.TilesData.TileData[y][x].ToString());
+
+                ValidationError err = new(new DataErrorValidationRule(), binding) { ErrorContent = "Invalid tile ID" };
+                Validation.MarkInvalid(binding, err);
+                _ = Task.Run(() =>
+                {
+                    Thread.Sleep(1000);
+                    Dispatcher.Invoke(() => Validation.ClearInvalid(binding));
+                });
+            }
+        }
+        private void OnLayerDataContentChange(object dataContext)
+        {
+            if (dataContext is Layer layer && layer.LayerType == LayerType.Tiles)
+            {
+                TileCellConverter.CurrentLayer = layer;
+                TileCellConverter.TilesWidth = layer.TilesData.TilesX;
+            }
+            else
+            {
+                TileCellConverter.CurrentLayer = null;
+                TileCellConverter.TilesWidth = 0;
+            }
+
+            TileCellConverter.CurrentPos = new int[] { 0, 0 };
+        }
+        private void LayerDataContent_Loaded(object sender, RoutedEventArgs e)
+        {
+            OnLayerDataContentChange(DataContext);
+        }
+        private void LayerDataContent_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            OnLayerDataContentChange(e.NewValue);
+        }
+
         private void MenuItem_NewGMS1Tile_Click(object sender, RoutedEventArgs e)
         {
             AddGMS1Tile(this.DataContext as UndertaleRoom);
@@ -973,8 +1024,7 @@ namespace UndertaleModTool
 
         public static void GenerateSpriteCache(UndertaleRoom room)
         {
-            // text. page name - text. page item list
-            ConcurrentDictionary<string, ConcurrentBag<UndertaleTexturePageItem>> textPages = new();
+            ConcurrentDictionary<string, ConcurrentBag<UndertaleTexturePageItem>> textPages = new(); // text. page name - text. page item list
             UndertaleCachedImageLoader loader = new();
 
             List<Tile> tiles = null;
@@ -1522,6 +1572,33 @@ namespace UndertaleModTool
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class TileCellConverter : IValueConverter
+    {
+        public static Layer CurrentLayer { get; set; }
+        public static uint TilesWidth { get; set; }
+        public static int[] CurrentPos { get; set; } = new int[] { 0, 0 };
+        
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            int[] currPos = (int[])CurrentPos.Clone();
+
+            if (CurrentPos[0] >= TilesWidth - 1)
+            {
+                CurrentPos[0] = 0;
+                CurrentPos[1]++;
+            }
+            else
+                CurrentPos[0]++;
+
+            return currPos;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using UndertaleModLib.Decompiler;
+using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Scripting
 {
@@ -54,8 +56,10 @@ namespace UndertaleModLib.Scripting
         void InitializeScriptDialog();
         void ReapplyProfileCode();
         void NukeProfileGML(string codeName);
-        string GetDecompiledText(string codeName);
+        string GetDecompiledText(string codeName, GlobalDecompileContext context = null);
+        string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null);
         string GetDisassemblyText(string codeName);
+        string GetDisassemblyText(UndertaleCode code);
         bool AreFilesIdentical(string File01, string File02);
         string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose);
         string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true);
@@ -92,7 +96,8 @@ namespace UndertaleModLib.Scripting
         void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false);
         void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false, bool throwOnError = false);
         void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false);
-        void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false);
+        void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null);
+        void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null);
         bool DummyBool();
         void DummyVoid();
         string DummyString();
