@@ -2150,14 +2150,20 @@ namespace UndertaleModLib.Decompiler
                                     {
                                         Dictionary<uint, Block> blocks2 = PrepareDecompileFlow(anonymousCodeObject.ParentEntry, new List<uint>() { 0 });
                                         DecompileFromBlock(childContext, blocks2, blocks2[0]);
-                                        List<Statement> statements = HLDecompile(childContext, blocks2, blocks2[0], blocks2[anonymousCodeObject.Length / 4]);
+                                        // This hack handles decompilation of code entries getting shorter, but not longer or out of place.
+                                        Block lastBlock;
+                                        if (!blocks2.TryGetValue(anonymousCodeObject.Length / 4, out lastBlock))
+                                            lastBlock = blocks2[blocks2.Keys.Max()];
+                                        List<Statement> statements = HLDecompile(childContext, blocks2, blocks2[0], lastBlock);
                                         foreach (Statement stmt2 in statements)
                                         {
                                             if (stmt2 is AssignmentStatement assign &&
-                                                assign.Value is FunctionDefinition funcDef &&
-                                                funcDef.FunctionBodyEntryBlock.Address == anonymousCodeObject.Offset / 4)
+                                                assign.Value is FunctionDefinition funcDef)
                                             {
-                                                return assign.Destination.Var.Name.Content;
+                                                if (funcDef.FunctionBodyEntryBlock.Address == anonymousCodeObject.Offset / 4)
+                                                    return assign.Destination.Var.Name.Content;
+                                                else
+                                                    throw new Exception("Non-matching offset: " + funcDef.FunctionBodyEntryBlock.Address.ToString() + " versus " + (anonymousCodeObject.Offset / 4).ToString());
                                             }
                                         }
                                         throw new Exception("Unable to find the var name for anonymous code object " + anonymousCodeObject.Name.Content);
