@@ -71,22 +71,34 @@ namespace UndertaleModLib.Models
 
             public event PropertyChangedEventHandler PropertyChanged;
 
+            private static readonly byte[] PNGHeader = new byte[8] { 137, 80, 78, 71, 13, 10, 26, 10 };
+            private static readonly byte[] QOIandBZipHeader = new byte[4] { 50, 122, 111, 113 };
+            private static readonly byte[] QOIHeader = new byte[4] { 102, 105, 111, 113 };
+
             public void Serialize(UndertaleWriter writer)
             {
                 if (writer.undertaleData.UseQoiFormat)
                 {
-                    writer.Write(new byte[] { 50, 122, 111, 113 });
+                    if (writer.undertaleData.UseBZipFormat)
+                    {
+                        writer.Write(QOIandBZipHeader);
 
-                    // Encode the PNG data back to QOI+BZip2
-                    Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
-                    writer.Write((short)bmp.Width);
-                    writer.Write((short)bmp.Height);
-                    byte[] data = QoiConverter.GetArrayFromImage(bmp);
-                    using MemoryStream input = new MemoryStream(data);
-                    using MemoryStream output = new MemoryStream(1024);
-                    BZip2.Compress(input, output, false, 9);
-                    writer.Write(output.ToArray());
-                    bmp.Dispose();
+                        // Encode the PNG data back to QOI+BZip2
+                        Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
+                        writer.Write((short)bmp.Width);
+                        writer.Write((short)bmp.Height);
+                        byte[] data = QoiConverter.GetArrayFromImage(bmp);
+                        using MemoryStream input = new MemoryStream(data);
+                        using MemoryStream output = new MemoryStream(1024);
+                        BZip2.Compress(input, output, false, 9);
+                        writer.Write(output.ToArray());
+                        bmp.Dispose();
+                    }
+                    else
+                    {
+                        // Encode the PNG data back to QOI
+                        writer.Write(QoiConverter.GetArrayFromImage(TextureWorker.GetImageFromByteArray(TextureBlob)));
+                    }
                 }
                 else
                     writer.Write(TextureBlob);
@@ -97,13 +109,14 @@ namespace UndertaleModLib.Models
                 uint startAddress = reader.Position;
 
                 byte[] header = reader.ReadBytes(8);
-                if (!header.SequenceEqual(new byte[8] { 137, 80, 78, 71, 13, 10, 26, 10 }))
+                if (!header.SequenceEqual(PNGHeader))
                 {
                     reader.Position = startAddress;
 
-                    if (header.Take(4).SequenceEqual(new byte[4] { 50, 122, 111, 113 }))
+                    if (header.Take(4).SequenceEqual(QOIandBZipHeader))
                     {
                         reader.undertaleData.UseQoiFormat = true;
+                        reader.undertaleData.UseBZipFormat = true;
 
                         // Don't really care about the width/height, so skip them, as well as header
                         reader.Position += 8;
@@ -116,6 +129,22 @@ namespace UndertaleModLib.Models
                         reader.Position = (uint)bufferWrapper.Position;
                         result.Seek(0, SeekOrigin.Begin);
                         Bitmap bmp = QoiConverter.GetImageFromStream(result);
+                        using MemoryStream final = new MemoryStream();
+                        bmp.Save(final, ImageFormat.Png);
+                        TextureBlob = final.ToArray();
+                        bmp.Dispose();
+                        return;
+                    }
+                    else if (header.Take(4).SequenceEqual(QOIHeader))
+                    {
+                        reader.undertaleData.UseQoiFormat = true;
+                        reader.undertaleData.UseBZipFormat = false;
+
+                        // Need to convert the QOI data to PNG for compatibility purposes (at least for now)
+                        using MemoryStream ms = new MemoryStream(reader.Buffer);
+                        ms.Seek(reader.Offset, SeekOrigin.Begin);
+                        Bitmap bmp = QoiConverter.GetImageFromStream(ms);
+                        reader.Offset = (int)ms.Position;
                         using MemoryStream final = new MemoryStream();
                         bmp.Save(final, ImageFormat.Png);
                         TextureBlob = final.ToArray();
