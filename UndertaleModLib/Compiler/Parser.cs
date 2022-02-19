@@ -114,6 +114,7 @@ namespace UndertaleModLib.Compiler
                     ExprConditional,
                     ExprVariableRef,
                     ExprSingleVariable,
+                    ExprFuncName,
 
                     Token,
                     Discard // optimization stage produces this
@@ -1364,7 +1365,8 @@ namespace UndertaleModLib.Compiler
                 // Check to make sure we aren't overriding a script/function name
                 if (context.BuiltInList.Functions.ContainsKey(s.Text) || context.scripts.Contains(s.Text))
                 {
-                    ReportCodeError(string.Format("Variable name {0} cannot be used; a function or script already has the name.", s.Text), false);
+                    //ReportCodeError(string.Format("Variable name {0} cannot be used; a function or script already has the name.", s.Text), false);
+                    return new Statement(Statement.StatementKind.ExprFuncName, s.Token) { ID = s.ID };       
                 }
 
                 Statement result = new Statement(Statement.StatementKind.ExprSingleVariable, s.Token);
