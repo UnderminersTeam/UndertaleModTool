@@ -2152,14 +2152,8 @@ namespace UndertaleModLib.Decompiler
                                         DecompileFromBlock(childContext, blocks2, blocks2[0]);
                                         // This hack handles decompilation of code entries getting shorter, but not longer or out of place.
                                         Block lastBlock;
-                                        try
-                                        {
-                                            lastBlock = blocks2[anonymousCodeObject.Length / 4];
-                                        }
-                                        catch
-                                        {
+                                        if (!blocks2.TryGetValue(anonymousCodeObject.Length / 4, out lastBlock))
                                             lastBlock = blocks2[blocks2.Keys.Max()];
-                                        }
                                         List<Statement> statements = HLDecompile(childContext, blocks2, blocks2[0], lastBlock);
                                         foreach (Statement stmt2 in statements)
                                         {
