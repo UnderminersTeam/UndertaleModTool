@@ -351,11 +351,14 @@
                                 <TextBox Grid.Column="1" Margin="3" Text="{Binding GravityY}" ToolTip="Y"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Grid</TextBlock>
-                            <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding Grid}"/>
+                            <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Grid Width</TextBlock>
+                            <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding GridWidth}"/>
 
-                            <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Grid Thickness</TextBlock>
-                            <TextBox Grid.Row="13" Grid.Column="1" Margin="3" Text="{Binding GridThicknessPx}"/>
+                            <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Grid Height</TextBlock>
+                            <TextBox Grid.Row="13" Grid.Column="1" Margin="3" Text="{Binding GridHeight}"/>
+
+                            <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">Grid Thickness</TextBlock>
+                            <TextBox Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding GridThicknessPx}"/>
                         </Grid>
                     </DataTemplate>
 

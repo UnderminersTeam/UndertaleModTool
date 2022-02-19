@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -42,7 +43,8 @@ namespace UndertaleModLib.Models
         public float GravityX { get; set; } = 0;
         public float GravityY { get; set; } = 10;
         public float MetersPerPixel { get; set; } = 0.1f;
-        public double Grid { get; set; } = 16d;
+        public double GridWidth { get; set; } = 16d;
+        public double GridHeight { get; set; } = 16d;
         public double GridThicknessPx { get; set; } = 1d;
         public UndertalePointerList<Background> Backgrounds { get; private set; } = new UndertalePointerList<Background>();
         public UndertalePointerList<View> Views { get; private set; } = new UndertalePointerList<View>();
@@ -237,6 +239,30 @@ namespace UndertaleModLib.Models
             }
             foreach (UndertaleRoom.Background bgnd in Backgrounds)
                 bgnd.ParentRoom = this;
+
+            // Automagically set the grid size to whatever most tiles are sized
+
+            Dictionary<Point, uint> tileSizes = new Dictionary<Point, uint>();
+
+            // Loop through each tile and save how many times their sizes are used
+            foreach (UndertaleRoom.Tile tile in Tiles)
+            {
+                Point scale = new Point((int)tile.Width, (int)tile.Height);
+                if (tileSizes.ContainsKey(scale))
+                {
+                    tileSizes[scale]++;
+                } else {
+                    tileSizes.Add(scale, 1);
+                }
+            }
+
+            // If tiles exist at all, grab the most used tile size and use that as our grid size
+            if (tileSizes.Count > 0)
+            {
+                var largestKey = tileSizes.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
+                GridWidth = largestKey.X;
+                GridHeight = largestKey.Y;
+            }
         }
 
         public override string ToString()
