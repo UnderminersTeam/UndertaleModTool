@@ -610,7 +610,7 @@
                             </Grid>
 
                             <Viewbox Grid.Row="3" Grid.Column="1" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
-                                <Canvas Width="{Binding Tpag.BoundingWidth}" Height="{Binding Tpag.BoundingHeight}" SnapsToDevicePixels="True" MouseMove="RectangleTile_MouseMove" MouseUp="RectangleTile_MouseUp">
+                                <Canvas Width="{Binding Tpag.BoundingWidth}" Height="{Binding Tpag.BoundingHeight}" SnapsToDevicePixels="True" MouseDown="RectangleTile_MouseDown" MouseMove="RectangleTile_MouseMove">
                                     <Border>
                                         <Border.Background>
                                             <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
@@ -624,7 +624,7 @@
                                         </Border.Background>
                                         <local:UndertaleTexturePageItemDisplay DataContext="{Binding Tpag}"/>
                                     </Border>
-                                    <Rectangle Canvas.Left="{Binding SourceX}" Canvas.Top="{Binding SourceY}" Width="{Binding Width}" Height="{Binding Height}" Stroke="#FFB23131" Panel.ZIndex="50" StrokeThickness="2" MouseDown="RectangleTile_MouseDown" SnapsToDevicePixels="True">
+                                    <Rectangle x:Name="TileSelector" Canvas.Left="{Binding SourceX}" Canvas.Top="{Binding SourceY}" Width="{Binding Width}" Height="{Binding Height}" Stroke="#FFB23131" Panel.ZIndex="50" StrokeThickness="2" SnapsToDevicePixels="True">
                                         <Rectangle.Fill>
                                             <SolidColorBrush Color="Red" Opacity=".1"/>
                                         </Rectangle.Fill>

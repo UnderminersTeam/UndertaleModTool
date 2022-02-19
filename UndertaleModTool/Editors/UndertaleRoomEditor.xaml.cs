@@ -114,8 +114,7 @@ namespace UndertaleModTool
         }
 
         private UndertaleObject movingObj;
-        private UndertaleRoom.Tile movingTile;
-        private double hotpointX, hotpointY, hotpointTileX, hotpointTileY;
+        private double hotpointX, hotpointY;
         private ScaleTransform canvasSt = new ScaleTransform();
 
         private void Rectangle_MouseDown(object sender, MouseButtonEventArgs e)
@@ -229,66 +228,6 @@ namespace UndertaleModTool
             }
         }
 
-        private void RectangleTile_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            var element = sender as Rectangle;
-            UndertaleRoom.Tile clickedObj = (sender as Rectangle).DataContext as UndertaleRoom.Tile;
-            var mousePos = e.GetPosition(element.Parent as UIElement);
-            movingTile = clickedObj;
-            hotpointTileX = mousePos.X - movingTile.SourceX;
-            hotpointTileY = mousePos.Y - movingTile.SourceY;
-        }
-
-        private void RectangleTile_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (movingTile != null)
-            {
-                var element = sender as UIElement;
-                UndertaleRoom room = this.DataContext as UndertaleRoom;
-
-                var maxX = movingTile.Tpag.BoundingWidth;
-                var maxY = movingTile.Tpag.BoundingHeight;
-
-                var mousePos = e.GetPosition(element);
-
-                int tgtX = (int)Math.Clamp(mousePos.X - hotpointTileX, 0, maxX - movingTile.Width);
-                int tgtY = (int)Math.Clamp(mousePos.Y - hotpointTileY, 0, maxY - movingTile.Height);
-
-                int scaleX = (int)Math.Clamp(mousePos.X - movingTile.SourceX, 0, maxX);
-                int scaleY = (int)Math.Clamp(mousePos.Y - movingTile.SourceY, 0, maxY);
-
-                int gridSize = Convert.ToInt32(room.Grid);
-                if (gridSize <= 0)
-                    gridSize = 1;
-                else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
-                    gridSize = gridSize / 2;
-                else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
-                    gridSize = gridSize * 2;
-
-                // Snap to grid
-                tgtX = (tgtX + gridSize / 2) / gridSize * gridSize;
-                tgtY = (tgtY + gridSize / 2) / gridSize * gridSize;
-
-                scaleX = (scaleX + gridSize / 2) / gridSize * gridSize;
-                scaleY = (scaleY + gridSize / 2) / gridSize * gridSize;
-                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
-                {
-                    movingTile.Width = (uint)scaleX;
-                    movingTile.Height = (uint)scaleY;
-                }
-                else
-                {
-                    movingTile.SourceX = (uint)tgtX;
-                    movingTile.SourceY = (uint)tgtY;
-                }
-            }
-        }
-
-        private void RectangleTile_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            movingTile = null;
-        }
-
         private void Rectangle_MouseMove(object sender, MouseEventArgs e)
         {
             if (movingObj != null)
@@ -322,6 +261,75 @@ namespace UndertaleModTool
                     (movingObj as UndertaleRoom.Tile).X = tgtX;
                     (movingObj as UndertaleRoom.Tile).Y = tgtY;
                 }
+            }
+        }
+
+        private Point GetGridMouseCoordinates(Point mousePos, UndertaleRoom room)
+        {
+            int gridSize = Convert.ToInt32(room.Grid);
+            if (gridSize <= 0)
+                gridSize = 1;
+            else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+                gridSize = gridSize / 2;
+            else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+                gridSize = gridSize * 2;
+
+            return new Point(Math.Floor(mousePos.X / gridSize) * gridSize, Math.Floor(mousePos.Y / gridSize) * gridSize);
+        }
+
+        double scaleOriginX, scaleOriginY;
+        private void RectangleTile_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var element = sender as Canvas;
+            var tileSelector = element.FindName("TileSelector") as Rectangle;
+            var mousePos = e.GetPosition(element);
+            var clickedTile = tileSelector.DataContext as UndertaleRoom.Tile;
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+
+            Point gridMouseCoordinates = GetGridMouseCoordinates(mousePos, room);
+            scaleOriginX = gridMouseCoordinates.X;
+            scaleOriginY = gridMouseCoordinates.Y;
+            clickedTile.SourceX = (uint)gridMouseCoordinates.X;
+            clickedTile.SourceY = (uint)gridMouseCoordinates.Y;
+            clickedTile.Width = (uint)room.Grid;
+            clickedTile.Height = (uint)room.Grid;
+        }
+
+        private void RectangleTile_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton != MouseButtonState.Pressed) return;
+
+            var element = sender as Canvas;
+            var tileSelector = element.FindName("TileSelector") as Rectangle;
+            var mousePos = e.GetPosition(element);
+
+            var clickedTile = tileSelector.DataContext as UndertaleRoom.Tile;
+
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+
+            Point gridMouseCoordinates = GetGridMouseCoordinates(mousePos, room);
+
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
+            {
+                double differenceX = gridMouseCoordinates.X - scaleOriginX;
+                double differenceY = gridMouseCoordinates.Y - scaleOriginY;
+                clickedTile.Width  = (uint)Math.Clamp(Math.Abs(differenceX), 0, clickedTile.Tpag.BoundingWidth ) + (uint)room.Grid;
+                clickedTile.Height = (uint)Math.Clamp(Math.Abs(differenceY), 0, clickedTile.Tpag.BoundingHeight) + (uint)room.Grid;
+
+                if (differenceX < 0)
+                    clickedTile.SourceX = (uint)gridMouseCoordinates.X;
+                else
+                    clickedTile.SourceX = (uint)scaleOriginX;
+
+                if (differenceY < 0)
+                    clickedTile.SourceY = (uint)gridMouseCoordinates.Y;
+                else
+                    clickedTile.SourceY = (uint)scaleOriginY;
+            }
+            else
+            {
+                clickedTile.SourceX = (uint)gridMouseCoordinates.X;
+                clickedTile.SourceY = (uint)gridMouseCoordinates.Y;
             }
         }
 
