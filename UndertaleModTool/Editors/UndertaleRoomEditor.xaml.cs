@@ -251,9 +251,9 @@ namespace UndertaleModTool
         bool placingTiles = false;
         List<Point> placedTiles = new();
 
-        private void PlaceTileCopy(Point gridMouse, UndertaleObject other, UndertaleRoom room)
+        private void PaintObjects(Point gridMouse, UndertaleObject other, UndertaleRoom room)
         {
-            if (Mouse.LeftButton != MouseButtonState.Pressed)
+            if ((Mouse.LeftButton != MouseButtonState.Pressed) || !(Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)))
             {
                 placingTiles = false;
                 return;
@@ -335,12 +335,13 @@ namespace UndertaleModTool
 
             placedTiles.Clear();
 
-            PlaceTileCopy(GetGridMouseCoordinates(mousePos, room), other, room);
+            PaintObjects(GetGridMouseCoordinates(mousePos, room), other, room);
         }
 
         private void RectangleBackground_MouseUp(object sender, MouseButtonEventArgs e)
         {
             placingTiles = false;
+            placedTiles.Clear();
         }
 
         private void RectangleBackground_MouseMove(object sender, MouseEventArgs e)
@@ -352,7 +353,7 @@ namespace UndertaleModTool
 
                 var mousePos = e.GetPosition(roomCanvas);
 
-                PlaceTileCopy(GetGridMouseCoordinates(mousePos, room), other, room);
+                PaintObjects(GetGridMouseCoordinates(mousePos, room), other, room);
                 return;
             }
             Rectangle_MouseMove(sender, e);
