@@ -13,6 +13,8 @@ namespace UndertaleModTool
     {
         public object Convert(object[] values, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
+            if (values.Any(x => x is not double))
+                return new Rect();
             return new Rect(0, 0, (double)values[0], (double)values[1]);
         }
 
