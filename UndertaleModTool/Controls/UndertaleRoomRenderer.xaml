@@ -62,15 +62,28 @@
             </ItemsControl.Style>
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <Canvas Name="RoomCanvas" Width="{Binding Width, Mode=OneTime}" Height="{Binding Height, Mode=OneTime}" IsItemsHost="True" AllowDrop="True" ClipToBounds="True"
+                    <Canvas x:Name="RoomCanvas" Width="{Binding Width, Mode=OneTime}" Height="{Binding Height, Mode=OneTime}" IsItemsHost="True" AllowDrop="True" ClipToBounds="True"
                             SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor"
                             Loaded="RoomCanvas_Loaded">
                         <Canvas.Background>
-                            <DrawingBrush TileMode="Tile" Viewport="{Binding Grid, Mode=OneTime, Converter={StaticResource GridConverter}}" ViewportUnits="Absolute">
+                            <DrawingBrush TileMode="Tile" ViewportUnits="Absolute">
+                                <DrawingBrush.Viewport>
+                                    <MultiBinding Converter="{StaticResource GridConverter}">
+                                        <Binding Path="GridWidth" Mode="OneTime"/>
+                                        <Binding Path="GridHeight" Mode="OneTime"/>
+                                    </MultiBinding>
+                                </DrawingBrush.Viewport>
                                 <DrawingBrush.Drawing>
                                     <GeometryDrawing>
                                         <GeometryDrawing.Geometry>
-                                            <RectangleGeometry Rect="{Binding Grid, Mode=OneTime, Converter={StaticResource GridConverter}}"/>
+                                            <RectangleGeometry>
+                                                <RectangleGeometry.Rect>
+                                                    <MultiBinding Converter="{StaticResource GridConverter}">
+                                                        <Binding Path="GridWidth" Mode="OneTime"/>
+                                                        <Binding Path="GridHeight" Mode="OneTime"/>
+                                                    </MultiBinding>
+                                                </RectangleGeometry.Rect>
+                                            </RectangleGeometry>
                                         </GeometryDrawing.Geometry>
                                         <GeometryDrawing.Brush>
                                             <!-- that binding replaces itself with proper one -->

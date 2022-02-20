@@ -50,16 +50,18 @@ namespace UndertaleModTool
         }
 
         private Stack<UndertaleObject> undoStack = new();
-        private Dictionary<UndertaleObject, FrameworkElement> roomObjDict = new();
-        public Canvas RoomCanvas { get; set; }
+        private CanvasWithDict roomCanvas;
 
         public static readonly DoubleAnimation flashAnim = new(1, 0, TimeSpan.FromSeconds(0.75))
-        { 
+        {
             AutoReverse = true,
             RepeatBehavior = RepeatBehavior.Forever,
             EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseIn }
         };
         private Storyboard currStoryboard;
+
+        private ConcurrentDictionary<uint, Layer> roomObjDict = new();
+        private ConcurrentDictionary<SpriteInstance, Layer> sprInstDict = new();
 
         public UndertaleRoomEditor()
         {
@@ -71,26 +73,26 @@ namespace UndertaleModTool
 
         public void SaveImagePNG(Stream outfile)
         {
-            if (RoomCanvas is null)
+            if (roomCanvas is null)
             {
-                if (MainWindow.FindVisualChild<Canvas>(RoomGraphics) is Canvas canv && canv.Name == "RoomCanvas")
-                    RoomCanvas = canv;
+                if (MainWindow.FindVisualChild<CanvasWithDict>(RoomGraphics) is CanvasWithDict canv && canv.Name == "RoomCanvas")
+                    roomCanvas = canv;
                 else
                     throw new Exception("\"RoomCanvas\" not found.");
             }
 
-            object prevOffset = visualOffProp.GetValue(RoomCanvas);
-            visualOffProp.SetValue(RoomCanvas, new Vector(0, 0)); // (probably, there is a better way to fix the offset of the rendered picture)
+            object prevOffset = visualOffProp.GetValue(roomCanvas);
+            visualOffProp.SetValue(roomCanvas, new Vector(0, 0)); // (probably, there is a better way to fix the offset of the rendered picture)
 
-            RenderTargetBitmap target = new((int)RoomCanvas.RenderSize.Width, (int)RoomCanvas.RenderSize.Height, 96, 96, PixelFormats.Pbgra32);
+            RenderTargetBitmap target = new((int)roomCanvas.RenderSize.Width, (int)roomCanvas.RenderSize.Height, 96, 96, PixelFormats.Pbgra32);
 
-            target.Render(RoomCanvas);
+            target.Render(roomCanvas);
 
             PngBitmapEncoder encoder = new() { Interlace = PngInterlaceOption.Off };
             encoder.Frames.Add(BitmapFrame.Create(target));
             encoder.Save(outfile);
 
-            visualOffProp.SetValue(RoomCanvas, prevOffset);
+            visualOffProp.SetValue(roomCanvas, prevOffset);
         }
 
         private void ExportAsPNG_Click(object sender, RoutedEventArgs e)
@@ -100,7 +102,7 @@ namespace UndertaleModTool
             dlg.FileName = (DataContext as UndertaleRoom).Name.Content + ".png";
             dlg.DefaultExt = ".png";
             dlg.Filter = "PNG files (.png)|*.png|All files|*";
-            
+
             if (dlg.ShowDialog() == true)
             {
                 try
@@ -137,40 +139,35 @@ namespace UndertaleModTool
 
             UndertaleCachedImageLoader.TileCache.Clear();
             UndertaleCachedImageLoader.ImageCache.Clear();
+            roomCanvas?.ObjectDict.Clear();
+            roomObjDict.Clear();
+            sprInstDict.Clear();
 
             if (DataContext is UndertaleRoom room)
             {
-                GameObjItems.Header = room.Flags.HasFlag(RoomEntryFlags.IsGMS2) 
+                GameObjItems.Header = room.Flags.HasFlag(RoomEntryFlags.IsGMS2)
                                       ? "Game objects (from all layers)"
                                       : "Game objects";
                 room.SetupRoom();
                 GenerateSpriteCache(DataContext as UndertaleRoom);
 
-                if (RoomCanvas is not null)
+                if (room.Layers.Count > 0) // if GMS 2+
                 {
-                    RoomGraphics.SetCurrentValue(ItemsControl.ItemsSourceProperty, null); // clear "RoomCanvas.Children"
-                    _ = Task.Run(() =>
+                    Parallel.ForEach(room.Layers, (layer) =>
                     {
-                        byte c = 0;
-                        int count = Dispatcher.Invoke(() => RoomCanvas.Children.Count);
-                        while (count == 0)
+                        if (layer.LayerType == LayerType.Assets)
                         {
-                            if (c >= 10)
-                                return;
+                            foreach (SpriteInstance spr in layer.AssetsData.Sprites)
+                                sprInstDict.TryAdd(spr, layer);
 
-                            Thread.Sleep(50);
-                            count = Dispatcher.Invoke(() => RoomCanvas.Children.Count, DispatcherPriority.ContextIdle);
-
-                            c++;
+                            foreach (Tile tile in layer.AssetsData.LegacyTiles)
+                                roomObjDict.TryAdd(tile.InstanceID, layer);
                         }
-
-                        roomObjDict.Clear();
-                        Dispatcher.Invoke(() =>
+                        else if (layer.LayerType == LayerType.Instances)
                         {
-                            RoomCanvas.UpdateLayout();
-                            foreach (ContentPresenter elem in RoomCanvas.Children.Cast<ContentPresenter>())
-                                roomObjDict.Add(elem.Content as UndertaleObject, VisualTreeHelper.GetChild(elem, 0) as FrameworkElement);
-                        });
+                            foreach (GameObject obj in layer.InstancesData.Instances)
+                                roomObjDict.TryAdd(obj.InstanceID, layer);
+                        }
                     });
                 }
             }
@@ -178,11 +175,7 @@ namespace UndertaleModTool
 
         private void RoomCanvas_Loaded(object sender, RoutedEventArgs e)
         {
-            RoomCanvas = sender as Canvas;
-
-            roomObjDict.Clear();
-            foreach (ContentPresenter elem in RoomCanvas.Children.Cast<ContentPresenter>())
-                roomObjDict.Add(elem.Content as UndertaleObject, VisualTreeHelper.GetChild(elem, 0) as FrameworkElement);
+            roomCanvas = sender as CanvasWithDict;
         }
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -194,7 +187,7 @@ namespace UndertaleModTool
                 currStoryboard.Stop(this);
                 currStoryboard.Remove(this);
             }
-            
+
             if (e.NewValue == RoomRootItem)
             {
                 ObjectEditor.Content = DataContext;
@@ -208,14 +201,14 @@ namespace UndertaleModTool
                     if (obj is Layer layer)
                     {
                         if (layer.LayerType == LayerType.Background)
-                            obj1 = roomObjDict[layer.BackgroundData];
+                            obj1 = VisualTreeHelper.GetChild(roomCanvas.ObjectDict[layer.BackgroundData], 0);
                         else
                             return;
                     }
                     else if (obj is View)
                         return;
                     else
-                        obj1 = roomObjDict[obj];
+                        obj1 = VisualTreeHelper.GetChild(roomCanvas.ObjectDict[obj], 0);
 
                     Storyboard.SetTarget(flashAnim, obj1);
                     Storyboard.SetTargetProperty(flashAnim, new PropertyPath(OpacityProperty));
@@ -258,71 +251,135 @@ namespace UndertaleModTool
             e.Handled = true;
             UndertaleObject clickedObj = (sender as Rectangle).DataContext as UndertaleObject;
             UndertaleRoom room = this.DataContext as UndertaleRoom;
-            Layer layer = ObjectEditor.Content as Layer;
-            if (clickedObj is UndertaleRoom.GameObject && Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
-            {
-                if (layer != null && layer.InstancesData == null)
+            Layer layer = null;
+            if (room.Layers.Count > 0)
+                layer = clickedObj switch
                 {
-                    MainWindow.ShowError("Must be on an instances layer");
-                    return;
-                }
-                var other = clickedObj as UndertaleRoom.GameObject;
-                var newObj = new UndertaleRoom.GameObject
-                {
-                    X = other.X,
-                    Y = other.Y,
-                    ObjectDefinition = other.ObjectDefinition,
-                    InstanceID = mainWindow.Data.GeneralInfo.LastObj++,
-                    CreationCode = other.CreationCode,
-                    ScaleX = other.ScaleX,
-                    ScaleY = other.ScaleY,
-                    Color = other.Color,
-                    Rotation = other.Rotation,
-                    PreCreateCode = other.PreCreateCode
+                    Tile or GameObject => roomObjDict[(clickedObj as RoomObject).InstanceID],
+                    SpriteInstance spr => sprInstDict[spr],
+                    _ => null
                 };
-                var index = room.GameObjects.IndexOf(other);
-                room.GameObjects.Insert(index + 1, newObj);
-                clickedObj = newObj;
-            }
-            if (clickedObj is UndertaleRoom.Tile && Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
+
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
             {
-                if (layer != null && layer.AssetsData == null)
+                if (clickedObj is GameObject)
                 {
-                    MainWindow.ShowError("Must be on an assets layer");
-                    return;
+                    if (layer != null && layer.InstancesData == null)
+                    {
+                        MainWindow.ShowError("Must be on an instances layer");
+                        return;
+                    }
+                    var other = clickedObj as GameObject;
+                    var newObj = new GameObject
+                    {
+                        X = other.X,
+                        Y = other.Y,
+                        ObjectDefinition = other.ObjectDefinition,
+                        InstanceID = mainWindow.Data.GeneralInfo.LastObj++,
+                        CreationCode = other.CreationCode,
+                        ScaleX = other.ScaleX,
+                        ScaleY = other.ScaleY,
+                        Color = other.Color,
+                        Rotation = other.Rotation,
+                        PreCreateCode = other.PreCreateCode
+                    };
+
+                    if (layer != null)
+                    {
+                        int index = layer.InstancesData.Instances.IndexOf(other);
+                        layer.InstancesData.Instances.Insert(index + 1, newObj);
+                        roomObjDict.TryAdd(newObj.InstanceID, layer);
+                    }
+                    else
+                    {
+                        int index = room.GameObjects.IndexOf(other);
+                        room.GameObjects.Insert(index + 1, newObj);
+                    }
+
+                    clickedObj = newObj;
                 }
-                var other = clickedObj as UndertaleRoom.Tile;
-                var newObj = new UndertaleRoom.Tile
+                else if (clickedObj is Tile)
                 {
-                    X = other.X,
-                    Y = other.Y,
-                    _SpriteMode = other._SpriteMode,
-                    ObjectDefinition = other.ObjectDefinition,
-                    SourceX = other.SourceX,
-                    SourceY = other.SourceY,
-                    Width = other.Width,
-                    Height = other.Height,
-                    TileDepth = other.TileDepth,
-                    InstanceID = mainWindow.Data.GeneralInfo.LastTile++,
-                    ScaleX = other.ScaleX,
-                    ScaleY = other.ScaleY,
-                    Color = other.Color
-                };
-                var index = room.Tiles.IndexOf(other);
-                room.Tiles.Insert(index + 1, newObj);
-                clickedObj = newObj;
+                    if (layer != null && layer.AssetsData == null)
+                    {
+                        MainWindow.ShowError("Must be on an assets layer");
+                        return;
+                    }
+                    var other = clickedObj as Tile;
+                    var newObj = new Tile
+                    {
+                        X = other.X,
+                        Y = other.Y,
+                        _SpriteMode = other._SpriteMode,
+                        ObjectDefinition = other.ObjectDefinition,
+                        SourceX = other.SourceX,
+                        SourceY = other.SourceY,
+                        Width = other.Width,
+                        Height = other.Height,
+                        TileDepth = other.TileDepth,
+                        InstanceID = mainWindow.Data.GeneralInfo.LastTile++,
+                        ScaleX = other.ScaleX,
+                        ScaleY = other.ScaleY,
+                        Color = other.Color
+                    };
+
+                    if (layer != null)
+                    {
+                        int index = layer.AssetsData.LegacyTiles.IndexOf(other);
+                        layer.AssetsData.LegacyTiles.Insert(index + 1, newObj);
+                        roomObjDict.TryAdd(newObj.InstanceID, layer);
+                    }
+                    else
+                    {
+                        int index = room.Tiles.IndexOf(other);
+                        room.Tiles.Insert(index + 1, newObj);
+                    }
+
+                    clickedObj = newObj;
+                }
+                else if (clickedObj is SpriteInstance)
+                {
+                    if (layer != null && layer.AssetsData == null)
+                    {
+                        MainWindow.ShowError("Must be on an assets layer");
+                        return;
+                    }
+
+                    string graphicName = "graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8");
+                    var other = clickedObj as SpriteInstance;
+                    var newObj = new SpriteInstance
+                    {
+                        Name = new UndertaleString(graphicName),
+                        Sprite = other.Sprite,
+                        X = other.X,
+                        Y = other.Y,
+                        ScaleX = other.ScaleX,
+                        ScaleY = other.ScaleY,
+                        Color = other.Color,
+                        AnimationSpeed = other.AnimationSpeed,
+                        AnimationSpeedType = other.AnimationSpeedType,
+                        FrameIndex = other.FrameIndex,
+                        Rotation = other.Rotation,
+                    };
+
+                    int index = layer.AssetsData.Sprites.IndexOf(other);
+                    layer.AssetsData.Sprites.Insert(index + 1, newObj);
+                    sprInstDict.TryAdd(newObj, layer);
+
+                    clickedObj = newObj;
+                }
             }
 
             SelectObject(clickedObj);
 
             var mousePos = e.GetPosition(RoomGraphics);
-            if (clickedObj is UndertaleRoom.GameObject || clickedObj is UndertaleRoom.Tile)
+            if (clickedObj is GameObject || clickedObj is Tile || clickedObj is SpriteInstance)
             {
                 movingObj = clickedObj;
-                if (movingObj is UndertaleRoom.GameObject)
+                if (movingObj is GameObject)
                 {
-                    var other = movingObj as UndertaleRoom.GameObject;
-                    var undoObj = new UndertaleRoom.GameObject()
+                    var other = movingObj as GameObject;
+                    var undoObj = new GameObject()
                     {
                         X = other.X,
                         Y = other.Y,
@@ -336,13 +393,13 @@ namespace UndertaleModTool
                         PreCreateCode = other.PreCreateCode
                     };
                     undoStack.Push(undoObj);
-                    hotpointX = mousePos.X - (movingObj as UndertaleRoom.GameObject).X;
-                    hotpointY = mousePos.Y - (movingObj as UndertaleRoom.GameObject).Y;
+                    hotpointX = mousePos.X - (movingObj as GameObject).X;
+                    hotpointY = mousePos.Y - (movingObj as GameObject).Y;
                 }
-                else if (movingObj is UndertaleRoom.Tile)
+                else if (movingObj is Tile)
                 {
-                    var other = movingObj as UndertaleRoom.Tile;
-                    var undoObj = new UndertaleRoom.Tile()
+                    var other = movingObj as Tile;
+                    var undoObj = new Tile()
                     {
                         X = other.X,
                         Y = other.Y,
@@ -359,8 +416,29 @@ namespace UndertaleModTool
                         Color = other.Color
                     };
                     undoStack.Push(undoObj);
-                    hotpointX = mousePos.X - (movingObj as UndertaleRoom.Tile).X;
-                    hotpointY = mousePos.Y - (movingObj as UndertaleRoom.Tile).Y;
+                    hotpointX = mousePos.X - (movingObj as Tile).X;
+                    hotpointY = mousePos.Y - (movingObj as Tile).Y;
+                }
+                else if (movingObj is SpriteInstance)
+                {
+                    var other = clickedObj as SpriteInstance;
+                    var undoObj = new SpriteInstance
+                    {
+                        Name = other.Name,
+                        Sprite = other.Sprite,
+                        X = other.X,
+                        Y = other.Y,
+                        ScaleX = other.ScaleX,
+                        ScaleY = other.ScaleY,
+                        Color = other.Color,
+                        AnimationSpeed = other.AnimationSpeed,
+                        AnimationSpeedType = other.AnimationSpeedType,
+                        FrameIndex = other.FrameIndex,
+                        Rotation = other.Rotation,
+                    };
+                    undoStack.Push(undoObj);
+                    hotpointX = mousePos.X - (movingObj as SpriteInstance).X;
+                    hotpointY = mousePos.Y - (movingObj as SpriteInstance).Y;
                 }
             }
         }
@@ -375,22 +453,31 @@ namespace UndertaleModTool
                 placingTiles = false;
                 return;
             }
-            UndertaleRoom.Layer layer = ObjectEditor.Content as UndertaleRoom.Layer;
 
-            if (layer != null && layer.AssetsData == null)
+            if (placedTiles.Contains(gridMouse))
+                return;
+
+            Layer layer = null;
+            if (room.Layers.Count > 0)
+                layer = other switch
+                {
+                    Tile or GameObject => roomObjDict[(other as RoomObject).InstanceID],
+                    SpriteInstance spr => sprInstDict[spr],
+                    _ => null
+                };
+
+            if (layer is not null && layer.AssetsData is null && layer.InstancesData is null)
             {
                 return;
             }
 
-            if (placedTiles.Contains(gridMouse)) return;
-
             placedTiles.Add(gridMouse);
             placingTiles = true;
 
-            if (other is UndertaleRoom.Tile)
+            if (other is Tile)
             {
-                var otherTile = other as UndertaleRoom.Tile;
-                var newObj = new UndertaleRoom.Tile
+                var otherTile = other as Tile;
+                var newObj = new Tile
                 {
                     X = (int)gridMouse.X,
                     Y = (int)gridMouse.Y,
@@ -402,26 +489,31 @@ namespace UndertaleModTool
                     Width = otherTile.Width,
                     Height = otherTile.Height,
                     TileDepth = otherTile.TileDepth,
-                    InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastTile++,
+                    InstanceID = mainWindow.Data.GeneralInfo.LastTile++,
                     ScaleX = otherTile.ScaleX,
                     ScaleY = otherTile.ScaleY,
                     Color = otherTile.Color
                 };
+
                 if (layer != null)
+                {
                     layer.AssetsData.LegacyTiles.Add(newObj);
+                    roomObjDict.TryAdd(newObj.InstanceID, layer);
+                }
                 else
                     room.Tiles.Add(newObj);
+
                 SelectObject(newObj);
             }
-            else if (other is UndertaleRoom.GameObject)
+            else if (other is GameObject)
             {
-                var otherObject = other as UndertaleRoom.GameObject;
-                var newObj = new UndertaleRoom.GameObject
+                var otherObject = other as GameObject;
+                var newObj = new GameObject
                 {
                     X = (int)gridMouse.X,
                     Y = (int)gridMouse.Y,
                     ObjectDefinition = otherObject.ObjectDefinition,
-                    InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastObj++,
+                    InstanceID = mainWindow.Data.GeneralInfo.LastObj++,
                     CreationCode = otherObject.CreationCode,
                     ScaleX = otherObject.ScaleX,
                     ScaleY = otherObject.ScaleY,
@@ -429,24 +521,50 @@ namespace UndertaleModTool
                     Rotation = otherObject.Rotation,
                     PreCreateCode = otherObject.PreCreateCode
                 };
+
                 room.GameObjects.Add(newObj);
                 if (layer != null)
+                {
                     layer.InstancesData.Instances.Add(newObj);
+                    roomObjDict.TryAdd(newObj.InstanceID, layer);
+                }
+
                 SelectObject(newObj);
             }
-        }
+            else if (other is SpriteInstance)
+            {
+                string graphicName = "graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8");
 
-        Canvas roomCanvas;
+                var otherObject = other as SpriteInstance;
+                var newObj = new SpriteInstance
+                {
+                    Name = new UndertaleString(graphicName),
+                    Sprite = otherObject.Sprite,
+                    X = (int)gridMouse.X,
+                    Y = (int)gridMouse.Y,
+                    ScaleX = otherObject.ScaleX,
+                    ScaleY = otherObject.ScaleY,
+                    Color = otherObject.Color,
+                    AnimationSpeed = otherObject.AnimationSpeed,
+                    AnimationSpeedType = otherObject.AnimationSpeedType,
+                    FrameIndex = otherObject.FrameIndex,
+                    Rotation = otherObject.Rotation,
+                };
 
-        private void Canvas_Loaded(object sender, RoutedEventArgs e)
-        {
-            roomCanvas = sender as Canvas;
+                if (layer != null)
+                {
+                    layer.AssetsData.Sprites.Add(newObj);
+                    sprInstDict.TryAdd(newObj, layer);
+                }
+
+                SelectObject(newObj);
+            }
         }
 
         private void RectangleBackground_MouseDown(object sender, MouseButtonEventArgs e)
         {
             UndertaleRoom room = DataContext as UndertaleRoom;
-            var other = selectedObject as UndertaleObject;
+            var other = selectedObject;
 
             var mousePos = e.GetPosition(roomCanvas);
 
@@ -505,15 +623,20 @@ namespace UndertaleModTool
                 tgtX = ((tgtX + gridWidth  / 2) / gridWidth ) * gridWidth;
                 tgtY = ((tgtY + gridHeight / 2) / gridHeight) * gridHeight;
 
-                if (movingObj is UndertaleRoom.GameObject)
+                if (movingObj is GameObject)
                 {
-                    (movingObj as UndertaleRoom.GameObject).X = tgtX;
-                    (movingObj as UndertaleRoom.GameObject).Y = tgtY;
+                    (movingObj as GameObject).X = tgtX;
+                    (movingObj as GameObject).Y = tgtY;
                 }
-                else if (movingObj is UndertaleRoom.Tile)
+                else if (movingObj is Tile)
                 {
-                    (movingObj as UndertaleRoom.Tile).X = tgtX;
-                    (movingObj as UndertaleRoom.Tile).Y = tgtY;
+                    (movingObj as Tile).X = tgtX;
+                    (movingObj as Tile).Y = tgtY;
+                }
+                else if (movingObj is SpriteInstance)
+                {
+                    (movingObj as SpriteInstance).X = tgtX;
+                    (movingObj as SpriteInstance).Y = tgtY;
                 }
             }
         }
@@ -524,7 +647,7 @@ namespace UndertaleModTool
             var element = sender as Canvas;
             var tileSelector = element.FindName("TileSelector") as Rectangle;
             var mousePos = e.GetPosition(element);
-            var clickedTile = tileSelector.DataContext as UndertaleRoom.Tile;
+            var clickedTile = tileSelector.DataContext as Tile;
             UndertaleRoom room = this.DataContext as UndertaleRoom;
 
             Point gridMouseCoordinates = GetGridMouseCoordinates(mousePos, room);
@@ -544,7 +667,7 @@ namespace UndertaleModTool
             var tileSelector = element.FindName("TileSelector") as Rectangle;
             var mousePos = e.GetPosition(element);
 
-            var clickedTile = tileSelector.DataContext as UndertaleRoom.Tile;
+            var clickedTile = tileSelector.DataContext as Tile;
 
             UndertaleRoom room = this.DataContext as UndertaleRoom;
 
@@ -622,103 +745,112 @@ namespace UndertaleModTool
             movingObj = null;
         }
 
-        UndertaleObject selectedObject;
+        private UndertaleObject selectedObject;
         private void SelectObject(UndertaleObject obj)
         {
             // TODO: enable virtualizing of RoomObjectsTree and make this method work with it
 
-            ScrollViewer mainTreeViewer = MainWindow.FindVisualChild<ScrollViewer>(RoomObjectsTree);
-            UndertaleRoom room = DataContext as UndertaleRoom;
-            IList resList = null;
-            TreeViewItem resListView = null;
-            Layer resLayer = null;
-            switch (obj)
+            selectedObject = obj;
+
+            try
             {
-                case UndertaleRoom.Background:
-                    resList = room.Backgrounds;
-                    resListView = BGItems;
-                    break;
+                ScrollViewer mainTreeViewer = MainWindow.FindVisualChild<ScrollViewer>(RoomObjectsTree);
+                UndertaleRoom room = DataContext as UndertaleRoom;
+                IList resList = null;
+                TreeViewItem resListView = null;
+                Layer resLayer = null;
+                switch (obj)
+                {
+                    case UndertaleRoom.Background:
+                        resList = room.Backgrounds;
+                        resListView = BGItems;
+                        break;
 
-                case View:
-                    resList = room.Views;
-                    resListView = ViewItems;
-                    break;
+                    case View:
+                        resList = room.Views;
+                        resListView = ViewItems;
+                        break;
 
-                case GameObject gameObj:
-                    if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
-                    {
-                        resLayer = room.Layers.AsParallel()
-                                              .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
-                                              .FirstOrDefault(l => l.LayerType is LayerType.Instances
-                                                  && (l.InstancesData.Instances?.Any(x => x.InstanceID == gameObj.InstanceID) ?? false));
-                        resList = resLayer.InstancesData.Instances;
-                        resListView = LayerItems.ItemContainerGenerator.ContainerFromItem(resLayer) as TreeViewItem;
-                    }
-                    else
-                    {
-                        resList = room.GameObjects;
-                        resListView = GameObjItems;
-                    }
+                    case GameObject gameObj:
+                        if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                        {
+                            resLayer = room.Layers.AsParallel()
+                                                  .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
+                                                  .FirstOrDefault(l => l.LayerType is LayerType.Instances
+                                                      && (l.InstancesData.Instances?.Any(x => x.InstanceID == gameObj.InstanceID) ?? false));
+                            resList = resLayer.InstancesData.Instances;
+                            resListView = LayerItems.ItemContainerGenerator.ContainerFromItem(resLayer) as TreeViewItem;
+                        }
+                        else
+                        {
+                            resList = room.GameObjects;
+                            resListView = GameObjItems;
+                        }
 
-                    break;
+                        break;
 
-                case Tile tile:
-                    if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
-                    {
+                    case Tile tile:
+                        if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                        {
+                            resLayer = room.Layers.AsParallel()
+                                                  .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
+                                                  .FirstOrDefault(l => l.LayerType is LayerType.Assets
+                                                      && (l.AssetsData.LegacyTiles?.Any(x => x.InstanceID == tile.InstanceID) ?? false));
+                            resList = resLayer.AssetsData.LegacyTiles;
+                            resListView = LayerItems.ItemContainerGenerator.ContainerFromItem(resLayer) as TreeViewItem;
+                        }
+                        else
+                        {
+                            resList = room.Tiles;
+                            resListView = TileItems;
+                        }
+
+                        break;
+
+                    case Layer:
+                    case Layer.LayerBackgroundData:
+                        resList = room.Layers;
+                        resListView = LayerItems;
+                        break;
+
+                    case SpriteInstance spr:
                         resLayer = room.Layers.AsParallel()
                                               .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
                                               .FirstOrDefault(l => l.LayerType is LayerType.Assets
-                                                  && (l.AssetsData.LegacyTiles?.Any(x => x.InstanceID == tile.InstanceID) ?? false));
-                        resList = resLayer.AssetsData.LegacyTiles;
+                                                  && (l.AssetsData.Sprites?.Any(x => x.Name == spr.Name) ?? false));
+                        resList = resLayer.AssetsData.Sprites;
                         resListView = LayerItems.ItemContainerGenerator.ContainerFromItem(resLayer) as TreeViewItem;
-                    }
-                    else
-                    {
-                        resList = room.Tiles;
-                        resListView = TileItems;
-                    }
+                        break;
+                }
 
-                    break;
+                if (resList is null || resListView is null)
+                    return;
 
-                case Layer:
-                case Layer.LayerBackgroundData:
-                    resList = room.Layers;
-                    resListView = LayerItems;
-                    break;
+                resListView.IsExpanded = true;
+                resListView.BringIntoView();
+                resListView.UpdateLayout();
 
-                case SpriteInstance spr:
-                    resLayer = room.Layers.AsParallel()
-                                          .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
-                                          .FirstOrDefault(l => l.LayerType is LayerType.Assets
-                                              && (l.AssetsData.Sprites?.Any(x => x.Name == spr.Name) ?? false));
-                    resList = resLayer.AssetsData.Sprites;
-                    resListView = LayerItems.ItemContainerGenerator.ContainerFromItem(resLayer) as TreeViewItem;
-                    break;
-            }
-
-            if (resList is null || resListView is null)
-                return;
-
-            resListView.IsExpanded = true;
-            resListView.BringIntoView();
-            resListView.UpdateLayout();
-
-            StackPanel resPanel = MainWindow.FindVisualChild<StackPanel>(resListView);
-            (resPanel.Children[0] as TreeViewItem).BringIntoView();
-            mainTreeViewer.UpdateLayout();
-
-            double firstElemOffset = mainTreeViewer.VerticalOffset + (resPanel.Children[0] as TreeViewItem).TransformToAncestor(mainTreeViewer).Transform(new Point(0, 0)).Y;
-
-            mainTreeViewer.ScrollToVerticalOffset(firstElemOffset + ((resList.IndexOf(obj) + 1) * 16) - (mainTreeViewer.ViewportHeight / 2));
-            mainTreeViewer.UpdateLayout();
-
-            UndertaleObject obj1 = obj is Layer.LayerBackgroundData bgData ? bgData.ParentLayer : obj;
-            if (resListView.ItemContainerGenerator.ContainerFromItem(obj1) is TreeViewItem resItem)
-            {
-                resItem.IsSelected = true;
-
+                StackPanel resPanel = MainWindow.FindVisualChild<StackPanel>(resListView);
+                (resPanel.Children[0] as TreeViewItem).BringIntoView();
                 mainTreeViewer.UpdateLayout();
-                mainTreeViewer.ScrollToHorizontalOffset(0);
+
+                double firstElemOffset = mainTreeViewer.VerticalOffset + (resPanel.Children[0] as TreeViewItem).TransformToAncestor(mainTreeViewer).Transform(new Point(0, 0)).Y;
+
+                mainTreeViewer.ScrollToVerticalOffset(firstElemOffset + ((resList.IndexOf(obj) + 1) * 16) - (mainTreeViewer.ViewportHeight / 2));
+                mainTreeViewer.UpdateLayout();
+
+                UndertaleObject obj1 = obj is Layer.LayerBackgroundData bgData ? bgData.ParentLayer : obj;
+                if (resListView.ItemContainerGenerator.ContainerFromItem(obj1) is TreeViewItem resItem)
+                {
+                    resItem.IsSelected = true;
+
+                    mainTreeViewer.UpdateLayout();
+                    mainTreeViewer.ScrollToHorizontalOffset(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("SelectObject() error - " + ex.Message);
             }
         }
 
@@ -759,7 +891,7 @@ namespace UndertaleModTool
                         return;
                     }
 
-                    var obj = new UndertaleRoom.GameObject()
+                    var obj = new GameObject()
                     {
                         X = (int)mousePos.X,
                         Y = (int)mousePos.Y,
@@ -780,7 +912,7 @@ namespace UndertaleModTool
             }
             e.Handled = true;
 
-            (this.DataContext as UndertaleRoom)?.SetupRoom();
+            (this.DataContext as UndertaleRoom)?.SetupRoom(false);
         }
 
         private void RoomObjectsTree_KeyDown(object sender, KeyEventArgs e)
@@ -790,128 +922,148 @@ namespace UndertaleModTool
                 UndertaleRoom room = this.DataContext as UndertaleRoom;
                 UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
 
-                if (selectedObj is UndertaleRoom.Background)
+                if (selectedObj is Background bg)
                 {
-                    UndertaleRoom.Background bg = selectedObj as UndertaleRoom.Background;
                     bg.Enabled = false;
                     bg.BackgroundDefinition = null;
+
                     ObjectEditor.Content = null;
                 }
-                else if (selectedObj is UndertaleRoom.View)
+                else if (selectedObj is View view)
                 {
-                    UndertaleRoom.View view = selectedObj as UndertaleRoom.View;
                     view.Enabled = false;
+
                     ObjectEditor.Content = null;
                 }
-                else if (selectedObj is UndertaleRoom.Tile)
+                else if (selectedObj is Tile tile)
                 {
-                    UndertaleRoom.Tile tile = selectedObj as UndertaleRoom.Tile;
                     if (mainWindow.IsGMS2 == Visibility.Visible)
+                    {
                         foreach (var layer in room.Layers)
                             if (layer.AssetsData != null)
                                 layer.AssetsData.LegacyTiles.Remove(tile);
+                        roomObjDict.Remove(tile.InstanceID, out _);
+                    }
+
                     room.Tiles.Remove(tile);
+
                     ObjectEditor.Content = null;
                 }
-                else if (selectedObj is UndertaleRoom.GameObject)
+                else if (selectedObj is GameObject gameObj)
                 {
-                    UndertaleRoom.GameObject gameObj = selectedObj as UndertaleRoom.GameObject;
                     if (mainWindow.IsGMS2 == Visibility.Visible)
+                    {
                         foreach (var layer in room.Layers)
                             if (layer.InstancesData != null)
                                 layer.InstancesData.Instances.Remove(gameObj);
+                        roomObjDict.Remove(gameObj.InstanceID, out _);
+                    }
+
                     room.GameObjects.Remove(gameObj);
+
                     ObjectEditor.Content = null;
                 }
-                else if (selectedObj is Layer)
+                else if (selectedObj is SpriteInstance sprInst)
                 {
-                    Layer layer = selectedObj as Layer;
+                    foreach (var layer in room.Layers)
+                        if (layer.AssetsData != null)
+                            layer.AssetsData.Sprites.Remove(sprInst);
+
+                    sprInstDict.Remove(sprInst, out _);
+
+                    ObjectEditor.Content = null;
+                }
+                else if (selectedObj is Layer layer)
+                {
                     if (layer.InstancesData != null)
                         foreach (var go in layer.InstancesData.Instances)
                             room.GameObjects.Remove(go);
+
+                    foreach (var pair in roomObjDict)
+                        if (pair.Value == layer)
+                            roomObjDict.Remove(pair.Key, out _);
+
+                    foreach (var pair in sprInstDict)
+                        if (pair.Value == layer)
+                            sprInstDict.Remove(pair.Key, out _);
+
                     room.Layers.Remove(layer);
-                    (RoomGraphics.ItemsSource as CompositeCollection).Remove(layer.BackgroundData);
+
+                    if (layer.LayerType == LayerType.Background)
+                    {
+                        (RoomGraphics.ItemsSource as CompositeCollection).Remove(layer.BackgroundData);
+                        room.UpdateBGColorLayer();
+                    }
+
                     ObjectEditor.Content = null;
-                    room.UpdateBGColorLayer();
                 }
             }
+
+            int dir = 0;
             if (e.Key == Key.OemMinus)
+                dir = -1;
+            else if (e.Key == Key.OemPlus)
+                dir = 1;
+
+            if (dir != 0)
             {
                 UndertaleRoom room = this.DataContext as UndertaleRoom;
                 UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+                Layer layer = null;
+                if (room.Layers.Count > 0)
+                    layer = selectedObj switch
+                    {
+                        Tile or GameObject => roomObjDict[(selectedObj as RoomObject).InstanceID],
+                        SpriteInstance spr => sprInstDict[spr],
+                        _ => null
+                    };
 
-                if (selectedObj is UndertaleRoom.Tile)
+                IList list = selectedObj switch
                 {
-                    UndertaleRoom.Tile tile = selectedObj as UndertaleRoom.Tile;
-                    var index = room.Tiles.IndexOf(tile);
-                    if (index > 0)
-                    {
-                        var prevIndex = index - 1;
-                        var prevIndexObj = room.Tiles[prevIndex];
-                        room.Tiles[prevIndex] = tile;
-                        room.Tiles[index] = prevIndexObj;
-                        SelectObject(tile);
-                    }
-                }
-                else if (selectedObj is UndertaleRoom.GameObject)
+                    Tile tile => layer is null ? room.Tiles : layer.AssetsData.LegacyTiles,
+                    GameObject gameObj => layer is null ? room.GameObjects : layer.InstancesData.Instances,
+                    SpriteInstance sprInst => layer.AssetsData.Sprites,
+                    _ => null
+                };
+                if (list is null)
                 {
-                    UndertaleRoom.GameObject gameObj = selectedObj as UndertaleRoom.GameObject;
-                    var index = room.GameObjects.IndexOf(gameObj);
-                    if (index > 0)
-                    {
-                        var prevIndex = index - 1;
-                        var prevIndexObj = room.GameObjects[prevIndex];
-                        room.GameObjects[prevIndex] = gameObj;
-                        room.GameObjects[index] = prevIndexObj;
-                        SelectObject(gameObj);
-                    }
+                    Debug.WriteLine($"Can't change object position - list of selected object not found.");
+                    return;
                 }
-            }
-            if (e.Key == Key.OemPlus)
-            {
-                UndertaleRoom room = this.DataContext as UndertaleRoom;
-                UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
 
-                if (selectedObj is UndertaleRoom.Tile)
+                int index = list.IndexOf(selectedObj);
+                if ((dir == -1 && index > 0) || (dir == 1 && index < list.Count - 1))
                 {
-                    UndertaleRoom.Tile tile = selectedObj as UndertaleRoom.Tile;
-                    var index = room.Tiles.IndexOf(tile);
-                    if (index < room.Tiles.Count - 1)
+                    int prevIndex = index + dir;
+                    var prevIndexObj = list[prevIndex];
+                    list[prevIndex] = selectedObj;
+                    list[index] = prevIndexObj;
+
+                    if (layer is not null)
                     {
-                        var prevIndex = index + 1;
-                        var prevIndexObj = room.Tiles[prevIndex];
-                        room.Tiles[prevIndex] = tile;
-                        room.Tiles[index] = prevIndexObj;
-                        SelectObject(tile);
+                        // swap back objects in "ObjectDict"
+                        var rect = roomCanvas.ObjectDict[selectedObj];
+                        var rectPrev = roomCanvas.ObjectDict[prevIndexObj as UndertaleObject];
+                        roomCanvas.ObjectDict[selectedObj] = rectPrev;
+                        roomCanvas.ObjectDict[prevIndexObj as UndertaleObject] = rect;
                     }
                 }
-                else if (selectedObj is UndertaleRoom.GameObject)
-                {
-                    UndertaleRoom.GameObject gameObj = selectedObj as UndertaleRoom.GameObject;
-                    var index = room.GameObjects.IndexOf(gameObj);
-                    if (index < room.GameObjects.Count - 1)
-                    {
-                        var prevIndex = index + 1;
-                        var prevIndexObj = room.GameObjects[prevIndex];
-                        room.GameObjects[prevIndex] = gameObj;
-                        room.GameObjects[index] = prevIndexObj;
-                        SelectObject(gameObj);
-                    }
-                }
+
+                SelectObject(selectedObj);
             }
         }
 
         private void RoomObjectsTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             object sel = (sender as TreeView).SelectedItem;
-            if (sel is UndertaleRoom.GameObject)
-                mainWindow.ChangeSelection((sel as UndertaleRoom.GameObject).ObjectDefinition);
-            if (sel is UndertaleRoom.Background)
-                mainWindow.ChangeSelection((sel as UndertaleRoom.Background).BackgroundDefinition);
-            if (sel is UndertaleRoom.Tile)
-                mainWindow.ChangeSelection((sel as UndertaleRoom.Tile).ObjectDefinition);
-            if (sel is UndertaleRoom.SpriteInstance)
-                mainWindow.ChangeSelection((sel as UndertaleRoom.SpriteInstance).Sprite);
+            if (sel is GameObject)
+                mainWindow.ChangeSelection((sel as GameObject).ObjectDefinition);
+            if (sel is Background)
+                mainWindow.ChangeSelection((sel as Background).BackgroundDefinition);
+            if (sel is Tile)
+                mainWindow.ChangeSelection((sel as Tile).ObjectDefinition);
+            if (sel is SpriteInstance)
+                mainWindow.ChangeSelection((sel as SpriteInstance).Sprite);
         }
 
         private UndertaleObject copied;
@@ -932,27 +1084,27 @@ namespace UndertaleModTool
             if (undoStack.Any())
             {
                 var undoObject = undoStack.Pop();
-                if (undoObject is UndertaleRoom.GameObject && ObjectEditor.Content is UndertaleRoom.GameObject)
+                if (undoObject is GameObject && ObjectEditor.Content is GameObject)
                 {
-                    var toChange = ObjectEditor.Content as UndertaleRoom.GameObject;
-                    var undoGameObject = undoObject as UndertaleRoom.GameObject;
+                    var toChange = ObjectEditor.Content as GameObject;
+                    var undoGameObject = undoObject as GameObject;
                     if (toChange.InstanceID == undoGameObject.InstanceID)
                     {
                         toChange.X = undoGameObject.X;
                         toChange.Y = undoGameObject.Y;
                     }
                 }
-                if (undoObject is UndertaleRoom.Tile && ObjectEditor.Content is UndertaleRoom.Tile)
+                if (undoObject is Tile && ObjectEditor.Content is Tile)
                 {
-                    var toChange = ObjectEditor.Content as UndertaleRoom.Tile;
-                    var undoGameObject = undoObject as UndertaleRoom.Tile;
+                    var toChange = ObjectEditor.Content as Tile;
+                    var undoGameObject = undoObject as Tile;
                     if (toChange.InstanceID == undoGameObject.InstanceID)
                     {
                         toChange.X = undoGameObject.X;
                         toChange.Y = undoGameObject.Y;
                     }
                 }
-                (this.DataContext as UndertaleRoom)?.SetupRoom();
+                (this.DataContext as UndertaleRoom)?.SetupRoom(false);
             }
         }
 
@@ -970,22 +1122,30 @@ namespace UndertaleModTool
             {
                 UndertaleRoom room = this.DataContext as UndertaleRoom;
 
-                Layer layer = ObjectEditor.Content as Layer;
+                Layer layer = null;
+                if (room.Layers.Count > 0)
+                    layer = copied switch
+                    {
+                        Tile or GameObject => roomObjDict[(copied as RoomObject).InstanceID],
+                        SpriteInstance spr => sprInstDict[spr],
+                        _ => null
+                    };
+
                 if (mainWindow.IsGMS2 == Visibility.Visible && layer == null)
                 {
                     MainWindow.ShowError("Must paste onto a layer");
                     return;
                 }
 
-                if (copied is UndertaleRoom.GameObject)
+                if (copied is GameObject)
                 {
                     if (layer != null && layer.InstancesData == null)
                     {
                         MainWindow.ShowError("Must be on an instances layer");
                         return;
                     }
-                    var other = copied as UndertaleRoom.GameObject;
-                    var obj = new UndertaleRoom.GameObject();
+                    var other = copied as GameObject;
+                    var obj = new GameObject();
                     obj.X = other.X;
                     obj.Y = other.Y;
                     obj.ObjectDefinition = other.ObjectDefinition;
@@ -998,18 +1158,22 @@ namespace UndertaleModTool
                     obj.PreCreateCode = other.PreCreateCode;
                     room.GameObjects.Add(obj);
                     if (layer != null)
+                    {
+                        roomObjDict.TryAdd(obj.InstanceID, layer);
                         layer.InstancesData.Instances.Add(obj);
+                    }
+
                     SelectObject(obj);
                 }
-                if (copied is UndertaleRoom.Tile)
+                if (copied is Tile)
                 {
                     if (layer != null && layer.AssetsData == null)
                     {
                         MainWindow.ShowError("Must be on an assets layer");
                         return;
                     }
-                    var other = copied as UndertaleRoom.Tile;
-                    var obj = new UndertaleRoom.Tile();
+                    var other = copied as Tile;
+                    var obj = new Tile();
                     obj.X = other.X;
                     obj.Y = other.Y;
                     obj._SpriteMode = other._SpriteMode;
@@ -1024,17 +1188,20 @@ namespace UndertaleModTool
                     obj.ScaleY = other.ScaleY;
                     obj.Color = other.Color;
                     if (layer != null)
+                    {
+                        roomObjDict.TryAdd(obj.InstanceID, layer);
                         layer.AssetsData.LegacyTiles.Add(obj);
+                    }
                     else
                         room.Tiles.Add(obj);
                     SelectObject(obj);
                 }
             }
 
-            (this.DataContext as UndertaleRoom)?.SetupRoom();
+            (this.DataContext as UndertaleRoom)?.SetupRoom(false);
         }
 
-        private void AddLayer<T>(UndertaleRoom.LayerType type, string name) where T : UndertaleRoom.Layer.LayerData, new()
+        private void AddLayer<T>(LayerType type, string name) where T : Layer.LayerData, new()
         {
             UndertaleRoom room = this.DataContext as UndertaleRoom;
 
@@ -1060,14 +1227,14 @@ namespace UndertaleModTool
             room.Layers.Add(layer);
             room.UpdateBGColorLayer();
 
-            if (layer.LayerType == UndertaleRoom.LayerType.Assets)
+            if (layer.LayerType == LayerType.Assets)
             {
                 // create a new pointer list
                 if (layer.AssetsData.LegacyTiles == null)
-                    layer.AssetsData.LegacyTiles = new UndertalePointerList<UndertaleRoom.Tile>();
+                    layer.AssetsData.LegacyTiles = new UndertalePointerList<Tile>();
                 // create new sprite pointer list
                 if (layer.AssetsData.Sprites == null)
-                    layer.AssetsData.Sprites = new UndertalePointerList<UndertaleRoom.SpriteInstance>();
+                    layer.AssetsData.Sprites = new UndertalePointerList<SpriteInstance>();
             }
 
             SelectObject(layer);
@@ -1076,7 +1243,7 @@ namespace UndertaleModTool
 
         private void AddObjectInstance(UndertaleRoom room)
         {
-            var newobject = new UndertaleRoom.GameObject { InstanceID = mainWindow.Data.GeneralInfo.LastObj++ };
+            var newobject = new GameObject { InstanceID = mainWindow.Data.GeneralInfo.LastObj++ };
             room.GameObjects.Add(newobject);
             SelectObject(newobject);
         }
@@ -1099,14 +1266,14 @@ namespace UndertaleModTool
         {
             // add pointer list if one doesn't already exist
             if (layer.AssetsData.LegacyTiles == null)
-                layer.AssetsData.LegacyTiles = new UndertalePointerList<UndertaleRoom.Tile>();
+                layer.AssetsData.LegacyTiles = new UndertalePointerList<Tile>();
 
             // add sprite pointer list if one doesn't already exist
             if (layer.AssetsData.Sprites == null)
-                layer.AssetsData.Sprites = new UndertalePointerList<UndertaleRoom.SpriteInstance>();
+                layer.AssetsData.Sprites = new UndertalePointerList<SpriteInstance>();
 
             // add tile to list
-            var tile = new UndertaleRoom.Tile { InstanceID = mainWindow.Data.GeneralInfo.LastTile++ };
+            var tile = new Tile { InstanceID = mainWindow.Data.GeneralInfo.LastTile++ };
             tile._SpriteMode = true;
             layer.AssetsData.LegacyTiles.Add(tile);
 
@@ -1118,10 +1285,10 @@ namespace UndertaleModTool
         {
             // add pointer list if one doesn't already exist
             if (layer.AssetsData.Sprites == null)
-                layer.AssetsData.Sprites = new UndertalePointerList<UndertaleRoom.SpriteInstance>();
+                layer.AssetsData.Sprites = new UndertalePointerList<SpriteInstance>();
 
             // add tile to list
-            var spriteinstance = new UndertaleRoom.SpriteInstance();
+            var spriteinstance = new SpriteInstance();
             layer.AssetsData.Sprites.Add(spriteinstance);
 
             if (layer != null)
@@ -1131,47 +1298,47 @@ namespace UndertaleModTool
         private void AddGMS1Tile(UndertaleRoom room)
         {
             // add tile to list
-            var tile = new UndertaleRoom.Tile { InstanceID = mainWindow.Data.GeneralInfo.LastTile++ };
+            var tile = new Tile { InstanceID = mainWindow.Data.GeneralInfo.LastTile++ };
             room.Tiles.Add(tile);
             SelectObject(tile);
         }
 
         private void MenuItem_NewLayerInstances_Click(object sender, RoutedEventArgs e)
         {
-            AddLayer<UndertaleRoom.Layer.LayerInstancesData>(UndertaleRoom.LayerType.Instances, "NewInstancesLayer");
+            AddLayer<Layer.LayerInstancesData>(LayerType.Instances, "NewInstancesLayer");
         }
 
         private void MenuItem_NewLayerTiles_Click(object sender, RoutedEventArgs e)
         {
-            AddLayer<Layer.LayerTilesData>(UndertaleRoom.LayerType.Tiles, "NewTilesLayer");
+            AddLayer<Layer.LayerTilesData>(LayerType.Tiles, "NewTilesLayer");
         }
 
         private void MenuItem_NewLayerBackground_Click(object sender, RoutedEventArgs e)
         {
-            AddLayer<Layer.LayerBackgroundData>(UndertaleRoom.LayerType.Background, "NewBackgroundLayer");
+            AddLayer<Layer.LayerBackgroundData>(LayerType.Background, "NewBackgroundLayer");
         }
 
         private void MenuItem_NewLayerAssets_Click(object sender, RoutedEventArgs e)
         {
-            AddLayer<UndertaleRoom.Layer.LayerAssetsData>(UndertaleRoom.LayerType.Assets, "NewAssetsLayer");
+            AddLayer<Layer.LayerAssetsData>(LayerType.Assets, "NewAssetsLayer");
         }
 
         private void MenuItem_NewGMS2ObjectInstance_Click(object sender, RoutedEventArgs e)
         {
             MenuItem menuitem = sender as MenuItem;
-            AddGMS2ObjectInstance(menuitem.DataContext as UndertaleRoom.Layer);
+            AddGMS2ObjectInstance(menuitem.DataContext as Layer);
         }
 
         private void MenuItem_NewLegacyTile_Click(object sender, RoutedEventArgs e)
         {
             MenuItem menuitem = sender as MenuItem;
-            AddLegacyTile(menuitem.DataContext as UndertaleRoom.Layer);
+            AddLegacyTile(menuitem.DataContext as Layer);
         }
 
         private void MenuItem_NewSprite_Click(object sender, RoutedEventArgs e)
         {
             MenuItem menuitem = sender as MenuItem;
-            AddSprite(menuitem.DataContext as UndertaleRoom.Layer);
+            AddSprite(menuitem.DataContext as Layer);
         }
 
         private void TileCellTextBox_LostFocus(object sender, RoutedEventArgs e)
@@ -1344,12 +1511,27 @@ namespace UndertaleModTool
     }
 
 
-    [ValueConversion(typeof(ObservableCollection<UndertaleRoom.GameObject>), typeof(int))]
+    public partial class CanvasWithDict : Canvas
+    {
+        public Dictionary<UndertaleObject, FrameworkElement> ObjectDict { get; } = new();
+
+        protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved)
+        {
+            if (visualAdded is ContentPresenter presAdded && presAdded.DataContext is UndertaleObject objAdded)
+                ObjectDict[objAdded] = visualAdded as FrameworkElement;
+
+            if (visualRemoved is ContentPresenter presRemoved && presRemoved.DataContext is UndertaleObject objRemoved)
+                ObjectDict.Remove(objRemoved);
+        }
+    }
+
+
+    [ValueConversion(typeof(ObservableCollection<GameObject>), typeof(int))]
     public class ObjCenterXConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            UndertaleRoom.GameObject obj = value as UndertaleRoom.GameObject;
+            GameObject obj = value as GameObject;
             if (obj == null)
                 return 0;
             if (obj.ObjectDefinition == null || obj.ObjectDefinition.Sprite == null)
@@ -1363,12 +1545,12 @@ namespace UndertaleModTool
         }
     }
 
-    [ValueConversion(typeof(ObservableCollection<UndertaleRoom.GameObject>), typeof(int))]
+    [ValueConversion(typeof(ObservableCollection<GameObject>), typeof(int))]
     public class ObjXOffsetConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            UndertaleRoom.GameObject obj = value as UndertaleRoom.GameObject;
+            GameObject obj = value as GameObject;
             if (obj == null)
                 return 0;
             if (obj.ObjectDefinition == null || obj.ObjectDefinition.Sprite == null)
@@ -1382,12 +1564,12 @@ namespace UndertaleModTool
         }
     }
 
-    [ValueConversion(typeof(ObservableCollection<UndertaleRoom.GameObject>), typeof(int))]
+    [ValueConversion(typeof(ObservableCollection<GameObject>), typeof(int))]
     public class ObjCenterYConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            UndertaleRoom.GameObject obj = value as UndertaleRoom.GameObject;
+            GameObject obj = value as GameObject;
             if (obj == null)
                 return 0;
             if (obj.ObjectDefinition == null || obj.ObjectDefinition.Sprite == null)
@@ -1410,17 +1592,17 @@ namespace UndertaleModTool
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
-            if (container is FrameworkElement && item != null && item is UndertaleRoom.Layer)
+            if (container is FrameworkElement && item != null && item is Layer)
             {
-                switch ((item as UndertaleRoom.Layer).LayerType)
+                switch ((item as Layer).LayerType)
                 {
-                    case UndertaleRoom.LayerType.Instances:
+                    case LayerType.Instances:
                         return InstancesDataTemplate;
-                    case UndertaleRoom.LayerType.Tiles:
+                    case LayerType.Tiles:
                         return TilesDataTemplate;
-                    case UndertaleRoom.LayerType.Assets:
+                    case LayerType.Assets:
                         return AssetsDataTemplate;
-                    case UndertaleRoom.LayerType.Background:
+                    case LayerType.Background:
                         return BackgroundDataTemplate;
                 }
             }
@@ -1529,7 +1711,7 @@ namespace UndertaleModTool
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             CompositeCollection collection = new();
-            IList<UndertaleRoom.Layer> layers = value as IList<UndertaleRoom.Layer>;
+            IList<Layer> layers = value as IList<Layer>;
             foreach (var layer in layers.OrderByDescending((x) => x?.LayerDepth ?? 0))
             {
                 if (layer == null)
@@ -1537,17 +1719,17 @@ namespace UndertaleModTool
 
                 switch (layer.LayerType)
                 {
-                    case UndertaleRoom.LayerType.Background:
+                    case LayerType.Background:
                         collection.Add(layer.BackgroundData);
                         break;
-                    case UndertaleRoom.LayerType.Instances:
+                    case LayerType.Instances:
                         collection.Add(new CollectionContainer() { Collection = layer.InstancesData.Instances });
                         break;
-                    case UndertaleRoom.LayerType.Assets:
+                    case LayerType.Assets:
                         collection.Add(new CollectionContainer() { Collection = layer.AssetsData.LegacyTiles });
                         collection.Add(new CollectionContainer() { Collection = layer.AssetsData.Sprites });
                         break;
-                    case UndertaleRoom.LayerType.Tiles:
+                    case LayerType.Tiles:
                         // TODO
                         break;
                 }

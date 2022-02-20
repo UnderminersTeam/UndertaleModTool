@@ -247,9 +247,9 @@ namespace UndertaleModLib.Models
             }
         }
 
-        public void SetupRoom()
+        public void SetupRoom(bool calculateGrid = true)
         {
-            foreach (UndertaleRoom.Layer layer in Layers)
+            foreach (Layer layer in Layers)
             {
                 if (layer != null)
                     layer.ParentRoom = this;
@@ -257,28 +257,33 @@ namespace UndertaleModLib.Models
             foreach (UndertaleRoom.Background bgnd in Backgrounds)
                 bgnd.ParentRoom = this;
 
-            // Automagically set the grid size to whatever most tiles are sized
-
-            Dictionary<Point, uint> tileSizes = new Dictionary<Point, uint>();
-
-            // Loop through each tile and save how many times their sizes are used
-            foreach (UndertaleRoom.Tile tile in Tiles)
+            if (calculateGrid)
             {
-                Point scale = new((int)tile.Width, (int)tile.Height);
-                if (tileSizes.ContainsKey(scale))
+                // Automagically set the grid size to whatever most tiles are sized
+
+                Dictionary<Point, uint> tileSizes = new();
+
+                // Loop through each tile and save how many times their sizes are used
+                foreach (Tile tile in Tiles)
                 {
-                    tileSizes[scale]++;
-                } else {
-                    tileSizes.Add(scale, 1);
+                    Point scale = new((int)tile.Width, (int)tile.Height);
+                    if (tileSizes.ContainsKey(scale))
+                    {
+                        tileSizes[scale]++;
+                    }
+                    else
+                    {
+                        tileSizes.Add(scale, 1);
+                    }
                 }
-            }
 
-            // If tiles exist at all, grab the most used tile size and use that as our grid size
-            if (tileSizes.Count > 0)
-            {
-                var largestKey = tileSizes.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
-                GridWidth = largestKey.X;
-                GridHeight = largestKey.Y;
+                // If tiles exist at all, grab the most used tile size and use that as our grid size
+                if (tileSizes.Count > 0)
+                {
+                    var largestKey = tileSizes.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
+                    GridWidth = largestKey.X;
+                    GridHeight = largestKey.Y;
+                }
             }
         }
 

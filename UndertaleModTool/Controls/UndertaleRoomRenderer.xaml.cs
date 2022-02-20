@@ -35,7 +35,7 @@ namespace UndertaleModTool
 
         public static DataTemplate RoomRendererTemplate { get; set; }
 
-        public Canvas RoomCanvas { get; set; }
+        private Canvas roomCanvas;
         public UndertalePath PreviewPath
         {
             get => (UndertalePath)GetValue(PreviewPathProperty);
@@ -53,42 +53,42 @@ namespace UndertaleModTool
 
         private void RoomRenderer_Loaded(object sender, RoutedEventArgs e)
         {
-            (DataContext as UndertaleRoom)?.SetupRoom();
+            (DataContext as UndertaleRoom)?.SetupRoom(!bgGridDisabled);
         }
         private void RoomRenderer_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            (DataContext as UndertaleRoom)?.SetupRoom();
+            (DataContext as UndertaleRoom)?.SetupRoom(!bgGridDisabled);
             UndertaleRoomEditor.GenerateSpriteCache(DataContext as UndertaleRoom);
         }
 
         private void RoomCanvas_Loaded(object sender, RoutedEventArgs e)
         {
-            RoomCanvas = sender as Canvas;
+            roomCanvas = sender as Canvas;
         }
 
         public void SaveImagePNG(Stream outfile, bool displayGrid = false, bool last = false)
         {
             Dispatcher.Invoke(DispatcherPriority.ContextIdle, (Action)(() =>
             {
-                if (RoomCanvas is null)
+                if (roomCanvas is null)
                 {
                     if (MainWindow.FindVisualChild<Canvas>(RoomGraphics) is Canvas canv && canv.Name == "RoomCanvas")
-                        RoomCanvas = canv;
+                        roomCanvas = canv;
                     else
                         throw new Exception("\"RoomCanvas\" not found.");
                 }
 
                 object prevOffset = null;
                 if (last)
-                    prevOffset = visualOffProp.GetValue(RoomCanvas);
+                    prevOffset = visualOffProp.GetValue(roomCanvas);
 
-                visualOffProp.SetValue(RoomCanvas, new Vector(0, 0)); // (probably, there is a better way to fix the offset of the rendered picture)
+                visualOffProp.SetValue(roomCanvas, new Vector(0, 0)); // (probably, there is a better way to fix the offset of the rendered picture)
 
                 if (!displayGrid && !bgGridDisabled)
                 {
                     if (gridPen is null)
                     {
-                        gridPen = ((RoomCanvas.Background as DrawingBrush).Drawing as GeometryDrawing).Pen;
+                        gridPen = ((roomCanvas.Background as DrawingBrush).Drawing as GeometryDrawing).Pen;
                         initialGridBrush = gridPen.Brush;
                     }
 
@@ -96,9 +96,9 @@ namespace UndertaleModTool
                     bgGridDisabled = true;
                 }
 
-                RenderTargetBitmap target = new((int)RoomCanvas.RenderSize.Width, (int)RoomCanvas.RenderSize.Height, 96, 96, PixelFormats.Pbgra32);
+                RenderTargetBitmap target = new((int)roomCanvas.RenderSize.Width, (int)roomCanvas.RenderSize.Height, 96, 96, PixelFormats.Pbgra32);
 
-                target.Render(RoomCanvas);
+                target.Render(roomCanvas);
 
                 PngBitmapEncoder encoder = new() { Interlace = PngInterlaceOption.Off };
                 encoder.Frames.Add(BitmapFrame.Create(target));
@@ -106,7 +106,7 @@ namespace UndertaleModTool
 
                 if (!displayGrid && last)
                 {
-                    visualOffProp.SetValue(RoomCanvas, prevOffset);
+                    visualOffProp.SetValue(roomCanvas, prevOffset);
                     gridPen.Brush = initialGridBrush;
                 }
             }));

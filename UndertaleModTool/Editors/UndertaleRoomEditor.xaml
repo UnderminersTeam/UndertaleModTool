@@ -268,6 +268,7 @@
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                             </Grid.RowDefinitions>
                             <Grid.Resources>
                                 <Style TargetType="TextBlock" BasedOn="{StaticResource Centered}"/>
@@ -630,9 +631,10 @@
                             </Grid>
 
                             <TextBlock Grid.Row="3" Grid.Column="2" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap">
-                                Hint: You can move and resize (with&#160;Alt) the <Run FontWeight="DemiBold" Foreground="#FFB23131">red</Run> tile selection border around.
+                                Hint: You can select a tile by clicking on it.<LineBreak/>
+                                To select a <Run FontWeight="DemiBold" Foreground="#FFB23131">region</Run> of tile, hold down ALT.
                             </TextBlock>
-                            <Viewbox Grid.Row="4" Grid.Column="1" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
+                            <Viewbox Grid.Row="4" Grid.Column="2" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
                                 <Canvas Width="{Binding Tpag.BoundingWidth, Mode=OneWay}" Height="{Binding Tpag.BoundingHeight, Mode=OneWay}" SnapsToDevicePixels="True" MouseDown="RectangleTile_MouseDown" MouseMove="RectangleTile_MouseMove">
                                     <Border>
                                         <Border.Background>
@@ -981,8 +983,8 @@
                 </ItemsControl.Style>
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Canvas Name="RoomCanvas" Width="{Binding Width, Mode=OneWay}" Height="{Binding Height, Mode=OneWay}" IsItemsHost="True" AllowDrop="True"
-                                DragOver="Canvas_DragOver" Drop="Canvas_Drop" Loaded="Canvas_Loaded">
+                        <local:CanvasWithDict x:Name="RoomCanvas" Width="{Binding Width, Mode=OneWay}" Height="{Binding Height, Mode=OneWay}" IsItemsHost="True" AllowDrop="True"
+                                DragOver="Canvas_DragOver" Drop="Canvas_Drop" Loaded="RoomCanvas_Loaded">
                             <Canvas.Background>
                                 <DrawingBrush TileMode="Tile" ViewportUnits="Absolute">
                                     <DrawingBrush.Viewport>
@@ -1017,7 +1019,7 @@
                                     </DrawingBrush.Drawing>
                                 </DrawingBrush>
                             </Canvas.Background>
-                        </Canvas>
+                        </local:CanvasWithDict>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.Resources>
@@ -1098,7 +1100,7 @@
                                    MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp"
                                    Opacity="{Binding Color, Mode=OneWay, Converter={StaticResource ColorToOpacityConverter}}">
                             <Rectangle.RenderTransform>
-                                <TranslateTransform x:Name="transform2_0" X="{Binding XOffset, Mode=OneWay}" Y="{Binding YOffset, Mode=OneWay}"/>
+                                <TranslateTransform x:Name="transform2_0" X="{Binding X, Mode=OneWay}" Y="{Binding Y, Mode=OneWay}"/>
                             </Rectangle.RenderTransform>
                             <Rectangle.Style>
                                 <Style BasedOn="{StaticResource NearestNeighbor}"/>
