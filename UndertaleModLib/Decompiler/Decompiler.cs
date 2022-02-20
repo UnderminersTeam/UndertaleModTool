@@ -1123,16 +1123,11 @@ namespace UndertaleModLib.Decompiler
                 string varPrefix = (HasVarKeyword ? "var " : "");
 
                 // Check for possible ++, --, or operation equal (for single vars)
-                if (Value is ExpressionTwo && ((Value as ExpressionTwo).Argument1 is ExpressionVar) &&
-                    ((Value as ExpressionTwo).Argument1 as ExpressionVar).Var == Destination.Var)
+                if (Value is ExpressionTwo two && (two.Argument1 is ExpressionVar) &&
+                    (two.Argument1 as ExpressionVar).Var == Destination.Var)
                 {
-                    ExpressionTwo two = (Value as ExpressionTwo);
-                    if (two.Argument2 is ExpressionConstant)
-                    {
-                        ExpressionConstant c = (two.Argument2 as ExpressionConstant);
-                        if (c.IsPushE && ExpressionConstant.ConvertToInt(c.Value) == 1)
-                            return varName + (two.Opcode == UndertaleInstruction.Opcode.Add ? "++" : "--");
-                    }
+                    if (two.Argument2 is ExpressionConstant c && c.IsPushE && ExpressionConstant.ConvertToInt(c.Value) == 1)
+                        return varName + (two.Opcode == UndertaleInstruction.Opcode.Add ? "++" : "--");
 
                     // Not ++ or --, could potentially be an operation equal
                     bool checkEqual(ExpressionVar a, ExpressionVar b)
@@ -2155,14 +2150,20 @@ namespace UndertaleModLib.Decompiler
                                     {
                                         Dictionary<uint, Block> blocks2 = PrepareDecompileFlow(anonymousCodeObject.ParentEntry, new List<uint>() { 0 });
                                         DecompileFromBlock(childContext, blocks2, blocks2[0]);
-                                        List<Statement> statements = HLDecompile(childContext, blocks2, blocks2[0], blocks2[anonymousCodeObject.Length / 4]);
+                                        // This hack handles decompilation of code entries getting shorter, but not longer or out of place.
+                                        Block lastBlock;
+                                        if (!blocks2.TryGetValue(anonymousCodeObject.Length / 4, out lastBlock))
+                                            lastBlock = blocks2[blocks2.Keys.Max()];
+                                        List<Statement> statements = HLDecompile(childContext, blocks2, blocks2[0], lastBlock);
                                         foreach (Statement stmt2 in statements)
                                         {
                                             if (stmt2 is AssignmentStatement assign &&
-                                                assign.Value is FunctionDefinition funcDef &&
-                                                funcDef.FunctionBodyEntryBlock.Address == anonymousCodeObject.Offset / 4)
+                                                assign.Value is FunctionDefinition funcDef)
                                             {
-                                                return assign.Destination.Var.Name.Content;
+                                                if (funcDef.FunctionBodyEntryBlock.Address == anonymousCodeObject.Offset / 4)
+                                                    return assign.Destination.Var.Name.Content;
+                                                else
+                                                    throw new Exception("Non-matching offset: " + funcDef.FunctionBodyEntryBlock.Address.ToString() + " versus " + (anonymousCodeObject.Offset / 4).ToString());
                                             }
                                         }
                                         throw new Exception("Unable to find the var name for anonymous code object " + anonymousCodeObject.Name.Content);
@@ -2664,19 +2665,18 @@ namespace UndertaleModLib.Decompiler
                             loopCheckStatement = loopCode[loopCode.Count - 1] as IfHLStatement;
                         }
 
-                        if (repeatAssignment == null || loopCheckStatement == null) // single-level break detection
+                        if ((repeatAssignment == null || loopCheckStatement == null) &&
+                            loopCode[loopCode.Count - 1] is IfHLStatement wrapperIfStatement &&
+                            wrapperIfStatement.HasElse
+                           ) // single-level break detection
                         {
-                            IfHLStatement wrapperIfStatement = loopCode[loopCode.Count - 1] as IfHLStatement;
-                            if (wrapperIfStatement != null && wrapperIfStatement.HasElse)
+                            insideElseBlock = wrapperIfStatement.falseBlock.Statements;
+                            wrapperIfStatement.trueBlock.Statements.Add(new BreakHLStatement());
+                            if (insideElseBlock.Count > 2)
                             {
-                                insideElseBlock = wrapperIfStatement.falseBlock.Statements;
-                                wrapperIfStatement.trueBlock.Statements.Add(new BreakHLStatement());
-                                if (insideElseBlock.Count > 2)
-                                {
-                                    repeatAssignment = insideElseBlock[insideElseBlock.Count - 2] as TempVarAssignmentStatement;
-                                    loopCheckStatement = insideElseBlock[insideElseBlock.Count - 1] as IfHLStatement;
-                                    hasBreak = true;
-                                }
+                                repeatAssignment = insideElseBlock[insideElseBlock.Count - 2] as TempVarAssignmentStatement;
+                                loopCheckStatement = insideElseBlock[insideElseBlock.Count - 1] as IfHLStatement;
+                                hasBreak = true;
                             }
                         }
 

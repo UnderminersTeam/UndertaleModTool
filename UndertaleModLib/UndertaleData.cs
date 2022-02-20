@@ -114,6 +114,8 @@ namespace UndertaleModLib
         public bool GMS2_3_1 = false;
         public bool GMS2_3_2 = false;
         public bool UseQoiFormat = false;
+        public bool UseBZipFormat = false;
+        public bool GMS2022_1 = false;
         public ToolInfo ToolInfo = new ToolInfo();
         public int PaddingAlignException = -1;
 
@@ -411,7 +413,7 @@ namespace UndertaleModLib
                         // GMS 2.3+
                         if (!isBuiltin)
                         {
-                            data.VarCount1 = Math.Max(data.VarCount1, (uint)id);
+                            data.VarCount1++;
                             data.VarCount2 = data.VarCount1;
                         }
                         oldId = (uint)id;
