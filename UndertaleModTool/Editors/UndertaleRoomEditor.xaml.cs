@@ -117,8 +117,28 @@ namespace UndertaleModTool
         private double hotpointX, hotpointY;
         private ScaleTransform canvasSt = new ScaleTransform();
 
+        private Point GetGridMouseCoordinates(Point mousePos, UndertaleRoom room)
+        {
+            int gridWidth = Math.Max(Convert.ToInt32(room.GridWidth), 1);
+            int gridHeight = Math.Max(Convert.ToInt32(room.GridHeight), 1);
+
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            {
+                gridWidth /= 2;
+                gridHeight /= 2;
+            }
+            else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            {
+                gridWidth *= 2;
+                gridHeight *= 2;
+            }
+
+            return new Point(Math.Floor(mousePos.X / gridWidth) * gridWidth, Math.Floor(mousePos.Y / gridHeight) * gridHeight);
+        }
+
         private void Rectangle_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            e.Handled = true;
             UndertaleObject clickedObj = (sender as Rectangle).DataContext as UndertaleObject;
             UndertaleRoom room = this.DataContext as UndertaleRoom;
             UndertaleRoom.Layer layer = ObjectEditor.Content as UndertaleRoom.Layer;
@@ -228,6 +248,90 @@ namespace UndertaleModTool
             }
         }
 
+        bool placingTiles = false;
+        List<Point> placedTiles = new();
+
+        private void PlaceTileCopy(Point gridMouse, UndertaleRoom.Tile other, UndertaleRoom room)
+        {
+            if (Mouse.LeftButton != MouseButtonState.Pressed)
+            {
+                placingTiles = false;
+                return;
+            }
+            if (!(selectedObject is UndertaleRoom.Tile)) return;
+            UndertaleRoom.Layer layer = ObjectEditor.Content as UndertaleRoom.Layer;
+
+            if (layer != null && layer.AssetsData == null)
+            {
+                return;
+            }
+
+            if (placedTiles.Contains(gridMouse)) return;
+
+            placedTiles.Add(gridMouse);
+            placingTiles = true;
+
+            var newObj = new UndertaleRoom.Tile
+            {
+                X = (int)gridMouse.X,
+                Y = (int)gridMouse.Y,
+                _SpriteMode = other._SpriteMode,
+                ObjectDefinition = other.ObjectDefinition,
+                SpriteDefinition = other.SpriteDefinition,
+                SourceX = other.SourceX,
+                SourceY = other.SourceY,
+                Width = other.Width,
+                Height = other.Height,
+                TileDepth = other.TileDepth,
+                InstanceID = (Application.Current.MainWindow as MainWindow).Data.GeneralInfo.LastTile++,
+                ScaleX = other.ScaleX,
+                ScaleY = other.ScaleY,
+                Color = other.Color
+            };
+
+            room.Tiles.Add(newObj);
+            SelectObject(newObj);
+        }
+
+        Canvas roomCanvas;
+
+        private void Canvas_Loaded(object sender, RoutedEventArgs e)
+        {
+            roomCanvas = sender as Canvas;
+        }
+
+        private void RectangleBackground_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            UndertaleRoom room = DataContext as UndertaleRoom;
+            var other = selectedObject as UndertaleRoom.Tile;
+
+            var mousePos = e.GetPosition(roomCanvas);
+
+            placedTiles.Clear();
+
+            PlaceTileCopy(GetGridMouseCoordinates(mousePos, room), other, room);
+        }
+
+        private void RectangleBackground_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            placingTiles = false;
+        }
+
+        private void RectangleBackground_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (placingTiles)
+            {
+                UndertaleRoom room = this.DataContext as UndertaleRoom;
+                var other = selectedObject as UndertaleRoom.Tile;
+
+                var mousePos = e.GetPosition(roomCanvas);
+
+                PlaceTileCopy(GetGridMouseCoordinates(mousePos, room), other, room);
+                return;
+            }
+            Rectangle_MouseMove(sender, e);
+        }
+
         private void Rectangle_MouseMove(object sender, MouseEventArgs e)
         {
             if (movingObj != null)
@@ -268,25 +372,6 @@ namespace UndertaleModTool
                     (movingObj as UndertaleRoom.Tile).Y = tgtY;
                 }
             }
-        }
-
-        private Point GetGridMouseCoordinates(Point mousePos, UndertaleRoom room)
-        {
-                int gridWidth  = Math.Max(Convert.ToInt32(room.GridWidth ), 1);
-                int gridHeight = Math.Max(Convert.ToInt32(room.GridHeight), 1);
-
-                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
-                {
-                    gridWidth  /= 2;
-                    gridHeight /= 2;
-                }
-                else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
-                {
-                    gridWidth  *= 2;
-                    gridHeight *= 2;
-                }
-
-            return new Point(Math.Floor(mousePos.X / gridWidth) * gridWidth, Math.Floor(mousePos.Y / gridHeight) * gridHeight);
         }
 
         double scaleOriginX, scaleOriginY;
@@ -389,13 +474,17 @@ namespace UndertaleModTool
 
         private void Rectangle_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            e.Handled = true;
             movingObj = null;
         }
 
+        UndertaleObject selectedObject;
         private void SelectObject(UndertaleObject obj)
         {
             // TODO: This sometimes fails to open objects in non-expanded tree
             // Note that this prefers to select the object inside a layer than the 'floating' one in GameObjects
+
+            selectedObject = obj;
 
             foreach (var child in (RoomObjectsTree.Items[0] as TreeViewItem).Items)
             {
@@ -448,7 +537,7 @@ namespace UndertaleModTool
                 else if (sourceItem is UndertaleGameObject)
                 {
                     UndertaleGameObject droppedObject = sourceItem as UndertaleGameObject;
-                    var mousePos = e.GetPosition(RoomGraphics);
+                    var mousePos = e.GetPosition(roomCanvas);
 
                     UndertaleRoom room = this.DataContext as UndertaleRoom;
                     UndertaleRoom.Layer layer = ObjectEditor.Content as UndertaleRoom.Layer;

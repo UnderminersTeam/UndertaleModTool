@@ -247,7 +247,7 @@ namespace UndertaleModLib.Models
             // Loop through each tile and save how many times their sizes are used
             foreach (UndertaleRoom.Tile tile in Tiles)
             {
-                Point scale = new Point((int)tile.Width, (int)tile.Height);
+                Point scale = new((int)tile.Width, (int)tile.Height);
                 if (tileSizes.ContainsKey(scale))
                 {
                     tileSizes[scale]++;
