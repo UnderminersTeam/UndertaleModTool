@@ -61,6 +61,11 @@ namespace UndertaleModTool
             UndertaleRoomEditor.GenerateSpriteCache(DataContext as UndertaleRoom);
         }
 
+        private void RoomCanvas_Loaded(object sender, RoutedEventArgs e)
+        {
+            RoomCanvas = sender as Canvas;
+        }
+
         public void SaveImagePNG(Stream outfile, bool displayGrid = false, bool last = false)
         {
             Dispatcher.Invoke(DispatcherPriority.ContextIdle, (Action)(() =>
