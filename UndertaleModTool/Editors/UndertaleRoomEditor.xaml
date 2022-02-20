@@ -351,11 +351,14 @@
                                 <TextBox Grid.Column="1" Margin="3" Text="{Binding GravityY}" ToolTip="Y"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Grid</TextBlock>
-                            <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding Grid}"/>
+                            <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Grid Width</TextBlock>
+                            <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding GridWidth}"/>
 
-                            <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Grid Thickness</TextBlock>
-                            <TextBox Grid.Row="13" Grid.Column="1" Margin="3" Text="{Binding GridThicknessPx}"/>
+                            <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Grid Height</TextBlock>
+                            <TextBox Grid.Row="13" Grid.Column="1" Margin="3" Text="{Binding GridHeight}"/>
+
+                            <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">Grid Thickness</TextBlock>
+                            <TextBox Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding GridThicknessPx}"/>
                         </Grid>
                     </DataTemplate>
 
@@ -610,7 +613,7 @@
                             </Grid>
 
                             <Viewbox Grid.Row="3" Grid.Column="1" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
-                                <Canvas Width="{Binding Tpag.BoundingWidth}" Height="{Binding Tpag.BoundingHeight}" SnapsToDevicePixels="True" MouseMove="RectangleTile_MouseMove" MouseUp="RectangleTile_MouseUp">
+                                <Canvas Width="{Binding Tpag.BoundingWidth}" Height="{Binding Tpag.BoundingHeight}" SnapsToDevicePixels="True" MouseDown="RectangleTile_MouseDown" MouseMove="RectangleTile_MouseMove">
                                     <Border>
                                         <Border.Background>
                                             <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
@@ -624,7 +627,7 @@
                                         </Border.Background>
                                         <local:UndertaleTexturePageItemDisplay DataContext="{Binding Tpag}"/>
                                     </Border>
-                                    <Rectangle Canvas.Left="{Binding SourceX}" Canvas.Top="{Binding SourceY}" Width="{Binding Width}" Height="{Binding Height}" Stroke="#FFB23131" Panel.ZIndex="50" StrokeThickness="2" MouseDown="RectangleTile_MouseDown" SnapsToDevicePixels="True">
+                                    <Rectangle x:Name="TileSelector" Canvas.Left="{Binding SourceX}" Canvas.Top="{Binding SourceY}" Width="{Binding Width}" Height="{Binding Height}" Stroke="#FFB23131" Panel.ZIndex="50" StrokeThickness="2" SnapsToDevicePixels="True">
                                         <Rectangle.Fill>
                                             <SolidColorBrush Color="Red" Opacity=".1"/>
                                         </Rectangle.Fill>
@@ -903,8 +906,8 @@
 
         <GridSplitter Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" ShowsPreview="True" Width="Auto" Height="3"/>
 
-        <ScrollViewer Margin="0,8,0,0" Grid.Column="0" Grid.Row="2" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" ScrollChanged="ScrollViewer_ScrollChanged">
-            <ItemsControl Name="RoomGraphics" Background="Black" MouseMove="Rectangle_MouseMove" MouseWheel="Canvas_MouseWheel">
+        <ScrollViewer Name="RoomGraphicsScroll" Margin="0,8,0,0" Grid.Column="0" Grid.Row="2" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" ScrollChanged="ScrollViewer_ScrollChanged">
+            <ItemsControl Name="RoomGraphics" Background="Black" MouseDown="RectangleBackground_MouseDown" MouseMove="RectangleBackground_MouseMove" MouseUp="RectangleBackground_MouseUp" MouseWheel="Canvas_MouseWheel">
                 <ItemsControl.Style>
                     <Style TargetType="ItemsControl">
                         <Setter Property="ItemsSource" Value="{Binding Source={StaticResource AllObjectsGMS1}}"/>
@@ -919,16 +922,29 @@
                 </ItemsControl.Style>
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Canvas Width="{Binding Width}" Height="{Binding Height}" IsItemsHost="True" AllowDrop="True" DragOver="Canvas_DragOver" Drop="Canvas_Drop">
+                        <Canvas Name="RoomCanvas" Width="{Binding Width}" Height="{Binding Height}" IsItemsHost="True" AllowDrop="True" DragOver="Canvas_DragOver" Drop="Canvas_Drop" Loaded="Canvas_Loaded">
                             <!--<Canvas.RenderTransform>
                                 <ScaleTransform ScaleX="2" ScaleY="2"></ScaleTransform>
                             </Canvas.RenderTransform>-->
                             <Canvas.Background>
-                                <DrawingBrush TileMode="Tile" Viewport="{Binding Grid, Converter={StaticResource GridConverter}}" ViewportUnits="Absolute">
+                                <DrawingBrush TileMode="Tile" ViewportUnits="Absolute">
+                                    <DrawingBrush.Viewport>
+                                        <MultiBinding Converter="{StaticResource GridConverter}">
+                                            <Binding Path="GridWidth"></Binding>
+                                            <Binding Path="GridHeight"></Binding>
+                                        </MultiBinding>
+                                    </DrawingBrush.Viewport>
                                     <DrawingBrush.Drawing>
                                         <GeometryDrawing>
                                             <GeometryDrawing.Geometry>
-                                                <RectangleGeometry Rect="{Binding Grid, Converter={StaticResource GridConverter}}"/>
+                                                <RectangleGeometry>
+                                                    <RectangleGeometry.Rect>
+                                                        <MultiBinding Converter="{StaticResource GridConverter}">
+                                                            <Binding Path="GridWidth"></Binding>
+                                                            <Binding Path="GridHeight"></Binding>
+                                                        </MultiBinding>
+                                                    </RectangleGeometry.Rect>
+                                                </RectangleGeometry>
                                             </GeometryDrawing.Geometry>
                                             <GeometryDrawing.Pen>
                                                 <Pen Brush="Gray" Thickness="{Binding GridThicknessPx}"/>
