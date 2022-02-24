@@ -21,7 +21,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertaleGameObjectEditor.xaml
     /// </summary>
-    public partial class UndertaleGameObjectEditor : UserControl
+    public partial class UndertaleGameObjectEditor : DataUserControl
     {
         public UndertaleGameObjectEditor()
         {

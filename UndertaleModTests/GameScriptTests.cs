@@ -34,6 +34,8 @@ namespace UndertaleModTests
         public string ScriptErrorType => throw new NotImplementedException();
         public bool GMLCacheEnabled => throw new NotImplementedException();
 
+        public bool IsAppClosed => throw new NotImplementedException();
+
         public void ChangeSelection(object newsel)
         {
         }
@@ -179,9 +181,13 @@ namespace UndertaleModTests
         {
             Console.Write("SetUMTConsoleText(): " + message);
         }
-        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false)
+        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
         {
-            Console.Write("ReplaceTextInGML(): " + codeName + ", " + keyword + ", " + replacement + ", " + case_sensitive.ToString() + ", " + isRegex.ToString());
+            Console.Write("ReplaceTextInGML(): " + codeName + ", " + keyword + ", " + replacement + ", " + case_sensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
+        }
+        public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+        {
+            Console.Write("ReplaceTextInGML(): " + code.ToString() + ", " + keyword + ", " + replacement + ", " + case_sensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
         }
         public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false)
         {
@@ -271,15 +277,27 @@ namespace UndertaleModTests
             throw new NotImplementedException();
         }
 
-        public string GetDecompiledText(string codeName)
+        public string GetDecompiledText(string codeName, GlobalDecompileContext context = null)
         {
             string output = "GetDecompiledText(): " + codeName;
+            Console.Write(output);
+            return output;
+        }
+        public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
+        {
+            string output = "GetDecompiledText(): " + code?.ToString();
             Console.Write(output);
             return output;
         }
         public string GetDisassemblyText(string codeName)
         {
             string output = "GetDisassemblyText(): " + codeName;
+            Console.Write(output);
+            return output;
+        }
+        public string GetDisassemblyText(UndertaleCode code)
+        {
+            string output = "GetDisassemblyText(): " + code?.ToString();
             Console.Write(output);
             return output;
         }

@@ -23,7 +23,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertaleSoundEditor.xaml
     /// </summary>
-    public partial class UndertaleSoundEditor : UserControl
+    public partial class UndertaleSoundEditor : DataUserControl
     {
         private WaveOutEvent waveOut;
         private WaveFileReader wavReader;

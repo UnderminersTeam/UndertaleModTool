@@ -20,7 +20,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Interaction logic for UndertaleExtensionFileEditor.xaml
     /// </summary>
-    public partial class UndertaleExtensionFileEditor : UserControl
+    public partial class UndertaleExtensionFileEditor : DataUserControl
     {
         public UndertaleExtensionFileEditor()
         {

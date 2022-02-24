@@ -92,6 +92,8 @@ namespace UndertaleModCli
 
         public bool GMLCacheEnabled => false; //not implemented yet
 
+        public bool IsAppClosed { get; set; }
+
         public FileInfo? Output { get; set; }
 
         /// <summary>
@@ -923,7 +925,4 @@ namespace UndertaleModCli
         }
 
     }
-
-
-
 }

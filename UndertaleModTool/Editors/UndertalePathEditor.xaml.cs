@@ -22,7 +22,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertalePathEditor.xaml
     /// </summary>
-    public partial class UndertalePathEditor : UserControl
+    public partial class UndertalePathEditor : DataUserControl
     {
         public UndertalePathEditor()
         {
@@ -59,7 +59,7 @@ namespace UndertaleModTool
             {
                 target.Add(new UndertalePathEditor.LineData()
                 {
-                    From = new Point(path.Points[path.Points.Count - 1].X, path.Points[path.Points.Count - 1].Y),
+                    From = new Point(path.Points[^1].X, path.Points[^1].Y),
                     To = new Point(path.Points[0].X, path.Points[0].Y)
                 });
             }
