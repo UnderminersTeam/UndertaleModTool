@@ -37,7 +37,7 @@ if (exportedTexturesFolder == null)
 
 bool displayGrid = ScriptQuestion("Draw background grid?");
 
-if (Data.IsGMS2 == Visibility.Visible)
+if (mainWindow.IsGMS2 == Visibility.Visible)
     if (!ScriptQuestion("Use the memory economy mode (uses less RAM, but slower)?"))
         TileLayerTemplateSelector.ForcedMode = 1; // render tile layers as whole images
 
