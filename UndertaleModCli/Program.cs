@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 using UndertaleModLib.Decompiler;
+using UndertaleModLib.Models;
 
 /// <summary>
 /// The supplied location of the data file did not exist
@@ -657,12 +658,20 @@ namespace UndertaleModCli
             throw new NotImplementedException();
         }
 
-        public string GetDecompiledText(string codeName)
+        public string GetDecompiledText(string codeName, GlobalDecompileContext context = null)
+        {
+            throw new NotImplementedException();
+        }
+        public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
         {
             throw new NotImplementedException();
         }
 
         public string GetDisassemblyText(string codeName)
+        {
+            throw new NotImplementedException();
+        }
+        public string GetDisassemblyText(UndertaleCode code)
         {
             throw new NotImplementedException();
         }
@@ -904,7 +913,11 @@ namespace UndertaleModCli
             throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
-        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false)
+        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+        {
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
+        }
+        public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
         {
             throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
