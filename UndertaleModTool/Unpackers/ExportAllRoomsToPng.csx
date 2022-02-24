@@ -29,7 +29,6 @@ if (dataEditorChild is null)
     throw new ScriptException("Can't find \"DataEditor\" child control.");
 
 UndertaleRoomRenderer roomRenderer;
-List<string> outputsList = new List<string>();
 int roomCount = Data.Rooms.Count;
 
 string exportedTexturesFolder = PromptChooseDirectory("Choose an export folder");
@@ -37,6 +36,10 @@ if (exportedTexturesFolder == null)
     throw new ScriptException("The export folder was not set, stopping script.");
 
 bool displayGrid = ScriptQuestion("Draw background grid?");
+
+if (Data.IsGMS2 == Visibility.Visible)
+    if (!ScriptQuestion("Use the memory economy mode (uses less RAM, but slower)?"))
+        TileLayerTemplateSelector.ForcedMode = 1; // render tile layers as whole images
 
 DirectoryInfo dir = new DirectoryInfo(exportedTexturesFolder);
 TextureWorker worker = new TextureWorker();

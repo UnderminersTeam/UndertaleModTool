@@ -9,14 +9,13 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance undertale:UndertaleRoom}" x:Name="RoomRenderer"
-             Loaded="RoomRenderer_Loaded" DataContextChanged="RoomRenderer_DataContextChanged">
+             DataContextChanged="RoomRenderer_DataContextChanged">
     <UserControl.Resources>
         <local:GridConverter x:Key="GridConverter"/>
         <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
         <local:ColorConverter x:Key="ColorConverter"/>
         <local:SimplePointsDisplayConverter x:Key="SimplePointsDisplayConverter"/>
         <local:LayerFlattenerConverter x:Key="LayerFlattenerConverter" />
-        <local:RoomObjectTemplateSelector x:Key="RoomObjectTemplateSelector"/>
         <local:IsGMS2Converter x:Key="IsGMS2Converter" />
         <local:RoomCaptionConverter x:Key="RoomCaptionConverter" />
         <local:BGColorConverter x:Key="BGColorConverter"/>
@@ -24,6 +23,9 @@
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
         <local:BGLayerVisConverter x:Key="BGLayerVisConverter"/>
         <local:ColorToOpacityConverter x:Key="ColorToOpacityConverter"/>
+        <local:CachedTileDataLoader x:Key="CachedTileDataLoader"/>
+        <local:TileLayerTemplateSelector x:Key="TileLayerTemplateSelector"/>
+        <local:TileRectanglesConverter x:Key="TileRectanglesConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomRenderer}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomRenderer}, Path=DataContext.Tiles}"/>
@@ -219,8 +221,61 @@
                         </Rectangle.Fill>
                     </Rectangle>
                 </DataTemplate>
+                <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerTilesData}">
+                    <ContentControl Content="{Binding ., Mode=OneTime}" ContentTemplateSelector="{StaticResource TileLayerTemplateSelector}"/>
+                </DataTemplate>
                 <DataTemplate DataType="{x:Type local:UndertalePathEditor+LineData}">
                     <Line X1="{Binding From.X, Mode=OneTime}" Y1="{Binding From.Y, Mode=OneTime}" X2="{Binding To.X, Mode=OneTime}" Y2="{Binding To.Y, Mode=OneTime}" Stroke="Green" StrokeThickness="2"/>
+                </DataTemplate>
+
+                <DataTemplate x:Key="TileLayerImageTemplate">
+                    <local:TileLayerImage
+                        LayerTilesData="{Binding ., Mode=OneTime}"
+                        Width="{Binding ParentLayer.ParentRoom.Width, Mode=OneTime}" Height="{Binding ParentLayer.ParentRoom.Height, Mode=OneTime}"
+                        Visibility="{Binding ParentLayer.IsVisible, Mode=OneTime, Converter={StaticResource BoolToVisConverter}}">
+                        <Image.Source>
+                            <MultiBinding Converter="{StaticResource CachedTileDataLoader}">
+                                <Binding Mode="OneTime"/>
+                            </MultiBinding>
+                        </Image.Source>
+                    </local:TileLayerImage>
+                </DataTemplate>
+                <DataTemplate x:Key="TileLayerRectanglesTemplate">
+                    <ItemsControl>
+                        <ItemsControl.ItemsSource>
+                            <MultiBinding Converter="{StaticResource TileRectanglesConverter}">
+                                <Binding Mode="OneTime"/>
+                            </MultiBinding>
+                        </ItemsControl.ItemsSource>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas 
+                                    Width="{Binding ParentLayer.ParentRoom.Width, Mode=OneTime}" Height="{Binding ParentLayer.ParentRoom.Height, Mode=OneTime}"
+                                    Visibility="{Binding ParentLayer.IsVisible, Mode=OneTime, Converter={StaticResource BoolToVisConverter}}"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.Resources>
+                            <DataTemplate DataType="{x:Type local:TileRectangle}">
+                                <Rectangle Width="{Binding Width, Mode=OneTime}" Height="{Binding Height, Mode=OneTime}"
+                                           RenderTransformOrigin="0.5,0.5">
+                                    <Rectangle.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform x:Name="transform5_0" ScaleX="{Binding ScaleX, Mode=OneTime}" ScaleY="{Binding ScaleY, Mode=OneTime}"/>
+                                            <RotateTransform x:Name="transform5_1" Angle="{Binding Angle, Mode=OneTime}"/>
+                                            <TranslateTransform x:Name="transform5_2" X="{Binding X, Mode=OneTime}" Y="{Binding Y, Mode=OneTime}"/>
+                                        </TransformGroup>
+                                    </Rectangle.RenderTransform>
+                                    <Rectangle.Fill>
+                                        <ImageBrush
+                                            ImageSource="{Binding ImageSrc, Mode=OneTime}"
+                                            TileMode="None"
+                                            Stretch="UniformToFill">
+                                        </ImageBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </DataTemplate>
+                        </ItemsControl.Resources>
+                    </ItemsControl>
                 </DataTemplate>
             </ItemsControl.Resources>
         </ItemsControl>

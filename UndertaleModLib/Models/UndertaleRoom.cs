@@ -262,9 +262,29 @@ namespace UndertaleModLib.Models
                 // Automagically set the grid size to whatever most tiles are sized
 
                 Dictionary<Point, uint> tileSizes = new();
+                IEnumerable<Tile> tileList;
+
+                if (Layers.Count > 0)
+                {
+                    tileList = new List<Tile>();
+                    foreach (Layer layer in Layers)
+                    {
+                        if (layer.LayerType == LayerType.Assets)
+                            tileList = tileList.Concat(layer.AssetsData.LegacyTiles);
+                        else if (layer.LayerType == LayerType.Tiles)
+                        {
+                            int w = (int)(Width / layer.TilesData.TilesX);
+                            int h = (int)(Height / layer.TilesData.TilesY);
+                            tileSizes[new(w, h)] = layer.TilesData.TilesX * layer.TilesData.TilesY;
+                        }
+                    }
+                        
+                }
+                else
+                    tileList = Tiles;
 
                 // Loop through each tile and save how many times their sizes are used
-                foreach (Tile tile in Tiles)
+                foreach (Tile tile in tileList)
                 {
                     Point scale = new((int)tile.Width, (int)tile.Height);
                     if (tileSizes.ContainsKey(scale))
@@ -631,6 +651,8 @@ namespace UndertaleModLib.Models
             {
                 if (BackgroundData != null)
                     BackgroundData.ParentLayer = this;
+                if (TilesData != null)
+                    TilesData.ParentLayer = this;
             }
 
             public void Serialize(UndertaleWriter writer)
@@ -753,6 +775,7 @@ namespace UndertaleModLib.Models
                 private uint _TilesY;
                 private uint[][] _TileData; // Each is simply an ID from the tileset/background/sprite
 
+                public Layer ParentLayer { get; set; }
                 public UndertaleBackground Background { get => _Background.Resource; set { _Background.Resource = value; OnPropertyChanged(); } }
                 public uint TilesX
                 {

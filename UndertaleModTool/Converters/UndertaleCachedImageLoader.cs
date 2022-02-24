@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,18 +17,32 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using UndertaleModLib.Models;
+using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModTool
 {
-    [ValueConversion(typeof(byte[]), typeof(ImageSource))]
     public class UndertaleCachedImageLoader : IValueConverter
     {
         [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool DeleteObject([In] IntPtr hObject);
 
-        public static ConcurrentDictionary<string, ImageSource> ImageCache { get; set; } = new();
-        public static ConcurrentDictionary<Tuple<string, Tuple<uint, uint, uint, uint>>, ImageSource> TileCache { get; set; } = new();
+        private static readonly ConcurrentDictionary<string, ImageSource> imageCache = new();
+        private static readonly ConcurrentDictionary<Tuple<string, Tuple<uint, uint, uint, uint>>, ImageSource> tileCache = new();
+
+        private static bool _reuseTileBuffer;
+        public static bool ReuseTileBuffer
+        {
+            get => _reuseTileBuffer;
+            set
+            {
+                sharedTileBuffer = value ? ArrayPool<byte>.Create() : null;
+
+                _reuseTileBuffer = value;
+            }
+        }
+        private static ArrayPool<byte> sharedTileBuffer;
+        private static int currBufferSize = 1048576;
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -54,9 +69,9 @@ namespace UndertaleModTool
                 tileRectList = parameter as List<Tuple<uint, uint, uint, uint>>;
             }
 
-            UndertaleRoom.Tile tile = null;
+            Tile tile = null;
             if (isTile)
-                tile = value as UndertaleRoom.Tile;
+                tile = value as Tile;
 
             UndertaleTexturePageItem texture = isTile ? tile.Tpag : value as UndertaleTexturePageItem;
             if (texture is null)
@@ -75,11 +90,11 @@ namespace UndertaleModTool
             ImageSource spriteSrc;
             if (isTile)
             {
-                if (TileCache.TryGetValue(new(texName, new(tile.SourceX, tile.SourceY, tile.Width, tile.Height)), out spriteSrc))
+                if (tileCache.TryGetValue(new(texName, new(tile.SourceX, tile.SourceY, tile.Width, tile.Height)), out spriteSrc))
                     return spriteSrc;
             }
 
-            if (!ImageCache.ContainsKey(texName) || !cacheEnabled)
+            if (!imageCache.ContainsKey(texName) || !cacheEnabled)
             {
                 Rectangle rect;
 
@@ -101,9 +116,9 @@ namespace UndertaleModTool
                 if (cacheEnabled)
                 {
                     if (isTile)
-                        TileCache.TryAdd(new(texName, new(tile.SourceX, tile.SourceY, tile.Width, tile.Height)), spriteSrc);
+                        tileCache.TryAdd(new(texName, new(tile.SourceX, tile.SourceY, tile.Width, tile.Height)), spriteSrc);
                     else
-                        ImageCache.TryAdd(texName, spriteSrc);
+                        imageCache.TryAdd(texName, spriteSrc);
                 }
 
                 if (generate)
@@ -112,10 +127,18 @@ namespace UndertaleModTool
                     return spriteSrc;
             }
 
-            return ImageCache[texName];
+            return imageCache[texName];
         }
 
-        private Bitmap CreateSpriteBitmap(Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0)
+        public static void Reset()
+        {
+            imageCache.Clear();
+            tileCache.Clear();
+            ReuseTileBuffer = false;
+            currBufferSize = 1048576;
+        }
+
+        public static Bitmap CreateSpriteBitmap(Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0)
         {
             using MemoryStream stream = new(texture.TexturePage.TextureData.TextureBlob);
             Bitmap spriteBMP = new(rect.Width, rect.Height);
@@ -147,8 +170,23 @@ namespace UndertaleModTool
         {
             BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, bmp.PixelFormat);
             int depth = Image.GetPixelFormatSize(data.PixelFormat) / 8;
-            byte[] buffer = new byte[data.Stride * bmp.Height];
-            Marshal.Copy(data.Scan0, buffer, 0, buffer.Length);
+
+            int bufferLen = data.Stride * bmp.Height;
+            byte[] buffer;
+            if (ReuseTileBuffer)
+            {
+                if (bufferLen > currBufferSize)
+                {
+                    currBufferSize = bufferLen;
+                    sharedTileBuffer = ArrayPool<byte>.Create(currBufferSize, 17); // 17 is default value
+                }
+
+                buffer = sharedTileBuffer.Rent(bufferLen);
+            }
+            else
+                buffer = new byte[bufferLen];
+
+            Marshal.Copy(data.Scan0, buffer, 0, bufferLen);
 
             _ = Parallel.ForEach(tileRectList, (tileRect) =>
             {
@@ -166,7 +204,8 @@ namespace UndertaleModTool
                 if (w > data.Width || h > data.Height || x + w > data.Width || y + h > data.Height)
                     return;
 
-                byte[] bufferRes = new byte[w * h * depth];
+                int bufferResLen = w * h * depth;
+                byte[] bufferRes = ArrayPool<byte>.Shared.Rent(bufferResLen); // may return bigger array than requested
 
                 // Source - https://stackoverflow.com/a/9691388/12136394
                 // There was faster solution, but it uses "unsafe" code
@@ -177,15 +216,15 @@ namespace UndertaleModTool
                         int origIndex = (y * data.Stride) + (i * data.Stride) + (x * depth) + j;
                         int croppedIndex = (i * w * depth) + j;
 
-                        for (int k = 0; k < depth; k++)
-                            bufferRes[croppedIndex + k] = buffer[origIndex + k];
+                        Buffer.BlockCopy(buffer, origIndex, bufferRes, croppedIndex, depth);
                     }
                 }
 
                 Bitmap tileBMP = new(w, h);
                 BitmapData dataNew = tileBMP.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, data.PixelFormat);
-                Marshal.Copy(bufferRes, 0, dataNew.Scan0, bufferRes.Length);
+                Marshal.Copy(bufferRes, 0, dataNew.Scan0, bufferResLen);
                 tileBMP.UnlockBits(dataNew);
+                ArrayPool<byte>.Shared.Return(bufferRes);
 
                 IntPtr bmpPtr = tileBMP.GetHbitmap();
                 ImageSource spriteSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(bmpPtr, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
@@ -195,16 +234,209 @@ namespace UndertaleModTool
                 spriteSrc.Freeze(); // allow UI thread access
 
                 Tuple<string, Tuple<uint, uint, uint, uint>> tileKey = new(textureName, new((uint)x, (uint)y, (uint)w, (uint)h));
-                TileCache.TryAdd(tileKey, spriteSrc);
+                tileCache.TryAdd(tileKey, spriteSrc);
             });
 
             bmp.UnlockBits(data);
             bmp.Dispose();
+
+            if (ReuseTileBuffer)
+                sharedTileBuffer.Return(buffer);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    // UndertaleCachedImageLoader wrapper
+    public class CachedTileImageLoader : IMultiValueConverter
+    {
+        private static UndertaleCachedImageLoader loader = new();
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values[0] is null) // tile
+                return null;
+
+            if ((uint)values[3] == 0 || (uint)values[4] == 0) // width, height
+                return null;
+
+            return loader.Convert(values[0], null, "tile", null);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class CachedTileDataLoader : IMultiValueConverter
+    {
+        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool DeleteObject([In] IntPtr hObject);
+
+        // Tile text. page, tile ID - tile pixel data
+        public static ConcurrentDictionary<Tuple<string, uint>, Bitmap> TileCache { get; set; } = new();
+        private static readonly ConcurrentDictionary<string, Bitmap> tilePageCache = new();
+
+        public static void Reset()
+        {
+            TileCache.Clear();
+            tilePageCache.Clear();
+            TileRectanglesConverter.TileCache.Clear();
+        }
+
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Any(x => x is null))
+                return null;
+
+            bool cache = parameter is string par && par == "cache";
+
+            Layer.LayerTilesData tilesData = values[0] as Layer.LayerTilesData;
+            UndertaleBackground tilesBG = tilesData.Background;
+
+            Bitmap tilePageBMP;
+            if (tilePageCache.ContainsKey(tilesBG.Texture.Name.Content))
+            {
+                tilePageBMP = tilePageCache[tilesBG.Texture.Name.Content];
+            }
+            else
+            {
+                tilePageBMP = UndertaleCachedImageLoader.CreateSpriteBitmap(new(tilesBG.Texture.SourceX,
+                                                                                tilesBG.Texture.SourceY,
+                                                                                tilesBG.Texture.SourceWidth,
+                                                                                tilesBG.Texture.SourceHeight), tilesBG.Texture);
+
+                tilePageCache[tilesBG.Texture.Name.Content] = tilePageBMP;
+            }
+
+            BitmapData data = tilePageBMP.LockBits(new Rectangle(0, 0, tilePageBMP.Width, tilePageBMP.Height), ImageLockMode.ReadOnly, tilePageBMP.PixelFormat);
+            int depth = Image.GetPixelFormatSize(data.PixelFormat) / 8;
+            byte[] buffer = new byte[data.Stride * tilePageBMP.Height];
+            Marshal.Copy(data.Scan0, buffer, 0, buffer.Length);
+            tilePageBMP.UnlockBits(data);
+
+            int w = (int)tilesBG.GMS2TileWidth;
+            int h = (int)tilesBG.GMS2TileHeight;
+            int outX = (int)tilesBG.GMS2OutputBorderX;
+            int outY = (int)tilesBG.GMS2OutputBorderY;
+            int tileRows = (int)Math.Ceiling(tilesBG.GMS2TileCount / (double)tilesBG.GMS2TileColumns);
+            System.Drawing.Imaging.PixelFormat format = tilePageBMP.PixelFormat;
+
+            _ = Parallel.For(0, tileRows, (y) =>
+            {
+                int y1 = ((y + 1) * outY) + (y * (h + outY));
+
+                for (int x = 0; x < tilesBG.GMS2TileColumns; x++)
+                {
+                    int x1 = ((x + 1) * outX) + (x * (w + outX));
+
+                    int bufferResLen = w * h * depth;
+                    byte[] bufferRes = ArrayPool<byte>.Shared.Rent(bufferResLen);
+
+                    if (!(x == 0 && y == 0))
+                    {
+                        for (int i = 0; i < h; i++)
+                        {
+                            for (int j = 0; j < w * depth; j += depth)
+                            {
+                                int origIndex = (y1 * data.Stride) + (i * data.Stride) + (x1 * depth) + j;
+                                int croppedIndex = (i * w * depth) + j;
+
+                                Buffer.BlockCopy(buffer, origIndex, bufferRes, croppedIndex, depth);
+                            }
+                        }
+                    }
+
+                    Bitmap tileBMP = new(w, h);
+                    BitmapData tileData = tileBMP.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, format);
+                    Marshal.Copy(bufferRes, 0, tileData.Scan0, bufferResLen);
+                    tileBMP.UnlockBits(tileData);
+                    ArrayPool<byte>.Shared.Return(bufferRes);
+
+                    TileCache.TryAdd(new(tilesBG.Texture.Name.Content, (uint)((tilesBG.GMS2TileColumns * y) + x)), tileBMP);
+                }
+            });
+
+            return cache ? null : CreateLayerSource(in tilesData, in tilesBG, in w, in h);
+        }
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ImageSource CreateLayerSource(in Layer.LayerTilesData tilesData, in UndertaleBackground tilesBG, in int w, in int h)
+        {
+            Bitmap layerBMP = new(w * (int)tilesData.TilesX, h * (int)tilesData.TilesY);
+            uint maxID = tilesData.Background.GMS2TileIds.Select(x => x.ID).Max();
+
+            using Graphics g = Graphics.FromImage(layerBMP);
+            for (int y = 0; y < tilesData.TilesY; y++)
+            {
+                for (int x = 0; x < tilesData.TilesX; x++)
+                {
+                    uint id = tilesData.TileData[y][x];
+                    if (id == 0)
+                        continue;
+
+                    if (id > maxID)
+                    {
+                        uint realID = id & 0x0FFFFFFF; // remove tile flag
+                        if (realID > maxID)
+                        {
+                            Debug.WriteLine("Tileset \"" + tilesData.Background.Name.Content + "\" doesn't contain tile ID " + realID);
+                            continue;
+                        }
+
+                        Bitmap resBMP = (Bitmap)TileCache[new(tilesBG.Texture.Name.Content, realID)].Clone();
+
+                        switch (id >> 28)
+                        {
+                            case 1:
+                                resBMP.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                                break;
+                            case 2:
+                                resBMP.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                                break;
+                            case 3:
+                                resBMP.RotateFlip(RotateFlipType.RotateNoneFlipXY);
+                                break;
+                            case 4:
+                                resBMP.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                                break;
+                            case 5:
+                                resBMP.RotateFlip(RotateFlipType.Rotate90FlipY);
+                                break;
+                            case 6:
+                                resBMP.RotateFlip(RotateFlipType.Rotate270FlipY);
+                                break;
+                            case 7:
+                                resBMP.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                                break;
+
+                            default:
+                                Debug.WriteLine("Tile of " + tilesData.ParentLayer.LayerName + " located at (" + x + ", " + y + ") has unknown flag.");
+                                break;
+                        }
+
+                        g.DrawImageUnscaled(resBMP, x * w, y * h);
+
+                        resBMP.Dispose();
+                    }
+                    else
+                        g.DrawImageUnscaled(TileCache[new(tilesBG.Texture.Name.Content, id)], x * w, y * h);
+                }
+            }
+
+            IntPtr bmpPtr = layerBMP.GetHbitmap();
+            ImageSource spriteSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(bmpPtr, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            DeleteObject(bmpPtr);
+            layerBMP.Dispose();
+
+            return spriteSrc;
         }
     }
 }

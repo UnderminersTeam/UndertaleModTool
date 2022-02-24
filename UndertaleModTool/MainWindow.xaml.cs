@@ -109,14 +109,17 @@ namespace UndertaleModTool
                     UndertaleRoomRenderer.RoomRendererTemplate = (DataTemplate)DataEditor.FindResource("roomRendererTemplate");
 
                 if (value)
+                {
                     DataEditor.ContentTemplate = UndertaleRoomRenderer.RoomRendererTemplate;
+                    UndertaleCachedImageLoader.ReuseTileBuffer = true;
+                }
                 else
                 {
                     DataEditor.ContentTemplate = null;
                     Selected = new DescriptionView("Welcome to UndertaleModTool!",
                                                    "Open data.win file to get started, then double click on the items on the left to view them");
-                    UndertaleCachedImageLoader.TileCache.Clear();
-                    UndertaleCachedImageLoader.ImageCache.Clear();
+                    UndertaleCachedImageLoader.Reset();
+                    CachedTileDataLoader.Reset();
                 }
 
                 _roomRendererEnabled = value;
@@ -700,7 +703,8 @@ namespace UndertaleModTool
                         Data = data;
 
                         await LoadGMLCache(filename, dialog);
-                        UndertaleCachedImageLoader.ImageCache.Clear();
+                        UndertaleCachedImageLoader.Reset();
+                        CachedTileDataLoader.Reset();
 
                         Data.ToolInfo.AppDataProfiles = ProfilesFolder;
                         FilePath = filename;

@@ -51,10 +51,6 @@ namespace UndertaleModTool
             InitializeComponent();
         }
 
-        private void RoomRenderer_Loaded(object sender, RoutedEventArgs e)
-        {
-            (DataContext as UndertaleRoom)?.SetupRoom(!bgGridDisabled);
-        }
         private void RoomRenderer_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             (DataContext as UndertaleRoom)?.SetupRoom(!bgGridDisabled);
