@@ -195,6 +195,10 @@ namespace UndertaleModLib.Models
                                     reader.undertaleData.GMS2022_1 = true;
                                 break;
                         }
+                        // Allow rooms in GMS 2.1 - 2.2.5 to load.
+                        // For some reason the above detects them as 2022.1
+                        // so this serves as a sanity check.
+                        reader.undertaleData.GMS2022_1 &= reader.undertaleData.GMS2_3 | reader.undertaleData.GMS2_3_1 | reader.undertaleData.GMS2_3_2 | reader.undertaleData.GMS2_2_2_302;
                     }
                     reader.Offset = returnTo;
                 }

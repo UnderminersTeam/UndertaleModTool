@@ -44,6 +44,8 @@
             <Word>break</Word>
             <Word>continue</Word>
             <Word>with</Word>
+            <Word>new</Word>
+            <Word>constructor</Word>
             <Word>function</Word>
             <Word>return</Word>
             <Word>exit</Word>
