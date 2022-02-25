@@ -136,7 +136,7 @@ namespace UndertaleModTool
             DisassemblyEditor.TextArea.SelectionCornerRadius = 0;
         }
 
-        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UndertaleCode code = this.DataContext as UndertaleCode;
             Directory.CreateDirectory(MainPath);
@@ -145,7 +145,7 @@ namespace UndertaleModTool
                 return;
             DecompiledSearchPanel.Close();
             DisassemblySearchPanel.Close();
-            DecompiledEditor_LostFocus(sender, null);
+            await DecompiledLostFocusBody(sender, null);
             DisassemblyEditor_LostFocus(sender, null);
             if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
             {
@@ -163,11 +163,26 @@ namespace UndertaleModTool
             }
         }
 
-        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private async void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return;
+
+            // compile/disassemble previously edited code (save changes)
+            if (DecompiledTab.IsSelected && DecompiledFocused && DecompiledChanged &&
+                CurrentDecompiled is not null && CurrentDecompiled != code)
+            {
+                DecompiledSkipped = true;
+                await DecompiledLostFocusBody(sender, null);
+            }
+            else if (DisassemblyTab.IsSelected && DisassemblyFocused && DisassemblyChanged &&
+                     CurrentDisassembled is not null && CurrentDisassembled != code)
+            {
+                DisassemblySkipped = true;
+                DisassemblyEditor_LostFocus(sender, null);
+            }
+
             DecompiledEditor_LostFocus(sender, null);
             DisassemblyEditor_LostFocus(sender, null);
 
