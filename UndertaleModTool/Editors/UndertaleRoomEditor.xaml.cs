@@ -1373,6 +1373,12 @@ namespace UndertaleModTool
         {
             if (RoomObjectsTree.SelectedItem is Layer layer)
             {
+                if (layer.TilesData.TileData.Length == 0)
+                {
+                    MainWindow.ShowError("Tile data is empty.");
+                    return;
+                }
+
                 StringBuilder sb = new();
                 foreach (uint[] dataRow in layer.TilesData.TileData)
                     sb.AppendLine(String.Join(";", dataRow.Select(x => x.ToString())));
@@ -1397,6 +1403,12 @@ namespace UndertaleModTool
         {
             if (RoomObjectsTree.SelectedItem is Layer layer)
             {
+                if (layer.TilesData.TilesX == 0 || layer.TilesData.TilesY == 0)
+                {
+                    MainWindow.ShowError("Tile data size can't be zero.");
+                    return;
+                }
+
                 OpenFileDialog dlg = new()
                 {
                     DefaultExt = "csv",
@@ -2070,6 +2082,9 @@ namespace UndertaleModTool
             if (values[0] is Layer.LayerTilesData tilesData)
             {
                 UndertaleBackground tilesBG = tilesData.Background;
+
+                if (tilesBG is null)
+                    return null;
 
                 _ = loader.Convert(new object[] { tilesData }, null, "cache", null);
                 

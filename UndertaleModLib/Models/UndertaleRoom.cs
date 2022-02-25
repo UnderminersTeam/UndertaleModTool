@@ -271,7 +271,7 @@ namespace UndertaleModLib.Models
                     {
                         if (layer.LayerType == LayerType.Assets)
                             tileList = tileList.Concat(layer.AssetsData.LegacyTiles);
-                        else if (layer.LayerType == LayerType.Tiles)
+                        else if (layer.LayerType == LayerType.Tiles && layer.TilesData.TileData.Length != 0)
                         {
                             int w = (int)(Width / layer.TilesData.TilesX);
                             int h = (int)(Height / layer.TilesData.TilesY);
@@ -1034,12 +1034,17 @@ namespace UndertaleModLib.Models
             public float AnimationSpeed { get; set; }
             public AnimationSpeedType AnimationSpeedType { get; set; }
             public float FrameIndex { get; set; }
+            public float SafeFrameIndex { get => FrameIndex; set { FrameIndex = Math.Clamp(value, 0, Sprite.Textures.Count - 1); OnPropertyChanged(); } }
             public float Rotation { get; set; }
             public float OppositeRotation => 360F - Rotation;
             public int XOffset => Sprite is not null ? X - Sprite.OriginX : X;
             public int YOffset => Sprite is not null ? Y - Sprite.OriginY : Y;
 
             public event PropertyChangedEventHandler PropertyChanged;
+            protected void OnPropertyChanged([CallerMemberName] string name = null)
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            }
 
             public void Serialize(UndertaleWriter writer)
             {

@@ -74,7 +74,7 @@ namespace UndertaleModTool
                 tile = value as Tile;
 
             UndertaleTexturePageItem texture = isTile ? tile.Tpag : value as UndertaleTexturePageItem;
-            if (texture is null)
+            if (texture is null || texture.TexturePage is null)
                 return null;
 
             string texName = texture.Name.Content;
@@ -248,9 +248,9 @@ namespace UndertaleModTool
         {
             throw new NotImplementedException();
         }
-    }
+    }    
 
-    // UndertaleCachedImageLoader wrapper
+    // UndertaleCachedImageLoader wrappers
     public class CachedTileImageLoader : IMultiValueConverter
     {
         private static UndertaleCachedImageLoader loader = new();
@@ -263,6 +263,27 @@ namespace UndertaleModTool
                 return null;
 
             return loader.Convert(values[0], null, "tile", null);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class CachedImageLoaderWithIndex : IMultiValueConverter
+    {
+        private static UndertaleCachedImageLoader loader = new();
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Any(x => x is null))
+                return null;
+
+            IList<UndertaleSprite.TextureEntry> textures = values[0] as IList<UndertaleSprite.TextureEntry>;
+            int index = (int)(float)values[1];
+            if (index > textures.Count - 1 || index < 0)
+                return null;
+            else
+                return loader.Convert(textures[index].Texture, null, null, null);
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
@@ -297,6 +318,9 @@ namespace UndertaleModTool
 
             Layer.LayerTilesData tilesData = values[0] as Layer.LayerTilesData;
             UndertaleBackground tilesBG = tilesData.Background;
+
+            if (tilesBG is null)
+                return null;
 
             Bitmap tilePageBMP;
             if (tilePageCache.ContainsKey(tilesBG.Texture.Name.Content))
