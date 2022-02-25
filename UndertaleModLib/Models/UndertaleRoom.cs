@@ -271,7 +271,7 @@ namespace UndertaleModLib.Models
                     {
                         if (layer.LayerType == LayerType.Assets)
                             tileList = tileList.Concat(layer.AssetsData.LegacyTiles);
-                        else if (layer.LayerType == LayerType.Tiles)
+                        else if (layer.LayerType == LayerType.Tiles && layer.TilesData.TileData.Length != 0)
                         {
                             int w = (int)(Width / layer.TilesData.TilesX);
                             int h = (int)(Height / layer.TilesData.TilesY);

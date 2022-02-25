@@ -74,7 +74,7 @@ namespace UndertaleModTool
                 tile = value as Tile;
 
             UndertaleTexturePageItem texture = isTile ? tile.Tpag : value as UndertaleTexturePageItem;
-            if (texture is null)
+            if (texture is null || texture.TexturePage is null)
                 return null;
 
             string texName = texture.Name.Content;
@@ -297,6 +297,9 @@ namespace UndertaleModTool
 
             Layer.LayerTilesData tilesData = values[0] as Layer.LayerTilesData;
             UndertaleBackground tilesBG = tilesData.Background;
+
+            if (tilesBG is null)
+                return null;
 
             Bitmap tilePageBMP;
             if (tilePageCache.ContainsKey(tilesBG.Texture.Name.Content))
