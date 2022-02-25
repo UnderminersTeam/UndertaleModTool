@@ -43,7 +43,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertaleCodeEditor.xaml
     /// </summary>
-    public partial class UndertaleCodeEditor : UserControl
+    public partial class UndertaleCodeEditor : DataUserControl
     {
         private static MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 

@@ -18,7 +18,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Interaction logic for UndertaleShaderEditor.xaml
     /// </summary>
-    public partial class UndertaleShaderEditor : UserControl
+    public partial class UndertaleShaderEditor : DataUserControl
     {
         public UndertaleShaderEditor()
         {

@@ -20,7 +20,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Interaction logic for UndertaleExtensionEditor.xaml
     /// </summary>
-    public partial class UndertaleExtensionEditor : UserControl
+    public partial class UndertaleExtensionEditor : DataUserControl
     {
         public int MyIndex { get => (Application.Current.MainWindow as MainWindow).Data.Extensions.IndexOf((UndertaleExtension)this.DataContext); }
         // God this is so ugly, if there's a better way, please, put in a pull request

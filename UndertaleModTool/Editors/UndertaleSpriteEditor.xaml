@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="UndertaleModTool.UndertaleSpriteEditor"
+﻿<local:DataUserControl x:Class="UndertaleModTool.UndertaleSpriteEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -105,7 +105,7 @@
         </Grid>
 
         <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Textures</TextBlock>
-        <DataGrid Grid.Row="10" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures}" Name="TextureList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
+        <DataGrid Grid.Row="10" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures, Mode=OneWay}" Name="TextureList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -154,14 +154,14 @@
                         </DrawingBrush.Drawing>
                     </DrawingBrush>
                 </Border.Background>
-                <local:UndertaleTexturePageItemDisplay DataContext="{Binding SelectedItem.Texture, ElementName=TextureList}" x:Name="TextureDisplay"/>
+                <local:UndertaleTexturePageItemDisplay DataContext="{Binding SelectedItem.Texture, Mode=OneWay, ElementName=TextureList}" x:Name="TextureDisplay"/>
             </Border>
         </Viewbox>
 
         <Button Grid.Row="12" Grid.Column="1" Content="Export all frames (or Spine data if this is a Spine sprite)" Click="ExportAll_Click"/>
 
         <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Collision masks</TextBlock>
-        <DataGrid Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks}" Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
+        <DataGrid Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks, Mode=OneWay}" Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -198,7 +198,7 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <ContentControl Grid.Row="14" Grid.Column="1" Margin="3" DataContext="{Binding SelectedItem, ElementName=MaskList}">
+        <ContentControl Grid.Row="14" Grid.Column="1" Margin="3" DataContext="{Binding SelectedItem, Mode=OneWay, ElementName=MaskList}">
             <ContentControl.Template>
                 <ControlTemplate>
                     <StackPanel Name="MaskEditor">
@@ -210,9 +210,9 @@
                                             <MultiBinding.Converter>
                                                 <local:MaskImageConverer/>
                                             </MultiBinding.Converter>
-                                            <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="DataContext.Width"/>
-                                            <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="DataContext.Height"/>
-                                            <Binding Path="Data"/>
+                                            <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="DataContext.Width" Mode="OneWay"/>
+                                            <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="DataContext.Height" Mode="OneWay"/>
+                                            <Binding Path="Data" Mode="OneWay"/>
                                         </MultiBinding>
                                     </Image.Source>
                                 </Image>
@@ -261,7 +261,7 @@
         <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Is special type?</TextBlock>
         <CheckBox Grid.Row="15" Grid.Column="1" Margin="3" IsChecked="{Binding IsSpecialType}"/>
 
-        <Grid Grid.Row="16" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding Path=IsSpecialType, Converter={StaticResource BoolToVis}}">
+        <Grid Grid.Row="16" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding Path=IsSpecialType, Mode=OneWay, Converter={StaticResource BoolToVis}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="3*"/>
@@ -279,7 +279,7 @@
             <ComboBox ItemsSource="{Binding Source={StaticResource SpriteType}}" SelectedItem="{Binding Path=SSpriteType}"
                   Grid.Row="1" Grid.Column="1" Margin="3"/>
 
-            <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+            <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="3*"/>
@@ -298,4 +298,4 @@
             </Grid>
         </Grid>
     </Grid>
-</UserControl>
+</local:DataUserControl>

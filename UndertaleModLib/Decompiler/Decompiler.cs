@@ -2170,11 +2170,6 @@ namespace UndertaleModLib.Decompiler
                                 while (arg2 is ExpressionCast cast)
                                     arg2 = cast.Argument;
 
-                                if (context.TargetCode.Name.Content.Contains("scr_get_valid_room"))
-                                {
-                                    var aaaaaa = 0;
-                                }
-
                                 if (arg2 is ExpressionConstant argCode && argCode.Type == UndertaleInstruction.DataType.Int32 &&
                                     argCode.Value is UndertaleInstruction.Reference<UndertaleFunction> argCodeFunc)
                                 {

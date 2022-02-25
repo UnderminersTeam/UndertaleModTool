@@ -16,13 +16,16 @@ namespace UndertaleModTool
 
     public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
-        public string GetDecompiledText(string codeName)
+        public string GetDecompiledText(string codeName, GlobalDecompileContext context = null)
         {
-            UndertaleCode code = Data.Code.ByName(codeName);
-            ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
+            return GetDecompiledText(Data.Code.ByName(codeName), context);
+        }
+        public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
+        {
+            GlobalDecompileContext DECOMPILE_CONTEXT = context is null ? new(Data, false) : context;
             try
             {
-                return code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "";
+                return code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT) : "";
             }
             catch (Exception e)
             {
@@ -30,17 +33,20 @@ namespace UndertaleModTool
             }
         }
 
-        public string GetDisassemblyText(string codeName)
+        public string GetDisassemblyText(UndertaleCode code)
         {
             try
             {
-                UndertaleCode code = Data.Code.ByName(codeName);
-                return (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "");
+                return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "";
             }
             catch (Exception e)
             {
                 return "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"; // Please don't
             }
+        }
+        public string GetDisassemblyText(string codeName)
+        {
+            return GetDisassemblyText(Data.Code.ByName(codeName));
         }
 
         public void CrashCheck()

@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="UndertaleModTool.UndertaleStringEditor"
+﻿<local:DataUserControl x:Class="UndertaleModTool.UndertaleStringEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -19,4 +19,4 @@
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Content</TextBlock>
         <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Content}"/>
     </Grid>
-</UserControl>
+</local:DataUserControl>

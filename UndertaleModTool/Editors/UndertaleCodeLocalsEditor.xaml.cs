@@ -19,7 +19,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertaleCodeLocalsEditor.xaml
     /// </summary>
-    public partial class UndertaleCodeLocalsEditor : UserControl
+    public partial class UndertaleCodeLocalsEditor : DataUserControl
     {
         public UndertaleCodeLocalsEditor()
         {
