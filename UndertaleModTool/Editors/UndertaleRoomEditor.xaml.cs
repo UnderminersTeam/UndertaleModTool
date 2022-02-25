@@ -1403,6 +1403,12 @@ namespace UndertaleModTool
         {
             if (RoomObjectsTree.SelectedItem is Layer layer)
             {
+                if (layer.TilesData.TilesX == 0 || layer.TilesData.TilesY == 0)
+                {
+                    MainWindow.ShowError("Tile data size can't be zero.");
+                    return;
+                }
+
                 OpenFileDialog dlg = new()
                 {
                     DefaultExt = "csv",
