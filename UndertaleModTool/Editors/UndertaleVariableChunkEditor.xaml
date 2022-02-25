@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="UndertaleModTool.UndertaleVariableChunkEditor"
+﻿<local:DataUserControl x:Class="UndertaleModTool.UndertaleVariableChunkEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -33,4 +33,4 @@
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Max local variable count</TextBlock>
         <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding MaxLocalVarCount}"/>
     </Grid>
-</UserControl>
+</local:DataUserControl>

@@ -20,7 +20,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertaleGeneralInfoEditor.xaml
     /// </summary>
-    public partial class UndertaleGeneralInfoEditor : UserControl
+    public partial class UndertaleGeneralInfoEditor : DataUserControl
     {
         public UndertaleGeneralInfoEditor()
         {

@@ -44,6 +44,490 @@ namespace UndertaleModLib.Models
         }
     }
 
+    public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyPropertyChanged
+    {
+        public UndertaleString Name { get; set; }
+        public uint Width { get; set; }
+        public uint Height { get; set; }
+        public int MarginLeft { get; set; }
+        public int MarginRight { get; set; }
+        public int MarginBottom { get; set; }
+        public int MarginTop { get; set; }
+        public bool Transparent { get; set; }
+        public bool Smooth { get; set; }
+        public bool Preload { get; set; }
+        public uint BBoxMode { get; set; }
+        public SepMaskType SepMasks { get; set; }
+        public int OriginX { get; set; }
+        public int OriginY { get; set; }
+        public UndertaleSimpleList<TextureEntry> Textures { get; private set; } = new UndertaleSimpleList<TextureEntry>();
+        public ObservableCollection<MaskEntry> CollisionMasks { get; } = new ObservableCollection<MaskEntry>();
+
+        // Special sprite types (always used in GMS2)
+        public uint SVersion { get; set; } = 1;
+        public SpriteType SSpriteType { get; set; }
+        public float GMS2PlaybackSpeed { get; set; } = 15.0f;
+        public AnimSpeedType GMS2PlaybackSpeedType { get; set; } = 0;
+        public bool IsSpecialType { get; set; } = false;
+
+        public int SpineVersion { get; set; }
+        public string SpineJSON { get; set; }
+        public string SpineAtlas { get; set; }
+        public UndertaleSimpleList<UndertaleSpineTextureEntry> SpineTextures { get; set; }
+
+        public bool IsSpineSprite { get => SpineJSON != null && SpineAtlas != null && SpineTextures != null; }
+        public bool IsYYSWFSprite { get => YYSWF != null; }
+
+        private int _SWFVersion;
+        private UndertaleYYSWF _YYSWF;
+
+        public int SWFVersion { get => _SWFVersion; set { _SWFVersion = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SWFVersion))); } }
+        public UndertaleYYSWF YYSWF { get => _YYSWF; set { _YYSWF = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(YYSWF))); } }
+
+        public UndertaleSequence V2Sequence;
+
+        public NineSlice V3NineSlice;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public override string ToString()
+        {
+            return Name.Content + " (" + GetType().Name + ")";
+        }
+
+        public MaskEntry NewMaskEntry()
+        {
+            MaskEntry newEntry = new MaskEntry();
+            uint len = (Width + 7) / 8 * Height;
+            newEntry.Data = new byte[len];
+            return newEntry;
+        }
+
+        public enum SpriteType : uint
+        {
+            Normal = 0,
+            SWF = 1,
+            Spine = 2
+        }
+
+        public enum SepMaskType : uint
+        {
+            AxisAlignedRect = 0,
+            Precise = 1,
+            RotatedRect = 2
+        }
+
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class TextureEntry : UndertaleObject
+        {
+            public UndertaleTexturePageItem Texture { get; set; }
+
+            public void Serialize(UndertaleWriter writer)
+            {
+                writer.WriteUndertaleObjectPointer(Texture);
+            }
+
+            public void Unserialize(UndertaleReader reader)
+            {
+                Texture = reader.ReadUndertaleObjectPointer<UndertaleTexturePageItem>();
+            }
+        }
+
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class MaskEntry
+        {
+            public byte[] Data { get; set; }
+
+            public MaskEntry()
+            {
+            }
+
+            public MaskEntry(byte[] data)
+            {
+                this.Data = data;
+            }
+        }
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.WriteUndertaleString(Name);
+            writer.Write(Width);
+            writer.Write(Height);
+            writer.Write(MarginLeft);
+            writer.Write(MarginRight);
+            writer.Write(MarginBottom);
+            writer.Write(MarginTop);
+            writer.Write(Transparent);
+            writer.Write(Smooth);
+            writer.Write(Preload);
+            writer.Write(BBoxMode);
+            writer.Write((uint)SepMasks);
+            writer.Write(OriginX);
+            writer.Write(OriginY);
+            if (IsSpecialType)
+            {
+                uint sequencePatchPos = 0;
+                uint nineSlicePatchPos = 0;
+
+                writer.Write(-1);
+                writer.Write(SVersion);
+                writer.Write((uint)SSpriteType);
+                if (writer.undertaleData.GeneralInfo?.Major >= 2)
+                {
+                    writer.Write(GMS2PlaybackSpeed);
+                    writer.Write((uint)GMS2PlaybackSpeedType);
+                    if (SVersion >= 2)
+                    {
+                        sequencePatchPos = writer.Position;
+                        writer.Write((int)0);
+                        if (SVersion >= 3)
+                        {
+                            nineSlicePatchPos = writer.Position;
+                            writer.Write((int)0);
+                        }
+                    }
+                }
+
+                switch (SSpriteType)
+                {
+                    case SpriteType.Normal:
+                        writer.WriteUndertaleObject(Textures);
+                        WriteMaskData(writer);
+                        break;
+                    case SpriteType.SWF:
+                        writer.Write(SWFVersion);
+                        if (SWFVersion == 8) writer.WriteUndertaleObject(Textures);
+                        writer.WriteUndertaleObject(YYSWF);
+                        break;
+                    case SpriteType.Spine:
+                        writer.Align(4);
+
+                        byte[] encodedJson = EncodeSpineBlob(Encoding.UTF8.GetBytes(SpineJSON));
+                        byte[] encodedAtlas = EncodeSpineBlob(Encoding.UTF8.GetBytes(SpineAtlas));
+
+                        // the header.
+                        writer.Write(SpineVersion);
+                        writer.Write(encodedJson.Length);
+                        writer.Write(encodedAtlas.Length);
+
+                        switch (SpineVersion)
+                        {
+                            case 1:
+                                {
+                                    UndertaleSpineTextureEntry atlas = SpineTextures.First(); // will throw an exception if the list is null, what I want!
+                                    writer.Write(atlas.PNGBlob.Length);
+                                    writer.Write(atlas.PageWidth);
+                                    writer.Write(atlas.PageHeight);
+
+                                    // the data.
+                                    writer.Write(encodedJson);
+                                    writer.Write(encodedAtlas);
+
+                                    // the one and only atlas.
+                                    writer.Write(atlas.PNGBlob);
+
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    writer.Write(SpineTextures.Count);
+
+                                    // the data.
+                                    writer.Write(encodedJson);
+                                    writer.Write(encodedAtlas);
+
+                                    // the length is stored in the header, so we can't use the list's method.
+                                    foreach (var tex in SpineTextures)
+                                    {
+                                        writer.WriteUndertaleObject(tex);
+                                    }
+
+                                    break;
+                                }
+                        }
+
+                        break;
+                }
+
+                // Sequence + nine slice
+                if (sequencePatchPos != 0 && V2Sequence != null) // Normal compiler also checks for sprite type to be normal, but whatever!
+                {
+                    uint returnTo = writer.Position;
+                    writer.Position = sequencePatchPos;
+                    writer.Write(returnTo);
+                    writer.Position = returnTo;
+                    writer.Write((int)1);
+                    writer.WriteUndertaleObject(V2Sequence);
+                }
+                if (nineSlicePatchPos != 0 && V3NineSlice != null)
+                {
+                    uint returnTo = writer.Position;
+                    writer.Position = nineSlicePatchPos;
+                    writer.Write(returnTo);
+                    writer.Position = returnTo;
+                    writer.WriteUndertaleObject(V3NineSlice);
+                }
+            }
+            else
+            {
+                writer.WriteUndertaleObject(Textures);
+                WriteMaskData(writer);
+            }
+        }
+
+        private void WriteMaskData(UndertaleWriter writer)
+        {
+            writer.Write((uint)CollisionMasks.Count);
+            uint total = 0;
+            foreach (var mask in CollisionMasks)
+            {
+                writer.Write(mask.Data);
+                total += (uint)mask.Data.Length;
+            }
+
+            while (total % 4 != 0)
+            {
+                writer.Write((byte)0);
+                total++;
+            }
+            Util.DebugUtil.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count), "Invalid mask data for sprite");
+        }
+
+        private static byte[] DecodeSpineBlob(byte[] blob)
+        {
+            // don't ask.
+            uint k = 42;
+            for (int i = 0; i < blob.Length; i++)
+            {
+                blob[i] -= (byte)k;
+                k *= k + 1;
+            }
+            return blob;
+        }
+
+        private static byte[] EncodeSpineBlob(byte[] blob)
+        {
+            // don't ask.
+            uint k = 42;
+            for (int i = 0; i < blob.Length; i++)
+            {
+                blob[i] += (byte)k;
+                k *= k + 1;
+            }
+            return blob;
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            Name = reader.ReadUndertaleString();
+            Width = reader.ReadUInt32();
+            Height = reader.ReadUInt32();
+            MarginLeft = reader.ReadInt32();
+            MarginRight = reader.ReadInt32();
+            MarginBottom = reader.ReadInt32();
+            MarginTop = reader.ReadInt32();
+            Transparent = reader.ReadBoolean();
+            Smooth = reader.ReadBoolean();
+            Preload = reader.ReadBoolean();
+            BBoxMode = reader.ReadUInt32();
+            SepMasks = (SepMaskType)reader.ReadUInt32();
+            OriginX = reader.ReadInt32();
+            OriginY = reader.ReadInt32();
+            if (reader.ReadInt32() == -1) // technically this seems to be able to occur on older versions, for special sprite types
+            {
+                int sequenceOffset = 0;
+                int nineSliceOffset = 0;
+
+                IsSpecialType = true;
+                SVersion = reader.ReadUInt32();
+                SSpriteType = (SpriteType)reader.ReadUInt32();
+                if (reader.undertaleData.GeneralInfo?.Major >= 2)
+                {
+                    GMS2PlaybackSpeed = reader.ReadSingle();
+                    GMS2PlaybackSpeedType = (AnimSpeedType)reader.ReadUInt32();
+                    if (SVersion >= 2)
+                    {
+                        sequenceOffset = reader.ReadInt32();
+                        if (SVersion >= 3)
+                        {
+                            reader.undertaleData.GMS2_3_1 = true;
+                            reader.undertaleData.GMS2_3_2 = true;
+                            nineSliceOffset = reader.ReadInt32();
+                        }
+                    }
+                }
+
+                switch (SSpriteType)
+                {
+                    case SpriteType.Normal:
+                        Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
+                        ReadMaskData(reader);
+                        break;
+                    case SpriteType.SWF:
+                        {
+                            //// ATTENTION: This code does not work all the time for some reason. ////
+
+                            SWFVersion = reader.ReadInt32();
+                            Util.DebugUtil.Assert(SWFVersion == 8 || SWFVersion == 7, "Invalid SWF sprite format, expected 7 or 8, got " + SWFVersion);
+
+                            if (SWFVersion == 8)
+                            {
+                                Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
+                            }
+
+                            YYSWF = reader.ReadUndertaleObjectNoPool<UndertaleYYSWF>();
+                        }
+                        break;
+                    case SpriteType.Spine:
+                        {
+                            reader.Align(4);
+
+                            SpineVersion = reader.ReadInt32();
+                            Util.DebugUtil.Assert(SpineVersion == 2 || SpineVersion == 1, "Invalid Spine format version number, expected 2 or 1, got " + SpineVersion);
+                            int jsonLength = reader.ReadInt32();
+                            int atlasLength = reader.ReadInt32();
+                            int textures = reader.ReadInt32(); // count in v2 and size in bytes in v1.
+                            SpineTextures = new UndertaleSimpleList<UndertaleSpineTextureEntry>();
+
+                            switch (SpineVersion)
+                            {
+                                // Version 1 - only one single PNG atlas.
+                                // Version 2 - can be multiple atlases.
+                                case 1:
+                                    {
+                                        UndertaleSpineTextureEntry atlas = new UndertaleSpineTextureEntry();
+                                        int atlasWidth = reader.ReadInt32();
+                                        int atlasHeight = reader.ReadInt32();
+                                        SpineJSON = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(jsonLength)));
+                                        SpineAtlas = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(atlasLength)));
+
+                                        atlas.PageWidth = atlasWidth;
+                                        atlas.PageHeight = atlasHeight;
+                                        atlas.PNGBlob = reader.ReadBytes(textures);
+                                        SpineTextures.Add(atlas);
+                                        break;
+                                    }
+                                case 2:
+                                    {
+                                        SpineJSON = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(jsonLength)));
+                                        SpineAtlas = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(atlasLength)));
+
+                                        // the length is stored before json and atlases so we can't use ReadUndertaleObjectList
+                                        // same goes for serialization.
+                                        for (int t = 0; t < textures; t++)
+                                        {
+                                            SpineTextures.Add(reader.ReadUndertaleObject<UndertaleSpineTextureEntry>());
+                                        }
+
+                                        break;
+                                    }
+                            }
+                        }
+                        break;
+                }
+
+                if (sequenceOffset != 0)
+                {
+                    if (reader.ReadInt32() != 1)
+                        throw new IOException("Expected 1");
+                    V2Sequence = reader.ReadUndertaleObject<UndertaleSequence>();
+                }
+
+                if (nineSliceOffset != 0)
+                {
+                    V3NineSlice = reader.ReadUndertaleObject<NineSlice>();
+                }
+            }
+            else
+            {
+                reader.Position -= 4;
+                Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
+                ReadMaskData(reader);
+            }
+        }
+
+        private void ReadMaskData(UndertaleReader reader)
+        {
+            uint MaskCount = reader.ReadUInt32();
+            uint len = (Width + 7) / 8 * Height;
+            CollisionMasks.Clear();
+            uint total = 0;
+            for (uint i = 0; i < MaskCount; i++)
+            {
+                CollisionMasks.Add(new MaskEntry(reader.ReadBytes((int)len)));
+                total += len;
+            }
+
+            while (total % 4 != 0)
+            {
+                if (reader.ReadByte() != 0)
+                    throw new IOException("Mask padding");
+                total++;
+            }
+            Util.DebugUtil.Assert(total == CalculateMaskDataSize(Width, Height, MaskCount));
+        }
+
+        public uint CalculateMaskDataSize(uint width, uint height, uint maskcount)
+        {
+            uint roundedWidth = (width + 7) / 8 * 8; // round to multiple of 8
+            uint dataBits = roundedWidth * height * maskcount;
+            uint dataBytes = ((dataBits + 31) / 32 * 32) / 8; // round to multiple of 4 bytes
+            return dataBytes;
+        }
+
+        public void SerializePrePadding(UndertaleWriter writer)
+        {
+            writer.Align(4);
+        }
+
+        public void UnserializePrePadding(UndertaleReader reader)
+        {
+            reader.Align(4);
+        }
+
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
+        public class NineSlice : UndertaleObject
+        {
+            public int Left { get; set; }
+            public int Top { get; set; }
+            public int Right { get; set; }
+            public int Bottom { get; set; }
+            public bool Enabled { get; set; }
+            public TileMode[] TileModes { get; set; } = new TileMode[5];
+
+            public enum TileMode : int
+            {
+                Stretch = 0,
+                Repeat = 1,
+                Mirror = 2,
+                BlankRepeat = 3,
+                Hide = 4
+            }
+
+            public void Serialize(UndertaleWriter writer)
+            {
+                writer.Write(Left);
+                writer.Write(Top);
+                writer.Write(Right);
+                writer.Write(Bottom);
+                writer.Write(Enabled);
+                for (int i = 0; i < 5; i++)
+                    writer.Write((int)TileModes[i]);
+            }
+
+            public void Unserialize(UndertaleReader reader)
+            {
+                Left = reader.ReadInt32();
+                Top = reader.ReadInt32();
+                Right = reader.ReadInt32();
+                Bottom = reader.ReadInt32();
+                Enabled = reader.ReadBoolean();
+                for (int i = 0; i < 5; i++)
+                    TileModes[i] = (TileMode)reader.ReadInt32();
+            }
+        }
+    }
+
     /// <summary>
     /// Some dirty hacks to make SWF work, they'll be removed later.
     /// </summary>
@@ -1010,490 +1494,6 @@ namespace UndertaleModLib.Models
         public override string ToString()
         {
             return $"UndertaleYYSWF ({Version})";
-        }
-    }
-
-    public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyPropertyChanged
-    {
-        public UndertaleString Name { get; set; }
-        public uint Width { get; set; }
-        public uint Height { get; set; }
-        public int MarginLeft { get; set; }
-        public int MarginRight { get; set; }
-        public int MarginBottom { get; set; }
-        public int MarginTop { get; set; }
-        public bool Transparent { get; set; }
-        public bool Smooth { get; set; }
-        public bool Preload { get; set; }
-        public uint BBoxMode { get; set; }
-        public SepMaskType SepMasks { get; set; }
-        public int OriginX { get; set; }
-        public int OriginY { get; set; }
-        public UndertaleSimpleList<TextureEntry> Textures { get; private set; } = new UndertaleSimpleList<TextureEntry>();
-        public ObservableCollection<MaskEntry> CollisionMasks { get; } = new ObservableCollection<MaskEntry>();
-
-        // Special sprite types (always used in GMS2)
-        public uint SVersion { get; set; } = 1;
-        public SpriteType SSpriteType { get; set; }
-        public float GMS2PlaybackSpeed { get; set; } = 15.0f;
-        public AnimSpeedType GMS2PlaybackSpeedType { get; set; } = 0;
-        public bool IsSpecialType { get; set; } = false;
-
-        public int SpineVersion { get; set; }
-        public string SpineJSON { get; set; }
-        public string SpineAtlas { get; set; }
-        public UndertaleSimpleList<UndertaleSpineTextureEntry> SpineTextures { get; set; }
-
-        public bool IsSpineSprite { get => SpineJSON != null && SpineAtlas != null && SpineTextures != null; }
-        public bool IsYYSWFSprite { get => YYSWF != null; }
-
-        private int _SWFVersion;
-        private UndertaleYYSWF _YYSWF;
-
-        public int SWFVersion { get => _SWFVersion; set { _SWFVersion = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SWFVersion))); } }
-        public UndertaleYYSWF YYSWF { get => _YYSWF; set { _YYSWF = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(YYSWF))); } }
-
-        public UndertaleSequence V2Sequence;
-
-        public NineSlice V3NineSlice;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public override string ToString()
-        {
-            return Name.Content + " (" + GetType().Name + ")";
-        }
-
-        public MaskEntry NewMaskEntry()
-        {
-            MaskEntry newEntry = new MaskEntry();
-            uint len = (Width + 7) / 8 * Height;
-            newEntry.Data = new byte[len];
-            return newEntry;
-        }
-
-        public enum SpriteType : uint
-        {
-            Normal = 0,
-            SWF = 1,
-            Spine = 2
-        }
-
-        public enum SepMaskType : uint
-        {
-            AxisAlignedRect = 0,
-            Precise = 1,
-            RotatedRect = 2
-        }
-
-        [PropertyChanged.AddINotifyPropertyChangedInterface]
-        public class TextureEntry : UndertaleObject
-        {
-            public UndertaleTexturePageItem Texture { get; set; }
-
-            public void Serialize(UndertaleWriter writer)
-            {
-                writer.WriteUndertaleObjectPointer(Texture);
-            }
-
-            public void Unserialize(UndertaleReader reader)
-            {
-                Texture = reader.ReadUndertaleObjectPointer<UndertaleTexturePageItem>();
-            }
-        }
-
-        [PropertyChanged.AddINotifyPropertyChangedInterface]
-        public class MaskEntry
-        {
-            public byte[] Data { get; set; }
-
-            public MaskEntry()
-            {
-            }
-
-            public MaskEntry(byte[] data)
-            {
-                this.Data = data;
-            }
-        }
-
-        public void Serialize(UndertaleWriter writer)
-        {
-            writer.WriteUndertaleString(Name);
-            writer.Write(Width);
-            writer.Write(Height);
-            writer.Write(MarginLeft);
-            writer.Write(MarginRight);
-            writer.Write(MarginBottom);
-            writer.Write(MarginTop);
-            writer.Write(Transparent);
-            writer.Write(Smooth);
-            writer.Write(Preload);
-            writer.Write(BBoxMode);
-            writer.Write((uint) SepMasks);
-            writer.Write(OriginX);
-            writer.Write(OriginY);
-            if (IsSpecialType)
-            {
-                uint sequencePatchPos = 0;
-                uint nineSlicePatchPos = 0;
-
-                writer.Write(-1);
-                writer.Write(SVersion);
-                writer.Write((uint)SSpriteType);
-                if (writer.undertaleData.GeneralInfo?.Major >= 2)
-                {
-                    writer.Write(GMS2PlaybackSpeed);
-                    writer.Write((uint)GMS2PlaybackSpeedType);
-                    if (SVersion >= 2)
-                    {
-                        sequencePatchPos = writer.Position;
-                        writer.Write((int)0);
-                        if (SVersion >= 3)
-                        {
-                            nineSlicePatchPos = writer.Position;
-                            writer.Write((int)0);
-                        }
-                    }
-                }
-
-                switch (SSpriteType)
-                {
-                    case SpriteType.Normal:
-                        writer.WriteUndertaleObject(Textures);
-                        WriteMaskData(writer);
-                        break;
-                    case SpriteType.SWF:
-                        writer.Write(SWFVersion);
-                        if (SWFVersion == 8) writer.WriteUndertaleObject(Textures);
-                        writer.WriteUndertaleObject(YYSWF);
-                        break;
-                    case SpriteType.Spine:
-                        writer.Align(4);
-                        
-                        byte[] encodedJson = EncodeSpineBlob(Encoding.UTF8.GetBytes(SpineJSON));
-                        byte[] encodedAtlas = EncodeSpineBlob(Encoding.UTF8.GetBytes(SpineAtlas));
-
-                        // the header.
-                        writer.Write(SpineVersion);
-                        writer.Write(encodedJson.Length);
-                        writer.Write(encodedAtlas.Length);
-
-                        switch (SpineVersion)
-                        {
-                            case 1:
-                                {
-                                    UndertaleSpineTextureEntry atlas = SpineTextures.First(); // will throw an exception if the list is null, what I want!
-                                    writer.Write(atlas.PNGBlob.Length);
-                                    writer.Write(atlas.PageWidth);
-                                    writer.Write(atlas.PageHeight);
-
-                                    // the data.
-                                    writer.Write(encodedJson);
-                                    writer.Write(encodedAtlas);
-
-                                    // the one and only atlas.
-                                    writer.Write(atlas.PNGBlob);
-
-                                    break;
-                                }
-                            case 2:
-                                {
-                                    writer.Write(SpineTextures.Count);
-
-                                    // the data.
-                                    writer.Write(encodedJson);
-                                    writer.Write(encodedAtlas);
-
-                                    // the length is stored in the header, so we can't use the list's method.
-                                    foreach (var tex in SpineTextures)
-                                    {
-                                        writer.WriteUndertaleObject(tex);
-                                    }
-
-                                    break;
-                                }
-                        }
-
-                        break;
-                }
-
-                // Sequence + nine slice
-                if (sequencePatchPos != 0 && V2Sequence != null) // Normal compiler also checks for sprite type to be normal, but whatever!
-                {
-                    uint returnTo = writer.Position;
-                    writer.Position = sequencePatchPos;
-                    writer.Write(returnTo);
-                    writer.Position = returnTo;
-                    writer.Write((int)1);
-                    writer.WriteUndertaleObject(V2Sequence);
-                }
-                if (nineSlicePatchPos != 0 && V3NineSlice != null)
-                {
-                    uint returnTo = writer.Position;
-                    writer.Position = nineSlicePatchPos;
-                    writer.Write(returnTo);
-                    writer.Position = returnTo;
-                    writer.WriteUndertaleObject(V3NineSlice);
-                }
-            }
-            else
-            {
-                writer.WriteUndertaleObject(Textures);
-                WriteMaskData(writer);
-            }
-        }
-
-        private void WriteMaskData(UndertaleWriter writer)
-        {
-            writer.Write((uint)CollisionMasks.Count);
-            uint total = 0;
-            foreach (var mask in CollisionMasks)
-            {
-                writer.Write(mask.Data);
-                total += (uint)mask.Data.Length;
-            }
-
-            while (total % 4 != 0)
-            {
-                writer.Write((byte)0);
-                total++;
-            }
-            Util.DebugUtil.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count), "Invalid mask data for sprite");
-        }
-
-        private static byte[] DecodeSpineBlob(byte[] blob)
-        {
-            // don't ask.
-            uint k = 42;
-            for (int i = 0; i < blob.Length; i++)
-            {
-                blob[i] -= (byte)k;
-                k *= k + 1;
-            }
-            return blob;
-        }
-
-        private static byte[] EncodeSpineBlob(byte[] blob)
-        {
-            // don't ask.
-            uint k = 42;
-            for (int i = 0; i < blob.Length; i++)
-            {
-                blob[i] += (byte)k;
-                k *= k + 1;
-            }
-            return blob;
-        }
-
-        public void Unserialize(UndertaleReader reader)
-        {
-            Name = reader.ReadUndertaleString();
-            Width = reader.ReadUInt32();
-            Height = reader.ReadUInt32();
-            MarginLeft = reader.ReadInt32();
-            MarginRight = reader.ReadInt32();
-            MarginBottom = reader.ReadInt32();
-            MarginTop = reader.ReadInt32();
-            Transparent = reader.ReadBoolean();
-            Smooth = reader.ReadBoolean();
-            Preload = reader.ReadBoolean();
-            BBoxMode = reader.ReadUInt32();
-            SepMasks = (SepMaskType) reader.ReadUInt32();
-            OriginX = reader.ReadInt32();
-            OriginY = reader.ReadInt32();
-            if (reader.ReadInt32() == -1) // technically this seems to be able to occur on older versions, for special sprite types
-            {
-                int sequenceOffset = 0;
-                int nineSliceOffset = 0;
-
-                IsSpecialType = true;
-                SVersion = reader.ReadUInt32();
-                SSpriteType = (SpriteType)reader.ReadUInt32();
-                if (reader.undertaleData.GeneralInfo?.Major >= 2)
-                {
-                    GMS2PlaybackSpeed = reader.ReadSingle();
-                    GMS2PlaybackSpeedType = (AnimSpeedType)reader.ReadUInt32();
-                    if (SVersion >= 2)
-                    {
-                        sequenceOffset = reader.ReadInt32();
-                        if (SVersion >= 3)
-                        {
-                            reader.undertaleData.GMS2_3_1 = true;
-                            reader.undertaleData.GMS2_3_2 = true;
-                            nineSliceOffset = reader.ReadInt32();
-                        }
-                    }
-                }
-
-                switch (SSpriteType)
-                {
-                    case SpriteType.Normal:
-                        Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
-                        ReadMaskData(reader);
-                        break;
-                    case SpriteType.SWF:
-                        {
-                            //// ATTENTION: This code does not work all the time for some reason. ////
-
-                            SWFVersion = reader.ReadInt32();
-                            Util.DebugUtil.Assert(SWFVersion == 8 || SWFVersion == 7, "Invalid SWF sprite format, expected 7 or 8, got " + SWFVersion);
-
-                            if (SWFVersion == 8)
-                            {
-                                Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
-                            }
-
-                            YYSWF = reader.ReadUndertaleObjectNoPool<UndertaleYYSWF>();
-                        }
-                        break;
-                    case SpriteType.Spine:
-                        {
-                            reader.Align(4);
-
-                            SpineVersion = reader.ReadInt32();
-                            Util.DebugUtil.Assert(SpineVersion == 2 || SpineVersion == 1, "Invalid Spine format version number, expected 2 or 1, got " + SpineVersion);
-                            int jsonLength = reader.ReadInt32();
-                            int atlasLength = reader.ReadInt32();
-                            int textures = reader.ReadInt32(); // count in v2 and size in bytes in v1.
-                            SpineTextures = new UndertaleSimpleList<UndertaleSpineTextureEntry>();
-
-                            switch (SpineVersion)
-                            {
-                                // Version 1 - only one single PNG atlas.
-                                // Version 2 - can be multiple atlases.
-                                case 1:
-                                    {
-                                        UndertaleSpineTextureEntry atlas = new UndertaleSpineTextureEntry();
-                                        int atlasWidth = reader.ReadInt32();
-                                        int atlasHeight = reader.ReadInt32();
-                                        SpineJSON = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(jsonLength)));
-                                        SpineAtlas = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(atlasLength)));
-
-                                        atlas.PageWidth = atlasWidth;
-                                        atlas.PageHeight = atlasHeight;
-                                        atlas.PNGBlob = reader.ReadBytes(textures);
-                                        SpineTextures.Add(atlas);
-                                        break;
-                                    }
-                                case 2:
-                                    {
-                                        SpineJSON = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(jsonLength)));
-                                        SpineAtlas = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(atlasLength)));
-
-                                        // the length is stored before json and atlases so we can't use ReadUndertaleObjectList
-                                        // same goes for serialization.
-                                        for (int t = 0; t < textures; t++)
-                                        {
-                                            SpineTextures.Add(reader.ReadUndertaleObject<UndertaleSpineTextureEntry>());
-                                        }
-
-                                        break;
-                                    }
-                            }
-                        }
-                        break;
-                }
-
-                if (sequenceOffset != 0)
-                {
-                    if (reader.ReadInt32() != 1)
-                        throw new IOException("Expected 1");
-                    V2Sequence = reader.ReadUndertaleObject<UndertaleSequence>();
-                }
-
-                if (nineSliceOffset != 0)
-                {
-                    V3NineSlice = reader.ReadUndertaleObject<NineSlice>();
-                }
-            }
-            else
-            {
-                reader.Position -= 4;
-                Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
-                ReadMaskData(reader);
-            }
-        }
-
-        private void ReadMaskData(UndertaleReader reader)
-        {
-            uint MaskCount = reader.ReadUInt32();
-            uint len = (Width + 7) / 8 * Height;
-            CollisionMasks.Clear();
-            uint total = 0;
-            for (uint i = 0; i < MaskCount; i++)
-            {
-                CollisionMasks.Add(new MaskEntry(reader.ReadBytes((int)len)));
-                total += len;
-            }
-
-            while (total % 4 != 0)
-            {
-                if (reader.ReadByte() != 0)
-                    throw new IOException("Mask padding");
-                total++;
-            }
-            Util.DebugUtil.Assert(total == CalculateMaskDataSize(Width, Height, MaskCount));
-        }
-
-        public uint CalculateMaskDataSize(uint width, uint height, uint maskcount)
-        {
-            uint roundedWidth = (width + 7) / 8 * 8; // round to multiple of 8
-            uint dataBits = roundedWidth * height * maskcount;
-            uint dataBytes = ((dataBits + 31) / 32 * 32) / 8; // round to multiple of 4 bytes
-            return dataBytes;
-        }
-
-        public void SerializePrePadding(UndertaleWriter writer)
-        {
-            writer.Align(4);
-        }
-
-        public void UnserializePrePadding(UndertaleReader reader)
-        {
-            reader.Align(4);
-        }
-
-        [PropertyChanged.AddINotifyPropertyChangedInterface]
-        public class NineSlice : UndertaleObject
-        {
-            public int Left { get; set; }
-            public int Top { get; set; }
-            public int Right { get; set; }
-            public int Bottom { get; set; }
-            public bool Enabled { get; set; }
-            public TileMode[] TileModes { get; set; } = new TileMode[5];
-
-            public enum TileMode : int
-            {
-                Stretch = 0,
-                Repeat = 1,
-                Mirror = 2,
-                BlankRepeat = 3,
-                Hide = 4
-            }
-
-            public void Serialize(UndertaleWriter writer)
-            {
-                writer.Write(Left);
-                writer.Write(Top);
-                writer.Write(Right);
-                writer.Write(Bottom);
-                writer.Write(Enabled);
-                for (int i = 0; i < 5; i++)
-                    writer.Write((int)TileModes[i]);
-            }
-
-            public void Unserialize(UndertaleReader reader)
-            {
-                Left = reader.ReadInt32();
-                Top = reader.ReadInt32();
-                Right = reader.ReadInt32();
-                Bottom = reader.ReadInt32();
-                Enabled = reader.ReadBoolean();
-                for (int i = 0; i < 5; i++)
-                    TileModes[i] = (TileMode)reader.ReadInt32();
-            }
         }
     }
 }
