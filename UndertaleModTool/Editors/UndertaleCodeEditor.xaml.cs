@@ -82,9 +82,9 @@ namespace UndertaleModTool
                 using (XmlTextReader reader = new XmlTextReader(stream))
                 {
                     DecompiledEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                    var def = DecompiledEditor.SyntaxHighlighting;
                     if (mainWindow.Data.GeneralInfo.Major < 2)
                     {
-                        var def = DecompiledEditor.SyntaxHighlighting;
                         foreach (var span in def.MainRuleSet.Spans)
                         {
                             string expr = span.StartExpression.ToString();
@@ -94,6 +94,41 @@ namespace UndertaleModTool
                             }
                         }
                     }
+                    // This was an attempt to only highlight
+                    // GMS 2.3+ keywords if the game is
+                    // made in such a version.
+                    // However despite what StackOverflow
+                    // says, this isn't working so it's just
+                    // hardcoded in the XML for now
+                    /*
+                    if(mainWindow.Data.GMS2_3)
+                    {
+                        HighlightingColor color = null;
+                        foreach (var rule in def.MainRuleSet.Rules)
+                        {
+                            if (rule.Regex.IsMatch("if"))
+                            {
+                                color = rule.Color;
+                                break;
+                            }
+                        }
+                        if (color != null)
+                        {
+                            string[] keywords =
+                            {
+                                "new",
+                                "function",
+                                "keywords"
+                            };
+                            var rule = new HighlightingRule();
+                            var regex = String.Format(@"\b(?>{0})\b", String.Join("|", keywords));
+
+                            rule.Regex = new Regex(regex);
+                            rule.Color = color;
+
+                            def.MainRuleSet.Rules.Add(rule);
+                        }
+                    }*/
                 }
             }
 

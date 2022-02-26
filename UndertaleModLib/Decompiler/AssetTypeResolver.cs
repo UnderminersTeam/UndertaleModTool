@@ -1461,6 +1461,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["snd_stop"] = new AssetIDType[] { AssetIDType.Sound };
                 builtin_funcs["snd_stop_ch1"] = new AssetIDType[] { AssetIDType.Sound };
                 builtin_funcs["snd_volume"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_valid_room"] = new AssetIDType[] { AssetIDType.Room, AssetIDType.Other };
 
                 builtin_vars.Add("_instruments", AssetIDType.Sound);
                 builtin_vars.Add("_instrumentsB", AssetIDType.Sound);
