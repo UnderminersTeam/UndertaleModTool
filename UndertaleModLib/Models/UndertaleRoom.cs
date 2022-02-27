@@ -169,61 +169,6 @@ namespace UndertaleModLib.Models
             bool sequences = false;
             if (reader.undertaleData.GeneralInfo.Major >= 2)
             {
-                // First, need to do a length check on one of the layers to see if this is 2022.1 or higher
-                if (!reader.undertaleData.GMS2022_1)
-                {
-                    int returnTo = reader.Offset;
-                    reader.Offset = reader.ReadInt32();
-                    int layerCount = reader.ReadInt32();
-                    if (layerCount >= 1)
-                    {
-                        int jumpOffset = reader.ReadInt32() + 8;
-                        int nextOffset = reader.ReadInt32();
-                        reader.Offset = jumpOffset;
-                        switch ((LayerType)reader.ReadInt32())
-                        {
-                            case LayerType.Background:
-                                if (nextOffset - reader.Offset > 16 * 4)
-                                    reader.undertaleData.GMS2022_1 = true;
-                                break;
-                            case LayerType.Instances:
-                                reader.Offset += 6 * 4;
-                                int instanceCount = reader.ReadInt32();
-                                if (nextOffset - reader.Offset != (instanceCount * 4))
-                                    reader.undertaleData.GMS2022_1 = true;
-                                break;
-                            case LayerType.Assets:
-                                reader.Offset += 6 * 4;
-                                int tileOffset = reader.ReadInt32();
-                                if (tileOffset != reader.Position + (reader.undertaleData.GMS2_3 ? 8 : 4))
-                                    reader.undertaleData.GMS2022_1 = true;
-                                break;
-                            case LayerType.Tiles:
-                                reader.Offset += 7 * 4;
-                                int tileMapWidth = reader.ReadInt32();
-                                int tileMapHeight = reader.ReadInt32();
-                                if (nextOffset - reader.Offset != (tileMapWidth * tileMapHeight * 4))
-                                    reader.undertaleData.GMS2022_1 = true;
-                                break;
-                            case LayerType.Effect:
-                                reader.Offset += 7 * 4;
-                                int propertyCount = reader.ReadInt32();
-                                if (nextOffset - reader.Offset != (propertyCount * 3 * 4))
-                                    reader.undertaleData.GMS2022_1 = true;
-                                break;
-                        }
-                        // Allow rooms in GMS 2.1 - 2.2.5 to load.
-                        // For some reason the above detects them as 2022.1
-                        // so this serves as a sanity check.
-                        reader.undertaleData.GMS2022_1 &= (reader.undertaleData.GMS2_3 || 
-                                                          reader.undertaleData.GMS2_3_1 || 
-                                                          reader.undertaleData.GMS2_3_2 || 
-                                                          reader.undertaleData.GMS2_2_2_302) &&
-                                                          reader.undertaleData.FORM.Chunks.ContainsKey("FEDS");
-                    }
-                    reader.Offset = returnTo;
-                }
-
                 Layers = reader.ReadUndertaleObjectPointer<UndertalePointerList<Layer>>();
                 sequences = reader.GMS2_3;
                 if (sequences)
