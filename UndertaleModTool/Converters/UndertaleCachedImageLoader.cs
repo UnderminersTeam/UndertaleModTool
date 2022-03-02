@@ -29,6 +29,7 @@ namespace UndertaleModTool
 
         private static readonly ConcurrentDictionary<string, ImageSource> imageCache = new();
         private static readonly ConcurrentDictionary<Tuple<string, Tuple<uint, uint, uint, uint>>, ImageSource> tileCache = new();
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
         private static bool _reuseTileBuffer;
         public static bool ReuseTileBuffer
@@ -77,7 +78,21 @@ namespace UndertaleModTool
             if (texture is null || texture.TexturePage is null)
                 return null;
 
-            string texName = texture.Name.Content;
+            string texName = texture.Name?.Content;
+            if (texName is null)
+            {
+                if (generate)
+                    texName = mainWindow.Dispatcher.Invoke(() =>
+                    {
+                        return (mainWindow.Data.TexturePageItems.IndexOf(texture) + 1).ToString();
+                    });
+                else
+                    texName = (mainWindow.Data.TexturePageItems.IndexOf(texture) + 1).ToString();
+
+                if (texName == "-1")
+                    return null;
+            }
+
 
             if (tileRectList is not null)
             {

@@ -1516,11 +1516,12 @@ namespace UndertaleModTool
 
             tileTextures = tiles?.AsParallel()
                                  .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
-                                 .GroupBy(x => x.Tpag?.Name)
+                                 .GroupBy(x => x.Tpag?.Name?.Content ?? (mainWindow.Data.TexturePageItems.IndexOf(x.Tpag) + 1).ToString())
+                                 .Where(x => x.Key != "-1")
                                  .Select(x =>
                                  {
                                      return new Tuple<UndertaleTexturePageItem, List<Tuple<uint, uint, uint, uint>>>(
-                                         x.First().Tpag, 
+                                         x.First().Tpag,
                                          x.Select(tile => new Tuple<uint, uint, uint, uint>(tile.SourceX, tile.SourceY, tile.Width, tile.Height))
                                           .Distinct()
                                           .ToList());
@@ -1540,9 +1541,16 @@ namespace UndertaleModTool
                     _ => null
                 };
 
-                if (texture is not null)
+                if (texture is not null && texture.TexturePage is not null)
                 {
-                    string textPageName = texture.TexturePage.Name.Content;
+                    string textPageName = texture.TexturePage.Name?.Content;
+                    if (textPageName is null)
+                    {
+                        textPageName = (mainWindow.Data.TexturePageItems.IndexOf(texture) + 1).ToString();
+                        if (textPageName == "-1")
+                            return;
+                    }
+
                     _ = textPages.AddOrUpdate(textPageName, new ConcurrentBag<UndertaleTexturePageItem>() { texture }, (_, list) =>
                     {
                         list.Add(texture);
