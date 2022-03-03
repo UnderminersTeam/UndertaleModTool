@@ -48,6 +48,8 @@ List<string> splitStringsList = GetSplitStringsList("sprite(s)/background(s)/fon
 bool[] SpriteSheetsCopyNeeded = new bool[DonorDataEmbeddedTexturesCount];
 bool[] SpriteSheetsUsed = new bool[(DataEmbeddedTexturesCount + DonorDataEmbeddedTexturesCount)];
 
+int lastTextPage = Data.EmbeddedTextures.Count - 1;
+
 SetProgressBar(null, "Textures Exported", 0, DonorData.TexturePageItems.Count);
 StartUpdater();
 
@@ -64,9 +66,9 @@ await Task.Run(() => {
     for (var i = 0; i < DonorDataEmbeddedTexturesCount; i++)
     {
         UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
+        texture.Name = new UndertaleString("Texture " + ++lastTextPage);
         texture.TextureData.TextureBlob = DonorData.EmbeddedTextures[i].TextureData.TextureBlob;
         Data.EmbeddedTextures.Add(texture);
-        texture.Name = new UndertaleString("Texture " + Data.EmbeddedTextures.IndexOf(texture).ToString());
     }
     for (var j = 0; j < splitStringsList.Count; j++)
     {

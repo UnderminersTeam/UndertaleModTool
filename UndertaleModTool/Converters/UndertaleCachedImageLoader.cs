@@ -79,7 +79,7 @@ namespace UndertaleModTool
                 return null;
 
             string texName = texture.Name?.Content;
-            if (texName is null)
+            if (texName is null || texName == "PageItem Unknown Index")
             {
                 if (generate)
                     texName = mainWindow.Dispatcher.Invoke(() =>
@@ -337,10 +337,18 @@ namespace UndertaleModTool
             if (tilesBG is null)
                 return null;
 
-            Bitmap tilePageBMP;
-            if (tilePageCache.ContainsKey(tilesBG.Texture.Name.Content))
+            string texName = tilesBG.Texture?.Name?.Content;
+            if (texName is null or "PageItem Unknown Index")
             {
-                tilePageBMP = tilePageCache[tilesBG.Texture.Name.Content];
+                texName = ((Application.Current.MainWindow as MainWindow).Data.TexturePageItems.IndexOf(tilesBG.Texture) + 1).ToString();
+                if (texName == "-1")
+                    return null;
+            }
+
+            Bitmap tilePageBMP;
+            if (tilePageCache.ContainsKey(texName))
+            {
+                tilePageBMP = tilePageCache[texName];
             }
             else
             {
@@ -349,7 +357,7 @@ namespace UndertaleModTool
                                                                                 tilesBG.Texture.SourceWidth,
                                                                                 tilesBG.Texture.SourceHeight), tilesBG.Texture);
 
-                tilePageCache[tilesBG.Texture.Name.Content] = tilePageBMP;
+                tilePageCache[texName] = tilePageBMP;
             }
 
             BitmapData data = tilePageBMP.LockBits(new Rectangle(0, 0, tilePageBMP.Width, tilePageBMP.Height), ImageLockMode.ReadOnly, tilePageBMP.PixelFormat);
@@ -396,7 +404,7 @@ namespace UndertaleModTool
                     tileBMP.UnlockBits(tileData);
                     ArrayPool<byte>.Shared.Return(bufferRes);
 
-                    TileCache.TryAdd(new(tilesBG.Texture.Name.Content, (uint)((tilesBG.GMS2TileColumns * y) + x)), tileBMP);
+                    TileCache.TryAdd(new(texName, (uint)((tilesBG.GMS2TileColumns * y) + x)), tileBMP);
                 }
             });
 

@@ -27,6 +27,8 @@ Packer packer = new Packer();
 packer.Process(sourcePath, searchPattern, textureSize, border, debug);
 packer.SaveAtlasses(outName);
 
+int lastTextPage = Data.EmbeddedTextures.Count - 1;
+int lastTextPageItem = Data.TexturePageItems.Count - 1;
 
 string prefix = outName.Replace(Path.GetExtension(outName), "");
 int atlasCount = 0;
@@ -35,6 +37,7 @@ foreach (Atlas atlas in packer.Atlasses)
     string atlasName = String.Format(prefix + "{0:000}" + ".png", atlasCount);
     Bitmap atlasBitmap = new Bitmap(atlasName);
     UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
+    texture.Name = new UndertaleString("Texture " + ++lastTextPage);
     texture.TextureData.TextureBlob = File.ReadAllBytes(atlasName);
     Data.EmbeddedTextures.Add(texture);
     foreach (Node n in atlas.Nodes)
@@ -42,6 +45,7 @@ foreach (Atlas atlas in packer.Atlasses)
         if (n.Texture != null)
         {
             UndertaleTexturePageItem texturePageItem = new UndertaleTexturePageItem();
+            texturePageItem.Name = new UndertaleString("PageItem " + ++lastTextPageItem);
             texturePageItem.SourceX = (ushort)n.Bounds.X;
             texturePageItem.SourceY = (ushort)n.Bounds.Y;
             texturePageItem.SourceWidth = (ushort)n.Bounds.Width;
