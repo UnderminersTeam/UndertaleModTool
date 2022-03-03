@@ -2036,21 +2036,30 @@ namespace UndertaleModTool
             }
         }
 
-        public static void ShowMessage(string message)
+        public static void ShowMessage(string message, bool wait = true)
         {
-            MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (wait)
+                MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Information);
+            else
+                _ = Task.Run(() => MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Information));
         }
         public static MessageBoxResult ShowQuestion(string message, MessageBoxImage icon = MessageBoxImage.Question)
         {
             return MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.YesNo, icon);
         }
-        public static void ShowWarning(string message)
+        public static void ShowWarning(string message, bool wait = true)
         {
-            MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning);
+            if (wait)
+                MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning);
+            else
+                _ = Task.Run(() => MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning));
         }
-        public static void ShowError(string message)
+        public static void ShowError(string message, bool wait = true)
         {
-            MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
+            if (wait)
+                MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
+            else
+                _ = Task.Run(() => MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error));
         }
 
         public void SetUMTConsoleText(string message)

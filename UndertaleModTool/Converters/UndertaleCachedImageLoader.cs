@@ -337,78 +337,100 @@ namespace UndertaleModTool
             if (tilesBG is null)
                 return null;
 
-            string texName = tilesBG.Texture?.Name?.Content;
-            if (texName is null or "PageItem Unknown Index")
+            try
             {
-                texName = ((Application.Current.MainWindow as MainWindow).Data.TexturePageItems.IndexOf(tilesBG.Texture) + 1).ToString();
-                if (texName == "-1")
-                    return null;
-            }
-
-            Bitmap tilePageBMP;
-            if (tilePageCache.ContainsKey(texName))
-            {
-                tilePageBMP = tilePageCache[texName];
-            }
-            else
-            {
-                tilePageBMP = UndertaleCachedImageLoader.CreateSpriteBitmap(new(tilesBG.Texture.SourceX,
-                                                                                tilesBG.Texture.SourceY,
-                                                                                tilesBG.Texture.SourceWidth,
-                                                                                tilesBG.Texture.SourceHeight), tilesBG.Texture);
-
-                tilePageCache[texName] = tilePageBMP;
-            }
-
-            BitmapData data = tilePageBMP.LockBits(new Rectangle(0, 0, tilePageBMP.Width, tilePageBMP.Height), ImageLockMode.ReadOnly, tilePageBMP.PixelFormat);
-            int depth = Image.GetPixelFormatSize(data.PixelFormat) / 8;
-            byte[] buffer = new byte[data.Stride * tilePageBMP.Height];
-            Marshal.Copy(data.Scan0, buffer, 0, buffer.Length);
-            tilePageBMP.UnlockBits(data);
-
-            int w = (int)tilesBG.GMS2TileWidth;
-            int h = (int)tilesBG.GMS2TileHeight;
-            int outX = (int)tilesBG.GMS2OutputBorderX;
-            int outY = (int)tilesBG.GMS2OutputBorderY;
-            int tileRows = (int)Math.Ceiling(tilesBG.GMS2TileCount / (double)tilesBG.GMS2TileColumns);
-            System.Drawing.Imaging.PixelFormat format = tilePageBMP.PixelFormat;
-
-            _ = Parallel.For(0, tileRows, (y) =>
-            {
-                int y1 = ((y + 1) * outY) + (y * (h + outY));
-
-                for (int x = 0; x < tilesBG.GMS2TileColumns; x++)
+                string texName = tilesBG.Texture?.Name?.Content;
+                if (texName is null or "PageItem Unknown Index")
                 {
-                    int x1 = ((x + 1) * outX) + (x * (w + outX));
+                    texName = ((Application.Current.MainWindow as MainWindow).Data.TexturePageItems.IndexOf(tilesBG.Texture) + 1).ToString();
+                    if (texName == "-1")
+                        return null;
+                }
 
-                    int bufferResLen = w * h * depth;
-                    byte[] bufferRes = ArrayPool<byte>.Shared.Rent(bufferResLen);
+                Bitmap tilePageBMP;
+                if (tilePageCache.ContainsKey(texName))
+                {
+                    tilePageBMP = tilePageCache[texName];
+                }
+                else
+                {
+                    tilePageBMP = UndertaleCachedImageLoader.CreateSpriteBitmap(new(tilesBG.Texture.SourceX,
+                                                                                    tilesBG.Texture.SourceY,
+                                                                                    tilesBG.Texture.SourceWidth,
+                                                                                    tilesBG.Texture.SourceHeight), tilesBG.Texture);
 
-                    if (!(x == 0 && y == 0))
+                    tilePageCache[texName] = tilePageBMP;
+                }
+
+                BitmapData data = tilePageBMP.LockBits(new Rectangle(0, 0, tilePageBMP.Width, tilePageBMP.Height), ImageLockMode.ReadOnly, tilePageBMP.PixelFormat);
+                int depth = Image.GetPixelFormatSize(data.PixelFormat) / 8;
+                byte[] buffer = new byte[data.Stride * tilePageBMP.Height];
+                Marshal.Copy(data.Scan0, buffer, 0, buffer.Length);
+                tilePageBMP.UnlockBits(data);
+
+                int w = (int)tilesBG.GMS2TileWidth;
+                int h = (int)tilesBG.GMS2TileHeight;
+                int outX = (int)tilesBG.GMS2OutputBorderX;
+                int outY = (int)tilesBG.GMS2OutputBorderY;
+                int tileRows = (int)Math.Ceiling(tilesBG.GMS2TileCount / (double)tilesBG.GMS2TileColumns);
+                System.Drawing.Imaging.PixelFormat format = tilePageBMP.PixelFormat;
+
+                bool outOfBounds = false;
+                _ = Parallel.For(0, tileRows, (y) =>
+                {
+                    int y1 = ((y + 1) * outY) + (y * (h + outY));
+
+                    for (int x = 0; x < tilesBG.GMS2TileColumns; x++)
                     {
-                        for (int i = 0; i < h; i++)
-                        {
-                            for (int j = 0; j < w * depth; j += depth)
-                            {
-                                int origIndex = (y1 * data.Stride) + (i * data.Stride) + (x1 * depth) + j;
-                                int croppedIndex = (i * w * depth) + j;
+                        int x1 = ((x + 1) * outX) + (x * (w + outX));
 
-                                Buffer.BlockCopy(buffer, origIndex, bufferRes, croppedIndex, depth);
+                        if (x1 + w > data.Width || y1 + h > data.Height)
+                        {
+                            outOfBounds = true;
+                            return;
+                        }
+
+                        int bufferResLen = w * h * depth;
+                        byte[] bufferRes = ArrayPool<byte>.Shared.Rent(bufferResLen);
+
+                        if (!(x == 0 && y == 0))
+                        {
+                            for (int i = 0; i < h; i++)
+                            {
+                                for (int j = 0; j < w * depth; j += depth)
+                                {
+                                    int origIndex = (y1 * data.Stride) + (i * data.Stride) + (x1 * depth) + j;
+                                    int croppedIndex = (i * w * depth) + j;
+
+                                    Buffer.BlockCopy(buffer, origIndex, bufferRes, croppedIndex, depth);
+                                }
                             }
                         }
+
+                        Bitmap tileBMP = new(w, h);
+                        BitmapData tileData = tileBMP.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, format);
+                        Marshal.Copy(bufferRes, 0, tileData.Scan0, bufferResLen);
+                        tileBMP.UnlockBits(tileData);
+                        ArrayPool<byte>.Shared.Return(bufferRes);
+
+                        TileCache.TryAdd(new(texName, (uint)((tilesBG.GMS2TileColumns * y) + x)), tileBMP);
                     }
+                });
 
-                    Bitmap tileBMP = new(w, h);
-                    BitmapData tileData = tileBMP.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, format);
-                    Marshal.Copy(bufferRes, 0, tileData.Scan0, bufferResLen);
-                    tileBMP.UnlockBits(tileData);
-                    ArrayPool<byte>.Shared.Return(bufferRes);
-
-                    TileCache.TryAdd(new(texName, (uint)((tilesBG.GMS2TileColumns * y) + x)), tileBMP);
+                if (outOfBounds)
+                {
+                    MainWindow.ShowError($"Tileset of \"{tilesData.ParentLayer.LayerName.Content}\" tile layer has wrong parameters (tile size, output border, etc.).\n" +
+                                          "It can't be displayed.", false);
+                    return "Error";
                 }
-            });
 
-            return cache ? null : CreateLayerSource(in tilesData, in tilesBG, in w, in h);
+                return cache ? null : CreateLayerSource(in tilesData, in tilesBG, in w, in h);
+            }
+            catch (Exception ex)
+            {
+                MainWindow.ShowError($"An error occured while rendering tile layer \"{tilesData.ParentLayer.LayerName.Content}\".\n\n{ex}", false);
+                return "Error";
+            }
         }
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {

@@ -2094,93 +2094,102 @@ namespace UndertaleModTool
                 if (tilesBG is null)
                     return null;
 
-                _ = loader.Convert(new object[] { tilesData }, null, "cache", null);
-                
-                HashSet<uint> usedIDs = new();
-                List<Tuple<uint, uint, uint>> tileList = new();
-                for (uint y = 0; y < tilesData.TilesY; y++)
-                    for (uint x = 0; x < tilesData.TilesX; x++)
-                    {
-                        uint tileID = tilesData.TileData[y][x];
-                        if (tileID != 0)
-                            tileList.Add(new(tileID, x, y));
+                if ((loader.Convert(new object[] { tilesData }, null, "cache", null) as string) == "Error")
+                    return null;
 
-                        usedIDs.Add(tileID & 0x0FFFFFFF); // removed tile flag
-                    }
-
-                // convert Bitmaps to ImageSources (only used IDs) 
-                _ = Parallel.ForEach(usedIDs, (id) =>
+                try
                 {
-                    Tuple<string, uint> tileKey = new(tilesBG.Texture.Name.Content, id);
-
-                    IntPtr bmpPtr = CachedTileDataLoader.TileCache[tileKey].GetHbitmap();
-                    ImageSource spriteSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(bmpPtr, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                    DeleteObject(bmpPtr);
-                    spriteSrc.Freeze(); // allow UI thread access
-
-                    TileCache.TryAdd(tileKey, spriteSrc);
-                });
-
-                var tileArr = new TileRectangle[tileList.Count];
-                uint w = tilesBG.GMS2TileWidth;
-                uint h = tilesBG.GMS2TileHeight;
-                uint maxID = tilesData.Background.GMS2TileIds.Select(x => x.ID).Max();
-                _ = Parallel.For(0, tileList.Count, (i) =>
-                {
-                    var tile = tileList[i];
-                    uint id = tile.Item1;
-                    uint realID;
-                    double scaleX = 1;
-                    double scaleY = 1;
-                    double angle = 0;
-
-                    if (id > maxID)
-                    {
-                        realID = id & 0x0FFFFFFF; // remove tile flag
-                        if (realID > maxID)
+                    HashSet<uint> usedIDs = new();
+                    List<Tuple<uint, uint, uint>> tileList = new();
+                    for (uint y = 0; y < tilesData.TilesY; y++)
+                        for (uint x = 0; x < tilesData.TilesX; x++)
                         {
-                            Debug.WriteLine("Tileset \"" + tilesData.Background.Name.Content + "\" doesn't contain tile ID " + realID);
-                            return;
+                            uint tileID = tilesData.TileData[y][x];
+                            if (tileID != 0)
+                                tileList.Add(new(tileID, x, y));
+
+                            usedIDs.Add(tileID & 0x0FFFFFFF); // removed tile flag
                         }
 
-                        switch (id >> 28)
+                    // convert Bitmaps to ImageSources (only used IDs) 
+                    _ = Parallel.ForEach(usedIDs, (id) =>
+                    {
+                        Tuple<string, uint> tileKey = new(tilesBG.Texture.Name.Content, id);
+
+                        IntPtr bmpPtr = CachedTileDataLoader.TileCache[tileKey].GetHbitmap();
+                        ImageSource spriteSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(bmpPtr, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                        DeleteObject(bmpPtr);
+                        spriteSrc.Freeze(); // allow UI thread access
+
+                        TileCache.TryAdd(tileKey, spriteSrc);
+                    });
+
+                    var tileArr = new TileRectangle[tileList.Count];
+                    uint w = tilesBG.GMS2TileWidth;
+                    uint h = tilesBG.GMS2TileHeight;
+                    uint maxID = tilesData.Background.GMS2TileIds.Select(x => x.ID).Max();
+                    _ = Parallel.For(0, tileList.Count, (i) =>
+                    {
+                        var tile = tileList[i];
+                        uint id = tile.Item1;
+                        uint realID;
+                        double scaleX = 1;
+                        double scaleY = 1;
+                        double angle = 0;
+
+                        if (id > maxID)
                         {
-                            case 1:
-                                scaleX = -1;
-                                break;
-                            case 2:
-                                scaleY = -1;
-                                break;
-                            case 3:
-                                scaleX = scaleY = -1;
-                                break;
-                            case 4:
-                                angle = 90;
-                                break;
-                            case 5:
-                                angle = 90;
-                                scaleY = -1;
-                                break;
-                            case 6:
-                                angle = 270;
-                                scaleY = -1;
-                                break;
-                            case 7:
-                                angle = 270;
-                                break;
+                            realID = id & 0x0FFFFFFF; // remove tile flag
+                            if (realID > maxID)
+                            {
+                                Debug.WriteLine("Tileset \"" + tilesData.Background.Name.Content + "\" doesn't contain tile ID " + realID);
+                                return;
+                            }
 
-                            default:
-                                Debug.WriteLine("Tile of " + tilesData.ParentLayer.LayerName + " located at (" + tile.Item2 + ", " + tile.Item3 + ") has unknown flag.");
-                                break;
+                            switch (id >> 28)
+                            {
+                                case 1:
+                                    scaleX = -1;
+                                    break;
+                                case 2:
+                                    scaleY = -1;
+                                    break;
+                                case 3:
+                                    scaleX = scaleY = -1;
+                                    break;
+                                case 4:
+                                    angle = 90;
+                                    break;
+                                case 5:
+                                    angle = 90;
+                                    scaleY = -1;
+                                    break;
+                                case 6:
+                                    angle = 270;
+                                    scaleY = -1;
+                                    break;
+                                case 7:
+                                    angle = 270;
+                                    break;
+
+                                default:
+                                    Debug.WriteLine("Tile of " + tilesData.ParentLayer.LayerName + " located at (" + tile.Item2 + ", " + tile.Item3 + ") has unknown flag.");
+                                    break;
+                            }
                         }
-                    }
-                    else
-                        realID = id;
+                        else
+                            realID = id;
 
-                    tileArr[i] = new(TileCache[new(tilesBG.Texture.Name.Content, realID)], tile.Item2 * w, tile.Item3 * h, w, h, scaleX, scaleY, angle);
-                });
+                        tileArr[i] = new(TileCache[new(tilesBG.Texture.Name.Content, realID)], tile.Item2 * w, tile.Item3 * h, w, h, scaleX, scaleY, angle);
+                    });
 
-                return tileArr;
+                    return tileArr;
+                }
+                catch (Exception ex)
+                {
+                    MainWindow.ShowError($"An error occured while generating \"Rectangles\" for tile layer {tilesData.ParentLayer.LayerName}.\n\n{ex}");
+                    return null;
+                }
             }
             else
                 return null;
