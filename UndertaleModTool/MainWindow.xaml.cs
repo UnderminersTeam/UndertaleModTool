@@ -1771,6 +1771,7 @@ namespace UndertaleModTool
             }
             list.Add(obj);
             UpdateTree();
+            HighlightObject(obj);
             OpenInNewTab(obj, "Untitled");
         }
 
@@ -1828,7 +1829,7 @@ namespace UndertaleModTool
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() =>
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() =>
                 {
                     scriptDialog.Update(message, status, progressValue, maxValue);
                 }));
@@ -1854,7 +1855,7 @@ namespace UndertaleModTool
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() =>
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() =>
                 {
                     scriptDialog.ReportProgress(progressValue);
                 }));
@@ -1864,10 +1865,10 @@ namespace UndertaleModTool
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() =>
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() =>
                 {
                     scriptDialog.ReportProgress(status);
-                })); ;
+                }));;
             }
         }
 
@@ -2029,6 +2030,7 @@ namespace UndertaleModTool
 
                 CodeEditorDecompile = editorDecompile;
 
+                HighlightObject(code);
                 //Highlighted = code;
                 OpenInNewTab(code, "Untitled");
             }
@@ -2880,6 +2882,77 @@ result in loss of work.");
         {
             int foundIndex = obj is UndertaleNamedResource ? Data.IndexOf(obj as UndertaleNamedResource, false) : -1;
             SetIDString(foundIndex == -1 ? "None" : (foundIndex == -2 ? "N/A" : Convert.ToString(foundIndex)));
+        }
+
+        public void HighlightObject(object obj, bool silent = true) {
+            UndertaleResource res = obj as UndertaleResource;
+            if (res is null) {
+                if (!silent)
+                    ShowWarning($"Can't highlight the object - it's null or isn't a UndertaleResource.");
+
+                return;
+            }
+
+            string objName = null;
+            if (obj is not UndertaleNamedResource) {
+                if (obj is UndertaleVariable var)
+                    objName = var.Name?.Content;
+            } else
+                objName = (res as UndertaleNamedResource).Name?.Content;
+
+            ScrollViewer mainTreeViewer = FindVisualChild<ScrollViewer>(MainTree);
+            Type objType = res.GetType();
+
+            TreeViewItem resListView = (MainTree.Items[0] as TreeViewItem).Items.Cast<TreeViewItem>()
+                                                                                .FirstOrDefault(x => (x.ItemTemplate?.DataType as Type) == objType);
+            IList resList;
+            try {
+                resList = Data[res.GetType()] as IList;
+            } catch (Exception ex) {
+                if (!silent)
+                    ShowWarning($"Can't highlight the object \"{objName}\".\nError - {ex.Message}");
+
+                return;
+            }
+
+            if (resListView is null) {
+                if (!silent)
+                    ShowWarning($"Can't highlight the object \"{objName}\" - element with object list not found.");
+
+                return;
+            }
+
+            double initOffsetV = mainTreeViewer.VerticalOffset;
+            double initOffsetH = mainTreeViewer.HorizontalOffset;
+            bool initExpanded = resListView.IsExpanded;
+
+            resListView.IsExpanded = true;
+            resListView.BringIntoView();
+            resListView.UpdateLayout();
+
+            VirtualizingStackPanel resPanel = FindVisualChild<VirtualizingStackPanel>(resListView);
+            (resPanel.Children[0] as TreeViewItem).BringIntoView();
+            mainTreeViewer.UpdateLayout();
+
+            double firstElemOffset = mainTreeViewer.VerticalOffset + (resPanel.Children[0] as TreeViewItem).TransformToAncestor(mainTreeViewer).Transform(new Point(0, 0)).Y;
+
+            mainTreeViewer.ScrollToVerticalOffset(firstElemOffset + ((resList.IndexOf(obj) + 1) * 16) - (mainTreeViewer.ViewportHeight / 2));
+            mainTreeViewer.UpdateLayout();
+
+            if (resListView.ItemContainerGenerator.ContainerFromItem(obj) is TreeViewItem resItem) {
+                Highlighted = resItem.DataContext;
+                resItem.IsSelected = true;
+
+                mainTreeViewer.UpdateLayout();
+                mainTreeViewer.ScrollToHorizontalOffset(0);
+            } else {
+                // revert visual changes
+                resListView.IsExpanded = initExpanded;
+                resListView.UpdateLayout();
+                mainTreeViewer.ScrollToVerticalOffset(initOffsetV);
+                mainTreeViewer.ScrollToHorizontalOffset(initOffsetH);
+                resListView.UpdateLayout();
+            }
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
