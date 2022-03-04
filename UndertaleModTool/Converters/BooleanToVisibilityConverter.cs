@@ -12,7 +12,7 @@ namespace UndertaleModTool
         
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (value is bool && ((bool)value)) ? trueValue : falseValue;
+            return (value is bool boolean && boolean) ? trueValue : falseValue;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

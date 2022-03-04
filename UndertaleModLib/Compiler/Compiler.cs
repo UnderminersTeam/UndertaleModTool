@@ -86,7 +86,8 @@ namespace UndertaleModLib.Compiler
             AddAssetsFromList(Data?.Paths);
             AddAssetsFromList(Data?.Fonts);
             AddAssetsFromList(Data?.Timelines);
-            AddAssetsFromList(Data?.Scripts);
+            if (!(Data?.GMS2_3 ?? false))
+                AddAssetsFromList(Data?.Scripts);
             AddAssetsFromList(Data?.Shaders);
             AddAssetsFromList(Data?.Rooms);
             AddAssetsFromList(Data?.AudioGroups);

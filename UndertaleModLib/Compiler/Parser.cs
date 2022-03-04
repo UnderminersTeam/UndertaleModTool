@@ -93,6 +93,7 @@ namespace UndertaleModLib.Compiler
                     SwitchCase,
                     SwitchDefault,
                     FunctionCall,
+                    FunctionDef,
                     Break,
                     Continue,
                     Exit,
@@ -113,6 +114,7 @@ namespace UndertaleModLib.Compiler
                     ExprConditional,
                     ExprVariableRef,
                     ExprSingleVariable,
+                    ExprFuncName,
 
                     Token,
                     Discard // optimization stage produces this
@@ -631,6 +633,9 @@ namespace UndertaleModLib.Compiler
                             ReportCodeError("Unexpected error token (invalid code).", remainingStageOne.Peek().Token, true);
                         }
                         break;
+                    case TokenKind.KeywordFunction:
+                        s = ParseFunction(context);
+                        break;
                     default:
                         // Assumes it's a variable assignment
                         if (remainingStageOne.Count > 0)
@@ -647,6 +652,35 @@ namespace UndertaleModLib.Compiler
             {
                 Statement result = new Statement(Statement.StatementKind.RepeatLoop, EnsureTokenKind(TokenKind.KeywordRepeat).Token);
                 result.Children.Add(ParseExpression(context));
+                result.Children.Add(ParseStatement(context));
+                return result;
+            }
+
+            private static Statement ParseFunction(CompileContext context)
+            {
+                Statement result = new Statement(Statement.StatementKind.FunctionDef, EnsureTokenKind(TokenKind.KeywordFunction).Token);
+                Statement args = new Statement();
+
+                EnsureTokenKind(TokenKind.OpenParen);
+
+                while (remainingStageOne.Count > 0 && !hasError && !IsNextToken(TokenKind.EOF) && !IsNextToken(TokenKind.CloseParen))
+                {
+                    Statement expr = ParseExpression(context);
+                    if (expr != null)
+                        args.Children.Add(expr);
+                    if (!IsNextTokenDiscard(TokenKind.Comma))
+                    {
+                        if (!IsNextToken(TokenKind.CloseParen))
+                        {
+                            ReportCodeError("Expected ',' or ')' after argument in function call.", result.Token, true);
+                            break;
+                        }
+                    }
+                }
+                result.Children.Add(args);
+
+                if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
+
                 result.Children.Add(ParseStatement(context));
                 return result;
             }
@@ -1331,7 +1365,8 @@ namespace UndertaleModLib.Compiler
                 // Check to make sure we aren't overriding a script/function name
                 if (context.BuiltInList.Functions.ContainsKey(s.Text) || context.scripts.Contains(s.Text))
                 {
-                    ReportCodeError(string.Format("Variable name {0} cannot be used; a function or script already has the name.", s.Text), false);
+                    //ReportCodeError(string.Format("Variable name {0} cannot be used; a function or script already has the name.", s.Text), false);
+                    return new Statement(Statement.StatementKind.ExprFuncName, s.Token) { ID = s.ID };       
                 }
 
                 Statement result = new Statement(Statement.StatementKind.ExprSingleVariable, s.Token);
@@ -1423,6 +1458,8 @@ namespace UndertaleModLib.Compiler
                         }
                     case TokenKind.ProcFunction:
                         return ParseFunctionCall(context, true);
+                    case TokenKind.KeywordFunction:
+                        return ParseFunction(context);
                     case TokenKind.ProcVariable:
                         {
                             Statement variableRef = ParseSingleVar(context);

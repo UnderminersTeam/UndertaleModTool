@@ -28,15 +28,56 @@ namespace UndertaleModTool
                 new FrameworkPropertyMetadata(0xFFFFFFFF,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
+        public static DependencyProperty HasAlphaProperty =
+            DependencyProperty.Register("HasAlpha", typeof(bool),
+                typeof(ColorPicker),
+                new FrameworkPropertyMetadata(true,
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnHasAlphaChanged));
+
         public uint Color
         {
-            get { return (uint)GetValue(ColorProperty); }
-            set { SetValue(ColorProperty, value); }
+            get => (uint)GetValue(ColorProperty);
+            set => SetValue(ColorProperty, value);
+        }
+        public bool HasAlpha
+        {
+            get => (bool)GetValue(HasAlphaProperty);
+            set => SetValue(HasAlphaProperty, value); // we can't put here any other logic
         }
 
         public ColorPicker()
         {
             InitializeComponent();
+
+            Binding binding = new("Color")
+            {
+                Converter = new ColorTextConverter(),
+                ConverterParameter = HasAlpha.ToString(), // HasAlpha
+                RelativeSource = new RelativeSource() { AncestorType = typeof(ColorPicker) },
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+            ColorText.SetBinding(TextBox.TextProperty, binding);
+
+            ColorText.MaxLength = HasAlpha ? 9 : 7;
+            ColorText.ToolTip = $"{(HasAlpha ? "A, " : "")}B, G, R";
+        }
+
+        private static void OnHasAlphaChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
+        {
+            bool hasAlpha = (bool)e.NewValue;
+            ColorPicker colorPicker = dependencyObject as ColorPicker;
+
+            Binding binding = new("Color")
+            {
+                Converter = new ColorTextConverter(),
+                ConverterParameter = hasAlpha.ToString(), // HasAlpha
+                RelativeSource = new RelativeSource() { AncestorType = typeof(ColorPicker) },
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+            colorPicker.ColorText.SetBinding(TextBox.TextProperty, binding);
+
+            colorPicker.ColorText.MaxLength = hasAlpha ? 9 : 7;
+            colorPicker.ColorText.ToolTip = $"{(hasAlpha ? "A, " : "")}B, G, R";
         }
     }
 
@@ -62,23 +103,30 @@ namespace UndertaleModTool
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             uint val = System.Convert.ToUInt32(value);
-            return "#" + val.ToString("X8");
+            bool hasAlpha = bool.Parse((string)parameter);
+            return "#" + (hasAlpha ? val.ToString("X8") : val.ToString("X8")[2..]);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string val = (string)value;
+            bool hasAlpha = bool.Parse((string)parameter);
+
             if (val[0] != '#')
                 return new ValidationResult(false, "Invalid color string");
-            val = val.Substring(1);
-            if (val.Length != 8)
+
+            val = val[1..];
+            if (val.Length != (hasAlpha ? 8 : 6))
                 return new ValidationResult(false, "Invalid color string");
+
+            if (!hasAlpha)
+                val = "FF" + val; // add alpha (255)
 
             try
             {
                 return System.Convert.ToUInt32(val, 16);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return new ValidationResult(false, e.Message);
             }

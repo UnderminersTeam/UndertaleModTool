@@ -18,7 +18,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertaleTextureGroupInfoEditor.xaml
     /// </summary>
-    public partial class UndertaleTextureGroupInfoEditor : UserControl
+    public partial class UndertaleTextureGroupInfoEditor : DataUserControl
     {
         public UndertaleTextureGroupInfoEditor()
         {

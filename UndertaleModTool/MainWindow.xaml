@@ -175,6 +175,7 @@
                             <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
                         </ContextMenu>
 
+                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#D4D4D4"/>
                         <Style TargetType="{x:Type TreeViewItem}">
                             <EventSetter Event="TreeViewItem.DragOver" Handler="TreeView_DragOver"/>
                             <EventSetter Event="TreeViewItem.Drop" Handler="TreeView_Drop"/>
@@ -450,7 +451,10 @@
                             <DataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
                                 <local:UndertaleGameObjectEditor/>
                             </DataTemplate>
-
+                            
+                            <DataTemplate x:Key="roomRendererTemplate">
+                                <local:UndertaleRoomRenderer/>
+                            </DataTemplate>
                             <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
                                 <local:UndertaleRoomEditor/>
                             </DataTemplate>
