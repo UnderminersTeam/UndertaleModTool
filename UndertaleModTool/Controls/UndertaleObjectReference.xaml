@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:UndertaleModTool"
+             xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
              d:DesignHeight="20" d:DesignWidth="300">
     <Grid>
@@ -13,13 +13,25 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <TextBox Grid.Column="0" IsReadOnly="True" Cursor="Arrow" ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!" AllowDrop="True" PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" Text="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-        <Button Grid.Column="1" Click="Details_Click" Content=" ... " ToolTip="Open referenced object">
+        <Button Grid.Column="1" Click="Details_Click">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
+                    <Setter Property="Content" Value=" ... " />
+                    <Setter Property="ToolTip" Value="Open referenced object" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Null}">
                             <Setter Property="IsEnabled" Value="False"/>
                         </DataTrigger>
+
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ObjectType, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Type undertale:UndertaleCode}" />
+                                <Condition Binding="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Null}" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Content" Value=" + "/>
+                            <Setter Property="ToolTip" Value="Create new code entry" />
+                            <Setter Property="IsEnabled" Value="True"/>
+                        </MultiDataTrigger>
                     </Style.Triggers>
                 </Style>
             </Button.Style>
