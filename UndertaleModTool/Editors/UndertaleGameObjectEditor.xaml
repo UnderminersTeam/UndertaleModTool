@@ -492,7 +492,10 @@
                                                     <DataGridTemplateColumn Header="Code" Width="*">
                                                         <DataGridTemplateColumn.CellTemplate>
                                                             <DataTemplate>
-                                                                <local:UndertaleObjectReference ObjectReference="{Binding CodeId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleCode}" Margin="23,3,3,3" CanRemove="False" ObjectEventType="{x:Static undertale:EventType.Draw}" ObjectEventSubtype="0"/>
+                                                                <local:UndertaleObjectReference ObjectReference="{Binding CodeId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleCode}"
+                                                                                                Margin="23,3,3,3" CanRemove="False"
+                                                                                                ObjectEventType="{Binding Text, Mode=OneTime, ElementName=EventTypeName, Converter={StaticResource EventNameConverter}, ConverterParameter=EventType}"
+                                                                                                ObjectEventSubtype="{Binding DataContext.EventSubtype, Mode=OneWay, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
                                                             </DataTemplate>
                                                         </DataGridTemplateColumn.CellTemplate>
                                                     </DataGridTemplateColumn>
