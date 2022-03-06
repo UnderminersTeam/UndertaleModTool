@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
@@ -33,6 +34,33 @@ namespace UndertaleModTool
             UndertaleGameObject.Event obj = new UndertaleGameObject.Event();
             obj.Actions.Add(new UndertaleGameObject.EventAction());
             e.NewItem = obj;
+
+            _ = Task.Run(() =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    // re-focus focused element when grid is updated
+                    FrameworkElement elem = Keyboard.FocusedElement as FrameworkElement;
+                    (sender as DataGrid).MoveFocus(new TraversalRequest(FocusNavigationDirection.Up));
+                    elem?.Focus();
+                },
+                DispatcherPriority.ContextIdle);
+            });
+        }
+
+        // mouse wheel scrolling fix
+        // source - https://stackoverflow.com/a/4342746/12136394
+        private void HandlePreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (!e.Handled)
+            {
+                e.Handled = true;
+                MouseWheelEventArgs eventArg = new(e.MouseDevice, e.Timestamp, e.Delta);
+                eventArg.RoutedEvent = MouseWheelEvent;
+                eventArg.Source = sender;
+                UIElement parent = ((Control)sender).Parent as UIElement;
+                parent.RaiseEvent(eventArg);
+            }
         }
     }
 }
