@@ -14,6 +14,9 @@ namespace UndertaleModTool
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (parameter is string par && par == "EventType")
+                return Enum.Parse(typeof(EventType), (string)value);
+
             uint val = System.Convert.ToUInt32(value);
             return ((EventType)val).ToString();
         }

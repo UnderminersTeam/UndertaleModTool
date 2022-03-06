@@ -97,31 +97,25 @@ namespace UndertaleModTool
             {
                 MessageBox.Show("This feature is very WIP, so expect it to be broken.");
 
-                MainWindow mainWindow = (Application.Current.MainWindow as MainWindow);
+                MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
                 if (mainWindow.Selected is null)
                 {
-                    MessageBox.Show("Nothing currently selected! This is currently unsupported.");
+                    MainWindow.ShowError("Nothing currently selected! This is currently unsupported.");
                     return;
                 }
-
-                if (mainWindow.Selected is not UndertaleGameObject)
+                else if (mainWindow.Selected is UndertaleGameObject gameObject)
                 {
-                    MessageBox.Show("Adding to non-objects is currently unsupported.");
-                    return;
-                }
+                    // Generate the code entry
+                    UndertaleCode code = gameObject.EventHandlerFor(ObjectEventType, ObjectEventSubtype, mainWindow.Data.Strings, mainWindow.Data.Code, mainWindow.Data.CodeLocals);
 
-                // Genereate the code entry
-                UndertaleGameObject gameObject = (UndertaleGameObject) (mainWindow.Selected as UndertaleNamedResource);
-                if (gameObject is null)
+                    ObjectReference = code;
+                }
+                else
                 {
-                    MessageBox.Show("The object is null?");
+                    MainWindow.ShowError("Adding to non-objects is currently unsupported.");
                     return;
                 }
-
-                UndertaleCode code = gameObject.EventHandlerFor(ObjectEventType, ObjectEventSubtype, mainWindow.Data.Strings, mainWindow.Data.Code, mainWindow.Data.CodeLocals);
-
-                ObjectReference = code;
             }
             else
             {
