@@ -364,6 +364,10 @@
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
+                                <Style TargetType="{x:Type ComboBox}">
+                                    <!-- DropDownX events are not routed events -->
+                                    <EventSetter Event="Loaded" Handler="ComboBox_Loaded"/>
+                                </Style>
                             </DataGrid.Resources>
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="Subtype ID" Width="1*">
