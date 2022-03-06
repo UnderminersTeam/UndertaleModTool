@@ -24,6 +24,8 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleGameObjectEditor : DataUserControl
     {
+        private bool handleMouseScroll = true;
+
         public UndertaleGameObjectEditor()
         {
             InitializeComponent();
@@ -52,7 +54,7 @@ namespace UndertaleModTool
         // source - https://stackoverflow.com/a/4342746/12136394
         private void HandlePreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (!e.Handled)
+            if (!e.Handled && handleMouseScroll)
             {
                 e.Handled = true;
                 MouseWheelEventArgs eventArg = new(e.MouseDevice, e.Timestamp, e.Delta);
@@ -61,6 +63,22 @@ namespace UndertaleModTool
                 UIElement parent = ((Control)sender).Parent as UIElement;
                 parent.RaiseEvent(eventArg);
             }
+        }
+
+        private void ComboBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            (sender as ComboBox).DropDownOpened -= ComboBox_DropDownOpened;
+            (sender as ComboBox).DropDownOpened += ComboBox_DropDownOpened;
+            (sender as ComboBox).DropDownClosed -= ComboBox_DropDownClosed;
+            (sender as ComboBox).DropDownClosed += ComboBox_DropDownClosed;
+        }
+        private void ComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            handleMouseScroll = false;
+        }
+        private void ComboBox_DropDownClosed(object sender, EventArgs e)
+        {
+            handleMouseScroll = true;
         }
     }
 }
