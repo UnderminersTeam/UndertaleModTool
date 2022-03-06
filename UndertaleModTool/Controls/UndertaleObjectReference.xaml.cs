@@ -42,10 +42,16 @@ namespace UndertaleModTool
                 new FrameworkPropertyMetadata(true,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
-        public static DependencyProperty EventSuffixProperty =
-            DependencyProperty.Register("EventSuffix", typeof(string),
+        public static DependencyProperty ObjectEventTypeProperty =
+            DependencyProperty.Register("ObjectEventType", typeof(EventType),
                 typeof(UndertaleObjectReference),
-                new FrameworkPropertyMetadata("",
+                new FrameworkPropertyMetadata(EventType.Create,
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+        public static DependencyProperty ObjectEventSubtypeProperty =
+            DependencyProperty.Register("ObjectEventSubtype", typeof(uint),
+                typeof(UndertaleObjectReference),
+                new FrameworkPropertyMetadata((uint) 0,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
 
@@ -67,11 +73,18 @@ namespace UndertaleModTool
             set { SetValue(ObjectTypeProperty, value); }
         }
 
-        public string EventSuffix
+        public EventType ObjectEventType
         {
-            get { return (string)GetValue(EventSuffixProperty); }
-            set { SetValue(EventSuffixProperty, value); }
+            get { return (EventType)GetValue(ObjectEventTypeProperty); }
+            set { SetValue(ObjectEventTypeProperty, value); }
         }
+
+        public uint ObjectEventSubtype
+        {
+            get { return (uint)GetValue(ObjectEventSubtypeProperty); }
+            set { SetValue(ObjectEventSubtypeProperty, value); }
+        }
+
 
         public UndertaleObjectReference()
         {
@@ -91,51 +104,23 @@ namespace UndertaleModTool
                     MessageBox.Show("Nothing currently selected! This is currently unsupported.");
                     return;
                 }
-                string name = (mainWindow.Selected as UndertaleNamedResource).Name.Content;
 
-                string prefix = "gml_";
-
-                switch (mainWindow.Selected)
+                if (mainWindow.Selected is not UndertaleGameObject)
                 {
-                    case UndertaleGameObject: prefix += "Object"; break;
-                    case UndertaleRoom:       prefix += "RoomCC"; break;
-                    case UndertaleScript:     prefix += "Script"; break;
+                    MessageBox.Show("Adding to non-objects is currently unsupported.");
+                    return;
                 }
 
-                prefix += "_";
-
-                //MessageBox.Show(mainWindow.Selected.GetType().Name);
-
-
-                // TEMPORARILY use ImportGMLString... this sucks.
-                //mainWindow.ImportGMLString(prefix + name + "_" + EventSuffix + "_0", "", true, false);
-                //UndertaleCode code = mainWindow.Data.Code.ByName(prefix + name + "_" + EventSuffix + "_0");
-
-                //if (code is null)
-                //{
-                //    MessageBox.Show("This should never happen.");
-                //    return;
-                //}
-
-
-                // Okay, INSTEAD of using ImportGMLString, let's do it ourselves!
-                UndertaleCode code = new UndertaleCode();
-                code.Name = mainWindow.Data.Strings.MakeString(prefix + name + "_" + EventSuffix + "_0");
-                mainWindow.Data.Code.Add(code);
-                if (mainWindow.Data?.GeneralInfo.BytecodeVersion > 14)
+                // Genereate the code entry
+                UndertaleGameObject gameObject = (UndertaleGameObject) (mainWindow.Selected as UndertaleNamedResource);
+                if (gameObject is null)
                 {
-                    UndertaleCodeLocals locals = new UndertaleCodeLocals();
-                    locals.Name = code.Name;
-                    UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-                    argsLocal.Name = mainWindow.Data.Strings.MakeString("arguments");
-                    argsLocal.Index = 0;
-                    locals.Locals.Add(argsLocal);
-                    code.LocalsCount = 1;
-                    code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals);
-                    mainWindow.Data.CodeLocals.Add(locals);
+                    MessageBox.Show("The object is null?");
+                    return;
                 }
 
-                // TODO: This doesn't persist somehow?
+                UndertaleCode code = gameObject.EventHandlerFor(ObjectEventType, ObjectEventSubtype, mainWindow.Data.Strings, mainWindow.Data.Code, mainWindow.Data.CodeLocals);
+
                 ObjectReference = code;
             }
             else

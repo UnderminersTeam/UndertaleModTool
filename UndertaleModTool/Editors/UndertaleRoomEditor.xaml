@@ -311,7 +311,7 @@
                             <CheckBox Grid.Row="6" Grid.Column="2" Margin="3" IsChecked="{Binding DrawBackgroundColor}" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}"/>
 
                             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Creation Code</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="2" Margin="3" ObjectReference="{Binding CreationCodeId}" ObjectType="{x:Type undertale:UndertaleCode}"  EventSuffix="Create"/>
+                            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="2" Margin="3" ObjectReference="{Binding CreationCodeId}" ObjectType="{x:Type undertale:UndertaleCode}"  ObjectEventType="{x:Static undertale:EventType.Create}" ObjectEventSubtype="0"/>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Flags</TextBlock>
                             <TextBox Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Flags, Converter={StaticResource IsGMS2Converter}, ConverterParameter=flags}"/>
@@ -540,7 +540,7 @@
                             <TextBox Grid.Row="2" Grid.Column="2" Margin="3" Text="{Binding InstanceID}"/>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Creation code</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="3" Grid.Column="2" Margin="3" ObjectReference="{Binding CreationCode}" ObjectType="{x:Type undertale:UndertaleCode}" EventSuffix="Create"/>
+                            <local:UndertaleObjectReference Grid.Row="3" Grid.Column="2" Margin="3" ObjectReference="{Binding CreationCode}" ObjectType="{x:Type undertale:UndertaleCode}" ObjectEventType="{x:Static undertale:EventType.Create}" ObjectEventSubtype="0"/>
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Scale</TextBlock>
                             <Grid Grid.Row="4" Grid.Column="2">
@@ -559,7 +559,7 @@
                             <TextBox Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
 
                             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Pre Create code</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="2" Margin="3" ObjectReference="{Binding PreCreateCode}" ObjectType="{x:Type undertale:UndertaleCode}"  EventSuffix="PreCreate"/>
+                            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="2" Margin="3" ObjectReference="{Binding PreCreateCode}" ObjectType="{x:Type undertale:UndertaleCode}"  ObjectEventType="{x:Static undertale:EventType.PreCreate}" ObjectEventSubtype="0"/>
                         </Grid>
                     </DataTemplate>
 
