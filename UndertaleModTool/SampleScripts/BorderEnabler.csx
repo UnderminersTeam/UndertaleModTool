@@ -66,10 +66,13 @@ if (!Directory.Exists(bordersPath))
 }
 
 // throw new ScriptException(bordersPath);
+int lastTextPage = Data.EmbeddedTextures.Count - 1;
+int lastTextPageItem = Data.TexturePageItems.Count - 1;
 
-foreach(var path in Directory.EnumerateFiles(bordersPath))
+foreach (var path in Directory.EnumerateFiles(bordersPath))
 {
     UndertaleEmbeddedTexture newtex = new UndertaleEmbeddedTexture();
+    newtex.Name = new UndertaleString("Texture " + ++lastTextPage);
     newtex.TextureData.TextureBlob = File.ReadAllBytes(path);
     Data.EmbeddedTextures.Add(newtex);
     textures.Add(Path.GetFileName(path), newtex);
@@ -83,6 +86,7 @@ Action<string, UndertaleEmbeddedTexture, ushort, ushort, ushort, ushort> AssignB
         return;
     }
     UndertaleTexturePageItem tpag = new UndertaleTexturePageItem();
+    tpag.Name = new UndertaleString("PageItem " + ++lastTextPageItem);
     tpag.SourceX = x; tpag.SourceY = y; tpag.SourceWidth = width; tpag.SourceHeight = height;
     tpag.TargetX = 0; tpag.TargetY = 0; tpag.TargetWidth = width; tpag.TargetHeight = height;
     tpag.BoundingWidth = width; tpag.BoundingHeight = height;

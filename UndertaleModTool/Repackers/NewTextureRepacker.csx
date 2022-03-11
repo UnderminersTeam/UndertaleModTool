@@ -416,6 +416,8 @@ var texPageLookup = texPageItems.OrderBy(
 ResetProgress("Laying out texture items");
 var atlases = await layoutPageItemLists(texPageLookup, pageSize, padding);
 
+int lastTextPage = Data.EmbeddedTextures.Count - 1;
+
 // Now recreate texture pages and link the items to the pages
 ResetProgress("Regenerating Texture Pages");
 using (var f = new StreamWriter($"{packagerDirectory}log.txt"))
@@ -434,6 +436,7 @@ using (var f = new StreamWriter($"{packagerDirectory}log.txt"))
         {
             // Textures that are contained into an atlas
             UndertaleEmbeddedTexture tex = new UndertaleEmbeddedTexture();
+            tex.Name = new UndertaleString("Texture " + ++lastTextPage);
             Data.EmbeddedTextures.Add(tex);
             Image img = new Bitmap(atlas.Size, atlas.Size, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             Graphics g = Graphics.FromImage(img);
@@ -476,6 +479,7 @@ using (var f = new StreamWriter($"{packagerDirectory}log.txt"))
                 f.WriteLine($"tex: {texPageItems.IndexOf(item)}: {0}, {0}, {item.OriginalRect.Width}, {item.OriginalRect.Height}");
 
                 UndertaleEmbeddedTexture tex = new UndertaleEmbeddedTexture();
+                tex.Name = new UndertaleString("Texture " + ++lastTextPage);
                 Data.EmbeddedTextures.Add(tex);
 
                 // Create POT texture if needed
