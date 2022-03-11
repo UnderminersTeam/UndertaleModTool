@@ -210,6 +210,9 @@ namespace UndertaleModTool
                 int w = (int)tileRect.Item3;
                 int h = (int)tileRect.Item4;
 
+                if (w == 0 || h == 0)
+                    return;
+
                 /// Sometimes, tile size can be bigger than texture size
                 /// (for example, BG tile of "room_torielroom")
                 /// Also, it can be out of texture bounds
