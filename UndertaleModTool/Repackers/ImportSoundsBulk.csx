@@ -282,7 +282,7 @@ await Task.Run(() => {
                 GroupID = (needAGRP ? audioGroupID : Data.GetBuiltinSoundGroupID())
             };
             Data.Sounds.Add(snd_to_add);
-            ChangeSelection(snd_to_add);
+            //ChangeSelection(snd_to_add);
         }
         else if (replaceSoundPropertiesCheck)
         {
@@ -303,7 +303,7 @@ await Task.Run(() => {
         {
             existing_snd.AudioFile = RaudioFile;
             existing_snd.AudioID = audioID;
-            ChangeSelection(existing_snd);
+            //ChangeSelection(existing_snd);
         }
     }
 });
