@@ -2749,12 +2749,14 @@ result in loss of work.");
             resListView.UpdateLayout();
 
             VirtualizingStackPanel resPanel = FindVisualChild<VirtualizingStackPanel>(resListView);
-            (resPanel.Children[0] as TreeViewItem).BringIntoView();
-            mainTreeViewer.UpdateLayout();
+            if (resPanel.Children.Count > 0)
+            {
+                (resPanel.Children[0] as TreeViewItem).BringIntoView();
+                mainTreeViewer.UpdateLayout();
 
-            double firstElemOffset = mainTreeViewer.VerticalOffset + (resPanel.Children[0] as TreeViewItem).TransformToAncestor(mainTreeViewer).Transform(new Point(0, 0)).Y;
-
-            mainTreeViewer.ScrollToVerticalOffset(firstElemOffset + ((resList.IndexOf(obj) + 1) * 16) - (mainTreeViewer.ViewportHeight / 2));
+                double firstElemOffset = mainTreeViewer.VerticalOffset + (resPanel.Children[0] as TreeViewItem).TransformToAncestor(mainTreeViewer).Transform(new Point(0, 0)).Y;
+                mainTreeViewer.ScrollToVerticalOffset(firstElemOffset + ((resList.IndexOf(obj) + 1) * 16) - (mainTreeViewer.ViewportHeight / 2));
+            }
             mainTreeViewer.UpdateLayout();
 
             if (resListView.ItemContainerGenerator.ContainerFromItem(obj) is TreeViewItem resItem)

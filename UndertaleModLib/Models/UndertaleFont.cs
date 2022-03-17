@@ -136,6 +136,15 @@ namespace UndertaleModLib.Models
             ScaleY = reader.ReadSingle();
             if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
                 AscenderOffset = reader.ReadInt32();
+            uint jacksunknownvalue = reader.ReadUInt32();
+            if (reader.ReadUInt32() < reader.Position)
+            {
+                // Might add a 2022.2+ variable with this as detection.
+                // Also, should probably figure out what it does.
+                reader.Position -= 4;
+            }
+            else
+                reader.Position -= 8;
             Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
         }
 
