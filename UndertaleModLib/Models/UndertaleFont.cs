@@ -23,6 +23,7 @@ namespace UndertaleModLib.Models
         public UndertaleTexturePageItem Texture { get; set; }
         public float ScaleX { get; set; }
         public float ScaleY { get; set; }
+        public uint Mystery2022Value { get; set; }
         public UndertalePointerList<Glyph> Glyphs { get; private set; } = new UndertalePointerList<Glyph>();
         public int AscenderOffset { get; set; }
 
@@ -107,6 +108,8 @@ namespace UndertaleModLib.Models
             writer.Write(ScaleY);
             if (writer.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
                 writer.Write(AscenderOffset);
+            if (writer.undertaleData.GMS2022_2)
+                writer.Write(Mystery2022Value);
             writer.WriteUndertaleObject(Glyphs);
         }
 
@@ -136,11 +139,12 @@ namespace UndertaleModLib.Models
             ScaleY = reader.ReadSingle();
             if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
                 AscenderOffset = reader.ReadInt32();
-            uint jacksunknownvalue = reader.ReadUInt32();
+            Mystery2022Value = reader.ReadUInt32();
             if (reader.ReadUInt32() < reader.Position)
             {
-                // Might add a 2022.2+ variable with this as detection.
-                // Also, should probably figure out what it does.
+                // We should still probably figure out what this does.
+                // And give it a better name.
+                reader.undertaleData.GMS2022_2 = true;
                 reader.Position -= 4;
             }
             else
