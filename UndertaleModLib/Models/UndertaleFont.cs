@@ -138,17 +138,19 @@ namespace UndertaleModLib.Models
             ScaleX = reader.ReadSingle();
             ScaleY = reader.ReadSingle();
             if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
-                AscenderOffset = reader.ReadInt32();
-            Mystery2022Value = reader.ReadUInt32();
-            if (reader.ReadUInt32() < reader.Position)
             {
-                // We should still probably figure out what this does.
-                // And give it a better name.
-                reader.undertaleData.GMS2022_2 = true;
-                reader.Position -= 4;
+                AscenderOffset = reader.ReadInt32();
+                Mystery2022Value = reader.ReadUInt32();
+                if (reader.ReadUInt32() < reader.Position)
+                {
+                    // We should still probably figure out what this does.
+                    // And give it a better name.
+                    reader.undertaleData.GMS2022_2 = true;
+                    reader.Position -= 4;
+                }
+                else
+                    reader.Position -= 8;
             }
-            else
-                reader.Position -= 8;
             Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
         }
 
