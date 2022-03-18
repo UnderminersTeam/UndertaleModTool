@@ -912,6 +912,7 @@ namespace UndertaleModTool
                         InstanceID = mainWindow.Data.GeneralInfo.LastObj++
                     };
                     room.GameObjects.Add(obj);
+                    roomObjDict.TryAdd(obj.InstanceID, layer);
                     if (layer != null)
                         layer.InstancesData.Instances.Add(obj);
 
