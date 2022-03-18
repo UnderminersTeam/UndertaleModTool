@@ -12,6 +12,8 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
+bool importAsSprite = false;
+
 string importFolder = CheckValidity();
 
 string workDirectory = Path.GetDirectoryName(FilePath) + Path.DirectorySeparatorChar;
@@ -68,6 +70,14 @@ foreach (Atlas atlas in packer.Atlasses)
             string stripped = Path.GetFileNameWithoutExtension(n.Texture.Source);
 
             SpriteType spriteType = GetSpriteType(n.Texture.Source);
+            
+            if (importAsSprite)
+            {
+                if ((spriteType == SpriteType.Unknown) || (spriteType == SpriteType.Font))
+                {
+                    spriteType = SpriteType.Sprite;
+                }
+            }
 
             setTextureTargetBounds(texturePageItem, stripped, n);
 
@@ -528,7 +538,6 @@ Do you want to continue?");
 
     //Stop the script if there's missing sprite entries or w/e.
     bool hadMessage = false;
-    bool importAsSprite = false;
     string[] dirFiles = Directory.GetFiles(importFolder, "*.png", SearchOption.AllDirectories);
     foreach (string file in dirFiles)
     {
@@ -609,4 +618,3 @@ Pressing ""No"" will cause the program to ignore these images.");
     }
     return importFolder;
 }
-
