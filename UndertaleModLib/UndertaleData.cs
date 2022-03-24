@@ -10,6 +10,9 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModLib
 {
+    /// <summary>
+    /// An object representing a Game Maker: Studio data file.
+    /// </summary>
     public class UndertaleData
     {
         // access resource list by its name
@@ -64,28 +67,111 @@ namespace UndertaleModLib
 
         public UndertaleChunkFORM FORM;
 
+        /// <summary>
+        /// General info of the data file.
+        /// </summary>
         public UndertaleGeneralInfo GeneralInfo => FORM.GEN8?.Object;
+
+        /// <summary>
+        /// General Options of the data file.
+        /// </summary>
         public UndertaleOptions Options => FORM.OPTN?.Object;
+
+        /// <summary>
+        /// Languages of the data file.
+        /// </summary>
         public UndertaleLanguage Language => FORM.LANG?.Object;
+
+        /// <summary>
+        /// The used extensions of the data file.
+        /// </summary>
         public IList<UndertaleExtension> Extensions => FORM.EXTN?.List;
+
+        /// <summary>
+        /// The used sounds of the data file.
+        /// </summary>
         public IList<UndertaleSound> Sounds => FORM.SOND?.List;
+
+        /// <summary>
+        /// The audio groups of the data file.
+        /// </summary>
         public IList<UndertaleAudioGroup> AudioGroups => FORM.AGRP?.List;
+
+        /// <summary>
+        /// The sprites of the data file.
+        /// </summary>
         public IList<UndertaleSprite> Sprites => FORM.SPRT?.List;
+
+        /// <summary>
+        /// The backgrounds (or Tilesets) of the data file.
+        /// </summary>
         public IList<UndertaleBackground> Backgrounds => FORM.BGND?.List;
+
+        /// <summary>
+        /// The paths of the data file.
+        /// </summary>
         public IList<UndertalePath> Paths => FORM.PATH?.List;
+
+        /// <summary>
+        /// The scripts of the data file.
+        /// </summary>
         public IList<UndertaleScript> Scripts => FORM.SCPT?.List;
+
+        /// <summary>
+        /// The global initialization scripts of the data file.
+        /// </summary>
         public IList<UndertaleGlobalInit> GlobalInitScripts => FORM.GLOB?.List;
+
+        /// <summary>
+        /// The global end scripts of the data file.
+        /// </summary>
         public IList<UndertaleGlobalInit> GameEndScripts => FORM.GMEN?.List;
+
+        /// <summary>
+        /// The used shaders of the data file.
+        /// </summary>
         public IList<UndertaleShader> Shaders => FORM.SHDR?.List;
+
+        /// <summary>
+        /// The fonts of the data file.
+        /// </summary>
         public IList<UndertaleFont> Fonts => FORM.FONT?.List;
+
+        /// <summary>
+        /// The Timelines of the data file.
+        /// </summary>
         public IList<UndertaleTimeline> Timelines => FORM.TMLN?.List;
+
+        /// <summary>
+        /// The game objects of the data file.
+        /// </summary>
         public IList<UndertaleGameObject> GameObjects => FORM.OBJT?.List;
+
+        /// <summary>
+        /// The rooms of the data file.
+        /// </summary>
         public IList<UndertaleRoom> Rooms => FORM.ROOM?.List;
         //[Obsolete("Unused")]
         // DataFile
+
+        /// <summary>
+        /// The texture page items from the data file.
+        /// </summary>
         public IList<UndertaleTexturePageItem> TexturePageItems => FORM.TPAG?.List;
+
+        /// <summary>
+        /// The code entries of the data file.
+        /// </summary>
         public IList<UndertaleCode> Code => FORM.CODE?.List;
+
+        /// <summary>
+        /// The used variables of the data file.
+        /// </summary>
         public IList<UndertaleVariable> Variables => FORM.VARI?.List;
+
+        /// <summary>
+        /// TODO: no idea what these are.
+        /// </summary>
         public uint VarCount1 { get => FORM.VARI.VarCount1; set => FORM.VARI.VarCount1 = value; }
         public uint VarCount2 { get => FORM.VARI.VarCount2; set => FORM.VARI.VarCount2 = value; }
         public bool DifferentVarCounts { get => FORM.VARI.DifferentVarCounts; set => FORM.VARI.DifferentVarCounts = value; }
@@ -94,33 +180,114 @@ namespace UndertaleModLib
         [Obsolete]
         public uint InstanceVarCountAgain { get => VarCount2; set => VarCount2 = value; }
         public uint MaxLocalVarCount { get => FORM.VARI.MaxLocalVarCount; set => FORM.VARI.MaxLocalVarCount = value; }
+
+        /// <summary>
+        /// The functions of the data file.
+        /// </summary>
         public IList<UndertaleFunction> Functions => FORM.FUNC?.Functions;
+
+        /// <summary>
+        /// The code locals of the data file.
+        /// </summary>
         public IList<UndertaleCodeLocals> CodeLocals => FORM.FUNC?.CodeLocals;
+
+        /// <summary>
+        /// The used strings of the data file.
+        /// </summary>
         public IList<UndertaleString> Strings => FORM.STRG?.List;
+
+        /// <summary>
+        /// The embedded images of the data file. This is used to store built-in particle sprites,
+        /// every time you use <c>part_sprite</c> functions.
+        /// </summary>
         public IList<UndertaleEmbeddedImage> EmbeddedImages => FORM.EMBI?.List;
+
+        /// <summary>
+        /// The embedded textures of the data file.
+        /// </summary>
         public IList<UndertaleEmbeddedTexture> EmbeddedTextures => FORM.TXTR?.List;
+
+
         public IList<UndertaleTextureGroupInfo> TextureGroupInfo => FORM.TGIN?.List;
+
+        /// <summary>
+        /// The embedded audio of the data file.
+        /// </summary>
         public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO?.List;
 
+        //TODO?
         public UndertaleTags Tags => FORM.TAGS?.Object;
+
+        /// <summary>
+        /// The animation curves of the data file.
+        /// </summary>
         public IList<UndertaleAnimationCurve> AnimationCurves => FORM.ACRV?.List;
+
+        /// <summary>
+        /// The sequences of the data file.
+        /// </summary>
         public IList<UndertaleSequence> Sequences => FORM.SEQN?.List;
 
+        /// <summary>
+        /// Whether this is an unsupported bytecode version
+        /// </summary>
         public bool UnsupportedBytecodeVersion = false;
+
+        /// <summary>
+        /// Whether the Texture Page Items (TPGA) chunk is 4 byte aligned.
+        /// </summary>
         public bool IsTPAG4ByteAligned = false;
+
+        /// <summary>
+        /// Whether the data file has short circuiting enabled.
+        /// </summary>
         public bool ShortCircuit = true;
+
+        /// <summary>
+        /// Whether the data file is from version GMS2.2.2.302
+        /// </summary>
         public bool GMS2_2_2_302 = false;
+
+        /// <summary>
+        /// Whether the data file is from version GMS2.3
+        /// </summary>
         public bool GMS2_3 = false;
+
+        /// <summary>
+        /// Whether the data file is from version GMS2.3.1
+        /// </summary>
         public bool GMS2_3_1 = false;
+
+        /// <summary>
+        /// Whether the data file is from version GMS2.3.2
+        /// </summary>
         public bool GMS2_3_2 = false;
+
+        /// <summary>
+        /// Whether the data file uses the QOI format for images.
+        /// </summary>
         public bool UseQoiFormat = false;
+
+        /// <summary>
+        /// Whether the data file uses BZip compression.
+        /// </summary>
         public bool UseBZipFormat = false;
+
+        /// <summary>
+        /// Whether the data file is from version GMS2022.1
+        /// </summary>
         public bool GMS2022_1 = false;
+
+
         public ToolInfo ToolInfo = new ToolInfo();
         public int PaddingAlignException = -1;
 
         public BuiltinList BuiltinList;
-        public Dictionary<string, UndertaleFunction> KnownSubFunctions; // Cache for known 2.3-style function names for compiler speedups. Can be re-built by setting this to null.
+
+        /// <summary>
+        /// Cache for known 2.3-style function names for compiler speedups. Can be re-built by setting this to null.
+        /// </summary>
+        public Dictionary<string, UndertaleFunction> KnownSubFunctions;
 
         public ConcurrentDictionary<string, string> GMLCache { get; set; }
         public List<string> GMLCacheFailed { get; set; }
@@ -130,6 +297,12 @@ namespace UndertaleModLib
         public bool GMLCacheIsReady { get; set; } = true;
 
 
+        /// <summary>
+        /// Get a resource from the data file by name.
+        /// </summary>
+        /// <param name="name">The name of the desired resource.</param>
+        /// <param name="ignoreCase">Whether to ignore casing while searching.</param>
+        /// <returns></returns>
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {
             // TODO: Check if those are all possible types
@@ -150,6 +323,14 @@ namespace UndertaleModLib
                 (UndertaleNamedResource)null;
         }
 
+        /// <summary>
+        /// Reports the zero-based index of the first occurence of the specified <see cref="UndertaleNamedResource"/>.
+        /// </summary>
+        /// <param name="obj">The object to get the index of.</param>
+        /// <param name="panicIfInvalid">Whether to throw if <paramref name="obj"/> is not a valid object.</param>
+        /// <returns>The zero-based index position of the <paramref name="obj"/> parameter if it is found or -2 if it is not.</returns>
+        /// <exception cref="InvalidOperationException"><paramref name="panicIfInvalid"/> is <see langword="true"/>
+        /// and <paramref name="obj"/> could not be found.</exception>
         public int IndexOf(UndertaleNamedResource obj, bool panicIfInvalid = true)
         {
             if (obj is UndertaleSound)
@@ -197,7 +378,10 @@ namespace UndertaleModLib
             throw new NotImplementedException();
         }
 
-        // Test if this data.win was built by GameMaker Studio 2.
+        /// <summary>
+        /// Reports whether the data file was build by GameMaker Studio 2.
+        /// </summary>
+        /// <returns><see langword="true"/> if yes, <see langword="false"/> if not.</returns>
         public bool IsGameMaker2()
         {
             return IsVersionAtLeast(2, 0, 0, 0);
@@ -212,6 +396,14 @@ namespace UndertaleModLib
             return (allowGMS2 || !IsGameMaker2()) && (IsVersionAtLeast(1, 0, 0, stableBuild) || (IsVersionAtLeast(1, 0, 0, betaBuild) && !IsVersionAtLeast(1, 0, 0, 1000)));
         }
 
+        /// <summary>
+        /// Reports whether the version of the data file is the same or higher than a specified version.
+        /// </summary>
+        /// <param name="major">The major version.</param>
+        /// <param name="minor">The minor version.</param>
+        /// <param name="release">The release version.</param>
+        /// <param name="build">The build version.</param>
+        /// <returns></returns>
         public bool IsVersionAtLeast(uint major, uint minor, uint release, uint build)
         {
             if (GeneralInfo.Major != major)
@@ -236,6 +428,10 @@ namespace UndertaleModLib
             return TestGMS1Version(1354, 161, true) ? 0 : 1;
         }
 
+        /// <summary>
+        /// Reports whether the data file was compiled with YYD
+        /// </summary>
+        /// <returns><see langword="true"/> if yes, <see langword="false"/> if not.</returns>
         public bool IsYYC()
         {
             return GeneralInfo != null && Code == null;
@@ -267,6 +463,10 @@ namespace UndertaleModLib
             return id;
         }
 
+        /// <summary>
+        /// Creates a new empty data file.
+        /// </summary>
+        /// <returns>The newly created data file.</returns>
         public static UndertaleData CreateNew()
         {
             UndertaleData data = new UndertaleData();
@@ -419,13 +619,13 @@ namespace UndertaleModLib
                         oldId = (uint)id;
                     }
                     else if (!data.DifferentVarCounts)
-                    { 
+                    {
                         // Bytecode 16+
                         data.VarCount1++;
                         data.VarCount2++;
                     }
                     else
-                    { 
+                    {
                         // Bytecode 15
                         if (inst == UndertaleInstruction.InstanceType.Self && !isBuiltin)
                         {

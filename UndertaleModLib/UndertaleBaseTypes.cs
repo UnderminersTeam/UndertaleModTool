@@ -9,7 +9,16 @@ namespace UndertaleModLib
 {
     public interface UndertaleObject
     {
+        /// <summary>
+        /// Serializes the data file into a specified <see cref="UndertaleWriter"/>.
+        /// </summary>
+        /// <param name="writer">Where to serialize to.</param>
         void Serialize(UndertaleWriter writer);
+
+        /// <summary>
+        /// Deserializes from a specified <see cref="UndertaleReader"/> to the current data file.
+        /// </summary>
+        /// <param name="reader"></param>
         void Unserialize(UndertaleReader reader);
     }
 
@@ -39,7 +48,7 @@ namespace UndertaleModLib
         void SerializePrePadding(UndertaleWriter writer);
         void UnserializePrePadding(UndertaleReader reader);
     }
-    
+
     public enum ResourceType : int
     {
         None = -1,
