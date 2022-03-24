@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
+    /// <summary>
+    /// A background (and tileset) entry in a data file.
+    /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleBackground : UndertaleNamedResource
     {
@@ -30,14 +33,42 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <summary>
+        /// The name of the background.
+        /// </summary>
         public UndertaleString Name { get; set; }
+
+        /// <summary>
+        /// Whether the background should be transparent.
+        /// </summary>
         public bool Transparent { get; set; }
+
+        /// <summary>
+        /// Whether the background should get smoothed.
+        /// </summary>
         public bool Smooth { get; set; }
+
+        /// <summary>
+        /// Whether to preload the background.
+        /// </summary>
         public bool Preload { get; set; }
+
+        /// <summary>
+        /// The <see cref="UndertaleTexturePageItem"/> this background uses.
+        /// </summary>
         public UndertaleTexturePageItem Texture { get; set; }
         public uint GMS2UnknownAlways2 { get; set; } = 2;
+
+        /// <summary>
+        /// The tile width of the tileset. Game Maker Studio 2 only.
+        /// </summary>
         public uint GMS2TileWidth { get; set; } = 32;
+
+        /// <summary>
+        /// The tile height of the tileset. Game Maker Studio 2 only.
+        /// </summary>
         public uint GMS2TileHeight { get; set; } = 32;
+
         public uint GMS2OutputBorderX { get; set; } = 2;
         public uint GMS2OutputBorderY { get; set; } = 2;
         public uint GMS2TileColumns { get; set; } = 32;

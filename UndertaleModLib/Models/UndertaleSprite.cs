@@ -44,23 +44,84 @@ namespace UndertaleModLib.Models
         }
     }
 
+    /// <summary>
+    /// Sprite entry in the data file.
+    /// </summary>
     public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyPropertyChanged
     {
+        /// <summary>
+        /// The name of the sprite.
+        /// </summary>
         public UndertaleString Name { get; set; }
+
+        /// <summary>
+        /// The width of the sprite.
+        /// </summary>
         public uint Width { get; set; }
+
+        /// <summary>
+        /// The height of the sprite.
+        /// </summary>
         public uint Height { get; set; }
+
+        /// <summary>
+        /// The left margin of the sprite.
+        /// </summary>
         public int MarginLeft { get; set; }
+
+        /// <summary>
+        /// The right margin of the sprite.
+        /// </summary>
         public int MarginRight { get; set; }
+
+        /// <summary>
+        /// The bottom margin of the sprite.
+        /// </summary>
         public int MarginBottom { get; set; }
+
+        /// <summary>
+        /// The top margin of the sprite.
+        /// </summary>
         public int MarginTop { get; set; }
+
+        /// <summary>
+        /// Whether the sprite should be transparent.
+        /// </summary>
         public bool Transparent { get; set; }
+
+        /// <summary>
+        /// Whether the sprite should get smoothed.
+        /// </summary>
         public bool Smooth { get; set; }
+
+        /// <summary>
+        /// Whether the sprite should get preloaded.
+        /// </summary>
         public bool Preload { get; set; }
+
+
         public uint BBoxMode { get; set; }
         public SepMaskType SepMasks { get; set; }
+
+
+        /// <summary>
+        /// The x-coordinate of the origin of the sprite.
+        /// </summary>
         public int OriginX { get; set; }
+
+        /// <summary>
+        /// The y-coordinate of the origin of the sprite.
+        /// </summary>
         public int OriginY { get; set; }
+
+        /// <summary>
+        /// The frames of the sprite.
+        /// </summary>
         public UndertaleSimpleList<TextureEntry> Textures { get; private set; } = new UndertaleSimpleList<TextureEntry>();
+
+        /// <summary>
+        /// The collision masks of the sprite.
+        /// </summary>
         public ObservableCollection<MaskEntry> CollisionMasks { get; } = new ObservableCollection<MaskEntry>();
 
         // Special sprite types (always used in GMS2)
@@ -103,13 +164,28 @@ namespace UndertaleModLib.Models
             return newEntry;
         }
 
+        /// <summary>
+        /// Different formats a sprite can have.
+        /// </summary>
         public enum SpriteType : uint
         {
+            /// <summary>
+            /// Normal format.
+            /// </summary>
             Normal = 0,
+            /// <summary>
+            /// SWF format.
+            /// </summary>
             SWF = 1,
+            /// <summary>
+            /// Spine format.
+            /// </summary>
             Spine = 2
         }
 
+        /// <summary>
+        /// Different Separation mask types a sprite can have.
+        /// </summary>
         public enum SepMaskType : uint
         {
             AxisAlignedRect = 0,
@@ -770,7 +846,7 @@ namespace UndertaleModLib.Models
     }
 
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class UndertaleYYSWFGradientRecord : UndertaleObject 
+    public class UndertaleYYSWFGradientRecord : UndertaleObject
     {
         public int Ratio { get; set; }
         public byte Red { get; set; }

@@ -7,33 +7,105 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
+    /// <summary>
+    /// A font entry of a data file.
+    /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleFont : UndertaleNamedResource
     {
+        /// <summary>
+        /// The name of the font.
+        /// </summary>
         public UndertaleString Name { get; set; }
+
+        /// <summary>
+        /// The display name of the font.
+        /// </summary>
         public UndertaleString DisplayName { get; set; }
+
+        /// <summary>
+        /// Whether the Em size is a float.
+        /// </summary>
         public bool EmSizeIsFloat { get; set; }
+
+        /// <summary>
+        /// The font size in Ems
+        /// </summary>
         public uint EmSize { get; set; }
+
+        /// <summary>
+        /// Whether to display the font in bold.
+        /// </summary>
         public bool Bold { get; set; }
+
+        /// <summary>
+        /// Whether to display the font in italics
+        /// </summary>
         public bool Italic { get; set; }
+
+
         public ushort RangeStart { get; set; }
         public byte Charset { get; set; }
         public byte AntiAliasing { get; set; }
         public uint RangeEnd { get; set; }
+
+
+        /// <summary>
+        /// The <see cref="UndertaleTexturePageItem"/> object that contains the texture for this font.
+        /// </summary>
         public UndertaleTexturePageItem Texture { get; set; }
+
+        /// <summary>
+        /// The x scale this font uses.
+        /// </summary>
         public float ScaleX { get; set; }
+
+        /// <summary>
+        /// The y scale this font uses.
+        /// </summary>
         public float ScaleY { get; set; }
+
+        /// <summary>
+        /// The glyphs that this font uses.
+        /// </summary>
         public UndertalePointerList<Glyph> Glyphs { get; private set; } = new UndertalePointerList<Glyph>();
+
+
         public int AscenderOffset { get; set; }
 
+
+        /// <summary>
+        /// Glyphs that a font can use.
+        /// </summary>
         [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class Glyph : UndertaleObject
         {
+            /// <summary>
+            /// The character for the glyph.
+            /// </summary>
             public ushort Character { get; set; }
+
+            /// <summary>
+            /// The x position in the <see cref="UndertaleFont.Texture"/> where the glyph can be found.
+            /// </summary>
             public ushort SourceX { get; set; }
+
+            /// <summary>
+            /// The y position in the <see cref="UndertaleFont.Texture"/> where the glyph can be found.
+            /// </summary>
             public ushort SourceY { get; set; }
+
+            /// <summary>
+            /// The width of the glyph.
+            /// </summary>
             public ushort SourceWidth { get; set; }
+
+            /// <summary>
+            /// The height of the glyph.
+            /// </summary>
             public ushort SourceHeight { get; set; }
+
+
             public short Shift { get; set; }
             public short Offset { get; set; }
             public UndertaleSimpleListShort<GlyphKerning> Kerning { get; set; } = new UndertaleSimpleListShort<GlyphKerning>();
