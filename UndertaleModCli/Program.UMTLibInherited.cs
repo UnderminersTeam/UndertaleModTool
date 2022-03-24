@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -55,7 +56,8 @@ namespace UndertaleModCli
 
         public async Task<bool> Make_New_File()
         {
-            await Task.Delay(1); //dummy await
+            // This call has no use except to suppress the "method is not doing anything async" warning
+            await Task.Delay(1);
 
             Data = UndertaleData.CreateNew();
             Console.WriteLine("New file created.");
@@ -70,6 +72,7 @@ namespace UndertaleModCli
 
         public void SetUMTConsoleText(string message)
         {
+            //TODO: seems to do nothing on Linux / Macos? Could be terminal dependant.
             Console.Title = message;
         }
 
@@ -77,24 +80,45 @@ namespace UndertaleModCli
         {
             Console.WriteLine(message);
             Console.Write("Input (Y/N)? ");
-            var isInputYes = Console.ReadKey(false).Key == ConsoleKey.Y;
+            bool isInputYes = Console.ReadKey(false).Key == ConsoleKey.Y;
             Console.WriteLine();
             return isInputYes;
         }
 
-        public void ScriptError(string error, string title = "Error", bool SetConsoleText = true)
+        public void ScriptError(string error, string title = "Error", bool setConsoleText = true)
         {
-            // no need to care about SetConsoleText if we're in CLI.........
+            // no need to care about setConsoleText if we're in CLI...
+            // Although we could copy SetUMTConsoleText and change the console.title as well
+            // potential TODO?
+
             Console.Error.WriteLine("--------------------------------------------------");
-            Console.Error.WriteLine("---------------------ERROR!-----------------------");
+            Console.Error.WriteLine("----------------------ERROR!----------------------");
             Console.Error.WriteLine("--------------------------------------------------");
             Console.Error.WriteLine(title);
             Console.Error.WriteLine("--------------------------------------------------");
             Console.Error.WriteLine(error);
             Console.Error.WriteLine("--------------------------------------------------");
-            Console.Error.WriteLine("---------------------ERROR!-----------------------");
+            Console.Error.WriteLine("----------------------ERROR!----------------------");
             Console.Error.WriteLine("--------------------------------------------------");
             if (IsInteractive) { Pause(); }
+        }
+
+        public void SimpleTextOutput(string title, string label, string defaultText, bool allowMultiline)
+        {
+            // In order to be similar to GUI output, we strip everything past a newline in "defaultValue" should multiline be disabled
+            if (!allowMultiline)
+                defaultText = defaultText.Remove(defaultText.IndexOf('\n'));
+
+            Console.WriteLine("----------------------OUTPUT----------------------");
+            Console.WriteLine(title);
+            Console.WriteLine(label);
+            Console.WriteLine("--------------------------------------------------");
+            Console.WriteLine(defaultText);
+            Console.WriteLine("--------------------------------------------------");
+            Console.WriteLine("----------------------OUTPUT----------------------");
+            Console.WriteLine("--------------------------------------------------");
+
+            if (IsInteractive) Pause();
         }
 
         public void ScriptOpenURL(string url)
@@ -115,7 +139,7 @@ namespace UndertaleModCli
             }
             else
             {
-                throw new InvalidOperationException("Unable to open the browser on this OS.");
+                throw new InvalidOperationException("Unable to open the browser on this OS: " +  RuntimeInformation.OSDescription);
             }
 
             p?.Dispose();
@@ -123,7 +147,46 @@ namespace UndertaleModCli
 
         public bool SendAUMIMessage(IpcMessage_t ipMessage, ref IpcReply_t outReply)
         {
-            return false;
+            // Implementation Copy-pasted from UndertaleModTool/MainWindow.xaml.cs
+
+            // By Archie
+            const int replySize = 132;
+
+            // Create the pipe
+            using var pPipeServer = new NamedPipeServerStream("AUMI-IPC", PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+
+            // Wait 1/8th of a second for AUMI to connect.
+            // If it doesn't connect in time (which it should), just return false to avoid a deadlock.
+            if (!pPipeServer.IsConnected)
+            {
+                pPipeServer.WaitForConnectionAsync();
+                Thread.Sleep(125);
+                if (!pPipeServer.IsConnected)
+                {
+                    pPipeServer.DisposeAsync();
+                    return false;
+                }
+            }
+
+            try
+            {
+                //Send the message
+                pPipeServer.Write(ipMessage.RawBytes());
+                pPipeServer.Flush();
+            }
+            catch (Exception e)
+            {
+                // Catch any errors that might arise if the connection is broken
+                ScriptError("Could not write data to the pipe!\nError: " + e.Message);
+                return false;
+            }
+
+            // Read the reply, the length of which is always a pre-set amount of bytes.
+            byte[] bBuffer = new byte[replySize];
+            pPipeServer.Read(bBuffer, 0, replySize);
+
+            outReply = IpcReply_t.FromBytes(bBuffer);
+            return true;
         }
 
         public bool RunUMTScript(string path)
@@ -141,8 +204,9 @@ namespace UndertaleModCli
 
         public bool AreFilesIdentical(string file1, string file2)
         {
-            using var fs1 = new FileStream(file1, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var fs2 = new FileStream(file2, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using FileStream fs1 = new FileStream(file1, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using FileStream fs2 = new FileStream(file2, FileMode.Open, FileAccess.Read, FileShare.Read);
+
             if (fs1.Length != fs2.Length) return false; // different size, files can't be the same
 
             while (true)
@@ -161,33 +225,29 @@ namespace UndertaleModCli
         {
             FinishedMessageEnabled = isFinishedMessageEnabled;
         }
-        public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
+
+        public void UpdateProgressBar(string message, string status, double currentValue, double maxValue)
         {
-            var evaledMessage = (String.IsNullOrEmpty(message) ? $"{message}|" : "");
-            Console.WriteLine($"[{evaledMessage}{status}] {progressValue} out of {maxValue}");
+            string evaluatedMessage = String.IsNullOrEmpty(message) ? $"{message}|" : "";
+            Console.WriteLine($"[{evaluatedMessage}{status}] {currentValue} out of {maxValue}");
         }
 
-        public void SetProgressBar(string message, string status, double progressValue, double maxValue)
+        //TODO: why do these function need/save attributes?
+        public void SetProgressBar(string message, string status, double currentValue, double maxValue)
         {
             savedMsg = message;
             savedStatus = status;
-            savedValue = progressValue;
+            savedValue = currentValue;
             savedValueMax = maxValue;
 
-            UpdateProgressBar(message, status, progressValue, maxValue);
+            UpdateProgressBar(message, status, currentValue, maxValue);
         }
 
-        //TODO: can be implemented I think
-        public void SetProgressBar()
+        public void UpdateProgressValue(double currentValue)
         {
-            //no dialog to show
-        }
+            UpdateProgressBar(savedMsg, savedStatus, currentValue, savedValueMax);
 
-        public void UpdateProgressValue(double progressValue)
-        {
-            UpdateProgressBar(savedMsg, savedStatus, progressValue, savedValueMax);
-
-            savedValue = progressValue;
+            savedValue = currentValue;
         }
         public void UpdateProgressStatus(string status)
         {
@@ -222,22 +282,47 @@ namespace UndertaleModCli
         }
 
         #region Empty Inherited Methods
+
+        public void InitializeScriptDialog()
+        {
+            // CLI has no dialogs to initialize
+        }
+
+        public void ReapplyProfileCode()
+        {
+            //CLI does not have any code editing tools, nor a profile Mode thus since is completely useless
+        }
+
+        public void NukeProfileGML(string codeName)
+        {
+            //CLI does not have any code editing tools, nor a profile Mode thus since is completely useless
+        }
+
+        public void SetProgressBar()
+        {
+            //no progress bar that can be setup to show
+        }
+
         public void HideProgressBar()
         {
             // nothing to hide..
         }
+
         public void EnableUI()
         {
             // nothing to enable...
         }
+
         public void SyncBinding(string resourceType, bool enable)
         {
             //there is no UI with any data binding
         }
+
         public void SyncBinding(bool enable = false)
         {
             //there is no UI with any data binding
         }
+
         #endregion
 
         public void StartUpdater()
@@ -252,22 +337,82 @@ namespace UndertaleModCli
         }
         public async Task StopUpdater() //"async" because "Wait()" blocks UI thread
         {
-            if (cTokenSource is not null)
+            if (cTokenSource is null) return;
+
+
+            cTokenSource.Cancel();
+
+            if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
+                Console.WriteLine("Error - stopping the progress updater task is failed.");
+            else
             {
-                cTokenSource.Cancel();
+                cTokenSource.Dispose();
+                cTokenSource = null;
+            }
 
-                if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
-                    Console.WriteLine("Error - stopping the progress updater task is failed.");
-                else
-                {
-                    cTokenSource.Dispose();
-                    cTokenSource = null;
-                }
+            updater.Dispose();
+        }
 
-                updater.Dispose();
+        public void ChangeSelection(object newSelection)
+        {
+            //this does *not* make sense, as CLI does not have any selections
+            //however, since Selection is a public object, it could potentially be used by scripts
+            Selected = newSelection;
+        }
+
+        public string PromptChooseDirectory(string prompt)
+        {
+            Console.WriteLine("Please type a path (or drag and drop) to a directory:");
+            Console.Write("Path: ");
+            //TODO: should probably trim quotes in order to not have funky stuff
+            string path = Console.ReadLine();
+            return path;
+        }
+
+        public string PromptLoadFile(string defaultExt, string filter)
+        {
+            Console.WriteLine("Please type a path (or drag and drop) to a file:");
+            Console.Write("Path: ");
+            //TODO: should probably trim quotes in order to not have funky stuff
+            string path = Console.ReadLine();
+            return path;
+        }
+
+        public string GetDecompiledText(string codeName, GlobalDecompileContext context = null)
+        {
+            return GetDecompiledText(Data.Code.ByName(codeName), context);
+        }
+        public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
+        {
+            GlobalDecompileContext DECOMPILE_CONTEXT = context is null ? new(Data, false) : context;
+            try
+            {
+                return code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT) : "";
+            }
+            catch (Exception e)
+            {
+                return "/*\nDECOMPILER FAILED!\n\n" + e + "\n*/";
             }
         }
 
+        public string GetDisassemblyText(string codeName)
+        {
+            return GetDisassemblyText(Data.Code.ByName(codeName));
+        }
+        public string GetDisassemblyText(UndertaleCode code)
+        {
+            try
+            {
+                return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "";
+            }
+            catch (Exception e)
+            {
+                return "/*\nDISASSEMBLY FAILED!\n\n" + e + "\n*/"; // Please don't
+            }
+        }
+
+        //TODO: implement all these
+        #region todo
         public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
         {
             await Task.Delay(1); //dummy await
@@ -275,27 +420,6 @@ namespace UndertaleModCli
             //TODO: not implemented yet
 
             return false;
-        }
-
-
-        public void ChangeSelection(object newsel)
-        {
-            Selected = newsel;
-        }
-
-        public string PromptChooseDirectory(string prompt)
-        {
-            Console.WriteLine("Please type a path (or drag and drop) to a directory:");
-            Console.Write("Path: ");
-            string p = Console.ReadLine();
-            return p;
-        }
-
-        //TODO: implement all these
-        #region todo
-        public string PromptLoadFile(string defaultExt, string filter)
-        {
-            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false)
@@ -329,87 +453,94 @@ namespace UndertaleModCli
 
         public string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
         {
-            throw new NotImplementedException();
+            /*
+             * TextInputDialog dlg = new TextInputDialog(titleText, labelText, defaultInputBoxText, cancelButtonText, submitButtonText, isMultiline, preventClose);
+            bool? dlgResult = dlg.ShowDialog();
+
+            if (!dlgResult.HasValue || dlgResult == false)
+            {
+                // returns null (not an empty!!!) string if the dialog has been closed, or an error has occured.
+                return null;
+            }
+
+            // otherwise just return the input (it may be empty aka .Length == 0).
+            return dlg.InputText;
+             */
+
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true)
         {
-            throw new NotImplementedException();
+            //TODO: not for CLI but for GUI: what exactly is the use of showdialog? in which weird case do you want to show an input prompt, that does not "accept" any input?
+            /*
+            TextInput input = new TextInput(labelText, titleText, defaultInputBoxText, isMultiline);
+
+            System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
+            if (showDialog)
+            {
+                result = input.ShowDialog();
+                input.Dispose();
+
+                if (result == System.Windows.Forms.DialogResult.OK)
+                    return input.ReturnString;            //values preserved after close
+                else
+                    return null;
+            }
+            else //if we don't need to wait for result
+            {
+                input.Show();
+                return null;
+                //no need to call input.Dispose(), because if form wasn't shown modally, Form.Close() (or closing it with "X") also calls Dispose()
+            }
+             */
+
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
-        public void SimpleTextOutput(string title, string label, string defaultText, bool allowMultiline)
-        {
-            throw new NotImplementedException();
-        }
+
         public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
         {
+            //will likely just call textoutput, as making it clickable is not really feasable.
             await Task.Delay(1); //dummy await
-            throw new NotImplementedException();
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
         public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
         {
+            //will likely just call textoutput, as making it clickable is not really feasable.
             await Task.Delay(1); //dummy await
-            throw new NotImplementedException();
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public bool LintUMTScript(string path)
         {
-            throw new NotImplementedException();
-        }
-        public void InitializeScriptDialog()
-        {
-            throw new NotImplementedException();
-        }
-        public void ReapplyProfileCode()
-        {
-            throw new NotImplementedException();
-        }
-        public void NukeProfileGML(string codeName)
-        {
-            throw new NotImplementedException();
-        }
-        public string GetDecompiledText(string codeName, GlobalDecompileContext context = null)
-        {
-            throw new NotImplementedException();
-        }
-        public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
-        {
-            throw new NotImplementedException();
-        }
-        public string GetDisassemblyText(string codeName)
-        {
-            throw new NotImplementedException();
-        }
-        public string GetDisassemblyText(UndertaleCode code)
-        {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public void ReplaceTempWithMain(bool ImAnExpertBTW = false)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public void ReplaceMainWithTemp(bool ImAnExpertBTW = false)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public void ReplaceTempWithCorrections(bool ImAnExpertBTW = false)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public void ReplaceCorrectionsWithTemp(bool ImAnExpertBTW = false)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
         public void UpdateCorrections(bool ImAnExpertBTW = false)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
         #endregion
-
 
         public bool DummyBool()
         {

@@ -131,7 +131,7 @@ namespace UndertaleModCli
             Console.OutputEncoding = Console.InputEncoding;
 
 
-            Console.WriteLine($"Trying to load file: {datafile.FullName}");
+            Console.WriteLine($"Trying to load file: '{datafile.FullName}'");
 
             this.FilePath = datafile.FullName;
             this.ExePath = Environment.CurrentDirectory;
@@ -187,15 +187,15 @@ namespace UndertaleModCli
             // If not STDOUT, write to file instead. Check first if we have permission to overwrite
             if (options.Output.Exists && !options.Overwrite)
             {
-                Console.Error.WriteLine($"{options.Output} already exists. Pass --overwrite to overwrite");
+                Console.Error.WriteLine($"'{options.Output}' already exists. Pass --overwrite to overwrite");
                 return EXIT_FAILURE;
             }
 
             // We're not writing to STDOUT, and overwrite flag was given, so we write to specified file.
-            if (options.Verbose) Console.WriteLine($"Attempting to write new Data file to {options.Output}...");
+            if (options.Verbose) Console.WriteLine($"Attempting to write new Data file to '{options.Output}'...");
             using FileStream fs = options.Output.OpenWrite();
             UndertaleIO.Write(fs, data);
-            if (options.Verbose) Console.WriteLine($"Successfully wrote new Data file to {options.Output}.");
+            if (options.Verbose) Console.WriteLine($"Successfully wrote new Data file to '{options.Output}'.");
             return EXIT_SUCCESS;
         }
 
@@ -208,10 +208,10 @@ namespace UndertaleModCli
         {
             Program program;
 
-            // try to load necessary values
+            // Try to load necessary values.
+            // This can throw if mandatory arguments are not given, in which case we want to exit cleanly without a stacktrace.
             try
             {
-                //TODO: can constructor ever fail?
                 program = new Program(options.Datafile, options.Scripts, options.Output, options.Verbose, options.Interactive);
             }
             catch (Exception e)
@@ -394,10 +394,11 @@ namespace UndertaleModCli
             {
                 lines = File.ReadAllText(path);
             }
-            catch (IOException exc)
+            catch (Exception exc)
             {
+                // rethrow as otherwise this will get interpreted as success
                 Console.Error.WriteLine(exc.Message);
-                return;
+                throw;
             }
 
             ScriptPath = path;
@@ -413,7 +414,7 @@ namespace UndertaleModCli
         private void RunCSharpCode(string code, string? scriptFile = null)
         {
             if (Verbose)
-                Console.WriteLine($"Attempting to execute {scriptFile ?? code}...");
+                Console.WriteLine($"Attempting to execute '1{scriptFile ?? code}'...");
 
             try
             {
@@ -433,7 +434,7 @@ namespace UndertaleModCli
             if (ScriptExecutionSuccess)
             {
                 if (Verbose)
-                    Console.WriteLine($"Finished executing {scriptFile ?? code}");
+                    Console.WriteLine($"Finished executing '{scriptFile ?? code}'");
             }
             else
             {
@@ -448,12 +449,12 @@ namespace UndertaleModCli
         private void SaveDataFile(string outputPath)
         {
             if (Verbose)
-                Console.WriteLine($"Saving new data file to {outputPath}");
+                Console.WriteLine($"Saving new data file to '{outputPath}'");
 
             using FileStream fs = new FileInfo(outputPath).OpenWrite();
             UndertaleIO.Write(fs, Data, MessageHandler);
             if (Verbose)
-                Console.WriteLine($"Saved data file to {outputPath}");
+                Console.WriteLine($"Saved data file to '{outputPath}'");
         }
 
         /// <summary>
@@ -473,7 +474,7 @@ namespace UndertaleModCli
             }
             catch (FileNotFoundException e)
             {
-                throw new FileNotFoundException($"data file {e.FileName} does not exist");
+                throw new FileNotFoundException($"Data file '{e.FileName}' does not exist");
             }
         }
 
