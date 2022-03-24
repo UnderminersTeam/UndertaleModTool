@@ -36,14 +36,14 @@ namespace UndertaleModTests
 
         public bool IsAppClosed => throw new NotImplementedException();
 
-        public void ChangeSelection(object newsel)
+        public void ChangeSelection(object newSelection)
         {
         }
 
         public void EnsureDataLoaded()
         {
         }
-        public async Task<bool> Make_New_File()
+        public async Task<bool> MakeNewDataFile()
         {
             await Task.Delay(1); //dummy await
             return true;
@@ -127,15 +127,15 @@ namespace UndertaleModTests
         {
             Console.WriteLine($"AddProgress(): {amount}");
         }
-        public void IncProgress()
+        public void IncrementProgress()
         {
             Console.WriteLine("IncProgress()");
         }
-        public void AddProgressP(int amount)
+        public void AddProgressParallel(int amount)
         {
             Console.WriteLine($"AddProgressP(): {amount}");
         }
-        public void IncProgressP()
+        public void IncrementProgressParallel()
         {
             Console.WriteLine("IncProgressP()");
         }
@@ -149,9 +149,9 @@ namespace UndertaleModTests
             Console.WriteLine($"SetProgress(): {value}");
         }
 
-        public string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
+        public string ScriptInputDialog(string title, string label, string defaultInput, string cancelText, string submitText, bool isMultiline, bool preventClose)
         {
-            Console.Write(labelText + " ");
+            Console.Write(label + " ");
             string ret = Console.ReadLine();
 
             return ret;
@@ -160,9 +160,9 @@ namespace UndertaleModTests
         {
             return ScriptInputDialog(titleText, labelText, defaultInputBoxText, "Cancel", "Submit", isMultiline, false);
         }
-        public void SimpleTextOutput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline)
+        public void SimpleTextOutput(string titleText, string labelText, string message, bool isMultiline)
         {
-            Console.WriteLine($"SimpleTextOutput(): \"{titleText}\", \"{labelText}\", *defaultInputBoxText* (length - {defaultInputBoxText.Length}), {isMultiline}");
+            Console.WriteLine($"SimpleTextOutput(): \"{titleText}\", \"{labelText}\", *defaultInputBoxText* (length - {message.Length}), {isMultiline}");
         }
         public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
         {
@@ -247,7 +247,7 @@ namespace UndertaleModTests
                               );
 
             await Task.Delay(1); //dummy await
-            
+
             return false;
         }
 
@@ -272,7 +272,7 @@ namespace UndertaleModTests
             throw new NotImplementedException();
         }
 
-        public string PromptChooseDirectory(string prompt)
+        public string PromptChooseDirectory()
         {
             throw new NotImplementedException();
         }
@@ -301,9 +301,9 @@ namespace UndertaleModTests
             Console.Write(output);
             return output;
         }
-        public bool AreFilesIdentical(string File01, string File02)
+        public bool AreFilesIdentical(string file1, string file2)
         {
-            string output = "AreFilesIdentical(): " + File01 + ", " + File02;
+            string output = "AreFilesIdentical(): " + file1 + ", " + file2;
             Console.Write(output);
             return true;
         }
@@ -355,7 +355,7 @@ namespace UndertaleModTests
         {
             await RunScript("ShowRoomName.csx");
         }
-        
+
         [TestMethod]
         [Ignore] // TODO: path problems
         public async Task BorderEnabler()

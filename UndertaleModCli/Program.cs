@@ -528,7 +528,7 @@ namespace UndertaleModCli
                 throw new Exception("No data file is loaded.");
         }
 
-        public async Task<bool> Make_New_File()
+        public async Task<bool> MakeNewDataFile()
         {
             await Task.Delay(1); //dummy await
 
@@ -676,12 +676,12 @@ namespace UndertaleModCli
             throw new NotImplementedException();
         }
 
-        public bool AreFilesIdentical(string File01, string File02)
+        public bool AreFilesIdentical(string file1, string file2)
         {
             try
             {
-                using var fs1 = new FileStream(File01, FileMode.Open, FileAccess.Read, FileShare.Read);
-                using var fs2 = new FileStream(File01, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var fs1 = new FileStream(file1, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var fs2 = new FileStream(file2, FileMode.Open, FileAccess.Read, FileShare.Read);
                 if (fs1.Length != fs2.Length) return false; // different size.
 
                 while (true)
@@ -702,7 +702,7 @@ namespace UndertaleModCli
             }
         }
 
-        public string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
+        public string ScriptInputDialog(string title, string label, string defaultInput, string cancelText, string submitText, bool isMultiline, bool preventClose)
         {
             throw new NotImplementedException();
         }
@@ -711,7 +711,7 @@ namespace UndertaleModCli
         {
             throw new NotImplementedException();
         }
-        public void SimpleTextOutput(string title, string label, string defaultText, bool allowMultiline)
+        public void SimpleTextOutput(string title, string label, string message, bool allowMultiline)
         {
             throw new NotImplementedException();
         }
@@ -775,15 +775,15 @@ namespace UndertaleModCli
         {
             progressValue += amount;
         }
-        public void IncProgress()
+        public void IncrementProgress()
         {
             progressValue++;
         }
-        public void AddProgressP(int amount) //P - Parallel (multithreaded)
+        public void AddProgressParallel(int amount) //P - Parallel (multithreaded)
         {
             Interlocked.Add(ref progressValue, amount); //thread-safe add operation (not the same as "lock ()")
         }
-        public void IncProgressP()
+        public void IncrementProgressParallel()
         {
             Interlocked.Increment(ref progressValue); //thread-safe increment
         }
@@ -875,12 +875,12 @@ namespace UndertaleModCli
         }
 
 
-        public void ChangeSelection(object newsel)
+        public void ChangeSelection(object newSelection)
         {
-            Selected = newsel;
+            Selected = newSelection;
         }
 
-        public string PromptChooseDirectory(string prompt)
+        public string PromptChooseDirectory()
         {
             Console.WriteLine("Please type a path (or drag and drop) to a directory:");
             Console.Write("Path: ");
