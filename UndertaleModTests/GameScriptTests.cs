@@ -247,7 +247,7 @@ namespace UndertaleModTests
                               );
 
             await Task.Delay(1); //dummy await
-            
+
             return false;
         }
 
@@ -301,9 +301,9 @@ namespace UndertaleModTests
             Console.Write(output);
             return output;
         }
-        public bool AreFilesIdentical(string File01, string File02)
+        public bool AreFilesIdentical(string file1, string file2)
         {
-            string output = "AreFilesIdentical(): " + File01 + ", " + File02;
+            string output = "AreFilesIdentical(): " + file1 + ", " + file2;
             Console.Write(output);
             return true;
         }
@@ -355,7 +355,7 @@ namespace UndertaleModTests
         {
             await RunScript("ShowRoomName.csx");
         }
-        
+
         [TestMethod]
         [Ignore] // TODO: path problems
         public async Task BorderEnabler()

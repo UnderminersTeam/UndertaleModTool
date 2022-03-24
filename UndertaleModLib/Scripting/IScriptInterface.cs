@@ -48,7 +48,7 @@ namespace UndertaleModLib.Scripting
         void ScriptMessage(string message);
         void SetUMTConsoleText(string message);
         bool ScriptQuestion(string message);
-        void ScriptError(string error, string title = "Error", bool SetConsoleText = true);
+        void ScriptError(string error, string title = "Error", bool SetConsoleText = true); //TODO: setConsoleText should get a *clearer* name
         void ScriptOpenURL(string url);
         bool SendAUMIMessage(IpcMessage_t ipMessage, ref IpcReply_t outReply);
         bool RunUMTScript(string path);
@@ -60,7 +60,7 @@ namespace UndertaleModLib.Scripting
         string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null);
         string GetDisassemblyText(string codeName);
         string GetDisassemblyText(UndertaleCode code);
-        bool AreFilesIdentical(string File01, string File02);
+        bool AreFilesIdentical(string file1, string file2);
         string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose);
         string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true);
         void SimpleTextOutput(string title, string label, string defaultText, bool allowMultiline);
