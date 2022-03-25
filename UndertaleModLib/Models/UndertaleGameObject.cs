@@ -9,39 +9,141 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
+    //TODO: shouldn't this be inside of the UGameObject class?
+    /// <summary>
+    /// Collision shapes a <see cref="UndertaleGameObject"/> can use.
+    /// </summary>
     public enum CollisionShapeFlags : uint
     {
+        /// <summary>
+        /// A circular collision shape.
+        /// </summary>
         Circle = 0,
+        /// <summary>
+        /// A rectangular collision shape.
+        /// </summary>
         Box = 1,
+        /// <summary>
+        /// A custom polygonal collision shape.
+        /// </summary>
         Custom = 2,
     }
 
+    /// <summary>
+    /// A game object in a data file.
+    /// </summary>
     public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChanged
     {
         public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
         public UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ParentId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
         public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _TextureMaskId = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
 
+        /// <summary>
+        /// The name of the game object.
+        /// </summary>
         public UndertaleString Name { get; set; }
+
+        /// <summary>
+        /// The sprite this game object uses.
+        /// </summary>
         public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sprite))); } }
+
+        /// <summary>
+        /// Whether the game object is visible.
+        /// </summary>
         public bool Visible { get; set; } = true;
+
+        /// <summary>
+        /// Whether the game object is solid.
+        /// </summary>
         public bool Solid { get; set; } = false;
+
+        /// <summary>
+        /// The depth level of the game object.
+        /// </summary>
         public int Depth { get; set; } = 0;
+
+        /// <summary>
+        /// Whether the game object is persistent.
+        /// </summary>
         public bool Persistent { get; set; } = false;
+
+        /// <summary>
+        /// The parent game object this is inheriting from.
+        /// </summary>
         public UndertaleGameObject ParentId { get => _ParentId.Resource; set { _ParentId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ParentId))); } }
+
+        /// <summary>
+        /// The texture mask this game object is using.
+        /// </summary>
         public UndertaleSprite TextureMaskId { get => _TextureMaskId.Resource; set { _TextureMaskId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextureMaskId))); } }
+
+        #region Physics related properties
+        /// <summary>
+        /// Whether this object uses Game Maker physics.
+        /// </summary>
         public bool UsesPhysics { get; set; } = false;
+
+        /// <summary>
+        /// Whether this game object should act as a sensor fixture.
+        /// </summary>
         public bool IsSensor { get; set; } = false;
+
+        /// <summary>
+        /// The collision shape the game object should use.
+        /// </summary>
         public CollisionShapeFlags CollisionShape { get; set; } = CollisionShapeFlags.Circle;
+
+        /// <summary>
+        /// The physics density of the game object.
+        /// </summary>
         public float Density { get; set; } = 0.5f;
+
+        /// <summary>
+        /// The physics restitution of the game object.
+        /// </summary>
         public float Restitution { get; set; } = 0.1f;
+
+        /// <summary>
+        /// The physics collision group this game object belongs to.
+        /// </summary>
         public uint Group { get; set; } = 0;
+
+        /// <summary>
+        /// The physics linear damping this game object uses.
+        /// </summary>
         public float LinearDamping { get; set; } = 0.1f;
+
+        /// <summary>
+        /// The physics angular damping this game object uses.
+        /// </summary>
         public float AngularDamping { get; set; } = 0.1f;
+
+        /// <summary>
+        /// The physics friction this game object uses.
+        /// </summary>
         public float Friction { get; set; } = 0.2f;
+
+        /// <summary>
+        /// Whether this game object should start awake in the physics simulation.
+        /// </summary>
         public bool Awake { get; set; } = false;
+
+        /// <summary>
+        /// Whether this game object is kinematic.
+        /// </summary>
         public bool Kinematic { get; set; } = false;
+
+        /// <summary>
+        /// The vertices used for a <see cref="CollisionShape"/> of type <see cref="CollisionShapeFlags.Custom"/>.
+        /// </summary>
         public List<UndertalePhysicsVertex> PhysicsVertices { get; private set; } = new List<UndertalePhysicsVertex>();
+
+        #endregion
+
+        /// <summary>
+        /// All the events that this game object has.
+        /// </summary>
         public UndertalePointerList<UndertalePointerList<Event>> Events { get; private set; } = new UndertalePointerList<UndertalePointerList<Event>>();
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -132,6 +234,8 @@ namespace UndertaleModLib.Models
             }
             Events = reader.ReadUndertaleObject<UndertalePointerList<UndertalePointerList<Event>>>();
         }
+
+        //TODO: what do all these eventhandlers do? can't find any references right now.
 
         public UndertaleCode EventHandlerFor(EventType type, uint subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
         {
@@ -247,11 +351,23 @@ namespace UndertaleModLib.Models
             return Name.Content + " (" + GetType().Name + ")";
         }
 
+        /// <summary>
+        /// Generic events that a <see cref="UndertaleGameObject"/> uses.
+        /// </summary>
         [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class Event : UndertaleObject
         {
-            public uint EventSubtype { get; set; } // (the same as the ID at the end of name)
-            public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>(); // seems to always have 1 entry, maybe the games using drag-and-drop code are different
+            /// <summary>
+            /// The subtype of this event.
+            /// </summary>
+            /// <remarks>Game Maker suffixes the action names with this id.</remarks>
+            public uint EventSubtype { get; set; }
+
+            /// <summary>
+            /// The available actions that will be performed for this event.
+            /// </summary>
+            /// <remarks>This seems to always have 1 entry, it would need testing if maybe the games using drag-and-drop code are different</remarks>
+            public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>();
 
             public EventSubtypeKey EventSubtypeKey
             {
@@ -302,12 +418,15 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <summary>
+        /// An action in an event.
+        /// </summary>
         public class EventAction : UndertaleObject, INotifyPropertyChanged
         {
             // All the unknown values seem to be provided for compatibility only - in older versions of GM:S they stored the drag and drop blocks,
             // but newer versions compile them down to GML bytecode anyway
             // Possible meaning of values: https://github.com/WarlockD/GMdsam/blob/26aefe3e90a7a7a1891cb83f468079546f32b4b7/GMdsam/GameMaker/ChunkTypes.cs#L466
-            
+
             // Note from the future: these aren't always these values...
 
             public uint LibID { get; set; } // always 1
@@ -319,6 +438,10 @@ namespace UndertaleModLib.Models
             public uint ExeType { get; set; } // always 2
             public UndertaleString ActionName { get; set; } // always ""
             private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CodeId = new UndertaleModLib.UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
+
+            /// <summary>
+            /// The code entry that gets executed.
+            /// </summary>
             public UndertaleCode CodeId { get => _CodeId.Resource; set { _CodeId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CodeId))); } }
             public uint ArgumentCount { get; set; } // always 1
             public int Who { get; set; } // always -1
@@ -365,10 +488,20 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <summary>
+        /// Class representing a physics vertex used for a <see cref="CollisionShape"/> of type <see cref="CollisionShapeFlags.Custom"/>.
+        /// </summary>
         [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class UndertalePhysicsVertex : UndertaleObject
         {
+            /// <summary>
+            /// The x position of the vertex.
+            /// </summary>
             public float X { get; set; }
+
+            /// <summary>
+            /// The y position of the vertex.
+            /// </summary>
             public float Y { get; set; }
 
             public void Serialize(UndertaleWriter writer)
@@ -385,156 +518,565 @@ namespace UndertaleModLib.Models
         }
     }
 
+    /// <summary>
+    /// The types an event can be.
+    /// </summary>
+    /// <remarks>Note, that subtypes exist as well.</remarks>
     public enum EventType : uint
     {
-        Create = 0, // no subtypes, always 0
-        Destroy = 1, // no subtypes, always 0
-        Alarm = 2, // subtype is alarm id (0-11)
+        /// <summary>
+        /// A creation event type. Has no subtypes, it's always 0
+        /// </summary>
+        Create = 0,
+        /// <summary>
+        /// A destroy event type. Has no subtypes, it's always 0.
+        /// </summary>
+        Destroy = 1,
+        /// <summary>
+        /// An alarm event type. The subtype is 0-11, depending on the alarm id.
+        /// </summary>
+        Alarm = 2,
+        /// <summary>
+        /// A step event type. The subtype is <see cref="EventSubtypeStep"/>.
+        /// </summary>
         Step = 3, // subtype is EventSubtypeStep
-        Collision = 4, // subtype is other game object ID
-        Keyboard = 5, // subtype is key ID, see EventSubtypeKey
+        /// <summary>
+        /// A collision event type. The subtype is the other <see cref="UndertaleGameObject"/>'s id.
+        /// </summary>
+        Collision = 4,
+        /// <summary>
+        /// A key down event type. The subtype is the key id, see <see cref="EventSubtypeKey"/>.
+        /// </summary>
+        Keyboard = 5,
+        /// <summary>
+        /// A mouse event type. The subtype is <see cref="EventSubtypeMouse"/>.
+        /// </summary>
         Mouse = 6, // subtype is EventSubtypeMouse
-        Other = 7, // subtype is EventSubtypeOther
-        Draw = 8, // subtype is EventSubtypeDraw
-        KeyPress = 9, // subtype is key ID, see EventSubtypeKey
-        KeyRelease = 10, // subtype is key ID, see EventSubtypeKey
+        /// <summary>
+        /// A miscellaneous event type. The subtype is <see cref="EventSubtypeOther"/>.
+        /// </summary>
+        Other = 7,
+        /// <summary>
+        /// A draw event type. The subtype is <see cref="EventSubtypeDraw"/>.
+        /// </summary>
+        Draw = 8,
+        /// <summary>
+        /// A key pressed event type. The subtype is the key id, see <see cref="EventSubtypeKey"/>.
+        /// </summary>
+        KeyPress = 9,
+        /// <summary>
+        /// A key released event type. The subtype is the key id, see <see cref="EventSubtypeKey"/>.
+        /// </summary>
+        KeyRelease = 10,
+        //TODO
         Trigger = 11, // no subtypes, always 0
-        CleanUp = 12, // no subtypes, always 0
-        Gesture = 13, // subtype is EventSubtypeGesture
+        /// <summary>
+        /// A cleanup event type. Has no subtypes, always 0.
+        /// </summary>
+        CleanUp = 12,
+        /// <summary>
+        /// A gesture event type. The subtype is <see cref="EventSubtypeGesture"/>.
+        /// </summary>
+        Gesture = 13,
+        /// <summary>
+        /// A pre-create event type. Unknown subtype. TODO?
+        /// </summary>
         PreCreate = 14
     }
 
+    /// <summary>
+    /// The subtypes for <see cref="EventType.Step"/>.
+    /// </summary>
     public enum EventSubtypeStep : uint
     {
+        /// <summary>
+        /// Normal step event.
+        /// </summary>
         Step = 0,
+        /// <summary>
+        /// The begin step event.
+        /// </summary>
         BeginStep = 1,
+        /// <summary>
+        /// The end step event.
+        /// </summary>
         EndStep = 2,
     }
 
+    /// <summary>
+    /// The subtypes for <see cref="EventType.Draw"/>.
+    /// </summary>
     public enum EventSubtypeDraw : uint
     {
+        /// <summary>
+        /// The draw event.
+        /// </summary>
         Draw = 0,
+        /// <summary>
+        /// The draw GUI event.
+        /// </summary>
         DrawGUI = 64,
+        /// <summary>
+        /// The resize event.
+        /// </summary>
         Resize = 65,
+        /// <summary>
+        /// The draw begin event.
+        /// </summary>
         DrawBegin = 72,
+        /// <summary>
+        /// The draw end event.
+        /// </summary>
         DrawEnd = 73,
+        /// <summary>
+        /// The draw GUI begin event.
+        /// </summary>
         DrawGUIBegin = 74,
+        /// <summary>
+        /// The draw GUI end event.
+        /// </summary>
         DrawGUIEnd = 75,
+        /// <summary>
+        /// The pre-draw event.
+        /// </summary>
         PreDraw = 76,
+        /// <summary>
+        /// The post-draw event.
+        /// </summary>
         PostDraw = 77,
     }
 
+    /// <summary>
+    /// The subtypes for <see cref="EventType.Keyboard"/>, <see cref="EventType.KeyPress"/> and <see cref="EventType.KeyRelease"/>.
+    /// </summary>
     public enum EventSubtypeKey : uint
     {
         // if doesn't match any of the below, then it's probably just chr(value)
+
+        /// <summary>
+        /// Keycode representing no key.
+        /// </summary>
         vk_nokey = 0,
+        /// <summary>
+        /// Keycode representing that any key.
+        /// </summary>
         vk_anykey = 1,
+        /// <summary>
+        /// Keycode representing Backspace.
+        /// </summary>
         vk_backspace = 8,
+        /// <summary>
+        /// Keycode representing Tab.
+        /// </summary>
         vk_tab = 9,
+        /// <summary>
+        /// Keycode representing Return.
+        /// </summary>
         vk_return = 13,
+        /// <summary>
+        /// Keycode representing Enter.
+        /// </summary>
         vk_enter = 13,
+        /// <summary>
+        /// Keycode representing any Shift key.
+        /// </summary>
         vk_shift = 16,
+        /// <summary>
+        /// Keycode representing any Control key.
+        /// </summary>
         vk_control = 17,
+        /// <summary>
+        /// Keycode representing any Alt key.
+        /// </summary>
         vk_alt = 18,
+        /// <summary>
+        /// Keycode representing the Pause key.
+        /// </summary>
         vk_pause = 19,
+        /// <summary>
+        /// Keycode representing the Escape key.
+        /// </summary>
         vk_escape = 27,
+        /// <summary>
+        /// Keycode representing the Space key.
+        /// </summary>
         vk_space = 32,
+        /// <summary>
+        /// Keycode representing PageUp.
+        /// </summary>
         vk_pageup = 33,
+        /// <summary>
+        /// Keycode representing PageDown.
+        /// </summary>
         vk_pagedown = 34,
+        /// <summary>
+        /// Keycode representing the End key.
+        /// </summary>
         vk_end = 35,
+        /// <summary>
+        /// Keycode representing the Home key.
+        /// </summary>
         vk_home = 36,
+        /// <summary>
+        /// Keycode representing the left arrow key.
+        /// </summary>
         vk_left = 37,
+        /// <summary>
+        /// Keycode representing the up arrow key.
+        /// </summary>
         vk_up = 38,
+        /// <summary>
+        /// Keycode representing the right arrow key.
+        /// </summary>
         vk_right = 39,
+        /// <summary>
+        /// Keycode representing the down arrow key.
+        /// </summary>
         vk_down = 40,
+        /// <summary>
+        /// Keycode representing the PrintScreen key.
+        /// </summary>
         vk_printscreen = 44,
+        /// <summary>
+        /// Keycode representing the Insert key.
+        /// </summary>
         vk_insert = 45,
+        /// <summary>
+        /// Keycode representing the Delete key.
+        /// </summary>
         vk_delete = 46,
+        /// <summary>
+        /// Keycode representing the 0 key.
+        /// </summary>
         Digit0 = 48,
+        /// <summary>
+        /// Keycode representing the 1 key.
+        /// </summary>
         Digit1 = 49,
+        /// <summary>
+        /// Keycode representing the 2 key.
+        /// </summary>
         Digit2 = 50,
+        /// <summary>
+        /// Keycode representing the 3 key.
+        /// </summary>
         Digit3 = 51,
+        /// <summary>
+        /// Keycode representing the 4 key.
+        /// </summary>
         Digit4 = 52,
+        /// <summary>
+        /// Keycode representing the 5 key.
+        /// </summary>
         Digit5 = 53,
+        /// <summary>
+        /// Keycode representing the 6 key.
+        /// </summary>
         Digit6 = 54,
+        /// <summary>
+        /// Keycode representing the 7 key.
+        /// </summary>
         Digit7 = 55,
+        /// <summary>
+        /// Keycode representing the 8 key.
+        /// </summary>
         Digit8 = 56,
+        /// <summary>
+        /// Keycode representing the 9 key.
+        /// </summary>
         Digit9 = 57,
+        /// <summary>
+        /// Keycode representing the A key.
+        /// </summary>
         A = 65,
+        /// <summary>
+        /// Keycode representing the B key.
+        /// </summary>
         B = 66,
+        /// <summary>
+        /// Keycode representing the C key.
+        /// </summary>
         C = 67,
+        /// <summary>
+        /// Keycode representing the D key.
+        /// </summary>
         D = 68,
+        /// <summary>
+        /// Keycode representing the E key.
+        /// </summary>
         E = 69,
+        /// <summary>
+        /// Keycode representing the F key.
+        /// </summary>
         F = 70,
+        /// <summary>
+        /// Keycode representing the G key.
+        /// </summary>
         G = 71,
+        /// <summary>
+        /// Keycode representing the H key.
+        /// </summary>
         H = 72,
+        /// <summary>
+        /// Keycode representing the I key.
+        /// </summary>
         I = 73,
+        /// <summary>
+        /// Keycode representing the J key.
+        /// </summary>
         J = 74,
+        /// <summary>
+        /// Keycode representing the K key.
+        /// </summary>
         K = 75,
+        /// <summary>
+        /// Keycode representing the L key.
+        /// </summary>
         L = 76,
+        /// <summary>
+        /// Keycode representing the M key.
+        /// </summary>
         M = 77,
+        /// <summary>
+        /// Keycode representing the N key.
+        /// </summary>
         N = 78,
+        /// <summary>
+        /// Keycode representing the O key.
+        /// </summary>
         O = 79,
+        /// <summary>
+        /// Keycode representing the P key.
+        /// </summary>
         P = 80,
+        /// <summary>
+        /// Keycode representing the Q key.
+        /// </summary>
         Q = 81,
+        /// <summary>
+        /// Keycode representing the R key.
+        /// </summary>
         R = 82,
+        /// <summary>
+        /// Keycode representing the S key.
+        /// </summary>
         S = 83,
+        /// <summary>
+        /// Keycode representing the T key.
+        /// </summary>
         T = 84,
+        /// <summary>
+        /// Keycode representing the U key.
+        /// </summary>
         U = 85,
+        /// <summary>
+        /// Keycode representing the V key.
+        /// </summary>
         V = 86,
+        /// <summary>
+        /// Keycode representing the W key.
+        /// </summary>
         W = 87,
+        /// <summary>
+        /// Keycode representing the X key.
+        /// </summary>
         X = 88,
+        /// <summary>
+        /// Keycode representing the Y key.
+        /// </summary>
         Y = 89,
+        /// <summary>
+        /// Keycode representing the Z key.
+        /// </summary>
         Z = 90,
+        /// <summary>
+        /// Keycode representing the 0 key on the numeric keypad.
+        /// </summary>
         vk_numpad0 = 96,
+        /// <summary>
+        /// Keycode representing the 1 key on the numeric keypad.
+        /// </summary>
         vk_numpad1 = 97,
+        /// <summary>
+        /// Keycode representing the 2 key on the numeric keypad.
+        /// </summary>
         vk_numpad2 = 98,
+        /// <summary>
+        /// Keycode representing the 3 key on the numeric keypad.
+        /// </summary>
         vk_numpad3 = 99,
+        /// <summary>
+        /// Keycode representing the 4 key on the numeric keypad.
+        /// </summary>
         vk_numpad4 = 100,
+        /// <summary>
+        /// Keycode representing the 5 key on the numeric keypad.
+        /// </summary>
         vk_numpad5 = 101,
+        /// <summary>
+        /// Keycode representing the 6 key on the numeric keypad.
+        /// </summary>
         vk_numpad6 = 102,
+        /// <summary>
+        /// Keycode representing the 7 key on the numeric keypad.
+        /// </summary>
         vk_numpad7 = 103,
+        /// <summary>
+        /// Keycode representing the 8 key on the numeric keypad.
+        /// </summary>
         vk_numpad8 = 104,
+        /// <summary>
+        /// Keycode representing the 9 key on the numeric keypad.
+        /// </summary>
         vk_numpad9 = 105,
+        /// <summary>
+        /// Keycode representing the Multiply key on the numeric keypad.
+        /// </summary>
         vk_multiply = 106,
+        /// <summary>
+        /// Keycode representing the Add key on the numeric keypad.
+        /// </summary>
         vk_add = 107,
+        /// <summary>
+        /// Keycode representing the Subtract key on the numeric keypad.
+        /// </summary>
         vk_subtract = 109,
+        /// <summary>
+        /// Keycode representing the Decimal Dot key on the numeric keypad.
+        /// </summary>
         vk_decimal = 110,
+        /// <summary>
+        /// Keycode representing the Divide key on the numeric keypad.
+        /// </summary>
         vk_divide = 111,
+        /// <summary>
+        /// Keycode representing the F1 key.
+        /// </summary>
         vk_f1 = 112,
+        /// <summary>
+        /// Keycode representing the F2 key.
+        /// </summary>
         vk_f2 = 113,
+        /// <summary>
+        /// Keycode representing the F3 key.
+        /// </summary>
         vk_f3 = 114,
+        /// <summary>
+        /// Keycode representing the F4 key.
+        /// </summary>
         vk_f4 = 115,
+        /// <summary>
+        /// Keycode representing the F5 key.
+        /// </summary>
         vk_f5 = 116,
+        /// <summary>
+        /// Keycode representing the F6 key.
+        /// </summary>
         vk_f6 = 117,
+        /// <summary>
+        /// Keycode representing the F7 key.
+        /// </summary>
         vk_f7 = 118,
+        /// <summary>
+        /// Keycode representing the F8 key.
+        /// </summary>
         vk_f8 = 119,
+        /// <summary>
+        /// Keycode representing the F9 key.
+        /// </summary>
         vk_f9 = 120,
+        /// <summary>
+        /// Keycode representing the F10 key.
+        /// </summary>
         vk_f10 = 121,
+        /// <summary>
+        /// Keycode representing the F11 key.
+        /// </summary>
         vk_f11 = 122,
+        /// <summary>
+        /// Keycode representing the F12 key.
+        /// </summary>
         vk_f12 = 123,
+        /// <summary>
+        /// Keycode representing the left Shift key.
+        /// </summary>
         vk_lshift = 160,
+        /// <summary>
+        /// Keycode representing the right Shift key.
+        /// </summary>
         vk_rshift = 161,
+        /// <summary>
+        /// Keycode representing the left Control key.
+        /// </summary>
         vk_lcontrol = 162,
+        /// <summary>
+        /// Keycode representing the right Control key.
+        /// </summary>
         vk_rcontrol = 163,
+        /// <summary>
+        /// Keycode representing the left Alt key.
+        /// </summary>
         vk_lalt = 164,
+        /// <summary>
+        /// Keycode representing the right Alt key.
+        /// </summary>
         vk_ralt = 165,
     }
-    
+
+    /// <summary>
+    /// The subtypes for <see cref="EventType.Mouse"/>.
+    /// </summary>
     public enum EventSubtypeMouse : uint
     {
+        /// <summary>
+        /// The left-mouse button down event.
+        /// </summary>
         LeftButton = 0,
+        /// <summary>
+        /// The right-mouse button down event.
+        /// </summary>
         RightButton = 1,
+        /// <summary>
+        /// The middle-mouse button down event.
+        /// </summary>
         MiddleButton = 2,
+        /// <summary>
+        /// The no-mouse input event.
+        /// </summary>
         NoButton = 3,
+        /// <summary>
+        /// The left-mouse button pressed event.
+        /// </summary>
         LeftPressed = 4,
+        /// <summary>
+        /// The right-mouse button pressed event.
+        /// </summary>
         RightPressed = 5,
+        /// <summary>
+        /// The middle-mouse button pressed event.
+        /// </summary>
         MiddlePressed = 6,
+        /// <summary>
+        /// The left-mouse button released event.
+        /// </summary>
         LeftReleased = 7,
+        /// <summary>
+        /// The right-mouse button released event.
+        /// </summary>
         RightReleased = 8,
+        /// <summary>
+        /// The middle-mouse button released event.
+        /// </summary>
         MiddleReleased = 9,
+        /// <summary>
+        /// The mouse enter event.
+        /// </summary>
         MouseEnter = 10,
+        /// <summary>
+        /// The mouse leave event.
+        /// </summary>
         MouseLeave = 11,
+        //TODO: are these even used?
         Joystick1Left = 16,
         Joystick1Right = 17,
         Joystick1Up = 18,
@@ -559,109 +1101,403 @@ namespace UndertaleModLib.Models
         Joystick2Button6 = 41,
         Joystick2Button7 = 42,
         Joystick2Button8 = 43,
+        /// <summary>
+        /// The global left-mouse button down event.
+        /// </summary>
         GlobLeftButton = 50,
+        /// <summary>
+        /// The global right-mouse button down event.
+        /// </summary>
         GlobRightButton = 51,
+        /// <summary>
+        /// The global middle-mouse button down event.
+        /// </summary>
         GlobMiddleButton = 52,
+        /// <summary>
+        /// The global left-mouse button pressed event.
+        /// </summary>
         GlobLeftPressed = 53,
+        /// <summary>
+        /// The global right-mouse button pressed event.
+        /// </summary>
         GlobRightPressed = 54,
+        /// <summary>
+        /// The global middle-mouse button pressed event.
+        /// </summary>
         GlobMiddlePressed = 55,
+        /// <summary>
+        /// The global left-mouse button released event.
+        /// </summary>
         GlobLeftReleased = 56,
+        /// <summary>
+        /// The global right-mouse button released event.
+        /// </summary>
         GlobRightReleased = 57,
+        /// <summary>
+        /// The global middle-mouse button released event.
+        /// </summary>
         GlobMiddleReleased = 58,
+        /// <summary>
+        /// The mouse-wheel up event.
+        /// </summary>
         MouseWheelUp = 60,
+        /// <summary>
+        /// The mouse-wheel down event.
+        /// </summary>
         MouseWheelDown = 61,
     }
-    
+
+    /// <summary>
+    /// The subtypes for <see cref="EventType.Other"/>.
+    /// </summary>
     public enum EventSubtypeOther : uint
     {
+        /// <summary>
+        /// The outside room event.
+        /// </summary>
         OutsideRoom = 0,
+        /// <summary>
+        /// The intersect boundary event.
+        /// </summary>
         IntersectBoundary = 1,
+        /// <summary>
+        /// The game start event.
+        /// </summary>
         GameStart = 2,
+        /// <summary>
+        /// The game end event.
+        /// </summary>
         GameEnd = 3,
+        /// <summary>
+        /// The room start event.
+        /// </summary>
         RoomStart = 4,
+        /// <summary>
+        /// The room end event.
+        /// </summary>
         RoomEnd = 5,
+
+        //TODO: are the ones here  used?
         NoMoreLives = 6,
+        /// <summary>
+        /// The animation end event.
+        /// </summary>
         AnimationEnd = 7,
+        /// <summary>
+        /// The path ended event.
+        /// </summary>
         EndOfPath = 8,
+
         NoMoreHealth = 9,
+
+        /// <summary>
+        /// The User 0 event.
+        /// </summary>
         User0 = 10,
+        /// <summary>
+        /// The User 1 event.
+        /// </summary>
         User1 = 11,
+        /// <summary>
+        /// The User 2 event.
+        /// </summary>
         User2 = 12,
+        /// <summary>
+        /// The User 3 event.
+        /// </summary>
         User3 = 13,
+        /// <summary>
+        /// The User 4 event.
+        /// </summary>
         User4 = 14,
+        /// <summary>
+        /// The User 5 event.
+        /// </summary>
         User5 = 15,
+        /// <summary>
+        /// The User 6 event.
+        /// </summary>
         User6 = 16,
+        /// <summary>
+        /// The User 7 event.
+        /// </summary>
         User7 = 17,
+        /// <summary>
+        /// The User 8 event.
+        /// </summary>
         User8 = 18,
+        /// <summary>
+        /// The User 9 event.
+        /// </summary>
         User9 = 19,
+        /// <summary>
+        /// The User 10 event.
+        /// </summary>
         User10 = 20,
+        /// <summary>
+        /// The User 11 event.
+        /// </summary>
         User11 = 21,
+        /// <summary>
+        /// The User 12 event.
+        /// </summary>
         User12 = 22,
+        /// <summary>
+        /// The User 13 event.
+        /// </summary>
         User13 = 23,
+        /// <summary>
+        /// The User 14 event.
+        /// </summary>
         User14 = 24,
+        /// <summary>
+        /// The User 15 event.
+        /// </summary>
         User15 = 25,
+        /// <summary>
+        /// The User 16 event.
+        /// </summary>
         User16 = 26,
+        /// <summary>
+        /// The Outside View 0 event.
+        /// </summary>
         OutsideView0 = 40,
+        /// <summary>
+        /// The Outside View 1 event.
+        /// </summary>
         OutsideView1 = 41,
+        /// <summary>
+        /// The Outside View 2 event.
+        /// </summary>
         OutsideView2 = 42,
+        /// <summary>
+        /// The Outside View 3 event.
+        /// </summary>
         OutsideView3 = 43,
+        /// <summary>
+        /// The Outside View 4 event.
+        /// </summary>
         OutsideView4 = 44,
+        /// <summary>
+        /// The Outside View 5 event.
+        /// </summary>
         OutsideView5 = 45,
+        /// <summary>
+        /// The Outside View 6 event.
+        /// </summary>
         OutsideView6 = 46,
+        /// <summary>
+        /// The Outside View 7 event.
+        /// </summary>
         OutsideView7 = 47,
+        /// <summary>
+        /// The Intersect View 0 Boundary event.
+        /// </summary>
         BoundaryView0 = 50,
+        /// <summary>
+        /// The Intersect View 1 Boundary event.
+        /// </summary>
         BoundaryView1 = 51,
+        /// <summary>
+        /// The Intersect View 2 Boundary event.
+        /// </summary>
         BoundaryView2 = 52,
+        /// <summary>
+        /// The Intersect View 3 Boundary event.
+        /// </summary>
         BoundaryView3 = 53,
+        /// <summary>
+        /// The Intersect View 4 Boundary event.
+        /// </summary>
         BoundaryView4 = 54,
+        /// <summary>
+        /// The Intersect View 5 Boundary event.
+        /// </summary>
         BoundaryView5 = 55,
+        /// <summary>
+        /// The Intersect View 6 Boundary event.
+        /// </summary>
         BoundaryView6 = 56,
+        /// <summary>
+        /// The Intersect View 7 Boundary event.
+        /// </summary>
         BoundaryView7 = 57,
+        /// <summary>
+        /// The animation Update event for Skeletal Animation functions.
+        /// </summary>
         AnimationUpdate = 58,
+        /// <summary>
+        /// The animation event for Skeletal Animation functions.
+        /// </summary>
         AnimationEvent = 59,
+        #region Async events
+        /// <summary>
+        /// The async image loaded event.
+        /// </summary>
         AsyncImageLoaded = 60,
+        /// <summary>
+        /// The async sound loaded event.
+        /// </summary>
         AsyncSoundLoaded = 61,
+        /// <summary>
+        /// The async http event.
+        /// </summary>
         AsyncHTTP = 62,
+        /// <summary>
+        /// The async dialog event.
+        /// </summary>
         AsyncDialog = 63,
+        /// <summary>
+        /// The async in-app purchase event.
+        /// </summary>
         AsyncIAP = 66,
+        /// <summary>
+        /// The async cloud event.
+        /// </summary>
         AsyncCloud = 67,
+        /// <summary>
+        /// The async networking event.
+        /// </summary>
         AsyncNetworking = 68,
+        /// <summary>
+        /// The async Steam event.
+        /// </summary>
         AsyncSteam = 69,
+        /// <summary>
+        /// The async social event.
+        /// </summary>
         AsyncSocial = 70,
+        /// <summary>
+        /// The async push notification event.
+        /// </summary>
         AsyncPushNotification = 71,
+        /// <summary>
+        /// The async save/load event.
+        /// </summary>
         AsyncSaveAndLoad = 72,
+        /// <summary>
+        /// The async audio recording event.
+        /// </summary>
         AsyncAudioRecording = 73,
+        /// <summary>
+        /// The async audio playback event.
+        /// </summary>
         AsyncAudioPlayback = 74,
+        /// <summary>
+        /// The async system event.
+        /// </summary>
         AsyncSystem = 75,
+        #endregion
     }
 
+    /// <summary>
+    /// The subtypes for <see cref="EventType.Gesture"/>.
+    /// </summary>
     public enum EventSubtypeGesture : uint
     {
+        /// <summary>
+        /// The tap event.
+        /// </summary>
         Tap = 0,
+        /// <summary>
+        /// The double tap event.
+        /// </summary>
         DoubleTap = 1,
+        /// <summary>
+        /// The drag start event.
+        /// </summary>
         DragStart = 2,
+        /// <summary>
+        /// The dragging event.
+        /// </summary>
         DragMove = 3,
+        /// <summary>
+        /// The drag end event.
+        /// </summary>
         DragEnd = 4,
+        /// <summary>
+        /// The flick event.
+        /// </summary>
         Flick = 5,
+        /// <summary>
+        /// The pinch start event.
+        /// </summary>
         PinchStart = 6,
+        /// <summary>
+        /// The pinch in event.
+        /// </summary>
         PinchIn = 7,
+        /// <summary>
+        /// The pinch out event.
+        /// </summary>
         PinchOut = 8,
+        /// <summary>
+        /// The pinch end event.
+        /// </summary>
         PinchEnd = 9,
+        /// <summary>
+        /// The rotate start event.
+        /// </summary>
         RotateStart = 10,
+        /// <summary>
+        /// The rotating event.
+        /// </summary>
         Rotating = 11,
+        /// <summary>
+        /// The rotate end event.
+        /// </summary>
         RotateEnd = 12,
+        /// <summary>
+        /// The global tap event.
+        /// </summary>
         GlobalTap = 64,
+        /// <summary>
+        /// The global double tap event.
+        /// </summary>
         GlobalDoubleTap = 65,
+        /// <summary>
+        /// The global drag start event.
+        /// </summary>
         GlobalDragStart = 66,
+        /// <summary>
+        /// The global dragging event.
+        /// </summary>
         GlobalDragMove = 67,
+        /// <summary>
+        /// The global drag end event.
+        /// </summary>
         GlobalDragEnd = 68,
+        /// <summary>
+        /// The global flick event.
+        /// </summary>
         GlobalFlick = 69,
+        /// <summary>
+        /// The global pinch start event.
+        /// </summary>
         GlobalPinchStart = 70,
+        /// <summary>
+        /// The global pinch in event.
+        /// </summary>
         GlobalPinchIn = 71,
+        /// <summary>
+        /// The global pinch out event.
+        /// </summary>
         GlobalPinchOut = 72,
+        /// <summary>
+        /// The global pinch end event.
+        /// </summary>
         GlobalPinchEnd = 73,
+        /// <summary>
+        /// The global rotate start event.
+        /// </summary>
         GlobalRotateStart = 74,
+        /// <summary>
+        /// The global rotating event.
+        /// </summary>
         GlobalRotating = 75,
+        /// <summary>
+        /// The global rotate end event.
+        /// </summary>
         GlobalRotateEnd = 76,
     }
 }
