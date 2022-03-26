@@ -1270,13 +1270,13 @@ namespace UndertaleModLib.Decompiler
             public UndertaleFunction Function { get; private set; }
             public UndertaleCode FunctionBodyCodeEntry { get; private set; }
             public Block FunctionBodyEntryBlock { get; private set; }
-            public FunctionType RealType { get; private set; }
+            public FunctionType Subtype { get; private set; }
 
             internal List<Expression> Arguments;
 
             public FunctionDefinition(UndertaleFunction target, UndertaleCode functionBodyCodeEntry, Block functionBodyEntryBlock, FunctionType type)
             {
-                RealType = type;
+                Subtype = type;
                 Function = target;
                 FunctionBodyCodeEntry = functionBodyCodeEntry;
                 FunctionBodyEntryBlock = functionBodyEntryBlock;
@@ -1284,10 +1284,10 @@ namespace UndertaleModLib.Decompiler
 
             public void PromoteToStruct()
             {
-                if (RealType == FunctionType.Function)
+                if (Subtype == FunctionType.Function)
                     throw new InvalidOperationException("Cannot promote function to struct");
 
-                RealType = FunctionType.Struct;
+                Subtype = FunctionType.Struct;
             }
 
             public void PopulateArguments(params Expression[] arguments)
@@ -1297,7 +1297,7 @@ namespace UndertaleModLib.Decompiler
 
             public void PopulateArguments(List<Expression> arguments)
             {
-                if (RealType != FunctionType.Struct)
+                if (Subtype != FunctionType.Struct)
                     throw new InvalidOperationException("Cannot populate arguments of non-struct");
 
                 if (Arguments == null)
@@ -1318,7 +1318,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     var oldDecompilingStruct = context.DecompilingStruct;
                     var oldReplacements = context.ArgumentReplacements;
-                    if (RealType == FunctionType.Struct)
+                    if (Subtype == FunctionType.Struct)
                         context.DecompilingStruct = true;
                     else
                     {
@@ -1331,7 +1331,7 @@ namespace UndertaleModLib.Decompiler
                             sb.Append(i);
                         }
                         sb.Append(") ");
-                        if (RealType == FunctionType.Constructor)
+                        if (Subtype == FunctionType.Constructor)
                             sb.Append("constructor ");
                         sb.Append("//");
                         sb.Append(Function.Name.Content);
@@ -1339,14 +1339,14 @@ namespace UndertaleModLib.Decompiler
 
                     sb.Append("\n");
                     sb.Append(context.Indentation);
-                    if (context.IndentationLevel == 0 || RealType == FunctionType.Struct) // See #614
+                    if (context.IndentationLevel == 0 || Subtype == FunctionType.Struct) // See #614
                     {
                         sb.Append("{\n");
                         context.IndentationLevel++;
                         context.ArgumentReplacements = Arguments;
                         foreach (Statement stmt in context.Statements[FunctionBodyEntryBlock.Address.Value])
                         {
-                            if (RealType == FunctionType.Struct && stmt is ReturnStatement)
+                            if (Subtype != FunctionType.Function && stmt is ReturnStatement)
                                 continue;
 
                             sb.Append(context.Indentation);
@@ -1424,7 +1424,7 @@ namespace UndertaleModLib.Decompiler
                     var actualArgs = Arguments.Skip(1).ToList();
                     if (Arguments[0] is FunctionDefinition def)
                     {
-                        if (def.RealType == FunctionDefinition.FunctionType.Struct) // Struct moment
+                        if (def.Subtype == FunctionDefinition.FunctionType.Struct) // Struct moment
                         {
                             def.PopulateArguments(actualArgs);
                             return def.ToString(context);
