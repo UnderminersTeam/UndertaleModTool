@@ -1328,7 +1328,7 @@ namespace UndertaleModLib.Decompiler
 
                     sb.Append("\n");
                     sb.Append(context.Indentation);
-                    if (true)//if (context.IndentationLevel == 0) // See #614
+                    if (context.IndentationLevel == 0 || Type == FunctionType.Struct) // See #614
                     {
                         sb.Append("{\n");
                         context.IndentationLevel++;
@@ -1349,7 +1349,7 @@ namespace UndertaleModLib.Decompiler
                     }
                     else
                     {
-                        //sb.Append("{} // Nested function decompilation is not currently supported.\n");
+                        sb.Append("{} // Nested function decompilation is not currently supported.\n");
                     }
                     context.DecompilingStruct = oldDecompilingStruct;
                 }
