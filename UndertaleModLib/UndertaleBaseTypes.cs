@@ -39,7 +39,16 @@ namespace UndertaleModLib
 
     public interface PaddedObject // TODO: use this everywhere
     {
+        /// <summary>
+        /// TODO!
+        /// </summary>
+        /// <param name="writer">Where to serialize to.</param>
         void SerializePadding(UndertaleWriter writer);
+
+        /// <summary>
+        /// TODO!
+        /// </summary>
+        /// <param name="reader">Where to deserialize from.</param>
         void UnserializePadding(UndertaleReader reader);
     }
 
@@ -80,6 +89,12 @@ namespace UndertaleModLib
 
     public interface ISearchable
     {
+        /// <summary>
+        /// Returns a value indicating whether a specified substring occurs within this object.
+        /// </summary>
+        /// <param name="filter">The string to seek. Case insensitive.</param>
+        /// <returns><see langword="true"/> if <paramref name="filter"/> occurs within this object, or if
+        /// <paramref name="filter"/> is the empty string (""); otherwise, false.</returns>
         bool SearchMatches(string filter);
     }
 }

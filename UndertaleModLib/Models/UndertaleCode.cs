@@ -1005,6 +1005,7 @@ namespace UndertaleModLib.Models
         public bool WeirdLocalsFlag { get; set; }
         public uint Offset { get; set; }
 
+
         /// <summary>
         /// A list of bytecode instructions this code entry has.
         /// </summary>
@@ -1157,6 +1158,10 @@ namespace UndertaleModLib.Models
             return null;
         }
 
+        /// <summary>
+        /// Finds and returns a list of all variables this code entry references.
+        /// </summary>
+        /// <returns>A list of all variables this code entry references.</returns>
         public IList<UndertaleVariable> FindReferencedVars()
         {
             List<UndertaleVariable> vars = new List<UndertaleVariable>();
@@ -1169,6 +1174,10 @@ namespace UndertaleModLib.Models
             return vars;
         }
 
+        /// <summary>
+        /// Finds and returns a list of all local variables this code entry references.
+        /// </summary>
+        /// <returns>A list of all local variables this code entry references.</returns>
         public IList<UndertaleVariable> FindReferencedLocalVars()
         {
             return FindReferencedVars().Where((x) => x.InstanceType == UndertaleInstruction.InstanceType.Local).ToList();
@@ -1198,8 +1207,8 @@ namespace UndertaleModLib.Models
         /// Append GML instructions at the end of this code entry.
         /// </summary>
         /// <param name="gmlCode">The GML code to append.</param>
-        /// <param name="data">From which data file the gml code is coming from.</param>
-        /// <exception cref="Exception"> if the GML code does not compile or if there's an error writing the code to the entry in profile mode.</exception>
+        /// <param name="data">From which data file the GML code is coming from.</param>
+        /// <exception cref="Exception"> if the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
         public void AppendGML(string gmlCode, UndertaleData data)
         {
             CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);
@@ -1229,6 +1238,12 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <summary>
+        /// Replaces <b>all</b> instructions currently existing in this code entry with another set of GML instructions.
+        /// </summary>
+        /// <param name="gmlCode">The new GML code for this code entry.</param>
+        /// <param name="data">From which data file the GML code is coming from.</param>
+        /// <exception cref="Exception">If the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
         public void ReplaceGML(string gmlCode, UndertaleData data)
         {
             CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);

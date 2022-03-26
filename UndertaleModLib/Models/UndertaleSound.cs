@@ -19,15 +19,22 @@ namespace UndertaleModLib.Models
         public enum AudioEntryFlags : uint
         {
             /// <summary>
-            /// Whether the sound is embedded.
+            /// Whether the sound is embedded into the data file.
             /// </summary>
             IsEmbedded = 0x1,
             /// <summary>
             /// Whether the sound is compressed.
             /// </summary>
             IsCompressed = 0x2,
-
+            /// <summary>
+            /// Whether the sound is compressed on load.
+            /// </summary>
             IsDecompressedOnLoad = 0x3,
+            /// <summary>
+            /// Whether this sound uses the "new audio system".
+            /// </summary>
+            /// <remarks>This is default for everything post Game Maker: Studio.
+            /// The legacy sound system was used in pre Game Maker 8</remarks>
             Regular = 0x64, // also means "Use New Audio System?" Set by default on GMS 2.
         }
 
@@ -51,6 +58,11 @@ namespace UndertaleModLib.Models
         /// </summary>
         public UndertaleString File { get; set; }
 
+        /// <summary>
+        /// A pre- Game Maker: Studio way of having certain effects on a sound effect.
+        /// </summary>
+        /// <remarks>The exact way this works is unknown. But following values are possible:
+        /// <c>Chorus</c>, <c>Echo</c>, <c>Flanger</c>, <c>Reverb</c>, <c>Gargle</c>, all possible to be combined with one another.</remarks>
         public uint Effects { get; set; } = 0;
 
         /// <summary>
@@ -82,7 +94,7 @@ namespace UndertaleModLib.Models
         public UndertaleEmbeddedAudio AudioFile { get => _AudioFile.Resource; set { _AudioFile.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AudioFile))); } }
 
         /// <summary>
-        /// The id of <exception cref="AudioFile"></exception>.
+        /// The id of <see cref="AudioFile"></see>.
         /// </summary>
         public int AudioID { get => _AudioFile.CachedId; set { _AudioFile.CachedId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AudioID))); } }
 
@@ -157,6 +169,9 @@ namespace UndertaleModLib.Models
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleAudioGroup : UndertaleNamedResource
     {
+        /// <summary>
+        /// The name of the audio group.
+        /// </summary>
         public UndertaleString Name { get; set; }
 
         public void Serialize(UndertaleWriter writer)

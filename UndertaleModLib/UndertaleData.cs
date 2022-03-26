@@ -314,12 +314,38 @@ namespace UndertaleModLib
         public Dictionary<string, UndertaleFunction> KnownSubFunctions;
 
         //Profile mode related properties
-        //TODO: vlad, help with this pls
+
+        //TODO: Why are the functions that deal with the cache in a completely different place than the cache parameters? These have *no* place of being here.
+        /// <summary>
+        /// A <see cref="Dictionary{TKey,TValue}"/><typeparam name="TKey"></typeparam> of cached decompiled code,
+        /// with the code name as the Key and the decompiled code text as the value.
+        /// </summary>
         public ConcurrentDictionary<string, string> GMLCache { get; set; }
+
+        /// <summary>
+        /// A list of names of code entries which failed to compile or decompile.
+        /// </summary>
         public List<string> GMLCacheFailed { get; set; }
+
+        /// <summary>
+        /// A list of names of modified code entries.
+        /// </summary>
         public ConcurrentBag<string> GMLCacheChanged { get; set; } = new();
+
+        /// <summary>
+        /// A list of names of code entries that were edited before the "Use decompiled code cache" setting was enabled.
+        /// </summary>
         public List<string> GMLEditedBefore { get; set; }
+
+        /// <summary>
+        /// Whether the decompiled code cache has been saved to disk with no new cache changes happening since then.
+        /// </summary>
         public bool GMLCacheWasSaved { get; set; }
+
+        /// <summary>
+        /// Whether the decompiled code cache is generated. This will be <see langword="false"/> if it's currently generating and
+        /// <see langword="true"/> otherwise.
+        /// </summary>
         public bool GMLCacheIsReady { get; set; } = true;
 
         /// <summary>

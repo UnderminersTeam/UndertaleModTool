@@ -24,15 +24,17 @@ namespace UndertaleModLib.Models
         /// </summary>
         public UndertaleCode Code { get => _Code.Resource; set { _Code.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Code))); } }
 
-
-        public bool Constructor { get; set; } = false;
+        /// <summary>
+        /// Whether or not this script is a constructor.
+        /// </summary>
+        public bool IsConstructor { get; set; } = false;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
-            if (Constructor)
+            if (IsConstructor)
                 writer.Write((uint)_Code.SerializeById(writer) | 2147483648u);
             else
                 writer.WriteUndertaleObject(_Code);
@@ -44,7 +46,7 @@ namespace UndertaleModLib.Models
             int id = reader.ReadInt32();
             if (id < -1)
             {
-                Constructor = true;
+                IsConstructor = true;
                 id = (int)((uint)id & 2147483647u);
             }
             _Code.UnserializeById(reader, id);

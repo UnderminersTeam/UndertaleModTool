@@ -30,6 +30,9 @@ namespace UndertaleModLib.Models
             /// </summary>
             public UndertalePointerList<UndertaleGameObject.EventAction> Event { get; set; }
 
+            /// <summary>
+            /// Initializes a new empty instance of the <see cref="UndertaleTimelineMoment"/> class.
+            /// </summary>
             public UndertaleTimelineMoment()
             {
                 /*
@@ -38,10 +41,15 @@ namespace UndertaleModLib.Models
                 */
             }
 
-            public UndertaleTimelineMoment(uint step, UndertalePointerList<UndertaleGameObject.EventAction> ev)
+            /// <summary>
+            /// Initializes a new instance of the <see cref="UndertaleTimelineMoment"/> with the specified step time and event action list.
+            /// </summary>
+            /// <param name="step">After how many steps the moment shall be executed.</param>
+            /// <param name="events">A list of events that shall be executed.</param>
+            public UndertaleTimelineMoment(uint step, UndertalePointerList<UndertaleGameObject.EventAction> events)
             {
                 Step = step;
-                Event = ev;
+                Event = events;
             }
 
             public void Serialize(UndertaleWriter writer)

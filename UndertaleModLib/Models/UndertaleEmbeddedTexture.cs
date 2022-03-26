@@ -12,12 +12,30 @@ using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models
 {
+    /// <summary>
+    /// An embedded texture entry in the data file.
+    /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleEmbeddedTexture : UndertaleNamedResource
     {
+        /// <summary>
+        /// The name of the embedded texture entry.
+        /// </summary>
         public UndertaleString Name { get; set; }
+
+        /// <summary>
+        /// Whether or not this embedded texture is scaled.
+        /// </summary>
         public uint Scaled { get; set; } = 0;
+
+        /// <summary>
+        /// The amount of generated mipmap levels.
+        /// </summary>
         public uint GeneratedMips { get; set; }
+
+        /// <summary>
+        /// The texture data in the embedded image.
+        /// </summary>
         public TexData TextureData { get; set; } = new TexData();
 
         public void Serialize(UndertaleWriter writer)
@@ -63,10 +81,16 @@ namespace UndertaleModLib.Models
             return Name.Content + " (" + GetType().Name + ")";
         }
 
+        /// <summary>
+        /// Texture data in an <see cref="UndertaleEmbeddedTexture"/>.
+        /// </summary>
         public class TexData : UndertaleObject, INotifyPropertyChanged
         {
             private byte[] _TextureBlob;
 
+            /// <summary>
+            /// The image data of the texture.
+            /// </summary>
             public byte[] TextureBlob { get => _TextureBlob; set { _TextureBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextureBlob))); } }
 
             public event PropertyChangedEventHandler PropertyChanged;

@@ -17,7 +17,7 @@ namespace UndertaleModLib.Models
     public class UndertaleBackground : UndertaleNamedResource
     {
         /// <summary>
-        /// A tile id, which can be used for referencing specific tiles in a tileset.
+        /// A tile id, which can be used for referencing specific tiles in a tileset. Game Maker Studio 2 only.
         /// </summary>
         public class TileID : UndertaleObject, INotifyPropertyChanged
         {

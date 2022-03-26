@@ -56,7 +56,7 @@ namespace UndertaleModLib.Models
         /// <summary>
         /// Deserializes from a specified <see cref="UndertaleReader"/> to the current data file.
         /// </summary>
-        /// <param name="reader"></param>
+        /// <param name="reader">Where to deserialize from.</param>
         /// <param name="includeName">Whether to include <see cref="Name"/> in the deserialization.</param>
         public void Unserialize(UndertaleReader reader, bool includeName)
         {
