@@ -1172,7 +1172,10 @@ namespace UndertaleModLib.Decompiler
                         val = cast;
 
                     if (val is FunctionDefinition def)
+                    {
+                        def.PromoteToStruct();
                         return "// Hiding initial definition of " + def.FunctionBodyCodeEntry.Name.Content + "\n";
+                    }
                 }
                 return String.Format("{0}{1}{2} {3}", varPrefix, varName, context.DecompilingStruct ? ":" : " =", Value.ToString(context));
             }
@@ -1267,16 +1270,24 @@ namespace UndertaleModLib.Decompiler
             public UndertaleFunction Function { get; private set; }
             public UndertaleCode FunctionBodyCodeEntry { get; private set; }
             public Block FunctionBodyEntryBlock { get; private set; }
-            public FunctionType Type { get; private set; }
+            public FunctionType RealType { get; private set; }
 
             internal List<Expression> Arguments;
 
             public FunctionDefinition(UndertaleFunction target, UndertaleCode functionBodyCodeEntry, Block functionBodyEntryBlock, FunctionType type)
             {
-                Type = type;
+                RealType = type;
                 Function = target;
                 FunctionBodyCodeEntry = functionBodyCodeEntry;
                 FunctionBodyEntryBlock = functionBodyEntryBlock;
+            }
+
+            public void PromoteToStruct()
+            {
+                if (RealType == FunctionType.Function)
+                    throw new InvalidOperationException("Cannot promote function to struct");
+
+                RealType = FunctionType.Struct;
             }
 
             public void PopulateArguments(params Expression[] arguments)
@@ -1286,7 +1297,7 @@ namespace UndertaleModLib.Decompiler
 
             public void PopulateArguments(List<Expression> arguments)
             {
-                if (Type != FunctionType.Struct)
+                if (RealType != FunctionType.Struct)
                     throw new InvalidOperationException("Cannot populate arguments of non-struct");
 
                 if (Arguments == null)
@@ -1307,7 +1318,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     var oldDecompilingStruct = context.DecompilingStruct;
                     var oldReplacements = context.ArgumentReplacements;
-                    if (Type == FunctionType.Struct)
+                    if (RealType == FunctionType.Struct)
                         context.DecompilingStruct = true;
                     else
                     {
@@ -1320,7 +1331,7 @@ namespace UndertaleModLib.Decompiler
                             sb.Append(i);
                         }
                         sb.Append(") ");
-                        if (Type == FunctionType.Constructor)
+                        if (RealType == FunctionType.Constructor)
                             sb.Append("constructor ");
                         sb.Append("//");
                         sb.Append(Function.Name.Content);
@@ -1328,14 +1339,14 @@ namespace UndertaleModLib.Decompiler
 
                     sb.Append("\n");
                     sb.Append(context.Indentation);
-                    if (context.IndentationLevel == 0 || Type == FunctionType.Struct) // See #614
+                    if (context.IndentationLevel == 0 || RealType == FunctionType.Struct) // See #614
                     {
                         sb.Append("{\n");
                         context.IndentationLevel++;
                         context.ArgumentReplacements = Arguments;
                         foreach (Statement stmt in context.Statements[FunctionBodyEntryBlock.Address.Value])
                         {
-                            if (Type == FunctionType.Struct && stmt is ReturnStatement)
+                            if (RealType == FunctionType.Struct && stmt is ReturnStatement)
                                 continue;
 
                             sb.Append(context.Indentation);
@@ -1413,7 +1424,7 @@ namespace UndertaleModLib.Decompiler
                     var actualArgs = Arguments.Skip(1).ToList();
                     if (Arguments[0] is FunctionDefinition def)
                     {
-                        if (def.Type == FunctionDefinition.FunctionType.Struct) // Struct moment
+                        if (def.RealType == FunctionDefinition.FunctionType.Struct) // Struct moment
                         {
                             def.PopulateArguments(actualArgs);
                             return def.ToString(context);
@@ -1426,6 +1437,8 @@ namespace UndertaleModLib.Decompiler
 
                     if (constructor.StartsWith("gml_Script_"))
                         constructor = constructor.Substring(11);
+                    if (constructor.EndsWith(context.TargetCode.Name.Content))
+                        constructor = constructor.Substring(0, constructor.Length - context.TargetCode.Name.Content.Length - 1);
 
                     if (AssetTypeResolver.builtin_funcs.TryGetValue(constructor, out AssetIDType[] types))
                     {
@@ -2259,9 +2272,6 @@ namespace UndertaleModLib.Decompiler
                                     FunctionDefinition.FunctionType type = FunctionDefinition.FunctionType.Function;
 
                                     if (arg1 is DirectFunctionCall call && call.Function.Name.Content == "@@NullObject@@")
-                                        type = FunctionDefinition.FunctionType.Struct;
-                                    else if (!(arg1 is ExpressionConstant argThis && argThis.Type == UndertaleInstruction.DataType.Int16 &&
-                                    (short)argThis.Value == (short)UndertaleInstruction.InstanceType.Self))
                                         type = FunctionDefinition.FunctionType.Constructor;
 
                                     UndertaleCode functionBody = context.GlobalContext.Data.Code.First(x => x.Name.Content == argCodeFunc.Target.Name.Content);
