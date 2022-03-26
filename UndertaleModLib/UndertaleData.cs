@@ -10,6 +10,11 @@ namespace UndertaleModLib
     /// <summary>
     /// An object representing a Game Maker: Studio data file.
     /// </summary>
+    /// <remarks>This is basically the heart of the data file, which is usually named <c>data.win</c>, <c>data.unx</c>,
+    /// <c>data.ios</c> or <c>data.droid</c>, depending for which OS the game was compiled for.. <br/>
+    /// It includes all the data within it accessible by either the <see cref="FORM"/>-Chunk attribute,
+    /// but also via already organized attributes such as <see cref="Backgrounds"/> or <see cref="GameObjects"/>.
+    /// TODO: add more documentation about how a data file works at one point.</remarks>
     public class UndertaleData
     {
         /// <summary>
@@ -216,7 +221,7 @@ namespace UndertaleModLib
         /// </summary>
         public IList<UndertaleEmbeddedTexture> EmbeddedTextures => FORM.TXTR?.List;
 
-
+        //TODO: no idea what this is. Seems to sometimes not exist?
         public IList<UndertaleTextureGroupInfo> TextureGroupInfo => FORM.TGIN?.List;
 
         /// <summary>
@@ -308,6 +313,8 @@ namespace UndertaleModLib
         /// </summary>
         public Dictionary<string, UndertaleFunction> KnownSubFunctions;
 
+        //Profile mode related properties
+        //TODO: vlad, help with this pls
         public ConcurrentDictionary<string, string> GMLCache { get; set; }
         public List<string> GMLCacheFailed { get; set; }
         public ConcurrentBag<string> GMLCacheChanged { get; set; } = new();
@@ -315,13 +322,12 @@ namespace UndertaleModLib
         public bool GMLCacheWasSaved { get; set; }
         public bool GMLCacheIsReady { get; set; } = true;
 
-
         /// <summary>
         /// Get a resource from the data file by name.
         /// </summary>
         /// <param name="name">The name of the desired resource.</param>
         /// <param name="ignoreCase">Whether to ignore casing while searching.</param>
-        /// <returns></returns>
+        /// <returns>The <see cref="UndertaleResource"/>.</returns>
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {
             // TODO: Check if those are all possible types
@@ -422,7 +428,7 @@ namespace UndertaleModLib
         /// <param name="minor">The minor version.</param>
         /// <param name="release">The release version.</param>
         /// <param name="build">The build version.</param>
-        /// <returns></returns>
+        /// <returns>Whether the version of the data file is the same or higher than a specified version.</returns>
         public bool IsVersionAtLeast(uint major, uint minor, uint release, uint build)
         {
             if (GeneralInfo.Major != major)

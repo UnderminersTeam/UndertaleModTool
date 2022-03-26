@@ -11,7 +11,7 @@ namespace UndertaleModLib.Models
 {
     //TODO: shouldn't this be inside of the UGameObject class?
     /// <summary>
-    /// Collision shapes a <see cref="UndertaleGameObject"/> can use.
+    /// Collision shapes an <see cref="UndertaleGameObject"/> can use.
     /// </summary>
     public enum CollisionShapeFlags : uint
     {
@@ -352,7 +352,7 @@ namespace UndertaleModLib.Models
         }
 
         /// <summary>
-        /// Generic events that a <see cref="UndertaleGameObject"/> uses.
+        /// Generic events that an <see cref="UndertaleGameObject"/> uses.
         /// </summary>
         [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class Event : UndertaleObject
@@ -519,7 +519,7 @@ namespace UndertaleModLib.Models
     }
 
     /// <summary>
-    /// The types an event can be.
+    /// The types an <see cref="UndertaleGameObject.Event"/> from an <see cref="UndertaleGameObject"/> can be.
     /// </summary>
     /// <remarks>Note, that subtypes exist as well.</remarks>
     public enum EventType : uint

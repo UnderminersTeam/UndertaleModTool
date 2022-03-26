@@ -18,7 +18,7 @@ namespace UndertaleModLib
         /// <summary>
         /// Deserializes from a specified <see cref="UndertaleReader"/> to the current data file.
         /// </summary>
-        /// <param name="reader"></param>
+        /// <param name="reader">Where to deserialize from.</param>
         void Unserialize(UndertaleReader reader);
     }
 

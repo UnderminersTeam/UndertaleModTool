@@ -975,18 +975,41 @@ namespace UndertaleModLib.Models
         }
     }
 
+    /// <summary>
+    /// A code entry in a data file.
+    /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
     {
+        /// <summary>
+        /// The name of the code entry.
+        /// </summary>
         public UndertaleString Name { get; set; }
+
+
         public uint Length { get; set; }
-        public uint LocalsCount { get; set; } // Warning: Actually a ushort, left this way for compatibility
+
+
+        /// <summary>
+        /// The amount of local variables this code entry has. <br/>
+        /// Warning: This is actually a ushort internally, it's an uint here for compatibility.
+        /// </summary>
+        public uint LocalsCount { get; set; }
+
+        /// <summary>
+        /// The amount of arguments this code entry accepts.
+        /// </summary>
         public ushort ArgumentsCount { get; set; }
+
+
         public bool WeirdLocalsFlag { get; set; }
         public uint Offset { get; set; }
+
+        /// <summary>
+        /// A list of bytecode instructions this code entry has.
+        /// </summary>
         public List<UndertaleInstruction> Instructions { get; } = new List<UndertaleInstruction>();
         public bool WeirdLocalFlag { get; set; }
-
         public UndertaleCode ParentEntry { get; set; } = null;
         public List<UndertaleCode> ChildEntries { get; set; } = new List<UndertaleCode>();
 
@@ -1151,18 +1174,32 @@ namespace UndertaleModLib.Models
             return FindReferencedVars().Where((x) => x.InstanceType == UndertaleInstruction.InstanceType.Local).ToList();
         }
 
+        /// <summary>
+        /// Append instructions at the end of this code entry.
+        /// </summary>
+        /// <param name="instructions">The instructions to append.</param>
         public void Append(IList<UndertaleInstruction> instructions)
         {
             Instructions.AddRange(instructions);
             UpdateAddresses();
         }
 
+        /// <summary>
+        /// Replaces <b>all</b> instructions currently existing in this code entry with another set of instructions.
+        /// </summary>
+        /// <param name="instructions">The new instructions for this code entry.</param>
         public void Replace(IList<UndertaleInstruction> instructions)
         {
             Instructions.Clear();
             Append(instructions);
         }
 
+        /// <summary>
+        /// Append GML instructions at the end of this code entry.
+        /// </summary>
+        /// <param name="gmlCode">The GML code to append.</param>
+        /// <param name="data">From which data file the gml code is coming from.</param>
+        /// <exception cref="Exception"> if the GML code does not compile or if there's an error writing the code to the entry in profile mode.</exception>
         public void AppendGML(string gmlCode, UndertaleData data)
         {
             CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);
