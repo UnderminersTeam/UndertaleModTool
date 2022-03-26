@@ -805,7 +805,7 @@ namespace UndertaleModCli
         {
             //there is no UI with any data binding
         }
-        public void SyncBinding(bool enable = false)
+        public void DisableAllSyncBinding()
         {
             //there is no UI with any data binding
         }
@@ -837,7 +837,7 @@ namespace UndertaleModCli
                 Thread.Sleep(100); //10 times per second
             }
         }
-        public void StartUpdater()
+        public void StartProgressBarUpdater()
         {
             if (cts is not null)
                 Console.WriteLine("Warning - there is another progress updater task running (hangs) in the background.");
@@ -847,7 +847,7 @@ namespace UndertaleModCli
 
             updater = Task.Run(ProgressUpdater);
         }
-        public async Task StopUpdater() //"async" because "Wait()" blocks UI thread
+        public async Task StopProgressBarUpdater() //"async" because "Wait()" blocks UI thread
         {
             if (cts is not null)
             {
@@ -865,7 +865,7 @@ namespace UndertaleModCli
             }
         }
 
-        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
+        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
         {
             await Task.Delay(1); //dummy await
 

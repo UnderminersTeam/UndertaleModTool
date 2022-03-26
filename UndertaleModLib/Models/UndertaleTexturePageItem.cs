@@ -5,26 +5,78 @@ using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models
 {
-    /**
-     * The way this works is:
-     * It renders in a box of size BoundingWidth x BoundingHeight at some position.
-     * TargetX/Y/W/H is relative to the bounding box, anything outside of that is just transparent.
-     * SourceX/Y/W/H is part of TexturePage that is drawn over TargetX/Y/W/H
-     */
+    /// <summary>
+    /// A texture page item in a data file.
+    /// </summary>
+    /// <remarks>The way a texture page item works is: <br/>
+    /// It renders in a box of size <see cref="BoundingWidth"/> x <see cref="BoundingHeight"/> at some position. <br/>
+    /// <see cref="TargetX"/>, <see cref="TargetY"/>, <see cref="TargetWidth"/> and <see cref="TargetHeight"/> are relative to the bounding box,
+    /// anything outside of that is just transparent. <br/>
+    /// <see cref="SourceX"/>, <see cref="SourceY"/>, <see cref="SourceWidth"/> and <see cref="SourceHeight"/> are part of the texture page which
+    /// are drawn over <see cref="TargetX"/>, <see cref="TargetY"/>, <see cref="TargetWidth"/>, <see cref="TargetHeight"/>.</remarks>
     public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyChanged
     {
+        /// <summary>
+        /// The name of the texture page item.
+        /// </summary>
+        //TODO: is not used by game maker, should get repurposed
         public UndertaleString Name { get; set; }
-        public ushort SourceX { get; set; } // X/Y of item on the texture page
+
+        /// <summary>
+        /// The x coordinate of the item on the texture page.
+        /// </summary>
+        public ushort SourceX { get; set; }
+
+        /// <summary>
+        /// The y coordinate of the item on the texture page.
+        /// </summary>
         public ushort SourceY { get; set; }
-        public ushort SourceWidth { get; set; } // Width/height of item on the texture page
+
+        /// <summary>
+        /// The width of the item on the texture page.
+        /// </summary>
+        public ushort SourceWidth { get; set; }
+
+        /// <summary>
+        /// The height of the item on the texture page.
+        /// </summary>
         public ushort SourceHeight { get; set; }
-        public ushort TargetX { get; set; } // X/Y of where to place inside of bound width/height
+
+        /// <summary>
+        /// The x coordinate of the item in the bounding rectangle.
+        /// </summary>
+        public ushort TargetX { get; set; }
+
+        /// <summary>
+        /// The y coordinate of the item in the bounding rectangle.
+        /// </summary>
         public ushort TargetY { get; set; }
-        public ushort TargetWidth { get; set; } // Dimensions of where to scale/place inside of bound width/height
+
+        /// <summary>
+        /// The width of the item in the bounding rectangle.
+        /// </summary>
+        public ushort TargetWidth { get; set; }
+
+        /// <summary>
+        /// The height of the item in the bounding rectangle.
+        /// </summary>
         public ushort TargetHeight { get; set; }
-        public ushort BoundingWidth { get; set; } // Source sprite/asset dimensions
+
+        /// <summary>
+        /// The width of the bounding rectangle.
+        /// </summary>
+        public ushort BoundingWidth { get; set; }
+
+        /// <summary>
+        /// The height of the bounding rectangle.
+        /// </summary>
         public ushort BoundingHeight { get; set; }
+
         private UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR> _TexturePage = new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();
+
+        /// <summary>
+        /// The texture page this item is referencing
+        /// </summary>
         public UndertaleEmbeddedTexture TexturePage { get => _TexturePage.Resource; set { _TexturePage.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TexturePage))); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -73,10 +125,15 @@ namespace UndertaleModLib.Models
             return Name.Content + " (" + GetType().Name + ")";
         }
 
+        /// <summary>
+        /// Replaces the current image of this texture page item to hold a new image.
+        /// </summary>
+        /// <param name="replaceImage">The new image that shall be applied to this texture page item.</param>
+        /// <param name="disposeImage">Whether to dispose <paramref name="replaceImage"/> afterwards.</param>
         public void ReplaceTexture(Image replaceImage, bool disposeImage = true)
         {
             Image finalImage = TextureWorker.ResizeImage(replaceImage, SourceWidth, SourceHeight);
-            
+
             // Apply the image to the TexturePage.
             lock (TexturePage.TextureData)
             {

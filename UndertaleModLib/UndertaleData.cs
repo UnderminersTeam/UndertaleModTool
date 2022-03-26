@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
 
@@ -15,7 +12,11 @@ namespace UndertaleModLib
     /// </summary>
     public class UndertaleData
     {
-        // access resource list by its name
+        /// <summary>
+        /// Indexer to access the resource list by its name.
+        /// </summary>
+        /// <param name="resourceTypeName">The resource name to get.</param>
+        /// <exception cref="MissingMemberException"> if the data file does not contain a property with that name.</exception>
         public object this[string resourceTypeName]
         {
             get
@@ -36,7 +37,12 @@ namespace UndertaleModLib
             }
         }
 
-        // access resource list by its items type
+        /// <summary>
+        /// Indexer to access the resource list by its items type.
+        /// </summary>
+        /// <param name="resourceType">The resource type to get.</param>
+        /// <exception cref="NotSupportedException"> if the type is not an <see cref="UndertaleNamedResource"/>.</exception>
+        /// <exception cref="MissingMemberException"> if the data file does not contain a property of that type.</exception>
         public object this[Type resourceType]
         {
             get
@@ -65,6 +71,9 @@ namespace UndertaleModLib
             }
         }
 
+        /// <summary>
+        /// The FORM chunk of the data file.
+        /// </summary>
         public UndertaleChunkFORM FORM;
 
         /// <summary>
@@ -229,7 +238,7 @@ namespace UndertaleModLib
         public IList<UndertaleSequence> Sequences => FORM.SEQN?.List;
 
         /// <summary>
-        /// Whether this is an unsupported bytecode version
+        /// Whether this is an unsupported bytecode version.
         /// </summary>
         public bool UnsupportedBytecodeVersion = false;
 
@@ -279,9 +288,19 @@ namespace UndertaleModLib
         public bool GMS2022_1 = false;
 
 
-        public ToolInfo ToolInfo = new ToolInfo();
+        /// <summary>
+        /// Some info for the editor to store data on.
+        /// </summary>
+        public readonly ToolInfo ToolInfo = new ToolInfo();
+
+        /// <summary>
+        /// Shows the current padding value. <c>-1</c> indicates a pre 1.4.9999 padding, where the default is 16.
+        /// </summary>
         public int PaddingAlignException = -1;
 
+        /// <summary>
+        /// A list of known Game Maker: Studio constants and variables.
+        /// </summary>
         public BuiltinList BuiltinList;
 
         /// <summary>
@@ -379,7 +398,7 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// Reports whether the data file was build by GameMaker Studio 2.
+        /// Reports whether the data file was build by Game Maker Studio 2.
         /// </summary>
         /// <returns><see langword="true"/> if yes, <see langword="false"/> if not.</returns>
         public bool IsGameMaker2()
@@ -391,7 +410,7 @@ namespace UndertaleModLib
         // Old Versions: https://store.yoyogames.com/downloads/gm-studio/release-notes-studio-old.html
         // https://web.archive.org/web/20150304025626/https://store.yoyogames.com/downloads/gm-studio/release-notes-studio.html
         // Early Access: https://web.archive.org/web/20181002232646/http://store.yoyogames.com:80/downloads/gm-studio-ea/release-notes-studio.html
-        public bool TestGMS1Version(uint stableBuild, uint betaBuild, bool allowGMS2 = false)
+        private bool TestGMS1Version(uint stableBuild, uint betaBuild, bool allowGMS2 = false)
         {
             return (allowGMS2 || !IsGameMaker2()) && (IsVersionAtLeast(1, 0, 0, stableBuild) || (IsVersionAtLeast(1, 0, 0, betaBuild) && !IsVersionAtLeast(1, 0, 0, 1000)));
         }
@@ -421,6 +440,7 @@ namespace UndertaleModLib
             return true; // The version is exactly what supplied.
         }
 
+        //TODO: I have no idea what this does.
         public int GetBuiltinSoundGroupID()
         {
             // It is known it works this way in 1.0.1266. The exact version which changed this is unknown.
@@ -429,7 +449,7 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// Reports whether the data file was compiled with YYD
+        /// Reports whether the data file was compiled with YYC.
         /// </summary>
         /// <returns><see langword="true"/> if yes, <see langword="false"/> if not.</returns>
         public bool IsYYC()
@@ -437,6 +457,7 @@ namespace UndertaleModLib
             return GeneralInfo != null && Code == null;
         }
 
+        //TODO: This is a helper method for something I don't really understand.
         public uint ExtensionFindLastId()
         {
             // The reason:
@@ -705,11 +726,24 @@ namespace UndertaleModLib
         }
     }
 
+    /// <summary>
+    /// An info handle for an editor to store data on.
+    /// </summary>
     public class ToolInfo
     {
-        // Info handle for the actual editor to store data on
+        /// <summary>
+        /// Whether profile mode is enabled.
+        /// </summary>
         public bool ProfileMode = false;
+
+        /// <summary>
+        /// The location of the profiles folder.
+        /// </summary>
         public string AppDataProfiles = null;
+
+        /// <summary>
+        /// The MD5 hash of the current file.
+        /// </summary>
         public string CurrentMD5 = "Unknown";
     }
 }

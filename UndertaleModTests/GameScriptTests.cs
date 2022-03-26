@@ -224,26 +224,26 @@ namespace UndertaleModTests
         {
             Console.WriteLine($"SyncBinding(): \"{resourceType}\", {enable}");
         }
-        public void SyncBinding(bool enable = false)
+        public void DisableAllSyncBinding()
         {
-            Console.WriteLine($"SyncBinding(): {enable}");
+            Console.WriteLine($"SyncBinding(): disabled");
         }
-        public void StartUpdater()
+        public void StartProgressBarUpdater()
         {
             Console.WriteLine("Starting progress bar updater...");
         }
-        public async Task StopUpdater()
+        public async Task StopProgressBarUpdater()
         {
             Console.WriteLine("Stopping progress bar updater...");
             await Task.Delay(1); //dummy await
         }
 
-        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
+        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
         {
             Console.WriteLine(string.Format("GenerateGMLCache(): *decompileContext*{0}, *dialog*{1}, {2}",
                                             decompileContext is null ? " (null)" : "",
                                             dialog is null ? " (null)" : "",
-                                            isSaving.ToString().ToLower())
+                                            clearGMLEditedBefore.ToString().ToLower())
                               );
 
             await Task.Delay(1); //dummy await

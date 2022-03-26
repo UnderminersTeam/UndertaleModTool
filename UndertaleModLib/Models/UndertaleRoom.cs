@@ -921,6 +921,7 @@ namespace UndertaleModLib.Models
         /// <summary>
         /// A layer with properties as it's used in a room. Game Maker: Studio 2 only.
         /// </summary>
+        //TODO: everything from here on is mostly gms2 related which i dont have much experience with
         public class Layer : UndertaleObject, INotifyPropertyChanged
         {
             public interface LayerData : UndertaleObject
@@ -929,12 +930,32 @@ namespace UndertaleModLib.Models
 
             private UndertaleRoom _ParentRoom;
             private int _layerDepth;
+
+            /// <summary>
+            /// The room this layer belongs to.
+            /// </summary>
             public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ParentRoom))); UpdateParentRoom(); } }
 
+            /// <summary>
+            /// The name of the layer.
+            /// </summary>
             public UndertaleString LayerName { get; set; }
+
+            /// <summary>
+            /// The id of the layer.
+            /// </summary>
             public uint LayerId { get; set; }
+
+            /// <summary>
+            /// The type of this layer.
+            /// </summary>
             public LayerType LayerType { get; set; }
+
+            /// <summary>
+            /// The depth of this layer.
+            /// </summary>
             public int LayerDepth { get => _layerDepth; set { _layerDepth = value; ParentRoom?.UpdateBGColorLayer(); } }
+
             public float XOffset { get; set; }
             public float YOffset { get; set; }
             public float HSpeed { get; set; }

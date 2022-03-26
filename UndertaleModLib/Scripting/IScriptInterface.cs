@@ -75,7 +75,9 @@ namespace UndertaleModLib.Scripting
         /// </summary>
         string ScriptErrorType { get; }
 
-        //TODO: no idea what this is. is not used per se anywhere, GUI implements its own thing and uses that instead.
+        /// <summary>
+        /// Indicates whether the user has enabled the setting to use decompiled code cache.
+        /// </summary>
         bool GMLCacheEnabled { get; }
 
         //TODO: this has no use. Only GUI uses this, and nothing should ever need to access this value.
@@ -395,13 +397,39 @@ namespace UndertaleModLib.Scripting
         /// </summary>
         void EnableUI();
 
-        // TODO: ask vlad about these.
+        /// <summary>
+        /// Allows scripts to synchronize their assets with the lists from the UI.
+        /// </summary>
+        /// <param name="resourceType">A comma separated list of asset list names. This is case sensitive.</param>
+        /// <param name="enable">Whether to enable or disable the synchronization.</param>
+        //TODO: Having resourceType as a comma separated list just screams for error. Make it use some array of predefined assets it can use.
         void SyncBinding(string resourceType, bool enable);
-        void SyncBinding(bool enable = false);
-        void StartUpdater();
-        Task StopUpdater();
 
-        Task<bool> GenerateGMLCache(ThreadLocal<Decompiler.GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false);
+        /// <summary>
+        /// Stops the synchronization of all previously enabled assets.
+        /// </summary>
+        void DisableAllSyncBinding();
+
+        /// <summary>
+        /// Starts the task that updates a progress bar in parallel.
+        /// </summary>
+        void StartProgressBarUpdater();
+
+        /// <summary>
+        /// Stops the task that updates a progress bar in parallel.
+        /// </summary>
+        /// <returns>A task that represents the stopped progress updater.</returns>
+        Task StopProgressBarUpdater();
+
+        /// <summary>
+        /// Generates a decompiled code cache to accelerate operations that need to access code often.
+        /// </summary>
+        /// <param name="decompileContext">The GlobalDecompileContext.</param>
+        /// <param name="dialog">The dialog that should be shown. If <see langword="null"/> then a new dialog will be automatically created and shown.</param>
+        /// <param name="clearGMLEditedBefore">Whether to clear <see cref="UndertaleData.GMLEditedBefore"/> from <see cref="Data"/>.</param>
+        /// <returns>Whether the decompiled GML cache was generated or not. <see langword="true"/> if it was successful,
+        /// <see langword="false"/> if it wasn't or <see cref="GMLCacheEnabled"/> is disabled.</returns>
+        Task<bool> GenerateGMLCache(ThreadLocal<Decompiler.GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false);
 
         /// <summary>
         /// Changes the currently selected in the GUI.

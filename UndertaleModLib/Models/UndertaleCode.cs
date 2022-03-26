@@ -12,8 +12,15 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Models
 {
+    /// <summary>
+    /// A bytecode instruction.
+    /// </summary>
     public class UndertaleInstruction : UndertaleObject
     {
+        /// <summary>
+        /// Possible opcodes an instruction can use.
+        /// </summary>
+        //TODO: document all these. i ain't smart enough to understand these.
         public enum Opcode : byte
         {
             Conv = 0x07, // Push((Types.Second)Pop) // DoubleTypeInstruction
@@ -51,6 +58,9 @@ namespace UndertaleModLib.Models
             Break = 0xFF, // TODO: Several sub-opcodes in GMS 2.3
         }
 
+        /// <summary>
+        /// Possible types an instruction can be.
+        /// </summary>
         public enum InstructionType
         {
             SingleTypeInstruction,
@@ -63,31 +73,37 @@ namespace UndertaleModLib.Models
             BreakInstruction
         }
 
+        /// <summary>
+        /// Determines the instruction type of an opcode and returns it.
+        /// </summary>
+        /// <param name="op">The opcode to get the instruction type of.</param>
+        /// <returns>The instruction type of the supplied opcode.</returns>
+        /// <exception cref="IOException">For unknown opcodes.</exception>
         public static InstructionType GetInstructionType(Opcode op)
         {
             return op switch
             {
-                Opcode.Neg or Opcode.Not or Opcode.Dup or 
-                Opcode.Ret or Opcode.Exit or Opcode.Popz or 
-                Opcode.CallV 
+                Opcode.Neg or Opcode.Not or Opcode.Dup or
+                Opcode.Ret or Opcode.Exit or Opcode.Popz or
+                Opcode.CallV
                     => InstructionType.SingleTypeInstruction,
 
-                Opcode.Conv or Opcode.Mul or Opcode.Div or 
-                Opcode.Rem or Opcode.Mod or Opcode.Add or 
-                Opcode.Sub or Opcode.And or Opcode.Or or 
-                Opcode.Xor or Opcode.Shl or Opcode.Shr 
+                Opcode.Conv or Opcode.Mul or Opcode.Div or
+                Opcode.Rem or Opcode.Mod or Opcode.Add or
+                Opcode.Sub or Opcode.And or Opcode.Or or
+                Opcode.Xor or Opcode.Shl or Opcode.Shr
                     => InstructionType.DoubleTypeInstruction,
 
                 Opcode.Cmp => InstructionType.ComparisonInstruction,
 
-                Opcode.B or Opcode.Bt or Opcode.Bf or 
-                Opcode.PushEnv or Opcode.PopEnv 
+                Opcode.B or Opcode.Bt or Opcode.Bf or
+                Opcode.PushEnv or Opcode.PopEnv
                     => InstructionType.GotoInstruction,
 
                 Opcode.Pop => InstructionType.PopInstruction,
 
-                Opcode.Push or Opcode.PushLoc or Opcode.PushGlb or 
-                Opcode.PushBltn or Opcode.PushI 
+                Opcode.Push or Opcode.PushLoc or Opcode.PushGlb or
+                Opcode.PushBltn or Opcode.PushI
                     => InstructionType.PushInstruction,
 
                 Opcode.Call => InstructionType.CallInstruction,
@@ -96,6 +112,7 @@ namespace UndertaleModLib.Models
                 _ => throw new IOException("Unknown opcode " + op.ToString().ToUpper()),
             };
         }
+
 
         public enum DataType : byte
         {
