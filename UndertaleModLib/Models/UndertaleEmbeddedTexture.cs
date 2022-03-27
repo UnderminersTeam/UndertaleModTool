@@ -54,6 +54,10 @@ namespace UndertaleModLib.Models
             TextureData = reader.ReadUndertaleObjectPointer<TexData>();
         }
 
+        /// <summary>
+        /// TODO!
+        /// </summary>
+        /// <param name="writer">Where to serialize to.</param>
         public void SerializeBlob(UndertaleWriter writer)
         {
             // padding
@@ -63,6 +67,10 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObject(TextureData);
         }
 
+        /// <summary>
+        /// TODO!
+        /// </summary>
+        /// <param name="reader">Where to deserialize from.</param>
         public void UnserializeBlob(UndertaleReader reader)
         {
             while (reader.Position % 0x80 != 0)

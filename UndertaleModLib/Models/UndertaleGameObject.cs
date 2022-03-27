@@ -568,7 +568,9 @@ namespace UndertaleModLib.Models
         /// A key released event type. The subtype is the key id, see <see cref="EventSubtypeKey"/>.
         /// </summary>
         KeyRelease = 10,
-        //TODO
+        /// <summary>
+        /// A trigger event type. Only used in Pre- Game Maker: Studio.
+        /// </summary>
         Trigger = 11, // no subtypes, always 0
         /// <summary>
         /// A cleanup event type. Has no subtypes, always 0.
@@ -1076,30 +1078,101 @@ namespace UndertaleModLib.Models
         /// The mouse leave event.
         /// </summary>
         MouseLeave = 11,
-        //TODO: are these even used?
+        /// <summary>
+        /// The Joystick1 left event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick1Left = 16,
+        /// <summary>
+        /// The Joystick1 right event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick1Right = 17,
+        /// <summary>
+        /// The Joystick1 up event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick1Up = 18,
+        /// <summary>
+        /// The Joystick1 down event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick1Down = 19,
+        /// <summary>
+        /// The Joystick1 button1 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick1Button1 = 21,
+        /// <summary>
+        /// The Joystick1 button2 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick1Button2 = 22,
+        /// <summary>
+        /// The Joystick1 button3 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick1Button3 = 23,
+        /// <summary>
+        /// The Joystick1 button4 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick1Button4 = 24,
+        /// <summary>
+        /// The Joystick1 button5 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick1Button5 = 25,
+        /// <summary>
+        /// The Joystick1 button6 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick1Button6 = 26,
+        /// <summary>
+        /// The Joystick1 button7 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick1Button7 = 27,
+        /// <summary>
+        /// The Joystick1 button8 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick1Button8 = 28,
+        /// <summary>
+        /// The Joystick2 left event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick2Left = 31,
+        /// <summary>
+        /// The Joystick2 right event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick2Right = 32,
+        /// <summary>
+        /// The Joystick2 up event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick2Up = 33,
+        /// <summary>
+        /// The Joystick2 down event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick2Down = 34,
+        /// <summary>
+        /// The Joystick2 button1 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick2Button1 = 36,
+        /// <summary>
+        /// The Joystick2 button2 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick2Button2 = 37,
+        /// <summary>
+        /// The Joystick2 button3 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick2Button3 = 38,
+        /// <summary>
+        /// The Joystick2 button4 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick2Button4 = 39,
+        /// <summary>
+        /// The Joystick2 button5 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick2Button5 = 40,
+        /// <summary>
+        /// The Joystick2 button6 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick2Button6 = 41,
+        /// <summary>
+        /// The Joystick2 button7 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick2Button7 = 42,
+        /// <summary>
+        /// The Joystick2 button8 event. Is only used in Pre-Game Maker: Studio.
+        /// </summary>
         Joystick2Button8 = 43,
         /// <summary>
         /// The global left-mouse button down event.
@@ -1176,8 +1249,9 @@ namespace UndertaleModLib.Models
         /// The room end event.
         /// </summary>
         RoomEnd = 5,
-
-        //TODO: are the ones here  used?
+        /// <summary>
+        /// THe "No More Lives" event. Only used in Game Maker Studio: 1 and earlier.
+        /// </summary>
         NoMoreLives = 6,
         /// <summary>
         /// The animation end event.
@@ -1187,9 +1261,11 @@ namespace UndertaleModLib.Models
         /// The path ended event.
         /// </summary>
         EndOfPath = 8,
-
+        /// <summary>
+        /// The "No More Health" event. Only used in Game Maker Studio: 1 and earlier.
+        /// </summary>
         NoMoreHealth = 9,
-
+        #region User events
         /// <summary>
         /// The User 0 event.
         /// </summary>
@@ -1258,6 +1334,8 @@ namespace UndertaleModLib.Models
         /// The User 16 event.
         /// </summary>
         User16 = 26,
+        #endregion
+        #region View events
         /// <summary>
         /// The Outside View 0 event.
         /// </summary>
@@ -1322,6 +1400,7 @@ namespace UndertaleModLib.Models
         /// The Intersect View 7 Boundary event.
         /// </summary>
         BoundaryView7 = 57,
+        #endregion
         /// <summary>
         /// The animation Update event for Skeletal Animation functions.
         /// </summary>

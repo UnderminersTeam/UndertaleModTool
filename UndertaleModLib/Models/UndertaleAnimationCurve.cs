@@ -28,6 +28,8 @@ namespace UndertaleModLib.Models
         /// The graph type of this animation curve.
         /// </summary>
         public GraphTypeEnum GraphType { get; set; }
+
+
         public UndertaleSimpleList<Channel> Channels { get; set; }
 
         public void Serialize(UndertaleWriter writer)

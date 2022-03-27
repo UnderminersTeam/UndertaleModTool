@@ -184,15 +184,27 @@ namespace UndertaleModLib
         public IList<UndertaleVariable> Variables => FORM.VARI?.List;
 
         /// <summary>
-        /// TODO: no idea what these are.
+        /// TODO: Unknown value, need more research.
         /// </summary>
         public uint VarCount1 { get => FORM.VARI.VarCount1; set => FORM.VARI.VarCount1 = value; }
+
+        /// <summary>
+        /// TODO: Unknown value, need more research.
+        /// </summary>
         public uint VarCount2 { get => FORM.VARI.VarCount2; set => FORM.VARI.VarCount2 = value; }
+
+        /// <summary>
+        /// TODO: Unknown value, need more research.
+        /// </summary>
         public bool DifferentVarCounts { get => FORM.VARI.DifferentVarCounts; set => FORM.VARI.DifferentVarCounts = value; }
         [Obsolete]
         public uint InstanceVarCount { get => VarCount1; set => VarCount1 = value; }
         [Obsolete]
         public uint InstanceVarCountAgain { get => VarCount2; set => VarCount2 = value; }
+
+        /// <summary>
+        /// TODO: Unknown value, need more research.
+        /// </summary>
         public uint MaxLocalVarCount { get => FORM.VARI.MaxLocalVarCount; set => FORM.VARI.MaxLocalVarCount = value; }
 
         /// <summary>
@@ -221,7 +233,9 @@ namespace UndertaleModLib
         /// </summary>
         public IList<UndertaleEmbeddedTexture> EmbeddedTextures => FORM.TXTR?.List;
 
-        //TODO: no idea what this is. Seems to sometimes not exist?
+        /// <summary>
+        /// The texture group infos of the data file.
+        /// </summary>
         public IList<UndertaleTextureGroupInfo> TextureGroupInfo => FORM.TGIN?.List;
 
         /// <summary>
@@ -229,7 +243,6 @@ namespace UndertaleModLib
         /// </summary>
         public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO?.List;
 
-        //TODO?
         public UndertaleTags Tags => FORM.TAGS?.Object;
 
         /// <summary>
@@ -291,7 +304,6 @@ namespace UndertaleModLib
         /// Whether the data file is from version GMS2022.1
         /// </summary>
         public bool GMS2022_1 = false;
-
 
         /// <summary>
         /// Some info for the editor to store data on.
@@ -472,7 +484,10 @@ namespace UndertaleModLib
             return true; // The version is exactly what supplied.
         }
 
-        //TODO: I have no idea what this does.
+        /// <summary>
+        /// TODO: needs to be documented on what this does.
+        /// </summary>
+        /// <returns>TODO</returns>
         public int GetBuiltinSoundGroupID()
         {
             // It is known it works this way in 1.0.1266. The exact version which changed this is unknown.
@@ -489,7 +504,10 @@ namespace UndertaleModLib
             return GeneralInfo != null && Code == null;
         }
 
-        //TODO: This is a helper method for something I don't really understand.
+        /// <summary>
+        /// TODO: Undocumented helper method.
+        /// </summary>
+        /// <returns>TODO</returns>
         public uint ExtensionFindLastId()
         {
             // The reason:

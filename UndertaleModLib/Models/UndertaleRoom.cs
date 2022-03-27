@@ -28,7 +28,7 @@ namespace UndertaleModLib.Models
             /// </summary>
             EnableViews = 1,
             /// <summary>
-            /// TODO no idea.
+            /// TODO not exactly sure, probably similar to <see cref="UndertaleRoom.DrawBackgroundColor"/>?
             /// </summary>
             ShowColor = 2,
             /// <summary>
@@ -67,8 +67,8 @@ namespace UndertaleModLib.Models
 
         /// <summary>
         /// The speed of the current room in steps.
+        /// TODO: GMS1 only? IIRC gms2 deals with it differently.
         /// </summary>
-        //TODO: GMS1 only? IIRC gms2 deals with it differently.
         public uint Speed { get; set; } = 30;
 
         /// <summary>

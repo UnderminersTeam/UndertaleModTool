@@ -29,7 +29,7 @@ namespace UndertaleModLib.Models
         public bool EmSizeIsFloat { get; set; }
 
         /// <summary>
-        /// The font size in Ems
+        /// The font size in Ems. In Game Maker: Studio 2.3 and above, this is a float instead.
         /// </summary>
         public uint EmSize { get; set; }
 
@@ -43,12 +43,26 @@ namespace UndertaleModLib.Models
         /// </summary>
         public bool Italic { get; set; }
 
-
+        /// <summary>
+        /// The start of the character range for this font.
+        /// </summary>
         public ushort RangeStart { get; set; }
-        public byte Charset { get; set; }
-        public byte AntiAliasing { get; set; }
-        public uint RangeEnd { get; set; }
 
+        /// <summary>
+        /// TODO: Currently unknown value.
+        /// </summary>
+        public byte Charset { get; set; }
+
+        /// <summary>
+        /// The level of anti-aliasing that is applied. 0 for none, Game Maker: Studio 2 has 1 for <c>on</c>, while
+        /// Game Maker Studio: 1 and earlier have values 1-3 for different anti-aliasing levels.
+        /// </summary>
+        public byte AntiAliasing { get; set; }
+
+        /// <summary>
+        /// The end of the character range for this font.
+        /// </summary>
+        public uint RangeEnd { get; set; }
 
         /// <summary>
         /// The <see cref="UndertaleTexturePageItem"/> object that contains the texture for this font.
@@ -70,7 +84,9 @@ namespace UndertaleModLib.Models
         /// </summary>
         public UndertalePointerList<Glyph> Glyphs { get; private set; } = new UndertalePointerList<Glyph>();
 
-
+        /// <summary>
+        /// TODO: currently unknown, needs investigation. Exists since bytecode 17, but seems to be only get checked since 2022.2+.
+        /// </summary>
         public int AscenderOffset { get; set; }
 
 
@@ -106,8 +122,10 @@ namespace UndertaleModLib.Models
             public ushort SourceHeight { get; set; }
 
 
+            //TODO: From here on out is some kerning related stuff I don't know.
             public short Shift { get; set; }
             public short Offset { get; set; }
+
             public UndertaleSimpleListShort<GlyphKerning> Kerning { get; set; } = new UndertaleSimpleListShort<GlyphKerning>();
 
             public void Serialize(UndertaleWriter writer)

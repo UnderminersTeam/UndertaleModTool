@@ -111,7 +111,11 @@ namespace UndertaleModLib.Scripting
         /// <param name="message">The message to show.</param>
         void ScriptMessage(string message);
 
-        //TODO: currently mostly used with GUI
+        //TODO: currently should get repurposed/renamed?
+        /// <summary>
+        /// Sets the message of the variable holding text from the console. Currently only used in GUI.
+        /// </summary>
+        /// <param name="message">The message to set it to.</param>
         void SetUMTConsoleText(string message);
 
         /// <summary>
@@ -126,7 +130,7 @@ namespace UndertaleModLib.Scripting
         /// </summary>
         /// <param name="error">The error message to show.</param>
         /// <param name="title">A short-descriptive title.</param>
-        /// <param name="SetConsoleText">TODO</param>
+        /// <param name="SetConsoleText">Whether to call <see cref="SetUMTConsoleText"/> with <paramref name="error"/>.</param>
         void ScriptError(string error, string title = "Error", bool SetConsoleText = true);
 
         /// <summary>
