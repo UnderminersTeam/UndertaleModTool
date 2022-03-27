@@ -129,15 +129,15 @@ namespace UndertaleModTests
         }
         public void IncrementProgress()
         {
-            Console.WriteLine("IncProgress()");
+            Console.WriteLine("IncrementProgress()");
         }
         public void AddProgressParallel(int amount)
         {
-            Console.WriteLine($"AddProgressP(): {amount}");
+            Console.WriteLine($"AddProgressParallel(): {amount}");
         }
         public void IncrementProgressParallel()
         {
-            Console.WriteLine("IncProgressP()");
+            Console.WriteLine("IncrementProgressParallel()");
         }
         public int GetProgress()
         {
@@ -224,9 +224,9 @@ namespace UndertaleModTests
         {
             Console.WriteLine($"SyncBinding(): \"{resourceType}\", {enable}");
         }
-        public void DisableAllSyncBinding()
+        public void DisableAllSyncBindings()
         {
-            Console.WriteLine($"SyncBinding(): disabled");
+            Console.WriteLine($"DisableAllSyncBindings(): disabled");
         }
         public void StartProgressBarUpdater()
         {

@@ -805,7 +805,7 @@ namespace UndertaleModCli
         {
             //there is no UI with any data binding
         }
-        public void DisableAllSyncBinding()
+        public void DisableAllSyncBindings()
         {
             //there is no UI with any data binding
         }

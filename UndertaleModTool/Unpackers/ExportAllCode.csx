@@ -37,15 +37,15 @@ bool cacheGenerated = false;
 if (exportFromCache)
 {
     cacheGenerated = await GenerateGMLCache(DECOMPILE_CONTEXT);
-    await StopUpdater();
+    await StopProgressBarUpdater();
 }
 
 SetProgressBar(null, "Code Entries", 0, exportFromCache ? Data.GMLCache.Count + Data.GMLCacheFailed.Count : toDump.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await DumpCode();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder);
 
@@ -94,7 +94,7 @@ void DumpCode(UndertaleCode code)
         }
     }
 
-    IncProgressP();
+    IncrementProgressParallel();
 }
 void DumpCachedCode(KeyValuePair<string, string> code)
 {
@@ -102,5 +102,5 @@ void DumpCachedCode(KeyValuePair<string, string> code)
 
     File.WriteAllText(path, code.Value);
 
-    IncProgressP();
+    IncrementProgressParallel();
 }

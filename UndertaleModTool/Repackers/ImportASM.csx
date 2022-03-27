@@ -35,7 +35,7 @@ bool stopOnError = ScriptQuestion("Stop importing on error?");
 
 
 SetProgressBar(null, "Files", 0, dirFiles.Length);
-StartUpdater();
+StartProgressBarUpdater();
 
 SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects, Functions, Variables", true);
 await Task.Run(() => {
@@ -43,11 +43,11 @@ await Task.Run(() => {
     {
         ImportASMFile(file, doParse, true, false, stopOnError);
 
-        IncProgress();
+        IncrementProgress();
     }
 });
-SyncBinding(false);
+DisableAllSyncBindings();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("All files successfully imported.");

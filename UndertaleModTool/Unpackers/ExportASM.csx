@@ -8,7 +8,7 @@ EnsureDataLoaded();
 
 string codeFolder = GetFolder(FilePath) + "Export_Assembly" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
-if (Directory.Exists(codeFolder)) 
+if (Directory.Exists(codeFolder))
 {
     ScriptError("An assembly export already exists. Please remove it.", "Error");
     return;
@@ -17,16 +17,16 @@ if (Directory.Exists(codeFolder))
 Directory.CreateDirectory(codeFolder);
 
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await DumpCode();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder);
 
 
-string GetFolder(string path) 
+string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
@@ -37,17 +37,17 @@ async Task DumpCode()
     await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
 }
 
-void DumpCode(UndertaleCode code) 
+void DumpCode(UndertaleCode code)
 {
     string path = Path.Combine(codeFolder, code.Name.Content + ".asm");
-    try 
+    try
     {
         File.WriteAllText(path, (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : ""));
     }
-    catch (Exception e) 
+    catch (Exception e)
     {
         File.WriteAllText(path, "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"); // Please don't
     }
 
-    IncProgressP();
+    IncrementProgressParallel();
 }

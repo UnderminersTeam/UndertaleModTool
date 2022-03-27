@@ -1750,7 +1750,7 @@ namespace UndertaleModTool
                 }
             }
         }
-        public void DisableAllSyncBinding() //disable all sync. bindings
+        public void DisableAllSyncBindings() //disable all sync. bindings
         {
             if (syncBindings.Count <= 0) return;
 

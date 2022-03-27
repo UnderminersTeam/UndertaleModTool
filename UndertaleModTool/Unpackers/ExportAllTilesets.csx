@@ -18,17 +18,17 @@ if (Directory.Exists(texFolder))
 Directory.CreateDirectory(texFolder);
 
 SetProgressBar(null, "Tilesets", 0, Data.Backgrounds.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await DumpTilesets();
 worker.Cleanup();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 
 
-string GetFolder(string path) 
+string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
@@ -39,10 +39,10 @@ async Task DumpTilesets()
     await Task.Run(() => Parallel.ForEach(Data.Backgrounds, DumpTileset));
 }
 
-void DumpTileset(UndertaleBackground tileset) 
+void DumpTileset(UndertaleBackground tileset)
 {
     if (tileset.Texture != null)
         worker.ExportAsPNG(tileset.Texture, texFolder + tileset.Name.Content + ".png");
 
-    IncProgressP();
+    IncrementProgressParallel();
 }

@@ -19,7 +19,7 @@ else
     ScriptError("Use the regular ImportGML please!", "Incompatible");
 }
 
-enum EventTypes 
+enum EventTypes
 {
     Create,
     Destroy,
@@ -46,9 +46,9 @@ List<string> CodeList = new List<string>();
 
 if (File.Exists(importFolder + "/LookUpTable.txt"))
 {
-    int counter = 0;  
-    string line;  
-    System.IO.StreamReader file = new System.IO.StreamReader(importFolder + "/" + "LookUpTable.txt");  
+    int counter = 0;
+    string line;
+    System.IO.StreamReader file = new System.IO.StreamReader(importFolder + "/" + "LookUpTable.txt");
     while((line = file.ReadLine()) != null)
     {
         if (counter > 0)
@@ -72,13 +72,13 @@ bool skipGlobalScripts = true;
 bool skipGlobalScriptsPrompted = false;
 
 SetProgressBar(null, "Files", 0, dirFiles.Length);
-StartUpdater();
+StartProgressBarUpdater();
 
 SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects, Functions, Variables", true);
 await Task.Run(() => {
     foreach (string file in dirFiles)
     {
-        IncProgress();
+        IncrementProgress();
 
         string fileName = Path.GetFileName(file);
         if (!(fileName.EndsWith(".gml")))
@@ -258,8 +258,8 @@ await Task.Run(() => {
         }
     }
 });
-SyncBinding(false);
+DisableAllSyncBindings();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("All files successfully imported.");

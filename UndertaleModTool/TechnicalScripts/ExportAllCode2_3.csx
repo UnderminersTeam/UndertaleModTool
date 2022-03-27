@@ -20,7 +20,7 @@ else
 string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
-if (Directory.Exists(codeFolder)) 
+if (Directory.Exists(codeFolder))
 {
     ScriptError("A code export already exists. Please remove it.", "Error");
     return;
@@ -29,12 +29,12 @@ if (Directory.Exists(codeFolder))
 Directory.CreateDirectory(codeFolder);
 
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 int failed = 0;
 await Task.Run(DumpCode);
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder + " " + failed.ToString() + " failed");
 
@@ -63,7 +63,7 @@ void DumpCode()
         {
             File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             if (!(Directory.Exists(codeFolder + "/Failed/")))
             {
@@ -74,6 +74,6 @@ void DumpCode()
             failed += 1;
         }
 
-        IncProgress();
+        IncrementProgress();
     }
 }

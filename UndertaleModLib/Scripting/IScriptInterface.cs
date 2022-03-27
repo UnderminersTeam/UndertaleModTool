@@ -136,11 +136,11 @@ namespace UndertaleModLib.Scripting
         void ScriptOpenURL(string url);
 
         /// <summary>
-        /// Used for communicating with AUMI (Archie's Undertale Modding Interface).
+        /// Used for communicating with <a href="https://github.com/Archie-osu/AUMI">AUMI</a> (Archie's Undertale Modding Interface).
         /// </summary>
-        /// <param name="ipMessage">TODO</param>
-        /// <param name="outReply">TODO</param>
-        /// <returns>TODO</returns>
+        /// <param name="ipMessage">The message to send.</param>
+        /// <param name="outReply">The reply from AUMI.</param>
+        /// <returns><see langword="false"/> if the message couldn't be sent. Otherwise, the function returns <see langword="true"/>.</returns>
         bool SendAUMIMessage(IpcMessage_t ipMessage, ref IpcReply_t outReply)
         {
             // By Archie
@@ -408,7 +408,7 @@ namespace UndertaleModLib.Scripting
         /// <summary>
         /// Stops the synchronization of all previously enabled assets.
         /// </summary>
-        void DisableAllSyncBinding();
+        void DisableAllSyncBindings();
 
         /// <summary>
         /// Starts the task that updates a progress bar in parallel.

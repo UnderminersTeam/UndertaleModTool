@@ -41,11 +41,11 @@ if (regex_check)
 }
 
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await DumpCode();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 
 await Task.Run(SortResults);
 
@@ -114,5 +114,5 @@ void DumpCode(UndertaleCode code)
         }
     }
 
-    IncProgressP();
+    IncrementProgressParallel();
 }

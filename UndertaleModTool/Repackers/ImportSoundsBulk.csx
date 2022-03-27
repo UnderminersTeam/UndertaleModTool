@@ -17,7 +17,7 @@ EnsureDataLoaded();
 
 int maxCount = 1;
 
-string GetFolder(string path) 
+string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
@@ -53,7 +53,7 @@ if (!emergencyCancel)
 
 bool replaceSoundPropertiesCheck = ScriptQuestion("WARNING!:\nIf a sound already exists in the game, it will be replaced instead of added. Would you like to replace the sound properties as well?");
 
-bool autoSpecifyEverySound = ScriptQuestion(@"Would you like to automatically specify the characteristics of each sound? 
+bool autoSpecifyEverySound = ScriptQuestion(@"Would you like to automatically specify the characteristics of each sound?
 If you select no you will have to manually specify all sounds.");
 
 manuallySpecifyEverySound = (autoSpecifyEverySound ? false : true);
@@ -74,7 +74,7 @@ if (manuallySpecifyEverySound == false)
 
 maxCount = dirFiles.Length;
 SetProgressBar(null, "Importing sounds", 0, maxCount);
-StartUpdater();
+StartProgressBarUpdater();
 
 SyncBinding("AudioGroups, EmbeddedAudio, Sounds, Strings", true);
 await Task.Run(() => {
@@ -197,7 +197,7 @@ await Task.Run(() => {
                 }
             }
         }
-        if (audioGroupID == 0) //If the audiogroup is zero then 
+        if (audioGroupID == 0) //If the audiogroup is zero then
             needAGRP = false;
 
         UndertaleEmbeddedAudio soundData = null;
@@ -307,14 +307,14 @@ await Task.Run(() => {
         }
     }
 });
-SyncBinding(false);
+DisableAllSyncBindings();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 ScriptMessage("Sound added successfully!\nEnjoy your meowing day!");
 
 
 void IncProgressLocal()
 {
     if (GetProgress() < maxCount)
-        IncProgress();
+        IncrementProgress();
 }

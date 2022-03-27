@@ -95,7 +95,7 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
 }
 
 SetProgressBar(null, "Code Entries", 0, codeToDump.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await Task.Run(() => {
     for (var j = 0; j < codeToDump.Count; j++)
@@ -104,18 +104,18 @@ await Task.Run(() => {
     }
 });
 
-await StopUpdater();
+await StopProgressBarUpdater();
 
-void DumpCode(UndertaleCode code) 
+void DumpCode(UndertaleCode code)
 {
     string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
     if (code.ParentEntry == null)
     {
-        try 
+        try
         {
             File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             if (!(Directory.Exists(Path.Combine(codeFolder, "Failed"))))
             {
@@ -132,12 +132,12 @@ void DumpCode(UndertaleCode code)
         {
             Directory.CreateDirectory(Path.Combine(codeFolder, "Duplicates"));
         }
-        try 
+        try
         {
             path = Path.Combine(codeFolder, "Duplicates", code.Name.Content + ".gml");
             File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value).Replace("@@This@@()", "self/*@@This@@()*/") : ""));
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             if (!(Directory.Exists(Path.Combine(codeFolder, "Duplicates", "Failed"))))
             {
@@ -148,5 +148,5 @@ void DumpCode(UndertaleCode code)
             failed += 1;
         }
     }
-    IncProgress();
+    IncrementProgress();
 }
