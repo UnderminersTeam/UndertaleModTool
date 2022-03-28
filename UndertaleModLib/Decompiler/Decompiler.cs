@@ -1357,6 +1357,8 @@ namespace UndertaleModLib.Decompiler
                         sb.Append("{\n");
                         context.IndentationLevel++;
                         context.ArgumentReplacements = Arguments;
+
+                        int count = 0;
                         foreach (Statement stmt in statements)
                         {
                             if (Subtype != FunctionType.Function && stmt is ReturnStatement)
@@ -1381,7 +1383,11 @@ namespace UndertaleModLib.Decompiler
                                 break;
                             }
                             else
+                            {
                                 sb.Append(stmt.ToString(context));
+                                if (Subtype == FunctionType.Struct && ++count < numNotReturn)
+                                    sb.Append(",");
+                            } 
                             sb.Append("\n");
                         }
                         context.DecompilingStruct = oldDecompilingStruct;
