@@ -93,8 +93,8 @@ namespace UndertaleModCli
                 dataFileOption,
                 scriptRunnerOption,
                 verboseOption,
+                //TODO: why no force overwrite here, but neded for new?
                 new Option<FileInfo>(new []{"-o", "--output"}, "Where to save the modified data file"),
-                //TODO: why no force overwrite here?
                 new Option<string>(new []{"-l","--line"}, "Run C# string. Runs AFTER everything else"),
                 new Option<bool>(new []{"-i", "--interactive"}, "Interactive menu launch")
             };
@@ -298,7 +298,13 @@ namespace UndertaleModCli
                         Console.Write("File path (you can drag and drop)? ");
                         string path = RemoveQuotes(Console.ReadLine());
                         Console.WriteLine("Trying to run script {0}", path);
-                        RunCSharpFile(path);
+                        try
+                        {
+                            RunCSharpFile(path);
+                        }
+                        catch (Exception e)
+                        {
+                        }
                         break;
                     }
 

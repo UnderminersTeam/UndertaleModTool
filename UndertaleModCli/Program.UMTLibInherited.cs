@@ -7,6 +7,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Operations;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.VisualBasic;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
@@ -40,7 +44,7 @@ namespace UndertaleModCli
 
         public string ScriptErrorType { get; set; }
 
-        public bool GMLCacheEnabled => false; //TODO: not implemented yet
+        public bool GMLCacheEnabled => false; //TODO: not implemented yet, due to no code editing
 
         public bool IsAppClosed { get; set; }
 
@@ -72,14 +76,14 @@ namespace UndertaleModCli
 
         public void SetUMTConsoleText(string message)
         {
-            //TODO: seems to do nothing on Linux / Macos? Could be terminal dependant.
-            Console.Title = message;
+            // Since the UMTConsole text messages are literally just messages that are shown,
+            // I'm giving them the same behaviour as the normal ScriptMessage
+            ScriptMessage(message);
         }
 
         public bool ScriptQuestion(string message)
         {
-            Console.WriteLine(message);
-            Console.Write("Input (Y/N)? ");
+            Console.Write($"{message} (Y/N) ");
             bool isInputYes = Console.ReadKey(false).Key == ConsoleKey.Y;
             Console.WriteLine();
             return isInputYes;
@@ -87,9 +91,7 @@ namespace UndertaleModCli
 
         public void ScriptError(string error, string title = "Error", bool setConsoleText = true)
         {
-            // no need to care about setConsoleText if we're in CLI...
-            // Although we could copy SetUMTConsoleText and change the console.title as well
-            // potential TODO?
+            // No need to care about setConsoleText if we're in CLI.
 
             Console.Error.WriteLine("--------------------------------------------------");
             Console.Error.WriteLine("----------------------ERROR!----------------------");
@@ -228,11 +230,10 @@ namespace UndertaleModCli
 
         public void UpdateProgressBar(string message, string status, double currentValue, double maxValue)
         {
-            string evaluatedMessage = String.IsNullOrEmpty(message) ? $"{message}|" : "";
+            string evaluatedMessage = !String.IsNullOrEmpty(message) ? $"{message}|" : "";
             Console.WriteLine($"[{evaluatedMessage}{status}] {currentValue} out of {maxValue}");
         }
 
-        //TODO: why do these function need/save attributes?
         public void SetProgressBar(string message, string status, double currentValue, double maxValue)
         {
             savedMsg = message;
@@ -260,26 +261,32 @@ namespace UndertaleModCli
         {
             progressValue += amount;
         }
+
         public void IncProgress()
         {
             progressValue++;
         }
+
         public void AddProgressP(int amount) //P - Parallel (multithreaded)
         {
             Interlocked.Add(ref progressValue, amount); //thread-safe add operation (not the same as "lock ()")
         }
+
         public void IncProgressP()
         {
             Interlocked.Increment(ref progressValue); //thread-safe increment
         }
+
         public int GetProgress()
         {
             return progressValue;
         }
+
         public void SetProgress(int value)
         {
             progressValue = value;
         }
+
 
         #region Empty Inherited Methods
 
@@ -288,14 +295,15 @@ namespace UndertaleModCli
             // CLI has no dialogs to initialize
         }
 
+        //TODO: revisit this once CLI gets code editor functionality
         public void ReapplyProfileCode()
         {
-            //CLI does not have any code editing tools, nor a profile Mode thus since is completely useless
+            //CLI does not have any code editing tools (yet), nor a profile Mode thus since is completely useless
         }
 
         public void NukeProfileGML(string codeName)
         {
-            //CLI does not have any code editing tools, nor a profile Mode thus since is completely useless
+            //CLI does not have any code editing tools (yet), nor a profile Mode thus since is completely useless
         }
 
         public void SetProgressBar()
@@ -362,19 +370,29 @@ namespace UndertaleModCli
 
         public string PromptChooseDirectory(string prompt)
         {
-            Console.WriteLine("Please type a path (or drag and drop) to a directory:");
-            Console.Write("Path: ");
-            //TODO: should probably trim quotes in order to not have funky stuff
-            string path = Console.ReadLine();
+            string path;
+            DirectoryInfo directoryInfo;
+            do
+            {
+                Console.WriteLine("Please type a path (or drag and drop) to a valid directory:");
+                Console.Write("Path: ");
+                path = RemoveQuotes(Console.ReadLine());
+                directoryInfo = new DirectoryInfo(path);
+            } while (directoryInfo.Exists);
             return path;
         }
 
         public string PromptLoadFile(string defaultExt, string filter)
         {
-            Console.WriteLine("Please type a path (or drag and drop) to a file:");
-            Console.Write("Path: ");
-            //TODO: should probably trim quotes in order to not have funky stuff
-            string path = Console.ReadLine();
+            string path;
+            FileInfo directoryInfo;
+            do
+            {
+                Console.WriteLine("Please type a path (or drag and drop) to a valid file:");
+                Console.Write("Path: ");
+                path = RemoveQuotes(Console.ReadLine());
+                directoryInfo = new FileInfo(path);
+            } while (directoryInfo.Exists);
             return path;
         }
 
@@ -382,6 +400,7 @@ namespace UndertaleModCli
         {
             return GetDecompiledText(Data.Code.ByName(codeName), context);
         }
+
         public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
         {
             GlobalDecompileContext DECOMPILE_CONTEXT = context is null ? new(Data, false) : context;
@@ -399,6 +418,7 @@ namespace UndertaleModCli
         {
             return GetDisassemblyText(Data.Code.ByName(codeName));
         }
+
         public string GetDisassemblyText(UndertaleCode code)
         {
             try
@@ -411,13 +431,158 @@ namespace UndertaleModCli
             }
         }
 
+        public string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
+        {
+            // I'll ignore the cancelButtonText and submitButtonText as they don't have much use.
+            return SimpleTextInput(titleText, labelText, defaultInputBoxText, isMultiline, preventClose);
+        }
+
+        public string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true)
+        {
+            // default value gets ignored, as it doesn't really have a use in CLI.
+
+            string result = "";
+
+            Console.WriteLine("-----------------------INPUT----------------------");
+            Console.WriteLine(title);
+            Console.WriteLine(label + (allowMultiline ? " (Multiline, hit SHIFT+ENTER to insert newline)" : ""));
+            Console.WriteLine("--------------------------------------------------");
+
+            if (!allowMultiline)
+            {
+                result = Console.ReadLine();
+            }
+            else
+            {
+                bool isShiftAndEnterPressed = false;
+                ConsoleKeyInfo keyInfo;
+                do
+                {
+                    keyInfo = Console.ReadKey();
+                    //result += keyInfo.KeyChar;
+
+                    // If Enter is pressed without shift
+                    if (((keyInfo.Modifiers & ConsoleModifiers.Shift) == 0) && (keyInfo.Key == ConsoleKey.Enter))
+                        isShiftAndEnterPressed = true;
+
+                    else
+                    {
+                        // If we have Enter + any other modifier pressed, append newline. Otherwise, just the content.
+                        if (keyInfo.Key == ConsoleKey.Enter)
+                        {
+                            result += "\n";
+                            Console.WriteLine();
+                        }
+                        // If backspace, display new empty char and move one back
+                        // TODO: There's some weird bug with ctrl+backspace, i'll ignore it for now.
+                        // Also make some of the multiline-backspace better.
+                        else if ((keyInfo.Key == ConsoleKey.Backspace) && (result.Length > 0))
+                        {
+                            Console.Write(' ');
+                            Console.SetCursorPosition(Console.CursorLeft-1, Console.CursorTop);
+                            result = result.Remove(result.Length - 1);
+                        }
+                        else
+                            result += keyInfo.KeyChar;
+                    }
+
+                } while (!isShiftAndEnterPressed);
+            }
+
+            Console.WriteLine("--------------------------------------------------");
+            Console.WriteLine("-----------------------INPUT----------------------");
+            Console.WriteLine("--------------------------------------------------");
+
+            return result;
+        }
+
+        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+        {
+            await ClickableTextOutput(title, query, resultsCount, resultsDict.ToDictionary(pair => pair.Key, pair => pair.Value), editorDecompile, failedList);
+        }
+        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+        {
+            await Task.Delay(1); //dummy await
+
+            // If we have failed entries...
+            if (failedList is not null)
+            {
+                // ...Print them all out
+                Console.ForegroundColor = ConsoleColor.Red;
+                if (failedList.Count() == 1)
+                    Console.Error.WriteLine("There is 1 code entry that encountered an error while searching:");
+                else
+                    Console.Error.WriteLine($"There are {failedList.Count()} code entries that encountered an error while searching");
+
+                foreach (var failedEntry in failedList)
+                    Console.Error.WriteLine(failedEntry);
+
+                Console.ResetColor();
+                Console.WriteLine();
+            }
+
+            Console.WriteLine($"{resultsCount} results in {resultsDict.Count} code entries for \"{query}\".");
+            Console.WriteLine();
+
+            // Print in a pattern of:
+            // results in code_file
+            // line3: code
+            // line6: code
+            //
+            // results in a codefile2
+            //etc.
+            foreach (var dictEntry in resultsDict)
+            {
+                Console.WriteLine($"Results in {dictEntry.Key}:");
+                foreach (var resultEntry in dictEntry.Value)
+                    Console.WriteLine(resultEntry);
+
+                Console.WriteLine();
+            }
+
+            if (IsInteractive) Pause();
+        }
+
+        public bool LintUMTScript(string path)
+        {
+            // By Grossley
+            if (!File.Exists(path))
+            {
+                ScriptError(path + " does not exist!");
+                return false;
+            }
+            try
+            {
+                CancellationTokenSource source = new CancellationTokenSource(100);
+                CancellationToken token = source.Token;
+                object test = CSharpScript.EvaluateAsync(File.ReadAllText(path), CliScriptOptions, this, typeof(IScriptInterface), token);
+            }
+            catch (CompilationErrorException exc)
+            {
+                ScriptError(exc.Message, "Script compile error");
+                ScriptExecutionSuccess = false;
+                ScriptErrorMessage = exc.Message;
+                ScriptErrorType = "CompilationErrorException";
+                return false;
+            }
+            catch (Exception)
+            {
+                // Using the 100 MS timer it can time out before successfully running, compilation errors are fast enough to get through.
+                ScriptExecutionSuccess = true;
+                ScriptErrorMessage = "";
+                ScriptErrorType = "";
+                return true;
+            }
+            return true;
+        }
+
         //TODO: implement all these
         #region todo
         public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
         {
             await Task.Delay(1); //dummy await
 
-            //TODO: not implemented yet
+            //TODO: not implemented yet, due to no code editing / profile mode.
 
             return false;
         }
@@ -451,71 +616,9 @@ namespace UndertaleModCli
             throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
 
-        public string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
-        {
-            /*
-             * TextInputDialog dlg = new TextInputDialog(titleText, labelText, defaultInputBoxText, cancelButtonText, submitButtonText, isMultiline, preventClose);
-            bool? dlgResult = dlg.ShowDialog();
+        #region Some dangerous functions I don't know what they do
 
-            if (!dlgResult.HasValue || dlgResult == false)
-            {
-                // returns null (not an empty!!!) string if the dialog has been closed, or an error has occured.
-                return null;
-            }
-
-            // otherwise just return the input (it may be empty aka .Length == 0).
-            return dlg.InputText;
-             */
-
-            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-        }
-
-        public string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true)
-        {
-            //TODO: not for CLI but for GUI: what exactly is the use of showdialog? in which weird case do you want to show an input prompt, that does not "accept" any input?
-            /*
-            TextInput input = new TextInput(labelText, titleText, defaultInputBoxText, isMultiline);
-
-            System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
-            if (showDialog)
-            {
-                result = input.ShowDialog();
-                input.Dispose();
-
-                if (result == System.Windows.Forms.DialogResult.OK)
-                    return input.ReturnString;            //values preserved after close
-                else
-                    return null;
-            }
-            else //if we don't need to wait for result
-            {
-                input.Show();
-                return null;
-                //no need to call input.Dispose(), because if form wasn't shown modally, Form.Close() (or closing it with "X") also calls Dispose()
-            }
-             */
-
-            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-        }
-
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
-        {
-            //will likely just call textoutput, as making it clickable is not really feasable.
-            await Task.Delay(1); //dummy await
-            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-        }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
-        {
-            //will likely just call textoutput, as making it clickable is not really feasable.
-            await Task.Delay(1); //dummy await
-            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-        }
-
-        public bool LintUMTScript(string path)
-        {
-            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-        }
-
+        //TODO: ask what these do and implement them.
         public void ReplaceTempWithMain(bool ImAnExpertBTW = false)
         {
             throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
@@ -540,6 +643,8 @@ namespace UndertaleModCli
         {
             throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
         }
+        #endregion
+
         #endregion
 
         public bool DummyBool()
