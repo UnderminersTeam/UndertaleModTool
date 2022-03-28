@@ -276,7 +276,11 @@
             <CheckBox Grid.Row="21" Grid.Column="1" Margin="3" IsChecked="{Binding Kinematic}"/>
 
             <TextBlock Grid.Row="22" Grid.Column="0" Margin="3">Physics shape vertices</TextBlock>
-            <DataGrid Grid.Row="22" Grid.Column="1" Margin="3" ItemsSource="{Binding PhysicsVertices, Mode=OneWay}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+            <DataGrid Grid.Row="22" Grid.Column="1" Margin="3" ItemsSource="{Binding PhysicsVertices, Mode=OneWay}"
+                      AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
+                      HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
+                      HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
+                      ScrollViewer.CanContentScroll="False" PreviewMouseWheel="HandlePreviewMouseWheel">
                 <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                     <Style TargetType="{x:Type DataGridCell}">
@@ -331,7 +335,11 @@
                 <DataTemplate>
                     <StackPanel>
                         <TextBlock Margin="3" Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource EventNameConverter}}" Name="EventTypeName"/>
-                        <DataGrid ItemsSource="{Binding .}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" AddingNewItem="DataGrid_AddingNewItem" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+                        <DataGrid ItemsSource="{Binding .}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
+                                  HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
+                                  AddingNewItem="DataGrid_AddingNewItem" PreviewMouseWheel="HandlePreviewMouseWheel"
+                                  HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
+                                  ScrollViewer.CanContentScroll="False">
                             <DataGrid.Resources>
                                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                                 <Style TargetType="{x:Type DataGridCell}">
@@ -355,6 +363,10 @@
                                             </Setter>
                                         </DataTrigger>
                                     </Style.Triggers>
+                                </Style>
+                                <Style TargetType="{x:Type ComboBox}">
+                                    <!-- DropDownX events are not routed events -->
+                                    <EventSetter Event="Loaded" Handler="ComboBox_Loaded"/>
                                 </Style>
                             </DataGrid.Resources>
                             <DataGrid.Columns>
@@ -480,7 +492,10 @@
                                                     <DataGridTemplateColumn Header="Code" Width="*">
                                                         <DataGridTemplateColumn.CellTemplate>
                                                             <DataTemplate>
-                                                                <local:UndertaleObjectReference ObjectReference="{Binding CodeId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleCode}" Margin="23,3,3,3" CanRemove="False"/>
+                                                                <local:UndertaleObjectReference ObjectReference="{Binding CodeId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleCode}"
+                                                                                                Margin="23,3,3,3" CanRemove="False"
+                                                                                                ObjectEventType="{Binding Text, Mode=OneTime, ElementName=EventTypeName, Converter={StaticResource EventNameConverter}, ConverterParameter=EventType}"
+                                                                                                ObjectEventSubtype="{Binding DataContext.EventSubtype, Mode=OneWay, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
                                                             </DataTemplate>
                                                         </DataGridTemplateColumn.CellTemplate>
                                                     </DataGridTemplateColumn>

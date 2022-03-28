@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
@@ -23,6 +24,8 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleGameObjectEditor : DataUserControl
     {
+        private bool handleMouseScroll = true;
+
         public UndertaleGameObjectEditor()
         {
             InitializeComponent();
@@ -33,6 +36,49 @@ namespace UndertaleModTool
             UndertaleGameObject.Event obj = new UndertaleGameObject.Event();
             obj.Actions.Add(new UndertaleGameObject.EventAction());
             e.NewItem = obj;
+
+            _ = Task.Run(() =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    // re-focus focused element when grid is updated
+                    FrameworkElement elem = Keyboard.FocusedElement as FrameworkElement;
+                    (sender as DataGrid).MoveFocus(new TraversalRequest(FocusNavigationDirection.Up));
+                    elem?.Focus();
+                },
+                DispatcherPriority.ContextIdle);
+            });
+        }
+
+        // mouse wheel scrolling fix
+        // source - https://stackoverflow.com/a/4342746/12136394
+        private void HandlePreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (!e.Handled && handleMouseScroll)
+            {
+                e.Handled = true;
+                MouseWheelEventArgs eventArg = new(e.MouseDevice, e.Timestamp, e.Delta);
+                eventArg.RoutedEvent = MouseWheelEvent;
+                eventArg.Source = sender;
+                UIElement parent = ((Control)sender).Parent as UIElement;
+                parent.RaiseEvent(eventArg);
+            }
+        }
+
+        private void ComboBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            (sender as ComboBox).DropDownOpened -= ComboBox_DropDownOpened;
+            (sender as ComboBox).DropDownOpened += ComboBox_DropDownOpened;
+            (sender as ComboBox).DropDownClosed -= ComboBox_DropDownClosed;
+            (sender as ComboBox).DropDownClosed += ComboBox_DropDownClosed;
+        }
+        private void ComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            handleMouseScroll = false;
+        }
+        private void ComboBox_DropDownClosed(object sender, EventArgs e)
+        {
+            handleMouseScroll = true;
         }
     }
 }
