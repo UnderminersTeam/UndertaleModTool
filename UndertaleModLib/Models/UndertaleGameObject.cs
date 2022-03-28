@@ -1250,7 +1250,7 @@ namespace UndertaleModLib.Models
         /// </summary>
         RoomEnd = 5,
         /// <summary>
-        /// THe "No More Lives" event. Only used in Game Maker Studio: 1 and earlier.
+        /// The "No More Lives" event. Only used in Game Maker Studio: 1 and earlier.
         /// </summary>
         NoMoreLives = 6,
         /// <summary>
