@@ -1719,18 +1719,25 @@ namespace UndertaleModTool
                 {
                     foreach (string resType in resTypes)
                     {
-                        BindingOperations.EnableCollectionSynchronization(Data[resType] as IEnumerable, bindingLock);
+                        IEnumerable resListCollection = Data[resType] as IEnumerable;
+                        if (resListCollection is not null)
+                        {
+                            BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
 
-                        syncBindings.Add(resType);
+                            syncBindings.Add(resType);
+                        }
                     }
                 }
                 else
                 {
                     foreach (string resType in resTypes)
                     {
-                        BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
+                        if (syncBindings.Contains(resType))
+                        {
+                            BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
 
-                        syncBindings.Remove(resType);
+                            syncBindings.Remove(resType);
+                        }
                     }
                 }
             }
@@ -1738,11 +1745,15 @@ namespace UndertaleModTool
             {
                 if (enable)
                 {
-                    BindingOperations.EnableCollectionSynchronization(Data[resourceType] as IEnumerable, bindingLock);
+                    IEnumerable resListCollection = Data[resourceType] as IEnumerable;
+                    if (resListCollection is not null)
+                    {
+                        BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
 
-                    syncBindings.Add(resourceType);
+                        syncBindings.Add(resourceType);
+                    } 
                 }
-                else
+                else if (syncBindings.Contains(resourceType))
                 {
                     BindingOperations.DisableCollectionSynchronization(Data[resourceType] as IEnumerable);
 
