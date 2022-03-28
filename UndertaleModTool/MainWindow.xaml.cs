@@ -54,7 +54,7 @@ namespace UndertaleModTool
         /// Note for those who don't know what is "PropertyChanged.Fody" -
         /// it automatically adds "OnPropertyChanged()" to every property (or modify existing) of the class that implements INotifyPropertyChanged.
         /// It does that on code compilation.
-        
+
         public UndertaleData Data { get; set; }
         public string FilePath { get; set; }
         public string ScriptPath { get; set; } // For the scripting interface specifically
@@ -170,9 +170,9 @@ namespace UndertaleModTool
             scriptSetupTask = Task.Run(() =>
             {
                 scriptOptions = ScriptOptions.Default
-                                .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", 
+                                .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler",
                                             "UndertaleModLib.Scripting", "UndertaleModLib.Compiler",
-                                            "UndertaleModTool", "System", "System.IO", "System.Collections.Generic", 
+                                            "UndertaleModTool", "System", "System.IO", "System.Collections.Generic",
                                             "System.Text.RegularExpressions")
                                 .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
                                                 GetType().GetTypeInfo().Assembly,
@@ -303,7 +303,7 @@ namespace UndertaleModTool
 
                                 Thread.Sleep(1000);
                             }
-                            
+
                             if (!deleted)
                                 ShowWarning($"The updater temp folder can't be deleted.\nError - {exMessage}.");
                         }
@@ -447,7 +447,7 @@ namespace UndertaleModTool
             CanSave = true;
             CanSafelySave = true;
 
-            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; //clean "GC holes" left in the memory by previous game data 
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; //clean "GC holes" left in the memory by previous game data
             GC.Collect();                                                                           //https://docs.microsoft.com/en-us/dotnet/api/system.runtime.gcsettings.largeobjectheapcompactionmode?view=net-5.0
 
             return true;
@@ -725,8 +725,8 @@ namespace UndertaleModTool
             });
             dialog.ShowDialog();
             await t;
-            
-            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; //clean "GC holes" left in the memory by previous game data 
+
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; //clean "GC holes" left in the memory by previous game data
             GC.Collect();                                                                           //https://docs.microsoft.com/en-us/dotnet/api/system.runtime.gcsettings.largeobjectheapcompactionmode?view=net-5.0
         }
 
@@ -1045,7 +1045,7 @@ namespace UndertaleModTool
                     {
                         fs.Write(Encoding.UTF8.GetBytes(hash + '\n'));
                         fs.Write(SystemJson.JsonSerializer.SerializeToUtf8Bytes(sortedCache));
-                        
+
                         if (Data.GMLCacheFailed.Count > 0)
                         {
                             fs.WriteByte((byte)'\n');
@@ -1071,7 +1071,7 @@ namespace UndertaleModTool
 
             if (Data.GMLCache is null)
                 Data.GMLCache = new();
-            
+
             ConcurrentBag<string> failedBag = new();
 
             if (scriptDialog is null)
@@ -1295,7 +1295,7 @@ namespace UndertaleModTool
             TreeViewItem targetTreeItem = VisualUpwardSearch<TreeViewItem>(e.OriginalSource as UIElement);
             UndertaleObject targetItem = targetTreeItem.DataContext as UndertaleObject;
 
-            e.Effects = (e.AllowedEffects.HasFlag(DragDropEffects.Move) && sourceItem != null && targetItem != null && sourceItem != targetItem && 
+            e.Effects = (e.AllowedEffects.HasFlag(DragDropEffects.Move) && sourceItem != null && targetItem != null && sourceItem != targetItem &&
                          sourceItem.GetType() == targetItem.GetType() && SettingsWindow.AssetOrderSwappingEnabled)
                             ? DragDropEffects.Move : DragDropEffects.None;
             if (e.Effects == DragDropEffects.Move)
@@ -1532,7 +1532,7 @@ namespace UndertaleModTool
                         (obj as UndertaleRoom).Caption = Data.Strings.MakeString("");
 
                         if (IsGMS2 == Visibility.Visible)
-                            (obj as UndertaleRoom).Flags |= UndertaleRoom.RoomEntryFlags.IsGMS2; 
+                            (obj as UndertaleRoom).Flags |= UndertaleRoom.RoomEntryFlags.IsGMS2;
                     }
 
                     if (obj is UndertaleScript)
@@ -1702,13 +1702,13 @@ namespace UndertaleModTool
         {
             progressValue = value;
         }
-        
+
         public void EnableUI()
         {
             if (!this.IsEnabled)
                 this.IsEnabled = true;
         }
-        
+
         public void SyncBinding(string resourceType, bool enable)
         {
             if (resourceType.Contains(',')) //if several types are listed
@@ -1780,7 +1780,7 @@ namespace UndertaleModTool
                             return;
                     }
                 }
-                
+
                 UpdateProgressValue(progressValue);
 
                 prevValue = progressValue;
@@ -1823,7 +1823,7 @@ namespace UndertaleModTool
             if (code is not null)
             {
                 Focus();
-                
+
                 CodeEditorDecompile = editorDecompile;
 
                 HighlightObject(code);
@@ -1865,7 +1865,7 @@ namespace UndertaleModTool
                 traceLines.AddRange(exc.InnerException.StackTrace.Split(Environment.NewLine));
             }
 
-            traceLines.AddRange(exc.StackTrace.Split(Environment.NewLine));              
+            traceLines.AddRange(exc.StackTrace.Split(Environment.NewLine));
 
             try
             {
@@ -1929,7 +1929,7 @@ namespace UndertaleModTool
             scriptDialog.Owner = this;
             scriptDialog.PreventClose = true;
             this.IsEnabled = false; // Prevent interaction while the script is running.
-            
+
             await RunScriptNow(path); // Runs the script now.
             HideProgressBar(); // Hide the progress bar.
             scriptDialog = null;
@@ -1946,12 +1946,12 @@ namespace UndertaleModTool
             {
                 if (!scriptSetupTask.IsCompleted)
                     await scriptSetupTask;
-                
+
                 ScriptPath = path;
 
                 string compatScriptText = Regex.Replace(scriptText, @"\bDecompileContext\b", "GlobalDecompileContext", RegexOptions.None);
                 object result = await CSharpScript.EvaluateAsync(compatScriptText, scriptOptions, this, typeof(IScriptInterface));
-                
+
                 if (FinishedMessageEnabled)
                 {
                     Dispatcher.Invoke(() => CommandBox.Text = result != null ? result.ToString() : Path.GetFileName(path) + " finished!");
@@ -2002,9 +2002,10 @@ namespace UndertaleModTool
         public string PromptChooseDirectory(string prompt)
         {
             VistaFolderBrowserDialog folderBrowser = new VistaFolderBrowserDialog();
-            return folderBrowser.ShowDialog() == true ? folderBrowser.SelectedPath : null;
+            // vista dialog doesn't suffix the folder name with "/", so we're fixing it here.
+            return folderBrowser.ShowDialog() == true ? folderBrowser.SelectedPath + "/" : null;
         }
-        
+
         #pragma warning disable CA1416
         public void PlayInformationSound()
         {
@@ -2094,7 +2095,7 @@ namespace UndertaleModTool
             }
             else //if we don't need to wait for result
             {
-                input.Show(); 
+                input.Show();
                 return null;
                 //no need to call input.Dispose(), because if form wasn't shown modally, Form.Close() (or closing it with "X") also calls Dispose()
             }
@@ -2108,12 +2109,12 @@ namespace UndertaleModTool
         public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
         {
             await Task.Delay(150); //wait until progress bar status is displayed
-            
+
             ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, editorDecompile, failedList);
 
             await textOutput.Dispatcher.InvokeAsync(textOutput.GenerateResults);
             _ = Task.Factory.StartNew(textOutput.FillingNotifier, TaskCreationOptions.LongRunning); //"LongRunning" = prefer creating a new thread
-            
+
             textOutput.Show();
 
             PlayInformationSound();
@@ -2348,7 +2349,7 @@ namespace UndertaleModTool
                     return;
                 }
             }
-            
+
             JObject artifact = null;
             for (int index = 0; index < artifactList.Count; index++) {
                 var currentArtifact = (JObject) artifactList[index];
@@ -2716,7 +2717,7 @@ result in loss of work.");
 
             ScrollViewer mainTreeViewer = FindVisualChild<ScrollViewer>(MainTree);
             Type objType = res.GetType();
-            
+
             TreeViewItem resListView = (MainTree.Items[0] as TreeViewItem).Items.Cast<TreeViewItem>()
                                                                                 .FirstOrDefault(x => (x.ItemTemplate?.DataType as Type) == objType);
             IList resList;
