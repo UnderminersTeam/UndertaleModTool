@@ -1347,43 +1347,51 @@ namespace UndertaleModLib.Decompiler
                         sb.Append(Function.Name.Content);
                     }
 
-                    sb.Append("\n");
-                    sb.Append(context.Indentation);
-                    sb.Append("{\n");
-                    context.IndentationLevel++;
-                    context.ArgumentReplacements = Arguments;
-                    foreach (Statement stmt in context.Statements[FunctionBodyEntryBlock.Address.Value])
+                    var statements = context.Statements[FunctionBodyEntryBlock.Address.Value];
+                    int numNotReturn = statements.FindAll(stmt => !(stmt is ReturnStatement)).Count;
+
+                    if (numNotReturn > 0 || Subtype != FunctionType.Struct)
                     {
-                        if (Subtype != FunctionType.Function && stmt is ReturnStatement)
-                            continue;
-
-                        sb.Append(context.Indentation);
-
-                        // See #614
-                        // This is not the place to monkey patch this
-                        // issue, but it's like 2am and quite frankly
-                        // I don't care anymore.
-                        def = null;
-                        if (stmt is FunctionDefinition)
-                            def = stmt as FunctionDefinition;
-                        else if (stmt is TempVarAssignmentStatement reference && reference.Value is FunctionDefinition)
-                            def = reference.Value as FunctionDefinition;
-
-                        if (def?.Function == Function)
-                        {
-                            //sb.Append("// Error decompiling function: function contains its own declaration???\n");
-                            sb.Append("\n");
-                            break;
-                        }
-                        else
-                            sb.Append(stmt.ToString(context));
                         sb.Append("\n");
+                        sb.Append(context.Indentation);
+                        sb.Append("{\n");
+                        context.IndentationLevel++;
+                        context.ArgumentReplacements = Arguments;
+                        foreach (Statement stmt in statements)
+                        {
+                            if (Subtype != FunctionType.Function && stmt is ReturnStatement)
+                                continue;
+
+                            sb.Append(context.Indentation);
+
+                            // See #614
+                            // This is not the place to monkey patch this
+                            // issue, but it's like 2am and quite frankly
+                            // I don't care anymore.
+                            def = null;
+                            if (stmt is FunctionDefinition)
+                                def = stmt as FunctionDefinition;
+                            else if (stmt is TempVarAssignmentStatement reference && reference.Value is FunctionDefinition)
+                                def = reference.Value as FunctionDefinition;
+
+                            if (def?.Function == Function)
+                            {
+                                //sb.Append("// Error decompiling function: function contains its own declaration???\n");
+                                sb.Append("\n");
+                                break;
+                            }
+                            else
+                                sb.Append(stmt.ToString(context));
+                            sb.Append("\n");
+                        }
+                        context.DecompilingStruct = oldDecompilingStruct;
+                        context.ArgumentReplacements = oldReplacements;
+                        context.IndentationLevel--;
+                        sb.Append(context.Indentation);
+                        sb.Append("}\n");
                     }
-                    context.DecompilingStruct = oldDecompilingStruct;
-                    context.ArgumentReplacements = oldReplacements;
-                    context.IndentationLevel--;
-                    sb.Append(context.Indentation);
-                    sb.Append("}\n");
+                    else
+                        sb.Append("{}");
                 }
                 else
                 {
