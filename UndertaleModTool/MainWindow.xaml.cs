@@ -2390,6 +2390,7 @@ namespace UndertaleModTool
             using (WebClient webClient = new())
             {
                 bool end = false;
+                bool ended = false;
                 string downloaded = "0.00";
 
                 webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler((sender, e) =>
@@ -2402,7 +2403,14 @@ namespace UndertaleModTool
                     end = true;
 
                     HideProgressBar();
-                    scriptDialog = null;
+                    _ = Task.Run(() =>
+                    {
+                        // wait until progress bar updater loop is finished
+                        while (!ended)
+                            Thread.Sleep(100);
+                        
+                        scriptDialog = null;
+                    });
 
                     if (e.Error is not null)
                     {
@@ -2497,6 +2505,8 @@ namespace UndertaleModTool
 
                         Thread.Sleep(100);
                     }
+
+                    ended = true;
                 });
 
                 webClient.DownloadFileAsync(new Uri(downloadUrl), Path.GetTempPath() + "UndertaleModTool\\Update.zip");
