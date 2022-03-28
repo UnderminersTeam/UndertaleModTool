@@ -80,7 +80,8 @@ namespace UndertaleModLib.Scripting
         /// </summary>
         bool GMLCacheEnabled { get; }
 
-        //TODO: this has no use. Only GUI uses this, and nothing should ever need to access this value.
+        //TODO: Only GUI and ExportAllRoomsToPng.csx uses this, but nothing should ever need to access this value.
+        // "somehow Dispatcher.Invoke() in a loop creates executable code queue that doesn't clear on app closing."
         bool IsAppClosed { get; }
 
         /// <summary>
@@ -213,7 +214,7 @@ namespace UndertaleModLib.Scripting
         /// <summary>
         ///Get the decompiled text from a code entry (like <c>gml_Script_moveTo</c>).
         /// </summary>
-        /// <param name="codeName">he name of the code entry from which to get the decompiled code from.</param>
+        /// <param name="codeName">The name of the code entry from which to get the decompiled code from.</param>
         /// <param name="context">The GlobalDecompileContext</param>
         /// <returns>Decompiled text as a <see cref="string"/>.</returns>
         /// <remarks>This will return a string, even if the decompilation failed! Usually commented out and featuring
@@ -276,7 +277,7 @@ namespace UndertaleModLib.Scripting
         /// <summary>
         /// Allows the user to input text with the option to cancel it.
         /// </summary>
-        /// <param name="title">Short descriptive title.</param>
+        /// <param name="title">A short descriptive title.</param>
         /// <param name="label">A label describing what the user should input.</param>
         /// <param name="defaultInput">The default value of the input.</param>
         /// <param name="cancelText">The text of the cancel button.</param>
@@ -290,7 +291,7 @@ namespace UndertaleModLib.Scripting
         /// <summary>
         /// Allows the user to input text in a simple dialog.
         /// </summary>
-        /// <param name="title">Short descriptive title.</param>
+        /// <param name="title">A short descriptive title.</param>
         /// <param name="label">A label describing what the user should input.</param>
         /// <param name="defaultValue">The default value of the input.</param>
         /// <param name="allowMultiline">Whether to allow the input to have multiple lines.</param>
@@ -301,7 +302,7 @@ namespace UndertaleModLib.Scripting
         /// <summary>
         /// Shows simple output to the user.
         /// </summary>
-        /// <param name="title">Short descriptive title.</param>
+        /// <param name="title">A short descriptive title.</param>
         /// <param name="label">A label describing the output.</param>
         /// <param name="message">The message to convey to the user.</param>
         /// <param name="allowMultiline">Whether to allow the message to be multiline or not.
@@ -309,8 +310,32 @@ namespace UndertaleModLib.Scripting
         void SimpleTextOutput(string title, string label, string message, bool allowMultiline);
 
         //TODO: not exactly sure about most of these.
-        Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null);
-        Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null);
+
+        /// <summary>
+        /// Shows search output with clickable text to the user.
+        /// </summary>
+        /// <param name="title">A short descriptive title.</param>
+        /// <param name="query">The query that was searched for.</param>
+        /// <param name="resultsCount">How many results have been found.</param>
+        /// <param name="resultsDict">An <see cref="IOrderedEnumerable{TElement}"/> of type <see cref="KeyValuePair{TKey,TValue}"/>,
+        /// with TKey being the name of the code entry an TValue being a list of matching code lines with their line number prepended.</param>
+        /// <param name="showInDecompiledView">Whether to open the "Decompiled" view or the "Disassembly" view when clicking on an entry name.</param>
+        /// <param name="failedList">A list of code entries that encountered an error while searching.</param>
+        /// <returns>A task that represents the search output.</returns>
+        Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null);
+
+        /// <summary>
+        /// Shows search output with clickable text to the user.
+        /// </summary>
+        /// <param name="title">A short descriptive title.</param>
+        /// <param name="query">The query that was searched for.</param>
+        /// <param name="resultsCount">How many results have been found.</param>
+        /// <param name="resultsDict">A <see cref="Dictionary{TKey,TValue}"/> with TKey being the name of the code entry and
+        /// TValue being a list of matching code lines with their line number prepended.</param>
+        /// <param name="showInDecompiledView">Whether to open the "Decompiled" view or the "Disassembly" view when clicking on an entry name.</param>
+        /// <param name="failedList">A list of code entries that encountered an error while searching.</param>
+        /// <returns>A task that represents the search output.</returns>
+        Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null);
 
         /// <summary>
         /// Sets <see cref="isFinishedMessageEnabled"/>.
@@ -402,7 +427,8 @@ namespace UndertaleModLib.Scripting
         void EnableUI();
 
         /// <summary>
-        /// Allows scripts to synchronize their assets with the lists from the UI.
+        /// Allows scripts to modify asset lists from the non-UI thread.
+        /// If this isn't called before attempting to modify them, a <see cref="NotSupportedException"/> will be thrown.
         /// </summary>
         /// <param name="resourceType">A comma separated list of asset list names. This is case sensitive.</param>
         /// <param name="enable">Whether to enable or disable the synchronization.</param>

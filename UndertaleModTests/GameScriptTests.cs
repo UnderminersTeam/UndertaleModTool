@@ -164,15 +164,15 @@ namespace UndertaleModTests
         {
             Console.WriteLine($"SimpleTextOutput(): \"{titleText}\", \"{labelText}\", *defaultInputBoxText* (length - {message.Length}), {isMultiline}");
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
         {
-            Console.WriteLine($"ClickableTextOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count()}), {editorDecompile.ToString().ToLower()}"
+            Console.WriteLine($"ClickableSearchOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count()}), {showInDecompiledView.ToString().ToLower()}"
                               + failedList is not null ? $", *failedList* (length - {failedList.Count()})" : string.Empty);
             await Task.Delay(1); //dummy await
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
         {
-            Console.WriteLine($"ClickableTextOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count}), {editorDecompile.ToString().ToLower()}"
+            Console.WriteLine($"ClickableSearchOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count}), {showInDecompiledView.ToString().ToLower()}"
                               + failedList is not null ? $", *failedList* (length - {failedList.Count()})" : string.Empty);
             await Task.Delay(1); //dummy await
         }
@@ -226,7 +226,7 @@ namespace UndertaleModTests
         }
         public void DisableAllSyncBindings()
         {
-            Console.WriteLine($"DisableAllSyncBindings(): disabled");
+            Console.WriteLine($"Disabling all enabled synced bindings.");
         }
         public void StartProgressBarUpdater()
         {

@@ -2104,11 +2104,11 @@ namespace UndertaleModTool
             TextInput textOutput = new TextInput(labelText, titleText, message, isMultiline, true); //read-only mode
             textOutput.Show();
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
         {
             await Task.Delay(150); //wait until progress bar status is displayed
 
-            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, editorDecompile, failedList);
+            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, showInDecompiledView, failedList);
 
             await textOutput.Dispatcher.InvokeAsync(textOutput.GenerateResults);
             _ = Task.Factory.StartNew(textOutput.FillingNotifier, TaskCreationOptions.LongRunning); //"LongRunning" = prefer creating a new thread
@@ -2117,11 +2117,11 @@ namespace UndertaleModTool
 
             PlayInformationSound();
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
         {
             await Task.Delay(150);
 
-            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, editorDecompile, failedList);
+            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, showInDecompiledView, failedList);
 
             await textOutput.Dispatcher.InvokeAsync(textOutput.GenerateResults);
             _ = Task.Factory.StartNew(textOutput.FillingNotifier, TaskCreationOptions.LongRunning);

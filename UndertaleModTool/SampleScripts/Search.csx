@@ -56,7 +56,7 @@ await StopProgressBarUpdater();
 await Task.Run(SortResults);
 
 UpdateProgressStatus("Generating result list...");
-await ClickableTextOutput("Search results.", keyword, result_count, resultsSorted, true, failedSorted);
+await ClickableSearchOutput("Search results.", keyword, result_count, resultsSorted, true, failedSorted);
 
 HideProgressBar();
 EnableUI();
