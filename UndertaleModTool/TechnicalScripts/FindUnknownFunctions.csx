@@ -8,14 +8,14 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-string exportFolder = PromptChooseDirectory("Export to where");
+string exportFolder = PromptChooseDirectory();
 if (exportFolder == null)
     throw new ScriptException("The export folder was not set.");
 
 //Overwrite Check One
 if (File.Exists(exportFolder + "unknown_functions.txt"))
 {
-    bool overwriteCheckOne = ScriptQuestion(@"A 'unknown_functions.txt' file already exists. 
+    bool overwriteCheckOne = ScriptQuestion(@"A 'unknown_functions.txt' file already exists.
 Would you like to overwrite it?");
     if (overwriteCheckOne)
     {

@@ -23,7 +23,7 @@ if (!recursiveCheck)
     throw new ScriptException("Script cancelled.");
 
 // Get import folder
-string importFolder = PromptChooseDirectory("Import From Where");
+string importFolder = PromptChooseDirectory();
 if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 

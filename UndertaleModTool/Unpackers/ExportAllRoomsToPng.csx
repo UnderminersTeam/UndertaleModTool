@@ -31,7 +31,7 @@ if (dataEditorChild is null)
 UndertaleRoomRenderer roomRenderer;
 int roomCount = Data.Rooms.Count;
 
-string exportedTexturesFolder = PromptChooseDirectory("Choose an export folder");
+string exportedTexturesFolder = PromptChooseDirectory();
 if (exportedTexturesFolder == null)
     throw new ScriptException("The export folder was not set, stopping script.");
 

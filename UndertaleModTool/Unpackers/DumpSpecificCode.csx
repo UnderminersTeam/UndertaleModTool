@@ -18,7 +18,7 @@ ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDe
 
 int failed = 0;
 
-string codeFolder = PromptChooseDirectory("Export to where");
+string codeFolder = PromptChooseDirectory();
 if (codeFolder == null)
     throw new ScriptException("The export folder was not set.");
 Directory.CreateDirectory(Path.Combine(codeFolder, "Code"));

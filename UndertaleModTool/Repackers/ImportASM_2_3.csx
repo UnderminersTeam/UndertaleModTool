@@ -38,7 +38,7 @@ enum EventTypes
 }
 
 // Check code directory.
-string importFolder = PromptChooseDirectory("Import From Where");
+string importFolder = PromptChooseDirectory();
 if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 

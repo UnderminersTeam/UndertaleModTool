@@ -11,7 +11,7 @@ EnsureDataLoaded();
 string output = "";
 int progress = 0;
 bool clearStrings = ScriptQuestion("Clear unused strings?");
-string exportFolder = PromptChooseDirectory("Write unused strings log file to");
+string exportFolder = PromptChooseDirectory();
 if (exportFolder == null)
 {
     ScriptError("The location of the unused strings log file was not set.");
@@ -21,7 +21,7 @@ if (exportFolder == null)
 //Overwrite Check One
 if (File.Exists(Path.Combine(exportFolder, "unused_strings_log.txt")))
 {
-    bool overwriteCheckOne = ScriptQuestion(@"An 'unused_strings_log.txt' file already exists. 
+    bool overwriteCheckOne = ScriptQuestion(@"An 'unused_strings_log.txt' file already exists.
 Would you like to overwrite it?");
     if (overwriteCheckOne)
     {
