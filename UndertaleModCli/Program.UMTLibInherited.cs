@@ -5,12 +5,11 @@ using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Operations;
 using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.VisualBasic;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
@@ -301,6 +300,15 @@ namespace UndertaleModCli
             //CLI does not have any code editing tools (yet), nor a profile Mode thus since is completely useless
         }
 
+        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
+        {
+            await Task.Delay(1); //dummy await
+
+            //TODO: not implemented yet, due to no code editing / profile mode.
+
+            return false;
+        }
+
         public void NukeProfileGML(string codeName)
         {
             //CLI does not have any code editing tools (yet), nor a profile Mode thus since is completely useless
@@ -576,44 +584,76 @@ namespace UndertaleModCli
             return true;
         }
 
-        //TODO: implement all these
-        #region todo
-        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
-        {
-            await Task.Delay(1); //dummy await
-
-            //TODO: not implemented yet, due to no code editing / profile mode.
-
-            return false;
-        }
-
         public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false)
         {
-            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
+            ImportCode(codeName, gmlCode, true, doParse, true, CheckDecompiler);
         }
 
         public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
         {
-            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
+            ImportCode(codeName, gmlCode, false, doParse, destroyASM, CheckDecompiler);
         }
 
         public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
-            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
+            ImportCodeFromFile(fileName, true, doParse, true, CheckDecompiler, throwOnError);
         }
 
         public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
-            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
+            ImportCodeFromFile(fileName, false, doParse, destroyASM, CheckDecompiler, throwOnError);
         }
 
         public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
         {
-            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
+            UndertaleCode code = Data.Code.ByName(codeName);
+            if (code is null)
+                throw new ScriptException($"No code named \"{codeName}\" was found!");
+
+            ReplaceTextInGML(code, keyword, replacement, case_sensitive, isRegex, context);
         }
         public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
         {
-            throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
+            EnsureDataLoaded();
+
+            string passBack = "";
+            string codeName = code.Name.Content;
+            GlobalDecompileContext DECOMPILE_CONTEXT = context is null ? new(Data, false) : context;
+
+            if (Data.ToolInfo.ProfileMode == false || Data.GMS2_3)
+            {
+                try
+                {
+                    passBack = GetPassBack((code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT ) : ""), keyword, replacement, case_sensitive, isRegex);
+                    code.ReplaceGML(passBack, Data);
+                }
+                catch (Exception exc)
+                {
+                    throw new Exception("Error during GML code replacement:\n" + exc.ToString());
+                }
+            }
+            else if (Data.ToolInfo.ProfileMode && !Data.GMS2_3)
+            {
+                try
+                {
+                    try
+                    {
+                        if (context is null)
+                            passBack = GetPassBack((code != null ? Decompiler.Decompile(code, new GlobalDecompileContext(Data, false)) : ""), keyword, replacement, case_sensitive, isRegex);
+                        else
+                            passBack = GetPassBack((code != null ? Decompiler.Decompile(code, context) : ""), keyword, replacement, case_sensitive, isRegex);
+                        code.ReplaceGML(passBack, Data);
+                    }
+                    catch (Exception exc)
+                    {
+                        throw new Exception("Error during GML code replacement:\n" + exc.ToString());
+                    }
+                }
+                catch (Exception exc)
+                {
+                    throw new Exception("Error during writing of GML code to profile:\n" + exc.ToString() + "\n\nCode:\n\n" + passBack);
+                }
+            }
         }
 
         #region Some dangerous functions I don't know what they do
@@ -662,6 +702,480 @@ namespace UndertaleModCli
             return "";
         }
 
+        // Copy-pasted from GUI. TODO: Should probably get shared at one point.
+        #region Helper functions for Code replacing
+
+        void ImportCode(string codeName, string gmlCode, bool IsGML = true, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
+        {
+            bool SkipPortions = false;
+            UndertaleCode code = Data.Code.ByName(codeName);
+            if (code is null)
+            {
+                code = new UndertaleCode();
+                code.Name = Data.Strings.MakeString(codeName);
+                Data.Code.Add(code);
+            }
+            if (Data?.GeneralInfo.BytecodeVersion > 14 && Data.CodeLocals.ByName(codeName) == null)
+            {
+                UndertaleCodeLocals locals = new UndertaleCodeLocals();
+                locals.Name = code.Name;
+
+                UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+                argsLocal.Name = Data.Strings.MakeString("arguments");
+                argsLocal.Index = 0;
+
+                locals.Locals.Add(argsLocal);
+
+                code.LocalsCount = 1;
+                code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
+                Data.CodeLocals.Add(locals);
+            }
+            if (doParse)
+            {
+                // This portion links code.
+                if (codeName.Substring(0, 10).Equals("gml_Script"))
+                {
+                    // Add code to scripts section.
+                    if (Data.Scripts.ByName(codeName.Substring(11)) == null)
+                    {
+                        UndertaleScript scr = new UndertaleScript();
+                        scr.Name = Data.Strings.MakeString(codeName.Substring(11));
+                        scr.Code = code;
+                        Data.Scripts.Add(scr);
+                    }
+                    else
+                    {
+                        UndertaleScript scr = Data.Scripts.ByName(codeName.Substring(11));
+                        scr.Code = code;
+                    }
+                }
+                else if (codeName.Substring(0, 16).Equals("gml_GlobalScript"))
+                {
+                    // Add code to global init section.
+                    UndertaleGlobalInit init_entry = null;
+                    // This doesn't work, have to do it the hard way: UndertaleGlobalInit init_entry = Data.GlobalInitScripts.ByName(scr_dup_code_name_con);
+                    foreach (UndertaleGlobalInit globalInit in Data.GlobalInitScripts)
+                    {
+                        if (globalInit.Code.Name.Content == codeName)
+                        {
+                            init_entry = globalInit;
+                            break;
+                        }
+                    }
+                    if (init_entry == null)
+                    {
+                        UndertaleGlobalInit NewInit = new UndertaleGlobalInit();
+                        NewInit.Code = code;
+                        Data.GlobalInitScripts.Add(NewInit);
+                    }
+                    else
+                    {
+                        UndertaleGlobalInit NewInit = init_entry;
+                        NewInit.Code = code;
+                    }
+                }
+                else if (codeName.Substring(0, 10).Equals("gml_Object"))
+                {
+                    string afterPrefix = codeName.Substring(11);
+                    int underCount = 0;
+                    string methodNumberStr = "", methodName = "", objName = "";
+                    for (int i = afterPrefix.Length - 1; i >= 0; i--)
+                    {
+                        if (afterPrefix[i] == '_')
+                        {
+                            underCount++;
+                            if (underCount == 1)
+                            {
+                                methodNumberStr = afterPrefix.Substring(i + 1);
+                            }
+                            else if (underCount == 2)
+                            {
+                                objName = afterPrefix.Substring(0, i);
+                                methodName = afterPrefix.Substring(i + 1, afterPrefix.Length - objName.Length - methodNumberStr.Length - 2);
+                                break;
+                            }
+                        }
+                    }
+                    int methodNumber = 0;
+                    try
+                    {
+                        methodNumber = int.Parse(methodNumberStr);
+                        if (methodName == "Collision" && (methodNumber >= Data.GameObjects.Count || methodNumber < 0))
+                        {
+                            bool doNewObj = ScriptQuestion("Object of ID " + methodNumber.ToString() + " was not found.\nAdd new object?");
+                            if (doNewObj)
+                            {
+                                UndertaleGameObject gameObj = new UndertaleGameObject();
+                                gameObj.Name = Data.Strings.MakeString(SimpleTextInput("Enter object name", "Enter object name", "This is a single text line input box test.", false));
+                                Data.GameObjects.Add(gameObj);
+                            }
+                            else
+                            {
+                                // It *needs* to have a valid value, make the user specify one.
+                                List<uint> possible_values = new List<uint>();
+                                possible_values.Add(uint.MaxValue);
+                                methodNumber = (int)ReduceCollisionValue(possible_values);
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        if (afterPrefix.LastIndexOf("_Collision_") != -1)
+                        {
+                            string s2 = "_Collision_";
+                            objName = afterPrefix.Substring(0, (afterPrefix.LastIndexOf("_Collision_")));
+                            methodNumberStr = afterPrefix.Substring(afterPrefix.LastIndexOf("_Collision_") + s2.Length, afterPrefix.Length - (afterPrefix.LastIndexOf("_Collision_") + s2.Length));
+                            methodName = "Collision";
+                            // GMS 2.3+ use the object name for the one colliding, which is rather useful.
+                            if (Data.GMS2_3)
+                            {
+                                if (Data.GameObjects.ByName(methodNumberStr) != null)
+                                {
+                                    for (var i = 0; i < Data.GameObjects.Count; i++)
+                                    {
+                                        if (Data.GameObjects[i].Name.Content == methodNumberStr)
+                                        {
+                                            methodNumber = i;
+                                            break;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    bool doNewObj = ScriptQuestion("Object " + objName + " was not found.\nAdd new object called " + objName + "?");
+                                    if (doNewObj)
+                                    {
+                                        UndertaleGameObject gameObj = new UndertaleGameObject();
+                                        gameObj.Name = Data.Strings.MakeString(objName);
+                                        Data.GameObjects.Add(gameObj);
+                                    }
+                                }
+                                if (Data.GameObjects.ByName(methodNumberStr) != null)
+                                {
+                                    // It *needs* to have a valid value, make the user specify one, silly.
+                                    List<uint> possible_values = new List<uint>();
+                                    possible_values.Add(uint.MaxValue);
+                                    ReassignGUIDs(methodNumberStr, ReduceCollisionValue(possible_values));
+                                }
+                            }
+                            else
+                            {
+                                // Let's try to get this going
+                                methodNumber = (int)ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName));
+                                ReassignGUIDs(methodNumberStr, ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName)));
+                            }
+                        }
+                    }
+                    UndertaleGameObject obj = Data.GameObjects.ByName(objName);
+                    if (obj == null)
+                    {
+                        bool doNewObj = ScriptQuestion("Object " + objName + " was not found.\nAdd new object called " + objName + "?");
+                        if (doNewObj)
+                        {
+                            UndertaleGameObject gameObj = new UndertaleGameObject();
+                            gameObj.Name = Data.Strings.MakeString(objName);
+                            Data.GameObjects.Add(gameObj);
+                        }
+                        else
+                        {
+                            SkipPortions = true;
+                        }
+                    }
+
+                    if (!(SkipPortions))
+                    {
+                        obj = Data.GameObjects.ByName(objName);
+                        int eventIdx = (int)Enum.Parse(typeof(EventType), methodName);
+                        bool duplicate = false;
+                        try
+                        {
+                            foreach (UndertaleGameObject.Event evnt in obj.Events[eventIdx])
+                            {
+                                foreach (UndertaleGameObject.EventAction action in evnt.Actions)
+                                {
+                                    if (action.CodeId?.Name?.Content == codeName)
+                                        duplicate = true;
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // Something went wrong, but probably because it's trying to check something non-existent
+                            // Just keep going
+                        }
+                        if (duplicate == false)
+                        {
+                            UndertalePointerList<UndertaleGameObject.Event> eventList = obj.Events[eventIdx];
+                            UndertaleGameObject.EventAction action = new UndertaleGameObject.EventAction();
+                            UndertaleGameObject.Event evnt = new UndertaleGameObject.Event();
+
+                            action.ActionName = code.Name;
+                            action.CodeId = code;
+                            evnt.EventSubtype = (uint)methodNumber;
+                            evnt.Actions.Add(action);
+                            eventList.Add(evnt);
+                        }
+                    }
+                }
+            }
+            SafeImport(codeName, gmlCode, IsGML, destroyASM, CheckDecompiler, throwOnError);
+        }
+
+        void ImportCodeFromFile(string file, bool IsGML = true, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
+        {
+            try
+            {
+                if (!Path.GetFileName(file).ToLower().EndsWith(IsGML ? ".gml" : ".asm"))
+                    return;
+                if (Path.GetFileName(file).ToLower().EndsWith("cleanup_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
+                    return;
+                if (Path.GetFileName(file).ToLower().EndsWith("precreate_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
+                    return;
+                string codeName = Path.GetFileNameWithoutExtension(file);
+                string gmlCode = File.ReadAllText(file);
+                ImportCode(codeName, gmlCode, IsGML, doParse, destroyASM, CheckDecompiler, throwOnError);
+            }
+            catch (ScriptException exc) when (throwOnError && exc.Message == "*codeImportError*")
+            {
+                throw new ScriptException("Code files importation stopped because of error(s).");
+            }
+            catch (Exception exc)
+            {
+                if (!CheckDecompiler)
+                {
+                    Console.Error.WriteLine("Import" + (IsGML ? "GML" : "ASM") + "File error! Send the following error to Grossley#2869 (Discord) and make an issue on Github:\n\n" + exc.ToString());
+
+                    if (throwOnError)
+                        throw new ScriptException("Code files importation stopped because of error(s).");
+                }
+                else
+                    throw new Exception("Error!");
+            }
+        }
+
+        public void ReassignGUIDs(string GUID, uint ObjectIndex)
+        {
+            int eventIdx = (int)Enum.Parse(typeof(EventType), "Collision");
+            for (var i = 0; i < Data.GameObjects.Count; i++)
+            {
+                UndertaleGameObject obj = Data.GameObjects[i];
+                try
+                {
+                    foreach (UndertaleGameObject.Event evnt in obj.Events[eventIdx])
+                    {
+                        foreach (UndertaleGameObject.EventAction action in evnt.Actions)
+                        {
+                            if (action.CodeId.Name.Content.Contains(GUID))
+                            {
+                                evnt.EventSubtype = ObjectIndex;
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // Silently ignore, some values can be null along the way
+                }
+            }
+        }
+
+        public uint ReduceCollisionValue(List<uint> possible_values)
+        {
+            if (possible_values.Count == 1)
+            {
+                if (possible_values[0] != uint.MaxValue)
+                    return possible_values[0];
+
+                // Nothing found, pick new one
+                bool obj_found = false;
+                uint obj_index = 0;
+                while (!obj_found)
+                {
+                    string object_index = SimpleTextInput("Object could not be found. Please enter it below:",
+                                                            "Object enter box.", "", false).ToLower();
+                    for (var i = 0; i < Data.GameObjects.Count; i++)
+                    {
+                        if (Data.GameObjects[i].Name.Content.ToLower() == object_index)
+                        {
+                            obj_found = true;
+                            obj_index = (uint)i;
+                        }
+                    }
+                }
+                return obj_index;
+            }
+
+            if (possible_values.Count != 0)
+            {
+                // 2 or more possible values, make a list to choose from
+
+                string gameObjectNames = "";
+                foreach (uint objID in possible_values)
+                    gameObjectNames += Data.GameObjects[(int)objID].Name.Content + "\n";
+
+                bool obj_found = false;
+                uint obj_index = 0;
+                while (!obj_found)
+                {
+                    string object_index = SimpleTextInput("Multiple objects were found. Select only one object below from the set, or, if none below match, some other object name:",
+                                                          "Object enter box.", gameObjectNames, true).ToLower();
+                    for (var i = 0; i < Data.GameObjects.Count; i++)
+                    {
+                        if (Data.GameObjects[i].Name.Content.ToLower() == object_index)
+                        {
+                            obj_found = true;
+                            obj_index = (uint)i;
+                        }
+                    }
+                }
+                return obj_index;
+            }
+
+            return 0;
+        }
+
+        public List<uint> GetCollisionValueFromCodeNameGUID(string codeName)
+        {
+            int eventIdx = (int)Enum.Parse(typeof(EventType), "Collision");
+            List<uint> possible_values = new List<uint>();
+            for (var i = 0; i < Data.GameObjects.Count; i++)
+            {
+                UndertaleGameObject obj = Data.GameObjects[i];
+                try
+                {
+                    foreach (UndertaleGameObject.Event evnt in obj.Events[eventIdx])
+                    {
+                        foreach (UndertaleGameObject.EventAction action in evnt.Actions)
+                        {
+                            if (action.CodeId.Name.Content == codeName)
+                            {
+                                if (Data.GameObjects[(int)evnt.EventSubtype] != null)
+                                {
+                                    possible_values.Add(evnt.EventSubtype);
+                                    return possible_values;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // Silently ignore, some values can be null along the way
+                }
+            }
+            possible_values = GetCollisionValueFromGUID(GetGUIDFromCodeName(codeName));
+            return possible_values;
+        }
+
+        public List<uint> GetCollisionValueFromGUID(string GUID)
+        {
+            int eventIdx = (int)Enum.Parse(typeof(EventType), "Collision");
+            List<uint> possible_values = new List<uint>();
+            for (var i = 0; i < Data.GameObjects.Count; i++)
+            {
+                UndertaleGameObject obj = Data.GameObjects[i];
+                try
+                {
+                    foreach (UndertaleGameObject.Event evnt in obj.Events[eventIdx])
+                    {
+                        foreach (UndertaleGameObject.EventAction action in evnt.Actions)
+                        {
+                            if (action.CodeId.Name.Content.Contains(GUID))
+                            {
+                                if (!possible_values.Contains(evnt.EventSubtype))
+                                {
+                                    possible_values.Add(evnt.EventSubtype);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // Silently ignore, some values can be null along the way
+                }
+            }
+
+            if (possible_values.Count == 0)
+            {
+                possible_values.Add(uint.MaxValue);
+                return possible_values;
+            }
+            else
+            {
+                return possible_values;
+            }
+        }
+
+        public string GetGUIDFromCodeName(string codeName)
+        {
+            string afterPrefix = codeName.Substring(11);
+            if (afterPrefix.LastIndexOf("_Collision_") != -1)
+            {
+                string s2 = "_Collision_";
+                return afterPrefix.Substring(afterPrefix.LastIndexOf("_Collision_") + s2.Length, afterPrefix.Length - (afterPrefix.LastIndexOf("_Collision_") + s2.Length));
+            }
+            else
+                return "Invalid";
+        }
+
+        void SafeImport(string codeName, string gmlCode, bool IsGML, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
+        {
+            UndertaleCode code = Data.Code.ByName(codeName);
+            try
+            {
+                if (IsGML)
+                {
+                    code.ReplaceGML(gmlCode, Data);
+                }
+                else
+                {
+                    var instructions = Assembler.Assemble(gmlCode, Data);
+                    code.Replace(instructions);
+                    if (destroyASM)
+                        NukeProfileGML(codeName);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!CheckDecompiler)
+                {
+                    string errorText = $"Code import error at {(IsGML ? "GML" : "ASM")} code \"{codeName}\":\n\n{ex.Message}";
+                    Console.Error.WriteLine(errorText);
+
+                    if (throwOnError)
+                        throw new ScriptException("*codeImportError*");
+                }
+                else
+                {
+                    code.ReplaceGML("", Data);
+                }
+            }
+        }
+
+        public string GetPassBack(string decompiled_text, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false)
+        {
+            keyword = keyword.Replace("\r\n", "\n");
+            replacement = replacement.Replace("\r\n", "\n");
+            string passBack;
+            if (!isRegex)
+            {
+                if (case_sensitive)
+                    passBack = decompiled_text.Replace(keyword, replacement);
+                else
+                    passBack = Regex.Replace(decompiled_text, Regex.Escape(keyword), replacement.Replace("$", "$$"), RegexOptions.IgnoreCase);
+            }
+            else
+            {
+                if (case_sensitive)
+                    passBack = Regex.Replace(decompiled_text, keyword, replacement, RegexOptions.None);
+                else
+                    passBack = Regex.Replace(decompiled_text, keyword, replacement, RegexOptions.IgnoreCase);
+            }
+            return passBack;
+        }
+
         #endregion
+
     }
 }
