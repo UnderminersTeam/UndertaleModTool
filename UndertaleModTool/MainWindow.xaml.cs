@@ -2465,7 +2465,7 @@ namespace UndertaleModTool
                     string updaterFolder = Path.Combine(ExePath, "Updater");
                     if (!File.Exists(Path.Combine(updaterFolder, "UndertaleModToolUpdater.exe")))
                     {
-                        ShowError("Updater not found! Aborting update, try to update manually.");
+                        ShowError("Updater not found! Aborting update, report this to the devs!\nLocation checked: " + updaterFolder);
                         window.UpdateButtonEnabled = true;
                         return;
                     }
