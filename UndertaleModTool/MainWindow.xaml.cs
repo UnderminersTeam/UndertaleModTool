@@ -74,7 +74,7 @@ namespace UndertaleModTool
         public bool ScriptExecutionSuccess { get; set; } = true;
         public bool IsSaving { get; set; }
         public string ScriptErrorMessage { get; set; } = "";
-        public string ExePath { get; private set; } = Environment.CurrentDirectory;
+        public string ExePath { get; private set; } = Program.GetExecutableDirectory();
         public string ScriptErrorType { get; set; } = "";
 
         public enum CodeEditorMode
@@ -2279,7 +2279,7 @@ namespace UndertaleModTool
                 return;
             }
 
-            bool isNonSingleFile = File.Exists("UndertaleModTool.dll");
+            bool isNonSingleFile = File.Exists(Path.Combine(ExePath, "UndertaleModTool.dll"));
             string assemblyLocation = AppDomain.CurrentDomain.GetAssemblies()
                                       .First(x => x.GetName().Name.StartsWith("System.Collections")).Location; // any of currently used assemblies
             bool isSelfContained = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
@@ -2317,7 +2317,7 @@ namespace UndertaleModTool
                 return;
             }
 
-            DateTime currDate = File.GetLastWriteTime(Path.Combine(Directory.GetCurrentDirectory(), "UndertaleModTool.exe"));
+            DateTime currDate = File.GetLastWriteTime(Path.Combine(ExePath, "UndertaleModTool.exe"));
             DateTime lastDate = (DateTime)action["updated_at"];
             if (lastDate.Subtract(currDate).Minutes <= 10)
                 if (ShowQuestion("UndertaleModTool is already up to date.\nUpdate anyway?") != MessageBoxResult.Yes)
@@ -2442,7 +2442,7 @@ namespace UndertaleModTool
                         return;
                     }
 
-                    string updaterFolder = Path.Combine(Directory.GetCurrentDirectory(), "Updater");
+                    string updaterFolder = Path.Combine(ExePath, "Updater");
                     if (!File.Exists(Path.Combine(updaterFolder, "UndertaleModToolUpdater.exe")))
                     {
                         ShowError("Updater not found! Aborting update, try to update manually.");
@@ -2468,7 +2468,7 @@ namespace UndertaleModTool
                         window.UpdateButtonEnabled = true;
                         return;
                     }
-                    File.WriteAllText(Path.Combine(updaterFolderTemp, "actualAppFolder"), Directory.GetCurrentDirectory());
+                    File.WriteAllText(Path.Combine(updaterFolderTemp, "actualAppFolder"), ExePath);
 
                     window.UpdateButtonEnabled = true;
 
