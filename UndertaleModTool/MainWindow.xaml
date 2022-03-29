@@ -171,7 +171,8 @@
                         <ContextMenu x:Key="AddMenu">
                             <MenuItem Header="Add" Click="MenuItem_Add_Click"/>
                         </ContextMenu>
-                        <ContextMenu x:Key="DeleteMenu">
+                        <ContextMenu x:Key="UndertaleResourceMenu">
+                            <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
                             <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
                         </ContextMenu>
 
@@ -182,7 +183,7 @@
                             <EventSetter Event="TreeViewItem.MouseMove" Handler="TreeView_MouseMove"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ., Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type undertalelib:UndertaleResource}}" Value="True">
-                                    <Setter Property="ContextMenu" Value="{StaticResource DeleteMenu}"/>
+                                    <Setter Property="ContextMenu" Value="{StaticResource UndertaleResourceMenu}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding ItemsSource, RelativeSource={RelativeSource Self}, Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type scol:IList}}" Value="True">
                                     <Setter Property="ContextMenu" Value="{StaticResource AddMenu}"/>
@@ -291,7 +292,7 @@
                         <TreeViewItem Name="CodeItemsList" Header="Code" ItemsSource="{Binding Code, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Code, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemContainerStyle>
                                 <Style TargetType="{x:Type TreeViewItem}">
-                                    <Setter Property="ContextMenu" Value="{StaticResource DeleteMenu}"/>
+                                    <Setter Property="ContextMenu" Value="{StaticResource UndertaleResourceMenu}"/>
                                     <Setter Property="Foreground" Value="Gray"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Path=ParentEntry}" Value="{x:Null}">
