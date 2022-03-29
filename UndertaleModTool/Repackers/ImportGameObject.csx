@@ -195,6 +195,9 @@ UndertaleGameObject.EventAction ReadAction(ref Utf8JsonReader reader) {
 		newAction.ActionName  = null;
 	} else {
 		newAction.ActionName  = new UndertaleString(actionName);
+
+		if (!Data.Strings.ToList().Any(s => s == newAction.ActionName))
+			Data.Strings.Add(newAction.ActionName);
 	}
 	
 	if (codeId == null) {
@@ -218,8 +221,10 @@ void ReadName(ref Utf8JsonReader reader) {
 	} else {
 		newGameObject = new UndertaleGameObject();
 		newGameObject.Name = new UndertaleString(name);
-		
+		Data.Strings.Add(newGameObject.Name);
 	}
+
+
 }
 
 // Read tokens of specified type

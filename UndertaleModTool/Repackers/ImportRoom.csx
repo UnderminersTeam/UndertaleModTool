@@ -9,6 +9,7 @@ using UndertaleModLib.Models;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Linq;
 
 ScriptMessage("Select the Room to import");
 string RoomInputPath = PromptLoadFile("Import which file", "Json Files|*.json");;
@@ -81,14 +82,17 @@ void ReadMainVals(ref Utf8JsonReader reader) {
 		newRoom.Caption = null;
 	} else {
 		newRoom.Caption = new UndertaleString(caption);
+
+		if (!Data.Strings.ToList().Any(s => s == newRoom.Caption))
+			Data.Strings.Add(newRoom.Caption);
 	}
-	
+
 	if (ccIdName == null) {
 		newRoom.CreationCodeId = null;
 	} else {
 		newRoom.CreationCodeId = Data.Code.ByName(ccIdName);
 	}
-	
+
 
 }
 
@@ -103,7 +107,7 @@ void ReadName(ref Utf8JsonReader reader) {
 	} else {
 		newRoom = new UndertaleRoom();
 		newRoom.Name = new UndertaleString(name);
-		
+		Data.Strings.Add(newRoom.Name);
 	}
 }
 
@@ -325,10 +329,12 @@ void ReadLayers (ref Utf8JsonReader reader) {
 				newLayer.LayerName = null;
 			} else {
 				newLayer.LayerName = new UndertaleString(layerName);
+
+				if (!Data.Strings.ToList().Any(s => s == newLayer.LayerName))
+					Data.Strings.Add(newLayer.LayerName);
 			}
-			
-			
-			switch(newLayer.LayerType) {
+
+			switch (newLayer.LayerType) {
 				case UndertaleRoom.LayerType.Background:
 					ReadBackgroundLayer(ref reader, newLayer);
 					break;
@@ -550,8 +556,11 @@ void ReadAssetsLayer(ref Utf8JsonReader reader, UndertaleRoom.Layer newLayer) {
 				newSpr.Name = null;
 			} else {
 				newSpr.Name = new UndertaleString(name);
+
+				if (!Data.Strings.ToList().Any(s => s == newSpr.Name))
+					Data.Strings.Add(newSpr.Name);
 			}
-			
+
 			if (spriteName == null) {
 				newSpr.Sprite = null;
 			} else {
@@ -596,8 +605,11 @@ void ReadAssetsLayer(ref Utf8JsonReader reader, UndertaleRoom.Layer newLayer) {
 				newSeq.Name = null;
 			} else {
 				newSeq.Name = new UndertaleString(name);
+
+				if (!Data.Strings.ToList().Any(s => s == newSeq.Name))
+					Data.Strings.Add(newSeq.Name);
 			}
-			
+
 			if (sequenceName == null) {
 				newSeq.Sequence = null;
 			} else {
@@ -641,8 +653,11 @@ void ReadAssetsLayer(ref Utf8JsonReader reader, UndertaleRoom.Layer newLayer) {
 				newSpr.Name = null;
 			} else {
 				newSpr.Name = new UndertaleString(name);
+
+				if (!Data.Strings.ToList().Any(s => s == newSpr.Name))
+					Data.Strings.Add(newSpr.Name);
 			}
-			
+
 			if (spriteName == null) {
 				newSpr.Sprite = null;
 			} else {
