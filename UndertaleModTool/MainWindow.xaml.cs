@@ -74,7 +74,7 @@ namespace UndertaleModTool
         public bool ScriptExecutionSuccess { get; set; } = true;
         public bool IsSaving { get; set; }
         public string ScriptErrorMessage { get; set; } = "";
-        public string ExePath { get; private set; } = Environment.CurrentDirectory;
+        public string ExePath { get; private set; } = Program.GetExecutableDirectory();
         public string ScriptErrorType { get; set; } = "";
 
         public enum CodeEditorMode
@@ -1719,18 +1719,25 @@ namespace UndertaleModTool
                 {
                     foreach (string resType in resTypes)
                     {
-                        BindingOperations.EnableCollectionSynchronization(Data[resType] as IEnumerable, bindingLock);
+                        IEnumerable resListCollection = Data[resType] as IEnumerable;
+                        if (resListCollection is not null)
+                        {
+                            BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
 
-                        syncBindings.Add(resType);
+                            syncBindings.Add(resType);
+                        }
                     }
                 }
                 else
                 {
                     foreach (string resType in resTypes)
                     {
-                        BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
+                        if (syncBindings.Contains(resType))
+                        {
+                            BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
 
-                        syncBindings.Remove(resType);
+                            syncBindings.Remove(resType);
+                        }
                     }
                 }
             }
@@ -1738,11 +1745,15 @@ namespace UndertaleModTool
             {
                 if (enable)
                 {
-                    BindingOperations.EnableCollectionSynchronization(Data[resourceType] as IEnumerable, bindingLock);
+                    IEnumerable resListCollection = Data[resourceType] as IEnumerable;
+                    if (resListCollection is not null)
+                    {
+                        BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
 
-                    syncBindings.Add(resourceType);
+                        syncBindings.Add(resourceType);
+                    } 
                 }
-                else
+                else if (syncBindings.Contains(resourceType))
                 {
                     BindingOperations.DisableCollectionSynchronization(Data[resourceType] as IEnumerable);
 
@@ -2001,7 +2012,8 @@ namespace UndertaleModTool
         public string PromptChooseDirectory()
         {
             VistaFolderBrowserDialog folderBrowser = new VistaFolderBrowserDialog();
-            return folderBrowser.ShowDialog() == true ? folderBrowser.SelectedPath : null;
+            // vista dialog doesn't suffix the folder name with "/", so we're fixing it here.
+            return folderBrowser.ShowDialog() == true ? folderBrowser.SelectedPath + "/" : null;
         }
 
         #pragma warning disable CA1416
@@ -2278,7 +2290,7 @@ namespace UndertaleModTool
                 return;
             }
 
-            bool isNonSingleFile = File.Exists("UndertaleModTool.dll");
+            bool isNonSingleFile = File.Exists(Path.Combine(ExePath, "UndertaleModTool.dll"));
             string assemblyLocation = AppDomain.CurrentDomain.GetAssemblies()
                                       .First(x => x.GetName().Name.StartsWith("System.Collections")).Location; // any of currently used assemblies
             bool isSelfContained = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
@@ -2316,7 +2328,7 @@ namespace UndertaleModTool
                 return;
             }
 
-            DateTime currDate = File.GetLastWriteTime(Path.Combine(Directory.GetCurrentDirectory(), "UndertaleModTool.exe"));
+            DateTime currDate = File.GetLastWriteTime(Path.Combine(ExePath, "UndertaleModTool.exe"));
             DateTime lastDate = (DateTime)action["updated_at"];
             if (lastDate.Subtract(currDate).Minutes <= 10)
                 if (ShowQuestion("UndertaleModTool is already up to date.\nUpdate anyway?") != MessageBoxResult.Yes)
@@ -2389,6 +2401,7 @@ namespace UndertaleModTool
             using (WebClient webClient = new())
             {
                 bool end = false;
+                bool ended = false;
                 string downloaded = "0.00";
 
                 webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler((sender, e) =>
@@ -2401,7 +2414,14 @@ namespace UndertaleModTool
                     end = true;
 
                     HideProgressBar();
-                    scriptDialog = null;
+                    _ = Task.Run(() =>
+                    {
+                        // wait until progress bar updater loop is finished
+                        while (!ended)
+                            Thread.Sleep(100);
+                        
+                        scriptDialog = null;
+                    });
 
                     if (e.Error is not null)
                     {
@@ -2441,10 +2461,10 @@ namespace UndertaleModTool
                         return;
                     }
 
-                    string updaterFolder = Path.Combine(Directory.GetCurrentDirectory(), "Updater");
+                    string updaterFolder = Path.Combine(ExePath, "Updater");
                     if (!File.Exists(Path.Combine(updaterFolder, "UndertaleModToolUpdater.exe")))
                     {
-                        ShowError("Updater not found! Aborting update, try to update manually.");
+                        ShowError("Updater not found! Aborting update, report this to the devs!\nLocation checked: " + updaterFolder);
                         window.UpdateButtonEnabled = true;
                         return;
                     }
@@ -2467,7 +2487,7 @@ namespace UndertaleModTool
                         window.UpdateButtonEnabled = true;
                         return;
                     }
-                    File.WriteAllText(Path.Combine(updaterFolderTemp, "actualAppFolder"), Directory.GetCurrentDirectory());
+                    File.WriteAllText(Path.Combine(updaterFolderTemp, "actualAppFolder"), ExePath);
 
                     window.UpdateButtonEnabled = true;
 
@@ -2496,6 +2516,8 @@ namespace UndertaleModTool
 
                         Thread.Sleep(100);
                     }
+
+                    ended = true;
                 });
 
                 webClient.DownloadFileAsync(new Uri(downloadUrl), Path.GetTempPath() + "UndertaleModTool\\Update.zip");

@@ -1220,6 +1220,12 @@ namespace UndertaleModTool
         private void AddLayer<T>(LayerType type, string name) where T : Layer.LayerData, new()
         {
             UndertaleRoom room = this.DataContext as UndertaleRoom;
+            if (room is null)
+            {
+                // (not sure if it's possible)
+                MainWindow.ShowError("Room is null.");
+                return;
+            }
 
             var data = mainWindow.Data;
             uint largest_layerid = 0;
@@ -1245,16 +1251,21 @@ namespace UndertaleModTool
 
             if (layer.LayerType == LayerType.Assets)
             {
-                // create a new pointer list
-                if (layer.AssetsData.LegacyTiles == null)
-                    layer.AssetsData.LegacyTiles = new UndertalePointerList<Tile>();
-                // create new sprite pointer list
-                if (layer.AssetsData.Sprites == null)
-                    layer.AssetsData.Sprites = new UndertalePointerList<SpriteInstance>();
+                // create a new pointer list (if null)
+                layer.AssetsData.LegacyTiles ??= new UndertalePointerList<Tile>();
+                // create new sprite pointer list (if null)
+                layer.AssetsData.Sprites ??= new UndertalePointerList<SpriteInstance>();
+                // create new sequence pointer list (if null)
+                layer.AssetsData.Sequences ??= new UndertalePointerList<SequenceInstance>();
+            }
+            else if (layer.LayerType == LayerType.Tiles)
+            {
+                // create new tile data (if null)
+                layer.TilesData.TileData ??= Array.Empty<uint[]>();
             }
 
             SelectObject(layer);
-            (this.DataContext as UndertaleRoom)?.SetupRoom();
+            room.SetupRoom(false);
         }
 
         private void AddObjectInstance(UndertaleRoom room)
@@ -1285,12 +1296,10 @@ namespace UndertaleModTool
             if (layer is not null)
             {
                 // add pointer list if one doesn't already exist
-                if (layer.AssetsData.LegacyTiles == null)
-                    layer.AssetsData.LegacyTiles = new UndertalePointerList<Tile>();
+                layer.AssetsData.LegacyTiles ??= new UndertalePointerList<Tile>();
 
                 // add sprite pointer list if one doesn't already exist
-                if (layer.AssetsData.Sprites == null)
-                    layer.AssetsData.Sprites = new UndertalePointerList<SpriteInstance>();
+                layer.AssetsData.Sprites ??= new UndertalePointerList<SpriteInstance>();
 
                 // add tile to list
                 var tile = new Tile { InstanceID = mainWindow.Data.GeneralInfo.LastTile++ };
@@ -1307,8 +1316,7 @@ namespace UndertaleModTool
             if (layer is not null)
             {
                 // add pointer list if one doesn't already exist
-                if (layer.AssetsData.Sprites == null)
-                    layer.AssetsData.Sprites = new UndertalePointerList<SpriteInstance>();
+                layer.AssetsData.Sprites ??= new UndertalePointerList<SpriteInstance>();
 
                 // add tile to list
                 var spriteinstance = new SpriteInstance();
