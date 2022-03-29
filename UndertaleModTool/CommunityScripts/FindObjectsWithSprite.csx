@@ -21,7 +21,7 @@ ConcurrentBag<string> resultList = new();
 
 bool caseSensitive = ScriptQuestion("Case sensitive?");
 bool regexCheck = ScriptQuestion("Regex search?");
-string qText = regexCheck ? "Enter RegEx of sprite name" : "Enter sprite name(s)";
+string qText = regexCheck ? "Enter RegEx of sprite name(s)" : "Enter sprite name(s)";
 string searchQuery = SimpleTextInput(qText, "Search box below", "", !regexCheck);
 
 if (String.IsNullOrEmpty(searchQuery) || String.IsNullOrWhiteSpace(searchQuery))
