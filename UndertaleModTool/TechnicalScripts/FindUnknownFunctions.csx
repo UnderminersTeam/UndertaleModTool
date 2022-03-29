@@ -89,7 +89,7 @@ if (unknownFunctions.Count > 0)
             resultsToDisplay += (unknownFunctions[i] + "\r\n");
         }
         resultsToDisplay = SimpleTextInput("Prune Menu", "Delete one or more lines to remove those entries", resultsToDisplay, true);
-        string[] IndividualLineArray = resultsToDisplay.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        string[] IndividualLineArray = resultsToDisplay.Split(new[] { '\n', '\v' }, StringSplitOptions.RemoveEmptyEntries);
         foreach (var OneLine in IndividualLineArray)
         {
             unknownFunctions2.Add(OneLine.Trim());

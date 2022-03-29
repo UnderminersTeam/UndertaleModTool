@@ -56,7 +56,7 @@ if (regex_check)
         keywordRegex = new(keyword, RegexOptions.Compiled | RegexOptions.IgnoreCase);
 }
 
-string[] searchNamesList = searchNames.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+string[] searchNamesList = searchNames.Split(new[] { '\n', '\v' }, StringSplitOptions.RemoveEmptyEntries);
 for (int i = 0; i < searchNamesList.Length; i++)
 {
     searchNamesList[i] = searchNamesList[i].Trim();

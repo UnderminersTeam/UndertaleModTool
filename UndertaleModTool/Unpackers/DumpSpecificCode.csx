@@ -29,7 +29,7 @@ List<String> gameObjectCandidates = new List<String>();
 List<String> splitStringsList = new List<String>();
 string InputtedText = "";
 InputtedText = SimpleTextInput("Menu", "Enter object, script, or code entry names", InputtedText, true);
-string[] IndividualLineArray = InputtedText.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+string[] IndividualLineArray = InputtedText.Split(new[] { '\n', '\v' }, StringSplitOptions.RemoveEmptyEntries);
 foreach (var OneLine in IndividualLineArray)
 {
     splitStringsList.Add(OneLine.Trim());
