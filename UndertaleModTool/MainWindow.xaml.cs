@@ -198,21 +198,21 @@ namespace UndertaleModTool
             foreach (var child in (MainTree.Items[0] as TreeViewItem).Items)
                 ((child as TreeViewItem).ItemsSource as ICollectionView)?.Refresh();
         }
-        /*
-                private static bool IsLikelyRunFromZipFolder()
-                {
-                    var path = System.Environment.CurrentDirectory;
-                    var fileInfo = new FileInfo(path);
-                    return fileInfo.Attributes.HasFlag(FileAttributes.ReadOnly);
-                }
+/*
+        private static bool IsLikelyRunFromZipFolder()
+        {
+            var path = System.Environment.CurrentDirectory;
+            var fileInfo = new FileInfo(path);
+            return fileInfo.Attributes.HasFlag(FileAttributes.ReadOnly);
+        }
 
-                private static bool IsRunFromTempFolder()
-                {
-                    var path = System.Environment.CurrentDirectory;
-                    var temp = Path.GetTempPath();
-                    return path.IndexOf(temp, StringComparison.OrdinalIgnoreCase) == 0;
-                }
-        */
+        private static bool IsRunFromTempFolder()
+        {
+            var path = System.Environment.CurrentDirectory;
+            var temp = Path.GetTempPath();
+            return path.IndexOf(temp, StringComparison.OrdinalIgnoreCase) == 0;
+        }
+*/
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Settings.Load();
@@ -516,7 +516,7 @@ namespace UndertaleModTool
             DependencyObject child = VisualTreeHelper.GetChild(DataEditor, 0);
             if (child is not null && VisualTreeHelper.GetChild(child, 0) is UndertaleCodeEditor codeEditor)
             {
-#pragma warning disable CA1416
+                #pragma warning disable CA1416
                 if (codeEditor.DecompiledChanged || codeEditor.DisassemblyChanged)
                 {
                     IsSaving = true;
@@ -527,7 +527,7 @@ namespace UndertaleModTool
                     result = IsSaving ? SaveResult.Error : SaveResult.Saved;
                     IsSaving = false;
                 }
-#pragma warning restore CA1416
+            #pragma warning restore CA1416
             }
 
             return result;
@@ -712,10 +712,10 @@ namespace UndertaleModTool
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilePath)));
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGMS2)));
 
-#pragma warning disable CA1416
+                        #pragma warning disable CA1416
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
-#pragma warning restore CA1416
+                        #pragma warning restore CA1416
 
                         ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"));
                         SelectionHistory.Clear();
