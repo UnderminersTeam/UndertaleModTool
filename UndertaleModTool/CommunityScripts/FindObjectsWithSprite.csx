@@ -45,7 +45,7 @@ if (regexCheck)
 }
 else
 {
-    spriteNames = searchQuery.Split(new char[] { '\n', '\v' }, StringSplitOptions.RemoveEmptyEntries); // Shift+Enter -> \v
+    spriteNames = searchQuery.Split('\n', StringSplitOptions.RemoveEmptyEntries); // Shift+Enter -> \v
 
     for (int i = 0; i < spriteNames.Length; i++)
         spriteNames[i] = spriteNames[i].Trim();

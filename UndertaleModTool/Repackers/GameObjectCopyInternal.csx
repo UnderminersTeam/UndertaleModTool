@@ -157,7 +157,7 @@ List<string> GetSplitStringsList(string assetType)
     List<string> splitStringsList = new List<string>();
     string InputtedText = "";
     InputtedText = SimpleTextInput("Menu", "Enter the name(s) of the " + assetType + "(s)", InputtedText, true);
-    string[] IndividualLineArray = InputtedText.Split(new[] { '\n', '\v' }, StringSplitOptions.RemoveEmptyEntries);
+    string[] IndividualLineArray = InputtedText.Split('\n', StringSplitOptions.RemoveEmptyEntries);
     foreach (var OneLine in IndividualLineArray)
     {
         splitStringsList.Add(OneLine.Trim());

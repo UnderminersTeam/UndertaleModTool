@@ -16,7 +16,7 @@ List<string> splitStringsList = new List<string>();
 List<string> gameObjectsUsedList = new List<string>();
 string InputtedText = "";
 InputtedText = SimpleTextInput("Menu", "Enter name(s) of game object(s)", InputtedText, true);
-string[] IndividualLineArray = InputtedText.Split(new[] { '\n', '\v' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+string[] IndividualLineArray = InputtedText.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 int usage_count = 0;
 int unique_objects_used = 0;
 foreach (var OneLine in IndividualLineArray)
