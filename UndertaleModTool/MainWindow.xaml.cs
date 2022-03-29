@@ -527,7 +527,7 @@ namespace UndertaleModTool
                     result = IsSaving ? SaveResult.Error : SaveResult.Saved;
                     IsSaving = false;
                 }
-            #pragma warning restore CA1416
+                #pragma warning restore CA1416
             }
 
             return result;
@@ -885,9 +885,9 @@ namespace UndertaleModTool
                     Data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                 }
 
-#pragma warning disable CA1416
+                #pragma warning disable CA1416
                 UndertaleCodeEditor.gettextJSON = null;
-#pragma warning restore CA1416
+                #pragma warning restore CA1416
 
                 Dispatcher.Invoke(() =>
                 {
