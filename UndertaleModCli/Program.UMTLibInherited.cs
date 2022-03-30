@@ -462,7 +462,7 @@ namespace UndertaleModCli
             }
             else
             {
-                bool isShiftAndEnterPressed = false;
+                bool isEnterWithoutShiftPressed = false;
                 ConsoleKeyInfo keyInfo;
                 do
                 {
@@ -471,7 +471,7 @@ namespace UndertaleModCli
 
                     // If Enter is pressed without shift
                     if (((keyInfo.Modifiers & ConsoleModifiers.Shift) == 0) && (keyInfo.Key == ConsoleKey.Enter))
-                        isShiftAndEnterPressed = true;
+                        isEnterWithoutShiftPressed = true;
 
                     else
                     {
@@ -494,7 +494,7 @@ namespace UndertaleModCli
                             result += keyInfo.KeyChar;
                     }
 
-                } while (!isShiftAndEnterPressed);
+                } while (!isEnterWithoutShiftPressed);
             }
 
             Console.WriteLine("--------------------------------------------------");
@@ -702,7 +702,7 @@ namespace UndertaleModCli
             return "";
         }
 
-        // Copy-pasted from GUI. TODO: Should probably get shared at one point.
+        // Copy-pasted from GUI. TODO: Should probably get shared at one point, but there are some GUI only attributes accessed there and I don't want to touch the methods.
         #region Helper functions for Code replacing
 
         void ImportCode(string codeName, string gmlCode, bool IsGML = true, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
