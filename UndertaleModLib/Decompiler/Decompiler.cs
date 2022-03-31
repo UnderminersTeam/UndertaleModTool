@@ -1085,7 +1085,11 @@ namespace UndertaleModLib.Decompiler
                             Value.DoTypePropagation(context, AssetTypeResolver.return_types[script.Name.Content]);
                     }
 
-                    return "return " + Value.ToString(context) + ";";
+                    string cleanVal = Value.ToString(context);
+                    if (cleanVal.EndsWith("\n"))
+                        cleanVal = cleanVal.Substring(0, cleanVal.Length - 1);
+
+                    return "return " + cleanVal + ";";
                 }
                 else
                     return (context.GlobalContext.Data?.IsGameMaker2() ?? false ? "return;" : "exit");
@@ -1111,6 +1115,34 @@ namespace UndertaleModLib.Decompiler
 
             public bool HasVarKeyword;
 
+            private bool _isStructDefinition, _checkedForDefinition;
+            public bool IsStructDefinition 
+            { get {
+                    // Quick hack
+                    if (!_checkedForDefinition)
+                    {
+                        try
+                        {
+                            if (Destination.Var.Name.Content.StartsWith("___struct___"))
+                            {
+                                Expression val = Value;
+                                while (val is ExpressionCast cast)
+                                    val = cast;
+
+                                if (val is FunctionDefinition def)
+                                {
+                                    def.PromoteToStruct();
+                                    _isStructDefinition = true;
+                                }
+                            }
+                        }
+                        catch (Exception) { }
+                        _checkedForDefinition = true;
+                    }
+                    return _isStructDefinition;
+                }
+            }
+
             public AssignmentStatement(ExpressionVar destination, Expression value)
             {
                 Destination = destination;
@@ -1119,9 +1151,14 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
+                bool gms2 = context.GlobalContext.Data?.IsGameMaker2() ?? false;
+
+                if (gms2 && IsStructDefinition)
+                    return "";
+
                 string varName = Destination.ToString(context);
 
-                if (context.GlobalContext.Data?.IsGameMaker2() ?? false && !HasVarKeyword)
+                if (gms2 && !HasVarKeyword)
                 {
                     var data = context.GlobalContext.Data;
                     if (data != null)
@@ -1170,19 +1207,6 @@ namespace UndertaleModLib.Decompiler
                             if (!(context.GlobalContext.Data?.GeneralInfo?.BytecodeVersion > 14 && v1.Opcode != UndertaleInstruction.Opcode.Push && Destination.Var.InstanceType != UndertaleInstruction.InstanceType.Self))
                                 return String.Format("{0}{1} {2}= {3}", varPrefix, varName, Expression.OperationToPrintableString(two.Opcode), two.Argument2.ToString(context));
                         }
-                    }
-                }
-                // Quick hack
-                if (varName.StartsWith("___struct___"))
-                {
-                    Expression val = Value;
-                    while (val is ExpressionCast cast)
-                        val = cast;
-
-                    if (val is FunctionDefinition def)
-                    {
-                        def.PromoteToStruct();
-                        return "// Hiding initial definition of " + def.FunctionBodyCodeEntry.Name.Content + "\n";
                     }
                 }
                 return String.Format("{0}{1}{2} {3}", varPrefix, varName, context.DecompilingStruct ? ":" : " =", Value.ToString(context));
@@ -1361,7 +1385,8 @@ namespace UndertaleModLib.Decompiler
                         int count = 0;
                         foreach (Statement stmt in statements)
                         {
-                            if (Subtype != FunctionType.Function && stmt is ReturnStatement)
+                            count++;
+                            if ((Subtype != FunctionType.Function && stmt is ReturnStatement) || (stmt is AssignmentStatement assign && assign.IsStructDefinition))
                                 continue;
 
                             sb.Append(context.Indentation);
@@ -1385,7 +1410,7 @@ namespace UndertaleModLib.Decompiler
                             else
                             {
                                 sb.Append(stmt.ToString(context));
-                                if (Subtype == FunctionType.Struct && ++count < numNotReturn)
+                                if (Subtype == FunctionType.Struct && count < numNotReturn)
                                     sb.Append(",");
                             } 
                             sb.Append("\n");
@@ -1394,7 +1419,9 @@ namespace UndertaleModLib.Decompiler
                         context.ArgumentReplacements = oldReplacements;
                         context.IndentationLevel--;
                         sb.Append(context.Indentation);
-                        sb.Append("}\n");
+                        sb.Append("}");
+                        if(!oldDecompilingStruct)
+                            sb.Append("\n");
                     }
                     else
                         sb.Append("{}");
@@ -1716,7 +1743,7 @@ namespace UndertaleModLib.Decompiler
                 string name = Var.Name.Content;
                 if (ArrayIndices != null)
                 {
-                    if (context.GlobalContext.Data?.GMS2_3 == true)
+                    if (context?.GlobalContext.Data?.GMS2_3 == true)
                     {
                         if (name == "argument" && context.DecompilingStruct && context.ArgumentReplacements != null && ArrayIndices.Count == 1)
                         {
@@ -2723,6 +2750,9 @@ namespace UndertaleModLib.Decompiler
                         sb.Append("{\n");
                     foreach (var stmt in Statements)
                     {
+                        if (stmt is AssignmentStatement assign && assign.IsStructDefinition)
+                            continue;
+
                         sb.Append(context.Indentation);
                         string resultStr = stmt.ToString(context);
                         sb.Append(resultStr).Append('\n');
@@ -3719,7 +3749,15 @@ namespace UndertaleModLib.Decompiler
             foreach (var warn in globalContext.DecompilerWarnings)
                 sb.Append(warn + "\n");
             foreach (var stmt in context.Statements[0])
+            {
+                // Ignore initial struct definitions, they clutter
+                // decompiled output and generally make code more
+                // confusing to read.
+                if (stmt is AssignmentStatement assign && assign.IsStructDefinition)
+                    continue;
+
                 sb.Append(stmt.ToString(context) + "\n");
+            }
 
             globalContext.DecompilerWarnings.Clear();
             context.Statements = null;
