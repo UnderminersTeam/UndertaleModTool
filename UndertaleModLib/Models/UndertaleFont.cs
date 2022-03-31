@@ -169,7 +169,7 @@ namespace UndertaleModLib.Models
                             }
                             reader.Position += 14;
                             ushort kerningLength = reader.ReadUInt16();
-                            reader.Position += (uint)2 * kerningLength; // combining read/write would apparently break
+                            reader.Position += (uint)4 * kerningLength; // combining read/write would apparently break
                         }
                     }
                     reader.Position = positionToReturn;
