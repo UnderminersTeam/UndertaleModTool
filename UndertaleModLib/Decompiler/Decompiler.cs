@@ -3121,7 +3121,7 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     foreach (Block pred in e)
-                        changed |= dominators[i].And(dominators[pred._CachedIndex], i);
+                        changed |= pred != null && dominators[i].And(dominators[pred._CachedIndex], i);
                 }
             } while (changed);
 
