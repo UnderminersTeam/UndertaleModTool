@@ -270,8 +270,8 @@ void WriteRoomToJson(UndertaleRoom room)
                                         writer.WriteBoolean("sprite_mode", tile._SpriteMode);
                                         writer.WriteNumber("x", tile.X);
                                         writer.WriteNumber("y", tile.Y);
-                                        WriteString(writer, "background_definition", tile.SpriteDefinition?.Name);
-                                        WriteString(writer, "sprite_definition", tile.BackgroundDefinition?.Name);
+                                        WriteString(writer, "background_definition", tile.BackgroundDefinition?.Name);
+                                        WriteString(writer, "sprite_definition", tile.SpriteDefinition?.Name);
                                         writer.WriteNumber("source_x", tile.SourceX);
                                         writer.WriteNumber("source_y", tile.SourceY);
                                         writer.WriteNumber("width", tile.Width);
@@ -369,6 +369,8 @@ void WriteRoomToJson(UndertaleRoom room)
                         case UndertaleRoom.LayerType.Tiles:
                         {
                             UndertaleRoom.Layer.LayerTilesData layerData = (UndertaleRoom.Layer.LayerTilesData) layer.Data;
+
+                            WriteString(writer, "background", layerData.Background?.Name);
 
                             writer.WriteNumber("tiles_x", layerData.TilesX);
                             writer.WriteNumber("tiles_y", layerData.TilesY);
