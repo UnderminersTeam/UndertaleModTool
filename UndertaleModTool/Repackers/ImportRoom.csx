@@ -13,9 +13,7 @@ using System.Linq;
 
 ScriptMessage("Select the Room to import");
 string roomInputPath = PromptLoadFile("Import which file", "Json Files|*.json");
-if (roomInputPath == null)
-	throw new Exception("The room's path was not set.");
-
+if (roomInputPath == null) throw new ScriptException("The room's path was not set.");
 
 UndertaleRoom newRoom = new UndertaleRoom();
 
@@ -81,7 +79,7 @@ void ReadMainValues(ref Utf8JsonReader reader)
 
 	newRoom.Caption = (caption == null) ? null : new UndertaleString(caption);
 
-	if ((newRoom.Caption != null) && !Data.Strings.ToList().Any(s => s == newRoom.Caption))
+	if ((newRoom.Caption != null) && !Data.Strings.Any(s => s == newRoom.Caption))
 		Data.Strings.Add(newRoom.Caption);
 
 	newRoom.CreationCodeId = (ccIdName == null) ? null : Data.Code.ByName(ccIdName);
@@ -302,7 +300,7 @@ void ReadLayers(ref Utf8JsonReader reader)
 
 			newLayer.LayerName = (layerName == null) ? null : new UndertaleString(layerName);
 
-			if ((layerName != null) && !Data.Strings.ToList().Any(s => s == newLayer.LayerName))
+			if ((layerName != null) && !Data.Strings.Any(s => s == newLayer.LayerName))
 				Data.Strings.Add(newLayer.LayerName);
 
 			switch (newLayer.LayerType)
@@ -509,7 +507,7 @@ void ReadAssetsLayer(ref Utf8JsonReader reader, UndertaleRoom.Layer newLayer)
 
 			newSpr.Name = (name == null) ? null : new UndertaleString(name);
 
-			if ((name != null) && !Data.Strings.ToList().Any(s => s == newSpr.Name))
+			if ((name != null) && !Data.Strings.Any(s => s == newSpr.Name))
 				Data.Strings.Add(newSpr.Name);
 
 			newSpr.Sprite = (spriteName == null) ? null : Data.Sprites.ByName(spriteName);
@@ -552,7 +550,7 @@ void ReadAssetsLayer(ref Utf8JsonReader reader, UndertaleRoom.Layer newLayer)
 
 			newSeq.Name = (name == null) ? null : new UndertaleString(name);
 
-			if ((name != null) && !Data.Strings.ToList().Any(s => s == newSeq.Name))
+			if ((name != null) && !Data.Strings.Any(s => s == newSeq.Name))
 				Data.Strings.Add(newSeq.Name);
 
 			newSeq.Sequence = (sequenceName == null) ? null : Data.Sequences.ByName(sequenceName);
@@ -594,7 +592,7 @@ void ReadAssetsLayer(ref Utf8JsonReader reader, UndertaleRoom.Layer newLayer)
 
 			newSpr.Name = (name == null) ? null : new UndertaleString(name);
 
-			if ((name != null) && !Data.Strings.ToList().Any(s => s == newSpr.Name))
+			if ((name != null) && !Data.Strings.Any(s => s == newSpr.Name))
 				Data.Strings.Add(newSpr.Name);
 
 			newSpr.Sprite = spriteName == null ? null : Data.Sprites.ByName(spriteName);

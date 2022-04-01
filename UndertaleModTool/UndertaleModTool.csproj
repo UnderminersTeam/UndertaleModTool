@@ -3613,11 +3613,11 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
-        <None Update="Unpackers\ExportRoom.csx">
+        <None Update="Unpackers\ExportAllRooms.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
-        <None Update="Unpackers\ExportGameObjects.csx">
+        <None Update="Unpackers\ExportAllGameObjects.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>

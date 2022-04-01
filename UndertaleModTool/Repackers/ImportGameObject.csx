@@ -4,11 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Linq;
 using UndertaleModLib.Models;
 
 ScriptMessage("Select the GameObject to import");
 string gameObjectInputPath = PromptLoadFile("Import which file", "Json Files|*.json");
-if (gameObjectInputPath == null) throw new Exception("The game object's path was not set.");
+if (gameObjectInputPath == null) throw new ScriptException("The game object's path was not set.");
 
 UndertaleGameObject newGameObject = new UndertaleGameObject();
 
@@ -174,7 +175,7 @@ UndertaleGameObject.EventAction ReadAction(ref Utf8JsonReader reader)
 	{
 		newAction.ActionName = new UndertaleString(actionName);
 
-		if (!Data.Strings.ToList().Any(s => s == newAction.ActionName))
+		if (!Data.Strings.Any(s => s == newAction.ActionName))
 			Data.Strings.Add(newAction.ActionName);
 	}
 

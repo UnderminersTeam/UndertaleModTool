@@ -8,7 +8,7 @@ using UndertaleModLib.Models;
 
 ScriptMessage("Select the Room output directory");
 string roomOutputPath = PromptChooseDirectory("Export to where");
-if (roomOutputPath == null) throw new Exception("The room exporter's output path was not set.");
+if (roomOutputPath == null) throw new ScriptException("The room exporter's output path was not set.");
 
 StreamWriter sw;
 foreach (UndertaleRoom room in Data.Rooms)

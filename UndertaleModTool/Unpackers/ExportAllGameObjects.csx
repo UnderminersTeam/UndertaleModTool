@@ -8,7 +8,7 @@ using UndertaleModLib.Models;
 
 ScriptMessage("Select the GameObject output directory");
 string gameObjectOutputPath = PromptChooseDirectory("Export to where");
-if (gameObjectOutputPath == null) throw new Exception("The patch's output path was not set.");
+if (gameObjectOutputPath == null) throw new ScriptException("The patch's output path was not set.");
 
 StreamWriter sw;
 foreach (UndertaleGameObject gameObject in Data.GameObjects)
