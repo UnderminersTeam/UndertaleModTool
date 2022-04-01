@@ -49,7 +49,7 @@ void WriteRoomToJson(UndertaleRoom room)
     writer.WriteNumber("height", room.Height);
     writer.WriteNumber("speed", room.Speed);
     writer.WriteBoolean("persistent", room.Persistent);
-    writer.WriteNumber("background_color", room.BackgroundColor);
+    writer.WriteNumber("background_color", room.BackgroundColor ^ 0xFF000000); // remove alpha (BG color doesn't have alpha)
     writer.WriteBoolean("draw_background_color", room.DrawBackgroundColor);
 
     // GMS 2 Params

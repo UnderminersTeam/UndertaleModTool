@@ -62,7 +62,7 @@ void ReadMainValues(ref Utf8JsonReader reader)
     newRoom.Height = (uint) ReadNum(ref reader);
     newRoom.Speed = (uint) ReadNum(ref reader);
     newRoom.Persistent = ReadBool(ref reader);
-    newRoom.BackgroundColor = (uint) ReadNum(ref reader);
+    newRoom.BackgroundColor = (uint) (0xFF000000 | ReadNum(ref reader)); // make alpha 255 (BG color doesn't have alpha)
     newRoom.DrawBackgroundColor = ReadBool(ref reader);
 
     string ccIdName = ReadString(ref reader);
