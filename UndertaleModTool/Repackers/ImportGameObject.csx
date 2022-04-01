@@ -89,7 +89,7 @@ void ReadPhysicsVerts(ref Utf8JsonReader reader)
 		if (reader.TokenType == JsonTokenType.EndObject) continue;
 		if (reader.TokenType == JsonTokenType.EndArray) break;
 
-		throw new Exception($"ERROR: Unexpected token type. Expected Integer - found {reader.TokenType}");
+		throw new ScriptException($"ERROR: Unexpected token type. Expected Integer - found {reader.TokenType}");
 	}
 }
 
@@ -110,7 +110,7 @@ void ReadAllEvents(ref Utf8JsonReader reader)
 		if (reader.TokenType == JsonTokenType.EndObject) continue;
 		if (reader.TokenType == JsonTokenType.EndArray) break;
 
-		throw new Exception($"ERROR: Unexpected token type. Expected Integer - found {reader.TokenType}");
+		throw new ScriptException($"ERROR: Unexpected token type. Expected Integer - found {reader.TokenType}");
 	}
 }
 
@@ -131,7 +131,7 @@ List<UndertaleGameObject.Event> ReadEvents(ref Utf8JsonReader reader)
 		ReadAnticipateJSONObject(ref reader, JsonTokenType.EndObject);
 	}
 
-	throw new Exception("ERROR: Could not find end of array token - Events.");
+	throw new ScriptException("ERROR: Could not find end of array token - Events.");
 }
 
 List<UndertaleGameObject.EventAction> ReadActions(ref Utf8JsonReader reader)
@@ -147,7 +147,7 @@ List<UndertaleGameObject.EventAction> ReadActions(ref Utf8JsonReader reader)
 		actionsToReturn.Add(newAction);
 	}
 
-	throw new Exception("ERROR: Could not find end of array token - Actions.");
+	throw new ScriptException("ERROR: Could not find end of array token - Actions.");
 }
 
 UndertaleGameObject.EventAction ReadAction(ref Utf8JsonReader reader)
@@ -191,7 +191,7 @@ UndertaleGameObject.EventAction ReadAction(ref Utf8JsonReader reader)
 void ReadName(ref Utf8JsonReader reader)
 {
 	string name = ReadString(ref reader);
-	if (name == null) throw new Exception("ERROR: Object name was null - object name must be defined!");
+	if (name == null) throw new ScriptException("ERROR: Object name was null - object name must be defined!");
 	if (Data.GameObjects.ByName(name) != null)
 	{
 		newGameObject = Data.GameObjects.ByName(name);
@@ -215,11 +215,11 @@ bool ReadBool(ref Utf8JsonReader reader)
 			case JsonTokenType.PropertyName: continue;
 			case JsonTokenType.True: return true;
 			case JsonTokenType.False: return false;
-			default: throw new Exception($"ERROR: Unexpected token type. Expected Boolean - found {reader.TokenType}");
+			default: throw new ScriptException($"ERROR: Unexpected token type. Expected Boolean - found {reader.TokenType}");
 		}
 	}
 
-	throw new Exception("ERROR: Did not find value of expected type. Expected Boolean.");
+	throw new ScriptException("ERROR: Did not find value of expected type. Expected Boolean.");
 }
 
 long ReadNum(ref Utf8JsonReader reader)
@@ -230,11 +230,11 @@ long ReadNum(ref Utf8JsonReader reader)
 		{
 			case JsonTokenType.PropertyName: continue;
 			case JsonTokenType.Number: return reader.GetInt64();
-			default: throw new Exception($"ERROR: Unexpected token type. Expected Integer - found {reader.TokenType}");
+			default: throw new ScriptException($"ERROR: Unexpected token type. Expected Integer - found {reader.TokenType}");
 		}
 	}
 
-	throw new Exception("ERROR: Did not find value of expected type. Expected Integer.");
+	throw new ScriptException("ERROR: Did not find value of expected type. Expected Integer.");
 }
 
 float ReadFloat(ref Utf8JsonReader reader)
@@ -245,11 +245,11 @@ float ReadFloat(ref Utf8JsonReader reader)
 		{
 			case JsonTokenType.PropertyName: continue;
 			case JsonTokenType.Number: return reader.GetSingle();
-			default: throw new Exception($"ERROR: Unexpected token type. Expected Decimal - found {reader.TokenType}");
+			default: throw new ScriptException($"ERROR: Unexpected token type. Expected Decimal - found {reader.TokenType}");
 		}
 	}
 
-	throw new Exception("ERROR: Did not find value of expected type. Expected Decimal.");
+	throw new ScriptException("ERROR: Did not find value of expected type. Expected Decimal.");
 }
 
 string ReadString(ref Utf8JsonReader reader)
@@ -261,11 +261,11 @@ string ReadString(ref Utf8JsonReader reader)
 			case JsonTokenType.PropertyName: continue;
 			case JsonTokenType.String: return reader.GetString();
 			case JsonTokenType.Null: return null;
-			default: throw new Exception($"ERROR: Unexpected token type. Expected String - found {reader.TokenType}");
+			default: throw new ScriptException($"ERROR: Unexpected token type. Expected String - found {reader.TokenType}");
 		}
 	}
 
-	throw new Exception("ERROR: Did not find value of expected type. Expected String.");
+	throw new ScriptException("ERROR: Did not find value of expected type. Expected String.");
 }
 
 // Watch for certain meta-tokens
@@ -278,8 +278,8 @@ void ReadAnticipateJSONObject(ref Utf8JsonReader reader, JsonTokenType allowedTo
 			continue;
 		if (reader.TokenType == allowedTokenType)
 			return;
-		throw new Exception($"ERROR: Unexpected token type. Expected {allowedTokenType} - found {reader.TokenType}");
+		throw new ScriptException($"ERROR: Unexpected token type. Expected {allowedTokenType} - found {reader.TokenType}");
 	}
 
-	throw new Exception("ERROR: Did not find value of expected type. Expected String.");
+	throw new ScriptException("ERROR: Did not find value of expected type. Expected String.");
 }
