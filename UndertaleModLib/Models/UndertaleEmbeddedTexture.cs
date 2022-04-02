@@ -19,12 +19,15 @@ namespace UndertaleModLib.Models
         public uint Scaled { get; set; } = 0;
         public uint GeneratedMips { get; set; }
         public TexData TextureData { get; set; } = new TexData();
+        public uint Unknown2022x3Value { get; set; }
 
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(Scaled);
             if (writer.undertaleData.GeneralInfo.Major >= 2)
                 writer.Write(GeneratedMips);
+            if (writer.undertaleData.GMS2022_3)
+                writer.Write(Unknown2022x3Value);
             writer.WriteUndertaleObjectPointer(TextureData);
         }
 
@@ -33,6 +36,15 @@ namespace UndertaleModLib.Models
             Scaled = reader.ReadUInt32();
             if (reader.undertaleData.GeneralInfo.Major >= 2)
                 GeneratedMips = reader.ReadUInt32();
+            Unknown2022x3Value = reader.ReadUInt32();
+            uint curPos = reader.ReadUInt32();
+            if (curPos > reader.Position)
+            {
+                reader.undertaleData.GMS2022_3 = true;
+                reader.Position -= 4;
+            }
+            else
+                reader.Position -= 8;
             TextureData = reader.ReadUndertaleObjectPointer<TexData>();
         }
 
