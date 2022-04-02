@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿// Written by VladiStep (VladStepu2001#3453 on Discord)
+
+using System.Text;
 using System;
 using System.IO;
 using System.Threading;
