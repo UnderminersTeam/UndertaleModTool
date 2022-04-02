@@ -89,7 +89,7 @@ namespace UndertaleModTool
                 else
                     texName = (mainWindow.Data.TexturePageItems.IndexOf(texture) + 1).ToString();
 
-                if (texName == "-1")
+                if (texName == "0")
                     return null;
             }
 
