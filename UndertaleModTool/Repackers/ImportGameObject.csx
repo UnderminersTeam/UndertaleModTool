@@ -7,6 +7,8 @@ using System.Text.Json;
 using System.Linq;
 using UndertaleModLib.Models;
 
+EnsureDataLoaded();
+
 ScriptMessage("Select the GameObject to import");
 string gameObjectInputPath = PromptLoadFile("Import which file", "Json Files|*.json");
 if (gameObjectInputPath == null) throw new ScriptException("The game object's path was not set.");

@@ -6,6 +6,8 @@ using System.Text;
 using System.Text.Json;
 using UndertaleModLib.Models;
 
+EnsureDataLoaded();
+
 ScriptMessage("Select the Room output directory");
 string roomOutputPath = PromptChooseDirectory("Export to where");
 if (roomOutputPath == null) throw new ScriptException("The room exporter's output path was not set.");

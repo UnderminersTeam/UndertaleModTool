@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Linq;
 
+EnsureDataLoaded();
+
 ScriptMessage("Select the Room to import");
 string roomInputPath = PromptLoadFile("Import which file", "Json Files|*.json");
 if (roomInputPath == null) throw new ScriptException("The room's path was not set.");

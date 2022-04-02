@@ -6,6 +6,8 @@ using System.Text;
 using System.Text.Json;
 using UndertaleModLib.Models;
 
+EnsureDataLoaded();
+
 ScriptMessage("Select the GameObject output directory");
 string gameObjectOutputPath = PromptChooseDirectory("Export to where");
 if (gameObjectOutputPath == null) throw new ScriptException("The patch's output path was not set.");
