@@ -36,22 +36,6 @@ namespace UndertaleModLib.Models
             Scaled = reader.ReadUInt32();
             if (reader.undertaleData.GeneralInfo.Major >= 2)
                 GeneratedMips = reader.ReadUInt32();
-            // Detect GM2022.3
-            if (!reader.undertaleData.GM2022_3)
-            {
-                uint positionToReturn = reader.Position;
-                uint firstValue = reader.ReadUInt32();
-                /* The first condition ensures padding exists (have not researched, it might always);
-                 * The second is a general check for a wonky pointer;
-                 * And the third finds a pointer value in the padding, showing we're off.
-                 * (If it's zero, that's regular padding and we're pre-2022.3)
-                 */
-                if ((firstValue > reader.Position + 4
-                    || firstValue < reader.Position)
-                    && reader.ReadUInt32() > 0)
-                    reader.undertaleData.GM2022_3 = true;
-                reader.Position = positionToReturn;
-            }
             if (reader.undertaleData.GM2022_3)
                 TextureBlockSize = reader.ReadUInt32();
             TextureData = reader.ReadUndertaleObjectPointer<TexData>();
