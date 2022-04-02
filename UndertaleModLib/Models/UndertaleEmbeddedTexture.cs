@@ -26,8 +26,7 @@ namespace UndertaleModLib.Models
             writer.Write(Scaled);
             if (writer.undertaleData.GeneralInfo.Major >= 2)
                 writer.Write(GeneratedMips);
-            if (writer.undertaleData.GMS2022_3)
-                writer.Write(Unknown2022x3Value);
+            writer.Write(Unknown2022x3Value);
             writer.WriteUndertaleObjectPointer(TextureData);
         }
 
@@ -37,14 +36,6 @@ namespace UndertaleModLib.Models
             if (reader.undertaleData.GeneralInfo.Major >= 2)
                 GeneratedMips = reader.ReadUInt32();
             Unknown2022x3Value = reader.ReadUInt32();
-            uint curPos = reader.ReadUInt32();
-            if (curPos > reader.Position)
-            {
-                reader.undertaleData.GMS2022_3 = true;
-                reader.Position -= 4;
-            }
-            else
-                reader.Position -= 8;
             TextureData = reader.ReadUndertaleObjectPointer<TexData>();
         }
 
