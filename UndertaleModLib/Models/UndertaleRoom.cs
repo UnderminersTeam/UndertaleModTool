@@ -820,7 +820,7 @@ namespace UndertaleModLib.Models
 
                 public bool Visible { get; set; }
                 public bool Foreground { get; set; }
-                public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; OnPropertyChanged(); ParentLayer.ParentRoom.UpdateBGColorLayer(); } }
+                public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; OnPropertyChanged(); ParentLayer?.ParentRoom?.UpdateBGColorLayer(); } }
                 public bool TiledHorizontally { get => _TiledHorizontally; set { _TiledHorizontally = value; OnPropertyChanged(); } }
                 public bool TiledVertically { get => _TiledVertically; set { _TiledVertically = value; OnPropertyChanged(); } }
                 public bool Stretch { get => _Stretch; set { _Stretch = value; OnPropertyChanged(); } }
