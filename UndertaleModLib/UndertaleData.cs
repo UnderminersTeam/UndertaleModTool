@@ -117,6 +117,7 @@ namespace UndertaleModLib
         public bool UseBZipFormat = false;
         public bool GMS2022_1 = false;
         public bool GMS2022_2 = false;
+        public bool GM2022_3 = false;
         public ToolInfo ToolInfo = new ToolInfo();
         public int PaddingAlignException = -1;
 
