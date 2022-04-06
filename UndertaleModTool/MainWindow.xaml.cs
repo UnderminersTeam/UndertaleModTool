@@ -2109,7 +2109,7 @@ namespace UndertaleModTool
                 input.Dispose();
 
                 if (result == System.Windows.Forms.DialogResult.OK)
-                    return input.ReturnString;            //values preserved after close
+                    return input.ReturnString.Replace('\v', '\n'); //values preserved after close; Shift+Enter -> '\v'
                 else
                     return null;
             }
