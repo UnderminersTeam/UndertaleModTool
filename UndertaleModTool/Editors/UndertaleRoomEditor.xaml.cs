@@ -1526,7 +1526,7 @@ namespace UndertaleModTool
             tileTextures = tiles?.AsParallel()
                                  .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
                                  .GroupBy(x => x.Tpag?.Name?.Content ?? (mainWindow.Data.TexturePageItems.IndexOf(x.Tpag) + 1).ToString())
-                                 .Where(x => x.Key != "-1")
+                                 .Where(x => x.Key != "0")
                                  .Select(x =>
                                  {
                                      return new Tuple<UndertaleTexturePageItem, List<Tuple<uint, uint, uint, uint>>>(
@@ -1556,7 +1556,7 @@ namespace UndertaleModTool
                     if (textPageName is null)
                     {
                         textPageName = (mainWindow.Data.TexturePageItems.IndexOf(texture) + 1).ToString();
-                        if (textPageName == "-1")
+                        if (textPageName == "0")
                             return;
                     }
 
