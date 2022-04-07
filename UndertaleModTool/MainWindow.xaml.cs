@@ -333,7 +333,7 @@ namespace UndertaleModTool
             ((Tab)CurrentTab).AutoClose = true;
             ((Tab)CurrentTab).SelectionHistory.Clear();
 
-            ((TabControl)this.FindName("TabController")).SelectedIndex = 0;
+            TabController.SelectedIndex = 0;
 
             TitleMain = "UndertaleModTool by krzys_h v" + Version;
 
@@ -372,19 +372,19 @@ namespace UndertaleModTool
                 ((child as TreeViewItem).ItemsSource as ICollectionView)?.Refresh();
         }
         /*
-                private static bool IsLikelyRunFromZipFolder()
-                {
-                    var path = System.Environment.CurrentDirectory;
-                    var fileInfo = new FileInfo(path);
-                    return fileInfo.Attributes.HasFlag(FileAttributes.ReadOnly);
-                }
+        private static bool IsLikelyRunFromZipFolder()
+        {
+            var path = System.Environment.CurrentDirectory;
+            var fileInfo = new FileInfo(path);
+            return fileInfo.Attributes.HasFlag(FileAttributes.ReadOnly);
+        }
 
-                private static bool IsRunFromTempFolder()
-                {
-                    var path = System.Environment.CurrentDirectory;
-                    var temp = Path.GetTempPath();
-                    return path.IndexOf(temp, StringComparison.OrdinalIgnoreCase) == 0;
-                }
+        private static bool IsRunFromTempFolder()
+        {
+            var path = System.Environment.CurrentDirectory;
+            var temp = Path.GetTempPath();
+            return path.IndexOf(temp, StringComparison.OrdinalIgnoreCase) == 0;
+        }
         */
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -890,10 +890,11 @@ namespace UndertaleModTool
                         #pragma warning disable CA1416
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
+                        #pragma warning restore CA1416
                         OpenInNewTab(new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"), "Welcome!");
                         ((Tab)CurrentTab).AutoClose = true;
                         ((Tab)CurrentTab).SelectionHistory.Clear();
-                        #pragma warning restore CA1416
+
                     }
                     dialog.Hide();
                 });
@@ -1556,6 +1557,15 @@ namespace UndertaleModTool
             if (MessageBox.Show("Delete " + obj.ToString() + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), "Confirmation", MessageBoxButton.YesNo, isLast ? MessageBoxImage.Question : MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
                 list.Remove(obj);
+                if (obj is UndertaleCode codeObj)
+                {
+                    string codeName = codeObj.Name.Content;
+                    Data.GMLCache?.TryRemove(codeName, out _);
+                    Data.GMLCacheChanged = new ConcurrentBag<string>(Data.GMLCacheChanged.Except(new[] {codeName}));
+                    Data.GMLCacheFailed?.Remove(codeName);
+                    Data.GMLEditedBefore?.Remove(codeName);
+                }
+
                 for (int i = 0; i < Tabs.Count; i++)
                 {
                     Tab tab = (Tab)Tabs[i];
@@ -1773,6 +1783,7 @@ namespace UndertaleModTool
             }
             list.Add(obj);
             UpdateTree();
+            HighlightObject(obj);
             OpenInNewTab(obj, "Untitled");
         }
 
@@ -1856,7 +1867,9 @@ namespace UndertaleModTool
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action) (() => { scriptDialog.ReportProgress(progressValue); }));
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action) (() => {
+                    scriptDialog.ReportProgress(progressValue);
+                }));
             }
         }
 
@@ -2033,15 +2046,9 @@ namespace UndertaleModTool
             {
                 Focus();
 
-                if (!CodeItemsList.IsExpanded)
-                    CodeItemsList.IsExpanded = true;
-
                 //TODO: find the way to scroll to the code item and highlight it.
 
                 CodeEditorDecompile = editorDecompile;
-
-                //Highlighted = code;
-                OpenInNewTab(code, "Untitled");
             }
             else
             {
