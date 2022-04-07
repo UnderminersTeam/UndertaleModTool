@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,21 +12,51 @@ namespace UndertaleModLib
 {
     public class UndertaleData
     {
-        public object this[string resourceType] //access resource(s) by its name
+        // access resource list by its name
+        public object this[string resourceTypeName]
         {
             get
             {
-                var property = GetType().GetProperty(resourceType);
+                var property = GetType().GetProperty(resourceTypeName);
                 if (property is null)
-                    throw new MissingMemberException($"\"UndertaleData\" doesn't contain a property named \"{resourceType}\".");
+                    throw new MissingMemberException($"\"UndertaleData\" doesn't contain a property named \"{resourceTypeName}\".");
 
                 return property.GetValue(this, null);
             }
             set
             {
-                var property = GetType().GetProperty(resourceType);
+                var property = GetType().GetProperty(resourceTypeName);
                 if (property is null)
-                    throw new MissingMemberException($"\"UndertaleData\" doesn't contain a property named \"{resourceType}\".");
+                    throw new MissingMemberException($"\"UndertaleData\" doesn't contain a property named \"{resourceTypeName}\".");
+
+                property.SetValue(this, value, null);
+            }
+        }
+
+        // access resource list by its items type
+        public object this[Type resourceType]
+        {
+            get
+            {
+                if (!typeof(UndertaleNamedResource).IsAssignableFrom(resourceType))
+                    throw new NotSupportedException($"\"{resourceType.FullName}\" is not a UndertaleNamedResource.");
+
+                var property = GetType().GetProperties().Where(x => x.PropertyType.Name == "IList`1")
+                                                        .FirstOrDefault(x => x.PropertyType.GetGenericArguments()[0] == resourceType);
+                if (property is null)
+                    throw new MissingMemberException($"\"UndertaleData\" doesn't contain a resource list of type \"{resourceType.FullName}\".");
+
+                return property.GetValue(this, null);
+            }
+            set
+            {
+                if (!typeof(UndertaleNamedResource).IsAssignableFrom(resourceType))
+                    throw new NotSupportedException($"\"{resourceType.FullName}\" is not a UndertaleNamedResource.");
+
+                var property = GetType().GetProperties().Where(x => x.PropertyType.Name == "IList`1")
+                                                        .FirstOrDefault(x => x.PropertyType.GetGenericArguments()[0] == resourceType);
+                if (property is null)
+                    throw new MissingMemberException($"\"UndertaleData\" doesn't contain a resource list of type \"{resourceType.FullName}\".");
 
                 property.SetValue(this, value, null);
             }
@@ -81,11 +113,24 @@ namespace UndertaleModLib
         public bool GMS2_3 = false;
         public bool GMS2_3_1 = false;
         public bool GMS2_3_2 = false;
+        public bool UseQoiFormat = false;
+        public bool UseBZipFormat = false;
+        public bool GMS2022_1 = false;
+        public bool GMS2022_2 = false;
+        public bool GM2022_3 = false;
         public ToolInfo ToolInfo = new ToolInfo();
         public int PaddingAlignException = -1;
 
         public BuiltinList BuiltinList;
         public Dictionary<string, UndertaleFunction> KnownSubFunctions; // Cache for known 2.3-style function names for compiler speedups. Can be re-built by setting this to null.
+
+        public ConcurrentDictionary<string, string> GMLCache { get; set; }
+        public List<string> GMLCacheFailed { get; set; }
+        public ConcurrentBag<string> GMLCacheChanged { get; set; } = new();
+        public List<string> GMLEditedBefore { get; set; }
+        public bool GMLCacheWasSaved { get; set; }
+        public bool GMLCacheIsReady { get; set; } = true;
+
 
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {
@@ -370,7 +415,7 @@ namespace UndertaleModLib
                         // GMS 2.3+
                         if (!isBuiltin)
                         {
-                            data.VarCount1 = Math.Max(data.VarCount1, (uint)id);
+                            data.VarCount1++;
                             data.VarCount2 = data.VarCount1;
                         }
                         oldId = (uint)id;

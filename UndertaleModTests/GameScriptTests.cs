@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +10,7 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UndertaleModLib;
+using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.Scripting;
 
@@ -29,6 +32,9 @@ namespace UndertaleModTests
         public string ScriptErrorMessage => throw new NotImplementedException();
         public string ExePath => throw new NotImplementedException();
         public string ScriptErrorType => throw new NotImplementedException();
+        public bool GMLCacheEnabled => throw new NotImplementedException();
+
+        public bool IsAppClosed => throw new NotImplementedException();
 
         public void ChangeSelection(object newsel)
         {
@@ -37,8 +43,9 @@ namespace UndertaleModTests
         public void EnsureDataLoaded()
         {
         }
-        public bool Make_New_File()
+        public async Task<bool> Make_New_File()
         {
+            await Task.Delay(1); //dummy await
             return true;
         }
         public void ReplaceTempWithMain(bool ImAnExpertBTW = false)
@@ -103,6 +110,10 @@ namespace UndertaleModTests
         {
             Console.WriteLine("SetProgressBar(): " + progressValue + " / " + maxValue + ", Message: " + message + ", Status: " + status);
         }
+        public void SetProgressBar()
+        {
+            Console.WriteLine("SetProgressBar()");
+        }
         public void UpdateProgressValue(double progressValue)
         {
             Console.WriteLine($"UpdateProgressValue(): {progressValue}");
@@ -153,14 +164,30 @@ namespace UndertaleModTests
         {
             Console.WriteLine($"SimpleTextOutput(): \"{titleText}\", \"{labelText}\", *defaultInputBoxText* (length - {defaultInputBoxText.Length}), {isMultiline}");
         }
+        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+        {
+            Console.WriteLine($"ClickableTextOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count()}), {editorDecompile.ToString().ToLower()}"
+                              + failedList is not null ? $", *failedList* (length - {failedList.Count()})" : string.Empty);
+            await Task.Delay(1); //dummy await
+        }
+        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+        {
+            Console.WriteLine($"ClickableTextOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count}), {editorDecompile.ToString().ToLower()}"
+                              + failedList is not null ? $", *failedList* (length - {failedList.Count()})" : string.Empty);
+            await Task.Delay(1); //dummy await
+        }
 
         public void SetUMTConsoleText(string message)
         {
             Console.Write("SetUMTConsoleText(): " + message);
         }
-        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false)
+        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
         {
-            Console.Write("ReplaceTextInGML(): " + codeName + ", " + keyword + ", " + replacement + ", " + case_sensitive.ToString() + ", " + isRegex.ToString());
+            Console.Write("ReplaceTextInGML(): " + codeName + ", " + keyword + ", " + replacement + ", " + case_sensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
+        }
+        public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+        {
+            Console.Write("ReplaceTextInGML(): " + code.ToString() + ", " + keyword + ", " + replacement + ", " + case_sensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
         }
         public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false)
         {
@@ -170,13 +197,13 @@ namespace UndertaleModTests
         {
             Console.Write("ImportASMString(): " + codeName + ", " + gmlCode + ", " + doParse.ToString());
         }
-        public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false)
+        public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
-            Console.Write("ImportGMLFile(): " + fileName + ", " + doParse.ToString());
+            Console.Write($"ImportGMLFile(): \"{fileName}\", {doParse}, {CheckDecompiler}, {throwOnError}");
         }
-        public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
+        public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
-            Console.Write("ImportASMFile(): " + fileName + ", " + doParse.ToString());
+            Console.Write($"ImportASMFile(): \"{fileName}\", {doParse}, {destroyASM}, {CheckDecompiler}, {throwOnError}");
         }
 
         public void SetFinishedMessage(bool isFinishedMessageEnabled)
@@ -188,7 +215,7 @@ namespace UndertaleModTests
         {
             Console.WriteLine("Hiding Progress Bar.");
         }
-        
+
         public void EnableUI()
         {
             Console.WriteLine("Enabling UI.");
@@ -209,6 +236,19 @@ namespace UndertaleModTests
         {
             Console.WriteLine("Stopping progress bar updater...");
             await Task.Delay(1); //dummy await
+        }
+
+        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
+        {
+            Console.WriteLine(string.Format("GenerateGMLCache(): *decompileContext*{0}, *dialog*{1}, {2}",
+                                            decompileContext is null ? " (null)" : "",
+                                            dialog is null ? " (null)" : "",
+                                            isSaving.ToString().ToLower())
+                              );
+
+            await Task.Delay(1); //dummy await
+
+            return false;
         }
 
         protected async Task<object> RunScript(string path)
@@ -237,9 +277,15 @@ namespace UndertaleModTests
             throw new NotImplementedException();
         }
 
-        public string GetDecompiledText(string codeName)
+        public string GetDecompiledText(string codeName, GlobalDecompileContext context = null)
         {
             string output = "GetDecompiledText(): " + codeName;
+            Console.Write(output);
+            return output;
+        }
+        public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
+        {
+            string output = "GetDecompiledText(): " + code?.ToString();
             Console.Write(output);
             return output;
         }
@@ -249,9 +295,15 @@ namespace UndertaleModTests
             Console.Write(output);
             return output;
         }
-        public bool AreFilesIdentical(string File01, string File02)
+        public string GetDisassemblyText(UndertaleCode code)
         {
-            string output = "AreFilesIdentical(): " + File01 + ", " + File02;
+            string output = "GetDisassemblyText(): " + code?.ToString();
+            Console.Write(output);
+            return output;
+        }
+        public bool AreFilesIdentical(string file1, string file2)
+        {
+            string output = "AreFilesIdentical(): " + file1 + ", " + file2;
             Console.Write(output);
             return true;
         }
@@ -303,7 +355,7 @@ namespace UndertaleModTests
         {
             await RunScript("ShowRoomName.csx");
         }
-        
+
         [TestMethod]
         [Ignore] // TODO: path problems
         public async Task BorderEnabler()

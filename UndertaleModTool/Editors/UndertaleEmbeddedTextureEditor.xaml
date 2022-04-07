@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="UndertaleModTool.UndertaleEmbeddedTextureEditor"
+﻿<local:DataUserControl x:Class="UndertaleModTool.UndertaleEmbeddedTextureEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -21,8 +21,8 @@
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Scaled</TextBlock>
         <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Scaled}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Generated mips</TextBlock>
-        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneratedMips}" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Generated mips</TextBlock>
+        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneratedMips}" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
 
         <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="3">
             <Grid.ColumnDefinitions>
@@ -49,7 +49,7 @@
                         </DrawingBrush>
                     </Border.Background>
 
-                    <Image Source="{Binding TextureData.TextureBlob}" MouseLeftButtonDown="Image_MouseLeftButtonDown"/>
+                    <Image Source="{Binding TextureData.TextureBlob, Mode=OneWay}" MouseLeftButtonDown="Image_MouseLeftButtonDown"/>
                 </Border>
             </Viewbox>
 
@@ -57,4 +57,4 @@
             <Button Grid.Row="1" Grid.Column="3" Content="Export" Click="Export_Click"/>
         </Grid>
     </Grid>
-</UserControl>
+</local:DataUserControl>

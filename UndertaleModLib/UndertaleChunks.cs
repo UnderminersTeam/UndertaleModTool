@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
+using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModLib
 {
@@ -264,6 +265,44 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
+            if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
+            {
+                /* This code performs three checks to identify GM2022.2.
+                 * First, as you've seen, is the bytecode version.
+                 * Second, we assume it is. If there are no Glyphs, we are vindicated by the impossibility of null values there.
+                 * Third, in case of a terrible fluke causing this to appear valid erroneously, we verify that each pointer leads into the next.
+                 * And if someone builds their game so the first pointer is absolutely valid length data and the next font is valid glyph data-
+                 * screw it, call Jacky720 when someone constructs that and you want to mod it.
+                 * Maybe try..catch on the whole shebang?
+                 */
+                uint positionToReturn = reader.Position;
+                if (reader.ReadUInt32() > 0) // Font count
+                {
+                    uint firstFontPointer = reader.ReadUInt32();
+                    reader.Position = firstFontPointer + 48; // There are 48 bytes of existing metadata.
+                    uint glyphsLength = reader.ReadUInt32();
+                    reader.undertaleData.GMS2022_2 = true;
+                    if (glyphsLength != 0)
+                    {
+                        List<uint> glyphPointers = new List<uint>();
+                        for (uint i = 0; i < glyphsLength; i++)
+                            glyphPointers.Add(reader.ReadUInt32());
+                        foreach (uint pointer in glyphPointers)
+                        {
+                            if (reader.Position != pointer)
+                            {
+                                reader.undertaleData.GMS2022_2 = false;
+                                break;
+                            }
+                            reader.Position += 14;
+                            ushort kerningLength = reader.ReadUInt16();
+                            reader.Position += (uint)4 * kerningLength; // combining read/write would apparently break
+                        }
+                    }
+                }
+                reader.Position = positionToReturn;
+            }
+
             base.UnserializeChunk(reader);
 
             Padding = reader.ReadBytes(512);
@@ -283,6 +322,93 @@ namespace UndertaleModLib
     public class UndertaleChunkROOM : UndertaleListChunk<UndertaleRoom>
     {
         public override string Name => "ROOM";
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            CheckForEffectData(reader);
+
+            base.UnserializeChunk(reader);
+        }
+
+        private void CheckForEffectData(UndertaleReader reader)
+        {
+            // Do a length check on room layers to see if this is 2022.1 or higher
+            if (!reader.undertaleData.GMS2022_1 && reader.undertaleData.GMS2_3)
+            {
+                int returnTo = reader.Offset;
+
+                // Iterate over all rooms until a length check is performed
+                int roomCount = reader.ReadInt32();
+                bool finished = false;
+                for (int roomIndex = 0; roomIndex < roomCount && !finished; roomIndex++)
+                {
+                    // Advance to room data we're interested in (and grab pointer for next room)
+                    reader.Offset = returnTo + 4 + (4 * roomIndex);
+                    int roomPtr = reader.ReadInt32();
+                    reader.Offset = roomPtr + (22 * 4);
+
+                    // Get the pointer for this room's layer list, as well as pointer to sequence list
+                    int layerListPtr = reader.ReadInt32();
+                    int seqnPtr = reader.ReadInt32();
+                    reader.Offset = layerListPtr;
+                    int layerCount = reader.ReadInt32();
+                    if (layerCount >= 1)
+                    {
+                        // Get pointer into the individual layer data (plus 8 bytes) for the first layer in the room
+                        int jumpOffset = reader.ReadInt32() + 8;
+
+                        // Find the offset for the end of this layer
+                        int nextOffset;
+                        if (layerCount == 1)
+                            nextOffset = seqnPtr;
+                        else
+                            nextOffset = reader.ReadInt32(); // (pointer to next element in the layer list)
+
+                        // Actually perform the length checks, depending on layer data
+                        reader.Offset = jumpOffset;
+                        switch ((LayerType)reader.ReadInt32())
+                        {
+                            case LayerType.Background:
+                                if (nextOffset - reader.Offset > 16 * 4)
+                                    reader.undertaleData.GMS2022_1 = true;
+                                finished = true;
+                                break;
+                            case LayerType.Instances:
+                                reader.Offset += 6 * 4;
+                                int instanceCount = reader.ReadInt32();
+                                if (nextOffset - reader.Offset != (instanceCount * 4))
+                                    reader.undertaleData.GMS2022_1 = true;
+                                finished = true;
+                                break;
+                            case LayerType.Assets:
+                                reader.Offset += 6 * 4;
+                                int tileOffset = reader.ReadInt32();
+                                if (tileOffset != reader.Position + 8)
+                                    reader.undertaleData.GMS2022_1 = true;
+                                finished = true;
+                                break;
+                            case LayerType.Tiles:
+                                reader.Offset += 7 * 4;
+                                int tileMapWidth = reader.ReadInt32();
+                                int tileMapHeight = reader.ReadInt32();
+                                if (nextOffset - reader.Offset != (tileMapWidth * tileMapHeight * 4))
+                                    reader.undertaleData.GMS2022_1 = true;
+                                finished = true;
+                                break;
+                            case LayerType.Effect:
+                                reader.Offset += 7 * 4;
+                                int propertyCount = reader.ReadInt32();
+                                if (nextOffset - reader.Offset != (propertyCount * 3 * 4))
+                                    reader.undertaleData.GMS2022_1 = true;
+                                finished = true;
+                                break;
+                        }
+                    }
+                }
+
+                reader.Offset = returnTo;
+            }
+        }
     }
 
     public class UndertaleChunkDAFL : UndertaleEmptyChunk // DataFiles
@@ -505,6 +631,27 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
+            // Detect GM2022.3
+            if (reader.undertaleData.GMS2_3)
+            {
+                uint positionToReturn = reader.Position;
+                uint texCount = reader.ReadUInt32();
+                if (texCount == 1) // If no textures exist, this could false positive.
+                {
+                    reader.Position += 16; // Jump to either padding or length, depending on version
+                    if (reader.ReadUInt32() > 0) // Check whether it's padding or length
+                        reader.undertaleData.GM2022_3 = true;
+                }
+                else if (texCount > 1)
+                {
+                    uint firstTex = reader.ReadUInt32();
+                    uint secondTex = reader.ReadUInt32();
+                    if (firstTex + 16 == secondTex)
+                        reader.undertaleData.GM2022_3 = true;
+                }
+                reader.Position = positionToReturn;
+            }
+
             base.UnserializeChunk(reader);
 
             // texture blobs

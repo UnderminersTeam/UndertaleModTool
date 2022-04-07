@@ -24,7 +24,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertaleSpriteEditor.xaml
     /// </summary>
-    public partial class UndertaleSpriteEditor : UserControl
+    public partial class UndertaleSpriteEditor : DataUserControl
     {
         public UndertaleSpriteEditor()
         {

@@ -89,6 +89,11 @@ namespace UndertaleModLib.Decompiler
         LoopEnd: return;
         }
 
+        #region Struct management
+        public List<Expression> ArgumentReplacements;
+        public bool DecompilingStruct;
+        #endregion
+
         #region Indentation management
         public const string Indent = "    ";
         private int _indentationLevel = 0;
@@ -136,6 +141,14 @@ namespace UndertaleModLib.Decompiler
         public HashSet<string> LocalVarDefines = new HashSet<string>();
         #endregion
 
+        #region GMS 2.3+ Function management
+        /// <summary>
+        /// Set containing already-decompiled child code entries.
+        /// Used to prevent decompiling the same child entry multiple times.
+        /// Only applies to function entries, struct and constructors are unaffected.
+        /// </summary>
+        public ISet<UndertaleCode> AlreadyProcessed = new HashSet<UndertaleCode>();
+        #endregion
 
         #region Asset type resolution
         /// <summary>
@@ -622,7 +635,10 @@ namespace UndertaleModLib.Decompiler
                 string op = OperationToPrintableString(Opcode);
                 if (Opcode == UndertaleInstruction.Opcode.Not && Type == UndertaleInstruction.DataType.Boolean)
                     op = "!"; // This is a logical negation instead, see #93
-                return String.Format("({0}{1})", op, Argument.ToString(context));
+                string arg = Argument.ToString(context);
+                if (arg.Contains(" "))
+                    return String.Format("({0}({1}))", op, arg);
+                return String.Format("({0}{1})", op, arg);
             }
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
@@ -1069,7 +1085,11 @@ namespace UndertaleModLib.Decompiler
                             Value.DoTypePropagation(context, AssetTypeResolver.return_types[script.Name.Content]);
                     }
 
-                    return "return " + Value.ToString(context) + ";";
+                    string cleanVal = Value.ToString(context);
+                    if (cleanVal.EndsWith("\n"))
+                        cleanVal = cleanVal.Substring(0, cleanVal.Length - 1);
+
+                    return "return " + cleanVal + ";";
                 }
                 else
                     return (context.GlobalContext.Data?.IsGameMaker2() ?? false ? "return;" : "exit");
@@ -1095,6 +1115,34 @@ namespace UndertaleModLib.Decompiler
 
             public bool HasVarKeyword;
 
+            private bool _isStructDefinition, _checkedForDefinition;
+            public bool IsStructDefinition 
+            { get {
+                    // Quick hack
+                    if (!_checkedForDefinition)
+                    {
+                        try
+                        {
+                            if (Destination.Var.Name.Content.StartsWith("___struct___"))
+                            {
+                                Expression val = Value;
+                                while (val is ExpressionCast cast)
+                                    val = cast;
+
+                                if (val is FunctionDefinition def)
+                                {
+                                    def.PromoteToStruct();
+                                    _isStructDefinition = true;
+                                }
+                            }
+                        }
+                        catch (Exception) { }
+                        _checkedForDefinition = true;
+                    }
+                    return _isStructDefinition;
+                }
+            }
+
             public AssignmentStatement(ExpressionVar destination, Expression value)
             {
                 Destination = destination;
@@ -1103,9 +1151,14 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
+                bool gms2 = context.GlobalContext.Data?.IsGameMaker2() ?? false;
+
+                if (gms2 && IsStructDefinition)
+                    return "";
+
                 string varName = Destination.ToString(context);
 
-                if (context.GlobalContext.Data?.IsGameMaker2() ?? false && !HasVarKeyword)
+                if (gms2 && !HasVarKeyword)
                 {
                     var data = context.GlobalContext.Data;
                     if (data != null)
@@ -1120,16 +1173,11 @@ namespace UndertaleModLib.Decompiler
                 string varPrefix = (HasVarKeyword ? "var " : "");
 
                 // Check for possible ++, --, or operation equal (for single vars)
-                if (Value is ExpressionTwo && ((Value as ExpressionTwo).Argument1 is ExpressionVar) &&
-                    ((Value as ExpressionTwo).Argument1 as ExpressionVar).Var == Destination.Var)
+                if (Value is ExpressionTwo two && (two.Argument1 is ExpressionVar) &&
+                    (two.Argument1 as ExpressionVar).Var == Destination.Var)
                 {
-                    ExpressionTwo two = (Value as ExpressionTwo);
-                    if (two.Argument2 is ExpressionConstant)
-                    {
-                        ExpressionConstant c = (two.Argument2 as ExpressionConstant);
-                        if (c.IsPushE && ExpressionConstant.ConvertToInt(c.Value) == 1)
-                            return varName + (two.Opcode == UndertaleInstruction.Opcode.Add ? "++" : "--");
-                    }
+                    if (two.Argument2 is ExpressionConstant c && c.IsPushE && ExpressionConstant.ConvertToInt(c.Value) == 1)
+                        return varName + (two.Opcode == UndertaleInstruction.Opcode.Add ? "++" : "--");
 
                     // Not ++ or --, could potentially be an operation equal
                     bool checkEqual(ExpressionVar a, ExpressionVar b)
@@ -1161,12 +1209,16 @@ namespace UndertaleModLib.Decompiler
                         }
                     }
                 }
-                return String.Format("{0}{1} = {2}", varPrefix, varName, Value.ToString(context));
+                return String.Format("{0}{1}{2} {3}", varPrefix, varName, context.DecompilingStruct ? ":" : " =", Value.ToString(context));
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
             {
-                Destination = (ExpressionVar)Destination.CleanExpression(context, block);
+                Expression expr = Destination.CleanExpression(context, block);
+
+                if (expr is ExpressionVar expvar)
+                    Destination = expvar;
+
                 Value = Value.CleanExpression(context, block);
                 if (Destination.Var.Name?.Content == "$$$$temp$$$$")
                     context.CompilerTempVar = this;
@@ -1240,15 +1292,50 @@ namespace UndertaleModLib.Decompiler
         // Represents an inline function definition
         public class FunctionDefinition : Expression
         {
+            public enum FunctionType
+            {
+                Function,
+                Constructor,
+                Struct
+            }
+
             public UndertaleFunction Function { get; private set; }
             public UndertaleCode FunctionBodyCodeEntry { get; private set; }
             public Block FunctionBodyEntryBlock { get; private set; }
+            public FunctionType Subtype { get; private set; }
 
-            public FunctionDefinition(UndertaleFunction target, UndertaleCode functionBodyCodeEntry, Block functionBodyEntryBlock)
+            internal List<Expression> Arguments;
+
+            public FunctionDefinition(UndertaleFunction target, UndertaleCode functionBodyCodeEntry, Block functionBodyEntryBlock, FunctionType type)
             {
+                Subtype = type;
                 Function = target;
                 FunctionBodyCodeEntry = functionBodyCodeEntry;
                 FunctionBodyEntryBlock = functionBodyEntryBlock;
+            }
+
+            public void PromoteToStruct()
+            {
+                if (Subtype == FunctionType.Function)
+                    throw new InvalidOperationException("Cannot promote function to struct");
+
+                Subtype = FunctionType.Struct;
+            }
+
+            public void PopulateArguments(params Expression[] arguments)
+            {
+                PopulateArguments(arguments.ToList());
+            }
+
+            public void PopulateArguments(List<Expression> arguments)
+            {
+                if (Subtype != FunctionType.Struct)
+                    throw new InvalidOperationException("Cannot populate arguments of non-struct");
+
+                if (Arguments == null)
+                    Arguments = new List<Expression>();
+
+                Arguments.AddRange(arguments);
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
@@ -1261,23 +1348,83 @@ namespace UndertaleModLib.Decompiler
                 StringBuilder sb = new StringBuilder();
                 if (context.Statements.ContainsKey(FunctionBodyEntryBlock.Address.Value))
                 {
-                    sb.Append("function(");
-                    for (int i = 0; i < FunctionBodyCodeEntry.ArgumentsCount; ++i)
+                    FunctionDefinition def;
+                    var oldDecompilingStruct = context.DecompilingStruct;
+                    var oldReplacements = context.ArgumentReplacements;
+                    if (Subtype == FunctionType.Struct)
+                        context.DecompilingStruct = true;
+                    else
                     {
-                        if (i != 0)
-                            sb.Append(", ");
-                        sb.Append("argument");
-                        sb.Append(i);
+                        context.DecompilingStruct = false;
+                        sb.Append("function(");
+                        for (int i = 0; i < FunctionBodyCodeEntry.ArgumentsCount; ++i)
+                        {
+                            if (i != 0)
+                                sb.Append(", ");
+                            sb.Append("argument");
+                            sb.Append(i);
+                        }
+                        sb.Append(") ");
+                        if (Subtype == FunctionType.Constructor)
+                            sb.Append("constructor ");
+                        sb.Append("//");
+                        sb.Append(Function.Name.Content);
                     }
-                    sb.Append(") // ");
-                    sb.Append(Function.Name.Content);
-                    sb.Append("\n{\n");
-                    context.IndentationLevel++;
-                    foreach (Statement stmt in context.Statements[FunctionBodyEntryBlock.Address.Value])
-                        sb.Append(context.Indentation + stmt.ToString(context) + "\n");
-                    context.IndentationLevel--;
-                    sb.Append("}");
-                    sb.Append("\n");
+
+                    var statements = context.Statements[FunctionBodyEntryBlock.Address.Value];
+                    int numNotReturn = statements.FindAll(stmt => !(stmt is ReturnStatement)).Count;
+
+                    if (numNotReturn > 0 || Subtype != FunctionType.Struct)
+                    {
+                        sb.Append("\n");
+                        sb.Append(context.Indentation);
+                        sb.Append("{\n");
+                        context.IndentationLevel++;
+                        context.ArgumentReplacements = Arguments;
+
+                        int count = 0;
+                        foreach (Statement stmt in statements)
+                        {
+                            count++;
+                            if ((Subtype != FunctionType.Function && stmt is ReturnStatement) || (stmt is AssignmentStatement assign && assign.IsStructDefinition))
+                                continue;
+
+                            sb.Append(context.Indentation);
+
+                            // See #614
+                            // This is not the place to monkey patch this
+                            // issue, but it's like 2am and quite frankly
+                            // I don't care anymore.
+                            def = null;
+                            if (stmt is FunctionDefinition)
+                                def = stmt as FunctionDefinition;
+                            else if (stmt is TempVarAssignmentStatement reference && reference.Value is FunctionDefinition)
+                                def = reference.Value as FunctionDefinition;
+
+                            if (def?.Function == Function)
+                            {
+                                //sb.Append("// Error decompiling function: function contains its own declaration???\n");
+                                sb.Append("\n");
+                                break;
+                            }
+                            else
+                            {
+                                sb.Append(stmt.ToString(context));
+                                if (Subtype == FunctionType.Struct && count < numNotReturn)
+                                    sb.Append(",");
+                            } 
+                            sb.Append("\n");
+                        }
+                        context.DecompilingStruct = oldDecompilingStruct;
+                        context.ArgumentReplacements = oldReplacements;
+                        context.IndentationLevel--;
+                        sb.Append(context.Indentation);
+                        sb.Append("}");
+                        if(!oldDecompilingStruct)
+                            sb.Append("\n");
+                    }
+                    else
+                        sb.Append("{}");
                 }
                 else
                 {
@@ -1295,7 +1442,7 @@ namespace UndertaleModLib.Decompiler
         // Represents a high-level function or script call.
         public abstract class FunctionCall : Expression
         {
-            private UndertaleInstruction.DataType ReturnType;
+            internal UndertaleInstruction.DataType ReturnType;
             internal List<Expression> Arguments;
 
             protected FunctionCall(UndertaleInstruction.DataType returnType, List<Expression> args)
@@ -1330,19 +1477,82 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 StringBuilder argumentString = new StringBuilder();
-                foreach (Expression exp in Arguments)
+
+                if (Function.Name.Content == "@@NewGMLObject@@") // Creating a new "object" via a constructor OR this is a struct definition
                 {
                     context.currentFunction = this;
-                    if (argumentString.Length > 0)
-                        argumentString.Append(", ");
-                    argumentString.Append(exp.ToString(context));
+
+                    string constructor;
+                    var actualArgs = Arguments.Skip(1).ToList();
+                    if (Arguments[0] is FunctionDefinition def)
+                    {
+                        if (def.Subtype == FunctionDefinition.FunctionType.Struct) // Struct moment
+                        {
+                            def.PopulateArguments(actualArgs);
+                            return def.ToString(context);
+                        }
+                        else
+                            constructor = def.FunctionBodyCodeEntry.Name.Content;
+                    }
+                    else
+                        constructor = Arguments[0].ToString(context);
+
+                    if (constructor.StartsWith("gml_Script_"))
+                        constructor = constructor.Substring(11);
+                    if (constructor.EndsWith(context.TargetCode.Name.Content))
+                        constructor = constructor.Substring(0, constructor.Length - context.TargetCode.Name.Content.Length - 1);
+
+                    if (AssetTypeResolver.builtin_funcs.TryGetValue(constructor, out AssetIDType[] types))
+                    {
+                        int index = 0;
+                        foreach (var arg in actualArgs)
+                            arg.DoTypePropagation(context, types[index++]);
+                    }
+
+                    // Don't ask
+                    if (Arguments[0] is ExpressionCast cast &&
+                        cast.Argument is ExpressionConstant constant &&
+                        constant.Value is UndertaleInstruction.Reference<UndertaleFunction> reference)
+                    {
+                        var call = new DirectFunctionCall(reference.Target, ReturnType, actualArgs) {
+                            OverridenName = constructor
+                        };
+
+                        return "new " + call.ToString(context);
+                    }
+                    else
+                    {   
+                        foreach (Expression exp in actualArgs)
+                        {
+                            context.currentFunction = this;
+                            if (argumentString.Length > 0)
+                                argumentString.Append(", ");
+                            argumentString.Append(exp.ToString(context));
+                        }
+                    }
                     context.currentFunction = null;
+
+                    return String.Format("new {0}({1})", constructor, argumentString);
+                }
+                else
+                {
+                    foreach (Expression exp in Arguments)
+                    {
+                        context.currentFunction = this;
+                        if (argumentString.Length > 0)
+                            argumentString.Append(", ");
+                        argumentString.Append(exp.ToString(context));
+                        
+                    }
+                    context.currentFunction = null;
+
+                    if (Function.Name.Content == "@@NewGMLArray@@") // Inline array definitions
+                        return "[" + argumentString.ToString() + "]";
+
+                    return String.Format("{0}({1})", OverridenName != string.Empty ? OverridenName : Function.Name.Content, argumentString.ToString());
                 }
 
-                if (Function.Name.Content == "@@NewGMLArray@@") // Special case in GMS2.
-                    return "[" + argumentString.ToString() + "]";
-
-                return String.Format("{0}({1})", OverridenName != string.Empty ? OverridenName : Function.Name.Content, argumentString.ToString());
+                
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
@@ -1434,6 +1644,9 @@ namespace UndertaleModLib.Decompiler
                         argumentString.Append(", ");
                     argumentString.Append(exp.ToString(context));
                 }
+
+                if (Function is FunctionDefinition)
+                    return String.Format("{0}({1})", Function.ToString(context), argumentString.ToString());
 
                 return String.Format("{0}.{1}({2})", FunctionThis.ToString(context), Function.ToString(context), argumentString.ToString());
             }
@@ -1528,20 +1741,27 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 string name = Var.Name.Content;
-                if (context.GlobalContext.Data?.GMS2_3 == true)
+                if (ArrayIndices != null)
                 {
-                    if (ArrayIndices != null)
+                    if (context?.GlobalContext.Data?.GMS2_3 == true)
                     {
+                        if (name == "argument" && context.DecompilingStruct && context.ArgumentReplacements != null && ArrayIndices.Count == 1)
+                        {
+                            var replacements = context.ArgumentReplacements;
+                            if (int.TryParse(ArrayIndices[0].ToString(context), out int index) && index >= 0 && index < replacements.Count)
+                                return replacements[index].ToString(context);
+                        }
                         foreach (Expression e in ArrayIndices)
                             name += "[" + e.ToString(context) + "]";
+
                     }
-                }
-                else if (ArrayIndices != null)
-                {
-                    if (ArrayIndices.Count == 2 && ArrayIndices[0] != null && ArrayIndices[1] != null)
-                        name += "[" + ArrayIndices[0].ToString(context) + ", " + ArrayIndices[1].ToString(context) + "]";
-                    else if (ArrayIndices[0] != null)
-                        name += "[" + ArrayIndices[0].ToString(context) + "]";
+                    else
+                    {
+                        if (ArrayIndices.Count == 2 && ArrayIndices[0] != null && ArrayIndices[1] != null)
+                            name += "[" + ArrayIndices[0].ToString(context) + ", " + ArrayIndices[1].ToString(context) + "]";
+                        else if (ArrayIndices[0] != null)
+                            name += "[" + ArrayIndices[0].ToString(context) + "]";
+                    }
                 }
 
                 // NOTE: The "var" prefix is handled in Decompiler.Decompile. 
@@ -1747,7 +1967,7 @@ namespace UndertaleModLib.Decompiler
                                 taken.Push(e);
                                 bytesToTake -= GetTypeSize(e);
                                 if (bytesToTake < 0)
-                                    throw new InvalidOperationException("The stack got misaligned?");
+                                    throw new InvalidOperationException("The stack got misaligned? Error 0");
                             }
 
                             int b2 = (byte)instr.ComparisonKind & 0x7F;
@@ -1761,7 +1981,7 @@ namespace UndertaleModLib.Decompiler
                                 moved.Push(e);
                                 bytesToMove -= GetTypeSize(e);
                                 if (bytesToMove < 0)
-                                    throw new InvalidOperationException("The stack got misaligned?");
+                                    throw new InvalidOperationException("The stack got misaligned? Error 1");
                             }
 
                             while (taken.Count > 0)
@@ -1800,7 +2020,10 @@ namespace UndertaleModLib.Decompiler
 
                             bytesToDuplicate -= GetTypeSize(item);
                             if (bytesToDuplicate < 0)
-                                throw new InvalidOperationException("The stack got misaligned?");
+                                throw new InvalidOperationException("The stack got misaligned? Error 2: Attempted to duplicate " 
+                                    + GetTypeSize(item) 
+                                    + " bytes, only found "
+                                    + (bytesToDuplicate + GetTypeSize(item)));
                         }
                         topExpressions1.Reverse();
                         topExpressions2.Reverse();
@@ -2099,18 +2322,28 @@ namespace UndertaleModLib.Decompiler
                                 while (arg2 is ExpressionCast cast)
                                     arg2 = cast.Argument;
 
-                                if (arg1 is ExpressionConstant argThis && argThis.Type == UndertaleInstruction.DataType.Int16 &&
-                                    (short)argThis.Value == (short)UndertaleInstruction.InstanceType.Self &&
-                                    arg2 is ExpressionConstant argCode && argCode.Type == UndertaleInstruction.DataType.Int32 &&
+                                if (arg2 is ExpressionConstant argCode && argCode.Type == UndertaleInstruction.DataType.Int32 &&
                                     argCode.Value is UndertaleInstruction.Reference<UndertaleFunction> argCodeFunc)
                                 {
                                     UndertaleCode functionBody = context.GlobalContext.Data.Code.First(x => x.Name.Content == argCodeFunc.Target.Name.Content);
-                                    if (context.TargetCode.ChildEntries.Contains(functionBody))
+
+                                    FunctionDefinition.FunctionType type = FunctionDefinition.FunctionType.Function;
+                                    bool processChildEntry;
+
+                                    if (arg1 is DirectFunctionCall call && call.Function.Name.Content == "@@NullObject@@")
+                                    {
+                                        type = FunctionDefinition.FunctionType.Constructor;
+                                        processChildEntry = true;
+                                    }
+                                    else
+                                        processChildEntry = context.AlreadyProcessed.Add(functionBody);
+                                        
+                                    if (context.TargetCode.ChildEntries.Contains(functionBody) && processChildEntry)
                                     {
                                         // This function is somewhere inside this UndertaleCode block
                                         // inline the definition
                                         Block functionBodyEntryBlock = blocks[functionBody.Offset / 4];
-                                        stack.Push(new FunctionDefinition(argCodeFunc.Target, functionBody, functionBodyEntryBlock));
+                                        stack.Push(new FunctionDefinition(argCodeFunc.Target, functionBody, functionBodyEntryBlock, type));
                                         workQueue.Push(new Tuple<Block, List<TempVarReference>>(functionBodyEntryBlock, new List<TempVarReference>()));
                                         break;
                                     }
@@ -2132,14 +2365,20 @@ namespace UndertaleModLib.Decompiler
                                     {
                                         Dictionary<uint, Block> blocks2 = PrepareDecompileFlow(anonymousCodeObject.ParentEntry, new List<uint>() { 0 });
                                         DecompileFromBlock(childContext, blocks2, blocks2[0]);
-                                        List<Statement> statements = HLDecompile(childContext, blocks2, blocks2[0], blocks2[anonymousCodeObject.Length / 4]);
+                                        // This hack handles decompilation of code entries getting shorter, but not longer or out of place.
+                                        Block lastBlock;
+                                        if (!blocks2.TryGetValue(anonymousCodeObject.Length / 4, out lastBlock))
+                                            lastBlock = blocks2[blocks2.Keys.Max()];
+                                        List<Statement> statements = HLDecompile(childContext, blocks2, blocks2[0], lastBlock);
                                         foreach (Statement stmt2 in statements)
                                         {
                                             if (stmt2 is AssignmentStatement assign &&
-                                                assign.Value is FunctionDefinition funcDef &&
-                                                funcDef.FunctionBodyEntryBlock.Address == anonymousCodeObject.Offset / 4)
+                                                assign.Value is FunctionDefinition funcDef)
                                             {
-                                                return assign.Destination.Var.Name.Content;
+                                                if (funcDef.FunctionBodyEntryBlock.Address == anonymousCodeObject.Offset / 4)
+                                                    return assign.Destination.Var.Name.Content;
+                                                else
+                                                    return string.Empty; //throw new Exception("Non-matching offset: " + funcDef.FunctionBodyEntryBlock.Address.ToString() + " versus " + (anonymousCodeObject.Offset / 4).ToString() + " (got name " + assign.Destination.Var.Name.Content + ")");
                                             }
                                         }
                                         throw new Exception("Unable to find the var name for anonymous code object " + anonymousCodeObject.Name.Content);
@@ -2227,6 +2466,25 @@ namespace UndertaleModLib.Decompiler
                                             throw new InvalidOperationException("Tried to popaf on something that is not a var");
                                     }
                                     break;
+                                case -4: // GMS2.3+, pushac
+                                    {
+                                        Expression ind = stack.Pop();
+                                        Expression target = stack.Pop();
+                                        if (target is ExpressionVar targetVar)
+                                        {
+                                            if (targetVar.VarType != UndertaleInstruction.VariableType.ArrayPushAF && targetVar.VarType != UndertaleInstruction.VariableType.ArrayPopAF)
+                                                throw new InvalidOperationException("Tried to pushac on var of type " + targetVar.VarType);
+
+                                            ExpressionVar newVar = new ExpressionVar(targetVar.Var, targetVar.InstType, targetVar.VarType);
+                                            newVar.Opcode = instr.Kind;
+                                            newVar.ArrayIndices = new List<Expression>(targetVar.ArrayIndices);
+                                            newVar.ArrayIndices.Add(ind);
+                                            stack.Push(newVar);
+                                        }
+                                        else
+                                            throw new InvalidOperationException("Tried to pushac on something that is not a var");
+                                    }
+                                    break;
                                 case -5: // GMS2.3+, setowner
                                     // Stop 'setowner' values from leaking into the decompiled output as tempvars.
                                     // Used in the VM to let copy-on-write functionality work, but unnecessary for decompilation
@@ -2240,6 +2498,25 @@ namespace UndertaleModLib.Decompiler
                                         owner = statement.ToString(context);
                                     statements.Add(new CommentStatement("setowner: " + (owner ?? "<null>")));
                                     */
+                                    break;
+                                case -10: // GMS2.3+, chknullish
+
+                                    // TODO: Implement nullish operator in decompiled output.
+                                    // Appearance in assembly is:
+
+                                    /* <push var>
+                                     * chknullish
+                                     * bf [block2]
+                                     * 
+                                     * :[block1]
+                                     * popz.v
+                                     * <var is nullish, evaluate new value>
+                                     * 
+                                     * :[block2]
+                                     * <use value>
+                                     */
+
+                                    // Note that this operator peeks from the stack, it does not pop directly.
                                     break;
                             }
                         }
@@ -2473,6 +2750,9 @@ namespace UndertaleModLib.Decompiler
                         sb.Append("{\n");
                     foreach (var stmt in Statements)
                     {
+                        if (stmt is AssignmentStatement assign && assign.IsStructDefinition)
+                            continue;
+
                         sb.Append(context.Indentation);
                         string resultStr = stmt.ToString(context);
                         sb.Append(resultStr).Append('\n');
@@ -2584,23 +2864,53 @@ namespace UndertaleModLib.Decompiler
                     Expression startValue = priorAssignment.Value;
 
                     List<Statement> loopCode = loop.Block.Statements;
-                    if (priorAssignment != null && loop.IsWhileLoop && loop.Condition == null && loopCode.Count > 2 && compareCondition.Opcode == UndertaleInstruction.ComparisonType.LTE && TestNumber(compareCondition.Argument2, 0) && compareCondition.Argument1.ToString(context) == startValue.ToString(context))
+                    if (priorAssignment != null &&
+                        loop.IsWhileLoop &&
+                        loop.Condition == null &&
+                        //loopCode.Count > 2 &&
+                        compareCondition.Opcode == UndertaleInstruction.ComparisonType.LTE &&
+                        TestNumber(compareCondition.Argument2, 0) &&
+                        compareCondition.Argument1.ToString(context) == startValue.ToString(context))
                     {
-                        TempVarAssignmentStatement repeatAssignment = loopCode[loopCode.Count - 2] as TempVarAssignmentStatement;
-                        IfHLStatement loopCheckStatement = loopCode[loopCode.Count - 1] as IfHLStatement;
+                        TempVarAssignmentStatement repeatAssignment = null;
+                        IfHLStatement loopCheckStatement = null;
+                        bool hasBreak = false;
+                        List<Statement> insideElseBlock = null;
+                        
+                        if (loopCode.Count > 2)
+                        {
+                            repeatAssignment = loopCode[loopCode.Count - 2] as TempVarAssignmentStatement;
+                            loopCheckStatement = loopCode[loopCode.Count - 1] as IfHLStatement;
+                        }
+
+                        if ((repeatAssignment == null || loopCheckStatement == null) &&
+                            loopCode[loopCode.Count - 1] is IfHLStatement wrapperIfStatement &&
+                            wrapperIfStatement.HasElse
+                           ) // single-level break detection
+                        {
+                            insideElseBlock = wrapperIfStatement.falseBlock.Statements;
+                            wrapperIfStatement.trueBlock.Statements.Add(new BreakHLStatement());
+                            if (insideElseBlock.Count > 2)
+                            {
+                                repeatAssignment = insideElseBlock[insideElseBlock.Count - 2] as TempVarAssignmentStatement;
+                                loopCheckStatement = insideElseBlock[insideElseBlock.Count - 1] as IfHLStatement;
+                                hasBreak = true;
+                            }
+                        }
 
                         if (repeatAssignment != null && loopCheckStatement != null)
                         { // tempVar = (tempVar -1); -> if (tempVar) continue -> break
 
                             // if (tempVar) {continue} else {empty}
-                            bool ifPass = loopCheckStatement.trueBlock.Statements.Count == 1 && !loopCheckStatement.HasElse && !loopCheckStatement.HasElseIf
-                                && loopCheckStatement.trueBlock.Statements[0] is ContinueHLStatement
-                                && loopCheckStatement.condition.ToString(context) == repeatAssignment.Value.ToString(context);
 
-                            if (ifPass)
+                            if (loopCheckStatement.trueBlock.Statements.Count == 1
+                                && !loopCheckStatement.HasElse
+                                && !loopCheckStatement.HasElseIf
+                                && loopCheckStatement.trueBlock.Statements[0] is ContinueHLStatement
+                                && loopCheckStatement.condition.ToString(context) == repeatAssignment.Value.ToString(context))
                             {
-                                loopCode.Remove(repeatAssignment);
-                                loopCode.Remove(loopCheckStatement);
+                                (hasBreak ? insideElseBlock : loopCode).Remove(repeatAssignment);
+                                (hasBreak ? insideElseBlock : loopCode).Remove(loopCheckStatement);
                                 block.Statements.Remove(priorAssignment);
 
                                 loop.RepeatStartValue = startValue;
@@ -2975,7 +3285,7 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     foreach (Block pred in e)
-                        changed |= dominators[i].And(dominators[pred._CachedIndex], i);
+                        changed |= pred != null && dominators[i].And(dominators[pred._CachedIndex], i);
                 }
             } while (changed);
 
@@ -3439,7 +3749,15 @@ namespace UndertaleModLib.Decompiler
             foreach (var warn in globalContext.DecompilerWarnings)
                 sb.Append(warn + "\n");
             foreach (var stmt in context.Statements[0])
+            {
+                // Ignore initial struct definitions, they clutter
+                // decompiled output and generally make code more
+                // confusing to read.
+                if (stmt is AssignmentStatement assign && assign.IsStructDefinition)
+                    continue;
+
                 sb.Append(stmt.ToString(context) + "\n");
+            }
 
             globalContext.DecompilerWarnings.Clear();
             context.Statements = null;

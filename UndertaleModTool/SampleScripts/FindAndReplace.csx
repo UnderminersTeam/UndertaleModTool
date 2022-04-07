@@ -31,7 +31,7 @@ String replacement = SimpleTextInput("Enter replacement term", "Search box below
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
 StartUpdater();
 
-SyncBinding("Strings, Functions, Variables", true);
+SyncBinding("Strings, Variables, Functions", true);
 await Task.Run(() => {
     foreach (UndertaleCode code in Data.Code)
     {

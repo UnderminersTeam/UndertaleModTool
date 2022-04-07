@@ -11,7 +11,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertaleTexturePageItemEditor.xaml
     /// </summary>
-    public partial class UndertaleTexturePageItemEditor : System.Windows.Controls.UserControl
+    public partial class UndertaleTexturePageItemEditor : DataUserControl
     {
         public UndertaleTexturePageItemEditor()
         {

@@ -13,10 +13,16 @@ namespace UndertaleModTool
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
+            bool ignore = parameter is string par && par == "returnEmptyOnNull";
+
             if (values.Any(e => e == DependencyProperty.UnsetValue))
             {
-                return null;
+                if (ignore)
+                    return new Rect(0, 0, 0, 0);
+                else
+                    return null;
             }
+
             return new Rect((ushort)values[0], (ushort)values[1], (ushort)values[2], (ushort)values[3]);
         }
 

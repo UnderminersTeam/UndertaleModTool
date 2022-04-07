@@ -16,7 +16,7 @@ List<string> splitStringsList = new List<string>();
 List<string> gameObjectsUsedList = new List<string>();
 string InputtedText = "";
 InputtedText = SimpleTextInput("Menu", "Enter name(s) of game object(s)", InputtedText, true);
-string[] IndividualLineArray = InputtedText.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+string[] IndividualLineArray = InputtedText.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 int usage_count = 0;
 int unique_objects_used = 0;
 foreach (var OneLine in IndividualLineArray)
@@ -59,7 +59,7 @@ for (var k = 0; k < splitStringsList.Count; k++)
 }
 if (gameObjectsUsedList.Count < 1)
 {
-    SimpleTextInput("No results for your query below", "No results for your query below", InputtedText, true);
+    SimpleTextOutput("No results for your query below", "No results for your query below", InputtedText, true);
     return;
 }
 else

@@ -24,6 +24,7 @@
         <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
         <DebugType>embedded</DebugType>
         <Platforms>AnyCPU;x64</Platforms>
+        <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
     </PropertyGroup>
     <PropertyGroup>
         <StartupObject>UndertaleModTool.Program</StartupObject>
@@ -47,6 +48,10 @@
         <None Update="CommunityScripts\BorderEnablerv1_11.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="CommunityScripts\FindObjectsWithSprite.csx">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="CommunityScripts\SafeBlaster.csx">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -3580,6 +3585,10 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
           <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
+        <None Update="SampleScripts\UndertaleDialogSimulator.csx">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
         <None Update="TechnicalScripts\ConvertFrom17to16_for_2.3.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3725,10 +3734,6 @@
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="CommunityScripts\DisableDogcheck.csx">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </None>
-        <None Update="CommunityScripts\EditGMS2TileData.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
@@ -4123,6 +4128,7 @@
         <PackageReference Include="Newtonsoft.Json">
             <Version>13.0.1</Version>
         </PackageReference>
+        <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
         <PackageReference Include="PropertyChanged.Fody" Version="3.3.3" />
         <PackageReference Include="System.AppContext">
             <Version>4.3.0</Version>

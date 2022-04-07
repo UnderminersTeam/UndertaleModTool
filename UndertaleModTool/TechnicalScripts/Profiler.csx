@@ -645,7 +645,7 @@ void PersistentObjectSetup(string objectName)
         obj = new UndertaleGameObject() { Name = Data.Strings.MakeString(objectName), Persistent = true };
         Data.GameObjects.Add(obj);
     }
-    if (Data.GeneralInfo.Name.Content == "UNDERTALE")
+    if (Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE"))
     {
         Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);
     }

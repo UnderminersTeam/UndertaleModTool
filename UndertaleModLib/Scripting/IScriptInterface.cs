@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using UndertaleModLib.Decompiler;
+using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Scripting
 {
@@ -31,8 +33,12 @@ namespace UndertaleModLib.Scripting
         string ExePath { get; }
         string ScriptErrorType { get; }
 
+        bool GMLCacheEnabled { get; }
+
+        bool IsAppClosed { get; }
+
         void EnsureDataLoaded();
-        bool Make_New_File();
+        Task<bool> Make_New_File();
         void ReplaceTempWithMain(bool ImAnExpertBTW = false);
         void ReplaceMainWithTemp(bool ImAnExpertBTW = false);
         void ReplaceTempWithCorrections(bool ImAnExpertBTW = false);
@@ -42,7 +48,7 @@ namespace UndertaleModLib.Scripting
         void ScriptMessage(string message);
         void SetUMTConsoleText(string message);
         bool ScriptQuestion(string message);
-        void ScriptError(string error, string title = "Error", bool SetConsoleText = true);
+        void ScriptError(string error, string title = "Error", bool SetConsoleText = true); //TODO: setConsoleText should get a *clearer* name
         void ScriptOpenURL(string url);
         bool SendAUMIMessage(IpcMessage_t ipMessage, ref IpcReply_t outReply);
         bool RunUMTScript(string path);
@@ -50,9 +56,11 @@ namespace UndertaleModLib.Scripting
         void InitializeScriptDialog();
         void ReapplyProfileCode();
         void NukeProfileGML(string codeName);
-        string GetDecompiledText(string codeName);
+        string GetDecompiledText(string codeName, GlobalDecompileContext context = null);
+        string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null);
         string GetDisassemblyText(string codeName);
-        bool AreFilesIdentical(string File01, string File02);
+        string GetDisassemblyText(UndertaleCode code);
+        bool AreFilesIdentical(string file1, string file2);
         string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose);
         string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true);
         void SimpleTextOutput(string title, string label, string defaultText, bool allowMultiline);
@@ -61,6 +69,7 @@ namespace UndertaleModLib.Scripting
         void SetFinishedMessage(bool isFinishedMessageEnabled);
         void UpdateProgressBar(string message, string status, double progressValue, double maxValue);
         void SetProgressBar(string message, string status, double progressValue, double maxValue);
+        void SetProgressBar();
         void UpdateProgressValue(double progressValue);
         void UpdateProgressStatus(string status);
         void AddProgress(int amount);
@@ -76,6 +85,8 @@ namespace UndertaleModLib.Scripting
         void StartUpdater();
         Task StopUpdater();
 
+        Task<bool> GenerateGMLCache(ThreadLocal<Decompiler.GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false);
+
         void ChangeSelection(object newsel);
 
         string PromptChooseDirectory(string prompt);
@@ -83,9 +94,10 @@ namespace UndertaleModLib.Scripting
         string PromptLoadFile(string defaultExt, string filter);
         void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false);
         void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false);
-        void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false);
-        void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false);
-        void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false);
+        void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false, bool throwOnError = false);
+        void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false);
+        void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null);
+        void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null);
         bool DummyBool();
         void DummyVoid();
         string DummyString();

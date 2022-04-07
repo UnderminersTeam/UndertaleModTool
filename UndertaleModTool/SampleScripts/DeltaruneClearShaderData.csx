@@ -24,6 +24,19 @@ foreach (string str in shadersNonExist)
     existing_shader.HLSL9_Vertex = Data.Strings.MakeString("");
     Data.Shaders.Add(existing_shader);
 }
+//Delete all places where shaders are probably called/referenced
+ImportASMString("gml_GlobalScript_pal_swap_set", "", false);
+ImportASMString("gml_GlobalScript_pal_swap_init_system", "", false);
+ImportASMString("gml_GlobalScript_pal_swap_enable_layer", "", false);
+ImportASMString("gml_GlobalScript_pal_swap_get_pal_count", "", false);
+ImportASMString("gml_GlobalScript_pal_swap_draw_palette", "", false);
+ImportASMString("gml_GlobalScript_pal_swap_reset", "", false);
+ImportASMString("gml_GlobalScript_pal_swap_layer_reset", "", false);
+ImportASMString("gml_GlobalScript_pal_swap_set_layer", "", false);
+ImportASMString("gml_GlobalScript_pal_swap_get_color_count", "", false);
+ImportASMString("gml_GlobalScript__pal_swap_layer_start", "", false);
+ImportASMString("gml_GlobalScript__pal_swap_layer_end", "", false);
+
 /*
 for (var i = 0; i < Data.Shaders.Count; i++)
 {

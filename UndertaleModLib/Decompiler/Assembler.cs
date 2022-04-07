@@ -14,15 +14,16 @@ namespace UndertaleModLib.Decompiler
     {
         public static Dictionary<short, string> BreakIDToName = new Dictionary<short, string>()
         {
-            { -1, "chkindex" },
-            { -2, "pushaf" },
-            { -3, "popaf" },
-            { -4, "pushac" },
-            { -5, "setowner" },
-            { -6, "isstaticok" },
-            { -7, "setstatic" },
-            { -8, "savearef" },
-            { -9, "restorearef" },
+            { -1,  "chkindex" },
+            { -2,  "pushaf" },
+            { -3,  "popaf" },
+            { -4,  "pushac" },
+            { -5,  "setowner" },
+            { -6,  "isstaticok" },
+            { -7,  "setstatic" },
+            { -8,  "savearef" },
+            { -9,  "restorearef" },
+            { -10, "chknullish" }
         };
         public static Dictionary<string, short> NameToBreakID = new Dictionary<string, short>()
         {
@@ -35,6 +36,7 @@ namespace UndertaleModLib.Decompiler
             { "setstatic", -7 },
             { "savearef", -8 },
             { "restorearef", -9 },
+            { "chknullish", -10 }
         };
 
         // TODO: Improve the error messages
@@ -360,9 +362,14 @@ namespace UndertaleModLib.Decompiler
                     throw new Exception("Bad string format");
                 str = UndertaleString.UnescapeText(str.Substring(1, str.Length - 2));
             }
+            else
+                str = null;
             UndertaleString strobj = id.HasValue ? strg[(int)id.Value] : null;
             if (strobj != null)
-                strobj.Content = str;
+            {
+                if (str != null) // Retain original value if empty string passed (push.s @300)
+                    strobj.Content = str;
+            }
             else
                 strobj = strg.MakeString(str);
             if (!id.HasValue)

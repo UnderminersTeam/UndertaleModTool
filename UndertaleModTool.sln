@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31624.102
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModTool", "UndertaleModTool\UndertaleModTool.csproj", "{C703A485-DBFB-4601-8A26-42E64CCF812F}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModTests", "UndertaleModTests\UndertaleModTests.csproj", "{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModCli", "UndertaleModCli\UndertaleModCli.csproj", "{CC5FDC60-A955-4D0C-B59F-8BD451778237}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModToolUpdater", "UndertaleModToolUpdater\UndertaleModToolUpdater.csproj", "{1E004B65-F3C8-4A62-B649-1465EA6A3B01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +63,14 @@ Global
 		{CC5FDC60-A955-4D0C-B59F-8BD451778237}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CC5FDC60-A955-4D0C-B59F-8BD451778237}.Release|x64.ActiveCfg = Release|Any CPU
 		{CC5FDC60-A955-4D0C-B59F-8BD451778237}.Release|x64.Build.0 = Release|Any CPU
+		{1E004B65-F3C8-4A62-B649-1465EA6A3B01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E004B65-F3C8-4A62-B649-1465EA6A3B01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E004B65-F3C8-4A62-B649-1465EA6A3B01}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1E004B65-F3C8-4A62-B649-1465EA6A3B01}.Debug|x64.Build.0 = Debug|Any CPU
+		{1E004B65-F3C8-4A62-B649-1465EA6A3B01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E004B65-F3C8-4A62-B649-1465EA6A3B01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E004B65-F3C8-4A62-B649-1465EA6A3B01}.Release|x64.ActiveCfg = Release|Any CPU
+		{1E004B65-F3C8-4A62-B649-1465EA6A3B01}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -171,17 +171,19 @@
                         <ContextMenu x:Key="AddMenu">
                             <MenuItem Header="Add" Click="MenuItem_Add_Click"/>
                         </ContextMenu>
-                        <ContextMenu x:Key="DeleteMenu">
+                        <ContextMenu x:Key="UndertaleResourceMenu">
+                            <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
                             <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
                         </ContextMenu>
 
+                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#D4D4D4"/>
                         <Style TargetType="{x:Type TreeViewItem}">
                             <EventSetter Event="TreeViewItem.DragOver" Handler="TreeView_DragOver"/>
                             <EventSetter Event="TreeViewItem.Drop" Handler="TreeView_Drop"/>
                             <EventSetter Event="TreeViewItem.MouseMove" Handler="TreeView_MouseMove"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ., Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type undertalelib:UndertaleResource}}" Value="True">
-                                    <Setter Property="ContextMenu" Value="{StaticResource DeleteMenu}"/>
+                                    <Setter Property="ContextMenu" Value="{StaticResource UndertaleResourceMenu}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding ItemsSource, RelativeSource={RelativeSource Self}, Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type scol:IList}}" Value="True">
                                     <Setter Property="ContextMenu" Value="{StaticResource AddMenu}"/>
@@ -290,10 +292,11 @@
                         <TreeViewItem Name="CodeItemsList" Header="Code" ItemsSource="{Binding Code, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Code, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemContainerStyle>
                                 <Style TargetType="{x:Type TreeViewItem}">
-                                    <Setter Property="Foreground" Value="Gray"></Setter>
+                                    <Setter Property="ContextMenu" Value="{StaticResource UndertaleResourceMenu}"/>
+                                    <Setter Property="Foreground" Value="Gray"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Path=ParentEntry}" Value="{x:Null}">
-                                            <Setter Property="Foreground" Value="Black"></Setter>
+                                            <Setter Property="Foreground" Value="Black"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -364,9 +367,6 @@
                 </TreeView>
 
                 <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
-                <ScrollViewer Name="TabScrollViewer" Grid.Column="2" Grid.RowSpan="1" HorizontalScrollBarVisibility="Hidden" PreviewMouseWheel="TabScrollViewer_PreviewMouseWheel">
-                    <TabControl Name="TabController" SelectionChanged="TabController_SelectionChanged" TabStripPlacement="Top"/>
-                </ScrollViewer>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="2">
                     <ContentControl Margin="10" Content="{Binding CurrentTab.Selected,Mode=OneWay}" Name="DataEditor">
                         <ContentControl.Resources>
@@ -449,7 +449,10 @@
                             <DataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
                                 <local:UndertaleGameObjectEditor/>
                             </DataTemplate>
-
+                            
+                            <DataTemplate x:Key="roomRendererTemplate">
+                                <local:UndertaleRoomRenderer/>
+                            </DataTemplate>
                             <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
                                 <local:UndertaleRoomEditor/>
                             </DataTemplate>

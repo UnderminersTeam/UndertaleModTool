@@ -731,7 +731,7 @@ namespace UndertaleModLib.Decompiler
                 { "path_get_x", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
                 { "path_get_y", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other} },
 
-                { "path_add",Array.Empty<AssetIDType>() },
+                { "path_add", Array.Empty<AssetIDType>() },
                 { "path_add_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
                 { "path_change_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
                 { "path_insert_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
@@ -1047,7 +1047,7 @@ namespace UndertaleModLib.Decompiler
             string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower();
 
             // Just Undertale
-            if (lowerName != null && (lowerName == "undertale"))
+            if (lowerName != null && lowerName.StartsWith("undertale"))
             {
 
                 //AddOverrideFor("gml_Object_obj_wizardorb_chaser_Alarm_0", "pop", AssetIDType.Script);
@@ -1238,7 +1238,7 @@ namespace UndertaleModLib.Decompiler
             }
 
             // Both UT and DR
-            if (lowerName != null && (lowerName == "undertale" || lowerName == "survey_program" || lowerName.StartsWith("deltarune") || lowerName == "deltarune chapter 1 & 2" || lowerName == "deltarune chapter 1&2"))
+            if (lowerName != null && (lowerName.StartsWith("undertale") || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
             {
                 AddOverrideFor("gml_Script_scr_getbuttonsprite", "control", AssetIDType.Enum_GamepadButton);
                 AddOverrideFor("gml_Script_scr_getbuttonsprite", "button", AssetIDType.Enum_GamepadButton);
@@ -1461,6 +1461,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["snd_stop"] = new AssetIDType[] { AssetIDType.Sound };
                 builtin_funcs["snd_stop_ch1"] = new AssetIDType[] { AssetIDType.Sound };
                 builtin_funcs["snd_volume"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_valid_room"] = new AssetIDType[] { AssetIDType.Room, AssetIDType.Other };
 
                 builtin_vars.Add("_instruments", AssetIDType.Sound);
                 builtin_vars.Add("_instrumentsB", AssetIDType.Sound);
@@ -1693,6 +1694,10 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("armorchar2temp", AssetIDType.Boolean);
                 builtin_vars.Add("armorchar3temp", AssetIDType.Boolean);
                 builtin_vars.Add("armorchar4temp", AssetIDType.Boolean);
+                builtin_vars.Add("weaponchar1temp", AssetIDType.Boolean);
+                builtin_vars.Add("weaponchar2temp", AssetIDType.Boolean);
+                builtin_vars.Add("weaponchar3temp", AssetIDType.Boolean);
+                builtin_vars.Add("weaponchar4temp", AssetIDType.Boolean);
                 builtin_vars.Add("legacy", AssetIDType.Boolean);
                 builtin_vars.Add("jp_data_loaded", AssetIDType.Boolean);
                 builtin_vars.Add("ingame", AssetIDType.Boolean);

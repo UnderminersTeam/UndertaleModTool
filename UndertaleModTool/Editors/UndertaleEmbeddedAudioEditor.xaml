@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="UndertaleModTool.UndertaleEmbeddedAudioEditor"
+﻿<local:DataUserControl x:Class="UndertaleModTool.UndertaleEmbeddedAudioEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -46,4 +46,4 @@
             <Button Grid.Row="3" Grid.Column="2" Name="Stop" Click="Stop_Click">Stop</Button>
         </Grid>
     </Grid>
-</UserControl>
+</local:DataUserControl>

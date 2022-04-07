@@ -20,7 +20,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Interaction logic for UndertaleTimelineEditor.xaml
     /// </summary>
-    public partial class UndertaleTimelineEditor : UserControl
+    public partial class UndertaleTimelineEditor : DataUserControl
     {
         public UndertaleTimelineEditor()
         {

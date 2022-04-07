@@ -23,6 +23,7 @@ namespace UndertaleModLib.Models
         public UndertaleTexturePageItem Texture { get; set; }
         public float ScaleX { get; set; }
         public float ScaleY { get; set; }
+        public uint Ascender { get; set; }
         public UndertalePointerList<Glyph> Glyphs { get; private set; } = new UndertalePointerList<Glyph>();
         public int AscenderOffset { get; set; }
 
@@ -107,6 +108,8 @@ namespace UndertaleModLib.Models
             writer.Write(ScaleY);
             if (writer.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
                 writer.Write(AscenderOffset);
+            if (writer.undertaleData.GMS2022_2)
+                writer.Write(Ascender);
             writer.WriteUndertaleObject(Glyphs);
         }
 
@@ -135,7 +138,11 @@ namespace UndertaleModLib.Models
             ScaleX = reader.ReadSingle();
             ScaleY = reader.ReadSingle();
             if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
+            {
                 AscenderOffset = reader.ReadInt32();
+                if (reader.undertaleData.GMS2022_2)
+                    Ascender = reader.ReadUInt32();
+            }
             Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
         }
 

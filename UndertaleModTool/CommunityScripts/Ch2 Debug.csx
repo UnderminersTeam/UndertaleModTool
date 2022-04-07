@@ -21,10 +21,7 @@ for(int i = 0; i < SCR_GAMESTART.Instructions.Count; i++)
 }
 for(int i = 0; i < 1; i++)
 {
-    if (enable)
-    ReplaceTextInGML(debugController, @"debug = 0", @"debug = 1");
-    else
-    ReplaceTextInGML(debugController, @"debug = 1", @"debug = 0");
+    ReplaceTextInGML(debugController, @"debug = ", "debug = " + (enable ? "true;" : "false;") + "//");
     patch1 = true;
 }
 

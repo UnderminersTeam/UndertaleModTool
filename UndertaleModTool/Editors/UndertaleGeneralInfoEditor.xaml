@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="UndertaleModTool.UndertaleGeneralInfoEditor"
+﻿<local:DataUserControl x:Class="UndertaleModTool.UndertaleGeneralInfoEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -184,7 +184,7 @@
 
                 <Button Grid.Row="22" Grid.Column="1" Margin="3" Content="Sync with room list" Click="SyncRoomList_Click"/>
 
-                <Grid Grid.Row="23" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+                <Grid Grid.Row="23" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*"/>
                         <ColumnDefinition Width="3*"/>
@@ -357,4 +357,4 @@
             </Grid>
         </StackPanel>
     </StackPanel>
-</UserControl>
+</local:DataUserControl>

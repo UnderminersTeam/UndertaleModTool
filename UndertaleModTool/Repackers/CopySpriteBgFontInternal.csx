@@ -38,6 +38,8 @@ List<string> splitStringsList = GetSplitStringsList("sprite(s)/background(s)/fon
 bool[] SpriteSheetsCopyNeeded = new bool[DataEmbeddedTexturesCount];
 bool[] SpriteSheetsUsed = new bool[(DataEmbeddedTexturesCount + DataEmbeddedTexturesCount)];
 
+int lastTextPage = Data.EmbeddedTextures.Count - 1;
+
 SetProgressBar(null, "Textures Exported", 0, Data.TexturePageItems.Count);
 StartUpdater();
 
@@ -54,9 +56,9 @@ await Task.Run(() => {
     for (var i = 0; i < DataEmbeddedTexturesCount; i++)
     {
         UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
+        texture.Name = new UndertaleString("Texture " + ++lastTextPage);
         texture.TextureData.TextureBlob = Data.EmbeddedTextures[i].TextureData.TextureBlob;
         Data.EmbeddedTextures.Add(texture);
-        texture.Name = new UndertaleString("Texture " + Data.EmbeddedTextures.IndexOf(texture).ToString());
     }
     for (var j = 0; j < splitStringsList.Count; j++)
     {
@@ -411,7 +413,7 @@ List<string> GetSplitStringsList(string assetType)
     List<string> splitStringsList = new List<string>();
     string InputtedText = "";
     InputtedText = SimpleTextInput("Menu", "Enter the name(s) of the " + assetType + "(s)", InputtedText, true);
-    string[] IndividualLineArray = InputtedText.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+    string[] IndividualLineArray = InputtedText.Split('\n', StringSplitOptions.RemoveEmptyEntries);
     foreach (var OneLine in IndividualLineArray)
     {
         splitStringsList.Add(OneLine.Trim());

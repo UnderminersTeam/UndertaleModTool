@@ -44,14 +44,14 @@ namespace UndertaleModTool
             ImportCode(codeName, gmlCode, false, doParse, destroyASM, CheckDecompiler);
         }
 
-        public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false)
+        public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
-            ImportCodeFromFile(fileName, true, doParse, true, CheckDecompiler);
+            ImportCodeFromFile(fileName, true, doParse, true, CheckDecompiler, throwOnError);
         }
 
-        public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
+        public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
-            ImportCodeFromFile(fileName, false, doParse, destroyASM, CheckDecompiler);
+            ImportCodeFromFile(fileName, false, doParse, destroyASM, CheckDecompiler, throwOnError);
         }
 
         public void NukeProfileGML(string codeName)
@@ -97,21 +97,27 @@ namespace UndertaleModTool
             return passBack;
         }
 
-        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false)
+        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
         {
-            EnsureDataLoaded();
-
-            string passBack = "";
             UndertaleCode code = Data.Code.ByName(codeName);
             if (code is null)
                 throw new ScriptException($"No code named \"{codeName}\" was found!");
 
+            ReplaceTextInGML(code, keyword, replacement, case_sensitive, isRegex, context);
+        }
+        public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+        {
+            EnsureDataLoaded();
+
+            string passBack = "";
+            string codeName = code.Name.Content;
+            GlobalDecompileContext DECOMPILE_CONTEXT = context is null ? new(Data, false) : context;
+
             if (Data.ToolInfo.ProfileMode == false || Data.GMS2_3)
             {
-                ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
                 try
                 {
-                    passBack = GetPassBack((code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""), keyword, replacement, case_sensitive, isRegex);
+                    passBack = GetPassBack((code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT ) : ""), keyword, replacement, case_sensitive, isRegex);
                     code.ReplaceGML(passBack, Data);
                 }
                 catch (Exception exc)
@@ -132,10 +138,12 @@ namespace UndertaleModTool
                     }
                     else
                     {
-                        ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
                         try
                         {
-                            passBack = GetPassBack((code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""), keyword, replacement, case_sensitive, isRegex);
+                            if (context is null)
+                                passBack = GetPassBack((code != null ? Decompiler.Decompile(code, new GlobalDecompileContext(Data, false)) : ""), keyword, replacement, case_sensitive, isRegex);
+                            else
+                                passBack = GetPassBack((code != null ? Decompiler.Decompile(code, context) : ""), keyword, replacement, case_sensitive, isRegex);
                             code.ReplaceGML(passBack, Data);
                         }
                         catch (Exception exc)
@@ -151,34 +159,43 @@ namespace UndertaleModTool
             }
         }
 
-        void ImportCodeFromFile(string file, bool IsGML = true, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
+        void ImportCodeFromFile(string file, bool IsGML = true, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
             try
             {
-                if (!(Path.GetFileName(file).EndsWith(IsGML ? ".gml" : ".asm")))
+                if (!Path.GetFileName(file).ToLower().EndsWith(IsGML ? ".gml" : ".asm"))
                     return;
-                if (Path.GetFileName(file).EndsWith("CleanUp_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
+                if (Path.GetFileName(file).ToLower().EndsWith("cleanup_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
                     return;
-                if (Path.GetFileName(file).EndsWith("PreCreate_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
+                if (Path.GetFileName(file).ToLower().EndsWith("precreate_0" + (IsGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
                     return;
                 string codeName = Path.GetFileNameWithoutExtension(file);
                 string gmlCode = File.ReadAllText(file);
-                ImportCode(codeName, gmlCode, IsGML, doParse, destroyASM, CheckDecompiler);
+                ImportCode(codeName, gmlCode, IsGML, doParse, destroyASM, CheckDecompiler, throwOnError);
+            }
+            catch (ScriptException exc) when (throwOnError && exc.Message == "*codeImportError*")
+            {
+                throw new ScriptException("Code files importation stopped because of error(s).");
             }
             catch (Exception exc)
             {
                 if (!CheckDecompiler)
-                    MessageBox.Show("Import" + (IsGML ? "GML" : "ASM") + "File error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                {
+                    ShowError("Import" + (IsGML ? "GML" : "ASM") + "File error! Send the following error to Grossley#2869 (Discord) and make an issue on Github:\n\n" + exc.ToString());
+
+                    if (throwOnError)
+                        throw new ScriptException("Code files importation stopped because of error(s).");
+                }
                 else
                     throw new Exception("Error!");
             }
         }
 
-        void ImportCode(string codeName, string gmlCode, bool IsGML = true, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
+        void ImportCode(string codeName, string gmlCode, bool IsGML = true, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
             bool SkipPortions = false;
             UndertaleCode code = Data.Code.ByName(codeName);
-            if (Data.Code.ByName(codeName) == null)
+            if (code is null)
             {
                 code = new UndertaleCode();
                 code.Name = Data.Strings.MakeString(codeName);
@@ -387,26 +404,27 @@ namespace UndertaleModTool
                     }
                 }
             }
-            SafeImport(codeName, gmlCode, IsGML, destroyASM, CheckDecompiler);
+            SafeImport(codeName, gmlCode, IsGML, destroyASM, CheckDecompiler, throwOnError);
         }
 
-        void SafeImport(string codeName, string gmlCode, bool IsGML, bool destroyASM = true, bool CheckDecompiler = false)
+        void SafeImport(string codeName, string gmlCode, bool IsGML, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
+            UndertaleCode code = Data.Code.ByName(codeName);
             try
             {
                 if (IsGML)
                 {
-                    Data.Code.ByName(codeName).ReplaceGML(gmlCode, Data);
+                    code.ReplaceGML(gmlCode, Data);
 
                     // Write to profile if necessary.
                     string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, "Temp", codeName + ".gml");
                     if (File.Exists(path))
-                        File.WriteAllText(path, GetDecompiledText(codeName));
+                        File.WriteAllText(path, GetDecompiledText(code));
                 }
                 else
                 {
                     var instructions = Assembler.Assemble(gmlCode, Data);
-                    Data.Code.ByName(codeName).Replace(instructions);
+                    code.Replace(instructions);
                     if (destroyASM)
                         NukeProfileGML(codeName);
                 }
@@ -415,12 +433,15 @@ namespace UndertaleModTool
             {
                 if (!CheckDecompiler)
                 {
-                    string ErrorText = "Error at " + (IsGML ? "GML code: " : "ASM code: ") + codeName + @"': " + gmlCode + "\nError: " + ex.ToString();
-                    MessageBox.Show(ErrorText, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    string errorText = $"Code import error at {(IsGML ? "GML" : "ASM")} code \"{codeName}\":\n\n{ex.Message}";
+                    ShowWarning(errorText);
+
+                    if (throwOnError)
+                        throw new ScriptException("*codeImportError*");
                 }
                 else
                 {
-                    Data.Code.ByName(codeName).ReplaceGML("", Data);
+                    code.ReplaceGML("", Data);
                 }
             }
         }
