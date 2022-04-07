@@ -7,8 +7,8 @@
         xmlns:local="clr-namespace:UndertaleModTool"
         xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
         xmlns:undertalelib="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
-        xmlns:scol="clr-namespace:System.Collections;assembly=mscorlib" 
-        xmlns:cmod="clr-namespace:System.ComponentModel;assembly=WindowsBase" 
+        xmlns:scol="clr-namespace:System.Collections;assembly=mscorlib"
+        xmlns:cmod="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         mc:Ignorable="d"
         Height="450" Width="800" Loaded="Window_Loaded"
         AllowDrop="True" Drop="Window_Drop">
@@ -367,6 +367,9 @@
                 </TreeView>
 
                 <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
+                <ScrollViewer Name="TabScrollViewer" Grid.Column="2" Grid.RowSpan="1" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Hidden" PreviewMouseWheel="TabScrollViewer_PreviewMouseWheel">
+                    <TabControl Name="TabController" SelectionChanged="TabController_SelectionChanged" TabStripPlacement="Top"/>
+                </ScrollViewer>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="2">
                     <ContentControl Margin="10" Content="{Binding CurrentTab.Selected,Mode=OneWay}" Name="DataEditor">
                         <ContentControl.Resources>
@@ -449,7 +452,7 @@
                             <DataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
                                 <local:UndertaleGameObjectEditor/>
                             </DataTemplate>
-                            
+
                             <DataTemplate x:Key="roomRendererTemplate">
                                 <local:UndertaleRoomRenderer/>
                             </DataTemplate>
