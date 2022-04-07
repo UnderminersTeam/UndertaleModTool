@@ -72,7 +72,7 @@ namespace UndertaleModTool
             this.AutoClose = false;
             TabControl tabControl = ((TabControl)MainWindow.FindName("TabController"));
             if (newsel is DescriptionView) {
-                
+
                 this.AutoClose = true;
                 if (((DescriptionView)newsel).Heading.Contains("Welcome"))
                 {
@@ -82,7 +82,7 @@ namespace UndertaleModTool
                 {
                     this.TabTitle = ((DescriptionView)newsel).Heading;
                 }
-            } 
+            }
             else if (newsel is UndertaleAudioGroup)
             {
                 this.TabTitle = String.Format("Audio Group Editor - {0}", ((UndertaleAudioGroup)newsel).Name.Content);
@@ -1677,7 +1677,7 @@ namespace UndertaleModTool
             if (Highlighted is UndertaleObject obj)
                 DeleteItem(obj);
         }
-      
+
         private void MenuItem_CopyName_Click(object sender, RoutedEventArgs e)
         {
             if (Highlighted is UndertaleNamedResource namedRes)
@@ -1851,27 +1851,22 @@ namespace UndertaleModTool
             if (scriptDialog != null && !scriptDialog.IsVisible)
                 scriptDialog.Dispatcher.Invoke(scriptDialog.Show);
         }
+
         public void UpdateProgressValue(double progressValue)
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() =>
-                {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
-
-                    scriptDialog.ReportProgress(progressValue);
-                }));
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action) (() => { scriptDialog.ReportProgress(progressValue); }));
             }
         }
+
         public void UpdateProgressStatus(string status)
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Background, (Action)(() =>
-                {
                 scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
                     scriptDialog.ReportProgress(status);
-                })); ;
+                }));
             }
         }
 
@@ -1954,7 +1949,7 @@ namespace UndertaleModTool
                         BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
 
                         syncBindings.Add(resourceType);
-                    } 
+                    }
                 }
                 else if (syncBindings.Contains(resourceType))
                 {
@@ -2628,7 +2623,7 @@ namespace UndertaleModTool
                         // wait until progress bar updater loop is finished
                         while (!ended)
                             Thread.Sleep(100);
-                        
+
                         scriptDialog = null;
                     });
 
@@ -2918,12 +2913,6 @@ result in loss of work.");
             SetIDString(foundIndex == -1 ? "None" : (foundIndex == -2 ? "N/A" : Convert.ToString(foundIndex)));
         }
 
-        public void ChangeSelection(object newsel)
-        {
-            SelectionHistory.Add(Selected);
-            Selected = newsel;
-            UpdateObjectLabel(newsel);
-        }
         public void HighlightObject(object obj, bool silent = true)
         {
             UndertaleResource res = obj as UndertaleResource;
@@ -3139,7 +3128,7 @@ result in loss of work.");
         {
 
             TabControl tabControl = (TabControl)this.FindName("TabController");
-            
+
             if (tabControl.SelectedIndex >= 0)
             {
                 CurrentTabIndex = tabControl.SelectedIndex;
