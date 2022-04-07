@@ -11,12 +11,24 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Scripting
 {
+    /// <summary>
+    /// The exception that is thrown when trivial errors happen during runtime of UndertaleModTool scripts. <br/>
+    /// This exception does not contain a stacktrace and should more be handled like an error message that stops execution of the currently running script.
+    /// </summary>
+    /// <example><code>if (Data is null) throw new ScriptException("Please load data.win first!);</code></example>
     public class ScriptException : Exception
     {
+        /// <summary>
+        /// Initializes a new instance of the IOException class with its message string set to the empty string ("").
+        /// </summary>
         public ScriptException()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the IOException class with its message string set to <paramref name="msg"/>.
+        /// </summary>
+        /// <param name="msg">A <see cref="String"/> that describes the error. The content of <paramref name="msg"/> is intended to be understood by humans.</param>
         public ScriptException(string msg) : base(msg)
         {
         }
