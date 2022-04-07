@@ -33,6 +33,7 @@
     </PropertyGroup>
     <PropertyGroup>
         <ApplicationIcon>icon.ico</ApplicationIcon>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
     </PropertyGroup>
     <ItemGroup>
         <None Update="About_Profile_Mode.txt">
