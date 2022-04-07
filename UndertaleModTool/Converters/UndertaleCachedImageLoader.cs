@@ -89,7 +89,7 @@ namespace UndertaleModTool
                 else
                     texName = (mainWindow.Data.TexturePageItems.IndexOf(texture) + 1).ToString();
 
-                if (texName == "-1")
+                if (texName == "0")
                     return null;
             }
 
@@ -346,7 +346,7 @@ namespace UndertaleModTool
                 if (texName is null or "PageItem Unknown Index")
                 {
                     texName = ((Application.Current.MainWindow as MainWindow).Data.TexturePageItems.IndexOf(tilesBG.Texture) + 1).ToString();
-                    if (texName == "-1")
+                    if (texName == "0")
                         return null;
                 }
 

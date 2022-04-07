@@ -265,6 +265,44 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
+            if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
+            {
+                /* This code performs three checks to identify GM2022.2.
+                 * First, as you've seen, is the bytecode version.
+                 * Second, we assume it is. If there are no Glyphs, we are vindicated by the impossibility of null values there.
+                 * Third, in case of a terrible fluke causing this to appear valid erroneously, we verify that each pointer leads into the next.
+                 * And if someone builds their game so the first pointer is absolutely valid length data and the next font is valid glyph data-
+                 * screw it, call Jacky720 when someone constructs that and you want to mod it.
+                 * Maybe try..catch on the whole shebang?
+                 */
+                uint positionToReturn = reader.Position;
+                if (reader.ReadUInt32() > 0) // Font count
+                {
+                    uint firstFontPointer = reader.ReadUInt32();
+                    reader.Position = firstFontPointer + 48; // There are 48 bytes of existing metadata.
+                    uint glyphsLength = reader.ReadUInt32();
+                    reader.undertaleData.GMS2022_2 = true;
+                    if (glyphsLength != 0)
+                    {
+                        List<uint> glyphPointers = new List<uint>();
+                        for (uint i = 0; i < glyphsLength; i++)
+                            glyphPointers.Add(reader.ReadUInt32());
+                        foreach (uint pointer in glyphPointers)
+                        {
+                            if (reader.Position != pointer)
+                            {
+                                reader.undertaleData.GMS2022_2 = false;
+                                break;
+                            }
+                            reader.Position += 14;
+                            ushort kerningLength = reader.ReadUInt16();
+                            reader.Position += (uint)4 * kerningLength; // combining read/write would apparently break
+                        }
+                    }
+                }
+                reader.Position = positionToReturn;
+            }
+
             base.UnserializeChunk(reader);
 
             Padding = reader.ReadBytes(512);
@@ -593,6 +631,27 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
+            // Detect GM2022.3
+            if (reader.undertaleData.GMS2_3)
+            {
+                uint positionToReturn = reader.Position;
+                uint texCount = reader.ReadUInt32();
+                if (texCount == 1) // If no textures exist, this could false positive.
+                {
+                    reader.Position += 16; // Jump to either padding or length, depending on version
+                    if (reader.ReadUInt32() > 0) // Check whether it's padding or length
+                        reader.undertaleData.GM2022_3 = true;
+                }
+                else if (texCount > 1)
+                {
+                    uint firstTex = reader.ReadUInt32();
+                    uint secondTex = reader.ReadUInt32();
+                    if (firstTex + 16 == secondTex)
+                        reader.undertaleData.GM2022_3 = true;
+                }
+                reader.Position = positionToReturn;
+            }
+
             base.UnserializeChunk(reader);
 
             // texture blobs

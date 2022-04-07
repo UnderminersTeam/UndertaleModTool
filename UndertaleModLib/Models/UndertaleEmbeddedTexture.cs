@@ -33,6 +33,9 @@ namespace UndertaleModLib.Models
         /// </summary>
         public uint GeneratedMips { get; set; }
 
+
+        public uint TextureBlockSize { get; set; }
+
         /// <summary>
         /// The texture data in the embedded image.
         /// </summary>
@@ -43,6 +46,8 @@ namespace UndertaleModLib.Models
             writer.Write(Scaled);
             if (writer.undertaleData.GeneralInfo.Major >= 2)
                 writer.Write(GeneratedMips);
+            if (writer.undertaleData.GM2022_3)
+                writer.Write(TextureBlockSize);
             writer.WriteUndertaleObjectPointer(TextureData);
         }
 
@@ -51,6 +56,8 @@ namespace UndertaleModLib.Models
             Scaled = reader.ReadUInt32();
             if (reader.undertaleData.GeneralInfo.Major >= 2)
                 GeneratedMips = reader.ReadUInt32();
+            if (reader.undertaleData.GM2022_3)
+                TextureBlockSize = reader.ReadUInt32();
             TextureData = reader.ReadUndertaleObjectPointer<TexData>();
         }
 

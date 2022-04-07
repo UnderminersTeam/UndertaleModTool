@@ -301,10 +301,20 @@ namespace UndertaleModLib
         public bool UseBZipFormat = false;
 
         /// <summary>
-        /// Whether the data file is from version GMS2022.1
+        /// Whether the data file is from version GMS2022.1.
         /// </summary>
         public bool GMS2022_1 = false;
-
+      
+        /// <summary>
+        /// Whether the data file is from version GMS2022.2.
+        /// </summary>
+        public bool GMS2022_2 = false;
+      
+        /// <summary>
+        /// Whether the data file is from version GMS2022.3.
+        /// </summary>
+        public bool GM2022_3 = false;
+      
         /// <summary>
         /// Some info for the editor to store data on.
         /// </summary>

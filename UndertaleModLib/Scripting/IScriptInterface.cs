@@ -132,6 +132,7 @@ namespace UndertaleModLib.Scripting
         /// <param name="error">The error message to show.</param>
         /// <param name="title">A short-descriptive title.</param>
         /// <param name="SetConsoleText">Whether to call <see cref="SetUMTConsoleText"/> with <paramref name="error"/>.</param>
+        //TODO: setConsoleText should get a *clearer* name
         void ScriptError(string error, string title = "Error", bool SetConsoleText = true);
 
         /// <summary>

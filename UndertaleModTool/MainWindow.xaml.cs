@@ -1271,15 +1271,9 @@ namespace UndertaleModTool
                 }
             }
         }
-
         private void TreeView_DragOver(object sender, DragEventArgs e)
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[e.Data.GetFormats().Length - 1]) as UndertaleObject; // TODO: make this more reliable
-
-#if DEBUG
-            foreach (var s in e.Data.GetFormats())
-                Debug.WriteLine(s);
-#endif
 
             TreeViewItem targetTreeItem = VisualUpwardSearch<TreeViewItem>(e.OriginalSource as UIElement);
             UndertaleObject targetItem = targetTreeItem.DataContext as UndertaleObject;
@@ -1287,10 +1281,13 @@ namespace UndertaleModTool
             e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Move) && sourceItem != null && targetItem != null && sourceItem != targetItem && sourceItem.GetType() == targetItem.GetType() ? DragDropEffects.Move : DragDropEffects.None;
             e.Handled = true;
         }
-
         private void TreeView_Drop(object sender, DragEventArgs e)
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[e.Data.GetFormats().Length - 1]) as UndertaleObject;
+
+#if DEBUG
+            Debug.WriteLine("Format(s) of dropped TreeViewItem - " + String.Join(", ", e.Data.GetFormats()));
+#endif
 
             TreeViewItem targetTreeItem = VisualUpwardSearch<TreeViewItem>(e.OriginalSource as UIElement);
             UndertaleObject targetItem = targetTreeItem.DataContext as UndertaleObject;
@@ -1401,6 +1398,13 @@ namespace UndertaleModTool
                 UpdateTree();
             }
         }
+        private void CopyItemName(UndertaleNamedResource namedRes)
+        {
+            if (namedRes.Name?.Content is not null)
+                Clipboard.SetText(namedRes.Name.Content);
+            else
+                ShowWarning("Item name is null.");
+        }
 
         private void MainTree_KeyDown(object sender, KeyEventArgs e)
         {
@@ -1481,8 +1485,13 @@ namespace UndertaleModTool
 
         private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
         {
-            if (Highlighted != null && Highlighted is UndertaleObject)
-                DeleteItem(Highlighted as UndertaleObject);
+            if (Highlighted is UndertaleObject obj)
+                DeleteItem(obj);
+        }
+        private void MenuItem_CopyName_Click(object sender, RoutedEventArgs e)
+        {
+            if (Highlighted is UndertaleNamedResource namedRes)
+                CopyItemName(namedRes);
         }
 
         private void MenuItem_Add_Click(object sender, RoutedEventArgs e)
@@ -2099,7 +2108,7 @@ namespace UndertaleModTool
                 input.Dispose();
 
                 if (result == System.Windows.Forms.DialogResult.OK)
-                    return input.ReturnString;            //values preserved after close
+                    return input.ReturnString.Replace('\v', '\n'); //values preserved after close; Shift+Enter -> '\v'
                 else
                     return null;
             }

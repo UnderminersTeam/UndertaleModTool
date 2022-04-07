@@ -47,6 +47,10 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
+        <None Update="CommunityScripts\FindObjectsWithSprite.csx">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
         <None Update="CommunityScripts\SafeBlaster.csx">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
           <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3726,10 +3730,6 @@
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="CommunityScripts\DisableDogcheck.csx">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </None>
-        <None Update="CommunityScripts\EditGMS2TileData.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
