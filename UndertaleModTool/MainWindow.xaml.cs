@@ -2046,9 +2046,10 @@ namespace UndertaleModTool
             {
                 Focus();
 
-                //TODO: find the way to scroll to the code item and highlight it.
-
                 CodeEditorDecompile = editorDecompile;
+
+                HighlightObject(code);
+                ChangeSelection(code);
             }
             else
             {
