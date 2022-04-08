@@ -34,6 +34,8 @@ using Ookii.Dialogs.Wpf;
 using ColorConvert = System.Windows.Media.ColorConverter;
 using System.Text.RegularExpressions;
 using System.Windows.Data;
+using System.Reflection.Metadata.Ecma335;
+using System.Windows.Media.Imaging;
 using System.Security.Cryptography;
 using System.Collections.Concurrent;
 using System.Runtime;
@@ -46,6 +48,165 @@ using System.Globalization;
 
 namespace UndertaleModTool
 {
+    public class Tab : INotifyPropertyChanged
+    {
+        public MainWindow MainWindow { get; set; }
+        public object Highlighted { get; set; }
+        public object Selected { get; set; }
+        public string TabTitle { get; set; }
+        public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
+        public bool AutoClose = false;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public Tab(string tabTitle, MainWindow mainWindow) {
+            this.TabTitle = tabTitle;
+            this.MainWindow = mainWindow;
+        }
+
+        public void ChangeSelection(object newsel)
+        {
+            this.Highlighted = newsel;
+            this.SelectionHistory.Add(Selected);
+            this.Selected = newsel;
+            this.AutoClose = false;
+            TabControl tabControl = ((TabControl)MainWindow.FindName("TabController"));
+            if (newsel is DescriptionView) {
+
+                this.AutoClose = true;
+                if (((DescriptionView)newsel).Heading.Contains("Welcome"))
+                {
+                    this.TabTitle = "Welcome!";
+                }
+                else
+                {
+                    this.TabTitle = ((DescriptionView)newsel).Heading;
+                }
+            }
+            else if (newsel is UndertaleAudioGroup)
+            {
+                this.TabTitle = String.Format("Audio Group Editor - {0}", ((UndertaleAudioGroup)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleSound)
+            {
+                this.TabTitle = String.Format("Sound Editor - {0}", ((UndertaleSound)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleSprite)
+            {
+                this.TabTitle = String.Format("Sprite Editor - {0}", ((UndertaleSprite)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleBackground)
+            {
+                this.TabTitle = String.Format("Background Editor - {0}", ((UndertaleBackground)newsel).Name.Content);
+            }
+            else if (newsel is UndertalePath)
+            {
+                this.TabTitle = String.Format("Path Editor - {0}", ((UndertalePath)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleScript)
+            {
+                this.TabTitle = String.Format("Script Editor - {0}", ((UndertaleScript)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleShader)
+            {
+                this.TabTitle = String.Format("Shader Editor - {0}", ((UndertaleShader)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleFont)
+            {
+                this.TabTitle = String.Format("Font Editor - {0}", ((UndertaleFont)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleTimeline)
+            {
+                this.TabTitle = String.Format("Timeline Editor - {0}", ((UndertaleTimeline)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleGameObject)
+            {
+                this.TabTitle = String.Format("Game Object Editor - {0}", ((UndertaleGameObject)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleRoom)
+            {
+                this.TabTitle = String.Format("Room Editor - {0}", ((UndertaleRoom)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleExtension)
+            {
+                this.TabTitle = String.Format("Extension Editor - {0}", ((UndertaleExtension)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleTexturePageItem)
+            {
+                this.TabTitle = String.Format("Texture Page Item Editor - {0}", ((UndertaleTexturePageItem)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleCode)
+            {
+                this.TabTitle = String.Format("Code Editor - {0}", ((UndertaleCode)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleVariable)
+            {
+                this.TabTitle = String.Format("Variable Editor - {0}", ((UndertaleVariable)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleFunction)
+            {
+                this.TabTitle = String.Format("Function Editor - {0}", ((UndertaleFunction)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleCodeLocals)
+            {
+                this.TabTitle = String.Format("Code Locals Editor - {0}", ((UndertaleCodeLocals)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleString)
+            {
+                this.TabTitle = String.Format("String Editor - {0}", ((UndertaleString)newsel).Content);
+            }
+            else if (newsel is UndertaleEmbeddedTexture)
+            {
+                this.TabTitle = String.Format("Embedded Texture Editor - {0}", ((UndertaleEmbeddedTexture)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleEmbeddedAudio)
+            {
+                this.TabTitle = String.Format("Embedded Audio Editor - {0}", ((UndertaleEmbeddedAudio)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleTextureGroupInfo)
+            {
+                this.TabTitle = String.Format("Texture Group Info Editor - {0}", ((UndertaleTextureGroupInfo)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleEmbeddedImage)
+            {
+                this.TabTitle = String.Format("Embedded Image Editor - {0}", ((UndertaleEmbeddedImage)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleSequence)
+            {
+                this.TabTitle = String.Format("Sequence Editor - {0}", ((UndertaleSequence)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleAnimationCurve)
+            {
+                this.TabTitle = String.Format("Animation Curve Editor - {0}", ((UndertaleAnimationCurve)newsel).Name.Content);
+            }
+            else if (newsel is UndertaleChunkVARI)
+            {
+                this.TabTitle = "Variables Overview";
+            }
+            else if (newsel is GeneralInfoEditor)
+            {
+                this.TabTitle = "General Info Editor";
+            }
+            else if (newsel is GlobalInitEditor)
+            {
+                this.TabTitle = "Global Init Editor";
+            }
+            else if (newsel is GameEndEditor)
+            {
+                this.TabTitle = "Game End Editor";
+            }
+            else
+            {
+                Debug.WriteLine(String.Format("Could not handle type {0}", newsel.GetType()));
+            }
+            TabItem tabItem = (TabItem)tabControl.Items[MainWindow.CurrentTabIndex];
+            ((TextBlock)((StackPanel)tabItem.Header).Children[0]).Text = this.TabTitle;
+            tabItem.TabIndex = MainWindow.CurrentTabIndex;
+            tabControl.SelectedIndex = tabItem.TabIndex;
+            MainWindow.UpdateObjectLabel(newsel);
+        }
+    }
+
     /// <summary>
     /// Logika interakcji dla klasy MainWindow.xaml
     /// </summary>
@@ -59,14 +220,21 @@ namespace UndertaleModTool
         public string FilePath { get; set; }
         public string ScriptPath { get; set; } // For the scripting interface specifically
 
+        private BitmapImage CloseButton = new BitmapImage(new Uri(@"/Resources/X.png", UriKind.RelativeOrAbsolute));
+        private BitmapImage CloseButtonHover = new BitmapImage(new Uri(@"/Resources/X_Down.png", UriKind.RelativeOrAbsolute));
+
         public string TitleMain { get; set; }
-        public object Highlighted { get; set; }
-        public object Selected { get; set; }
+
+        public List<object> Tabs { get; set; } = new List<object>();
+        public object CurrentTab { get; set; }
+        public int CurrentTabIndex = -1;
+
+        public object Highlighted { get { return ((Tab)CurrentTab).Highlighted; } set { OpenInNewTab(value, "Untitled"); } }
+        public object Selected { get { return ((Tab)CurrentTab).Selected; } set { OpenInNewTab(value, "Untitled"); } }
+
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
         // God this is so ugly, if there's a better way, please, put in a pull request
         public Visibility IsExtProductIDEligible => (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && (((Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? Visibility.Visible : Visibility.Collapsed;
-
-        public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
         public bool CanSave { get; set; }
         public bool CanSafelySave = false;
         public bool WasWarnedAboutTempRun = false;
@@ -159,8 +327,13 @@ namespace UndertaleModTool
         {
             InitializeComponent();
             this.DataContext = this;
-            ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"));
-            SelectionHistory.Clear();
+
+            OpenInNewTab(new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"), "Welcome!");
+
+            ((Tab)CurrentTab).AutoClose = true;
+            ((Tab)CurrentTab).SelectionHistory.Clear();
+
+            TabController.SelectedIndex = 0;
 
             TitleMain = "UndertaleModTool by krzys_h v" + Version;
 
@@ -198,7 +371,7 @@ namespace UndertaleModTool
             foreach (var child in (MainTree.Items[0] as TreeViewItem).Items)
                 ((child as TreeViewItem).ItemsSource as ICollectionView)?.Refresh();
         }
-/*
+        /*
         private static bool IsLikelyRunFromZipFolder()
         {
             var path = System.Environment.CurrentDirectory;
@@ -212,7 +385,7 @@ namespace UndertaleModTool
             var temp = Path.GetTempPath();
             return path.IndexOf(temp, StringComparison.OrdinalIgnoreCase) == 0;
         }
-*/
+        */
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Settings.Load();
@@ -412,7 +585,7 @@ namespace UndertaleModTool
                     throw new Exception("ummmmm");
                 if (thingToOpen[0] != "AUDO") // Just pretend I'm not hacking it together that poorly
                     throw new Exception("errrrr");
-                ChangeSelection(Data.EmbeddedAudio[Int32.Parse(thingToOpen[1])]);
+                OpenInNewTab(Data.EmbeddedAudio[Int32.Parse(thingToOpen[1])], "Embedded Audio");
                 Activate();
             }
         }
@@ -441,8 +614,10 @@ namespace UndertaleModTool
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Data)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilePath)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGMS2)));
-            ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P"));
-            SelectionHistory.Clear();
+
+            OpenInNewTab(new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P"), "Ok!");
+            ((Tab)CurrentTab).SelectionHistory.Clear();
+            ((Tab)CurrentTab).AutoClose = true;
 
             CanSave = true;
             CanSafelySave = true;
@@ -716,9 +891,10 @@ namespace UndertaleModTool
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
                         #pragma warning restore CA1416
+                        OpenInNewTab(new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"), "Welcome!");
+                        ((Tab)CurrentTab).AutoClose = true;
+                        ((Tab)CurrentTab).SelectionHistory.Clear();
 
-                        ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"));
-                        SelectionHistory.Clear();
                     }
                     dialog.Hide();
                 });
@@ -1208,17 +1384,17 @@ namespace UndertaleModTool
 
                 if (item == "Data")
                 {
-                    Highlighted = new DescriptionView("Welcome to UndertaleModTool!", Data != null ? "Double click on the items on the left to view them" : "Open data.win file to get started");
+                    OpenInNewTab(new DescriptionView("Welcome to UndertaleModTool!", Data != null ? "Double click on the items on the left to view them" : "Open data.win file to get started"), "Untitled");
                     return;
                 }
 
                 if (Data == null)
                 {
-                    Highlighted = new DescriptionView(item, "Load data.win file first");
+                    OpenInNewTab(new DescriptionView(item, "Load data.win file first"), "Untitled");
                     return;
                 }
 
-                Highlighted = item switch
+                object newContent = item switch
                 {
                     "General info" => new GeneralInfoEditor(Data?.GeneralInfo, Data?.Options, Data?.Language),
                     "Global init" => new GlobalInitEditor(Data?.GlobalInitScripts),
@@ -1226,23 +1402,24 @@ namespace UndertaleModTool
                     "Variables" => (object)Data.FORM.Chunks["VARI"],
                     _ => new DescriptionView(item, "Expand the list on the left to edit items"),
                 };
+                OpenInNewTab(newContent, "Untitled");
             }
             else
             {
-                Highlighted = e.NewValue;
+                ((Tab)CurrentTab).Highlighted = e.NewValue;
             }
         }
 
         private void MainTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ChangeSelection(Highlighted);
+            OpenInNewTab(((Tab)CurrentTab).Highlighted, "Untitled");
         }
 
         private void MainTree_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return)
             {
-                ChangeSelection(Highlighted);
+                OpenInNewTab(((Tab)CurrentTab).Highlighted, "Untitled");
             }
         }
 
@@ -1252,7 +1429,7 @@ namespace UndertaleModTool
             {
                 DragDropEffects effects = DragDropEffects.Move | DragDropEffects.Link;
 
-                UndertaleObject draggedItem = Highlighted as UndertaleObject;
+                UndertaleObject draggedItem = ((Tab)CurrentTab).Highlighted as UndertaleObject;
                 if (draggedItem != null)
                 {
                     DataObject data = new DataObject(draggedItem);
@@ -1380,21 +1557,41 @@ namespace UndertaleModTool
             if (MessageBox.Show("Delete " + obj.ToString() + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), "Confirmation", MessageBoxButton.YesNo, isLast ? MessageBoxImage.Question : MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
                 list.Remove(obj);
-
                 if (obj is UndertaleCode codeObj)
                 {
                     string codeName = codeObj.Name.Content;
                     Data.GMLCache?.TryRemove(codeName, out _);
-                    Data.GMLCacheChanged = new ConcurrentBag<string>(Data.GMLCacheChanged.Except(new[] { codeName }));
+                    Data.GMLCacheChanged = new ConcurrentBag<string>(Data.GMLCacheChanged.Except(new[] {codeName}));
                     Data.GMLCacheFailed?.Remove(codeName);
                     Data.GMLEditedBefore?.Remove(codeName);
                 }
 
-                while (SelectionHistory.Remove(obj)) ;
-                if (Selected == obj)
-                    ChangeSelection(null);
-                if (Highlighted == obj)
-                    Highlighted = null;
+                for (int i = 0; i < Tabs.Count; i++)
+                {
+                    Tab tab = (Tab)Tabs[i];
+                    if (tab.Selected == obj || tab.Highlighted == obj)
+                    {
+                        TabControl tabControl = ((TabControl)this.FindName("TabController"));
+                        int newIndex = Math.Max(Tabs.Count - 1, 0);
+
+                        if (Tabs.Count - 1 < 0)
+                        {
+                            OpenInNewTab(new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"), "Welcome!");
+
+                            ((Tab)CurrentTab).AutoClose = true;
+                            ((Tab)CurrentTab).SelectionHistory.Clear();
+
+                        }
+                        CurrentTabIndex = newIndex;
+                        tabControl.SelectedIndex = newIndex;
+                        Tabs.RemoveAt(i);
+                        tabControl.Items.RemoveAt(i);
+                        for (int j = 0; j < tabControl.Items.Count; j++)
+                        {
+                            ((TabItem)tabControl.Items[j]).TabIndex = j;
+                        }
+                    }
+                }
                 UpdateTree();
             }
         }
@@ -1410,9 +1607,9 @@ namespace UndertaleModTool
         {
             if (e.Key == Key.Delete)
             {
-                if (Highlighted != null && Highlighted is UndertaleObject)
+                if (((Tab)CurrentTab).Highlighted != null && ((Tab)CurrentTab).Highlighted is UndertaleObject)
                 {
-                    UndertaleObject obj = Highlighted as UndertaleObject;
+                    UndertaleObject obj = ((Tab)CurrentTab).Highlighted as UndertaleObject;
                     DeleteItem(obj);
                 }
             }
@@ -1485,9 +1682,12 @@ namespace UndertaleModTool
 
         private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
         {
+            if (((Tab)CurrentTab).Highlighted != null && ((Tab)CurrentTab).Highlighted is UndertaleObject)
+                DeleteItem(((Tab)CurrentTab).Highlighted as UndertaleObject);
             if (Highlighted is UndertaleObject obj)
                 DeleteItem(obj);
         }
+
         private void MenuItem_CopyName_Click(object sender, RoutedEventArgs e)
         {
             if (Highlighted is UndertaleNamedResource namedRes)
@@ -1584,7 +1784,7 @@ namespace UndertaleModTool
             list.Add(obj);
             UpdateTree();
             HighlightObject(obj);
-            ChangeSelection(obj);
+            OpenInNewTab(obj, "Untitled");
         }
 
         private void MenuItem_RunBuiltinScript_SubmenuOpened(object sender, RoutedEventArgs e)
@@ -1662,22 +1862,24 @@ namespace UndertaleModTool
             if (scriptDialog != null && !scriptDialog.IsVisible)
                 scriptDialog.Dispatcher.Invoke(scriptDialog.Show);
         }
+
         public void UpdateProgressValue(double progressValue)
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action) (() => {
                     scriptDialog.ReportProgress(progressValue);
                 }));
             }
         }
+
         public void UpdateProgressStatus(string status)
         {
             if (scriptDialog != null)
             {
                 scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
                     scriptDialog.ReportProgress(status);
-                }));;
+                }));
             }
         }
 
@@ -1760,7 +1962,7 @@ namespace UndertaleModTool
                         BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
 
                         syncBindings.Add(resourceType);
-                    } 
+                    }
                 }
                 else if (syncBindings.Contains(resourceType))
                 {
@@ -2429,7 +2631,7 @@ namespace UndertaleModTool
                         // wait until progress bar updater loop is finished
                         while (!ended)
                             Thread.Sleep(100);
-                        
+
                         scriptDialog = null;
                     });
 
@@ -2719,12 +2921,6 @@ result in loss of work.");
             SetIDString(foundIndex == -1 ? "None" : (foundIndex == -2 ? "N/A" : Convert.ToString(foundIndex)));
         }
 
-        public void ChangeSelection(object newsel)
-        {
-            SelectionHistory.Add(Selected);
-            Selected = newsel;
-            UpdateObjectLabel(newsel);
-        }
         public void HighlightObject(object obj, bool silent = true)
         {
             UndertaleResource res = obj as UndertaleResource;
@@ -2811,9 +3007,9 @@ result in loss of work.");
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            Selected = SelectionHistory.Last();
-            SelectionHistory.RemoveAt(SelectionHistory.Count - 1);
-            UpdateObjectLabel(Selected);
+            ((Tab)CurrentTab).Selected = ((Tab)CurrentTab).SelectionHistory.Last();
+            ((Tab)CurrentTab).SelectionHistory.RemoveAt(((Tab)CurrentTab).SelectionHistory.Count - 1);
+            UpdateObjectLabel(((Tab)CurrentTab).Selected);
         }
 
         public void EnsureDataLoaded()
@@ -2874,6 +3070,128 @@ result in loss of work.");
                 }
             }
         }
+
+        private void OpenInNewTab(object view, string tabTitle)
+        {
+            Tab newTab = new Tab(tabTitle, this);
+            newTab.TabTitle = tabTitle;
+            TabControl tabControl = (TabControl)this.FindName("TabController");
+            if (Tabs.Count > 0 && CurrentTabIndex >= 0 && ((Tab)CurrentTab).AutoClose)
+            {
+                Tabs.RemoveAt(CurrentTabIndex);
+                tabControl.Items.RemoveAt(CurrentTabIndex);
+            }
+            Tabs.Add(newTab);
+            CurrentTabIndex = Tabs.Count - 1;
+            CurrentTab = Tabs[CurrentTabIndex];
+
+            TabItem newTabItem = new TabItem();
+            StackPanel tabHeaderPanel = new StackPanel();
+            TextBlock textBlock = new TextBlock();
+            textBlock.Text = tabTitle;
+            Button tabButton = new Button();
+            tabButton.Width = 16;
+            tabButton.Height = 16;
+            tabButton.Click += TabCloseButton_OnClick;
+            tabButton.MouseEnter += TabCloseButton_OnMouseEnter;
+            tabButton.MouseLeave += TabCloseButton_OnMouseLeave;
+            Image buttonContent = new Image();
+            buttonContent.Source = CloseButton;
+            tabButton.Content = buttonContent;
+            tabButton.BorderThickness = new System.Windows.Thickness(0.0d, 0.0d, 0.0d, 0.0d);
+            Separator tabHeaderGap = new Separator();
+            tabHeaderGap.Width = 20;
+            tabHeaderGap.Visibility = System.Windows.Visibility.Hidden;
+            tabHeaderPanel.Orientation = Orientation.Horizontal;
+            tabHeaderPanel.Children.Add(textBlock);
+            tabHeaderPanel.Children.Add(tabHeaderGap);
+            tabHeaderPanel.Children.Add(tabButton);
+            newTabItem.Header = tabHeaderPanel;
+            newTabItem.TabIndex = tabControl.Items.Count;
+            tabControl.Items.Add(newTabItem);
+            newTab.ChangeSelection(view);
+            for (int i = 0; i < Tabs.Count; i++)
+            {
+                if (((Tab)Tabs[i]).TabTitle.Equals(newTab.TabTitle) && i != CurrentTabIndex)
+                {
+                    CurrentTabIndex = i;
+                    tabControl.SelectedIndex = i;
+                    CurrentTab = Tabs[CurrentTabIndex];
+                    Tabs.RemoveAt(Tabs.Count - 1);
+                    tabControl.Items.RemoveAt(tabControl.Items.Count - 1);
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentTab)));
+                    return;
+                }
+            }
+            tabControl.SelectedIndex = newTabItem.TabIndex;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentTab)));
+        }
+
+        public void ChangeSelection(object newsel)
+        {
+            OpenInNewTab(newsel, "Untitled");
+        }
+
+        private void TabController_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+            TabControl tabControl = (TabControl)this.FindName("TabController");
+
+            if (tabControl.SelectedIndex >= 0)
+            {
+                CurrentTabIndex = tabControl.SelectedIndex;
+                CurrentTab = Tabs[CurrentTabIndex];
+            }
+        }
+
+        private void TabScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            ScrollViewer scv = (ScrollViewer)sender;
+            scv.ScrollToHorizontalOffset(scv.HorizontalOffset - e.Delta);
+            e.Handled = true;
+        }
+
+        private void TabCloseButton_OnClick(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+            TabControl tabControl = ((TabControl)this.FindName("TabController"));
+            int tabIndex = ((TabItem)((StackPanel)button.Parent).Parent).TabIndex;
+            int newIndex = Math.Max(Tabs.Count - 2, 0);
+            if (Tabs.Count - 2 < 0)
+            {
+                OpenInNewTab(new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"), "Welcome!");
+
+                ((Tab)CurrentTab).AutoClose = true;
+                ((Tab)CurrentTab).SelectionHistory.Clear();
+
+            }
+            Tabs.RemoveAt(tabIndex);
+            tabControl.Items.RemoveAt(tabIndex);
+            for (int j = 0; j < tabControl.Items.Count; j++)
+            {
+                ((TabItem)tabControl.Items[j]).TabIndex = j;
+            }
+            CurrentTabIndex = newIndex;
+            tabControl.SelectedIndex = newIndex;
+        }
+
+        private void TabCloseButton_OnMouseEnter(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+            Image buttonContent = new Image();
+            buttonContent.Source = CloseButtonHover;
+            button.Content = buttonContent;
+        }
+
+        private void TabCloseButton_OnMouseLeave(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+            Image buttonContent = new Image();
+            buttonContent.Source = CloseButton;
+            button.Content = buttonContent;
+        }
+
+
     }
 
     public class GeneralInfoEditor
