@@ -129,9 +129,9 @@ namespace UndertaleModLib.Util
             return bmp;
         }
 
-        public unsafe static byte[] GetArrayFromImage(Bitmap bmp)
+        public unsafe static byte[] GetArrayFromImage(Bitmap bmp, int padding = 4)
         {
-            byte[] res = new byte[(bmp.Width * bmp.Height * 4 * 12) + 4]; // default capacity
+            byte[] res = new byte[(bmp.Width * bmp.Height * 4 * 12) + padding]; // default capacity
             res[0] = 102; // f
             res[1] = 105; // o
             res[2] = 111; // i
@@ -241,7 +241,7 @@ namespace UndertaleModLib.Util
             bmp.UnlockBits(data);
 
             // Add padding
-            resPos += 4;
+            resPos += padding;
 
             // Write final length
             int length = resPos - 12;
