@@ -25,7 +25,7 @@ namespace UndertaleModLib.Util
         {
             byte[] header = new byte[12];
             s.Read(header, 0, 12);
-            if (header[0] != 102 /* f */ || header[1] != 105 /* o */ || header[2] != 111 /* i */ || header[3] != 113 /* q */)
+            if (header[0] != (byte)'f' || header[1] != (byte)'i' || header[2] != (byte)'o' || header[3] != (byte)'q')
                 throw new Exception("Invalid little-endian QOIF image magic");
 
             int width = header[4] + (header[5] << 8);
@@ -132,10 +132,11 @@ namespace UndertaleModLib.Util
         public unsafe static byte[] GetArrayFromImage(Bitmap bmp, int padding = 4)
         {
             byte[] res = new byte[(bmp.Width * bmp.Height * 4 * 12) + padding]; // default capacity
-            res[0] = 102; // f
-            res[1] = 105; // o
-            res[2] = 111; // i
-            res[3] = 113; // q
+            // Little-endian QOIF image magic
+            res[0] = (byte)'f';
+            res[1] = (byte)'i';
+            res[2] = (byte)'o';
+            res[3] = (byte)'q';
             res[4] = (byte)(bmp.Width & 0xff);
             res[5] = (byte)((bmp.Width >> 8) & 0xff);
             res[6] = (byte)(bmp.Height & 0xff);
