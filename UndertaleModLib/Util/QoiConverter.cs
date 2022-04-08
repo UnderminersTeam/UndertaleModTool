@@ -155,10 +155,10 @@ namespace UndertaleModLib.Util
             int[] index = new int[64];
             while (bmpPtr < bmpEnd)
             {
-                b = *bmpPtr++;
-                g = *bmpPtr++;
-                r = *bmpPtr++;
-                a = *bmpPtr++;
+                b = *bmpPtr;
+                g = *(bmpPtr + 1);
+                r = *(bmpPtr + 2);
+                a = *(bmpPtr + 3);
 
                 v = (r << 24) | (g << 16) | (b << 8) | a;
                 if (v == vPrev)
@@ -235,6 +235,7 @@ namespace UndertaleModLib.Util
                 }
 
                 vPrev = v;
+                bmpPtr += 4;
             }
 
             bmp.UnlockBits(data);
