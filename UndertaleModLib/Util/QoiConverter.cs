@@ -25,7 +25,7 @@ namespace UndertaleModLib.Util
         {
             byte[] header = new byte[12];
             s.Read(header, 0, 12);
-            if (header[0] != 102 /* f */ || header[1] != 105 /* o */ || header[2] != 111 /* i */ || header[3] != 113 /* q */)
+            if (header[0] != (byte)'f' || header[1] != (byte)'i' || header[2] != (byte)'o' || header[3] != (byte)'q')
                 throw new Exception("Invalid little-endian QOIF image magic");
 
             int width = header[4] + (header[5] << 8);
@@ -129,13 +129,14 @@ namespace UndertaleModLib.Util
             return bmp;
         }
 
-        public unsafe static byte[] GetArrayFromImage(Bitmap bmp)
+        public unsafe static byte[] GetArrayFromImage(Bitmap bmp, int padding = 4)
         {
-            byte[] res = new byte[(bmp.Width * bmp.Height * 4 * 12) + 4]; // default capacity
-            res[0] = 102; // f
-            res[1] = 105; // o
-            res[2] = 111; // i
-            res[3] = 113; // q
+            byte[] res = new byte[(bmp.Width * bmp.Height * 4 * 12) + padding]; // default capacity
+            // Little-endian QOIF image magic
+            res[0] = (byte)'f';
+            res[1] = (byte)'i';
+            res[2] = (byte)'o';
+            res[3] = (byte)'q';
             res[4] = (byte)(bmp.Width & 0xff);
             res[5] = (byte)((bmp.Width >> 8) & 0xff);
             res[6] = (byte)(bmp.Height & 0xff);
@@ -155,10 +156,10 @@ namespace UndertaleModLib.Util
             int[] index = new int[64];
             while (bmpPtr < bmpEnd)
             {
-                b = *bmpPtr++;
-                g = *bmpPtr++;
-                r = *bmpPtr++;
-                a = *bmpPtr++;
+                b = *bmpPtr;
+                g = *(bmpPtr + 1);
+                r = *(bmpPtr + 2);
+                a = *(bmpPtr + 3);
 
                 v = (r << 24) | (g << 16) | (b << 8) | a;
                 if (v == vPrev)
@@ -235,12 +236,13 @@ namespace UndertaleModLib.Util
                 }
 
                 vPrev = v;
+                bmpPtr += 4;
             }
 
             bmp.UnlockBits(data);
 
             // Add padding
-            resPos += 4;
+            resPos += padding;
 
             // Write final length
             int length = resPos - 12;

@@ -126,7 +126,7 @@ namespace UndertaleModLib.Models
                         Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
                         writer.Write((short)bmp.Width);
                         writer.Write((short)bmp.Height);
-                        byte[] data = QoiConverter.GetArrayFromImage(bmp);
+                        byte[] data = QoiConverter.GetArrayFromImage(bmp, writer.undertaleData.GM2022_3 ? 0 : 4);
                         using MemoryStream input = new MemoryStream(data);
                         using MemoryStream output = new MemoryStream(1024);
                         BZip2.Compress(input, output, false, 9);
@@ -136,7 +136,8 @@ namespace UndertaleModLib.Models
                     else
                     {
                         // Encode the PNG data back to QOI
-                        writer.Write(QoiConverter.GetArrayFromImage(TextureWorker.GetImageFromByteArray(TextureBlob)));
+                        writer.Write(QoiConverter.GetArrayFromImage(TextureWorker.GetImageFromByteArray(TextureBlob),
+                            writer.undertaleData.GM2022_3 ? 0 : 4));
                     }
                 }
                 else
