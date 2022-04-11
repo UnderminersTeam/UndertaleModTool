@@ -70,9 +70,9 @@ namespace UndertaleModTool
             this.SelectionHistory.Add(Selected);
             this.Selected = newsel;
             this.AutoClose = false;
-            TabControl tabControl = ((TabControl)MainWindow.FindName("TabController"));
-            if (newsel is DescriptionView) {
-
+            TabControl tabControl = (TabControl)MainWindow.FindName("TabController");
+            if (newsel is DescriptionView)
+            {
                 this.AutoClose = true;
                 if (((DescriptionView)newsel).Heading.Contains("Welcome"))
                 {
@@ -1561,7 +1561,7 @@ namespace UndertaleModTool
                 {
                     string codeName = codeObj.Name.Content;
                     Data.GMLCache?.TryRemove(codeName, out _);
-                    Data.GMLCacheChanged = new ConcurrentBag<string>(Data.GMLCacheChanged.Except(new[] {codeName}));
+                    Data.GMLCacheChanged = new ConcurrentBag<string>(Data.GMLCacheChanged.Except(new[] { codeName }));
                     Data.GMLCacheFailed?.Remove(codeName);
                     Data.GMLEditedBefore?.Remove(codeName);
                 }
