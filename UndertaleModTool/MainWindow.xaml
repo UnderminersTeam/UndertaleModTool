@@ -138,7 +138,7 @@
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding CurrentTab.SelectionHistory.Count}" Value="0">
+                                    <DataTrigger Binding="{Binding SelectionHistory.Count}" Value="0">
                                         <Setter Property="IsEnabled" Value="False" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -371,13 +371,13 @@
                     <TabControl Name="TabController" SelectionChanged="TabController_SelectionChanged" TabStripPlacement="Top"/>
                 </ScrollViewer>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="2">
-                    <ContentControl Margin="10" Content="{Binding CurrentTab.Selected,Mode=OneWay}" Name="DataEditor">
+                    <ContentControl Margin="10" Content="{Binding Selected, Mode=OneWay}" Name="DataEditor">
                         <ContentControl.Resources>
                             <DataTemplate DataType="{x:Type local:DescriptionView}">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding Heading,Mode=OneWay}" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Heading, Mode=OneWay}" FontWeight="Bold"/>
                                     <Separator/>
-                                    <TextBlock Text="{Binding Description,Mode=OneWay}"/>
+                                    <TextBlock Text="{Binding Description, Mode=OneWay}"/>
                                 </StackPanel>
                             </DataTemplate>
 
