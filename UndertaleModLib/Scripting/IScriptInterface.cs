@@ -111,6 +111,13 @@ namespace UndertaleModLib.Scripting
         /// <returns><see langword="true"/> if task was successful, <see langword="false"/> if not.</returns>
         Task<bool> MakeNewDataFile();
 
+        /// <summary> Obsolete. Use <see cref="MakeNewDataFile"/>. </summary>
+        [Obsolete("Use MakeNewDataFile instead!")]
+        sealed Task<bool> Make_New_File()
+        {
+            return MakeNewDataFile();
+        }
+
         //TODO: i have absolutely no idea what any of these do.
         void ReplaceTempWithMain(bool ImAnExpertBTW = false);
         void ReplaceMainWithTemp(bool ImAnExpertBTW = false);
@@ -298,7 +305,7 @@ namespace UndertaleModLib.Scripting
         /// <param name="isMultiline">Whether to allow the input to have multiple lines.</param>
         /// <param name="preventClose">Whether the window is allowed to be closed.
         /// Should this be set to <see langword="false"/>, then there also won't be a close button.</param>
-        /// <returns></returns>
+        /// <returns>The text that the user inputted.</returns>
         string ScriptInputDialog(string title, string label, string defaultInput, string cancelText, string submitText, bool isMultiline, bool preventClose);
 
         /// <summary>
@@ -322,8 +329,6 @@ namespace UndertaleModLib.Scripting
         /// Should this be false but <paramref name="message"/> have multiple lines, then only the first line will be shown.</param>
         void SimpleTextOutput(string title, string label, string message, bool allowMultiline);
 
-        //TODO: not exactly sure about most of these.
-
         /// <summary>
         /// Shows search output with clickable text to the user.
         /// </summary>
@@ -338,6 +343,15 @@ namespace UndertaleModLib.Scripting
         Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null);
 
         /// <summary>
+        /// Obsolete.
+        /// </summary>
+        [Obsolete("Use ClickableSearchOutput instead!")]
+        sealed Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
+        {
+            return ClickableSearchOutput(title, query, resultsCount, resultsDict, showInDecompiledView, failedList);
+        }
+
+        /// <summary>
         /// Shows search output with clickable text to the user.
         /// </summary>
         /// <param name="title">A short descriptive title.</param>
@@ -349,6 +363,15 @@ namespace UndertaleModLib.Scripting
         /// <param name="failedList">A list of code entries that encountered an error while searching.</param>
         /// <returns>A task that represents the search output.</returns>
         Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null);
+
+        /// <summary>
+        /// Obsolete.
+        /// </summary>
+        [Obsolete("Use ClickableSearchOutput instead!")]
+        sealed Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
+        {
+            return ClickableSearchOutput(title, query, resultsCount, resultsDict, showInDecompiledView, failedList);
+        }
 
         /// <summary>
         /// Sets <see cref="isFinishedMessageEnabled"/>.
@@ -405,6 +428,15 @@ namespace UndertaleModLib.Scripting
         void IncrementProgress();
 
         /// <summary>
+        /// Obsolete.
+        /// </summary>
+        [Obsolete("Use IncrementProgress instead!")]
+        sealed void IncProgress()
+        {
+            IncrementProgress();
+        }
+
+        /// <summary>
         /// Adds a certain amount to the variable holding a progress value in.
         /// Used for parallel operations, as it is thread-safe.
         /// </summary>
@@ -412,10 +444,28 @@ namespace UndertaleModLib.Scripting
         void AddProgressParallel(int amount);
 
         /// <summary>
+        /// Obsolete.
+        /// </summary>
+        [Obsolete("Use AddProgressParallel instead!")]
+        sealed void AddProgressP(int amount)
+        {
+            AddProgressParallel(amount);
+        }
+
+        /// <summary>
         /// Increments the variable holding a progress value by one.
         /// Used for parallel operations, as it is thread-safe.
         /// </summary>
         void IncrementProgressParallel();
+
+        /// <summary>
+        /// Obsolete.
+        /// </summary>
+        [Obsolete("Use IncrementProgressParallel instead!")]
+        sealed void IncProgressP()
+        {
+            IncrementProgressParallel();
+        }
 
         /// <summary>
         /// Gets the value of the variable holding a progress value.
@@ -454,15 +504,43 @@ namespace UndertaleModLib.Scripting
         void DisableAllSyncBindings();
 
         /// <summary>
+        /// Obsolete
+        /// </summary>
+        /// <param name="enable"></param>
+        [Obsolete("Use DisableAllSyncBindings() instead!")]
+        sealed void SyncBinding(bool enable = false)
+        {
+            DisableAllSyncBindings();
+        }
+
+        /// <summary>
         /// Starts the task that updates a progress bar in parallel.
         /// </summary>
         void StartProgressBarUpdater();
+
+        /// <summary>
+        /// Obsolete.
+        /// </summary>
+        [Obsolete("Use StartProgressBarUpdater instead!")]
+        sealed void StartUpdater()
+        {
+            StartProgressBarUpdater();
+        }
 
         /// <summary>
         /// Stops the task that updates a progress bar in parallel.
         /// </summary>
         /// <returns>A task that represents the stopped progress updater.</returns>
         Task StopProgressBarUpdater();
+
+        /// <summary>
+        /// Obsolete.
+        /// </summary>
+        [Obsolete("Use StopProgressBarUpdater instead!")]
+        sealed void StopUpdater ()
+        {
+            StopProgressBarUpdater();
+        }
 
         /// <summary>
         /// Generates a decompiled code cache to accelerate operations that need to access code often.
@@ -485,6 +563,15 @@ namespace UndertaleModLib.Scripting
         /// </summary>
         /// <returns>The directory selected by the user.</returns>
         string PromptChooseDirectory();
+
+        /// <summary>
+        /// Obsolete
+        /// </summary>
+        [Obsolete("Use this parameters, as it is not used.")]
+        sealed string PromptChooseDirectory(string prompt)
+        {
+            return PromptChooseDirectory();
+        }
 
         /// <summary>
         /// Used to prompt the user for a file.
