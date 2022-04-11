@@ -1571,7 +1571,6 @@ namespace UndertaleModTool
                     Tab tab = (Tab)Tabs[i];
                     if (tab.Selected == obj || tab.Highlighted == obj)
                     {
-                        TabControl tabControl = ((TabControl)this.FindName("TabController"));
                         int newIndex = Math.Max(Tabs.Count - 1, 0);
 
                         if (Tabs.Count - 1 < 0)
@@ -1583,12 +1582,12 @@ namespace UndertaleModTool
 
                         }
                         CurrentTabIndex = newIndex;
-                        tabControl.SelectedIndex = newIndex;
+                        TabController.SelectedIndex = newIndex;
                         Tabs.RemoveAt(i);
-                        tabControl.Items.RemoveAt(i);
-                        for (int j = 0; j < tabControl.Items.Count; j++)
+                        TabController.Items.RemoveAt(i);
+                        for (int j = 0; j < TabController.Items.Count; j++)
                         {
-                            ((TabItem)tabControl.Items[j]).TabIndex = j;
+                            ((TabItem)TabController.Items[j]).TabIndex = j;
                         }
                     }
                 }
@@ -3075,11 +3074,10 @@ result in loss of work.");
         {
             Tab newTab = new Tab(tabTitle, this);
             newTab.TabTitle = tabTitle;
-            TabControl tabControl = (TabControl)this.FindName("TabController");
             if (Tabs.Count > 0 && CurrentTabIndex >= 0 && ((Tab)CurrentTab).AutoClose)
             {
                 Tabs.RemoveAt(CurrentTabIndex);
-                tabControl.Items.RemoveAt(CurrentTabIndex);
+                TabController.Items.RemoveAt(CurrentTabIndex);
             }
             Tabs.Add(newTab);
             CurrentTabIndex = Tabs.Count - 1;
@@ -3098,32 +3096,32 @@ result in loss of work.");
             Image buttonContent = new Image();
             buttonContent.Source = CloseButton;
             tabButton.Content = buttonContent;
-            tabButton.BorderThickness = new System.Windows.Thickness(0.0d, 0.0d, 0.0d, 0.0d);
+            tabButton.BorderThickness = new Thickness(0.0d, 0.0d, 0.0d, 0.0d);
             Separator tabHeaderGap = new Separator();
             tabHeaderGap.Width = 20;
-            tabHeaderGap.Visibility = System.Windows.Visibility.Hidden;
+            tabHeaderGap.Visibility = Visibility.Hidden;
             tabHeaderPanel.Orientation = Orientation.Horizontal;
             tabHeaderPanel.Children.Add(textBlock);
             tabHeaderPanel.Children.Add(tabHeaderGap);
             tabHeaderPanel.Children.Add(tabButton);
             newTabItem.Header = tabHeaderPanel;
-            newTabItem.TabIndex = tabControl.Items.Count;
-            tabControl.Items.Add(newTabItem);
+            newTabItem.TabIndex = TabController.Items.Count;
+            TabController.Items.Add(newTabItem);
             newTab.ChangeSelection(view);
             for (int i = 0; i < Tabs.Count; i++)
             {
                 if (((Tab)Tabs[i]).TabTitle.Equals(newTab.TabTitle) && i != CurrentTabIndex)
                 {
                     CurrentTabIndex = i;
-                    tabControl.SelectedIndex = i;
+                    TabController.SelectedIndex = i;
                     CurrentTab = Tabs[CurrentTabIndex];
                     Tabs.RemoveAt(Tabs.Count - 1);
-                    tabControl.Items.RemoveAt(tabControl.Items.Count - 1);
+                    TabController.Items.RemoveAt(TabController.Items.Count - 1);
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentTab)));
                     return;
                 }
             }
-            tabControl.SelectedIndex = newTabItem.TabIndex;
+            TabController.SelectedIndex = newTabItem.TabIndex;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentTab)));
         }
 
@@ -3134,12 +3132,9 @@ result in loss of work.");
 
         private void TabController_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
-            TabControl tabControl = (TabControl)this.FindName("TabController");
-
-            if (tabControl.SelectedIndex >= 0)
+            if (TabController.SelectedIndex >= 0)
             {
-                CurrentTabIndex = tabControl.SelectedIndex;
+                CurrentTabIndex = TabController.SelectedIndex;
                 CurrentTab = Tabs[CurrentTabIndex];
             }
         }
@@ -3154,7 +3149,6 @@ result in loss of work.");
         private void TabCloseButton_OnClick(object sender, EventArgs e)
         {
             Button button = (Button)sender;
-            TabControl tabControl = ((TabControl)this.FindName("TabController"));
             int tabIndex = ((TabItem)((StackPanel)button.Parent).Parent).TabIndex;
             int newIndex = Math.Max(Tabs.Count - 2, 0);
             if (Tabs.Count - 2 < 0)
@@ -3166,13 +3160,13 @@ result in loss of work.");
 
             }
             Tabs.RemoveAt(tabIndex);
-            tabControl.Items.RemoveAt(tabIndex);
-            for (int j = 0; j < tabControl.Items.Count; j++)
+            TabController.Items.RemoveAt(tabIndex);
+            for (int j = 0; j < TabController.Items.Count; j++)
             {
-                ((TabItem)tabControl.Items[j]).TabIndex = j;
+                ((TabItem)TabController.Items[j]).TabIndex = j;
             }
             CurrentTabIndex = newIndex;
-            tabControl.SelectedIndex = newIndex;
+            TabController.SelectedIndex = newIndex;
         }
 
         private void TabCloseButton_OnMouseEnter(object sender, EventArgs e)
