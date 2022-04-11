@@ -225,12 +225,12 @@ namespace UndertaleModTool
 
         public string TitleMain { get; set; }
 
-        public List<object> Tabs { get; set; } = new List<object>();
-        public object CurrentTab { get; set; }
+        public List<Tab> Tabs { get; set; } = new();
+        public Tab CurrentTab { get; set; }
         public int CurrentTabIndex = -1;
 
-        public object Highlighted { get { return ((Tab)CurrentTab).Highlighted; } set { OpenInNewTab(value, "Untitled"); } }
-        public object Selected { get { return ((Tab)CurrentTab).Selected; } set { OpenInNewTab(value, "Untitled"); } }
+        public object Highlighted { get { return CurrentTab.Highlighted; } set { OpenInNewTab(value, "Untitled"); } }
+        public object Selected { get { return CurrentTab.Selected; } set { OpenInNewTab(value, "Untitled"); } }
 
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
         // God this is so ugly, if there's a better way, please, put in a pull request
@@ -330,8 +330,8 @@ namespace UndertaleModTool
 
             OpenInNewTab(new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"), "Welcome!");
 
-            ((Tab)CurrentTab).AutoClose = true;
-            ((Tab)CurrentTab).SelectionHistory.Clear();
+            CurrentTab.AutoClose = true;
+            CurrentTab.SelectionHistory.Clear();
 
             TabController.SelectedIndex = 0;
 
@@ -616,8 +616,8 @@ namespace UndertaleModTool
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGMS2)));
 
             OpenInNewTab(new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P"), "Ok!");
-            ((Tab)CurrentTab).SelectionHistory.Clear();
-            ((Tab)CurrentTab).AutoClose = true;
+            CurrentTab.SelectionHistory.Clear();
+            CurrentTab.AutoClose = true;
 
             CanSave = true;
             CanSafelySave = true;
@@ -892,8 +892,8 @@ namespace UndertaleModTool
                         UndertaleCodeEditor.gettextJSON = null;
                         #pragma warning restore CA1416
                         OpenInNewTab(new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"), "Welcome!");
-                        ((Tab)CurrentTab).AutoClose = true;
-                        ((Tab)CurrentTab).SelectionHistory.Clear();
+                        CurrentTab.AutoClose = true;
+                        CurrentTab.SelectionHistory.Clear();
 
                     }
                     dialog.Hide();
@@ -1406,20 +1406,20 @@ namespace UndertaleModTool
             }
             else
             {
-                ((Tab)CurrentTab).Highlighted = e.NewValue;
+                CurrentTab.Highlighted = e.NewValue;
             }
         }
 
         private void MainTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            OpenInNewTab(((Tab)CurrentTab).Highlighted, "Untitled");
+            OpenInNewTab(CurrentTab.Highlighted, "Untitled");
         }
 
         private void MainTree_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return)
             {
-                OpenInNewTab(((Tab)CurrentTab).Highlighted, "Untitled");
+                OpenInNewTab(CurrentTab.Highlighted, "Untitled");
             }
         }
 
@@ -1429,7 +1429,7 @@ namespace UndertaleModTool
             {
                 DragDropEffects effects = DragDropEffects.Move | DragDropEffects.Link;
 
-                UndertaleObject draggedItem = ((Tab)CurrentTab).Highlighted as UndertaleObject;
+                UndertaleObject draggedItem = CurrentTab.Highlighted as UndertaleObject;
                 if (draggedItem != null)
                 {
                     DataObject data = new DataObject(draggedItem);
@@ -1568,7 +1568,7 @@ namespace UndertaleModTool
 
                 for (int i = 0; i < Tabs.Count; i++)
                 {
-                    Tab tab = (Tab)Tabs[i];
+                    Tab tab = Tabs[i];
                     if (tab.Selected == obj || tab.Highlighted == obj)
                     {
                         int newIndex = Math.Max(Tabs.Count - 1, 0);
@@ -1577,8 +1577,8 @@ namespace UndertaleModTool
                         {
                             OpenInNewTab(new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"), "Welcome!");
 
-                            ((Tab)CurrentTab).AutoClose = true;
-                            ((Tab)CurrentTab).SelectionHistory.Clear();
+                            CurrentTab.AutoClose = true;
+                            CurrentTab.SelectionHistory.Clear();
 
                         }
                         CurrentTabIndex = newIndex;
@@ -1606,9 +1606,9 @@ namespace UndertaleModTool
         {
             if (e.Key == Key.Delete)
             {
-                if (((Tab)CurrentTab).Highlighted != null && ((Tab)CurrentTab).Highlighted is UndertaleObject)
+                if (CurrentTab.Highlighted != null && CurrentTab.Highlighted is UndertaleObject)
                 {
-                    UndertaleObject obj = ((Tab)CurrentTab).Highlighted as UndertaleObject;
+                    UndertaleObject obj = CurrentTab.Highlighted as UndertaleObject;
                     DeleteItem(obj);
                 }
             }
@@ -1681,8 +1681,8 @@ namespace UndertaleModTool
 
         private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
         {
-            if (((Tab)CurrentTab).Highlighted != null && ((Tab)CurrentTab).Highlighted is UndertaleObject)
-                DeleteItem(((Tab)CurrentTab).Highlighted as UndertaleObject);
+            if (CurrentTab.Highlighted != null && CurrentTab.Highlighted is UndertaleObject)
+                DeleteItem(CurrentTab.Highlighted as UndertaleObject);
             if (Highlighted is UndertaleObject obj)
                 DeleteItem(obj);
         }
@@ -3006,9 +3006,9 @@ result in loss of work.");
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            ((Tab)CurrentTab).Selected = ((Tab)CurrentTab).SelectionHistory.Last();
-            ((Tab)CurrentTab).SelectionHistory.RemoveAt(((Tab)CurrentTab).SelectionHistory.Count - 1);
-            UpdateObjectLabel(((Tab)CurrentTab).Selected);
+            CurrentTab.Selected = CurrentTab.SelectionHistory.Last();
+            CurrentTab.SelectionHistory.RemoveAt(CurrentTab.SelectionHistory.Count - 1);
+            UpdateObjectLabel(CurrentTab.Selected);
         }
 
         public void EnsureDataLoaded()
@@ -3074,7 +3074,7 @@ result in loss of work.");
         {
             Tab newTab = new Tab(tabTitle, this);
             newTab.TabTitle = tabTitle;
-            if (Tabs.Count > 0 && CurrentTabIndex >= 0 && ((Tab)CurrentTab).AutoClose)
+            if (Tabs.Count > 0 && CurrentTabIndex >= 0 && CurrentTab.AutoClose)
             {
                 Tabs.RemoveAt(CurrentTabIndex);
                 TabController.Items.RemoveAt(CurrentTabIndex);
@@ -3110,7 +3110,7 @@ result in loss of work.");
             newTab.ChangeSelection(view);
             for (int i = 0; i < Tabs.Count; i++)
             {
-                if (((Tab)Tabs[i]).TabTitle.Equals(newTab.TabTitle) && i != CurrentTabIndex)
+                if (Tabs[i].TabTitle.Equals(newTab.TabTitle) && i != CurrentTabIndex)
                 {
                     CurrentTabIndex = i;
                     TabController.SelectedIndex = i;
@@ -3155,8 +3155,8 @@ result in loss of work.");
             {
                 OpenInNewTab(new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"), "Welcome!");
 
-                ((Tab)CurrentTab).AutoClose = true;
-                ((Tab)CurrentTab).SelectionHistory.Clear();
+                CurrentTab.AutoClose = true;
+                CurrentTab.SelectionHistory.Clear();
 
             }
             Tabs.RemoveAt(tabIndex);
