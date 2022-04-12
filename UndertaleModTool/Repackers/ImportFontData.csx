@@ -12,7 +12,7 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-string importFolder = PromptChooseDirectory("Import From Where");
+string importFolder = PromptChooseDirectory();
 if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 
@@ -137,7 +137,7 @@ public void fontUpdate(UndertaleFont newFont)
                 newFont.RangeEnd = UInt32.Parse(s[0]);
             }
         }
-        
+
     }
 }
 

@@ -9,7 +9,16 @@ namespace UndertaleModLib
 {
     public interface UndertaleObject
     {
+        /// <summary>
+        /// Serializes the data file into a specified <see cref="UndertaleWriter"/>.
+        /// </summary>
+        /// <param name="writer">Where to serialize to.</param>
         void Serialize(UndertaleWriter writer);
+
+        /// <summary>
+        /// Deserializes from a specified <see cref="UndertaleReader"/> to the current data file.
+        /// </summary>
+        /// <param name="reader">Where to deserialize from.</param>
         void Unserialize(UndertaleReader reader);
     }
 
@@ -30,7 +39,16 @@ namespace UndertaleModLib
 
     public interface PaddedObject // TODO: use this everywhere
     {
+        /// <summary>
+        /// TODO!
+        /// </summary>
+        /// <param name="writer">Where to serialize to.</param>
         void SerializePadding(UndertaleWriter writer);
+
+        /// <summary>
+        /// TODO!
+        /// </summary>
+        /// <param name="reader">Where to deserialize from.</param>
         void UnserializePadding(UndertaleReader reader);
     }
 
@@ -39,7 +57,7 @@ namespace UndertaleModLib
         void SerializePrePadding(UndertaleWriter writer);
         void UnserializePrePadding(UndertaleReader reader);
     }
-    
+
     public enum ResourceType : int
     {
         None = -1,
@@ -71,6 +89,12 @@ namespace UndertaleModLib
 
     public interface ISearchable
     {
+        /// <summary>
+        /// Returns a value indicating whether a specified substring occurs within this object.
+        /// </summary>
+        /// <param name="filter">The string to seek. Case insensitive.</param>
+        /// <returns><see langword="true"/> if <paramref name="filter"/> occurs within this object, or if
+        /// <paramref name="filter"/> is the empty string (""); otherwise, false.</returns>
         bool SearchMatches(string filter);
     }
 }

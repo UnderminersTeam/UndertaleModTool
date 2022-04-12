@@ -41,16 +41,16 @@ if (regex_check)
 }
 
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await DumpCode();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 
 await Task.Run(SortResults);
 
 UpdateProgressStatus("Generating result list...");
-await ClickableTextOutput("Search results.", keyword, result_count, resultsSorted, false, failedSorted);
+await ClickableSearchOutput("Search results.", keyword, result_count, resultsSorted, false, failedSorted);
 
 HideProgressBar();
 EnableUI();
@@ -114,5 +114,5 @@ void DumpCode(UndertaleCode code)
         }
     }
 
-    IncProgressP();
+    IncrementProgressParallel();
 }

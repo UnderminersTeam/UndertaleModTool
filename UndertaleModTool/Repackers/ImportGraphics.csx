@@ -70,7 +70,7 @@ foreach (Atlas atlas in packer.Atlasses)
             string stripped = Path.GetFileNameWithoutExtension(n.Texture.Source);
 
             SpriteType spriteType = GetSpriteType(n.Texture.Source);
-            
+
             if (importAsSprite)
             {
                 if ((spriteType == SpriteType.Unknown) || (spriteType == SpriteType.Font))
@@ -532,7 +532,7 @@ Do you want to continue?");
         throw new ScriptException("Script cancelled.");
 
     // Get import folder
-    string importFolder = PromptChooseDirectory("Import From Where");
+    string importFolder = PromptChooseDirectory();
     if (importFolder == null)
         throw new ScriptException("The import folder was not set.");
 

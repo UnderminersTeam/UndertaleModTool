@@ -6,6 +6,7 @@
     <PublishUrl>publish\</PublishUrl>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
 </Project>

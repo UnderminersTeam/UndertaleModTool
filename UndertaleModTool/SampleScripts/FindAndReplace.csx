@@ -22,25 +22,25 @@ if (!ScriptQuestion("This will make changes across all of the code! Are you sure
 {
     return;
 }
-bool case_sensitive = ScriptQuestion("Case sensitive?"); 
-bool multiline = ScriptQuestion("Multi-line search?"); 
+bool case_sensitive = ScriptQuestion("Case sensitive?");
+bool multiline = ScriptQuestion("Multi-line search?");
 bool isRegex = ScriptQuestion("Is regex search?");
 String keyword = SimpleTextInput("Enter search terms", "Search box below", "", multiline);
 String replacement = SimpleTextInput("Enter replacement term", "Search box below", "", multiline);
 
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 SyncBinding("Strings, Variables, Functions", true);
 await Task.Run(() => {
     foreach (UndertaleCode code in Data.Code)
     {
         ReplaceTextInGML(code.Name.Content, keyword, replacement, case_sensitive, isRegex);
-        IncProgress();
+        IncrementProgress();
     }
 });
-SyncBinding(false);
+DisableAllSyncBindings();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Completed");

@@ -12,47 +12,158 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
+    /// <summary>
+    /// A room in a data file.
+    /// </summary>
     public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
     {
+        /// <summary>
+        /// Certain flags a room can have.
+        /// </summary>
         [Flags]
         public enum RoomEntryFlags : uint
         {
+            /// <summary>
+            /// Whether the room has Views enabled.
+            /// </summary>
             EnableViews = 1,
+            /// <summary>
+            /// TODO not exactly sure, probably similar to <see cref="UndertaleRoom.DrawBackgroundColor"/>?
+            /// </summary>
             ShowColor = 2,
+            /// <summary>
+            /// Whether the room should clear the display buffer.
+            /// </summary>
             ClearDisplayBuffer = 4,
+            /// <summary>
+            /// Whether the room was made in Game Maker: Studio 2.
+            /// </summary>
             IsGMS2 = 131072,
+            /// <summary>
+            /// Whether the room was made in Game Maker: Studio 2.3.
+            /// </summary>
             IsGMS2_3 = 65536
         }
 
+        /// <summary>
+        /// The name of the room.
+        /// </summary>
         public UndertaleString Name { get; set; }
+
+        /// <summary>
+        /// The caption of the room. Legacy variable that's used in pre- Game Maker: Studio.
+        /// </summary>
         public UndertaleString Caption { get; set; }
+
+        /// <summary>
+        /// The Width of the room.
+        /// </summary>
         public uint Width { get; set; } = 320;
+
+        /// <summary>
+        /// The height of the room.
+        /// </summary>
         public uint Height { get; set; } = 240;
+
+        /// <summary>
+        /// The speed of the current room in steps.
+        /// TODO: GMS1 only? IIRC gms2 deals with it differently.
+        /// </summary>
         public uint Speed { get; set; } = 30;
+
+        /// <summary>
+        /// Whether this room is persistant.
+        /// </summary>
         public bool Persistent { get; set; } = false;
+
+        /// <summary>
+        /// The background color of this room.
+        /// </summary>
         public uint BackgroundColor { get; set; } = 0;
+
+        /// <summary>
+        /// Whether the display buffer should be cleared with Window Color.
+        /// </summary>
         public bool DrawBackgroundColor { get; set; } = true;
 
         private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCodeId = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
+
+        /// <summary>
+        /// The creation code of this room.
+        /// </summary>
         public UndertaleCode CreationCodeId { get => _CreationCodeId.Resource; set { _CreationCodeId.Resource = value; OnPropertyChanged(); } }
+
+        /// <summary>
+        /// The room flags this room has.
+        /// </summary>
         public RoomEntryFlags Flags { get; set; } = RoomEntryFlags.EnableViews;
+
+        //TODO
         public bool World { get; set; } = false;
         public uint Top { get; set; } = 0;
         public uint Left { get; set; } = 0;
         public uint Right { get; set; } = 1024;
         public uint Bottom { get; set; } = 768;
+
+        /// <summary>
+        /// The gravity towards x axis using room physics in m/s.
+        /// </summary>
         public float GravityX { get; set; } = 0;
+
+        /// <summary>
+        /// The gravity towards y axis using room physics in m/s.
+        /// </summary>
         public float GravityY { get; set; } = 10;
+
+        /// <summary>
+        /// The meters per pixel value for room physics.
+        /// </summary>
         public float MetersPerPixel { get; set; } = 0.1f;
+
+        /// <summary>
+        /// The width of the room grid in pixels.
+        /// </summary>
         public double GridWidth { get; set; } = 16d;
+
+        /// <summary>
+        /// The height of the room grid in pixels.
+        /// </summary>
         public double GridHeight { get; set; } = 16d;
+
+        /// <summary>
+        /// The thickness of the room grid in pixels.
+        /// </summary>
         public double GridThicknessPx { get; set; } = 1d;
         private UndertalePointerList<Layer> _layers = new();
+
+        /// <summary>
+        /// The list of backgrounds this room uses.
+        /// </summary>
         public UndertalePointerList<Background> Backgrounds { get; private set; } = new UndertalePointerList<Background>();
+
+        /// <summary>
+        /// The list of views this room uses.
+        /// </summary>
         public UndertalePointerList<View> Views { get; private set; } = new UndertalePointerList<View>();
+
+        /// <summary>
+        /// The list of game objects this room uses.
+        /// </summary>
         public UndertalePointerListLenCheck<GameObject> GameObjects { get; private set; } = new UndertalePointerListLenCheck<GameObject>();
+
+        /// <summary>
+        /// The list of tiles this room uses.
+        /// </summary>
         public UndertalePointerList<Tile> Tiles { get; private set; } = new UndertalePointerList<Tile>();
+
+        /// <summary>
+        /// The list of layers this room uses. Used in Game Maker Studio: 2 only, as <see cref="Backgrounds"/> and <see cref="Tiles"/> are empty there.
+        /// </summary>
         public UndertalePointerList<Layer> Layers { get => _layers; private set { _layers = value; UpdateBGColorLayer(); OnPropertyChanged(); } }
+
+        /// <summary>
+        /// The list of sequences this room uses.
+        /// </summary>
         public UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>> Sequences { get; private set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
 
         private Layer GetBGColorLayer()
@@ -64,6 +175,10 @@ namespace UndertaleModLib.Models
                            .FirstOrDefault();
         }
         public void UpdateBGColorLayer() => OnPropertyChanged("BGColorLayer");
+
+        /// <summary>
+        /// The layer containing the background color.
+        /// </summary>
         public Layer BGColorLayer => GetBGColorLayer();
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -135,7 +250,7 @@ namespace UndertaleModLib.Models
             if (writer.undertaleData.GeneralInfo.Major >= 2)
             {
                 writer.WriteUndertaleObject(Layers);
-                
+
                 if (sequences)
                     writer.WriteUndertaleObject(Sequences);
             }
@@ -194,7 +309,7 @@ namespace UndertaleModLib.Models
                         }
                     }
                 }
-                
+
                 if (sequences)
                     reader.ReadUndertaleObject(Sequences);
             }
@@ -231,7 +346,7 @@ namespace UndertaleModLib.Models
                             tileSizes[new(w, h)] = layer.TilesData.TilesX * layer.TilesData.TilesY;
                         }
                     }
-                        
+
                 }
                 else
                     tileList = Tiles;
@@ -265,35 +380,98 @@ namespace UndertaleModLib.Models
             return Name.Content + " (" + GetType().Name + ")";
         }
 
+        /// <summary>
+        /// Interface for objects within rooms.
+        /// </summary>
         public interface RoomObject
         {
+            /// <summary>
+            /// X coordinate of the object.
+            /// </summary>
             int X { get; }
+
+            /// <summary>
+            /// Y coordinate of the object.
+            /// </summary>
             int Y { get; }
+
+            /// <summary>
+            /// Instance id of the object.
+            /// </summary>
             uint InstanceID { get; }
         }
 
+        /// <summary>
+        /// A background with properties as it's used in a room.
+        /// </summary>
         public class Background : UndertaleObject, INotifyPropertyChanged
         {
             private UndertaleRoom _ParentRoom;
+
+            /// <summary>
+            /// The room parent this background belongs to.
+            /// </summary>
             public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; OnPropertyChanged(); UpdateStretch(); } }
+
+            //TODO:
             public float CalcScaleX { get; set; } = 1;
             public float CalcScaleY { get; set; } = 1;
+
+            /// <summary>
+            /// Whether this background is enabled.
+            /// </summary>
             public bool Enabled { get; set; } = false;
+
+            /// <summary>
+            /// Whether this acts as a foreground.
+            /// </summary>
             public bool Foreground { get; set; } = false;
             private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>();
+
+            /// <summary>
+            /// The background asset this uses.
+            /// </summary>
             public UndertaleBackground BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; OnPropertyChanged(); } }
             private int _X = 0;
-            private int _Y = 0; 
+            private int _Y = 0;
+
+            /// <summary>
+            /// The x coordinate of the background in the room.
+            /// </summary>
             public int X { get => _X; set { _X = value; OnPropertyChanged(); UpdateStretch(); } }
+
+            /// <summary>
+            /// The y coordinate of the background in the room.
+            /// </summary>
             public int Y { get => _Y; set { _Y = value; OnPropertyChanged(); UpdateStretch(); } }
             public int TileX { get; set; } = 1;
             public int TileY { get; set; } = 1;
+
+            /// <summary>
+            /// Horizontal speed of the background.
+            /// </summary>
             public int SpeedX { get; set; } = 0;
+
+            /// <summary>
+            /// Vertical speed of the background.
+            /// </summary>
             public int SpeedY { get; set; } = 0;
 
             private bool _Stretch = false;
+
+            /// <summary>
+            /// Whether this background is stretched
+            /// </summary>
             public bool Stretch { get => _Stretch; set { _Stretch = value; OnPropertyChanged(); UpdateStretch(); } }
+
+            /// <summary>
+            /// Whether this background is tiled horizontally.
+            /// </summary>
             public bool TiledHorizontally { get => TileX > 0; set { TileX = value ? 1 : 0; OnPropertyChanged(); } }
+
+            /// <summary>
+            /// Whether this background is tiled vertically.
+            /// </summary>
             public bool TiledVertically { get => TileY > 0; set { TileY = value ? 1 : 0; OnPropertyChanged(); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
@@ -338,23 +516,81 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <summary>
+        /// A view with properties as it's used in a room.
+        /// </summary>
         public class View : UndertaleObject, INotifyPropertyChanged
         {
+            /// <summary>
+            /// Whether this view is enabled.
+            /// </summary>
             public bool Enabled { get; set; } = false;
+
+            /// <summary>
+            /// The x coordinate of the view in the room.
+            /// </summary>
             public int ViewX { get; set; }
+
+            /// <summary>
+            /// The y coordinate of the view in the room.
+            /// </summary>
             public int ViewY { get; set; }
+
+            /// <summary>
+            /// The width of the view.
+            /// </summary>
             public int ViewWidth { get; set; } = 640;
+
+            /// <summary>
+            /// The height of the view.
+            /// </summary>
             public int ViewHeight { get; set; } = 480;
+
+            /// <summary>
+            /// The x coordinate of the viewport on the screen.
+            /// </summary>
             public int PortX { get; set; }
+
+            /// <summary>
+            /// The y coordinate of the viewport on the screen.
+            /// </summary>
             public int PortY { get; set; }
+
+            /// <summary>
+            /// The width of the viewport on the screen.
+            /// </summary>
             public int PortWidth { get; set; } = 640;
+
+            /// <summary>
+            /// The height of the viewport on the screen.
+            /// </summary>
             public int PortHeight { get; set; } = 480;
+
+            /// <summary>
+            /// The horizontal border of the view for view following.
+            /// </summary>
             public uint BorderX { get; set; } = 32;
+
+            /// <summary>
+            /// The vertical border of the view for view following.
+            /// </summary>
             public uint BorderY { get; set; } = 32;
+
+            /// <summary>
+            /// The horizontal movement speed of the view.
+            /// </summary>
             public int SpeedX { get; set; } = -1;
+
+            /// <summary>
+            /// The vertical movement speed of the view.
+            /// </summary>
             public int SpeedY { get; set; } = -1;
 
             private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
+
+            /// <summary>
+            /// The object the view should follow.
+            /// </summary>
             public UndertaleGameObject ObjectId { get => _ObjectId.Resource; set { _ObjectId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ObjectId))); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
@@ -396,23 +632,71 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <summary>
+        /// A game object with properties as it's used in a room.
+        /// </summary>
         public class GameObject : UndertaleObjectLenCheck, RoomObject, INotifyPropertyChanged
         {
             private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectDefinition = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
             private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCode = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
             private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _PreCreateCode = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
 
+            /// <summary>
+            /// The x coordinate of this object.
+            /// </summary>
             public int X { get; set; }
+
+            /// <summary>
+            /// The y coordinate of this object.
+            /// </summary>
             public int Y { get; set; }
+
+            /// <summary>
+            /// The game object that is used.
+            /// </summary>
             public UndertaleGameObject ObjectDefinition { get => _ObjectDefinition.Resource; set { _ObjectDefinition.Resource = value; OnPropertyChanged(); } }
+
+            /// <summary>
+            /// The instance id of this object.
+            /// </summary>
             public uint InstanceID { get; set; }
+
+            /// <summary>
+            /// The creation code for this object.
+            /// </summary>
             public UndertaleCode CreationCode { get => _CreationCode.Resource; set { _CreationCode.Resource = value; OnPropertyChanged(); } }
+
+            /// <summary>
+            /// The x scale that's applied for this object.
+            /// </summary>
             public float ScaleX { get; set; } = 1;
+
+            /// <summary>
+            /// The y scale that's applied for this object.
+            /// </summary>
             public float ScaleY { get; set; } = 1;
+
+            //TODO: no idea
             public uint Color { get; set; } = 0xFFFFFFFF;
+
+            /// <summary>
+            /// The rotation of this object.
+            /// </summary>
             public float Rotation { get; set; }
+
+            /// <summary>
+            /// The pre creation code of this object.
+            /// </summary>
             public UndertaleCode PreCreateCode { get => _PreCreateCode.Resource; set { _PreCreateCode.Resource = value; OnPropertyChanged(); } }
+
+            /// <summary>
+            /// The image speed of this object. Game Maker: Studio 2 only.
+            /// </summary>
             public float ImageSpeed { get; set; }
+
+            /// <summary>
+            /// The image index of this object. Game Maker: Studio 2 only.
+            /// </summary>
             public int ImageIndex { get; set; }
 
             public event PropertyChangedEventHandler PropertyChanged;
@@ -421,7 +705,10 @@ namespace UndertaleModLib.Models
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
             }
 
-            public float OppositeRotation => 360F - Rotation;
+            /// <summary>
+            /// The opposite angle of the current rotation.
+            /// </summary>
+            public float OppositeRotation => 360F - (Rotation % 360);
             public int XOffset => ObjectDefinition.Sprite != null
                                   ? X - ObjectDefinition.Sprite.OriginX + (ObjectDefinition.Sprite.Textures.FirstOrDefault()?.Texture?.TargetX ?? 0)
                                   : X;
@@ -481,25 +768,85 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <summary>
+        /// A tile with properties as it's used in a room.
+        /// </summary>
         public class Tile : UndertaleObject, RoomObject, INotifyPropertyChanged
         {
+            /// <summary>
+            /// Whether this tile is from an asset layer. Game Maker Studio: 2 exclusive.
+            /// </summary>
             public bool _SpriteMode = false;
             private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>();
             private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _SpriteDefinition = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
 
+            /// <summary>
+            /// The x coordinate of the tile in the room.
+            /// </summary>
             public int X { get; set; }
+
+            /// <summary>
+            /// The y coordinate of the tile in the room.
+            /// </summary>
             public int Y { get; set; }
+
+            /// <summary>
+            /// From which tileset / background the tile stems from.
+            /// </summary>
             public UndertaleBackground BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("ObjectDefinition"); } }
+
+            /// <summary>
+            /// From which sprite this tile stems from.
+            /// </summary>
             public UndertaleSprite SpriteDefinition { get => _SpriteDefinition.Resource; set { _SpriteDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("ObjectDefinition"); } }
+
+            /// <summary>
+            /// From which object this tile stems from.
+            /// Will return a <see cref="UndertaleBackground"/> if <see cref="_SpriteMode"/> is disabled, a <see cref="UndertaleSprite"/> if it's enabled.
+            /// </summary>
             public UndertaleNamedResource ObjectDefinition { get => _SpriteMode ? SpriteDefinition : BackgroundDefinition; set { if (_SpriteMode) SpriteDefinition = (UndertaleSprite)value; else BackgroundDefinition = (UndertaleBackground)value; } }
+
+            /// <summary>
+            /// The x coordinate of the tile in <see cref="ObjectDefinition"/>.
+            /// </summary>
             public uint SourceX { get; set; }
+
+            /// <summary>
+            /// The y coordinate of the tile in <see cref="ObjectDefinition"/>.
+            /// </summary>
             public uint SourceY { get; set; }
+
+            /// <summary>
+            /// The width of the tile.
+            /// </summary>
             public uint Width { get; set; }
+
+            /// <summary>
+            /// The height of the tile.
+            /// </summary>
             public uint Height { get; set; }
+
+            /// <summary>
+            /// The depth value of this tile.
+            /// </summary>
             public int TileDepth { get; set; }
+
+            /// <summary>
+            /// The instance id of this tile.
+            /// </summary>
             public uint InstanceID { get; set; }
+
+            /// <summary>
+            /// The x scale that's applied for this tile.
+            /// </summary>
             public float ScaleX { get; set; } = 1;
+
+            /// <summary>
+            /// The y scale that's applied for this tile.
+            /// </summary>
             public float ScaleY { get; set; } = 1;
+
+            //TODO?
             public uint Color { get; set; } = 0xFFFFFFFF;
 
             public UndertaleTexturePageItem Tpag => _SpriteMode ? SpriteDefinition?.Textures?.FirstOrDefault()?.Texture : BackgroundDefinition?.Texture; // TODO: what happens on sprites with multiple textures?
@@ -558,6 +905,10 @@ namespace UndertaleModLib.Models
         }
 
         // For GMS2, Backgrounds and Tiles are empty and this is used instead
+        /// <summary>
+        /// The layer type for a specific layer. In Game Maker: Studio 2, <see cref="UndertaleRoom.Backgrounds"/>, <see cref="UndertaleRoom.Tiles"/>
+        /// are empty and this is used instead.
+        /// </summary>
         public enum LayerType
         {
             Background = 1,
@@ -567,6 +918,10 @@ namespace UndertaleModLib.Models
             Effect = 6
         }
 
+        /// <summary>
+        /// A layer with properties as it's used in a room. Game Maker: Studio 2 only.
+        /// </summary>
+        //TODO: everything from here on is mostly gms2 related which i dont have much experience with
         public class Layer : UndertaleObject, INotifyPropertyChanged
         {
             public interface LayerData : UndertaleObject
@@ -575,12 +930,32 @@ namespace UndertaleModLib.Models
 
             private UndertaleRoom _ParentRoom;
             private int _layerDepth;
+
+            /// <summary>
+            /// The room this layer belongs to.
+            /// </summary>
             public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ParentRoom))); UpdateParentRoom(); } }
 
+            /// <summary>
+            /// The name of the layer.
+            /// </summary>
             public UndertaleString LayerName { get; set; }
+
+            /// <summary>
+            /// The id of the layer.
+            /// </summary>
             public uint LayerId { get; set; }
+
+            /// <summary>
+            /// The type of this layer.
+            /// </summary>
             public LayerType LayerType { get; set; }
+
+            /// <summary>
+            /// The depth of this layer.
+            /// </summary>
             public int LayerDepth { get => _layerDepth; set { _layerDepth = value; ParentRoom?.UpdateBGColorLayer(); } }
+
             public float XOffset { get; set; }
             public float YOffset { get; set; }
             public float HSpeed { get; set; }
@@ -652,7 +1027,7 @@ namespace UndertaleModLib.Models
                     throw new Exception("Unsupported layer type " + LayerType);
                 }
             }
-            
+
             public void Unserialize(UndertaleReader reader)
             {
                 LayerName = reader.ReadUndertaleString();

@@ -23,7 +23,7 @@ if (!recursiveCheck)
     throw new ScriptException("Script cancelled.");
 
 // Get import folder
-string importFolder = PromptChooseDirectory("Import From Where");
+string importFolder = PromptChooseDirectory();
 if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 
@@ -100,14 +100,14 @@ Dictionary<string, string> assetTypeDict = new Dictionary<string, string>();
 Directory.CreateDirectory(exportedTexturesFolder);
 
 SetProgressBar(null, "Existing Textures Exported", 0, Data.TexturePageItems.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await DumpSprites();
 await DumpFonts();
 await DumpBackgrounds();
 worker.Cleanup();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 
 async Task DumpSprites()

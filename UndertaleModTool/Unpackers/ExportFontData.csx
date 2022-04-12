@@ -21,12 +21,12 @@ if (ShowInputDialog() == System.Windows.Forms.DialogResult.Cancel)
 string[] arrayString = input.ToArray();
 
 SetProgressBar(null, "Fonts", 0, Data.Fonts.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await DumpFonts();
 worker.Cleanup();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + fntFolder);
 
@@ -57,7 +57,7 @@ void DumpFont(UndertaleFont font)
         }
     }
 
-    IncProgressP();
+    IncrementProgressParallel();
 }
 
 private DialogResult ShowInputDialog()

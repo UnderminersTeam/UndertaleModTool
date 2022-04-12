@@ -21,7 +21,7 @@ else
         NukeProfileGML(c.Name.Content);
 }
 
-string importFolder = PromptChooseDirectory("Import from where");
+string importFolder = PromptChooseDirectory();
 if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 

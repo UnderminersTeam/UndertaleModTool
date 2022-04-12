@@ -9,10 +9,20 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
+    /// <summary>
+    /// An embedded audio entry in a data file.
+    /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleEmbeddedAudio : UndertaleNamedResource, PaddedObject
     {
+        /// <summary>
+        /// The name of the embedded audio entry.
+        /// </summary>
         public UndertaleString Name { get; set; }
+
+        /// <summary>
+        /// The audio data of the embedded audio entry.
+        /// </summary>
         public byte[] Data { get; set; } = Array.Empty<byte>();
 
         public void Serialize(UndertaleWriter writer)

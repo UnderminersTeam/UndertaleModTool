@@ -57,7 +57,7 @@ namespace UndertaleModCli
                 throw new Exception("No data file is loaded.");
         }
 
-        public async Task<bool> Make_New_File()
+        public async Task<bool> MakeNewDataFile()
         {
             // This call has no use except to suppress the "method is not doing anything async" warning
             await Task.Delay(1);
@@ -261,17 +261,17 @@ namespace UndertaleModCli
             progressValue += amount;
         }
 
-        public void IncProgress()
+        public void IncrementProgress()
         {
             progressValue++;
         }
 
-        public void AddProgressP(int amount) //P - Parallel (multithreaded)
+        public void AddProgressParallel(int amount) //P - Parallel (multithreaded)
         {
             Interlocked.Add(ref progressValue, amount); //thread-safe add operation (not the same as "lock ()")
         }
 
-        public void IncProgressP()
+        public void IncrementProgressParallel()
         {
             Interlocked.Increment(ref progressValue); //thread-safe increment
         }
@@ -334,14 +334,14 @@ namespace UndertaleModCli
             //there is no UI with any data binding
         }
 
-        public void SyncBinding(bool enable = false)
+        public void DisableAllSyncBindings()
         {
             //there is no UI with any data binding
         }
 
         #endregion
 
-        public void StartUpdater()
+        public void StartProgressBarUpdater()
         {
             if (cTokenSource is not null)
                 Console.WriteLine("Warning - there is another progress updater task running (hangs) in the background.");
@@ -351,7 +351,7 @@ namespace UndertaleModCli
 
             updater = Task.Run(ProgressUpdater);
         }
-        public async Task StopUpdater() //"async" because "Wait()" blocks UI thread
+        public async Task StopProgressBarUpdater() //"async" because "Wait()" blocks UI thread
         {
             if (cTokenSource is null) return;
 
@@ -376,7 +376,7 @@ namespace UndertaleModCli
             Selected = newSelection;
         }
 
-        public string PromptChooseDirectory(string prompt)
+        public string PromptChooseDirectory()
         {
             string path;
             DirectoryInfo directoryInfo;
@@ -504,11 +504,11 @@ namespace UndertaleModCli
             return result;
         }
 
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
         {
-            await ClickableTextOutput(title, query, resultsCount, resultsDict.ToDictionary(pair => pair.Key, pair => pair.Value), editorDecompile, failedList);
+            await ClickableSearchOutput(title, query, resultsCount, resultsDict.ToDictionary(pair => pair.Key, pair => pair.Value), editorDecompile, failedList);
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
         {
             await Task.Delay(1); //dummy await
 

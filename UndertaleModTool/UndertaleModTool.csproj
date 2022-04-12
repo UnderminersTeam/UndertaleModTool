@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net5.0-windows</TargetFramework>
+        <RollForward>LatestMajor</RollForward>
         <OutputType>WinExe</OutputType>
         <PublishUrl>publish\</PublishUrl>
         <Install>true</Install>
@@ -25,12 +26,14 @@
         <DebugType>embedded</DebugType>
         <Platforms>AnyCPU;x64</Platforms>
         <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
+        <LangVersion>9</LangVersion>
     </PropertyGroup>
     <PropertyGroup>
         <StartupObject>UndertaleModTool.Program</StartupObject>
     </PropertyGroup>
     <PropertyGroup>
         <ApplicationIcon>icon.ico</ApplicationIcon>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
     </PropertyGroup>
     <ItemGroup>
       <None Remove="Resources\X_Down.png" />

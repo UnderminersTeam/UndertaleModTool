@@ -8,32 +8,82 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
+    /// <summary>
+    /// General info about a data file.
+    /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleGeneralInfo : UndertaleObject
     {
+        /// <summary>
+        /// Information flags a data file can use.
+        /// </summary>
         [Flags]
         public enum InfoFlags : uint
         {
-            Fullscreen = 0x0001,        // Start fullscreen
-            SyncVertex1 = 0x0002,       // Use synchronization to avoid tearing
+            /// <summary>
+            /// Start fullscreen
+            /// </summary>
+            Fullscreen = 0x0001,
+            /// <summary>
+            /// Use synchronization to avoid tearing
+            /// </summary>
+            SyncVertex1 = 0x0002,
+            /// <summary>
+            /// Use synchronization to avoid tearing
+            /// </summary>
             SyncVertex2 = 0x0004,
-            Interpolate = 0x0008,       // Interpolate colours between pixels
-            Scale = 0x0010,             // Scaling: Keep aspect
-            ShowCursor = 0x0020,        // Display cursor
-            Sizeable = 0x0040,          // Allow window resize
-            ScreenKey = 0x0080,         // Allow fullscreen switching
+            /// <summary>
+            /// Interpolate colours between pixels
+            /// </summary>
+            Interpolate = 0x0008,
+            /// <summary>
+            /// Scaling: Keep aspect
+            /// </summary>
+            Scale = 0x0010,
+            /// <summary>
+            /// Display cursor
+            /// </summary>
+            ShowCursor = 0x0020,
+            /// <summary>
+            /// Allow window resize
+            /// </summary>
+            Sizeable = 0x0040,
+            /// <summary>
+            /// Allow fullscreen switching
+            /// </summary>
+            ScreenKey = 0x0080,
+
             SyncVertex3 = 0x0100,
             StudioVersionB1 = 0x0200,
             StudioVersionB2 = 0x0400,
             StudioVersionB3 = 0x0800,
-            StudioVersionMask = 0x0E00, // studioVersion = (infoFlags & InfoFlags.StudioVersionMask) >> 9
-            SteamEnabled = 0x1000,      // Enable Steam
+
+            /// <summary>
+            /// studioVersion = (infoFlags & InfoFlags.StudioVersionMask) >> 9
+            /// </summary>
+            StudioVersionMask = 0x0E00,
+            /// <summary>
+            /// Enable Steam
+            /// </summary>
+            SteamEnabled = 0x1000,
+
             LocalDataEnabled = 0x2000,
-            BorderlessWindow = 0x4000,  // Borderless Window
-            JavaScriptMode = 0x8000, // Tells the runner to run Javascript code
+
+            /// <summary>
+            /// Borderless Window
+            /// </summary>
+            BorderlessWindow = 0x4000,
+            /// <summary>
+            /// Tells the runner to run Javascript code
+            /// </summary>
+            JavaScriptMode = 0x8000,
+
             LicenseExclusions = 0x10000,
         }
 
+        /// <summary>
+        /// Function classifications a data file can have.
+        /// </summary>
         [Flags]
         public enum FunctionClassification : ulong
         {
@@ -106,38 +156,132 @@ namespace UndertaleModLib.Models
         }
 
         public bool DisableDebugger { get; set; } = true;
+
+        /// <summary>
+        /// The bytecode version of the data file.
+        /// </summary>
         public byte BytecodeVersion { get; set; } = 0x10;
+
         public ushort Unknown { get; set; } = 0;
+
         public UndertaleString Filename { get; set; }
         public UndertaleString Config { get; set; }
+
+        /// <summary>
+        /// The last object id of the data file.
+        /// </summary>
         public uint LastObj { get; set; } = 100000;
+
+        /// <summary>
+        /// The last tile id of the data file.
+        /// </summary>
         public uint LastTile { get; set; } = 10000000;
+
+        /// <summary>
+        /// The game id of the data file.
+        /// </summary>
         public uint GameID { get; set; } = 13371337;
-        public Guid DirectPlayGuid { get; set; } = Guid.Empty; // in Studio it's always empty.
+
+        /// <summary>
+        /// The DirectPlay GUID of the data file
+        /// </summary>
+        /// <remarks>This is always empty in Game Maker: Studio.</remarks>
+        public Guid DirectPlayGuid { get; set; } = Guid.Empty;
+
+
         public UndertaleString Name { get; set; }
+
+        /// <summary>
+        /// The major version of the data file.
+        /// </summary>
         public uint Major { get; set; } = 1;
+
+        /// <summary>
+        /// The minor version of the data file.
+        /// </summary>
         public uint Minor { get; set; } = 0;
+
+        /// <summary>
+        /// The Release version of the data file.
+        /// </summary>
         public uint Release { get; set; } = 0;
+
+        /// <summary>
+        /// The build version of the data file.
+        /// </summary>
         public uint Build { get; set; } = 1337;
+
+        /// <summary>
+        /// The default window width of the game.
+        /// </summary>
         public uint DefaultWindowWidth { get; set; } = 1024;
+
+        /// <summary>
+        /// The default window height of the game.
+        /// </summary>
         public uint DefaultWindowHeight { get; set; } = 768;
+
+        /// <summary>
+        /// The info flags of the data file.
+        /// </summary>
         public InfoFlags Info { get; set; } = InfoFlags.Interpolate | InfoFlags.Scale | InfoFlags.ShowCursor | InfoFlags.ScreenKey | InfoFlags.StudioVersionB3;
+
+        /// <summary>
+        /// The MD5 of the license used to compile the game.
+        /// </summary>
         public byte[] LicenseMD5 { get; set; } = new byte[16];
+
+        /// <summary>
+        /// The CRC32 of the license used to compile the game.
+        /// </summary>
         public uint LicenseCRC32 { get; set; }
+
+        /// <summary>
+        /// The UNIX timestamp the game was compiled.
+        /// </summary>
         public ulong Timestamp { get; set; } = 0;
+
+        /// <summary>
+        /// The name that gets displayed in the window.
+        /// </summary>
         public UndertaleString DisplayName { get; set; }
+
+
         public ulong ActiveTargets { get; set; } = 0;
         public FunctionClassification FunctionClassifications { get; set; } = FunctionClassification.None; // Initializing it with None is a very bad idea.
+
+        /// <summary>
+        /// The Steam app id of the game.
+        /// </summary>
         public int SteamAppID { get; set; } = 0;
+
+        /// <summary>
+        /// The port the data file exposes for the debugger.
+        /// </summary>
         public uint DebuggerPort { get; set; } = 6502;
+
+        /// <summary>
+        /// The room order of the data file.
+        /// </summary>
         public UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM> RoomOrder { get; private set; } = new UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>();
 
         public List<long> GMS2RandomUID { get; set; } = new List<long>(); // Some sort of checksum
 
+        /// <summary>
+        /// The FPS of the data file. Game Maker Studio: 2 only.
+        /// </summary>
         public float GMS2FPS { get; set; } = 30.0f;
+
+        /// <summary>
+        /// Whether the data file allows statistics. Game Maker Studio: 2 only.
+        /// </summary>
         public bool GMS2AllowStatistics { get; set; } = true;
+
+
         public byte[] GMS2GameGUID { get; set; } = new byte[16]; // more high entropy data
 
+        /// <inheritdoc/>
+        /// <exception cref="IOException">If <see cref="LicenseMD5"/> or <see cref="GMS2GameGUID"/> has an invalid length.</exception>
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(DisableDebugger ? (byte)1 : (byte)0);
@@ -305,20 +449,51 @@ namespace UndertaleModLib.Models
         }
     }
 
+    /// <summary>
+    /// General options about a data file.
+    /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleOptions : UndertaleObject
     {
+        /// <summary>
+        /// Option flags a data file can use
+        /// </summary>
         [Flags]
         public enum OptionsFlags : ulong
         {
+            /// <summary>
+            /// If game should start in fullscreen.
+            /// </summary>
             FullScreen = 0x1,
+            /// <summary>
+            /// If pixels should be interpolated.
+            /// </summary>
             InterpolatePixels = 0x2,
+            /// <summary>
+            /// If the new audio format should be used.
+            /// </summary>
             UseNewAudio = 0x4,
+            /// <summary>
+            /// If borderless window should be used.
+            /// </summary>
             NoBorder = 0x8,
+            /// <summary>
+            /// If the mouse cursor should be shown.
+            /// </summary>
             ShowCursor = 0x10,
+            /// <summary>
+            /// If the window should be resizable.
+            /// </summary>
             Sizeable = 0x20,
+            /// <summary>
+            /// If the window should stay on top.
+            /// </summary>
             StayOnTop = 0x40,
+            /// <summary>
+            /// If the resolution can be changed.
+            /// </summary>
             ChangeResolution = 0x80,
+
             NoButtons = 0x100,
             ScreenKey = 0x200,
             HelpKey = 0x400,
@@ -344,26 +519,69 @@ namespace UndertaleModLib.Models
 
         public uint Unknown1 { get; set; } = 0x80000000;
         public uint Unknown2 { get; set; } = 0x00000002;
+
+        /// <summary>
+        /// Option flags the data file uses.
+        /// </summary>
         public OptionsFlags Info { get; set; } = OptionsFlags.InterpolatePixels | OptionsFlags.UseNewAudio | OptionsFlags.ShowCursor | OptionsFlags.ScreenKey | OptionsFlags.QuitKey | OptionsFlags.SaveKey | OptionsFlags.ScreenShotKey | OptionsFlags.CloseSec | OptionsFlags.ScaleProgress | OptionsFlags.DisplayErrors | OptionsFlags.VariableErrors | OptionsFlags.CreationEventOrder;
+
+        /// <summary>
+        /// The window scale.
+        /// </summary>
         public int Scale { get; set; } = -1;
+
+        /// <summary>
+        /// The window color.
+        /// </summary>
         public uint WindowColor { get; set; } = 0;
+
+        /// <summary>
+        /// The Color depth.
+        /// </summary>
         public uint ColorDepth { get; set; } = 0;
+
+        /// <summary>
+        /// The game's resolution.
+        /// </summary>
         public uint Resolution { get; set; } = 0;
+
+        /// <summary>
+        /// The game's refresh rate.
+        /// </summary>
         public uint Frequency { get; set; } = 0;
+
+        /// <summary>
+        /// Whether the game uses V-Sync.
+        /// </summary>
         public uint VertexSync { get; set; } = 0;
+
         public uint Priority { get; set; } = 0;
         public UndertaleSprite.TextureEntry BackImage { get; set; } = new UndertaleSprite.TextureEntry(); // Apparently these exist, but I can't find any examples of it
         public UndertaleSprite.TextureEntry FrontImage { get; set; } = new UndertaleSprite.TextureEntry();
         public UndertaleSprite.TextureEntry LoadImage { get; set; } = new UndertaleSprite.TextureEntry();
         public uint LoadAlpha { get; set; } = 255;
+
+        /// <summary>
+        /// A list of Constants that the game uses.
+        /// </summary>
         public UndertaleSimpleList<Constant> Constants { get; private set; } = new UndertaleSimpleList<Constant>();
 
         public bool NewFormat { get; set; } = true;
 
+        /// <summary>
+        /// A class for game constants.
+        /// </summary>
         [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class Constant : UndertaleObject
         {
+            /// <summary>
+            /// The name of the constant.
+            /// </summary>
             public UndertaleString Name { get; set; }
+
+            /// <summary>
+            /// The value of the constant.
+            /// </summary>
             public UndertaleString Value { get; set; }
 
             public void Serialize(UndertaleWriter writer)

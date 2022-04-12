@@ -9,7 +9,7 @@ EnsureDataLoaded();
 string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
-if (Directory.Exists(codeFolder)) 
+if (Directory.Exists(codeFolder))
 {
     codeFolder = GetFolder(FilePath) + "Export_Code_2" + Path.DirectorySeparatorChar;
 }
@@ -17,12 +17,12 @@ if (Directory.Exists(codeFolder))
 Directory.CreateDirectory(codeFolder);
 
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 int failed = 0;
 await Task.Run(DumpCode);
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder + " " + failed.ToString() + " failed");
 
@@ -32,18 +32,18 @@ string GetFolder(string path)
 }
 
 
-void DumpCode() 
+void DumpCode()
 {
     foreach(UndertaleCode code in Data.Code)
     {
         string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
         if (code.ParentEntry == null)
         {
-            try 
+            try
             {
                 File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 if (!(Directory.Exists(codeFolder + "/Failed/")))
                 {
@@ -60,12 +60,12 @@ void DumpCode()
             {
                 Directory.CreateDirectory(codeFolder + "/Duplicates/");
             }
-            try 
+            try
             {
                 path = Path.Combine(codeFolder + "/Duplicates/", code.Name.Content + ".gml");
                 File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 if (!(Directory.Exists(codeFolder + "/Duplicates/Failed/")))
                 {
@@ -77,7 +77,7 @@ void DumpCode()
             }
         }
 
-        IncProgress();
+        IncrementProgress();
     }
 }
 

@@ -15,14 +15,14 @@ using UndertaleModLib.Util;
 EnsureDataLoaded();
 
 // Get import folder
-string importFolder = PromptChooseDirectory("Import From Where");
+string importFolder = PromptChooseDirectory();
 if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 
 string[] dirFiles = Directory.GetFiles(importFolder);
 
 //Stop the script if there's missing sprite entries or w/e.
-foreach (string file in dirFiles) 
+foreach (string file in dirFiles)
 {
     string FileNameWithExtension = Path.GetFileName(file);
     if (!FileNameWithExtension.EndsWith(".png"))
@@ -82,12 +82,12 @@ foreach (string file in dirFiles)
 }
 
 SetProgressBar(null, "Files", 0, dirFiles.Length);
-StartUpdater();
+StartProgressBarUpdater();
 
 await Task.Run(() => {
     foreach (string file in dirFiles)
     {
-        IncProgress();
+        IncrementProgress();
 
         string FileNameWithExtension = Path.GetFileName(file);
         if (!FileNameWithExtension.EndsWith(".png"))
@@ -114,6 +114,6 @@ await Task.Run(() => {
     }
 });
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Import Complete!");

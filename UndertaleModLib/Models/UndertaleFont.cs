@@ -7,36 +7,130 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
+    /// <summary>
+    /// A font entry of a data file.
+    /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleFont : UndertaleNamedResource
     {
+        /// <summary>
+        /// The name of the font.
+        /// </summary>
         public UndertaleString Name { get; set; }
+
+        /// <summary>
+        /// The display name of the font.
+        /// </summary>
         public UndertaleString DisplayName { get; set; }
+
+        /// <summary>
+        /// Whether the Em size is a float.
+        /// </summary>
         public bool EmSizeIsFloat { get; set; }
+
+        /// <summary>
+        /// The font size in Ems. In Game Maker: Studio 2.3 and above, this is a float instead.
+        /// </summary>
         public uint EmSize { get; set; }
+
+        /// <summary>
+        /// Whether to display the font in bold.
+        /// </summary>
         public bool Bold { get; set; }
+
+        /// <summary>
+        /// Whether to display the font in italics
+        /// </summary>
         public bool Italic { get; set; }
+
+        /// <summary>
+        /// The start of the character range for this font.
+        /// </summary>
         public ushort RangeStart { get; set; }
+
+        /// <summary>
+        /// TODO: Currently unknown value.
+        /// </summary>
         public byte Charset { get; set; }
+
+        /// <summary>
+        /// The level of anti-aliasing that is applied. 0 for none, Game Maker: Studio 2 has 1 for <c>on</c>, while
+        /// Game Maker Studio: 1 and earlier have values 1-3 for different anti-aliasing levels.
+        /// </summary>
         public byte AntiAliasing { get; set; }
+
+        /// <summary>
+        /// The end of the character range for this font.
+        /// </summary>
         public uint RangeEnd { get; set; }
+
+        /// <summary>
+        /// The <see cref="UndertaleTexturePageItem"/> object that contains the texture for this font.
+        /// </summary>
         public UndertaleTexturePageItem Texture { get; set; }
+
+        /// <summary>
+        /// The x scale this font uses.
+        /// </summary>
         public float ScaleX { get; set; }
+
+        /// <summary>
+        /// The y scale this font uses.
+        /// </summary>
         public float ScaleY { get; set; }
+
+        /// <summary>
+        /// TODO: currently unknown, needs investigation.
+        /// </summary>
         public uint Ascender { get; set; }
+
+        /// <summary>
+        /// The glyphs that this font uses.
+        /// </summary>
         public UndertalePointerList<Glyph> Glyphs { get; private set; } = new UndertalePointerList<Glyph>();
+
+        /// <summary>
+        /// TODO: currently unknown, needs investigation. Exists since bytecode 17, but seems to be only get checked since 2022.2+.
+        /// </summary>
         public int AscenderOffset { get; set; }
 
+
+        /// <summary>
+        /// Glyphs that a font can use.
+        /// </summary>
         [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class Glyph : UndertaleObject
         {
+            /// <summary>
+            /// The character for the glyph.
+            /// </summary>
             public ushort Character { get; set; }
+
+            /// <summary>
+            /// The x position in the <see cref="UndertaleFont.Texture"/> where the glyph can be found.
+            /// </summary>
             public ushort SourceX { get; set; }
+
+            /// <summary>
+            /// The y position in the <see cref="UndertaleFont.Texture"/> where the glyph can be found.
+            /// </summary>
             public ushort SourceY { get; set; }
+
+            /// <summary>
+            /// The width of the glyph.
+            /// </summary>
             public ushort SourceWidth { get; set; }
+
+            /// <summary>
+            /// The height of the glyph.
+            /// </summary>
             public ushort SourceHeight { get; set; }
+
+
+            //TODO: From here on out is some kerning related stuff I don't know.
             public short Shift { get; set; }
             public short Offset { get; set; }
+
             public UndertaleSimpleListShort<GlyphKerning> Kerning { get; set; } = new UndertaleSimpleListShort<GlyphKerning>();
 
             public void Serialize(UndertaleWriter writer)
