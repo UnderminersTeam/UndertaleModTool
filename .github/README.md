@@ -1,16 +1,15 @@
-# UndertaleModTool
-*(seeing such an amazing tool...<br/>
-... fills you with DETERMINATION.)*
+# <img title="" src="images/logo.png" alt="UndertaleModTool" data-align="inline" width="722">
+
+> (seeing such an amazing tool it fills you with DETERMINATION.)
 
 Heya. I heard you like digging deep into Undertale data so I made a tool just for you! 
 
-**Downloads** are **HERE**: :point_right::point_right::point_right: https://github.com/krzys-h/UndertaleModTool/releases :point_left::point_left::point_left:
 
-**Have questions? Want to talk?** Join us on Discord! https://discord.gg/RxXpdwJ
 
-![flowey](flowey.png)
+<img src="images/flowey.gif" title="" alt="flowey" data-align="center">
 
-### Main features
+## Main features
+
 * Can read every single byte from the data file for lastest version of Undertale, Deltarune, and most other GameMaker: Studio games (GM:S 1.4 and GMS2 bytecode versions 13 to 17 are currently supported) for every platform and then recreate a byte-for-byte exact copy from the decoded data.
 * Properly handles all of the pointers in the file so that if you add/remove stuff, make things longer/shorter, move them around etc. the file format won't break.
 * An editor which lets you change (almost) every single value, including unknown ones.
@@ -22,7 +21,9 @@ Heya. I heard you like digging deep into Undertale data so I made a tool just fo
 * Can generate an .yydebug file for the GM:S debugger so that you can edit variables live! (see [here](https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-GameMaker-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions#yydebug-file-format))
 
 ### Included scripts
+
 Included are some test scripts. They are, but not limited to:
+
 * Universal:
   * EnableDebug: does just that, makes the global variable 'debug' be enabled at game start. If you don't know about Undertale's debug mode, check out https://tcrf.net/Undertale/Debug_Mode
   * DebugToggler: similar to the above, but instead toggles the debug mode on and off with F1
@@ -39,11 +40,13 @@ Included are some test scripts. They are, but not limited to:
   * DeltaHATE: [HATE](https://www.reddit.com/r/Undertale/comments/41lb16/hate_the_undertale_corruptor/)-inspired script for corrupting Deltarune
   * DeltaMILK: Replaces every non-background sprite with the K.Round healing milk. Don't ask why.
   * TheWholeWorldRevolving: The world is spinning, spinning
-  
+
 Additionally, included are some community-made scripts. For more information, consult the [SCRIPTS.md](https://github.com/krzys-h/UndertaleModTool/blob/master/SCRIPTS.md) file.
 
 ### Bug reports, contributing
+
 All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is a current list of stuff that needs to be worked on:
+
 * Work on the profile system
 * Decompiler improvements
 * Dark mode / theming support
@@ -51,7 +54,9 @@ All contributions are welcome! If you find a bug, a data file that does not load
 * Eventually, making the tool cross-platform if possible
 
 ### Compilation Instructions
+
 In order to compile UndertaleModTool yourself, the following dependencies are needed:
+
 * Windows (Due to WPF being used currently, this won't work on any other OS)
 * .NET Core 5 SDK
 * Any recent version of Visual Studio
@@ -61,7 +66,9 @@ Alternatively, you can also compile via command line, like so: `dotnet publish U
 You can adjust win-x86 to other RIDs, such as win-x64 or win-arm.
 
 ### data.win file format
+
 Interested in the file and instruction format research I've done while working on this? Check out these:
+
 * https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-GameMaker-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions
 * https://github.com/krzys-h/UndertaleModTool/wiki/Changes-in-GameMaker-Studio-2
 * https://github.com/krzys-h/UndertaleModTool/wiki/Extensions,-Shaders,-Timelines-format
@@ -69,7 +76,9 @@ Interested in the file and instruction format research I've done while working o
 * https://github.com/krzys-h/UndertaleModTool/wiki/YYC-games
 
 ### Special thanks
+
 Special thanks to everybody who did previous research on unpacking and decompiling Undertale, it was a really huge help:
+
 * https://pcy.ulyssis.be/undertale/
 * [https://github.com/donkeybonks/acolyte/wiki/Bytecode](https://web.archive.org/web/20191126144953if_/https://github.com/donkeybonks/acolyte/wiki/Bytecode)
 * https://github.com/PoroCYon/Altar.NET
@@ -80,6 +89,4 @@ Special thanks to everybody who did previous research on unpacking and decompili
 
 And of course, special thanks to Toby Fox and the whole Undertale team for making the game(s) ;)
 
-How about a random screenshot because I'm bad at writing READMEs? NYEH HEH HEH HEH!
-
-![screenshot](screenshot.png)
+<img src="images/papyrus.gif" title="" alt="screenshot" data-align="center">
