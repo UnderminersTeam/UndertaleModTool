@@ -1,9 +1,7 @@
 name: Suggest a Feature
-description: Have an idea for something completely new or for improving something that UndertaleModTool has or could benefit from doing or having? Let us know!
+description: Have an idea for something completely new that UndertaleModTool could benefit from having? Or for improving something that already exists? Let us know!
 title: "Feature: <Title>"
-labels: [enhancement, needs triage]
-assignees:
-  - Grossley
+labels: ["enhancement"]
 body:
 - type: dropdown
   attributes:
@@ -14,7 +12,7 @@ body:
 - type: textarea
   attributes:
     label: Describe your feature suggestion in more detail
-    description: Feel free to add pictures or video directly to this description!
+    description: A clear description of your feature suggestion. Feel free to add pictures or videos directly to this description!
     placeholder: |
       Give a clear explanation of what you want us to add. 
       Please don't give vague suggestions like "Make button look better" or "Add a new panel".
