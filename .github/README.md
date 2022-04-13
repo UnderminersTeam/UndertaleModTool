@@ -20,7 +20,7 @@ Looking for the most stable or most latest download avaliable? look at the table
 | Latest[^1] 	| [![CLI tool](https://github.com/krzys-h/UndertaleModTool/actions/workflows/cli_build.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/cli_build.yml)<br>[![Build CLI tool NET Bundled](https://github.com/krzys-h/UndertaleModTool/actions/workflows/cli_build_net.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/cli_build_net.yml)<br>[![Build tool](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build.yml)<br>[![Build tool NET Bundled](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml)<br>[![Build tool NET Bundled non-single file](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net_nonbundled.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net_nonbundled.yml)<br>[![Build tool non-single file](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_nonbundled.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_nonbundled.yml) 	|
 
 [^1]: UndertaleModTool has multiple releases such has .net bundle, non single file, and single file the differenes on these releases are:
-      - .Net bunlde: bundles the required .net framework version to run the tool
+      - .NET bundle: bundles the required .net framework version to run the tool
       - Single file: just one exe an no extra dlls
       - Non Single File: Just like above but it ships the dlls that are required by the tool
 
