@@ -1,12 +1,14 @@
-# <img title="" src="images/logo.png" alt="UndertaleModTool" data-align="inline" width="722">
+<p align="center">
+  <img src="images/logo.png" alt="UndertaleModTool Logo"/>
+</p>
 
-> (seeing such an amazing tool it fills you with DETERMINATION.)
+![Discord](https://img.shields.io/discord/566861759210586112?label=Discord&logo=discord&logoColor=white) ![GitHub](https://img.shields.io/github/license/krzys-h/UndertaleModTool?logo=github) ![GitHub issues](https://img.shields.io/github/issues-raw/krzys-h/UndertaleModTool?logo=github) ![GitHub pull requests](https://img.shields.io/github/issues-pr/krzys-h/UndertaleModTool?logo=github) ![GitHub repo size](https://img.shields.io/github/repo-size/krzys-h/UndertaleModTool?logo=github) [![Build CLI tool](https://github.com/krzys-h/UndertaleModTool/actions/workflows/cli_build.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/cli_build.yml) [![Build tool](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build.yml)
 
-Heya. I heard you like digging deep into Undertale data so I made a tool just for you! 
-
-
-
-<img src="images/flowey.gif" title="" alt="flowey" data-align="center">
+<p align="center">(seeing such an amazing tool it fills you with DETERMINATION.)</p>
+<p align="center">Heya. I heard you like digging deep into Undertale data so I made a tool just for you!</p>
+<p align="center">
+  <img src="images/flowey.gif" alt="Flowey"/>
+</p>
 
 ## Main features
 
@@ -89,4 +91,6 @@ Special thanks to everybody who did previous research on unpacking and decompili
 
 And of course, special thanks to Toby Fox and the whole Undertale team for making the game(s) ;)
 
-<img src="images/papyrus.gif" title="" alt="screenshot" data-align="center">
+<p align="center">
+  <img src="images/papyrus.gif" alt="Papyrus"/>
+</p>
