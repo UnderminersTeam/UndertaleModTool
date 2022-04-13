@@ -10,7 +10,21 @@
   <img src="images/flowey.gif" alt="Flowey"/>
 </p>
 
-<img src="images/features.png" alt="Main Features"/>
+# Downloads
+
+Looking for the most stable or most latest download avaliable? look at the table below!
+
+| Releases 	| Status 	|
+|:---:	|----------	|
+| Stable[^1] 	| ![GitHub release (latest by date)](https://img.shields.io/github/downloads/krzys-h/UndertaleModTool/latest/total) 	|
+| Latest[^1] 	| [![CLI tool](https://github.com/krzys-h/UndertaleModTool/actions/workflows/cli_build.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/cli_build.yml)<br>[![Build CLI tool NET Bundled](https://github.com/krzys-h/UndertaleModTool/actions/workflows/cli_build_net.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/cli_build_net.yml)<br>[![Build tool](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build.yml)<br>[![Build tool NET Bundled](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml)<br>[![Build tool NET Bundled non-single file](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net_nonbundled.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net_nonbundled.yml)<br>[![Build tool non-single file](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_nonbundled.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_nonbundled.yml) 	|
+
+[^1]: UndertaleModTool has multiple releases such has .net bundle, non single file, and single file the differenes on these releases are:
+      - .Net bunlde: bundles the required .net framework version to run the tool
+      - Single file: just one exe an no extra dlls
+      - Non Single File: Just like above but it ships the dlls that are required by the tool
+
+# Main Features
 
 * Can read every single byte from the data file for lastest version of Undertale, Deltarune, and most other GameMaker: Studio games (GM:S 1.4 and GMS2 bytecode versions 13 to 17 are currently supported) for every platform and then recreate a byte-for-byte exact copy from the decoded data.
 * Properly handles all of the pointers in the file so that if you add/remove stuff, make things longer/shorter, move them around etc. the file format won't break.
@@ -22,7 +36,7 @@
 * All core IO functionality extracted into a library for use in external tools.
 * Can generate an .yydebug file for the GM:S debugger so that you can edit variables live! (see [here](https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-GameMaker-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions#yydebug-file-format))
 
-<img src="images/scripts.png" alt="Include Scripts"/>
+# Include Scripts
 
 Included are some test scripts. They are, but not limited to:
 
@@ -45,7 +59,7 @@ Included are some test scripts. They are, but not limited to:
 
 Additionally, included are some community-made scripts. For more information, consult the [SCRIPTS.md](https://github.com/krzys-h/UndertaleModTool/blob/master/SCRIPTS.md) file.
 
-<img src="images/bugs.png" alt="Bug reports, contributing"/>
+# Bug reports, Contributing
 
 All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is a current list of stuff that needs to be worked on:
 
@@ -55,7 +69,7 @@ All contributions are welcome! If you find a bug, a data file that does not load
 * Add support for latest versions of GameMaker (notably, 2.3) - decompiler cannot function in most cases currently
 * Eventually, making the tool cross-platform if possible
 
-<img src="images/compilation.png" alt="Compilation Instructions"/>
+# Compilation Instructions
 
 In order to compile UndertaleModTool yourself, the following dependencies are needed:
 
@@ -67,7 +81,7 @@ After that, you can just open the `UndertaleModTool.sln` file in Visual Studio, 
 Alternatively, you can also compile via command line, like so: `dotnet publish UndertaleModTool --no-self-contained -p:PublishSingleFile=true -c release -r win-x86`
 You can adjust win-x86 to other RIDs, such as win-x64 or win-arm.
 
-<img src="images/format.png" alt="data.win file format"/>
+# data.win File Format
 
 Interested in the file and instruction format research I've done while working on this? Check out these:
 
@@ -79,7 +93,7 @@ Interested in the file and instruction format research I've done while working o
 
 feel free to check out the [Wiki](https://github.com/krzys-h/UndertaleModTool/wiki) for more.
 
-<img src="images/thanks.png" alt="Special thanks"/>
+# Special thanks
 
 Special thanks to everybody who did previous research on unpacking and decompiling Undertale, it was a really huge help:
 
