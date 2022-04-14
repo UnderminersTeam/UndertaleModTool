@@ -43,13 +43,13 @@ Both the latest stable release and the most cutting edge version can be download
 Here's some screenshots of what UTMT can do:
 
 ## [AM2R: Horde Mode Mod](https://github.com/Hornoads/AM2R-The-Horde-Multitroid/releases)
-<img src="images/am2r.png" alt="AM2R: Horde Mode"/>
+<img src="images/am2r.png" alt="AM2R: Horde Mode" width="640" height="480"/>
 
 ## [Undertale: Bits and Pieces Mod](https://gamejolt.com/games/UndertaleBnP/574044)
-<img src="images/bnp-ut.png" alt="BnP"/>
+<img src="images/bnp-ut.png" alt="BnP" width="640" height="480"/>
 
 ## [RIBBIT - The Deltarune Mod](https://gamejolt.com/games/ribbitmod/671888)
-<img src="images/ribbit-dr.png" alt="RIBBIT"/>
+<img src="images/ribbit-dr.png" alt="RIBBIT" width="640" height="480"/>
 
 # Included Scripts
 
