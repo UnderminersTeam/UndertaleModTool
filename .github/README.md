@@ -12,7 +12,7 @@
 
 # Downloads
 
-oth the latest stable release and the most cutting edge version can be downloaded from the table below!
+Both the latest stable release and the most cutting edge version can be downloaded from the table below!
 
 | Releases 	| Status 	|
 |:---:	|----------	|
