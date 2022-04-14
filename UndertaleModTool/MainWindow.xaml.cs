@@ -48,19 +48,25 @@ using System.Globalization;
 
 namespace UndertaleModTool
 {
+    [DebuggerDisplay(@"\{{GetType().FullName,nq} - {OpenedObject,nb}\}")] // display value in debugger as "{UndertaleModTool.Tab - {*object*}}"
     public class Tab
     {
-        public MainWindow MainWindow { get; set; }
+        public static readonly BitmapImage ClosedIcon = new(new Uri(@"/Resources/X.png", UriKind.RelativeOrAbsolute));
+        public static readonly BitmapImage ClosedHoverIcon = new(new Uri(@"/Resources/X_Down.png", UriKind.RelativeOrAbsolute));
+
         public object OpenedObject { get; set; }
-        public string TabTitle { get; set; }
+        public string TabTitle { get; set; } = "Untitled";
+        public int TabIndex { get; set; }
         public bool AutoClose { get; set; } = false;
 
-        public Tab(string tabTitle, MainWindow mainWindow) {
-            this.TabTitle = tabTitle;
-            this.MainWindow = mainWindow;
+        public Tab(object obj, int tabIndex, string tabTitle = null)
+        {
+            OpenedObject = obj;
+            TabIndex = tabIndex;
+            TabTitle = tabTitle ?? GetTitleForObject(obj);
         }
 
-        public static string GetTitleForObject(object obj)
+        private static string GetTitleForObject(object obj)
         {
             if (obj is null)
                 return null;
@@ -142,24 +148,6 @@ namespace UndertaleModTool
 
             return title;
         }
-
-        public void ChangeSelection(object newsel)
-        {
-            MainWindow.SelectionHistory.Add(this);
-            MainWindow.Selected = newsel;
-            this.AutoClose = false;
-            TabControl tabControl = MainWindow.TabController;
-
-            string title = GetTitleForObject(newsel);
-            if (title is not null)
-                this.TabTitle = title;
-
-            TabItem tabItem = (TabItem)tabControl.Items[MainWindow.CurrentTabIndex];
-            ((TextBlock)((StackPanel)tabItem.Header).Children[0]).Text = this.TabTitle;
-            tabItem.TabIndex = MainWindow.CurrentTabIndex;
-            tabControl.SelectedIndex = tabItem.TabIndex;
-            MainWindow.UpdateObjectLabel(newsel);
-        }
     }
 
     /// <summary>
@@ -175,14 +163,11 @@ namespace UndertaleModTool
         public string FilePath { get; set; }
         public string ScriptPath { get; set; } // For the scripting interface specifically
 
-        private BitmapImage CloseButton = new BitmapImage(new Uri(@"/Resources/X.png", UriKind.RelativeOrAbsolute));
-        private BitmapImage CloseButtonHover = new BitmapImage(new Uri(@"/Resources/X_Down.png", UriKind.RelativeOrAbsolute));
-
         public string TitleMain { get; set; }
 
-        public List<Tab> Tabs { get; set; } = new();
+        public ObservableCollection<Tab> Tabs { get; set; } = new();
         public Tab CurrentTab { get; set; }
-        public int CurrentTabIndex = -1;
+        public int CurrentTabIndex { get; set; } = 0;
 
         public object Highlighted { get; set; }
         public object Selected { get; set; }
@@ -287,12 +272,10 @@ namespace UndertaleModTool
             this.DataContext = this;
 
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them");
-            OpenInNewTab(Highlighted, "Welcome!");
+            OpenInTab(Highlighted);
 
             CurrentTab.AutoClose = true;
             SelectionHistory.Clear();
-
-            TabController.SelectedIndex = 0;
 
             TitleMain = "UndertaleModTool by krzys_h v" + Version;
 
@@ -544,7 +527,7 @@ namespace UndertaleModTool
                     throw new Exception("ummmmm");
                 if (thingToOpen[0] != "AUDO") // Just pretend I'm not hacking it together that poorly
                     throw new Exception("errrrr");
-                OpenInNewTab(Data.EmbeddedAudio[Int32.Parse(thingToOpen[1])], "Embedded Audio");
+                OpenInTab(Data.EmbeddedAudio[Int32.Parse(thingToOpen[1])], false, "Embedded Audio");
                 Activate();
             }
         }
@@ -574,8 +557,9 @@ namespace UndertaleModTool
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilePath)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGMS2)));
 
+            Tabs.Clear();
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P");
-            OpenInNewTab(Highlighted, "Ok!");
+            OpenInTab(Highlighted);
             SelectionHistory.Clear();
             CurrentTab.AutoClose = true;
 
@@ -764,6 +748,13 @@ namespace UndertaleModTool
                 CommandBox.Text = "";
             });
             dialog.Owner = this;
+
+            // temporary save the current tabs in case of loading error
+            Tab[] tempTabs = Tabs.ToArray();
+            int lastTabIndex = CurrentTabIndex;
+
+            Tabs.Clear(); // clear the current tabs to destroy game object references
+
             Task t = Task.Run(() =>
             {
                 bool hadWarnings = false;
@@ -853,11 +844,18 @@ namespace UndertaleModTool
                         #pragma warning restore CA1416
 
                         Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
-                        OpenInNewTab(Highlighted, "Welcome!");
+                        OpenInTab(Highlighted);
                         CurrentTab.AutoClose = true;
                         SelectionHistory.Clear();
 
                     }
+                    else
+                    {
+                        // restore the tabs because new data hasn't been loaded
+                        Tabs = new(tempTabs);
+                        CurrentTabIndex = lastTabIndex;
+                    }
+
                     dialog.Hide();
                 });
             });
@@ -1373,14 +1371,14 @@ namespace UndertaleModTool
 
         private void MainTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            OpenInNewTab(Highlighted, "Untitled");
+            OpenInTab(Highlighted);
         }
 
         private void MainTree_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return)
             {
-                OpenInNewTab(Highlighted, "Untitled");
+                OpenInTab(Highlighted);
             }
         }
 
@@ -1527,32 +1525,7 @@ namespace UndertaleModTool
                     Data.GMLEditedBefore?.Remove(codeName);
                 }
 
-                for (int i = 0; i < Tabs.Count; i++)
-                {
-                    Tab tab = Tabs[i];
-                    if (tab.OpenedObject == obj)
-                    {
-                        int newIndex = Math.Max(Tabs.Count - 1, 0);
-
-                        if (Tabs.Count - 1 < 0)
-                        {
-                            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them");
-                            OpenInNewTab(Highlighted, "Welcome!");
-
-                            CurrentTab.AutoClose = true;
-                            //SelectionHistory.Clear();
-
-                        }
-                        CurrentTabIndex = newIndex;
-                        TabController.SelectedIndex = newIndex;
-                        Tabs.RemoveAt(i);
-                        TabController.Items.RemoveAt(i);
-                        for (int j = 0; j < TabController.Items.Count; j++)
-                        {
-                            ((TabItem)TabController.Items[j]).TabIndex = j;
-                        }
-                    }
-                }
+                CloseTab(obj);
                 UpdateTree();
             }
         }
@@ -1740,7 +1713,7 @@ namespace UndertaleModTool
             list.Add(obj);
             UpdateTree();
             HighlightObject(obj);
-            OpenInNewTab(obj, "Untitled");
+            OpenInTab(obj);
         }
 
         private void MenuItem_RunBuiltinScript_SubmenuOpened(object sender, RoutedEventArgs e)
@@ -2963,9 +2936,18 @@ result in loss of work.");
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            Selected = SelectionHistory.Last();
+            TabController.SelectionChanged -= TabController_SelectionChanged;
+
+            Tab lastTab = SelectionHistory.Last();
             SelectionHistory.RemoveAt(SelectionHistory.Count - 1);
-            UpdateObjectLabel(CurrentTab.OpenedObject);
+
+            CurrentTab = lastTab;
+            CurrentTabIndex = lastTab.TabIndex;
+
+            Selected = lastTab.OpenedObject;
+            UpdateObjectLabel(Selected);
+
+            TabController.SelectionChanged += TabController_SelectionChanged;
         }
 
         public void EnsureDataLoaded()
@@ -3027,71 +3009,153 @@ result in loss of work.");
             }
         }
 
-        private void OpenInNewTab(object obj, string tabTitle)
+        private void OpenInTab(object obj, bool isNewTab = false, string tabTitle = null)
         {
-            Tab newTab = new Tab(tabTitle, this);
-            newTab.TabTitle = tabTitle;
-            if (Tabs.Count > 0 && CurrentTabIndex >= 0 && CurrentTab.AutoClose)
-            {
-                Tabs.RemoveAt(CurrentTabIndex);
-                TabController.Items.RemoveAt(CurrentTabIndex);
-            }
-            Tabs.Add(newTab);
-            CurrentTabIndex = Tabs.Count - 1;
-            CurrentTab = Tabs[CurrentTabIndex];
+            bool tabSwitched = true;
 
-            TabItem newTabItem = new TabItem();
-            StackPanel tabHeaderPanel = new StackPanel();
-            TextBlock textBlock = new TextBlock();
-            textBlock.Text = tabTitle;
-            Button tabButton = new Button();
-            tabButton.Width = 16;
-            tabButton.Height = 16;
-            tabButton.Click += TabCloseButton_OnClick;
-            tabButton.MouseEnter += TabCloseButton_OnMouseEnter;
-            tabButton.MouseLeave += TabCloseButton_OnMouseLeave;
-            Image buttonContent = new Image();
-            buttonContent.Source = CloseButton;
-            tabButton.Content = buttonContent;
-            tabButton.BorderThickness = new Thickness(0.0d, 0.0d, 0.0d, 0.0d);
-            Separator tabHeaderGap = new Separator();
-            tabHeaderGap.Width = 20;
-            tabHeaderGap.Visibility = Visibility.Hidden;
-            tabHeaderPanel.Orientation = Orientation.Horizontal;
-            tabHeaderPanel.Children.Add(textBlock);
-            tabHeaderPanel.Children.Add(tabHeaderGap);
-            tabHeaderPanel.Children.Add(tabButton);
-            newTabItem.Header = tabHeaderPanel;
-            newTabItem.TabIndex = TabController.Items.Count;
-            TabController.Items.Add(newTabItem);
-            newTab.ChangeSelection(obj);
             for (int i = 0; i < Tabs.Count; i++)
             {
-                if (Tabs[i].TabTitle.Equals(newTab.TabTitle) && i != CurrentTabIndex)
+                if (Tabs[i].OpenedObject == obj)
                 {
-                    CurrentTabIndex = i;
-                    TabController.SelectedIndex = i;
-                    CurrentTab = Tabs[CurrentTabIndex];
-                    Tabs.RemoveAt(Tabs.Count - 1);
-                    TabController.Items.RemoveAt(TabController.Items.Count - 1);
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentTab)));
-                    return;
+                    if (i != CurrentTabIndex)
+                    {
+                        CurrentTab = Tabs[i];
+                        CurrentTabIndex = i;
+
+                        return;
+                    }
+                    else
+                        tabSwitched = false;
+
+                    break;
                 }
             }
-            TabController.SelectedIndex = newTabItem.TabIndex;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentTab)));
+
+            if (tabSwitched)
+            {
+                // close auto-closing tab
+                if (Tabs.Count > 0 && CurrentTabIndex >= 0 && CurrentTab.AutoClose)
+                    CloseTab(CurrentTab.TabIndex, false);
+            }
+            else
+                return;
+
+            int newIndex = Tabs.Count;
+
+            Tab newTab = new(obj, newIndex, tabTitle);
+
+            Tabs.Add(newTab);
+            CurrentTabIndex = newIndex;
+            CurrentTab = Tabs[CurrentTabIndex];
+
+            Selected = obj;
+
+            UpdateObjectLabel(obj);
+        }
+
+        public void CloseTab(bool addDefaultTab = true) // close the current tab
+        {
+            CloseTab(CurrentTabIndex, addDefaultTab);
+        }
+        public void CloseTab(int tabIndex, bool addDefaultTab = true)
+        {
+            if (tabIndex >= 0 && tabIndex < Tabs.Count)
+            {
+                // remove all closed tab occurrences from the selection history
+                Tab closingTab = Tabs[tabIndex];
+                for (int i = 0; i < SelectionHistory.Count; i++)
+                {
+                    if (SelectionHistory[i].OpenedObject == closingTab.OpenedObject)
+                        SelectionHistory.RemoveAt(i);
+                }
+
+                // remove consecutive duplicates ( { 1, 1, 2 } -> { 1, 2 } )
+                for (int i = 0; i < SelectionHistory.Count - 1; i++)
+                {
+                    if (SelectionHistory[i] == SelectionHistory[i + 1])
+                        SelectionHistory.RemoveAt(i);
+                }
+
+                TabController.SelectionChanged -= TabController_SelectionChanged;
+
+                int currIndex = CurrentTabIndex;
+                Tabs.RemoveAt(tabIndex); // "CurrentTabIndex" changes here (bound to "TabController.SelectedIndex")
+
+                if (Tabs.Count == 0)
+                {
+                    if (addDefaultTab)
+                    {
+                        Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them");
+                        OpenInTab(Highlighted);
+
+                        CurrentTab.AutoClose = true;
+                    }
+                    else
+                    {
+                        CurrentTabIndex = -1;
+                        CurrentTab = null;
+                    }
+
+                    TabController.SelectionChanged += TabController_SelectionChanged;
+                }
+                else
+                {
+                    for (int i = tabIndex; i < Tabs.Count; i++)
+                        Tabs[i].TabIndex = i;
+
+                    if (currIndex == tabIndex)          // if closing open tab
+                    {
+                        if (tabIndex < Tabs.Count - 1)  // and if that tab is not last
+                            currIndex = Tabs.Count - 1; // switch to the last tab
+                        else
+                            currIndex -= 1;
+                    }
+                    else if (currIndex > tabIndex)
+                    {
+                        currIndex -= 1;
+                    }
+
+                    TabController.SelectionChanged += TabController_SelectionChanged;
+
+                    CurrentTabIndex = currIndex;
+                    CurrentTab = Tabs[CurrentTabIndex];
+
+                    if (SelectionHistory.Count > 0 && CurrentTab == SelectionHistory.Last())
+                        SelectionHistory.RemoveAt(SelectionHistory.Count - 1);
+
+                    Selected = CurrentTab.OpenedObject;
+                }
+            }
+        }
+        public void CloseTab(object obj, bool addDefaultTab = true)
+        {
+            if (obj is not null)
+            {
+                int tabIndex = Tabs.First(x => x.OpenedObject == obj)?.TabIndex ?? -1;
+                if (tabIndex != -1)
+                    CloseTab(tabIndex, addDefaultTab);
+            }
+            else
+                Debug.WriteLine("Can't close the tab - object is null.");
         }
 
         public void ChangeSelection(object newsel)
         {
-            OpenInNewTab(newsel, "Untitled");
+            OpenInTab(newsel);
         }
 
         private void TabController_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (TabController.SelectedIndex >= 0)
             {
-                CurrentTabIndex = TabController.SelectedIndex;
+                if (CurrentTab is not null
+                    && Tabs.Contains(CurrentTab)
+                    && SelectionHistory.LastOrDefault()?.OpenedObject != CurrentTab.OpenedObject
+                    && CurrentTab.OpenedObject is not DescriptionView)
+                {
+                    SelectionHistory.Add(CurrentTab);
+                }
+
                 CurrentTab = Tabs[CurrentTabIndex];
                 Selected = CurrentTab.OpenedObject;
             }
@@ -3104,47 +3168,21 @@ result in loss of work.");
             e.Handled = true;
         }
 
-        private void TabCloseButton_OnClick(object sender, EventArgs e)
+        private void TabCloseButton_OnClick(object sender, RoutedEventArgs e)
         {
             Button button = (Button)sender;
-            int tabIndex = ((TabItem)((StackPanel)button.Parent).Parent).TabIndex;
-            int newIndex = Math.Max(Tabs.Count - 2, 0);
-            if (Tabs.Count - 2 < 0)
-            {
-                Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them");
-                OpenInNewTab(Highlighted, "Welcome!");
+            int tabIndex = (button.DataContext as Tab).TabIndex;
 
-                CurrentTab.AutoClose = true;
-                //SelectionHistory.Clear();
-
-            }
-            Tabs.RemoveAt(tabIndex);
-            TabController.Items.RemoveAt(tabIndex);
-            for (int j = 0; j < TabController.Items.Count; j++)
-            {
-                ((TabItem)TabController.Items[j]).TabIndex = j;
-            }
-            CurrentTabIndex = newIndex;
-            TabController.SelectedIndex = newIndex;
+            CloseTab(tabIndex);
         }
-
-        private void TabCloseButton_OnMouseEnter(object sender, EventArgs e)
+        private void TabCloseButton_MouseEnter(object sender, MouseEventArgs e)
         {
-            Button button = (Button)sender;
-            Image buttonContent = new Image();
-            buttonContent.Source = CloseButtonHover;
-            button.Content = buttonContent;
+            (sender as Button).Content = new Image() { Source = Tab.ClosedHoverIcon };
         }
-
-        private void TabCloseButton_OnMouseLeave(object sender, EventArgs e)
+        private void TabCloseButton_MouseLeave(object sender, MouseEventArgs e)
         {
-            Button button = (Button)sender;
-            Image buttonContent = new Image();
-            buttonContent.Source = CloseButton;
-            button.Content = buttonContent;
+            (sender as Button).Content = new Image() { Source = Tab.ClosedIcon };
         }
-
-
     }
 
     public class GeneralInfoEditor
