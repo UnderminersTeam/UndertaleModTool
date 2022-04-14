@@ -2,7 +2,7 @@
   <img src="images/logo.png" alt="UndertaleModTool Logo"/>
 </p>
 
-![Discord](https://img.shields.io/discord/566861759210586112?label=Discord&logo=discord&logoColor=white) ![GitHub](https://img.shields.io/github/license/krzys-h/UndertaleModTool?logo=github)
+[![Underminers Discord](https://img.shields.io/discord/566861759210586112?label=Discord&logo=discord&logoColor=white)](https://discord.gg/UMwccfs2Hb) [![GitHub](https://img.shields.io/github/license/krzys-h/UndertaleModTool?logo=github)](https://github.com/krzys-h/UndertaleModTool/blob/master/LICENSE.txt)
 
 <p align="center">(seeing such an amazing tool it fills you with DETERMINATION.)</p>
 <p align="center">Heya. I heard you like digging deep into Undertale/Deltarune or any GameMaker game data so I made a tool just for you!</p>
@@ -16,14 +16,14 @@ Looking for the most stable or the latest avaliable download? Both the latest st
 
 | Releases 	| Status 	|
 |:---:	|----------	|
-| Stable[^1][^2] 	| ![GitHub release (latest by date)](https://img.shields.io/github/downloads/krzys-h/UndertaleModTool/latest/total) |
+| Stable[^1][^2] 	| [![GitHub release (latest by date)](https://img.shields.io/github/downloads/krzys-h/UndertaleModTool/latest/total)](https://github.com/krzys-h/UndertaleModTool/releases/latest) |
 | Bleeding edge[^1] 	| [![Build tool NET Bundled](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml) |
 
-[^1]: UndertaleModTool has multiple releases such has .net bundle, non single file, and single file the differenes on these releases are:
-      - .NET bundle: bundles the required .net framework version to run the tool
-      - Single file: just one exe an no extra dlls
-      - Non Single File: Just like above but it ships the dlls that are required by the tool
-[^2]: You can updated to the blending edge releases within the settings menu in UndertaleModTool.
+[^1]: UndertaleModTool has different builds per release. The differences are as follows:
+      - `.NET bundled` - bundles the required .NET runtime version needed to run the tool alongside it. All stable releases are .NET bundled, so you don't have to worry about installing the necessary runtime.
+      - `Single file` - the tool is only one executable, with all dependencies embedded within it. This does make your folders cleaner, however it also causes some unexpected stability issues.
+      - `Non-single File` - all dependencies are not embedded within the executable, but are now located right next to it. Choose this if you don't care about finding the right executable in-between of ~300 dll's, or if the stability issues from the `Single file` build affect you.
+[^2]: You can update to the bleeding edge releases at any time from within the settings menu of UndertaleModTool.
 
 # Main Features
 
@@ -37,12 +37,12 @@ Looking for the most stable or the latest avaliable download? Both the latest st
 * All core IO functionality extracted into a library for use in external tools.
 * Can generate an .yydebug file for the GM:S debugger so that you can edit variables live! (see [here](https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-GameMaker-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions#yydebug-file-format))
 
-# Include Scripts
+# Included Scripts
 
 Included are some test scripts. They are, but not limited to:
 
 * Universal:
-  * EnableDebug: does just that, makes the global variable 'debug' be enabled at game start. If you don't know about Undertale's debug mode, check out [TCR Undertale Debug Mode](https://tcrf.net/Undertale/Debug_Mode)
+  * EnableDebug: does just that, makes the global variable 'debug' be enabled at game start. If you don't know about Undertale's debug mode, check out the [this write up of Undertale's Debug Mode](https://tcrf.net/Undertale/Debug_Mode)
   * DebugToggler: similar to the above, but instead toggles the debug mode on and off with F1
   * GoToRoom: Replaces the debug mode functionality of the F3 button with a dialog that lets you jump to any room by ID
   * ShowRoomName: Displays the current room name and ID on screen in debug mode
@@ -60,7 +60,7 @@ Included are some test scripts. They are, but not limited to:
 
 Additionally, included are some community-made scripts. For more information, consult the [SCRIPTS.md](https://github.com/krzys-h/UndertaleModTool/blob/master/SCRIPTS.md) file.
 
-# Bug reports, Contributing
+# Contributing
 
 All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is a current list of stuff that needs to be worked on:
 
@@ -82,29 +82,19 @@ After that, you can just open the `UndertaleModTool.sln` file in Visual Studio, 
 Alternatively, you can also compile via command line, like so: `dotnet publish UndertaleModTool --no-self-contained -p:PublishSingleFile=true -c release -r win-x86`
 You can adjust win-x86 to other RIDs, such as win-x64 or win-arm.
 
-# data.win File Format
+# GameMaker Data File Format
 
-Interested in the file and instruction format research I've done while working on this? Check out these:
-
-* [Corrections to GameMaker Studio 1.4 data.win format and VM bytecode, .yydebug format and debugger instructions](https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-GameMaker-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions)
-* [Changes in GameMaker Studio 2](https://github.com/krzys-h/UndertaleModTool/wiki/Changes-in-GameMaker-Studio-2)
-* [Extensions, Shaders, Timelines format](https://github.com/krzys-h/UndertaleModTool/wiki/Extensions,-Shaders,-Timelines-format)
-* [Bytecode version differences](https://github.com/krzys-h/UndertaleModTool/wiki/Bytecode-version-differences)
-* [YYC games](https://github.com/krzys-h/UndertaleModTool/wiki/YYC-games)
-
-feel free to check out the [Wiki](https://github.com/krzys-h/UndertaleModTool/wiki) for more.
+Interested in the file and instruction format research I've done while working on this? Check out the [Wiki](https://github.com/krzys-h/UndertaleModTool/wiki)
+for full details and documentation.
 
 # Special thanks
 
 Special thanks to everybody who did previous research on unpacking and decompiling Undertale, it was a really huge help:
 
-* [Ulyssis's UNDERTALE decompilation research](https://pcy.ulyssis.be/undertale/)
+* [Ulyssis' UNDERTALE decompilation research](https://pcy.ulyssis.be/undertale/)
 * [Donkeybonks's GameMaker data.win Bytecode research](https://web.archive.org/web/20191126144953if_/https://github.com/donkeybonks/acolyte/wiki/Bytecode)
 * [PoroCYon's Altar.NET](https://github.com/PoroCYon/Altar.NET)
 * [WarlockD's GMdsam](https://github.com/WarlockD/GMdsam)
-* [@NarryG](https://github.com/NarryG) for [helping me figure out](https://github.com/krzys-h/UndertaleModTool/issues/3) the missing stuff for GMS2 and Nintendo Switch release
-* [@colinator27](https://github.com/colinator27) for [lots of things, including the gml compiler](https://github.com/krzys-h/UndertaleModTool/issues/4), [Sha](https://github.com/krzys-h/UndertaleModTool/issues/13)[ders](https://github.com/krzys-h/UndertaleModTool/pull/25) and [a bunch of other stuff](https://github.com/krzys-h/UndertaleModTool/pull/30)
-* [@Kneesnap](https://github.com/Kneesnap) for [improving the decompiler a bunch](https://github.com/krzys-h/UndertaleModTool/pull/162)
 
 as well as all the other contributors:
 <p align="center">
