@@ -12,7 +12,7 @@
 
 # Downloads
 
-Looking for the most stable or most latest avaliable download? look at the table below!
+Looking for the most stable or the latest avaliable download? Look at the table below!
 
 | Releases 	| Status 	|
 |:---:	|----------	|
