@@ -12,18 +12,19 @@
 
 # Downloads
 
-Looking for the most stable or the latest avaliable download? Both the latest stable release and the most cutting edge version are in the table below!
+oth the latest stable release and the most cutting edge version can be downloaded from the table below!
 
 | Releases 	| Status 	|
 |:---:	|----------	|
-| Stable[^1][^2] 	| [![GitHub release (latest by date)](https://img.shields.io/github/downloads/krzys-h/UndertaleModTool/latest/total)](https://github.com/krzys-h/UndertaleModTool/releases/latest) |
-| Bleeding edge[^1] 	| [![Build tool NET Bundled](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml) |
+| Stable¹ ² 	| [![GitHub release (latest by date)](https://img.shields.io/github/downloads/krzys-h/UndertaleModTool/latest/total)](https://github.com/krzys-h/UndertaleModTool/releases/latest) |
+| Bleeding edge¹ 	| [![Build tool NET Bundled](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml) |
 
-[^1]: UndertaleModTool has different builds per release. The differences are as follows:
-      - `.NET bundled` - bundles the required .NET runtime version needed to run the tool alongside it. All stable releases are .NET bundled, so you don't have to worry about installing the necessary runtime.
-      - `Single file` - the tool is only one executable, with all dependencies embedded within it. This does make your folders cleaner, however it also causes some unexpected stability issues.
-      - `Non-single File` - all dependencies are not embedded within the executable, but are now located right next to it. Choose this if you don't care about finding the right executable in-between of ~300 dll's, or if the stability issues from the `Single file` build affect you.
-[^2]: You can update to the bleeding edge releases at any time from within the settings menu of UndertaleModTool.
+¹: UndertaleModTool has different builds per release. The differences are as follows:
+* `.NET bundled` - bundles the required .NET runtime version needed to run the tool alongside it. All stable releases are .NET bundled, so you don't have to worry about installing the necessary runtime.
+* `Single file` - the tool is only one executable, with all dependencies embedded within it. This does make your folders cleaner, however it also causes some unexpected stability issues.
+* `Non-single File` - all dependencies are not embedded within the executable, but are now located right next to it. Choose this if you don't care about finding the right executable in-between of ~300 dll's, or if the stability issues from the `Single file` build affect you.
+
+²: You can update to the bleeding edge releases at any time from within the settings menu of UndertaleModTool.
 
 # Main Features
 
@@ -37,12 +38,25 @@ Looking for the most stable or the latest avaliable download? Both the latest st
 * All core IO functionality extracted into a library for use in external tools.
 * Can generate an .yydebug file for the GM:S debugger so that you can edit variables live! (see [here](https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-GameMaker-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions#yydebug-file-format))
 
+# Screenshots
+
+Here's some screenshots of what UTMT can do:
+
+## [AM2R: Horde Mode Mod](https://github.com/Hornoads/AM2R-The-Horde-Multitroid/releases)
+<img src="images/am2r.png" alt="AM2R: Horde Mode"/>
+
+## [Undertale: Bits and Pieces Mod](https://gamejolt.com/games/UndertaleBnP/574044)
+<img src="images/bnp-ut.png" alt="BnP"/>
+
+## [RIBBIT - The Deltarune Mod](https://gamejolt.com/games/ribbitmod/671888)
+<img src="images/ribbit-dr.png" alt="RIBBIT"/>
+
 # Included Scripts
 
 Included are some test scripts. They are, but not limited to:
 
 * Universal:
-  * EnableDebug: does just that, makes the global variable 'debug' be enabled at game start. If you don't know about Undertale's debug mode, check out the [this write up of Undertale's Debug Mode](https://tcrf.net/Undertale/Debug_Mode)
+  * EnableDebug: does just that, makes the global variable 'debug' be enabled at game start. If you don't know about Undertale's debug mode, check out [this write up of Undertale's Debug Mode](https://tcrf.net/Undertale/Debug_Mode)
   * DebugToggler: similar to the above, but instead toggles the debug mode on and off with F1
   * GoToRoom: Replaces the debug mode functionality of the F3 button with a dialog that lets you jump to any room by ID
   * ShowRoomName: Displays the current room name and ID on screen in debug mode
