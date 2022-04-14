@@ -12,7 +12,7 @@
 
 # Downloads
 
-Looking for the most stable or the latest avaliable download? Look at the table below!
+Looking for the most stable or the latest avaliable download? Both the latest stable release and the most cutting edge version are in the table below!
 
 | Releases 	| Status 	|
 |:---:	|----------	|
