@@ -23,6 +23,8 @@
         <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
         <local:FilteredViewConverter x:Key="FilteredViewConverter" Filter="{Binding Text, Source={x:Reference SearchBox}, UpdateSourceTrigger=PropertyChanged}"/>
         <local:NullToVisibilityConverter x:Key="VisibleIfNotNull"  nullValue="Collapsed" notNullValue="Visible"/>
+        <local:CompareNumbersConverter x:Key="CompareNumbersConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/> <!-- (built-in converter) -->
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="New" Executed="Command_New" />
@@ -406,7 +408,13 @@
                             </TabControl.ContentTemplate>
                         </TabControl>
                     </ScrollViewer>
-                    <StackPanel Grid.Column="1" Margin="5" Orientation="Horizontal" Visibility="Collapsed" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                    <StackPanel Grid.Column="1" Margin="5" Orientation="Horizontal" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                        <StackPanel.Visibility>
+                            <MultiBinding Converter="{StaticResource CompareNumbersConverter}" ConverterParameter=">" Mode="OneWay">
+                                <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabController"/>
+                                <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabScrollViewer"/>
+                            </MultiBinding>
+                        </StackPanel.Visibility>
                         <Button Width="16" Height="16" Click="TabsScrollLeftButton_Click">
                             <Image Source="/Resources/tabs_left_button.png" Stretch="None"/>
                         </Button>
