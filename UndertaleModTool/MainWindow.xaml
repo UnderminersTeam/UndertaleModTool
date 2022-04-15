@@ -370,7 +370,7 @@
 
                 <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
 
-                <Grid Grid.Column="2" Grid.Row="0">
+                <Grid Name="TabsGrid" Grid.Column="2" Grid.Row="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
@@ -412,7 +412,7 @@
                         <StackPanel.Visibility>
                             <MultiBinding Converter="{StaticResource CompareNumbersConverter}" ConverterParameter=">" Mode="OneWay">
                                 <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabController"/>
-                                <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabScrollViewer"/>
+                                <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabsGrid"/>
                             </MultiBinding>
                         </StackPanel.Visibility>
                         <Button Width="16" Height="16" Click="TabsScrollLeftButton_Click">
