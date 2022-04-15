@@ -493,7 +493,7 @@ namespace UndertaleModLib.Compiler
                     "return" => new Token(Token.TokenKind.KeywordReturn, cr.GetPositionInfo(index)),
                     "default" => new Token(Token.TokenKind.KeywordDefault, cr.GetPositionInfo(index)),
                     "struct" => new Token(Token.TokenKind.KeywordStruct, cr.GetPositionInfo(index)),
-                    "function" => new Token(Token.TokenKind.KeywordFunction, cr.GetPositionInfo(index)),
+                    "function" when cr.compileContext.Data.GMS2_3 => new Token(Token.TokenKind.KeywordFunction, cr.GetPositionInfo(index)),
                     "for" => new Token(Token.TokenKind.KeywordFor, cr.GetPositionInfo(index)),
                     "case" => new Token(Token.TokenKind.KeywordCase, cr.GetPositionInfo(index)),
                     "switch" => new Token(Token.TokenKind.KeywordSwitch, cr.GetPositionInfo(index)),
