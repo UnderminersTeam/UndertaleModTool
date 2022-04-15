@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace UndertaleModLib.Models
 {
     // TODO: INotifyPropertyChanged
-    public class UndertaleVariable : UndertaleResource, ISearchable, UndertaleInstruction.ReferencedObject
+    public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleInstruction.ReferencedObject
     {
         public UndertaleString Name { get; set; }
         public UndertaleInstruction.InstanceType InstanceType { get; set; }

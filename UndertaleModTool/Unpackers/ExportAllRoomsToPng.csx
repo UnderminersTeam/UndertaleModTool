@@ -44,6 +44,8 @@ if (mainWindow.IsGMS2 == Visibility.Visible)
 DirectoryInfo dir = new DirectoryInfo(exportedTexturesFolder);
 TextureWorker worker = new TextureWorker();
 
+mainWindow.LastOpenedObject = mainWindow.Selected;
+
 SetProgressBar(null, "Rooms Exported", 0, roomCount);
 StartUpdater();
 
