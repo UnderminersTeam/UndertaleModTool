@@ -25,6 +25,7 @@
         <local:NullToVisibilityConverter x:Key="VisibleIfNotNull"  nullValue="Collapsed" notNullValue="Visible"/>
         <local:CompareNumbersConverter x:Key="CompareNumbersConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/> <!-- (built-in converter) -->
+        <local:TabTitleConverter x:Key="TabTitleConverter"/>
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="New" Executed="Command_New" />
@@ -386,7 +387,15 @@
                             <TabControl.ItemTemplate>
                                 <DataTemplate DataType="{x:Type local:Tab}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding TabTitle, Mode=OneWay}"/>
+                                        <TextBlock>
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource TabTitleConverter}" Mode="OneWay">
+                                                    <Binding Path="OpenedObject" Mode="OneTime"/>
+                                                    <!-- for notification only -->
+                                                    <Binding Path="OpenedObject.Name.Content" Mode="OneWay"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
                                         <Button Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
                                             Click="TabCloseButton_OnClick" MouseEnter="TabCloseButton_MouseEnter" MouseLeave="TabCloseButton_MouseLeave">
                                             <Button.Style>

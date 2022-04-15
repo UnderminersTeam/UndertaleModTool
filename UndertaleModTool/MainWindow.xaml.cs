@@ -66,7 +66,7 @@ namespace UndertaleModTool
             TabTitle = tabTitle ?? GetTitleForObject(obj);
         }
 
-        private static string GetTitleForObject(object obj)
+        public static string GetTitleForObject(object obj)
         {
             if (obj is null)
                 return null;
@@ -147,6 +147,18 @@ namespace UndertaleModTool
             }
 
             return title;
+        }
+    }
+    public class TabTitleConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Tab.GetTitleForObject(values[0]);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 
