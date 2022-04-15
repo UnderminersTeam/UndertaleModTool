@@ -33,6 +33,8 @@
         <ApplicationIcon>icon.ico</ApplicationIcon>
     </PropertyGroup>
     <ItemGroup>
+      <None Remove="Resources\tabs_left_button.png" />
+      <None Remove="Resources\tabs_right_button.png" />
       <None Remove="Resources\X_Down.png" />
       <None Remove="X.png" />
     </ItemGroup>
@@ -3647,6 +3649,8 @@
         </None>
         <EmbeddedResource Include="Resources\GML.xshd" />
         <EmbeddedResource Include="Resources\VMASM.xshd" />
+        <Resource Include="Resources\tabs_left_button.png" />
+        <Resource Include="Resources\tabs_right_button.png" />
         <Resource Include="Resources\X.png" />
         <Resource Include="Resources\X_Down.png" />
         <None Update="Repackers\ReduceEmbeddedTexturePages.csx">

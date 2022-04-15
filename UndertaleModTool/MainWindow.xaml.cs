@@ -3183,6 +3183,15 @@ result in loss of work.");
         {
             (sender as Button).Content = new Image() { Source = Tab.ClosedIcon };
         }
+
+        private void TabsScrollLeftButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void TabsScrollRightButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 
     public class GeneralInfoEditor
