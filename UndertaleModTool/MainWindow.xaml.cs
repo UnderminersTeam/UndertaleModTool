@@ -87,32 +87,32 @@ namespace UndertaleModTool
             else if (obj is UndertaleNamedResource namedRes)
             {
                 string content = namedRes.Name?.Content;
-
+                
                 string header = obj switch
                 {
-                    UndertaleAudioGroup => "Audio Group Editor",
-                    UndertaleSound => "Sound Editor",
-                    UndertaleSprite => "Sprite Editor",
-                    UndertaleBackground => "Background Editor",
-                    UndertalePath => "Path Editor",
-                    UndertaleScript => "Script Editor",
-                    UndertaleShader => "Shader Editor",
-                    UndertaleFont => "Font Editor",
-                    UndertaleTimeline => "Timeline Editor",
-                    UndertaleGameObject => "Game Object Editor",
-                    UndertaleRoom => "Room Editor",
-                    UndertaleExtension => "Extension Editor",
-                    UndertaleTexturePageItem => "Texture Page Item Editor",
-                    UndertaleCode => "Code Editor",
-                    UndertaleVariable => "Variable Editor",
-                    UndertaleFunction => "Function Editor",
-                    UndertaleCodeLocals => "Code Locals Editor",
-                    UndertaleEmbeddedTexture => "Embedded Texture Editor",
-                    UndertaleEmbeddedAudio => "Embedded Audio Editor",
-                    UndertaleTextureGroupInfo => "Texture Group Info Editor",
-                    UndertaleEmbeddedImage => "Embedded Image Editor",
-                    UndertaleSequence => "Sequence Editor",
-                    UndertaleAnimationCurve => "Animation Curve Editor",
+                    UndertaleAudioGroup => "Audio Group",
+                    UndertaleSound => "Sound",
+                    UndertaleSprite => "Sprite",
+                    UndertaleBackground => "Background",
+                    UndertalePath => "Path",
+                    UndertaleScript => "Script",
+                    UndertaleShader => "Shader",
+                    UndertaleFont => "Font",
+                    UndertaleTimeline => "Timeline",
+                    UndertaleGameObject => "Game Object",
+                    UndertaleRoom => "Room",
+                    UndertaleExtension => "Extension",
+                    UndertaleTexturePageItem => "Texture Page Item",
+                    UndertaleCode => "Code",
+                    UndertaleVariable => "Variable",
+                    UndertaleFunction => "Function",
+                    UndertaleCodeLocals => "Code Locals",
+                    UndertaleEmbeddedTexture => "Embedded Texture",
+                    UndertaleEmbeddedAudio => "Embedded Audio",
+                    UndertaleTextureGroupInfo => "Texture Group Info",
+                    UndertaleEmbeddedImage => "Embedded Image",
+                    UndertaleSequence => "Sequence",
+                    UndertaleAnimationCurve => "Animation Curve",
                     _ => null
                 };
 
@@ -123,7 +123,7 @@ namespace UndertaleModTool
             }
             else if (obj is UndertaleString)
             {
-                title = "String Editor - " + ((UndertaleString)obj).Content;
+                title = "String - " + ((UndertaleString)obj).Content;
             }
             else if (obj is UndertaleChunkVARI)
             {
@@ -131,15 +131,15 @@ namespace UndertaleModTool
             }
             else if (obj is GeneralInfoEditor)
             {
-                title = "General Info Editor";
+                title = "General Info";
             }
             else if (obj is GlobalInitEditor)
             {
-                title = "Global Init Editor";
+                title = "Global Init";
             }
             else if (obj is GameEndEditor)
             {
-                title = "Game End Editor";
+                title = "Game End";
             }
             else
             {
