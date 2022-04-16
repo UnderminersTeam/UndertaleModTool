@@ -186,6 +186,7 @@ namespace UndertaleModTool
 
         public static RoutedUICommand CloseTabCommand = new RoutedUICommand("Close current tab", "CloseTab", typeof(MainWindow));
         public static RoutedUICommand CloseAllTabsCommand = new RoutedUICommand("Close all tabs", "CloseAllTabs", typeof(MainWindow));
+        public static RoutedUICommand RestoreClosedTabCommand = new RoutedUICommand("Restore last closed tab", "RestoreClosedTab", typeof(MainWindow));
         public ObservableCollection<Tab> Tabs { get; set; } = new();
         public Tab CurrentTab { get; set; }
         public int CurrentTabIndex { get; set; } = 0;
@@ -198,6 +199,7 @@ namespace UndertaleModTool
         public Visibility IsExtProductIDEligible => (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && (((Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? Visibility.Visible : Visibility.Collapsed;
 
         public ObservableCollection<Tab> SelectionHistory { get; } = new();
+        public List<Tab> ClosedTabsHistory { get; } = new();
 
         public bool CanSave { get; set; }
         public bool CanSafelySave = false;
@@ -302,6 +304,7 @@ namespace UndertaleModTool
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them");
             OpenInTab(Highlighted);
             SelectionHistory.Clear();
+            ClosedTabsHistory.Clear();
 
             TitleMain = "UndertaleModTool by krzys_h v" + Version;
 
@@ -588,6 +591,7 @@ namespace UndertaleModTool
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P");
             OpenInTab(Highlighted);
             SelectionHistory.Clear();
+            ClosedTabsHistory.Clear();
 
             CanSave = true;
             CanSafelySave = true;
@@ -775,6 +779,7 @@ namespace UndertaleModTool
                 return;
 
             SelectionHistory.Clear();
+            ClosedTabsHistory.Clear();
             Tabs.Clear();
             CurrentTab = null;
 
@@ -784,6 +789,28 @@ namespace UndertaleModTool
 
             Selected = CurrentTab.OpenedObject;
             UpdateObjectLabel(Selected);
+        }
+        private void Command_RestoreClosedTab(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (ClosedTabsHistory.Count > 0)
+            {
+                Tab lastTab = ClosedTabsHistory.Last();
+                ClosedTabsHistory.RemoveAt(ClosedTabsHistory.Count - 1);
+
+                if (CurrentTab.AutoClose)
+                    CloseTab(false);
+
+                Tabs.Insert(lastTab.TabIndex, lastTab);
+                CurrentTabIndex = lastTab.TabIndex;
+
+                for (int i = CurrentTabIndex + 1; i < Tabs.Count; i++)
+                    Tabs[i].TabIndex = i;
+
+                ScrollToTab(CurrentTabIndex);
+
+                Selected = lastTab.OpenedObject;
+                UpdateObjectLabel(Selected);
+            }
         }
 
         private async Task LoadFile(string filename, bool preventClose = false)
@@ -894,6 +921,7 @@ namespace UndertaleModTool
                         Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
                         OpenInTab(Highlighted);
                         SelectionHistory.Clear();
+                        ClosedTabsHistory.Clear();
 
                     }
                     else
@@ -1575,6 +1603,20 @@ namespace UndertaleModTool
 
                 CloseTab(obj);
                 UpdateTree();
+
+                // remove all tabs with deleted object occurrences from the closed tab history
+                for (int i = 0; i < ClosedTabsHistory.Count; i++)
+                {
+                    if (ClosedTabsHistory[i].OpenedObject == obj)
+                        ClosedTabsHistory.RemoveAt(i);
+                }
+
+                // remove consecutive duplicates ( { 1, 1, 2 } -> { 1, 2 } )
+                for (int i = 0; i < ClosedTabsHistory.Count - 1; i++)
+                {
+                    if (ClosedTabsHistory[i] == ClosedTabsHistory[i + 1])
+                        ClosedTabsHistory.RemoveAt(i);
+                }
             }
         }
         private void CopyItemName(UndertaleNamedResource namedRes)
@@ -3144,6 +3186,9 @@ result in loss of work.");
                 int currIndex = CurrentTabIndex;
                 Tabs.RemoveAt(tabIndex); // "CurrentTabIndex" changes here (bound to "TabController.SelectedIndex")
 
+                if (!closingTab.AutoClose)
+                    ClosedTabsHistory.Add(closingTab);
+
                 if (Tabs.Count == 0)
                 {
                     CurrentTabIndex = -1;
@@ -3369,7 +3414,7 @@ result in loss of work.");
         // source - https://stackoverflow.com/a/10738247/12136394
         private void TabItem_PreviewMouseMove(object sender, MouseEventArgs e)
         {
-            if (e.Source is not TabItem tabItem)
+            if (e.Source is not TabItem tabItem || e.OriginalSource is Button)
                 return;
 
             if (Mouse.PrimaryDevice.LeftButton == MouseButtonState.Pressed)
@@ -3396,9 +3441,7 @@ result in loss of work.");
                 Tabs.Insert(targetIndex, sourceTab);
 
                 for (int i = 0; i < Tabs.Count; i++)
-                {
                     Tabs[i].TabIndex = i;
-                }
 
                 CurrentTabIndex = targetIndex;
 
@@ -3420,12 +3463,18 @@ result in loss of work.");
             if (tab is null)
                 return;
 
+            foreach (Tab t in Tabs.Reverse())
+            {
+                if (t == tab)
+                    continue;
+
+                ClosedTabsHistory.Add(t);
+            }
+
             SelectionHistory.Clear();
             Tabs = new() { tab };
             CurrentTabIndex = 0;
         }
-
-        
     }
 
     public class GeneralInfoEditor

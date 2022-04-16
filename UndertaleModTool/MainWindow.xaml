@@ -40,6 +40,7 @@
         <CommandBinding Command="Properties" Executed="Command_Settings" />
         <CommandBinding Command="{x:Static local:MainWindow.CloseTabCommand}" Executed="Command_CloseTab" />
         <CommandBinding Command="{x:Static local:MainWindow.CloseAllTabsCommand}" Executed="Command_CloseAllTabs" />
+        <CommandBinding Command="{x:Static local:MainWindow.RestoreClosedTabCommand}" Executed="Command_RestoreClosedTab" />
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="N" Command="New"/>
@@ -53,6 +54,7 @@
         <KeyBinding Modifiers="Shift" Key="F5" Command="PrintPreview"/>
         <KeyBinding Modifiers="Control" Key="W" Command="{x:Static local:MainWindow.CloseTabCommand}"/>
         <KeyBinding Gesture="Ctrl+Shift+W" Command="{x:Static local:MainWindow.CloseAllTabsCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+T" Command="{x:Static local:MainWindow.RestoreClosedTabCommand}"/>
     </Window.InputBindings>
     <Grid>
         <DockPanel>
