@@ -3174,7 +3174,7 @@ result in loss of work.");
 
         public void ChangeSelection(object newsel)
         {
-            OpenInTab(newsel);
+            OpenInTab(newsel, true);
         }
 
         private void TabController_SelectionChanged(object sender, SelectionChangedEventArgs e)
