@@ -41,6 +41,8 @@
         <CommandBinding Command="{x:Static local:MainWindow.CloseTabCommand}" Executed="Command_CloseTab" />
         <CommandBinding Command="{x:Static local:MainWindow.CloseAllTabsCommand}" Executed="Command_CloseAllTabs" />
         <CommandBinding Command="{x:Static local:MainWindow.RestoreClosedTabCommand}" Executed="Command_RestoreClosedTab" />
+        <CommandBinding Command="{x:Static local:MainWindow.SwitchToNextTabCommand}" Executed="Command_SwitchToNextTab" />
+        <CommandBinding Command="{x:Static local:MainWindow.SwitchToPrevTabCommand}" Executed="Command_SwitchToPrevTab" />
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="N" Command="New"/>
@@ -55,6 +57,8 @@
         <KeyBinding Modifiers="Control" Key="W" Command="{x:Static local:MainWindow.CloseTabCommand}"/>
         <KeyBinding Gesture="Ctrl+Shift+W" Command="{x:Static local:MainWindow.CloseAllTabsCommand}"/>
         <KeyBinding Gesture="Ctrl+Shift+T" Command="{x:Static local:MainWindow.RestoreClosedTabCommand}"/>
+        <KeyBinding Gesture="Ctrl+Tab" Command="{x:Static local:MainWindow.SwitchToNextTabCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{x:Static local:MainWindow.SwitchToPrevTabCommand}"/>
     </Window.InputBindings>
     <Grid>
         <DockPanel>

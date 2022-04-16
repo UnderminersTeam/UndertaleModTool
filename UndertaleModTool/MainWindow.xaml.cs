@@ -187,6 +187,8 @@ namespace UndertaleModTool
         public static RoutedUICommand CloseTabCommand = new RoutedUICommand("Close current tab", "CloseTab", typeof(MainWindow));
         public static RoutedUICommand CloseAllTabsCommand = new RoutedUICommand("Close all tabs", "CloseAllTabs", typeof(MainWindow));
         public static RoutedUICommand RestoreClosedTabCommand = new RoutedUICommand("Restore last closed tab", "RestoreClosedTab", typeof(MainWindow));
+        public static RoutedUICommand SwitchToNextTabCommand = new RoutedUICommand("Switch to the next tab", "SwitchToNextTab", typeof(MainWindow));
+        public static RoutedUICommand SwitchToPrevTabCommand = new RoutedUICommand("Switch to the previous tab", "SwitchToPrevTab", typeof(MainWindow));
         public ObservableCollection<Tab> Tabs { get; set; } = new();
         public Tab CurrentTab { get; set; }
         public int CurrentTabIndex { get; set; } = 0;
@@ -811,6 +813,16 @@ namespace UndertaleModTool
                 Selected = lastTab.OpenedObject;
                 UpdateObjectLabel(Selected);
             }
+        }
+        private void Command_SwitchToNextTab(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (CurrentTabIndex < Tabs.Count - 1)
+                CurrentTabIndex++;
+        }
+        private void Command_SwitchToPrevTab(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (CurrentTabIndex > 0)
+                CurrentTabIndex--;
         }
 
         private async Task LoadFile(string filename, bool preventClose = false)
