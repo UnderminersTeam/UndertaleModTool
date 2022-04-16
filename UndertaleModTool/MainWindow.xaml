@@ -383,6 +383,7 @@
                             <TabControl.ItemContainerStyle>
                                 <Style TargetType="TabItem">
                                     <Setter Property="TabIndex" Value="{Binding TabIndex, Mode=OneWay}"/>
+                                    <EventSetter Event="MouseUp" Handler="TabItem_MouseUp"/>
                                 </Style>
                             </TabControl.ItemContainerStyle>
                             <TabControl.ItemTemplate>

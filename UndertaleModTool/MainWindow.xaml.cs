@@ -3166,7 +3166,7 @@ result in loss of work.");
         {
             if (obj is not null)
             {
-                int tabIndex = Tabs.First(x => x.OpenedObject == obj)?.TabIndex ?? -1;
+                int tabIndex = Tabs.FirstOrDefault(x => x.OpenedObject == obj)?.TabIndex ?? -1;
                 if (tabIndex != -1)
                     CloseTab(tabIndex, addDefaultTab);
             }
@@ -3322,6 +3322,20 @@ result in loss of work.");
         private void TabCloseButton_MouseLeave(object sender, MouseEventArgs e)
         {
             (sender as Button).Content = new Image() { Source = Tab.ClosedIcon };
+        }
+
+        private void TabItem_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == System.Windows.Input.MouseButton.Middle)
+            {
+                TabItem tabItem = sender as TabItem;
+                Tab tab = tabItem?.DataContext as Tab;
+                if (tab is null)
+                    return;
+
+                if (tab.TabTitle != "Welcome!")
+                    CloseTab(tab.OpenedObject);
+            }
         }
     }
 
