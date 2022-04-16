@@ -405,7 +405,10 @@
                                 <Style TargetType="TabItem">
                                     <Setter Property="TabIndex" Value="{Binding TabIndex, Mode=OneWay}"/>
                                     <Setter Property="ContextMenu" Value="{StaticResource TabMenu}"/>
+                                    <Setter Property="AllowDrop" Value="True"/>
                                     <EventSetter Event="MouseUp" Handler="TabItem_MouseUp"/>
+                                    <EventSetter Event="PreviewMouseMove" Handler="TabItem_PreviewMouseMove"/>
+                                    <EventSetter Event="Drop" Handler="TabItem_Drop"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding TabTitle, Mode=OneTime}" Value="Welcome!">
                                             <Setter Property="ContextMenu" Value="{x:Null}"/>

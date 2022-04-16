@@ -50,10 +50,12 @@ using System.Windows.Controls.Primitives;
 namespace UndertaleModTool
 {
     [DebuggerDisplay(@"\{{GetType().FullName,nq} - {OpenedObject,nb}\}")] // display value in debugger as "{UndertaleModTool.Tab - {*object*}}"
-    public class Tab
+    public class Tab : INotifyPropertyChanged
     {
         public static readonly BitmapImage ClosedIcon = new(new Uri(@"/Resources/X.png", UriKind.RelativeOrAbsolute));
         public static readonly BitmapImage ClosedHoverIcon = new(new Uri(@"/Resources/X_Down.png", UriKind.RelativeOrAbsolute));
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public object OpenedObject { get; set; }
         public string TabTitle { get; set; } = "Untitled";
@@ -3360,6 +3362,47 @@ result in loss of work.");
                     CloseTab(tab.OpenedObject);
             }
         }
+
+        // source - https://stackoverflow.com/a/10738247/12136394
+        private void TabItem_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Source is not TabItem tabItem)
+                return;
+
+            if (Mouse.PrimaryDevice.LeftButton == MouseButtonState.Pressed)
+            {
+                CurrentTabIndex = tabItem.TabIndex;
+                DragDrop.DoDragDrop(tabItem, tabItem, DragDropEffects.All);
+            }
+        }
+        private void TabItem_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Source is TabItem tabItemTarget &&
+                e.Data.GetData(typeof(TabItem)) is TabItem tabItemSource &&
+                !tabItemTarget.Equals(tabItemSource))
+            {
+                int sourceIndex = tabItemSource.TabIndex;
+                int targetIndex = tabItemTarget.TabIndex;
+                Tab sourceTab = tabItemSource.DataContext as Tab;
+                if (sourceTab is null)
+                    return;
+
+                TabController.SelectionChanged -= TabController_SelectionChanged;
+
+                Tabs.RemoveAt(sourceIndex);
+                Tabs.Insert(targetIndex, sourceTab);
+
+                for (int i = 0; i < Tabs.Count; i++)
+                {
+                    Tabs[i].TabIndex = i;
+                }
+
+                CurrentTabIndex = targetIndex;
+
+                TabController.SelectionChanged += TabController_SelectionChanged;
+            }
+        }
+
         private void CloseTabMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Tab tab = (sender as MenuItem).DataContext as Tab;
@@ -3378,6 +3421,8 @@ result in loss of work.");
             Tabs = new() { tab };
             CurrentTabIndex = 0;
         }
+
+        
     }
 
     public class GeneralInfoEditor
