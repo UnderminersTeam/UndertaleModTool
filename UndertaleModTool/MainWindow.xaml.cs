@@ -2966,6 +2966,8 @@ result in loss of work.");
             CurrentTab = lastTab;
             CurrentTabIndex = lastTab.TabIndex;
 
+            ScrollToTab(CurrentTabIndex);
+
             Selected = lastTab.OpenedObject;
             UpdateObjectLabel(Selected);
 
@@ -3189,7 +3191,6 @@ result in loss of work.");
                     SelectionHistory.Add(CurrentTab);
                 }
 
-                TabScrollViewer.UpdateLayout();
                 ScrollToTab(CurrentTabIndex);
 
                 CurrentTab = Tabs[CurrentTabIndex];
@@ -3249,6 +3250,8 @@ result in loss of work.");
         }
         private void ScrollToTab(int tabIndex)
         {
+            TabScrollViewer.UpdateLayout();
+
             if (tabIndex == 0)
                 TabScrollViewer.ScrollToLeftEnd();
             else if (tabIndex == Tabs.Count - 1)
