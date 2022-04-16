@@ -3189,6 +3189,9 @@ result in loss of work.");
                     SelectionHistory.Add(CurrentTab);
                 }
 
+                TabScrollViewer.UpdateLayout();
+                ScrollToTab(CurrentTabIndex);
+
                 CurrentTab = Tabs[CurrentTabIndex];
                 Selected = CurrentTab.OpenedObject;
                 UpdateObjectLabel(Selected);
@@ -3205,17 +3208,32 @@ result in loss of work.");
                 && ((dir == ScrollDirection.Left && offset > 0)
                 || (dir == ScrollDirection.Right && offset < TabController.ActualWidth)))
             {
+                int count = VisualTreeHelper.GetChildrenCount(tabPanel);
+                List<TabItem> tabItems = new(count);
+                for (int i1 = 0; i1 < count; i1++)
+                    tabItems.Add(VisualTreeHelper.GetChild(tabPanel, i1) as TabItem);
+
+                // selected TabItem is in the end of child list somehow, so it should be fixed
+                if (CurrentTabIndex != count - 1)
+                {
+                    tabItems.Insert(CurrentTabIndex, tabItems[^1]);
+                    tabItems.RemoveAt(tabItems.Count - 1);
+                }
+
                 // get index of first visible tab
-                TabItem[] tabItems = FindVisualChildren<TabItem>(tabPanel).ToArray();
                 int i = 0;
                 foreach (TabItem item in tabItems)
                 {
-                    clearOffset += item.ActualWidth;
+                    double actualWidth = item.ActualWidth;
+                    if (i == CurrentTabIndex)
+                        actualWidth -= 4; // selected tab is wider
+
+                    clearOffset += actualWidth;
 
                     if (clearOffset > offset)
                     {
                         if (dir == ScrollDirection.Left)
-                            clearOffset -= item.ActualWidth;
+                            clearOffset -= actualWidth;
 
                         break;
                     }
@@ -3223,10 +3241,54 @@ result in loss of work.");
                     i++;
                 }
 
-                if (dir == ScrollDirection.Left && TabScrollViewer.ScrollableWidth != offset)
+                if (dir == ScrollDirection.Left && TabScrollViewer.ScrollableWidth != offset && i != 0)
                     TabScrollViewer.ScrollToHorizontalOffset(clearOffset - tabItems[i - 1].ActualWidth);
                 else
                     TabScrollViewer.ScrollToHorizontalOffset(clearOffset);
+            }
+        }
+        private void ScrollToTab(int tabIndex)
+        {
+            if (tabIndex == 0)
+                TabScrollViewer.ScrollToLeftEnd();
+            else if (tabIndex == Tabs.Count - 1)
+                TabScrollViewer.ScrollToRightEnd();
+            else
+            {
+                TabPanel tabPanel = FindVisualChild<TabPanel>(TabController);
+
+                int count = VisualTreeHelper.GetChildrenCount(tabPanel);
+                List<TabItem> tabItems = new(count);
+                for (int i1 = 0; i1 < count; i1++)
+                    tabItems.Add(VisualTreeHelper.GetChild(tabPanel, i1) as TabItem);
+
+                // selected TabItem is in the end of child list somehow, so it should be fixed
+                if (CurrentTabIndex != count - 1)
+                {
+                    tabItems.Insert(CurrentTabIndex, tabItems[^1]);
+                    tabItems.RemoveAt(tabItems.Count - 1);
+                }
+
+                TabItem currTabItem = null;
+                double offset = 0;
+                int i = 0;
+                foreach (TabItem item in tabItems)
+                {
+                    if (i == tabIndex)
+                    {
+                        currTabItem = item;
+                        break;
+                    }
+
+                    offset += item.ActualWidth;
+                    i++;
+                }
+
+                double endOffset = TabScrollViewer.HorizontalOffset + TabScrollViewer.ViewportWidth;
+                if (offset < TabScrollViewer.HorizontalOffset || offset > endOffset)
+                    TabScrollViewer.ScrollToHorizontalOffset(offset);
+                else
+                    currTabItem?.BringIntoView();
             }
         }
         private void TabScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
