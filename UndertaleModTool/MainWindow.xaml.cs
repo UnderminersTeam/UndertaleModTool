@@ -55,7 +55,10 @@ namespace UndertaleModTool
         public static readonly BitmapImage ClosedIcon = new(new Uri(@"/Resources/X.png", UriKind.RelativeOrAbsolute));
         public static readonly BitmapImage ClosedHoverIcon = new(new Uri(@"/Resources/X_Down.png", UriKind.RelativeOrAbsolute));
 
+        // it's actually used, but when it will be compiled (see the note in "MainWindow" class)
+        #pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
+        #pragma warning restore CS0067
 
         public object OpenedObject { get; set; }
         public string TabTitle { get; set; } = "Untitled";
