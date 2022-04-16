@@ -3343,6 +3343,24 @@ result in loss of work.");
                     CloseTab(tab.OpenedObject);
             }
         }
+        private void CloseTabMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Tab tab = (sender as MenuItem).DataContext as Tab;
+            if (tab is null)
+                return;
+
+            CloseTab(tab.TabIndex);
+        }
+        private void CloseOtherTabsMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Tab tab = (sender as MenuItem).DataContext as Tab;
+            if (tab is null)
+                return;
+
+            SelectionHistory.Clear();
+            Tabs = new() { tab };
+            CurrentTabIndex = 0;
+        }
     }
 
     public class GeneralInfoEditor

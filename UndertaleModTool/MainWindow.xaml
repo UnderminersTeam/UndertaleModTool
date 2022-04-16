@@ -382,10 +382,32 @@
                     <ScrollViewer Grid.Column="0" Name="TabScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" PreviewMouseWheel="TabScrollViewer_PreviewMouseWheel">
                         <TabControl Name="TabController" Height="22" TabStripPlacement="Top" ItemsSource="{Binding Tabs, Mode=OneWay}" SelectedIndex="{Binding CurrentTabIndex}"
                                 SelectionChanged="TabController_SelectionChanged">
+                            <TabControl.Resources>
+                                <ContextMenu x:Key="TabMenu">
+                                    <MenuItem Header="Close" Click="CloseTabMenuItem_Click" InputGestureText="Ctrl+W"/>
+                                    <MenuItem Header="Close other tabs" Click="CloseOtherTabsMenuItem_Click">
+                                        <MenuItem.Style>
+                                            <Style TargetType="MenuItem">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Tabs.Count, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:MainWindow}, Mode=OneWay}" Value="1">
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </MenuItem.Style>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </TabControl.Resources>
                             <TabControl.ItemContainerStyle>
                                 <Style TargetType="TabItem">
                                     <Setter Property="TabIndex" Value="{Binding TabIndex, Mode=OneWay}"/>
+                                    <Setter Property="ContextMenu" Value="{StaticResource TabMenu}"/>
                                     <EventSetter Event="MouseUp" Handler="TabItem_MouseUp"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding TabTitle,Mode=OneTime}" Value="Welcome!">
+                                            <Setter Property="ContextMenu" Value="{x:Null}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
                                 </Style>
                             </TabControl.ItemContainerStyle>
                             <TabControl.ItemTemplate>
