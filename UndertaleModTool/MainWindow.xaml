@@ -37,18 +37,20 @@
         <CommandBinding Command="Print" Executed="Command_Run" />
         <CommandBinding Command="CancelPrint" Executed="Command_RunSpecial" />
         <CommandBinding Command="PrintPreview" Executed="Command_RunDebug" />
-        <CommandBinding Command="Properties" Executed="Command_Settings"/>
+        <CommandBinding Command="Properties" Executed="Command_Settings" />
+        <CommandBinding Command="{x:Static local:MainWindow.CloseTabCommand}" Executed="Command_CloseTab" />
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="N" Command="New"/>
         <KeyBinding Modifiers="Control" Key="O" Command="Open"/>
         <KeyBinding Modifiers="Control" Key="S" Command="Save"/>
-        <KeyBinding Modifiers="Control" Key="W" Command="Close"/>
+        <KeyBinding Modifiers="Control" Key="Q" Command="Close"/>
         <KeyBinding Modifiers="Control" Key="C" Command="Copy"/>
         <KeyBinding Modifiers="Control" Key="P" Command="Paste"/>
         <KeyBinding Key="F5" Command="Print"/>
         <KeyBinding Modifiers="Alt" Key="F5" Command="CancelPrint"/>
         <KeyBinding Modifiers="Shift" Key="F5" Command="PrintPreview"/>
+        <KeyBinding Modifiers="Control" Key="W" Command="{x:Static local:MainWindow.CloseTabCommand}"/>
     </Window.InputBindings>
     <Grid>
         <DockPanel>
@@ -90,7 +92,7 @@
                     <MenuItem Header="Generate o_ffset map" Click="MenuItem_OffsetMap_Click"/>
                     <Separator/>
                     <MenuItem Header="S_ettings" Command="Properties"/>
-                    <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+W"/>
+                    <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+Q"/>
                 </MenuItem>
                 <MenuItem Header="_Scripts">
                     <MenuItem Header="_Run builtin script" SubmenuOpened="MenuItem_RunBuiltinScript_SubmenuOpened">

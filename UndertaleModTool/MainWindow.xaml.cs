@@ -179,6 +179,7 @@ namespace UndertaleModTool
 
         public string TitleMain { get; set; }
 
+        public static RoutedUICommand CloseTabCommand = new RoutedUICommand("Close current tab", "CloseTab", typeof(MainWindow));
         public ObservableCollection<Tab> Tabs { get; set; } = new();
         public Tab CurrentTab { get; set; }
         public int CurrentTabIndex { get; set; } = 0;
@@ -756,6 +757,11 @@ namespace UndertaleModTool
                 if (w is not MainWindow && w.Owner is null) //&& is not a modal window
                     w.Close();
             }
+        }
+
+        private void Command_CloseTab(object sender, ExecutedRoutedEventArgs e)
+        {
+            CloseTab();
         }
 
         private async Task LoadFile(string filename, bool preventClose = false)
