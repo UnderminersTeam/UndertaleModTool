@@ -45,6 +45,7 @@ using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Globalization;
+using System.Windows.Controls.Primitives;
 
 namespace UndertaleModTool
 {
@@ -212,6 +213,11 @@ namespace UndertaleModTool
             NotSaved,
             Saved,
             Error
+        }
+        public enum ScrollDirection
+        {
+            Left,
+            Right
         }
         public static CodeEditorMode CodeEditorDecompile { get; set; } = CodeEditorMode.Unstated;
 
@@ -570,6 +576,7 @@ namespace UndertaleModTool
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilePath)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGMS2)));
 
+            CurrentTab = null;
             Tabs.Clear();
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P");
             OpenInTab(Highlighted);
@@ -765,6 +772,7 @@ namespace UndertaleModTool
             Tab[] tempTabs = Tabs.ToArray();
             int lastTabIndex = CurrentTabIndex;
 
+            CurrentTab = null;
             Tabs.Clear(); // clear the current tabs to destroy game object references
 
             Task t = Task.Run(() =>
@@ -864,6 +872,7 @@ namespace UndertaleModTool
                     {
                         // restore the tabs because new data hasn't been loaded
                         Tabs = new(tempTabs);
+                        CurrentTab = Tabs[lastTabIndex];
                         CurrentTabIndex = lastTabIndex;
                     }
 
@@ -3187,11 +3196,52 @@ result in loss of work.");
             }
         }
 
+        private void ScrollTabs(ScrollDirection dir)
+        {
+            double offset = TabScrollViewer.HorizontalOffset;
+            double clearOffset = 0;
+            TabPanel tabPanel = FindVisualChild<TabPanel>(TabController);
+
+            if (Tabs.Count > 1
+                && ((dir == ScrollDirection.Left && offset > 0)
+                || (dir == ScrollDirection.Right && offset < TabController.ActualWidth)))
+            {
+                // get index of first visible tab
+                TabItem[] tabItems = FindVisualChildren<TabItem>(tabPanel).ToArray();
+                int i = 0;
+                foreach (TabItem item in tabItems)
+                {
+                    clearOffset += item.ActualWidth;
+
+                    if (clearOffset > offset)
+                    {
+                        if (dir == ScrollDirection.Left)
+                            clearOffset -= item.ActualWidth;
+
+                        break;
+                    }
+
+                    i++;
+                }
+
+                if (dir == ScrollDirection.Left && TabScrollViewer.ScrollableWidth != offset)
+                    TabScrollViewer.ScrollToHorizontalOffset(clearOffset - tabItems[i - 1].ActualWidth);
+                else
+                    TabScrollViewer.ScrollToHorizontalOffset(clearOffset);
+            }
+        }
         private void TabScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            ScrollViewer scv = (ScrollViewer)sender;
-            scv.ScrollToHorizontalOffset(scv.HorizontalOffset - e.Delta);
+            ScrollTabs(e.Delta < 0 ? ScrollDirection.Right : ScrollDirection.Left);
             e.Handled = true;
+        }
+        private void TabsScrollLeftButton_Click(object sender, RoutedEventArgs e)
+        {
+            ScrollTabs(ScrollDirection.Left);
+        }
+        private void TabsScrollRightButton_Click(object sender, RoutedEventArgs e)
+        {
+            ScrollTabs(ScrollDirection.Right);
         }
 
         private void TabCloseButton_OnClick(object sender, RoutedEventArgs e)
@@ -3208,15 +3258,6 @@ result in loss of work.");
         private void TabCloseButton_MouseLeave(object sender, MouseEventArgs e)
         {
             (sender as Button).Content = new Image() { Source = Tab.ClosedIcon };
-        }
-
-        private void TabsScrollLeftButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-        private void TabsScrollRightButton_Click(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 

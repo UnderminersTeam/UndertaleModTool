@@ -372,7 +372,7 @@
 
                 <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
 
-                <Grid Name="TabsGrid" Grid.Column="2" Grid.Row="0">
+                <Grid Name="TabsGrid" Grid.Column="2" Grid.Row="0" UseLayoutRounding="True">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
