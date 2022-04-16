@@ -28,11 +28,11 @@ if (!Directory.Exists(winFolder + "Export_Tilesets\\"))
 }
 
 SetProgressBar(null, "Tilesets", 0, Data.Backgrounds.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await ImportTilesets();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Import Complete.");
 
@@ -58,5 +58,5 @@ void ImportTileset(UndertaleBackground tileset)
         ScriptMessage($"Failed to import file {tileset.Name} (index - {Data.Backgrounds.IndexOf(tileset)}) due to: " + ex.Message);
     }
 
-    IncProgressP();
+    IncrementProgress();
 }

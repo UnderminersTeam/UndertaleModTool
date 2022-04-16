@@ -8,15 +8,31 @@ using System.Collections.ObjectModel;
 
 namespace UndertaleModLib.Models
 {
+    /// <summary>
+    /// A timeline in a data file.
+    /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleTimeline : UndertaleNamedResource
     {
+        /// <summary>
+        /// A specific moment in a timeline.
+        /// </summary>
         [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class UndertaleTimelineMoment : UndertaleObject
         {
+            /// <summary>
+            /// After how many steps this moment gets executed.
+            /// </summary>
             public uint Step { get; set; }
+
+            /// <summary>
+            /// The actions that get executed at this moment.
+            /// </summary>
             public UndertalePointerList<UndertaleGameObject.EventAction> Event { get; set; }
 
+            /// <summary>
+            /// Initializes a new empty instance of the <see cref="UndertaleTimelineMoment"/> class.
+            /// </summary>
             public UndertaleTimelineMoment()
             {
                 /*
@@ -25,10 +41,15 @@ namespace UndertaleModLib.Models
                 */
             }
 
-            public UndertaleTimelineMoment(uint step, UndertalePointerList<UndertaleGameObject.EventAction> ev)
+            /// <summary>
+            /// Initializes a new instance of the <see cref="UndertaleTimelineMoment"/> with the specified step time and event action list.
+            /// </summary>
+            /// <param name="step">After how many steps the moment shall be executed.</param>
+            /// <param name="events">A list of events that shall be executed.</param>
+            public UndertaleTimelineMoment(uint step, UndertalePointerList<UndertaleGameObject.EventAction> events)
             {
                 Step = step;
-                Event = ev;
+                Event = events;
             }
 
             public void Serialize(UndertaleWriter writer)
@@ -42,7 +63,14 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <summary>
+        /// The name of the timeline.
+        /// </summary>
         public UndertaleString Name { get; set; }
+
+        /// <summary>
+        /// The moments this timeline has. Comparable to keyframes.
+        /// </summary>
         public ObservableCollection<UndertaleTimelineMoment> Moments { get; set; } = new ObservableCollection<UndertaleTimelineMoment>();
 
         public override string ToString()

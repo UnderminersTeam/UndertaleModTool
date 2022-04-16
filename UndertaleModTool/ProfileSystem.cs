@@ -397,7 +397,7 @@ an issue on GitHub.");
 
                 DirectoryInfo[] dirs = dir.GetDirectories();
 
-                // If the destination directory doesn't exist, create it.       
+                // If the destination directory doesn't exist, create it.
                 Directory.CreateDirectory(destDirName);
 
                 // Get the files in the directory and copy them to the new location.
@@ -432,50 +432,6 @@ an issue on GitHub.");
             catch (Exception exc)
             {
                 MessageBox.Show("DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
-            }
-        }
-
-        public bool AreFilesIdentical(string file1, string file2)
-        {
-            int file1byte, file2byte;
-            FileStream fs1, fs2;
-
-            // Open the two files.
-            fs1 = new FileStream(file1, FileMode.Open);
-            fs2 = new FileStream(file2, FileMode.Open);
-
-            // Check the file sizes. If they are not the same, the files
-            // are not the same.
-            if (fs1.Length != fs2.Length)
-            {
-                // Close the files
-                fs1.Close();
-                fs2.Close();
-
-                // Return false to indicate files are different
-                return false;
-            }
-            else
-            {
-                // Read and compare a byte from each file until either a
-                // non-matching set of bytes is found or until the end of
-                // file1 is reached.
-                do
-                {
-                    // Read one byte from each file.
-                    file1byte = fs1.ReadByte();
-                    file2byte = fs2.ReadByte();
-                }
-                while (file1byte == file2byte && file1byte != -1);
-
-                // Close the files.
-                fs1.Close();
-                fs2.Close();
-
-                // Return the success of the comparison. "file1byte" is
-                // equal to "file2byte" at this point only if the files are
-                // the same.
-                return (file1byte - file2byte) == 0;
             }
         }
     }

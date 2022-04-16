@@ -297,6 +297,9 @@ namespace UndertaleModTool
                 return null;
 
             IList<UndertaleSprite.TextureEntry> textures = values[0] as IList<UndertaleSprite.TextureEntry>;
+            if (textures is null)
+                return null;
+
             int index = (int)(float)values[1];
             if (index > textures.Count - 1 || index < 0)
                 return null;

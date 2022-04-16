@@ -18,7 +18,7 @@ ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDe
 
 int failed = 0;
 
-string codeFolder = PromptChooseDirectory("Export to where");
+string codeFolder = PromptChooseDirectory();
 if (codeFolder == null)
     throw new ScriptException("The export folder was not set.");
 Directory.CreateDirectory(Path.Combine(codeFolder, "Code"));
@@ -29,7 +29,7 @@ List<String> gameObjectCandidates = new List<String>();
 List<String> splitStringsList = new List<String>();
 string InputtedText = "";
 InputtedText = SimpleTextInput("Menu", "Enter object, script, or code entry names", InputtedText, true);
-string[] IndividualLineArray = InputtedText.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+string[] IndividualLineArray = InputtedText.Split('\n'}, StringSplitOptions.RemoveEmptyEntries);
 foreach (var OneLine in IndividualLineArray)
 {
     splitStringsList.Add(OneLine.Trim());
@@ -95,7 +95,7 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
 }
 
 SetProgressBar(null, "Code Entries", 0, codeToDump.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await Task.Run(() => {
     for (var j = 0; j < codeToDump.Count; j++)
@@ -104,18 +104,18 @@ await Task.Run(() => {
     }
 });
 
-await StopUpdater();
+await StopProgressBarUpdater();
 
-void DumpCode(UndertaleCode code) 
+void DumpCode(UndertaleCode code)
 {
     string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
     if (code.ParentEntry == null)
     {
-        try 
+        try
         {
             File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             if (!(Directory.Exists(Path.Combine(codeFolder, "Failed"))))
             {
@@ -132,12 +132,12 @@ void DumpCode(UndertaleCode code)
         {
             Directory.CreateDirectory(Path.Combine(codeFolder, "Duplicates"));
         }
-        try 
+        try
         {
             path = Path.Combine(codeFolder, "Duplicates", code.Name.Content + ".gml");
             File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value).Replace("@@This@@()", "self/*@@This@@()*/") : ""));
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             if (!(Directory.Exists(Path.Combine(codeFolder, "Duplicates", "Failed"))))
             {
@@ -148,5 +148,5 @@ void DumpCode(UndertaleCode code)
             failed += 1;
         }
     }
-    IncProgress();
+    IncrementProgress();
 }

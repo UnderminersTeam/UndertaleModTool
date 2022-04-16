@@ -21,17 +21,17 @@ if (Directory.Exists(texFolder))
 Directory.CreateDirectory(texFolder);
 
 SetProgressBar(null, "Sprites", 0, Data.Sprites.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await DumpSprites();
 worker.Cleanup();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 
 
-string GetFolder(string path) 
+string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
@@ -41,11 +41,11 @@ async Task DumpSprites()
     await Task.Run(() => Parallel.ForEach(Data.Sprites, DumpSprite));
 }
 
-void DumpSprite(UndertaleSprite sprite) 
+void DumpSprite(UndertaleSprite sprite)
 {
     for (int i = 0; i < sprite.Textures.Count; i++)
         if (sprite.Textures[i]?.Texture != null)
             worker.ExportAsPNG(sprite.Textures[i].Texture, texFolder + sprite.Name.Content + "_" + i + ".png", null, padded); // Include padding to make sprites look neat!
 
-    IncProgressP();
+    IncrementProgressParallel();
 }

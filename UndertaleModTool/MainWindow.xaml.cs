@@ -553,9 +553,9 @@ namespace UndertaleModTool
 
         private async void Command_New(object sender, ExecutedRoutedEventArgs e)
         {
-            await Make_New_File();
+            await MakeNewDataFile();
         }
-        public async Task<bool> Make_New_File()
+        public async Task<bool> MakeNewDataFile()
         {
             if (Data != null)
             {
@@ -1182,7 +1182,7 @@ namespace UndertaleModTool
                     if (updateCache)
                     {
                         await GenerateGMLCache(null, dialog, true);
-                        await StopUpdater();
+                        await StopProgressBarUpdater();
                     }
 
                     string[] codeNames = Data.Code.Where(x => x.ParentEntry is null).Select(x => x.Name.Content).ToArray();
@@ -1216,7 +1216,7 @@ namespace UndertaleModTool
             });
         }
 
-        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
+        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
         {
             if (!SettingsWindow.UseGMLCache)
                 return false;
@@ -1260,7 +1260,7 @@ namespace UndertaleModTool
             if (Data.GMLCache.IsEmpty)
             {
                 SetProgressBar(null, "Generating decompiled code cache...", 0, Data.Code.Count);
-                StartUpdater();
+                StartProgressBarUpdater();
 
                 await Task.Run(() => Parallel.ForEach(Data.Code, (code) =>
                 {
@@ -1276,7 +1276,7 @@ namespace UndertaleModTool
                         }
                     }
 
-                    IncProgressP();
+                    IncrementProgressParallel();
                 }));
 
                 Data.GMLEditedBefore = new(Data.GMLCacheChanged);
@@ -1308,7 +1308,7 @@ namespace UndertaleModTool
                 if (codeToUpdate.Count > 0)
                 {
                     SetProgressBar(null, "Updating decompiled code cache...", 0, codeToUpdate.Count);
-                    StartUpdater();
+                    StartProgressBarUpdater();
 
                     await Task.Run(() => Parallel.ForEach(codeToUpdate.Select(x => Data.Code.ByName(x)), (code) =>
                     {
@@ -1326,10 +1326,10 @@ namespace UndertaleModTool
                             }
                         }
 
-                        IncProgressP();
+                        IncrementProgressParallel();
                     }));
 
-                    if (isSaving)
+                    if (clearGMLEditedBefore)
                         Data.GMLEditedBefore.Clear();
                     else
                         Data.GMLEditedBefore = Data.GMLEditedBefore.Union(Data.GMLCacheChanged).ToList();
@@ -1338,7 +1338,7 @@ namespace UndertaleModTool
                     Data.GMLCacheFailed = Data.GMLCacheFailed.Union(failedBag).ToList();
                     Data.GMLCacheWasSaved = false;
                 }
-                else if (isSaving)
+                else if (clearGMLEditedBefore)
                     Data.GMLEditedBefore.Clear();
 
                 if (!existedDialog)
@@ -1346,7 +1346,7 @@ namespace UndertaleModTool
 
                 if (createdDialog)
                 {
-                    await StopUpdater();
+                    await StopProgressBarUpdater();
                     HideProgressBar();
                 }
             }
@@ -1845,15 +1845,15 @@ namespace UndertaleModTool
         {
             progressValue += amount;
         }
-        public void IncProgress()
+        public void IncrementProgress()
         {
             progressValue++;
         }
-        public void AddProgressP(int amount) //P - Parallel (multithreaded)
+        public void AddProgressParallel(int amount) //P - Parallel (multithreaded)
         {
             Interlocked.Add(ref progressValue, amount); //thread-safe add operation (not the same as "lock ()")
         }
-        public void IncProgressP()
+        public void IncrementProgressParallel()
         {
             Interlocked.Increment(ref progressValue); //thread-safe increment
         }
@@ -1924,15 +1924,14 @@ namespace UndertaleModTool
                 }
             }
         }
-        public void SyncBinding(bool enable = false) //disable all sync. bindings
+        public void DisableAllSyncBindings() //disable all sync. bindings
         {
-            if (syncBindings.Count != 0)
-            {
-                foreach (string resType in syncBindings)
-                    BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
+            if (syncBindings.Count <= 0) return;
 
-                syncBindings.Clear();
-            }
+            foreach (string resType in syncBindings)
+                BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
+
+            syncBindings.Clear();
         }
 
         private void ProgressUpdater()
@@ -1962,7 +1961,7 @@ namespace UndertaleModTool
                 Thread.Sleep(100); //10 times per second
             }
         }
-        public void StartUpdater()
+        public void StartProgressBarUpdater()
         {
             if (cts is not null)
                 ScriptWarning("Warning - there is another progress bar updater task running (hangs) in the background.\nRestart the application to prevent some unexpected behavior.");
@@ -1972,22 +1971,22 @@ namespace UndertaleModTool
 
             updater = Task.Run(ProgressUpdater);
         }
-        public async Task StopUpdater() //async because "Wait()" blocks UI thread
+        public async Task StopProgressBarUpdater() //async because "Wait()" blocks UI thread
         {
-            if (cts is not null)
+            if (cts is null) return;
+
+            cts.Cancel();
+
+            if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
+                ScriptError("Stopping the progress bar updater task is failed.\nIt's highly recommended to restart the application.",
+                    "Script error", false);
+            else
             {
-                cts.Cancel();
-
-                if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
-                    ScriptError("Stopping the progress bar updater task is failed.\nIt's highly recommended to restart the application.", "Script error", false);
-                else
-                {
-                    cts.Dispose();
-                    cts = null;
-                }
-
-                updater.Dispose();
+                cts.Dispose();
+                cts = null;
             }
+
+            updater.Dispose();
         }
 
         public void OpenCodeFile(string name, CodeEditorMode editorDecompile)
@@ -2152,7 +2151,7 @@ namespace UndertaleModTool
                 if (!isScriptException)
                     excString = ProcessException(in exc, in scriptText);
 
-                await StopUpdater();
+                await StopProgressBarUpdater();
 
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
@@ -2173,7 +2172,7 @@ namespace UndertaleModTool
         }
 
         #pragma warning disable CA1416
-        public string PromptChooseDirectory(string prompt)
+        public string PromptChooseDirectory()
         {
             VistaFolderBrowserDialog folderBrowser = new VistaFolderBrowserDialog();
             // vista dialog doesn't suffix the folder name with "/", so we're fixing it here.
@@ -2275,16 +2274,16 @@ namespace UndertaleModTool
             }
         }
 
-        public void SimpleTextOutput(string titleText, string labelText, string defaultText, bool isMultiline)
+        public void SimpleTextOutput(string titleText, string labelText, string message, bool isMultiline)
         {
-            TextInput textOutput = new TextInput(labelText, titleText, defaultText, isMultiline, true); //read-only mode
+            TextInput textOutput = new TextInput(labelText, titleText, message, isMultiline, true); //read-only mode
             textOutput.Show();
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
         {
             await Task.Delay(150); //wait until progress bar status is displayed
 
-            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, editorDecompile, failedList);
+            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, showInDecompiledView, failedList);
 
             await textOutput.Dispatcher.InvokeAsync(textOutput.GenerateResults);
             _ = Task.Factory.StartNew(textOutput.FillingNotifier, TaskCreationOptions.LongRunning); //"LongRunning" = prefer creating a new thread
@@ -2293,11 +2292,11 @@ namespace UndertaleModTool
 
             PlayInformationSound();
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
         {
             await Task.Delay(150);
 
-            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, editorDecompile, failedList);
+            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, showInDecompiledView, failedList);
 
             await textOutput.Dispatcher.InvokeAsync(textOutput.GenerateResults);
             _ = Task.Factory.StartNew(textOutput.FillingNotifier, TaskCreationOptions.LongRunning);
@@ -2312,9 +2311,9 @@ namespace UndertaleModTool
             OpenBrowser(url);
         }
 
-        public string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
+        public string ScriptInputDialog(string title, string label, string defaultInput, string cancelText, string submitText, bool isMultiline, bool preventClose)
         {
-            TextInputDialog dlg = new TextInputDialog(titleText, labelText, defaultInputBoxText, cancelButtonText, submitButtonText, isMultiline, preventClose);
+            TextInputDialog dlg = new TextInputDialog(title, label, defaultInput, cancelText, submitText, isMultiline, preventClose);
             bool? dlgResult = dlg.ShowDialog();
 
             if (!dlgResult.HasValue || dlgResult == false)

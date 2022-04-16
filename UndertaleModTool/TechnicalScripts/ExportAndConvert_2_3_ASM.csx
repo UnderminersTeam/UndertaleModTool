@@ -15,7 +15,7 @@ if (Data.ToolInfo.ProfileMode)
 string codeFolder = GetFolder(FilePath) + "Export_Assembly2" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
-if (Directory.Exists(codeFolder)) 
+if (Directory.Exists(codeFolder))
 {
     codeFolder = GetFolder(FilePath) + "Export_Assembly2_2" + Path.DirectorySeparatorChar;
 }
@@ -23,17 +23,17 @@ if (Directory.Exists(codeFolder))
 Directory.CreateDirectory(codeFolder);
 
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 SyncBinding("Strings, CodeLocals, Variables, Functions", true);
 await Task.Run(DumpCode);
-SyncBinding(false);
+DisableAllSyncBindings();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Conversion Complete.\n\nLocation: " + codeFolder);
 
-string GetFolder(string path) 
+string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
@@ -50,7 +50,7 @@ string ReplaceFirst(string text, string search, string replace)
 
 void DumpCode()
 {
-    foreach (UndertaleCode code_orig in Data.Code) 
+    foreach (UndertaleCode code_orig in Data.Code)
     {
         code_orig.Offset = 0;
         if (Data.CodeLocals.ByName(code_orig.Name.Content) == null)
@@ -91,7 +91,7 @@ void DumpCode()
         if (code_orig.ParentEntry == null)
         {
             string x = "";
-            try 
+            try
             {
                 string disasm_code = code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig));
                 //ScriptMessage(code_orig.Name.Content);
@@ -110,7 +110,7 @@ void DumpCode()
                     //Console.WriteLine(toBeSearched2);
                     ix = toBeSearched2.IndexOf(":" + code);
                     x = "";
-                    if (ix != -1) 
+                    if (ix != -1)
                     {
                         code = toBeSearched2.Substring(ix, toBeSearched2.Length - (ix));
                         //Console.WriteLine(code);
@@ -126,7 +126,7 @@ void DumpCode()
                     code_output = code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig));
                 File.WriteAllText(str_path_to_use, code_output);
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 ScriptMessage("Error " + code_orig.Name.Content + ": " + e.ToString());
                 SetUMTConsoleText(x);
@@ -134,7 +134,7 @@ void DumpCode()
                 return;
             }
 
-            IncProgress();
+            IncrementProgress();
         }
         else
         {
@@ -142,7 +142,7 @@ void DumpCode()
             {
                 Directory.CreateDirectory(Path.Combine(codeFolder, "Duplicates"));
             }
-            try 
+            try
             {
                 string str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
                 string code_output = "";
@@ -150,13 +150,13 @@ void DumpCode()
                     code_output = code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig));
                 File.WriteAllText(str_path_to_use, code_output);
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 string str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
                 File.WriteAllText(str_path_to_use, "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"); // Please don't
             }
 
-            IncProgress();
+            IncrementProgress();
         }
     }
 }

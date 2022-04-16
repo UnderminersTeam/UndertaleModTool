@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 EnsureDataLoaded();
 
-string importFolder = PromptChooseDirectory("Select 'Import_Loc.txt' file in 'Shader_Data'");
+// "Select 'Import_Loc.txt' file in 'Shader_Data'"
+string importFolder = PromptChooseDirectory();
 if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 
@@ -254,10 +255,10 @@ void AddShader(string shader_name)
     }
     if (File.Exists(localImportDir + "VertexShaderAttributes.txt"))
     {
-        string line;  
-        // Read the file and display it line by line.  
-        System.IO.StreamReader file = new System.IO.StreamReader(localImportDir + "VertexShaderAttributes.txt");  
-        while((line = file.ReadLine()) != null)  
+        string line;
+        // Read the file and display it line by line.
+        System.IO.StreamReader file = new System.IO.StreamReader(localImportDir + "VertexShaderAttributes.txt");
+        while((line = file.ReadLine()) != null)
         {
             if (line != "")
             {
@@ -266,7 +267,7 @@ void AddShader(string shader_name)
                 new_shader.VertexShaderAttributes.Add(vertex_x);
             }
         }
-        file.Close();  
+        file.Close();
     }
     Data.Shaders.Add(new_shader);
 }
@@ -283,7 +284,7 @@ void Reorganize<T>(IList<T> list, List<string> order) where T : UndertaleNamedRe
             temp[assetName] = asset;
         }
     }
-    
+
     List<T> addOrder = new List<T>();
     for (int i = order.Count - 1; i >= 0; i--)
     {
@@ -297,7 +298,7 @@ void Reorganize<T>(IList<T> list, List<string> order) where T : UndertaleNamedRe
         }
         addOrder.Add(asset);
     }
-    
+
     foreach (T asset in addOrder)
         list.Remove(asset);
     foreach (T asset in addOrder)

@@ -492,6 +492,7 @@ namespace UndertaleModCli
         /// <returns>A new <see cref="String"/> that can be directly passed onto a FileInfo Constructor</returns>
         //TODO: needs some proper testing on how it behaves on Linux/MacOS and might need to get expanded
         private static string RemoveQuotes(string s)
+
         {
             return s.TrimStart('"').TrimEnd('"');
         }

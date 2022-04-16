@@ -12,8 +12,15 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Models
 {
+    /// <summary>
+    /// A bytecode instruction.
+    /// </summary>
     public class UndertaleInstruction : UndertaleObject
     {
+        /// <summary>
+        /// Possible opcodes an instruction can use.
+        /// </summary>
+        //TODO: document all these. i ain't smart enough to understand these.
         public enum Opcode : byte
         {
             Conv = 0x07, // Push((Types.Second)Pop) // DoubleTypeInstruction
@@ -51,6 +58,9 @@ namespace UndertaleModLib.Models
             Break = 0xFF, // TODO: Several sub-opcodes in GMS 2.3
         }
 
+        /// <summary>
+        /// Possible types an instruction can be.
+        /// </summary>
         public enum InstructionType
         {
             SingleTypeInstruction,
@@ -63,31 +73,37 @@ namespace UndertaleModLib.Models
             BreakInstruction
         }
 
+        /// <summary>
+        /// Determines the instruction type of an opcode and returns it.
+        /// </summary>
+        /// <param name="op">The opcode to get the instruction type of.</param>
+        /// <returns>The instruction type of the supplied opcode.</returns>
+        /// <exception cref="IOException">For unknown opcodes.</exception>
         public static InstructionType GetInstructionType(Opcode op)
         {
             return op switch
             {
-                Opcode.Neg or Opcode.Not or Opcode.Dup or 
-                Opcode.Ret or Opcode.Exit or Opcode.Popz or 
-                Opcode.CallV 
+                Opcode.Neg or Opcode.Not or Opcode.Dup or
+                Opcode.Ret or Opcode.Exit or Opcode.Popz or
+                Opcode.CallV
                     => InstructionType.SingleTypeInstruction,
 
-                Opcode.Conv or Opcode.Mul or Opcode.Div or 
-                Opcode.Rem or Opcode.Mod or Opcode.Add or 
-                Opcode.Sub or Opcode.And or Opcode.Or or 
-                Opcode.Xor or Opcode.Shl or Opcode.Shr 
+                Opcode.Conv or Opcode.Mul or Opcode.Div or
+                Opcode.Rem or Opcode.Mod or Opcode.Add or
+                Opcode.Sub or Opcode.And or Opcode.Or or
+                Opcode.Xor or Opcode.Shl or Opcode.Shr
                     => InstructionType.DoubleTypeInstruction,
 
                 Opcode.Cmp => InstructionType.ComparisonInstruction,
 
-                Opcode.B or Opcode.Bt or Opcode.Bf or 
-                Opcode.PushEnv or Opcode.PopEnv 
+                Opcode.B or Opcode.Bt or Opcode.Bf or
+                Opcode.PushEnv or Opcode.PopEnv
                     => InstructionType.GotoInstruction,
 
                 Opcode.Pop => InstructionType.PopInstruction,
 
-                Opcode.Push or Opcode.PushLoc or Opcode.PushGlb or 
-                Opcode.PushBltn or Opcode.PushI 
+                Opcode.Push or Opcode.PushLoc or Opcode.PushGlb or
+                Opcode.PushBltn or Opcode.PushI
                     => InstructionType.PushInstruction,
 
                 Opcode.Call => InstructionType.CallInstruction,
@@ -96,6 +112,7 @@ namespace UndertaleModLib.Models
                 _ => throw new IOException("Unknown opcode " + op.ToString().ToUpper()),
             };
         }
+
 
         public enum DataType : byte
         {
@@ -958,18 +975,42 @@ namespace UndertaleModLib.Models
         }
     }
 
+    /// <summary>
+    /// A code entry in a data file.
+    /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
     {
+        /// <summary>
+        /// The name of the code entry.
+        /// </summary>
         public UndertaleString Name { get; set; }
+
+
         public uint Length { get; set; }
-        public uint LocalsCount { get; set; } // Warning: Actually a ushort, left this way for compatibility
+
+
+        /// <summary>
+        /// The amount of local variables this code entry has. <br/>
+        /// Warning: This is actually a ushort internally, it's an uint here for compatibility.
+        /// </summary>
+        public uint LocalsCount { get; set; }
+
+        /// <summary>
+        /// The amount of arguments this code entry accepts.
+        /// </summary>
         public ushort ArgumentsCount { get; set; }
+
+
         public bool WeirdLocalsFlag { get; set; }
         public uint Offset { get; set; }
+
+
+        /// <summary>
+        /// A list of bytecode instructions this code entry has.
+        /// </summary>
         public List<UndertaleInstruction> Instructions { get; } = new List<UndertaleInstruction>();
         public bool WeirdLocalFlag { get; set; }
-
         public UndertaleCode ParentEntry { get; set; } = null;
         public List<UndertaleCode> ChildEntries { get; set; } = new List<UndertaleCode>();
 
@@ -1117,6 +1158,10 @@ namespace UndertaleModLib.Models
             return null;
         }
 
+        /// <summary>
+        /// Finds and returns a list of all variables this code entry references.
+        /// </summary>
+        /// <returns>A list of all variables this code entry references.</returns>
         public IList<UndertaleVariable> FindReferencedVars()
         {
             List<UndertaleVariable> vars = new List<UndertaleVariable>();
@@ -1129,23 +1174,41 @@ namespace UndertaleModLib.Models
             return vars;
         }
 
+        /// <summary>
+        /// Finds and returns a list of all local variables this code entry references.
+        /// </summary>
+        /// <returns>A list of all local variables this code entry references.</returns>
         public IList<UndertaleVariable> FindReferencedLocalVars()
         {
             return FindReferencedVars().Where((x) => x.InstanceType == UndertaleInstruction.InstanceType.Local).ToList();
         }
 
+        /// <summary>
+        /// Append instructions at the end of this code entry.
+        /// </summary>
+        /// <param name="instructions">The instructions to append.</param>
         public void Append(IList<UndertaleInstruction> instructions)
         {
             Instructions.AddRange(instructions);
             UpdateAddresses();
         }
 
+        /// <summary>
+        /// Replaces <b>all</b> instructions currently existing in this code entry with another set of instructions.
+        /// </summary>
+        /// <param name="instructions">The new instructions for this code entry.</param>
         public void Replace(IList<UndertaleInstruction> instructions)
         {
             Instructions.Clear();
             Append(instructions);
         }
 
+        /// <summary>
+        /// Append GML instructions at the end of this code entry.
+        /// </summary>
+        /// <param name="gmlCode">The GML code to append.</param>
+        /// <param name="data">From which data file the GML code is coming from.</param>
+        /// <exception cref="Exception"> if the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
         public void AppendGML(string gmlCode, UndertaleData data)
         {
             CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);
@@ -1175,6 +1238,12 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <summary>
+        /// Replaces <b>all</b> instructions currently existing in this code entry with another set of GML instructions.
+        /// </summary>
+        /// <param name="gmlCode">The new GML code for this code entry.</param>
+        /// <param name="data">From which data file the GML code is coming from.</param>
+        /// <exception cref="Exception">If the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
         public void ReplaceGML(string gmlCode, UndertaleData data)
         {
             CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);

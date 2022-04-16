@@ -36,14 +36,14 @@ namespace UndertaleModTests
 
         public bool IsAppClosed => throw new NotImplementedException();
 
-        public void ChangeSelection(object newsel)
+        public void ChangeSelection(object newSelection)
         {
         }
 
         public void EnsureDataLoaded()
         {
         }
-        public async Task<bool> Make_New_File()
+        public async Task<bool> MakeNewDataFile()
         {
             await Task.Delay(1); //dummy await
             return true;
@@ -127,17 +127,17 @@ namespace UndertaleModTests
         {
             Console.WriteLine($"AddProgress(): {amount}");
         }
-        public void IncProgress()
+        public void IncrementProgress()
         {
-            Console.WriteLine("IncProgress()");
+            Console.WriteLine("IncrementProgress()");
         }
-        public void AddProgressP(int amount)
+        public void AddProgressParallel(int amount)
         {
-            Console.WriteLine($"AddProgressP(): {amount}");
+            Console.WriteLine($"AddProgressParallel(): {amount}");
         }
-        public void IncProgressP()
+        public void IncrementProgressParallel()
         {
-            Console.WriteLine("IncProgressP()");
+            Console.WriteLine("IncrementProgressParallel()");
         }
         public int GetProgress()
         {
@@ -149,9 +149,9 @@ namespace UndertaleModTests
             Console.WriteLine($"SetProgress(): {value}");
         }
 
-        public string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
+        public string ScriptInputDialog(string title, string label, string defaultInput, string cancelText, string submitText, bool isMultiline, bool preventClose)
         {
-            Console.Write(labelText + " ");
+            Console.Write(label + " ");
             string ret = Console.ReadLine();
 
             return ret;
@@ -160,19 +160,19 @@ namespace UndertaleModTests
         {
             return ScriptInputDialog(titleText, labelText, defaultInputBoxText, "Cancel", "Submit", isMultiline, false);
         }
-        public void SimpleTextOutput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline)
+        public void SimpleTextOutput(string titleText, string labelText, string message, bool isMultiline)
         {
-            Console.WriteLine($"SimpleTextOutput(): \"{titleText}\", \"{labelText}\", *defaultInputBoxText* (length - {defaultInputBoxText.Length}), {isMultiline}");
+            Console.WriteLine($"SimpleTextOutput(): \"{titleText}\", \"{labelText}\", *defaultInputBoxText* (length - {message.Length}), {isMultiline}");
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
         {
-            Console.WriteLine($"ClickableTextOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count()}), {editorDecompile.ToString().ToLower()}"
+            Console.WriteLine($"ClickableSearchOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count()}), {showInDecompiledView.ToString().ToLower()}"
                               + failedList is not null ? $", *failedList* (length - {failedList.Count()})" : string.Empty);
             await Task.Delay(1); //dummy await
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
         {
-            Console.WriteLine($"ClickableTextOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count}), {editorDecompile.ToString().ToLower()}"
+            Console.WriteLine($"ClickableSearchOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count}), {showInDecompiledView.ToString().ToLower()}"
                               + failedList is not null ? $", *failedList* (length - {failedList.Count()})" : string.Empty);
             await Task.Delay(1); //dummy await
         }
@@ -224,26 +224,26 @@ namespace UndertaleModTests
         {
             Console.WriteLine($"SyncBinding(): \"{resourceType}\", {enable}");
         }
-        public void SyncBinding(bool enable = false)
+        public void DisableAllSyncBindings()
         {
-            Console.WriteLine($"SyncBinding(): {enable}");
+            Console.WriteLine($"Disabling all enabled synced bindings.");
         }
-        public void StartUpdater()
+        public void StartProgressBarUpdater()
         {
             Console.WriteLine("Starting progress bar updater...");
         }
-        public async Task StopUpdater()
+        public async Task StopProgressBarUpdater()
         {
             Console.WriteLine("Stopping progress bar updater...");
             await Task.Delay(1); //dummy await
         }
 
-        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
+        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
         {
             Console.WriteLine(string.Format("GenerateGMLCache(): *decompileContext*{0}, *dialog*{1}, {2}",
                                             decompileContext is null ? " (null)" : "",
                                             dialog is null ? " (null)" : "",
-                                            isSaving.ToString().ToLower())
+                                            clearGMLEditedBefore.ToString().ToLower())
                               );
 
             await Task.Delay(1); //dummy await
@@ -272,7 +272,7 @@ namespace UndertaleModTests
             throw new NotImplementedException();
         }
 
-        public string PromptChooseDirectory(string prompt)
+        public string PromptChooseDirectory()
         {
             throw new NotImplementedException();
         }

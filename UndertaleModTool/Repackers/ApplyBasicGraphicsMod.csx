@@ -12,7 +12,7 @@ using UndertaleModLib.Util;
 EnsureDataLoaded();
 
 // At this point, this just imports the sprites.
-string importFolder = PromptChooseDirectory("Import From Where");
+string importFolder = PromptChooseDirectory();
 if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 
@@ -44,7 +44,7 @@ foreach (string file in dirFiles)
         if ((Data.Sprites.ByName(spriteName).Width != (uint)img.Width) || (Data.Sprites.ByName(spriteName).Height != (uint)img.Height))
             throw new ScriptException(FileNameWithExtension + " is not the proper size to be imported! Please correct this before importing! The proper dimensions are width: " + Data.Sprites.ByName(spriteName).Width.ToString() + " px, height: " + Data.Sprites.ByName(spriteName).Height.ToString() + " px.");
     }
-    
+
     Int32 validFrameNumber = 0;
     try
     {
@@ -79,12 +79,12 @@ foreach (string file in dirFiles)
 }
 
 SetProgressBar(null, "Files", 0, dirFiles.Length);
-StartUpdater();
+StartProgressBarUpdater();
 
 await Task.Run(() => {
     foreach (string file in dirFiles)
     {
-        IncProgress();
+        IncrementProgress();
 
         string fileName = Path.GetFileName(file);
         if (!fileName.EndsWith(".png") || !fileName.Contains("_"))
@@ -142,6 +142,6 @@ await Task.Run(() => {
     }
 });
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Import Complete!");

@@ -17,7 +17,7 @@ bool usesAGRPs = (Data.AudioGroups.Count > 0);
 
 if (Data.AudioGroups.Count > 1)
 {
-    bool warningCheck = ScriptQuestion(@"This game uses external audiogroup.dat files. 
+    bool warningCheck = ScriptQuestion(@"This game uses external audiogroup.dat files.
 In order to externalize the audio files it will clear all data from the external audiogroup.dat files.
 It is recommended that you make a backup of your game files.
 If you have already made a backup and wish to continue, select 'Yes'.
@@ -30,8 +30,8 @@ Otherwise, select 'No', and make a backup of the game before using this script.
 //Overwrite Folder Check One
 if (Directory.Exists(winFolder + "Exported_Sounds\\"))
 {
-    bool overwriteCheckOne = ScriptQuestion(@"An 'Exported_Sounds' folder already exists. 
-Would you like to remove it? This may some time. 
+    bool overwriteCheckOne = ScriptQuestion(@"An 'Exported_Sounds' folder already exists.
+Would you like to remove it? This may some time.
 
 Note: If an error window stating that 'the directory is not empty' appears, please try again or delete the folder manually.
 ");
@@ -60,16 +60,16 @@ You will have to check the code for these functions and change it accordingly.
 }
 
 SetProgressBar(null, "Externalizing Sounds...", 0, Data.Sounds.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 SyncBinding("Strings", true);
 await Task.Run(() => {
     DumpSounds(); // This runs sync, because it has to load audio groups.
     ExternalizeSounds(); // This runs sync, because it has to load audio groups.
 });
-SyncBinding(false);
+DisableAllSyncBindings();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Externalization Complete.\nExternalized " + sounds.ToString() + " sounds.\n\nNOTE: You will need to convert any external WAV files into OGG files.\nThen replace the WAV file with the OGG file.\nOtherwise the sound will not play.\nA batch conversion tool such as 'LameXP' will help.\nCheck the #faq for more information or message Grossley#2869 on Discord.");
 
@@ -80,12 +80,12 @@ void ExternalizeSounds()
         ExternalizeSound(sound);
 }
 
-string GetFolder(string path) 
+string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
 
-void ExternalizeSound(UndertaleSound sound) 
+void ExternalizeSound(UndertaleSound sound)
 {
     bool flagCompressed = sound.Flags.HasFlag(UndertaleSound.AudioEntryFlags.IsCompressed);
     bool flagEmbedded = sound.Flags.HasFlag(UndertaleSound.AudioEntryFlags.IsEmbedded);
@@ -95,8 +95,8 @@ void ExternalizeSound(UndertaleSound sound)
     string searchName = sound.Name.Content;
     string searchFilePath = winFolder + "Exported_Sounds\\";
     // If it's not an external file already, setup the sound entry such that it is external.
-    if (flagCompressed == true || flagEmbedded == true) 
-    { 
+    if (flagCompressed == true || flagEmbedded == true)
+    {
         // 4.
         string[] files = Directory.GetFiles(searchFilePath, searchName + ".*", SearchOption.AllDirectories);
         var path_result = files[0];
@@ -117,7 +117,7 @@ void ExternalizeSound(UndertaleSound sound)
             //Array.Resize(audioGroupDat.EmbeddedAudio[_audioid].Data, 1);
             audioGroupDat.EmbeddedAudio[_audioid].Data = new byte[1];
             audioGroupDat.EmbeddedAudio[_audioid].Data[0] = 0;
-            
+
             var audioGroupWriteStream = (new FileStream(winFolder + "audiogroup" + _groupid.ToString() + ".dat", FileMode.Create));
             UndertaleIO.Write(audioGroupWriteStream, audioGroupDat); // Write it to the disk
             audioGroupWriteStream.Dispose();
@@ -137,9 +137,9 @@ void ExternalizeSound(UndertaleSound sound)
         sound.AudioGroup = Data.AudioGroups[Data.GetBuiltinSoundGroupID()];
     }
     // if it doesn't then we shouldn't care, it's always null.
-    
+
     sounds++;
-    IncProgress();
+    IncrementProgress();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -147,7 +147,7 @@ void ExternalizeSound(UndertaleSound sound)
 byte[] EMPTY_WAV_FILE_BYTES = System.Convert.FromBase64String("UklGRiQAAABXQVZFZm10IBAAAAABAAIAQB8AAAB9AAAEABAAZGF0YQAAAAA=");
 string DEFAULT_AUDIOGROUP_NAME = "audiogroup_default";
 
-void MakeFolder(String folderName) 
+void MakeFolder(String folderName)
 {
     if (!Directory.Exists(winFolder + folderName + "/"))
         Directory.CreateDirectory(winFolder + folderName + "/");
@@ -155,25 +155,25 @@ void MakeFolder(String folderName)
 
 Dictionary<string, IList<UndertaleEmbeddedAudio>> loadedAudioGroups;
 
-IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound) 
+IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
 {
     if (loadedAudioGroups == null)
         loadedAudioGroups = new Dictionary<string, IList<UndertaleEmbeddedAudio>>();
-    
+
     string audioGroupName = sound.AudioGroup != null ? sound.AudioGroup.Name.Content : DEFAULT_AUDIOGROUP_NAME;
     if (loadedAudioGroups.ContainsKey(audioGroupName))
         return loadedAudioGroups[audioGroupName];
-    
+
     string groupFilePath = winFolder + "audiogroup" + sound.GroupID + ".dat";
     if (!File.Exists(groupFilePath))
         return null; // Doesn't exist.
-    
-    try 
+
+    try
     {
         UndertaleData data = null;
         using (var stream = new FileStream(groupFilePath, FileMode.Open, FileAccess.Read))
             data = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + audioGroupName + ":\n" + warning));
-        
+
         loadedAudioGroups[audioGroupName] = data.EmbeddedAudio;
         return data.EmbeddedAudio;
     } catch (Exception e)
@@ -183,12 +183,12 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
     }
 }
 
-byte[] GetSoundData(UndertaleSound sound) 
+byte[] GetSoundData(UndertaleSound sound)
 {
     if (sound.AudioFile != null)
         return sound.AudioFile.Data;
-    
-    if (sound.GroupID > Data.GetBuiltinSoundGroupID()) 
+
+    if (sound.GroupID > Data.GetBuiltinSoundGroupID())
     {
         IList<UndertaleEmbeddedAudio> audioGroup = GetAudioGroupData(sound);
         if (audioGroup != null)
@@ -197,7 +197,7 @@ byte[] GetSoundData(UndertaleSound sound)
     return EMPTY_WAV_FILE_BYTES;
 }
 
-void DumpSounds() 
+void DumpSounds()
 {
     foreach (UndertaleSound sound in Data.Sounds)
         DumpSound(sound);

@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
+    /// <summary>
+    /// An animation curve entry in a data file.
+    /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleAnimationCurve : UndertaleNamedResource
     {
@@ -16,8 +19,17 @@ namespace UndertaleModLib.Models
             Unknown1 = 1
         }
 
+        /// <summary>
+        /// The name of this animation curve.
+        /// </summary>
         public UndertaleString Name { get; set; }
+
+        /// <summary>
+        /// The graph type of this animation curve.
+        /// </summary>
         public GraphTypeEnum GraphType { get; set; }
+
+
         public UndertaleSimpleList<Channel> Channels { get; set; }
 
         public void Serialize(UndertaleWriter writer)
@@ -25,6 +37,11 @@ namespace UndertaleModLib.Models
             Serialize(writer, true);
         }
 
+        /// <summary>
+        /// Serializes the data file into a specified <see cref="UndertaleWriter"/>.
+        /// </summary>
+        /// <param name="writer">Where to serialize to.</param>
+        /// <param name="includeName">Whether to include <see cref="Name"/> in the serialization.</param>
         public void Serialize(UndertaleWriter writer, bool includeName)
         {
             if (includeName)
@@ -38,6 +55,11 @@ namespace UndertaleModLib.Models
             Unserialize(reader, true);
         }
 
+        /// <summary>
+        /// Deserializes from a specified <see cref="UndertaleReader"/> to the current data file.
+        /// </summary>
+        /// <param name="reader">Where to deserialize from.</param>
+        /// <param name="includeName">Whether to include <see cref="Name"/> in the deserialization.</param>
         public void Unserialize(UndertaleReader reader, bool includeName)
         {
             if (includeName)

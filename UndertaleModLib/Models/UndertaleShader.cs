@@ -7,12 +7,21 @@ using System.ComponentModel;
 
 namespace UndertaleModLib.Models
 {
+    /// <summary>
+    /// A shader entry for a data file.
+    /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleShader : UndertaleNamedResource
     {
+        /// <summary>
+        /// The vertex shader attributes a shader can have.
+        /// </summary>
         [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class VertexShaderAttribute : UndertaleObject
         {
+            /// <summary>
+            /// The name of the vertex shader attribute.
+            /// </summary>
             public UndertaleString Name { get; set; }
 
             public void Serialize(UndertaleWriter writer)
@@ -28,14 +37,44 @@ namespace UndertaleModLib.Models
 
         public uint _EntryEnd;
 
+        /// <summary>
+        /// The name of the shader.
+        /// </summary>
         public UndertaleString Name { get; set; }
+
+        /// <summary>
+        /// The type the shader uses.
+        /// </summary>
         public ShaderType Type { get; set; }
 
+        /// <summary>
+        /// The GLSL ES vertex code this shader uses.
+        /// </summary>
         public UndertaleString GLSL_ES_Vertex { get; set; }
+
+        /// <summary>
+        /// The GLSL ES fragment code this shader uses.
+        /// </summary>
         public UndertaleString GLSL_ES_Fragment { get; set; }
+
+        /// <summary>
+        /// The GLSL vertex code this shader uses.
+        /// </summary>
         public UndertaleString GLSL_Vertex { get; set; }
+
+        /// <summary>
+        /// The GLSL fragment code this shader uses.
+        /// </summary>
         public UndertaleString GLSL_Fragment { get; set; }
+
+        /// <summary>
+        /// The HLSL9 vertex code this shader uses.
+        /// </summary>
         public UndertaleString HLSL9_Vertex { get; set; }
+
+        /// <summary>
+        /// The HLSL9 fragment code this shader uses.
+        /// </summary>
         public UndertaleString HLSL9_Fragment { get; set; }
 
         public int Version { get; set; } = 2;
@@ -308,17 +347,43 @@ namespace UndertaleModLib.Models
             }
         }
 
-        // PSSL is a shading language used only in PS4, based on HLSL11.
-        // Cg stands for "C for graphics" made by NVIDIA and used in PSVita and PS3 (they have their own variants of Cg), based on HLSL9.
-        // All console shaders (and HLSL11?) are compiled using confidential SDK tools when GMAssetCompiler builds the game (for PSVita it's psp2cgc shader compiler).
+        /// <summary>
+        /// Possible shader types a shader can have.
+        /// </summary>
+        /// <remarks>All console shaders (and HLSL11?) are compiled using confidential SDK tools when
+        /// GMAssetCompiler builds the game (for PSVita it's psp2cgc shader compiler).</remarks>
         public enum ShaderType : uint
         {
+            /// <summary>
+            /// Shader uses GLSL_ES
+            /// </summary>
             GLSL_ES = 1,
+            /// <summary>
+            /// Shader uses GLSL
+            /// </summary>
             GLSL = 2,
+            /// <summary>
+            /// Shader uses HLSL9
+            /// </summary>
             HLSL9 = 3,
+            /// <summary>
+            /// Shader uses HLSL11
+            /// </summary>
             HLSL11 = 4,
+            /// <summary>
+            /// Shader uses PSSL
+            /// </summary>
+            /// <remarks>PSSL is a shading language used only in PS4, based on HLSL11.</remarks>
             PSSL = 5,
+            /// <summary>
+            /// Shader uses for the PSVita
+            /// </summary>
+            /// <remarks>Cg stands for "C for graphics" made by NVIDIA and used in PSVita and PS3 (they have their own variants of Cg), based on HLSL9.</remarks>
             Cg_PSVita = 6,
+            /// <summary>
+            /// Shader uses Cg for the PS3
+            /// </summary>
+            /// <remarks>Cg stands for "C for graphics" made by NVIDIA and used in PSVita and PS3 (they have their own variants of Cg), based on HLSL9.</remarks>
             Cg_PS3 = 7
         }
 
@@ -348,14 +413,14 @@ namespace UndertaleModLib.Models
                 if (writeLength)
                     writer.Write((Data == null) ? 0 : Data.Length);
             }
-            
+
             public void Unserialize(UndertaleReader reader, bool readLength = true)
             {
                 _PointerLocation = reader.Position;
                 _Position = reader.ReadUInt32();
                 if (readLength)
                     _Length = reader.ReadUInt32();
-                
+
                 IsNull = (_Position == 0x00000000u);
             }
 

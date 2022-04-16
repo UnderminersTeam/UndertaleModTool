@@ -15,7 +15,7 @@ if (!CanOverwrite())
 MakeFolder("EmbeddedTextures");
 
 SetProgressBar(null, "Embedded textures", 0, Data.EmbeddedTextures.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await Task.Run(() => {
     for (var i = 0; i < Data.EmbeddedTextures.Count; i++)
@@ -29,23 +29,23 @@ await Task.Run(() => {
             ScriptMessage("Failed to export file: " + ex.Message);
         }
 
-        IncProgress();
+        IncrementProgress();
     }
 });
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + EmbFolder);
 
 /* Helper functions below.
 */
 
-string GetFolder(string path) 
+string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
 
-void MakeFolder(String folderName) 
+void MakeFolder(String folderName)
 {
     string MakeFolderPath = Path.Combine(winFolder, folderName);
     if (!Directory.Exists(MakeFolderPath))
