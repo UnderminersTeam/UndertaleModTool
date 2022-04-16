@@ -180,6 +180,7 @@ namespace UndertaleModTool
         public string TitleMain { get; set; }
 
         public static RoutedUICommand CloseTabCommand = new RoutedUICommand("Close current tab", "CloseTab", typeof(MainWindow));
+        public static RoutedUICommand CloseAllTabsCommand = new RoutedUICommand("Close all tabs", "CloseAllTabs", typeof(MainWindow));
         public ObservableCollection<Tab> Tabs { get; set; } = new();
         public Tab CurrentTab { get; set; }
         public int CurrentTabIndex { get; set; } = 0;
@@ -655,7 +656,7 @@ namespace UndertaleModTool
             DependencyObject child = VisualTreeHelper.GetChild(DataEditor, 0);
             if (child is not null && VisualTreeHelper.GetChild(child, 0) is UndertaleCodeEditor codeEditor)
             {
-                #pragma warning disable CA1416
+#pragma warning disable CA1416
                 if (codeEditor.DecompiledChanged || codeEditor.DisassemblyChanged)
                 {
                     IsSaving = true;
@@ -666,7 +667,7 @@ namespace UndertaleModTool
                     result = IsSaving ? SaveResult.Error : SaveResult.Saved;
                     IsSaving = false;
                 }
-                #pragma warning restore CA1416
+#pragma warning restore CA1416
             }
 
             return result;
@@ -762,6 +763,22 @@ namespace UndertaleModTool
         private void Command_CloseTab(object sender, ExecutedRoutedEventArgs e)
         {
             CloseTab();
+        }
+        private void Command_CloseAllTabs(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Tabs.Count == 1 && CurrentTab.TabTitle == "Welcome!")
+                return;
+
+            SelectionHistory.Clear();
+            Tabs.Clear();
+            CurrentTab = null;
+
+            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them");
+            OpenInTab(Highlighted);
+            CurrentTab = Tabs[CurrentTabIndex];
+
+            Selected = CurrentTab.OpenedObject;
+            UpdateObjectLabel(Selected);
         }
 
         private async Task LoadFile(string filename, bool preventClose = false)

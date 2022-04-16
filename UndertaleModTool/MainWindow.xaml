@@ -39,6 +39,7 @@
         <CommandBinding Command="PrintPreview" Executed="Command_RunDebug" />
         <CommandBinding Command="Properties" Executed="Command_Settings" />
         <CommandBinding Command="{x:Static local:MainWindow.CloseTabCommand}" Executed="Command_CloseTab" />
+        <CommandBinding Command="{x:Static local:MainWindow.CloseAllTabsCommand}" Executed="Command_CloseAllTabs" />
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="N" Command="New"/>
@@ -51,6 +52,7 @@
         <KeyBinding Modifiers="Alt" Key="F5" Command="CancelPrint"/>
         <KeyBinding Modifiers="Shift" Key="F5" Command="PrintPreview"/>
         <KeyBinding Modifiers="Control" Key="W" Command="{x:Static local:MainWindow.CloseTabCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+W" Command="{x:Static local:MainWindow.CloseAllTabsCommand}"/>
     </Window.InputBindings>
     <Grid>
         <DockPanel>
@@ -396,6 +398,7 @@
                                             </Style>
                                         </MenuItem.Style>
                                     </MenuItem>
+                                    <MenuItem Header="Close all tabs" Command="{x:Static local:MainWindow.CloseAllTabsCommand}" InputGestureText="Ctrl+Shift+W"/>
                                 </ContextMenu>
                             </TabControl.Resources>
                             <TabControl.ItemContainerStyle>
@@ -404,7 +407,7 @@
                                     <Setter Property="ContextMenu" Value="{StaticResource TabMenu}"/>
                                     <EventSetter Event="MouseUp" Handler="TabItem_MouseUp"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding TabTitle,Mode=OneTime}" Value="Welcome!">
+                                        <DataTrigger Binding="{Binding TabTitle, Mode=OneTime}" Value="Welcome!">
                                             <Setter Property="ContextMenu" Value="{x:Null}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
