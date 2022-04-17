@@ -3201,7 +3201,9 @@ result in loss of work.");
                 TabController.SelectionChanged -= TabController_SelectionChanged;
 
                 int currIndex = CurrentTabIndex;
-                Tabs.RemoveAt(tabIndex); // "CurrentTabIndex" changes here (bound to "TabController.SelectedIndex")
+
+                // "CurrentTabIndex" changes here (bound to "TabController.SelectedIndex")
+                Tabs.RemoveAt(tabIndex);
 
                 if (!closingTab.AutoClose)
                     ClosedTabsHistory.Add(closingTab);
@@ -3228,10 +3230,15 @@ result in loss of work.");
                     for (int i = tabIndex; i < Tabs.Count; i++)
                         Tabs[i].TabIndex = i;
 
-                    if (currIndex == tabIndex)                            // if closing open tab
+                    // if closing the currently open tab
+                    if (currIndex == tabIndex)                            
                     {
-                        if (Tabs.Count > 1 && tabIndex < Tabs.Count - 1)  // and if that tab is not last
-                            currIndex = Tabs.Count - 1;                   // switch to the last tab
+                        // and if that tab is not the last
+                        if (Tabs.Count > 1 && tabIndex < Tabs.Count - 1)
+                        {
+                            // switch to the last tab
+                            currIndex = Tabs.Count - 1;
+                        }
                         else if (currIndex != 0)
                             currIndex -= 1;
                     }
