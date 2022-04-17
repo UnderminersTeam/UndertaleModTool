@@ -49,7 +49,6 @@ using System.Windows.Controls.Primitives;
 
 namespace UndertaleModTool
 {
-    [DebuggerDisplay(@"\{{GetType().FullName,nq} - {OpenedObject}\}")] // display value in debugger as "{UndertaleModTool.Tab - {*object*}}"
     public class Tab : INotifyPropertyChanged
     {
         public static readonly BitmapImage ClosedIcon = new(new Uri(@"/Resources/X.png", UriKind.RelativeOrAbsolute));
@@ -154,6 +153,12 @@ namespace UndertaleModTool
             }
 
             return title;
+        }
+
+        public override string ToString()
+        {
+            // for ease of debugging
+            return GetType().FullName + " - {" + OpenedObject?.ToString() + '}';
         }
     }
     public class TabTitleConverter : IMultiValueConverter
