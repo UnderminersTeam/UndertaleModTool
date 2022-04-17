@@ -125,7 +125,3 @@ as well as all the other contributors:
 </p>
 
 And of course, special thanks to Toby Fox and the whole Undertale team for making the game(s) ;)
-
-<p align="center">
-  <img src="images/papyrus.gif" alt="Papyrus"/>
-</p>
