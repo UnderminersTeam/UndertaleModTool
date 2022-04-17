@@ -303,7 +303,7 @@ namespace UndertaleModTool
             InitializeComponent();
             this.DataContext = this;
 
-            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them");
+            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open a data.win file to get started, then double click on the items on the left to view them.");
             OpenInTab(Highlighted);
             SelectionHistory.Clear();
             ClosedTabsHistory.Clear();
@@ -590,7 +590,7 @@ namespace UndertaleModTool
 
             CurrentTab = null;
             Tabs.Clear();
-            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P");
+            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P");
             OpenInTab(Highlighted);
             SelectionHistory.Clear();
             ClosedTabsHistory.Clear();
@@ -3208,7 +3208,7 @@ result in loss of work.");
 
                     if (addDefaultTab)
                     {
-                        Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them");
+                        Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open a data.win file to get started, then double click on the items on the left to view them");
                         OpenInTab(Highlighted);
                         CurrentTab = Tabs[CurrentTabIndex];
 
