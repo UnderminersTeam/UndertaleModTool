@@ -11,7 +11,7 @@ namespace UndertaleModTool
 {
     public class CompareNumbersConverter : IMultiValueConverter
     {
-        // these could be overriden on declaration
+        // these could be overridden on declaration
         public object TrueValue { get; set; } = Visibility.Visible;
         public object FalseValue { get; set; } = Visibility.Collapsed;
 
