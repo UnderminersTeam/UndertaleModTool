@@ -667,7 +667,7 @@ namespace UndertaleModTool
             DependencyObject child = VisualTreeHelper.GetChild(DataEditor, 0);
             if (child is not null && VisualTreeHelper.GetChild(child, 0) is UndertaleCodeEditor codeEditor)
             {
-#pragma warning disable CA1416
+                #pragma warning disable CA1416
                 if (codeEditor.DecompiledChanged || codeEditor.DisassemblyChanged)
                 {
                     IsSaving = true;
@@ -678,7 +678,7 @@ namespace UndertaleModTool
                     result = IsSaving ? SaveResult.Error : SaveResult.Saved;
                     IsSaving = false;
                 }
-#pragma warning restore CA1416
+                #pragma warning restore CA1416
             }
 
             return result;
