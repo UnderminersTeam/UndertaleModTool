@@ -86,15 +86,22 @@ All contributions are welcome! If you find a bug, a data file that does not load
 
 # Compilation Instructions
 
-In order to compile UndertaleModTool yourself, the following dependencies are needed:
+In order to compile the repo yourself, the `.NET Core 5 SDK` or later is required.
 
-* Windows (Due to WPF being used currently, this won't work on any other OS)
-* .NET Core 5 SDK
-* Any recent version of Visual Studio
+The following projects can be compiled:  
+- `UndertaleModLib`: The core library used by all other projects.
+- `UndertaleModCli`: A command line interface for interacting with GameMaker data files and applying scripts. Currently is very primitive in what it can do.
+- `UndertaleModTool`: The main graphical user interface for interacting with GameMaker data files. **Windows is required in order to compile this**.
 
-After that, you can just open the `UndertaleModTool.sln` file in Visual Studio, Select `UndertaleModTool` as the project to build, and then compile.  
-Alternatively, you can also compile via command line, like so: `dotnet publish UndertaleModTool --no-self-contained -p:PublishSingleFile=true -c release -r win-x86`
-You can adjust win-x86 to other RIDs, such as win-x64 or win-arm.
+#### Compiling Via IDE
+- Open the `UndertaleModTool.sln` in the IDE of your choice (Visual Studio, JetBrains Rider, Visual Studio Code etc.)
+- Select the project you want to compile
+- Compile
+
+#### Compiling Via Command Line
+- Open a terminal and navigate to the directory of `UndertaleModTool.sln`
+- Execute `dotnet publish <Project>` where `<Project>` is one of the projects listed above.
+You can also provide arguments for compiling, such as `--no-self-contained` or `-c release`. For a full list of arguments, consult the [Microsoft Documentation](https://docs.microsoft.com/dotnet/core/tools/dotnet-publish)
 
 # GameMaker Data File Format
 
