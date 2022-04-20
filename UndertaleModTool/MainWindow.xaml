@@ -389,7 +389,7 @@
                     </Grid.ColumnDefinitions>
                     <ScrollViewer Grid.Column="0" Name="TabScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" PreviewMouseWheel="TabScrollViewer_PreviewMouseWheel">
                         <TabControl Name="TabController" Height="22" TabStripPlacement="Top" ItemsSource="{Binding Tabs, Mode=OneWay}" SelectedIndex="{Binding CurrentTabIndex}"
-                                SelectionChanged="TabController_SelectionChanged">
+                                    SelectionChanged="TabController_SelectionChanged">
                             <TabControl.Resources>
                                 <ContextMenu x:Key="TabMenu">
                                     <MenuItem Header="Close" Click="CloseTabMenuItem_Click" InputGestureText="Ctrl+W"/>
@@ -434,8 +434,8 @@
                                                 </MultiBinding>
                                             </TextBlock.Text>
                                         </TextBlock>
-                                        <Button Background="Transparent "Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
-                                            Click="TabCloseButton_OnClick" MouseEnter="TabCloseButton_MouseEnter" MouseLeave="TabCloseButton_MouseLeave">
+                                        <Button Background="Transparent" Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
+                                                Click="TabCloseButton_OnClick" MouseEnter="TabCloseButton_MouseEnter" MouseLeave="TabCloseButton_MouseLeave">
                                             <Button.Style>
                                                 <Style TargetType="Button">
                                                     <Style.Triggers>
