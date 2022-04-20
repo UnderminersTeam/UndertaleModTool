@@ -699,7 +699,7 @@ namespace UndertaleModLib.Models
             /// </summary>
             public int ImageIndex { get; set; }
             /// <summary>
-            /// A wrapper of <see cref="ImageIndex"/> that prevents entering index that's out of bounds.
+            /// A wrapper of <see cref="ImageIndex"/> that prevents using an out of bounds index.
             /// </summary>
             public int SafeImageIndex { get => ImageIndex; set { ImageIndex = Math.Clamp(value, 0, (ObjectDefinition?.Sprite?.Textures?.Count ?? 1) - 1); OnPropertyChanged(); } }
 
