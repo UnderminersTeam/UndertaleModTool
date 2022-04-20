@@ -300,7 +300,12 @@ namespace UndertaleModTool
             if (textures is null)
                 return null;
 
-            int index = (int)(float)values[1];
+            int index = -1;
+            if (values[1] is int indexInt)
+                index = indexInt;
+            else if (values[1] is float indexFloat)
+                index = (int)indexFloat;
+
             if (index > textures.Count - 1 || index < 0)
                 return null;
             else

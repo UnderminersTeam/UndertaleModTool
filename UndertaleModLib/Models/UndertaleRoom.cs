@@ -698,6 +698,10 @@ namespace UndertaleModLib.Models
             /// The image index of this object. Game Maker: Studio 2 only.
             /// </summary>
             public int ImageIndex { get; set; }
+            /// <summary>
+            /// A wrapper of <see cref="ImageIndex"/> that prevents using an out of bounds index.
+            /// </summary>
+            public int SafeImageIndex { get => ImageIndex; set { ImageIndex = Math.Clamp(value, 0, (ObjectDefinition?.Sprite?.Textures?.Count ?? 1) - 1); OnPropertyChanged(); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -1362,7 +1366,7 @@ namespace UndertaleModLib.Models
             public float AnimationSpeed { get; set; }
             public AnimationSpeedType AnimationSpeedType { get; set; }
             public float FrameIndex { get; set; }
-            public float SafeFrameIndex { get => FrameIndex; set { FrameIndex = Math.Clamp(value, 0, Sprite.Textures.Count - 1); OnPropertyChanged(); } }
+            public float SafeFrameIndex { get => FrameIndex; set { FrameIndex = Math.Clamp(value, 0, (Sprite?.Textures?.Count ?? 1) - 1); OnPropertyChanged(); } }
             public float Rotation { get; set; }
             public float OppositeRotation => 360F - Rotation;
             public int XOffset => Sprite is not null ? X - Sprite.OriginX : X;

@@ -31,6 +31,7 @@
         <local:TileLayerTemplateSelector x:Key="TileLayerTemplateSelector"/>
         <local:TileRectanglesConverter x:Key="TileRectanglesConverter"/>
         <local:CachedImageLoaderWithIndex x:Key="CachedImageLoaderWithIndex"/>
+        <local:DataFieldOneTimeConverter x:Key="DataFieldOneTimeConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Tiles}"/>
@@ -355,7 +356,7 @@
                     </DataTemplate>
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Background}">
-                        <Grid>
+                        <Grid IsSharedSizeScope="True">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="5"/>
@@ -422,7 +423,7 @@
                     </DataTemplate>
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+View}">
-                        <Grid>
+                        <Grid IsSharedSizeScope="True">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="5"/>
@@ -500,9 +501,9 @@
                     </DataTemplate>
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
-                        <Grid>
+                        <Grid IsSharedSizeScope="True">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="FirstColumn"/>
                                 <ColumnDefinition Width="5"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
@@ -514,6 +515,7 @@
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                             </Grid.RowDefinitions>
                             <Grid.Resources>
@@ -558,13 +560,30 @@
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Rotation</TextBlock>
                             <TextBox Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
 
-                            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Pre Create code</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="2" Margin="3" ObjectReference="{Binding PreCreateCode}" ObjectType="{x:Type undertale:UndertaleCode}"  ObjectEventType="{x:Static undertale:EventType.PreCreate}" ObjectEventSubtype="0"/>
+                            <Grid Grid.Row="7" Grid.ColumnSpan="3" Visibility="{Binding Data, ConverterParameter=GMS2_2_2_302, Mode=OneTime, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource DataFieldOneTimeConverter}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="FirstColumn"/>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Frame index</TextBlock>
+                                <TextBox Grid.Row="0" Grid.Column="2" Margin="3" Text="{Binding SafeImageIndex}"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Image speed</TextBlock>
+                                <TextBox Grid.Row="1" Grid.Column="2" Margin="3" Text="{Binding ImageSpeed}"/>
+                            </Grid>
+                            
+                            <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Pre Create code</TextBlock>
+                            <local:UndertaleObjectReference Grid.Row="9" Grid.Column="2" Margin="3" ObjectReference="{Binding PreCreateCode}" ObjectType="{x:Type undertale:UndertaleCode}"  ObjectEventType="{x:Static undertale:EventType.PreCreate}" ObjectEventSubtype="0"/>
                         </Grid>
                     </DataTemplate>
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Tile}">
-                        <Grid>
+                        <Grid IsSharedSizeScope="True">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="5"/>
@@ -873,7 +892,7 @@
                     </DataTemplate>
 
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+SpriteInstance}">
-                        <Grid>
+                        <Grid IsSharedSizeScope="True">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="5"/>
@@ -1074,9 +1093,14 @@
                             </Rectangle.RenderTransform>
                             <Rectangle.Fill>
                                 <ImageBrush
-                                    ImageSource="{Binding ObjectDefinition.Sprite.Textures[0].Texture, Mode=OneWay, Converter={StaticResource UndertaleCachedImageLoader}}"
                                     TileMode="None"
                                     Stretch="UniformToFill">
+                                    <ImageBrush.ImageSource>
+                                        <MultiBinding Converter="{StaticResource CachedImageLoaderWithIndex}">
+                                            <Binding Path="ObjectDefinition.Sprite.Textures" Mode="OneWay"/>
+                                            <Binding Path="ImageIndex" Mode="OneWay"/>
+                                        </MultiBinding>
+                                    </ImageBrush.ImageSource>
                                 </ImageBrush>
                             </Rectangle.Fill>
                         </Rectangle>
