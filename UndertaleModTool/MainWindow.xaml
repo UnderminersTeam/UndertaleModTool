@@ -23,6 +23,9 @@
         <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
         <local:FilteredViewConverter x:Key="FilteredViewConverter" Filter="{Binding Text, Source={x:Reference SearchBox}, UpdateSourceTrigger=PropertyChanged}"/>
         <local:NullToVisibilityConverter x:Key="VisibleIfNotNull"  nullValue="Collapsed" notNullValue="Visible"/>
+        <local:CompareNumbersConverter x:Key="CompareNumbersConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/> <!-- (built-in converter) -->
+        <local:TabTitleConverter x:Key="TabTitleConverter"/>
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="New" Executed="Command_New" />
@@ -34,18 +37,28 @@
         <CommandBinding Command="Print" Executed="Command_Run" />
         <CommandBinding Command="CancelPrint" Executed="Command_RunSpecial" />
         <CommandBinding Command="PrintPreview" Executed="Command_RunDebug" />
-        <CommandBinding Command="Properties" Executed="Command_Settings"/>
+        <CommandBinding Command="Properties" Executed="Command_Settings" />
+        <CommandBinding Command="{x:Static local:MainWindow.CloseTabCommand}" Executed="Command_CloseTab" />
+        <CommandBinding Command="{x:Static local:MainWindow.CloseAllTabsCommand}" Executed="Command_CloseAllTabs" />
+        <CommandBinding Command="{x:Static local:MainWindow.RestoreClosedTabCommand}" Executed="Command_RestoreClosedTab" />
+        <CommandBinding Command="{x:Static local:MainWindow.SwitchToNextTabCommand}" Executed="Command_SwitchToNextTab" />
+        <CommandBinding Command="{x:Static local:MainWindow.SwitchToPrevTabCommand}" Executed="Command_SwitchToPrevTab" />
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="N" Command="New"/>
         <KeyBinding Modifiers="Control" Key="O" Command="Open"/>
         <KeyBinding Modifiers="Control" Key="S" Command="Save"/>
-        <KeyBinding Modifiers="Control" Key="W" Command="Close"/>
+        <KeyBinding Modifiers="Control" Key="Q" Command="Close"/>
         <KeyBinding Modifiers="Control" Key="C" Command="Copy"/>
         <KeyBinding Modifiers="Control" Key="P" Command="Paste"/>
         <KeyBinding Key="F5" Command="Print"/>
         <KeyBinding Modifiers="Alt" Key="F5" Command="CancelPrint"/>
         <KeyBinding Modifiers="Shift" Key="F5" Command="PrintPreview"/>
+        <KeyBinding Modifiers="Control" Key="W" Command="{x:Static local:MainWindow.CloseTabCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+W" Command="{x:Static local:MainWindow.CloseAllTabsCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+T" Command="{x:Static local:MainWindow.RestoreClosedTabCommand}"/>
+        <KeyBinding Gesture="Ctrl+Tab" Command="{x:Static local:MainWindow.SwitchToNextTabCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{x:Static local:MainWindow.SwitchToPrevTabCommand}"/>
     </Window.InputBindings>
     <Grid>
         <DockPanel>
@@ -87,7 +100,7 @@
                     <MenuItem Header="Generate o_ffset map" Click="MenuItem_OffsetMap_Click"/>
                     <Separator/>
                     <MenuItem Header="S_ettings" Command="Properties"/>
-                    <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+W"/>
+                    <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+Q"/>
                 </MenuItem>
                 <MenuItem Header="_Scripts">
                     <MenuItem Header="_Run builtin script" SubmenuOpened="MenuItem_RunBuiltinScript_SubmenuOpened">
@@ -138,7 +151,7 @@
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding CurrentTab.SelectionHistory.Count}" Value="0">
+                                    <DataTrigger Binding="{Binding SelectionHistory.Count}" Value="0">
                                         <Setter Property="IsEnabled" Value="False" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -172,6 +185,7 @@
                             <MenuItem Header="Add" Click="MenuItem_Add_Click"/>
                         </ContextMenu>
                         <ContextMenu x:Key="UndertaleResourceMenu">
+                            <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
                             <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
                             <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
                         </ContextMenu>
@@ -367,17 +381,103 @@
                 </TreeView>
 
                 <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
-                <ScrollViewer Name="TabScrollViewer" Grid.Column="2" Grid.RowSpan="1" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Hidden" PreviewMouseWheel="TabScrollViewer_PreviewMouseWheel">
-                    <TabControl Name="TabController" SelectionChanged="TabController_SelectionChanged" TabStripPlacement="Top"/>
-                </ScrollViewer>
+
+                <Grid Name="TabsGrid" Grid.Column="2" Grid.Row="0" UseLayoutRounding="True">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <ScrollViewer Grid.Column="0" Name="TabScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" PreviewMouseWheel="TabScrollViewer_PreviewMouseWheel">
+                        <TabControl Name="TabController" Height="22" TabStripPlacement="Top" ItemsSource="{Binding Tabs, Mode=OneWay}" SelectedIndex="{Binding CurrentTabIndex}"
+                                SelectionChanged="TabController_SelectionChanged">
+                            <TabControl.Resources>
+                                <ContextMenu x:Key="TabMenu">
+                                    <MenuItem Header="Close" Click="CloseTabMenuItem_Click" InputGestureText="Ctrl+W"/>
+                                    <MenuItem Header="Close other tabs" Click="CloseOtherTabsMenuItem_Click">
+                                        <MenuItem.Style>
+                                            <Style TargetType="MenuItem">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Tabs.Count, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:MainWindow}, Mode=OneWay}" Value="1">
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </MenuItem.Style>
+                                    </MenuItem>
+                                    <MenuItem Header="Close all tabs" Command="{x:Static local:MainWindow.CloseAllTabsCommand}" InputGestureText="Ctrl+Shift+W"/>
+                                </ContextMenu>
+                            </TabControl.Resources>
+                            <TabControl.ItemContainerStyle>
+                                <Style TargetType="TabItem">
+                                    <Setter Property="TabIndex" Value="{Binding TabIndex, Mode=OneWay}"/>
+                                    <Setter Property="ContextMenu" Value="{StaticResource TabMenu}"/>
+                                    <Setter Property="AllowDrop" Value="True"/>
+                                    <EventSetter Event="MouseUp" Handler="TabItem_MouseUp"/>
+                                    <EventSetter Event="PreviewMouseMove" Handler="TabItem_PreviewMouseMove"/>
+                                    <EventSetter Event="Drop" Handler="TabItem_Drop"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding TabTitle, Mode=OneTime}" Value="Welcome!">
+                                            <Setter Property="ContextMenu" Value="{x:Null}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TabControl.ItemContainerStyle>
+                            <TabControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type local:Tab}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock>
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource TabTitleConverter}" Mode="OneWay">
+                                                    <Binding Path="OpenedObject" Mode="OneTime"/>
+                                                    <!-- for notification only -->
+                                                    <Binding Path="OpenedObject.Name.Content" Mode="OneWay"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                        <Button Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
+                                            Click="TabCloseButton_OnClick" MouseEnter="TabCloseButton_MouseEnter" MouseLeave="TabCloseButton_MouseLeave">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding TabTitle, Mode=OneTime}" Value="Welcome!">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                            <Image Source="/Resources/X.png"/>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </TabControl.ItemTemplate>
+                            <TabControl.ContentTemplate>
+                                <DataTemplate DataType="{x:Type local:Tab}"/>
+                            </TabControl.ContentTemplate>
+                        </TabControl>
+                    </ScrollViewer>
+                    <StackPanel Grid.Column="1" Margin="5" Orientation="Horizontal" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                        <StackPanel.Visibility>
+                            <MultiBinding Converter="{StaticResource CompareNumbersConverter}" ConverterParameter=">" Mode="OneWay">
+                                <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabController"/>
+                                <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabsGrid"/>
+                            </MultiBinding>
+                        </StackPanel.Visibility>
+                        <Button Width="16" Height="16" Click="TabsScrollLeftButton_Click">
+                            <Image Source="/Resources/tabs_left_button.png" Stretch="None"/>
+                        </Button>
+                        <Button Width="16" Height="16" Click="TabsScrollRightButton_Click">
+                            <Image Source="/Resources/tabs_right_button.png" Stretch="None"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="2">
-                    <ContentControl Margin="10" Content="{Binding CurrentTab.Selected,Mode=OneWay}" Name="DataEditor">
+                    <ContentControl Margin="10" Content="{Binding Selected, Mode=OneWay}" Name="DataEditor">
                         <ContentControl.Resources>
                             <DataTemplate DataType="{x:Type local:DescriptionView}">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding Heading,Mode=OneWay}" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Heading, Mode=OneWay}" FontWeight="Bold"/>
                                     <Separator/>
-                                    <TextBlock Text="{Binding Description,Mode=OneWay}"/>
+                                    <TextBlock Text="{Binding Description, Mode=OneWay}"/>
                                 </StackPanel>
                             </DataTemplate>
 

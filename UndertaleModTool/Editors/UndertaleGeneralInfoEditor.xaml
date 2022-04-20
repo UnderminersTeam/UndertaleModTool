@@ -144,7 +144,10 @@
 
                 <TextBlock Grid.Row="21" Grid.Column="0" Margin="3">Room order</TextBlock>
                 <Expander Grid.Row="21" Grid.Column="1" Margin="3" Header="List">
-                    <DataGrid ItemsSource="{Binding GeneralInfo.RoomOrder}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
+                    <DataGrid ItemsSource="{Binding GeneralInfo.RoomOrder}" MaxHeight="369" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                              ScrollViewer.CanContentScroll="True"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling">
                         <DataGrid.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                             <Style TargetType="{x:Type DataGridCell}">
