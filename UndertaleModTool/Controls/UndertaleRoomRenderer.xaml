@@ -26,6 +26,7 @@
         <local:CachedTileDataLoader x:Key="CachedTileDataLoader"/>
         <local:TileLayerTemplateSelector x:Key="TileLayerTemplateSelector"/>
         <local:TileRectanglesConverter x:Key="TileRectanglesConverter"/>
+        <local:CachedImageLoaderWithIndex x:Key="CachedImageLoaderWithIndex"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomRenderer}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomRenderer}, Path=DataContext.Tiles}"/>
@@ -146,9 +147,14 @@
                         </Rectangle.RenderTransform>
                         <Rectangle.Fill>
                             <ImageBrush
-                                ImageSource="{Binding ObjectDefinition.Sprite.Textures[0].Texture, Converter={StaticResource UndertaleCachedImageLoader}, Mode=OneTime}"
                                 TileMode="None"
                                 Stretch="UniformToFill">
+                                <ImageBrush.ImageSource>
+                                    <MultiBinding Converter="{StaticResource CachedImageLoaderWithIndex}" Mode="OneTime">
+                                        <Binding Path="ObjectDefinition.Sprite.Textures" Mode="OneTime"/>
+                                        <Binding Path="ImageIndex" Mode="OneTime"/>
+                                    </MultiBinding>
+                                </ImageBrush.ImageSource>
                             </ImageBrush>
                         </Rectangle.Fill>
                     </Rectangle>
@@ -180,9 +186,14 @@
                         </Rectangle.RenderTransform>
                         <Rectangle.Fill>
                             <ImageBrush
-                                ImageSource="{Binding Sprite.Textures[0].Texture, Mode=OneTime, Converter={StaticResource UndertaleCachedImageLoader}}"
                                 TileMode="None"
                                 Stretch="UniformToFill">
+                                <ImageBrush.ImageSource>
+                                    <MultiBinding Converter="{StaticResource CachedImageLoaderWithIndex}" Mode="OneTime">
+                                        <Binding Path="Sprite.Textures" Mode="OneTime"/>
+                                        <Binding Path="FrameIndex" Mode="OneTime"/>
+                                    </MultiBinding>
+                                </ImageBrush.ImageSource>
                             </ImageBrush>
                         </Rectangle.Fill>
                     </Rectangle>

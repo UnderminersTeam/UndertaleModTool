@@ -1093,9 +1093,14 @@
                             </Rectangle.RenderTransform>
                             <Rectangle.Fill>
                                 <ImageBrush
-                                    ImageSource="{Binding ObjectDefinition.Sprite.Textures[0].Texture, Mode=OneWay, Converter={StaticResource UndertaleCachedImageLoader}}"
                                     TileMode="None"
                                     Stretch="UniformToFill">
+                                    <ImageBrush.ImageSource>
+                                        <MultiBinding Converter="{StaticResource CachedImageLoaderWithIndex}">
+                                            <Binding Path="ObjectDefinition.Sprite.Textures" Mode="OneWay"/>
+                                            <Binding Path="ImageIndex" Mode="OneWay"/>
+                                        </MultiBinding>
+                                    </ImageBrush.ImageSource>
                                 </ImageBrush>
                             </Rectangle.Fill>
                         </Rectangle>
