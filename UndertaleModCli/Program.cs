@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UndertaleModLib;
@@ -48,6 +49,16 @@ namespace UndertaleModCli
         /// File path or directory path that determines an output for the current Program.
         /// </summary>
         private FileSystemInfo? Output { get; }
+
+        /// <summary>
+        /// Constant, used to indicate that the user wants to replace everything in a replace command.
+        /// </summary>
+        private const string UMT_REPLACE_ALL = "UMT_REPLACE_ALL";
+
+        /// <summary>
+        /// Constant, used to indicate that the user wants to dump everything in a dump command
+        /// </summary>
+        private const string UMT_DUMP_ALL = "UMT_DUMP_ALL";
 
         //TODO: document these, these are intertwined with inherited updating methods
         private int progressValue;
@@ -119,11 +130,24 @@ namespace UndertaleModCli
                 verboseOption,
                 new Option<DirectoryInfo>(new []{"-o", "--output"}, "Where to dump data file properties to. Will default to path of the data file"),
                 new Option<string[]>(new[] {"-c", "--code"},
-                    "The code files to dump. Ex. gml_Script_init_map gml_Script_reset_map. Specify 'UMT_DUMP_ALL' to dump all code entries"),
+                    $"The code files to dump. Ex. gml_Script_init_map gml_Script_reset_map. Specify '{UMT_DUMP_ALL}' to dump all code entries"),
                 new Option<bool>(new[] {"-s", "--strings"}, "Whether to dump all strings"),
                 new Option<bool>(new[] {"-t", "--textures"}, "Whether to dump all embedded textures")
             };
             dumpCommand.Handler = CommandHandler.Create<DumpOptions>(Program.Dump);
+
+            // Setup replace command
+            Command replaceCommand = new Command("replace", "Replace certain properties in the game data file")
+            {
+                dataFileArgument,
+                verboseOption,
+                new Option<FileInfo>(new []{"-o", "--output"}, "Where to save the modified data file"),
+                new Option<string[]>(new[] {"-c", "--code"},
+                    $"Which code files to replace with which file. Ex. 'gml_Script_init_map=./newCode.gml'. It is possible to replace everything by using '{UMT_REPLACE_ALL}'"),
+                new Option<string[]>(new []{"-t", "--textures"},
+                    $"Which embedded texture entry to replace with which file. Ex. 'Texture 0=./newTexture.png'. It is possible to replace everything by using '{UMT_REPLACE_ALL}'")
+            };
+            replaceCommand.Handler = CommandHandler.Create<ReplaceOptions>(Program.Replace);
 
             // Merge everything together
             RootCommand rootCommand = new RootCommand
@@ -131,7 +155,8 @@ namespace UndertaleModCli
                 newCommand,
                 loadCommand,
                 infoCommand,
-                dumpCommand
+                dumpCommand,
+                replaceCommand
             };
             rootCommand.Description = "CLI tool for modding, decompiling and unpacking Undertale (and other Game Maker: Studio games)!";
             Parser commandLine = new CommandLineBuilder(rootCommand)
@@ -318,7 +343,7 @@ namespace UndertaleModCli
             if ((options.Code != null) && (options.Code.Length > 0) && (program.Data.Code.Count > 0))
             {
                 // If user wanted to dump everything, do that, otherwise only dump what user provided
-                if (options.Code.Contains("UMT_DUMP_ALL"))
+                if (options.Code.Contains(UMT_DUMP_ALL))
                 {
                     foreach (UndertaleCode code in program.Data.Code)
                     {
@@ -345,6 +370,106 @@ namespace UndertaleModCli
             {
                 program.DumpTextures();
             }
+
+            return EXIT_SUCCESS;
+        }
+
+        /// <summary>
+        /// Method that gets executed on the "replace" command
+        /// </summary>
+        /// <param name="options">The arguments that have been provided with the "replace" command</param>
+        /// <returns><see cref="EXIT_SUCCESS"/> and <see cref="EXIT_FAILURE"/> for being successful and failing respectively</returns>
+        private static int Replace(ReplaceOptions options)
+        {
+            Program program;
+            try
+            {
+                program = new Program(options.Datafile, null, options.Output, options.Verbose);
+            }
+            catch (FileNotFoundException e)
+            {
+                Console.Error.WriteLine(e.Message);
+                return EXIT_FAILURE;
+            }
+
+            // If user provided code to replace, replace it
+            if ((options.Code != null) && (options.Code.Length > 0) && (program.Data.Code.Count > 0))
+            {
+                // get the values and put them into a dictionary for ease of use
+                Dictionary<string, FileInfo> codeDict = new Dictionary<string, FileInfo>();
+                foreach (string code in options.Code)
+                {
+                    string[] splitText = code.Split('=');
+
+                    if (splitText.Length != 2)
+                    {
+                        Console.Error.WriteLine(code + " is malformed! Should be of format 'name_of_code=./newCode.gml' instead!");
+                        return EXIT_FAILURE;
+                    }
+
+                    codeDict.Add(splitText[0], new FileInfo(splitText[1]));
+                }
+
+                // If user wants to replace all, we'll be handling it differently
+                if (codeDict.ContainsKey(UMT_REPLACE_ALL))
+                {
+                    string directory = codeDict[UMT_REPLACE_ALL].FullName;
+                    foreach (FileInfo file in new DirectoryInfo(directory).GetFiles())
+                    {
+                        program.ReplaceCodeEntryWithFile(file.Name, file);
+                    }
+                }
+                // Otherwise, just replace every file which was given
+                else
+                {
+                    foreach (KeyValuePair<string, FileInfo> keyValue in codeDict)
+                    {
+                        program.ReplaceCodeEntryWithFile(keyValue.Key, keyValue.Value);
+                    }
+                }
+
+            }
+
+            // If user provided texture to replace, replace it
+            if ((options.Textures != null) && (options.Textures.Length > 0))
+            {
+                // get the values and put them into a dictionary for ease of use
+                Dictionary<string, FileInfo> textureDict = new Dictionary<string, FileInfo>();
+                foreach (string texture in options.Textures)
+                {
+                    string[] splitText = texture.Split('=');
+
+                    if (splitText.Length != 2)
+                    {
+                        Console.Error.WriteLine(texture + " is malformed! Should be of format 'Name=./new.png' instead!");
+                        return EXIT_FAILURE;
+                    }
+
+                    textureDict.Add(splitText[0], new FileInfo(splitText[1]));
+                }
+
+                // If user wants to replace all, we'll be handling it differently
+                if (textureDict.ContainsKey(UMT_REPLACE_ALL))
+                {
+                    string directory = textureDict[UMT_REPLACE_ALL].FullName;
+                    foreach (FileInfo file in new DirectoryInfo(directory).GetFiles())
+                    {
+                        program.ReplaceTextureWithFile(file.Name, file);
+                    }
+                }
+                // Otherwise, just replace every file which was given
+                else
+                {
+                    foreach (KeyValuePair<string, FileInfo> keyValue in textureDict)
+                    {
+                        program.ReplaceTextureWithFile(keyValue.Key, keyValue.Value);
+                    }
+                }
+            }
+
+            // if parameter to save file was given, save the data file
+            if (options.Output != null)
+                program.SaveDataFile(options.Output.FullName);
 
             return EXIT_SUCCESS;
         }
@@ -531,6 +656,47 @@ namespace UndertaleModCli
             }
         }
 
+        /// <summary>
+        /// Replaces a code entry with text from another file.
+        /// </summary>
+        /// <param name="codeEntry">The code entry to replace</param>
+        /// <param name="fileToReplace">File path which should replace the code entry.</param>
+        private void ReplaceCodeEntryWithFile(string codeEntry, FileInfo fileToReplace)
+        {
+            UndertaleCode? code = Data.Code.FirstOrDefault(c => c.Name.Content == codeEntry);
+
+            if (code == null)
+            {
+                Console.Error.WriteLine($"Data file does not contain a code entry named {codeEntry}!");
+                return;
+            }
+
+            if (Verbose)
+                Console.WriteLine("Replacing " + codeEntry);
+
+            ImportGMLString(codeEntry, File.ReadAllText(fileToReplace.FullName));
+        }
+
+        /// <summary>
+        /// Replaces an embedded texture with contents from another file.
+        /// </summary>
+        /// <param name="textureEntry">Embedded texture to replace</param>
+        /// <param name="fileToReplace">File path which should replace the embedded texture.</param>
+        private void ReplaceTextureWithFile(string textureEntry, FileInfo fileToReplace)
+        {
+            UndertaleEmbeddedTexture? texture = Data.EmbeddedTextures.FirstOrDefault(t => t.Name.Content == textureEntry);
+
+            if (texture == null)
+            {
+                Console.Error.WriteLine($"Data file does not contain an embedded texture named {textureEntry}!");
+                return;
+            }
+
+            if (Verbose)
+                Console.WriteLine("Replacing " + textureEntry);
+
+            texture.TextureData.TextureBlob = File.ReadAllBytes(fileToReplace.FullName);
+        }
 
         /// <summary>
         /// Evaluates and executes the contents of a file as C# Code.
@@ -619,7 +785,10 @@ namespace UndertaleModCli
             try
             {
                 using FileStream fs = datafile.OpenRead();
-                return UndertaleIO.Read(fs, warningHandler, messageHandler);
+                UndertaleData gmData = UndertaleIO.Read(fs, warningHandler, messageHandler);
+                //TODO: this should be handled in UTCode, not here
+                gmData.ToolInfo.AppDataProfiles = "";
+                return gmData;
             }
             catch (FileNotFoundException e)
             {

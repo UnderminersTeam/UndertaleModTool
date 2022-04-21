@@ -1257,6 +1257,7 @@ namespace UndertaleModLib.Models
 
             data.GMLCacheChanged?.Add(Name.Content);
 
+            //TODO: only do this if profile mode is enabled in the first place
             try
             {
                 // When necessary, write to profile.
