@@ -1502,11 +1502,12 @@ namespace UndertaleModTool
                             else
                                 tiles.AddRange(layer.AssetsData.LegacyTiles);
 
-                            allObjects.AddRange(layer.AssetsData.Sprites);
+                            allObjects.AddRange(layer.AssetsData.Sprites.Where(s => s.Sprite?.Textures.Count > 0));
                             break;
 
                         case LayerType.Background:
-                            allObjects.Add(layer.BackgroundData);
+                            if (layer.BackgroundData.Sprite?.Textures.Count > 0)
+                                allObjects.Add(layer.BackgroundData);
                             break;
 
                         case LayerType.Instances:
@@ -1520,7 +1521,7 @@ namespace UndertaleModTool
                 tiles = room.Tiles.ToList();
 
                 allObjects.AddRange(room.Backgrounds);
-                allObjects.AddRange(room.GameObjects);
+                allObjects.AddRange(room.GameObjects.Where(g => g.ObjectDefinition?.Sprite?.Textures.Count > 0));
             }
 
             tileTextures = tiles?.AsParallel()
