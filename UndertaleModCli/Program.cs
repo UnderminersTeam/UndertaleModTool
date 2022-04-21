@@ -12,8 +12,11 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using UndertaleModLib.Models;
 
 namespace UndertaleModCli
 {
@@ -42,9 +45,9 @@ namespace UndertaleModCli
         private bool Verbose { get; }
 
         /// <summary>
-        /// File path to where to save the modified data file
+        /// File path or directory path that determines an output for the current Program.
         /// </summary>
-        private FileInfo? Output { get; }
+        private FileSystemInfo? Output { get; }
 
         //TODO: document these, these are intertwined with inherited updating methods
         private int progressValue;
@@ -75,7 +78,7 @@ namespace UndertaleModCli
         {
             var verboseOption = new Option<bool>(new []{"-v", "--verbose"}, "Detailed logs");
 
-            var dataFileOption = new Argument<FileInfo>("datafile", "Path to the data.win/.ios/.droid/.unx file");
+            var dataFileArgument = new Argument<FileInfo>("datafile", "Path to the data.win/.ios/.droid/.unx file");
 
             // Setup new command
             Command newCommand = new Command("new", "Generates a blank data file")
@@ -88,12 +91,13 @@ namespace UndertaleModCli
             newCommand.Handler = CommandHandler.Create<NewOptions>(Program.New);
 
             // Setup load command
-            var scriptRunnerOption = new Option<FileInfo[]>(new []{ "-s", "--scripts"}, "Scripts to apply to the <datafile>. ex. a.csx b.csx");
-            Command loadCommand = new Command("load", "Load a data file and perform actions on it") {
-                dataFileOption,
+            var scriptRunnerOption = new Option<FileInfo[]>(new []{ "-s", "--scripts"}, "Scripts to apply to the <datafile>. Ex. a.csx b.csx");
+            Command loadCommand = new Command("load", "Load a data file and perform actions on it")
+            {
+                dataFileArgument,
                 scriptRunnerOption,
                 verboseOption,
-                //TODO: why no force overwrite here, but neded for new?
+                //TODO: why no force overwrite here, but needed for new?
                 new Option<FileInfo>(new []{"-o", "--output"}, "Where to save the modified data file"),
                 new Option<string>(new []{"-l","--line"}, "Run C# string. Runs AFTER everything else"),
                 new Option<bool>(new []{"-i", "--interactive"}, "Interactive menu launch")
@@ -103,17 +107,31 @@ namespace UndertaleModCli
             // Setup info command
             Command infoCommand = new Command("info", "Show basic info about the game data file")
             {
-                dataFileOption,
+                dataFileArgument,
                 verboseOption
             };
             infoCommand.Handler = CommandHandler.Create<InfoOptions>(Program.Info);
+
+            // Setup dump command
+            Command dumpCommand = new Command("dump", "Dump certain properties about the game data file")
+            {
+                dataFileArgument,
+                verboseOption,
+                new Option<DirectoryInfo>(new []{"-o", "--output"}, "Where to dump data file properties to. Will default to path of the data file"),
+                new Option<string[]>(new[] {"-c", "--code"},
+                    "The code files to dump. Ex. gml_Script_init_map gml_Script_reset_map. Specify 'UMT_DUMP_ALL' to dump all code entries"),
+                new Option<bool>(new[] {"-s", "--strings"}, "Whether to dump all strings"),
+                new Option<bool>(new[] {"-t", "--textures"}, "Whether to dump all embedded textures")
+            };
+            dumpCommand.Handler = CommandHandler.Create<DumpOptions>(Program.Dump);
 
             // Merge everything together
             RootCommand rootCommand = new RootCommand
             {
                 newCommand,
                 loadCommand,
-                infoCommand
+                infoCommand,
+                dumpCommand
             };
             rootCommand.Description = "CLI tool for modding, decompiling and unpacking Undertale (and other Game Maker: Studio games)!";
             Parser commandLine = new CommandLineBuilder(rootCommand)
@@ -155,9 +173,15 @@ namespace UndertaleModCli
                             .WithEmitDebugInformation(true);
         }
 
-        public Program(FileInfo datafile, bool verbose)
+        public Program(FileInfo datafile, bool verbose, DirectoryInfo output = null)
         {
+            Console.WriteLine($"Trying to load file: '{datafile.FullName}'");
+            this.Verbose = verbose;
             this.Data = ReadDataFile(datafile, verbose ? WarningHandler : null, verbose ? MessageHandler : null);
+            this.Output = output ?? new DirectoryInfo(datafile.DirectoryName);
+
+            if (this.Verbose)
+                Console.WriteLine("Output directory has been set to " + this.Output.FullName);
         }
 
         /// <summary>
@@ -267,6 +291,61 @@ namespace UndertaleModCli
             }
 
             program.CliQuickInfo();
+            return EXIT_SUCCESS;
+        }
+
+        /// <summary>
+        /// Method that gets executed on the "dump" command
+        /// </summary>
+        /// <param name="options">The arguments that have been provided with the "dump" command</param>
+        /// <returns><see cref="EXIT_SUCCESS"/> and <see cref="EXIT_FAILURE"/> for being successful and failing respectively</returns>
+        private static int Dump(DumpOptions options)
+        {
+            //TODO: get rid of a ton of string concat
+
+            Program program;
+            try
+            {
+                program = new Program(options.Datafile, options.Verbose, options.Output);
+            }
+            catch (FileNotFoundException e)
+            {
+                Console.Error.WriteLine(e.Message);
+                return EXIT_FAILURE;
+            }
+
+            // If user provided code to dump, dump code
+            if ((options.Code != null) && (options.Code.Length > 0) && (program.Data.Code.Count > 0))
+            {
+                // If user wanted to dump everything, do that, otherwise only dump what user provided
+                if (options.Code.Contains("UMT_DUMP_ALL"))
+                {
+                    foreach (UndertaleCode code in program.Data.Code)
+                    {
+                        program.DumpCodeEntry(code.Name.Content);
+                    }
+                }
+                else
+                {
+                    foreach (string code in options.Code)
+                    {
+                        program.DumpCodeEntry(code);
+                    }
+                }
+            }
+
+            // If user wanted to dump strings, dump all of them in a text file
+            if (options.Strings)
+            {
+                program.DumpStrings();
+            }
+
+            // If user wanted to dump embedded textures, dump all of them
+            if (options.Textures)
+            {
+                program.DumpTextures();
+            }
+
             return EXIT_SUCCESS;
         }
 
@@ -388,6 +467,70 @@ namespace UndertaleModCli
 
             if (IsInteractive) Pause();
         }
+
+        /// <summary>
+        /// Dumped a code entry from a data file.
+        /// </summary>
+        /// <param name="codeEntry">The code entry that should get dumped</param>
+        private void DumpCodeEntry(string codeEntry)
+        {
+            UndertaleCode? code = Data.Code.FirstOrDefault(c => c.Name.Content == codeEntry);
+
+            if (code == null)
+            {
+                Console.Error.WriteLine($"Data file does not contain a code entry named {codeEntry}!");
+                return;
+            }
+
+            string directory = Output.FullName + "/CodeEntries/";
+
+            Directory.CreateDirectory(directory);
+
+            if (Verbose)
+                Console.WriteLine("Dumping " + codeEntry);
+
+            File.WriteAllText(directory + "/" + codeEntry + ".gml", GetDecompiledText(code));
+        }
+
+        /// <summary>
+        /// Dumps all strings in a data file.
+        /// </summary>
+        private void DumpStrings()
+        {
+            string directory = Output.FullName;
+
+            Directory.CreateDirectory(directory);
+
+            StringBuilder combinedText = new StringBuilder();
+            foreach (UndertaleString dataString in Data.Strings)
+            {
+                if (Verbose)
+                    Console.WriteLine("Added " + dataString.Content);
+                combinedText.Append(dataString.Content + "\n");
+            }
+
+            if (Verbose)
+                Console.WriteLine("Writing all strings to disk");
+            File.WriteAllText(directory + "/strings.txt", combinedText.ToString());
+        }
+
+        /// <summary>
+        /// Dumps all embedded textures in a data file.
+        /// </summary>
+        private void DumpTextures()
+        {
+            string directory = Output.FullName + "/EmbeddedTextures/";
+
+            Directory.CreateDirectory(directory);
+
+            foreach (UndertaleEmbeddedTexture texture in Data.EmbeddedTextures)
+            {
+                if (Verbose)
+                    Console.WriteLine("Dumping " + texture.Name);
+                File.WriteAllBytes(directory + "/" + texture.Name.Content + ".png", texture.TextureData.TextureBlob);
+            }
+        }
+
 
         /// <summary>
         /// Evaluates and executes the contents of a file as C# Code.
