@@ -1465,7 +1465,7 @@ namespace UndertaleModTool
 
         private void MainTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            OpenInTab(Highlighted);
+            OpenInTab(Highlighted, true);
         }
 
         private void MainTree_KeyUp(object sender, KeyEventArgs e)

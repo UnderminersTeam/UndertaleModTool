@@ -835,6 +835,7 @@ namespace UndertaleModTool
 
                 resListView.IsExpanded = true;
                 resListView.BringIntoView();
+                resListView.Focus();
                 resListView.UpdateLayout();
 
                 StackPanel resPanel = MainWindow.FindVisualChild<StackPanel>(resListView);
