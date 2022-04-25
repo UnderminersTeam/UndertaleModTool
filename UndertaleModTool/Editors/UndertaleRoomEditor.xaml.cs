@@ -1794,13 +1794,12 @@ namespace UndertaleModTool
                         {
                             try
                             {
-                                MessageBox.Show("Room flags of the GMS 2+ games must contain \"IsGMS2\" flag, else game would crash on that room.",
-                                            "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MainWindow.ShowError("Room flags of the GMS 2+ games must contain \"IsGMS2\" flag, else game would crash on that room.", false);
                             }
                             catch {}
                         }
 
-                        flags |= RoomEntryFlags.IsGMS2 | RoomEntryFlags.IsGMS2_3;
+                        flags |= RoomEntryFlags.IsGMS2;
                     }
 
                     return flags;
