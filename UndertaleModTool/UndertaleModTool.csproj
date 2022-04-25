@@ -56,7 +56,7 @@
         </None>
         <None Update="CommunityScripts\FindObjectsWithSprite.csx">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="CommunityScripts\SafeBlaster.csx">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -3575,6 +3575,10 @@
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="Corrections\d0822e279464db858682ca99ec4cbbff\Temp\gml_Script_SCR_TEXT.gml">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="SampleScripts\AddNewRoom.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
