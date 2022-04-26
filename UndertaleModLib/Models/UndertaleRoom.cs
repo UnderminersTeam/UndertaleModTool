@@ -305,7 +305,19 @@ namespace UndertaleModLib.Models
                         layer.InstancesData.Instances.Clear();
                         foreach (var id in layer.InstancesData._InstanceIds)
                         {
-                            layer.InstancesData.Instances.Add(GameObjects.ByInstanceID(id));
+                            if (GameObjects.ByInstanceID(id) != null)
+                                layer.InstancesData.Instances.Add(GameObjects.ByInstanceID(id));
+                            else
+                            {
+                                /* Attempt to resolve null objects.
+                                 * Sometimes, the instance ID in GameObjects will end up a duplicate
+                                 * of a previous ID, rather than the correct one.
+                                 * So, we traverse the object list a little to find the correct one.
+                                 * If you can get two broken objects in a row... it'll probably crash.
+                                 */
+                                int foundIndex = GameObjects.IndexOf(GameObjects.ByInstanceID(id - 1));
+                                layer.InstancesData.Instances.Add(GameObjects[foundIndex + 1]);
+                            }
                         }
                     }
                 }
@@ -1006,29 +1018,14 @@ namespace UndertaleModLib.Models
                     writer.WriteUndertaleObject(EffectProperties);
                 }
 
-                if (LayerType == LayerType.Instances)
+                switch (LayerType)
                 {
-                    writer.WriteUndertaleObject(InstancesData);
-                }
-                else if (LayerType == LayerType.Tiles)
-                {
-                    writer.WriteUndertaleObject(TilesData);
-                }
-                else if (LayerType == LayerType.Background)
-                {
-                    writer.WriteUndertaleObject(BackgroundData);
-                }
-                else if (LayerType == LayerType.Assets)
-                {
-                    writer.WriteUndertaleObject(AssetsData);
-                }
-                else if (LayerType == LayerType.Effect)
-                {
-                    writer.WriteUndertaleObject(EffectData);
-                }
-                else
-                {
-                    throw new Exception("Unsupported layer type " + LayerType);
+                    case LayerType.Instances: writer.WriteUndertaleObject(InstancesData); break;
+                    case LayerType.Tiles: writer.WriteUndertaleObject(TilesData); break;
+                    case LayerType.Background: writer.WriteUndertaleObject(BackgroundData); break;
+                    case LayerType.Assets: writer.WriteUndertaleObject(AssetsData); break;
+                    case LayerType.Effect: writer.WriteUndertaleObject(EffectData); break;
+                    default: throw new Exception("Unsupported layer type " + LayerType);
                 }
             }
 
@@ -1051,29 +1048,14 @@ namespace UndertaleModLib.Models
                     EffectProperties = reader.ReadUndertaleObject<UndertaleSimpleList<EffectProperty>>();
                 }
 
-                if (LayerType == LayerType.Instances)
+                switch (LayerType)
                 {
-                    Data = reader.ReadUndertaleObject<LayerInstancesData>();
-                }
-                else if (LayerType == LayerType.Tiles)
-                {
-                    Data = reader.ReadUndertaleObject<LayerTilesData>();
-                }
-                else if (LayerType == LayerType.Background)
-                {
-                    Data = reader.ReadUndertaleObject<LayerBackgroundData>();
-                }
-                else if (LayerType == LayerType.Assets)
-                {
-                    Data = reader.ReadUndertaleObject<LayerAssetsData>();
-                }
-                else if (LayerType == LayerType.Effect)
-                {
-                    Data = reader.ReadUndertaleObject<LayerEffectData>();
-                }
-                else
-                {
-                    throw new Exception("Unsupported layer type " + LayerType);
+                    case LayerType.Instances: Data = reader.ReadUndertaleObject<LayerInstancesData>(); break;
+                    case LayerType.Tiles: Data = reader.ReadUndertaleObject<LayerTilesData>(); break;
+                    case LayerType.Background: Data = reader.ReadUndertaleObject<LayerBackgroundData>(); break;
+                    case LayerType.Assets: Data = reader.ReadUndertaleObject<LayerAssetsData>(); break;
+                    case LayerType.Effect: Data = reader.ReadUndertaleObject<LayerEffectData>(); break;
+                    default: throw new Exception("Unsupported layer type " + LayerType);
                 }
             }
 
