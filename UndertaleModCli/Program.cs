@@ -326,8 +326,6 @@ namespace UndertaleModCli
         /// <returns><see cref="EXIT_SUCCESS"/> and <see cref="EXIT_FAILURE"/> for being successful and failing respectively</returns>
         private static int Dump(DumpOptions options)
         {
-            //TODO: get rid of a ton of string concat
-
             Program program;
             try
             {
@@ -343,33 +341,23 @@ namespace UndertaleModCli
             if ((options.Code != null) && (options.Code.Length > 0) && (program.Data.Code.Count > 0))
             {
                 // If user wanted to dump everything, do that, otherwise only dump what user provided
+                string[] codeArray;
                 if (options.Code.Contains(UMT_DUMP_ALL))
-                {
-                    foreach (UndertaleCode code in program.Data.Code)
-                    {
-                        program.DumpCodeEntry(code.Name.Content);
-                    }
-                }
+                    codeArray = program.Data.Code.Select(c => c.Name.Content).ToArray();
                 else
-                {
-                    foreach (string code in options.Code)
-                    {
-                        program.DumpCodeEntry(code);
-                    }
-                }
+                    codeArray = options.Code;
+
+                foreach (string code in codeArray)
+                    program.DumpCodeEntry(code);
             }
 
             // If user wanted to dump strings, dump all of them in a text file
             if (options.Strings)
-            {
-                program.DumpStrings();
-            }
+                program.DumpAllStrings();
 
             // If user wanted to dump embedded textures, dump all of them
             if (options.Textures)
-            {
-                program.DumpTextures();
-            }
+                program.DumpAllTextures();
 
             return EXIT_SUCCESS;
         }
@@ -392,7 +380,7 @@ namespace UndertaleModCli
                 return EXIT_FAILURE;
             }
 
-            // If user provided code to replace, replace it
+            // If user provided code to replace, replace them
             if ((options.Code != null) && (options.Code.Length > 0) && (program.Data.Code.Count > 0))
             {
                 // get the values and put them into a dictionary for ease of use
@@ -403,34 +391,29 @@ namespace UndertaleModCli
 
                     if (splitText.Length != 2)
                     {
-                        Console.Error.WriteLine(code + " is malformed! Should be of format 'name_of_code=./newCode.gml' instead!");
+                        Console.Error.WriteLine($"{code} is malformed! Should be of format 'name_of_code=./newCode.gml' instead!");
                         return EXIT_FAILURE;
                     }
 
                     codeDict.Add(splitText[0], new FileInfo(splitText[1]));
                 }
 
-                // If user wants to replace all, we'll be handling it differently
+                // If user wants to replace all, we'll be handling it differently. Replace every file from the provided directory
                 if (codeDict.ContainsKey(UMT_REPLACE_ALL))
                 {
                     string directory = codeDict[UMT_REPLACE_ALL].FullName;
                     foreach (FileInfo file in new DirectoryInfo(directory).GetFiles())
-                    {
                         program.ReplaceCodeEntryWithFile(file.Name, file);
-                    }
                 }
                 // Otherwise, just replace every file which was given
                 else
                 {
                     foreach (KeyValuePair<string, FileInfo> keyValue in codeDict)
-                    {
                         program.ReplaceCodeEntryWithFile(keyValue.Key, keyValue.Value);
-                    }
                 }
-
             }
 
-            // If user provided texture to replace, replace it
+            // If user provided texture to replace, replace them
             if ((options.Textures != null) && (options.Textures.Length > 0))
             {
                 // get the values and put them into a dictionary for ease of use
@@ -441,29 +424,25 @@ namespace UndertaleModCli
 
                     if (splitText.Length != 2)
                     {
-                        Console.Error.WriteLine(texture + " is malformed! Should be of format 'Name=./new.png' instead!");
+                        Console.Error.WriteLine($"{texture} is malformed! Should be of format 'Name=./new.png' instead!");
                         return EXIT_FAILURE;
                     }
 
                     textureDict.Add(splitText[0], new FileInfo(splitText[1]));
                 }
 
-                // If user wants to replace all, we'll be handling it differently
+                // If user wants to replace all, we'll be handling it differently. Replace every file from the provided directory
                 if (textureDict.ContainsKey(UMT_REPLACE_ALL))
                 {
                     string directory = textureDict[UMT_REPLACE_ALL].FullName;
                     foreach (FileInfo file in new DirectoryInfo(directory).GetFiles())
-                    {
                         program.ReplaceTextureWithFile(file.Name, file);
-                    }
                 }
                 // Otherwise, just replace every file which was given
                 else
                 {
-                    foreach (KeyValuePair<string, FileInfo> keyValue in textureDict)
-                    {
-                        program.ReplaceTextureWithFile(keyValue.Key, keyValue.Value);
-                    }
+                    foreach ((string key, FileInfo value) in textureDict)
+                        program.ReplaceTextureWithFile(key, value);
                 }
             }
 
@@ -487,6 +466,7 @@ namespace UndertaleModCli
                 Console.WriteLine("3 - Save and overwrite.");
                 Console.WriteLine("4 - Save to different place.");
                 Console.WriteLine("5 - Display quick info.");
+                //TODO: add dumping and replacing options
                 Console.WriteLine("6 - Quit without saving.");
 
                 Console.Write("Input, please: ");
@@ -594,7 +574,7 @@ namespace UndertaleModCli
         }
 
         /// <summary>
-        /// Dumped a code entry from a data file.
+        /// Dumps a code entry from a data file.
         /// </summary>
         /// <param name="codeEntry">The code entry that should get dumped</param>
         private void DumpCodeEntry(string codeEntry)
@@ -607,20 +587,20 @@ namespace UndertaleModCli
                 return;
             }
 
-            string directory = Output.FullName + "/CodeEntries/";
+            string directory = $"{Output.FullName}/CodeEntries/";
 
             Directory.CreateDirectory(directory);
 
             if (Verbose)
-                Console.WriteLine("Dumping " + codeEntry);
+                Console.WriteLine($"Dumping {codeEntry}");
 
-            File.WriteAllText(directory + "/" + codeEntry + ".gml", GetDecompiledText(code));
+            File.WriteAllText($"{directory}/{codeEntry}.gml", GetDecompiledText(code));
         }
 
         /// <summary>
         /// Dumps all strings in a data file.
         /// </summary>
-        private void DumpStrings()
+        private void DumpAllStrings()
         {
             string directory = Output.FullName;
 
@@ -630,29 +610,29 @@ namespace UndertaleModCli
             foreach (UndertaleString dataString in Data.Strings)
             {
                 if (Verbose)
-                    Console.WriteLine("Added " + dataString.Content);
-                combinedText.Append(dataString.Content + "\n");
+                    Console.WriteLine($"Added {dataString.Content}");
+                combinedText.Append($"{dataString.Content}\n");
             }
 
             if (Verbose)
                 Console.WriteLine("Writing all strings to disk");
-            File.WriteAllText(directory + "/strings.txt", combinedText.ToString());
+            File.WriteAllText($"{directory}/strings.txt", combinedText.ToString());
         }
 
         /// <summary>
         /// Dumps all embedded textures in a data file.
         /// </summary>
-        private void DumpTextures()
+        private void DumpAllTextures()
         {
-            string directory = Output.FullName + "/EmbeddedTextures/";
+            string directory = $"{Output.FullName}/EmbeddedTextures/";
 
             Directory.CreateDirectory(directory);
 
             foreach (UndertaleEmbeddedTexture texture in Data.EmbeddedTextures)
             {
                 if (Verbose)
-                    Console.WriteLine("Dumping " + texture.Name);
-                File.WriteAllBytes(directory + "/" + texture.Name.Content + ".png", texture.TextureData.TextureBlob);
+                    Console.WriteLine($"Dumping {texture.Name}");
+                File.WriteAllBytes($"{directory}/{texture.Name.Content}.png", texture.TextureData.TextureBlob);
             }
         }
 
