@@ -338,7 +338,7 @@ namespace UndertaleModCli
             }
 
             // If user provided code to dump, dump code
-            if ((options.Code != null) && (options.Code.Length > 0) && (program.Data.Code.Count > 0))
+            if ((options.Code?.Length > 0) && (program.Data.Code.Count > 0))
             {
                 // If user wanted to dump everything, do that, otherwise only dump what user provided
                 string[] codeArray;
@@ -381,7 +381,7 @@ namespace UndertaleModCli
             }
 
             // If user provided code to replace, replace them
-            if ((options.Code != null) && (options.Code.Length > 0) && (program.Data.Code.Count > 0))
+            if ((options.Code?.Length > 0) && (program.Data.Code.Count > 0))
             {
                 // get the values and put them into a dictionary for ease of use
                 Dictionary<string, FileInfo> codeDict = new Dictionary<string, FileInfo>();
@@ -414,7 +414,7 @@ namespace UndertaleModCli
             }
 
             // If user provided texture to replace, replace them
-            if ((options.Textures != null) && (options.Textures.Length > 0))
+            if (options.Textures?.Length > 0)
             {
                 // get the values and put them into a dictionary for ease of use
                 Dictionary<string, FileInfo> textureDict = new Dictionary<string, FileInfo>();
@@ -579,7 +579,8 @@ namespace UndertaleModCli
         /// <param name="codeEntry">The code entry that should get dumped</param>
         private void DumpCodeEntry(string codeEntry)
         {
-            UndertaleCode? code = Data.Code.FirstOrDefault(c => c.Name.Content == codeEntry);
+            UndertaleCode code = Data.Code.ByName(codeEntry);
+
 
             if (code == null)
             {
@@ -643,7 +644,7 @@ namespace UndertaleModCli
         /// <param name="fileToReplace">File path which should replace the code entry.</param>
         private void ReplaceCodeEntryWithFile(string codeEntry, FileInfo fileToReplace)
         {
-            UndertaleCode? code = Data.Code.FirstOrDefault(c => c.Name.Content == codeEntry);
+            UndertaleCode code = Data.Code.ByName(codeEntry);
 
             if (code == null)
             {
@@ -664,7 +665,7 @@ namespace UndertaleModCli
         /// <param name="fileToReplace">File path which should replace the embedded texture.</param>
         private void ReplaceTextureWithFile(string textureEntry, FileInfo fileToReplace)
         {
-            UndertaleEmbeddedTexture? texture = Data.EmbeddedTextures.FirstOrDefault(t => t.Name.Content == textureEntry);
+            UndertaleEmbeddedTexture texture = Data.EmbeddedTextures.ByName(textureEntry);
 
             if (texture == null)
             {
