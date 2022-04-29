@@ -3540,6 +3540,11 @@ result in loss of work.");
         public string Heading { get; private set; }
         public string Description { get; private set; }
 
+        // Used only by the "TabTitleConverter" to prevent the following WPF binding warning:
+        // "Name property not found on object of type DescriptionView".
+        // (within "TabControl.ItemTemplate")
+        public UndertaleString Name { get; } = new();
+
         public DescriptionView(string heading, string description)
         {
             Heading = heading;
