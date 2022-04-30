@@ -1543,11 +1543,11 @@ namespace UndertaleModTool
                 UndertaleTexturePageItem texture = obj switch
                 {
                     Background bg => bg.BackgroundDefinition?.Texture,
-                    GameObject gameObj => gameObj.ObjectDefinition?.Sprite?.Textures[0].Texture,
+                    GameObject gameObj => gameObj.ObjectDefinition?.Sprite?.Textures[gameObj.ImageIndex].Texture,
 
                     // GMS 2+
                     Layer.LayerBackgroundData bgData => bgData.Sprite?.Textures[0].Texture,
-                    SpriteInstance sprite => sprite.Sprite?.Textures[0].Texture,
+                    SpriteInstance sprite => sprite.Sprite?.Textures[(int)sprite.FrameIndex].Texture,
                     _ => null
                 };
 

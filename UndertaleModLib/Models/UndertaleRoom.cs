@@ -714,7 +714,7 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// A wrapper of <see cref="ImageIndex"/> that prevents using an out of bounds index.
             /// </summary>
-            public int SafeImageIndex { get => ImageIndex; set { ImageIndex = Math.Clamp(value, 0, (ObjectDefinition?.Sprite?.Textures?.Count ?? 1) - 1); OnPropertyChanged(); } }
+            public int SafeImageIndex { get => ImageIndex; set { ImageIndex = Math.Clamp(value, 0, (ObjectDefinition?.Sprite?.Textures.Count ?? 1) - 1); OnPropertyChanged(); } }
 
 
             public event PropertyChangedEventHandler PropertyChanged;
@@ -727,11 +727,11 @@ namespace UndertaleModLib.Models
             /// The opposite angle of the current rotation.
             /// </summary>
             public float OppositeRotation => 360F - (Rotation % 360);
-            public int XOffset => ObjectDefinition.Sprite != null
-                                  ? X - ObjectDefinition.Sprite.OriginX + (ObjectDefinition.Sprite.Textures.FirstOrDefault()?.Texture?.TargetX ?? 0)
+            public int XOffset => ObjectDefinition?.Sprite != null
+                                  ? X - ObjectDefinition.Sprite.OriginX + (ObjectDefinition.Sprite.Textures.ElementAtOrDefault(ImageIndex)?.Texture?.TargetX ?? 0)
                                   : X;
-            public int YOffset => ObjectDefinition.Sprite != null
-                                  ? Y - ObjectDefinition.Sprite.OriginY + (ObjectDefinition.Sprite.Textures.FirstOrDefault()?.Texture?.TargetY ?? 0)
+            public int YOffset => ObjectDefinition?.Sprite != null
+                                  ? Y - ObjectDefinition.Sprite.OriginY + (ObjectDefinition.Sprite.Textures.ElementAtOrDefault(ImageIndex)?.Texture?.TargetY ?? 0)
                                   : Y;
 
             public void Serialize(UndertaleWriter writer)
@@ -867,7 +867,7 @@ namespace UndertaleModLib.Models
             //TODO?
             public uint Color { get; set; } = 0xFFFFFFFF;
 
-            public UndertaleTexturePageItem Tpag => _SpriteMode ? SpriteDefinition?.Textures?.FirstOrDefault()?.Texture : BackgroundDefinition?.Texture; // TODO: what happens on sprites with multiple textures?
+            public UndertaleTexturePageItem Tpag => _SpriteMode ? SpriteDefinition?.Textures.FirstOrDefault()?.Texture : BackgroundDefinition?.Texture; // TODO: what happens on sprites with multiple textures?
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -1350,7 +1350,7 @@ namespace UndertaleModLib.Models
             public float AnimationSpeed { get; set; }
             public AnimationSpeedType AnimationSpeedType { get; set; }
             public float FrameIndex { get; set; }
-            public float SafeFrameIndex { get => FrameIndex; set { FrameIndex = Math.Clamp(value, 0, (Sprite?.Textures?.Count ?? 1) - 1); OnPropertyChanged(); } }
+            public float SafeFrameIndex { get => FrameIndex; set { FrameIndex = Math.Clamp(value, 0, (Sprite?.Textures.Count ?? 1) - 1); OnPropertyChanged(); } }
             public float Rotation { get; set; }
             public float OppositeRotation => 360F - Rotation;
             public int XOffset => Sprite is not null ? X - Sprite.OriginX : X;
