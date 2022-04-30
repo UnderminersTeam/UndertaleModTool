@@ -883,22 +883,6 @@ namespace UndertaleModLib.Models
 
             public UndertaleTexturePageItem Tpag => spriteMode ? SpriteDefinition?.Textures.FirstOrDefault()?.Texture : BackgroundDefinition?.Texture; // TODO: what happens on sprites with multiple textures?
 
-            /// <summary>
-            /// A horizontal offset used for proper tile display in the UndertaleModTool room editor.
-            /// </summary>
-            /// <remarks>
-            /// This attribute is UMT-only and does not exist in GameMaker.
-            /// </remarks>
-            public int XOffset => X + (Tpag?.TargetX ?? 0);
-
-            /// <summary>
-            /// A vertical offset used for proper tile display in the UndertaleModTool room editor.
-            /// </summary>
-            /// <remarks>
-            /// This attribute is UMT-only and does not exist in GameMaker.
-            /// </remarks>
-            public int YOffset => Y + (Tpag?.TargetY ?? 0);
-
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
             {
