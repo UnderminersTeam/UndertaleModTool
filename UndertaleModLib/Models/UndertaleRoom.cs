@@ -649,9 +649,9 @@ namespace UndertaleModLib.Models
         /// </summary>
         public class GameObject : UndertaleObjectLenCheck, RoomObject, INotifyPropertyChanged
         {
-            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectDefinition = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
-            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCode = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
-            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _PreCreateCode = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
+            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _objectDefinition = new();
+            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _creationCode = new();
+            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _preCreateCode = new();
 
             /// <summary>
             /// The x coordinate of this object.
@@ -666,7 +666,7 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// The game object that is used.
             /// </summary>
-            public UndertaleGameObject ObjectDefinition { get => _ObjectDefinition.Resource; set { _ObjectDefinition.Resource = value; OnPropertyChanged(); } }
+            public UndertaleGameObject ObjectDefinition { get => _objectDefinition.Resource; set { _objectDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("CurrentTexture"); } }
 
             /// <summary>
             /// The instance id of this object.
@@ -676,7 +676,7 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// The creation code for this object.
             /// </summary>
-            public UndertaleCode CreationCode { get => _CreationCode.Resource; set { _CreationCode.Resource = value; OnPropertyChanged(); } }
+            public UndertaleCode CreationCode { get => _creationCode.Resource; set { _creationCode.Resource = value; OnPropertyChanged(); } }
 
             /// <summary>
             /// The x scale that's applied for this object.
@@ -699,7 +699,7 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// The pre creation code of this object.
             /// </summary>
-            public UndertaleCode PreCreateCode { get => _PreCreateCode.Resource; set { _PreCreateCode.Resource = value; OnPropertyChanged(); } }
+            public UndertaleCode PreCreateCode { get => _preCreateCode.Resource; set { _preCreateCode.Resource = value; OnPropertyChanged(); } }
 
             /// <summary>
             /// The image speed of this object. Game Maker: Studio 2 only.
@@ -710,10 +710,12 @@ namespace UndertaleModLib.Models
             /// The image index of this object. Game Maker: Studio 2 only.
             /// </summary>
             public int ImageIndex { get; set; }
+
             /// <summary>
             /// A wrapper of <see cref="ImageIndex"/> that prevents using an out of bounds index.
             /// </summary>
             public int SafeImageIndex { get => ImageIndex; set { ImageIndex = Math.Clamp(value, 0, (ObjectDefinition?.Sprite?.Textures?.Count ?? 1) - 1); OnPropertyChanged(); } }
+
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -736,9 +738,9 @@ namespace UndertaleModLib.Models
             {
                 writer.Write(X);
                 writer.Write(Y);
-                writer.WriteUndertaleObject(_ObjectDefinition);
+                writer.WriteUndertaleObject(_objectDefinition);
                 writer.Write(InstanceID);
-                writer.WriteUndertaleObject(_CreationCode);
+                writer.WriteUndertaleObject(_creationCode);
                 writer.Write(ScaleX);
                 writer.Write(ScaleY);
                 if (writer.undertaleData.GMS2_2_2_302)
@@ -749,7 +751,7 @@ namespace UndertaleModLib.Models
                 writer.Write(Color);
                 writer.Write(Rotation);
                 if (writer.undertaleData.GeneralInfo.BytecodeVersion >= 16) // TODO: is that dependent on bytecode or something else?
-                    writer.WriteUndertaleObject(_PreCreateCode);         // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
+                    writer.WriteUndertaleObject(_preCreateCode);         // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
             }
 
             public void Unserialize(UndertaleReader reader)
@@ -761,9 +763,9 @@ namespace UndertaleModLib.Models
             {
                 X = reader.ReadInt32();
                 Y = reader.ReadInt32();
-                _ObjectDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
+                _objectDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
                 InstanceID = reader.ReadUInt32();
-                _CreationCode = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
+                _creationCode = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
                 ScaleX = reader.ReadSingle();
                 ScaleY = reader.ReadSingle();
                 if (length == 48)
@@ -775,7 +777,7 @@ namespace UndertaleModLib.Models
                 Color = reader.ReadUInt32();
                 Rotation = reader.ReadSingle();
                 if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 16) // TODO: is that dependent on bytecode or something else?
-                    _PreCreateCode = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>(); // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
+                    _preCreateCode = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>(); // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
             }
 
             public override string ToString()

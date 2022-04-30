@@ -136,7 +136,7 @@
                     </Rectangle>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
-                    <Rectangle Width="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth, Mode=OneTime}" Height="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight, Mode=OneTime}"
+                    <Rectangle Width="{Binding Fill.ImageSource.Width, RelativeSource={RelativeSource Self}, Mode=OneTime}" Height="{Binding Fill.ImageSource.Height, RelativeSource={RelativeSource Self}, Mode=OneTime}"
                                Opacity="{Binding Color, Mode=OneTime, Converter={StaticResource ColorToOpacityConverter}}">
                         <Rectangle.RenderTransform>
                             <TransformGroup>
@@ -175,7 +175,7 @@
                     </Rectangle>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type undertale:UndertaleRoom+SpriteInstance}">
-                    <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth, Mode=OneTime}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight, Mode=OneTime}"
+                    <Rectangle Width="{Binding Fill.ImageSource.Width, RelativeSource={RelativeSource Self}, Mode=OneTime}" Height="{Binding Fill.ImageSource.Height, RelativeSource={RelativeSource Self}, Mode=OneTime}"
                                Opacity="{Binding Color, Mode=OneTime, Converter={StaticResource ColorToOpacityConverter}}">
                         <Rectangle.RenderTransform>
                             <TransformGroup>
