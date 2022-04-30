@@ -147,7 +147,7 @@ namespace UndertaleModLib
         private WarningHandlerDelegate WarningHandler;
         private MessageHandlerDelegate MessageHandler;
 
-        public UndertaleReader(Stream input, 
+        public UndertaleReader(Stream input,
                                WarningHandlerDelegate warningHandler = null, MessageHandlerDelegate messageHandler = null) : base(input)
         {
             WarningHandler = warningHandler;

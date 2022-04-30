@@ -584,24 +584,24 @@ namespace UndertaleModCli
             return true;
         }
 
-        public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false)
+        public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool replaceWithEmptyStringOnFail = false)
         {
-            ImportCode(codeName, gmlCode, true, doParse, true, CheckDecompiler);
+            ImportCode(codeName, gmlCode, true, doParse, true, replaceWithEmptyStringOnFail);
         }
 
-        public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
+        public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool nukeProfile = true, bool replaceWithEmptyStringOnFail = false)
         {
-            ImportCode(codeName, gmlCode, false, doParse, destroyASM, CheckDecompiler);
+            ImportCode(codeName, gmlCode, false, doParse, nukeProfile, replaceWithEmptyStringOnFail);
         }
 
-        public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false, bool throwOnError = false)
+        public void ImportGMLFile(string fileName, bool doParse = true, bool replaceWithEmptyStringOnFail = false, bool throwOnError = false)
         {
-            ImportCodeFromFile(fileName, true, doParse, true, CheckDecompiler, throwOnError);
+            ImportCodeFromFile(fileName, true, doParse, true, replaceWithEmptyStringOnFail, throwOnError);
         }
 
-        public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
+        public void ImportASMFile(string fileName, bool doParse = true, bool nukeProfile = true, bool replaceWithEmptyStringOnFail = false, bool throwOnError = false)
         {
-            ImportCodeFromFile(fileName, false, doParse, destroyASM, CheckDecompiler, throwOnError);
+            ImportCodeFromFile(fileName, false, doParse, nukeProfile, replaceWithEmptyStringOnFail, throwOnError);
         }
 
         public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
