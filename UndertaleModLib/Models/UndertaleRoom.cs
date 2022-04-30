@@ -794,9 +794,9 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// Whether this tile is from an asset layer. Game Maker Studio: 2 exclusive.
             /// </summary>
-            public bool _SpriteMode = false;
-            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new();
-            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _SpriteDefinition = new();
+            public bool spriteMode = false;
+            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _backgroundDefinition = new();
+            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _spriteDefinition = new();
 
             /// <summary>
             /// The x coordinate of the tile in the room.
@@ -811,18 +811,18 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// From which tileset / background the tile stems from.
             /// </summary>
-            public UndertaleBackground BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("ObjectDefinition"); } }
+            public UndertaleBackground BackgroundDefinition { get => _backgroundDefinition.Resource; set { _backgroundDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("ObjectDefinition"); } }
 
             /// <summary>
             /// From which sprite this tile stems from.
             /// </summary>
-            public UndertaleSprite SpriteDefinition { get => _SpriteDefinition.Resource; set { _SpriteDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("ObjectDefinition"); } }
+            public UndertaleSprite SpriteDefinition { get => _spriteDefinition.Resource; set { _spriteDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("ObjectDefinition"); } }
 
             /// <summary>
             /// From which object this tile stems from.
-            /// Will return a <see cref="UndertaleBackground"/> if <see cref="_SpriteMode"/> is disabled, a <see cref="UndertaleSprite"/> if it's enabled.
+            /// Will return a <see cref="UndertaleBackground"/> if <see cref="spriteMode"/> is disabled, a <see cref="UndertaleSprite"/> if it's enabled.
             /// </summary>
-            public UndertaleNamedResource ObjectDefinition { get => _SpriteMode ? SpriteDefinition : BackgroundDefinition; set { if (_SpriteMode) SpriteDefinition = (UndertaleSprite)value; else BackgroundDefinition = (UndertaleBackground)value; } }
+            public UndertaleNamedResource ObjectDefinition { get => spriteMode ? SpriteDefinition : BackgroundDefinition; set { if (spriteMode) SpriteDefinition = (UndertaleSprite)value; else BackgroundDefinition = (UndertaleBackground)value; } }
 
             /// <summary>
             /// The x coordinate of the tile in <see cref="ObjectDefinition"/>.
@@ -867,7 +867,7 @@ namespace UndertaleModLib.Models
             //TODO?
             public uint Color { get; set; } = 0xFFFFFFFF;
 
-            public UndertaleTexturePageItem Tpag => _SpriteMode ? SpriteDefinition?.Textures.FirstOrDefault()?.Texture : BackgroundDefinition?.Texture; // TODO: what happens on sprites with multiple textures?
+            public UndertaleTexturePageItem Tpag => spriteMode ? SpriteDefinition?.Textures.FirstOrDefault()?.Texture : BackgroundDefinition?.Texture; // TODO: what happens on sprites with multiple textures?
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -879,12 +879,12 @@ namespace UndertaleModLib.Models
             {
                 writer.Write(X);
                 writer.Write(Y);
-                if (_SpriteMode != (writer.undertaleData.GeneralInfo.Major >= 2))
+                if (spriteMode != (writer.undertaleData.GeneralInfo.Major >= 2))
                     throw new Exception("Unsupported in GMS" + writer.undertaleData.GeneralInfo.Major);
-                if (_SpriteMode)
-                    writer.WriteUndertaleObject(_SpriteDefinition);
+                if (spriteMode)
+                    writer.WriteUndertaleObject(_spriteDefinition);
                 else
-                    writer.WriteUndertaleObject(_BackgroundDefinition);
+                    writer.WriteUndertaleObject(_backgroundDefinition);
                 writer.Write(SourceX);
                 writer.Write(SourceY);
                 writer.Write(Width);
@@ -900,11 +900,11 @@ namespace UndertaleModLib.Models
             {
                 X = reader.ReadInt32();
                 Y = reader.ReadInt32();
-                _SpriteMode = reader.undertaleData.GeneralInfo.Major >= 2;
-                if (_SpriteMode)
-                    _SpriteDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
+                spriteMode = reader.undertaleData.GeneralInfo.Major >= 2;
+                if (spriteMode)
+                    _spriteDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
                 else
-                    _BackgroundDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>>();
+                    _backgroundDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>>();
                 SourceX = reader.ReadUInt32();
                 SourceY = reader.ReadUInt32();
                 Width = reader.ReadUInt32();

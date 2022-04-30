@@ -316,7 +316,7 @@ namespace UndertaleModTool
                     {
                         X = other.X,
                         Y = other.Y,
-                        _SpriteMode = other._SpriteMode,
+                        spriteMode = other.spriteMode,
                         ObjectDefinition = other.ObjectDefinition,
                         SourceX = other.SourceX,
                         SourceY = other.SourceY,
@@ -409,7 +409,7 @@ namespace UndertaleModTool
                     {
                         X = other.X,
                         Y = other.Y,
-                        _SpriteMode = other._SpriteMode,
+                        spriteMode = other.spriteMode,
                         ObjectDefinition = other.ObjectDefinition,
                         SourceX = other.SourceX,
                         SourceY = other.SourceY,
@@ -487,7 +487,7 @@ namespace UndertaleModTool
                 {
                     X = (int)gridMouse.X,
                     Y = (int)gridMouse.Y,
-                    _SpriteMode = otherTile._SpriteMode,
+                    spriteMode = otherTile.spriteMode,
                     ObjectDefinition = otherTile.ObjectDefinition,
                     SpriteDefinition = otherTile.SpriteDefinition,
                     SourceX = otherTile.SourceX,
@@ -1192,7 +1192,7 @@ namespace UndertaleModTool
                     var obj = new Tile();
                     obj.X = other.X;
                     obj.Y = other.Y;
-                    obj._SpriteMode = other._SpriteMode;
+                    obj.spriteMode = other.spriteMode;
                     obj.ObjectDefinition = other.ObjectDefinition;
                     obj.SourceX = other.SourceX;
                     obj.SourceY = other.SourceY;
@@ -1303,7 +1303,7 @@ namespace UndertaleModTool
 
                 // add tile to list
                 var tile = new Tile { InstanceID = mainWindow.Data.GeneralInfo.LastTile++ };
-                tile._SpriteMode = true;
+                tile.spriteMode = true;
                 layer.AssetsData.LegacyTiles.Add(tile);
                 roomObjDict.TryAdd(tile.InstanceID, layer);
 
