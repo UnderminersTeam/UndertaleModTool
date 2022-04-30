@@ -213,12 +213,12 @@ namespace UndertaleModTool
                 if (w == 0 || h == 0)
                     return;
 
-                /// Sometimes, tile size can be bigger than texture size
-                /// (for example, BG tile of "room_torielroom")
-                /// Also, it can be out of texture bounds
-                /// (for example, tile 10055649 of "room_fire_core_topright")
-                /// (both examples are from Undertale)
-                /// This algorithm doesn't support that, so this tile will be processed by "CreateSpriteSource()"
+                // Sometimes, tile size can be bigger than texture size
+                // (for example, BG tile of "room_torielroom")
+                // Also, it can be out of texture bounds
+                // (for example, tile 10055649 of "room_fire_core_topright")
+                // (both examples are from Undertale)
+                // This algorithm doesn't support that, so this tile will be processed by "CreateSpriteSource()"
                 if (w > data.Width || h > data.Height || x + w > data.Width || y + h > data.Height)
                     return;
 
