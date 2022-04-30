@@ -1110,7 +1110,7 @@
                                    MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp"
                                    Opacity="{Binding Color, Mode=OneWay, Converter={StaticResource ColorToOpacityConverter}}">
                             <Rectangle.RenderTransform>
-                                <TranslateTransform x:Name="transform2_0" X="{Binding X, Mode=OneWay}" Y="{Binding Y, Mode=OneWay}"/>
+                                <TranslateTransform x:Name="transform2_0" X="{Binding XOffset, Mode=OneWay}" Y="{Binding YOffset, Mode=OneWay}"/>
                             </Rectangle.RenderTransform>
                             <Rectangle.Style>
                                 <Style BasedOn="{StaticResource NearestNeighbor}"/>

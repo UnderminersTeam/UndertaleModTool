@@ -727,9 +727,23 @@ namespace UndertaleModLib.Models
             /// The opposite angle of the current rotation.
             /// </summary>
             public float OppositeRotation => 360F - (Rotation % 360);
+
+            /// <summary>
+            /// A horizontal offset used for proper game object display in the UndertaleModTool room editor.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public int XOffset => ObjectDefinition?.Sprite != null
                                   ? X - ObjectDefinition.Sprite.OriginX + (ObjectDefinition.Sprite.Textures.ElementAtOrDefault(ImageIndex)?.Texture?.TargetX ?? 0)
                                   : X;
+
+            /// <summary>
+            /// A vertical offset used for proper game object display in the UndertaleModTool room editor.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public int YOffset => ObjectDefinition?.Sprite != null
                                   ? Y - ObjectDefinition.Sprite.OriginY + (ObjectDefinition.Sprite.Textures.ElementAtOrDefault(ImageIndex)?.Texture?.TargetY ?? 0)
                                   : Y;
@@ -868,6 +882,22 @@ namespace UndertaleModLib.Models
             public uint Color { get; set; } = 0xFFFFFFFF;
 
             public UndertaleTexturePageItem Tpag => spriteMode ? SpriteDefinition?.Textures.FirstOrDefault()?.Texture : BackgroundDefinition?.Texture; // TODO: what happens on sprites with multiple textures?
+
+            /// <summary>
+            /// A horizontal offset used for proper tile display in the UndertaleModTool room editor.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
+            public int XOffset => X + (Tpag?.TargetX ?? 0);
+
+            /// <summary>
+            /// A vertical offset used for proper tile display in the UndertaleModTool room editor.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
+            public int YOffset => Y + (Tpag?.TargetY ?? 0);
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -1353,8 +1383,8 @@ namespace UndertaleModLib.Models
             public float SafeFrameIndex { get => FrameIndex; set { FrameIndex = Math.Clamp(value, 0, (Sprite?.Textures.Count ?? 1) - 1); OnPropertyChanged(); } }
             public float Rotation { get; set; }
             public float OppositeRotation => 360F - Rotation;
-            public int XOffset => Sprite is not null ? X - Sprite.OriginX : X;
-            public int YOffset => Sprite is not null ? Y - Sprite.OriginY : Y;
+            public int XOffset => X - (Sprite?.OriginX ?? 0);
+            public int YOffset => Y - (Sprite?.OriginY ?? 0);
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
