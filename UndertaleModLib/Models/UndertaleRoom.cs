@@ -86,7 +86,7 @@ namespace UndertaleModLib.Models
         /// </summary>
         public bool DrawBackgroundColor { get; set; } = true;
 
-        private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCodeId = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
+        private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCodeId = new();
 
         /// <summary>
         /// The creation code of this room.
@@ -438,7 +438,7 @@ namespace UndertaleModLib.Models
             /// Whether this acts as a foreground.
             /// </summary>
             public bool Foreground { get; set; } = false;
-            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>();
+            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new();
 
             /// <summary>
             /// The background asset this uses.
@@ -598,7 +598,7 @@ namespace UndertaleModLib.Models
             /// </summary>
             public int SpeedY { get; set; } = -1;
 
-            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
+            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId = new();
 
             /// <summary>
             /// The object the view should follow.
@@ -795,8 +795,8 @@ namespace UndertaleModLib.Models
             /// Whether this tile is from an asset layer. Game Maker Studio: 2 exclusive.
             /// </summary>
             public bool _SpriteMode = false;
-            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>();
-            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _SpriteDefinition = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
+            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new();
+            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _SpriteDefinition = new();
 
             /// <summary>
             /// The x coordinate of the tile in the room.
@@ -1086,7 +1086,7 @@ namespace UndertaleModLib.Models
 
             public class LayerTilesData : LayerData, INotifyPropertyChanged
             {
-                private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _Background = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>(); // In GMS2 backgrounds are just tilesets
+                private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _Background = new(); // In GMS2 backgrounds are just tilesets
                 private uint _TilesX;
                 private uint _TilesY;
                 private uint[][] _TileData; // Each is simply an ID from the tileset/background/sprite
@@ -1172,7 +1172,7 @@ namespace UndertaleModLib.Models
             {
                 private Layer _ParentLayer;
 
-                private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>(); // Apparently there's a mode where it's a background reference, but probably not necessary
+                private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new(); // Apparently there's a mode where it's a background reference, but probably not necessary
                 private bool _TiledHorizontally;
                 private bool _TiledVertically;
                 private bool _Stretch;
@@ -1338,7 +1338,7 @@ namespace UndertaleModLib.Models
 
         public class SpriteInstance : UndertaleObject, INotifyPropertyChanged
         {
-            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
+            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new();
 
             public UndertaleString Name { get; set; }
             public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sprite))); } }
@@ -1400,7 +1400,7 @@ namespace UndertaleModLib.Models
 
         public class SequenceInstance : UndertaleObject, INotifyPropertyChanged
         {
-            private UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN> _Sequence = new UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>();
+            private UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN> _Sequence = new();
 
             public UndertaleString Name { get; set; }
             public UndertaleSequence Sequence { get => _Sequence.Resource; set { _Sequence.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sequence))); } }
