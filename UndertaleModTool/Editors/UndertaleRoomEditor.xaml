@@ -1047,7 +1047,7 @@
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
                                     <!-- Giving names to transform elements prevents random "Cannot find governing FrameworkElement or FrameworkContentElement for target element." errors -->
-                                    <TranslateTransform x:Name="transform0_0" X="{Binding X, Mode=OneWay}" Y="{Binding Y, Mode=OneWay}"/>
+                                    <TranslateTransform x:Name="transform0_0" X="{Binding XOffset, Mode=OneWay}" Y="{Binding YOffset, Mode=OneWay}"/>
                                     <ScaleTransform x:Name="transform0_1" ScaleX="{Binding CalcScaleX, Mode=OneWay}" ScaleY="{Binding CalcScaleY, Mode=OneWay}" CenterX="0" CenterY="0"/>
                                 </TransformGroup>
                             </Rectangle.RenderTransform>
@@ -1069,8 +1069,8 @@
                                             <Binding Path="Stretch" Mode="OneWay"/>
                                             <!-- for notification only -->
                                             <Binding RelativeSource="{RelativeSource Self}" Path="ImageSource" Mode="OneWay"/>
-                                            <Binding Path="X" Mode="OneWay"/>
-                                            <Binding Path="Y" Mode="OneWay"/>
+                                            <Binding Path="XOffset" Mode="OneWay"/>
+                                            <Binding Path="YOffset" Mode="OneWay"/>
                                         </MultiBinding>
                                     </ImageBrush.Viewport>
                                 </ImageBrush>
@@ -1173,7 +1173,7 @@
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform x:Name="transform3_0" ScaleX="{Binding CalcScaleX, Mode=OneWay}" ScaleY="{Binding CalcScaleY, Mode=OneWay}" CenterX="0" CenterY="0"/>
-                                    <TranslateTransform x:Name="transform3_1" X="{Binding ParentLayer.XOffset, Mode=OneWay}" Y="{Binding ParentLayer.YOffset, Mode=OneWay}"/>
+                                    <TranslateTransform x:Name="transform3_1" X="{Binding XOffset, Mode=OneWay}" Y="{Binding YOffset, Mode=OneWay}"/>
                                 </TransformGroup>
                             </Rectangle.RenderTransform>
                             <Rectangle.Style>
@@ -1193,8 +1193,8 @@
                                             <Binding Path="TiledHorizontally" Mode="OneWay"/>
                                             <Binding Path="Stretch" Mode="OneWay"/>
                                             <!-- for notification only -->
-                                            <Binding RelativeSource="{RelativeSource AncestorType=Rectangle}" Path="DataContext.ParentLayer.XOffset" Mode="OneWay"/>
-                                            <Binding RelativeSource="{RelativeSource AncestorType=Rectangle}" Path="DataContext.ParentLayer.YOffset" Mode="OneWay"/>
+                                            <Binding RelativeSource="{RelativeSource AncestorType=Rectangle}" Path="XOffset" Mode="OneWay"/>
+                                            <Binding RelativeSource="{RelativeSource AncestorType=Rectangle}" Path="YOffset" Mode="OneWay"/>
                                             <Binding Path="ParentLayer.ParentRoom.Width" Mode="OneWay"/>
                                             <Binding Path="ParentLayer.ParentRoom.Height" Mode="OneWay"/>
                                             <Binding RelativeSource="{RelativeSource Self}" Path="ImageSource" Mode="OneWay"/>

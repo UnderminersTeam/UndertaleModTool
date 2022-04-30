@@ -1859,10 +1859,10 @@ namespace UndertaleModTool
                 texture = bg.BackgroundDefinition.Texture;
 
                 bg.UpdateStretch();
-                offsetV = bg.Y * (1 / bg.CalcScaleY);
-                offsetH = bg.X * (1 / bg.CalcScaleX);
-                xOffset = bg.X;
-                yOffset = bg.Y;
+                offsetV = bg.YOffset * (1 / bg.CalcScaleY);
+                offsetH = bg.XOffset * (1 / bg.CalcScaleX);
+                xOffset = bg.XOffset;
+                yOffset = bg.YOffset;
                 roomWidth = System.Convert.ToDouble(bg.ParentRoom.Width);
                 roomHeight = System.Convert.ToDouble(bg.ParentRoom.Height);
             }

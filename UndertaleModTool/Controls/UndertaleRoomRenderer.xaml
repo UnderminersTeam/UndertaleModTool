@@ -112,7 +112,7 @@
                         <Rectangle.RenderTransform>
                             <TransformGroup>
                                 <!-- Giving names to transform elements prevents random "Cannot find governing FrameworkElement or FrameworkContentElement for target element." errors -->
-                                <TranslateTransform x:Name="transform0_0" X="{Binding X, Mode=OneTime}" Y="{Binding Y, Mode=OneTime}"/>
+                                <TranslateTransform x:Name="transform0_0" X="{Binding XOffset, Mode=OneTime}" Y="{Binding YOffset, Mode=OneTime}"/>
                                 <ScaleTransform x:Name="transform0_1" ScaleX="{Binding CalcScaleX, Mode=OneWay}" ScaleY="{Binding CalcScaleY, Mode=OneWay}"  CenterX="{Binding X, Mode=OneTime}" CenterY="{Binding Y, Mode=OneTime}"/>
                             </TransformGroup>
                         </Rectangle.RenderTransform>
@@ -210,7 +210,7 @@
                         <Rectangle.RenderTransform>
                             <TransformGroup>
                                 <ScaleTransform x:Name="transform3_0" ScaleX="{Binding CalcScaleX, Mode=OneWay}" ScaleY="{Binding CalcScaleY, Mode=OneWay}" CenterX="0" CenterY="0"/>
-                                <TranslateTransform x:Name="transform3_1" X="{Binding ParentLayer.XOffset, Mode=OneWay}" Y="{Binding ParentLayer.YOffset, Mode=OneWay}"/>
+                                <TranslateTransform x:Name="transform3_1" X="{Binding XOffset, Mode=OneWay}" Y="{Binding YOffset, Mode=OneWay}"/>
                             </TransformGroup>
                         </Rectangle.RenderTransform>
                         <Rectangle.Fill>

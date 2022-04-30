@@ -486,6 +486,9 @@ namespace UndertaleModLib.Models
             /// </summary>
             public bool TiledVertically { get => TileY > 0; set { TileY = value ? 1 : 0; OnPropertyChanged(); } }
 
+            public int XOffset => X + (BackgroundDefinition?.Texture?.TargetX ?? 0);
+            public int YOffset => Y + (BackgroundDefinition?.Texture?.TargetY ?? 0);
+
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
             {
@@ -1206,6 +1209,9 @@ namespace UndertaleModLib.Models
                 public float AnimationSpeed { get; set; }
                 public AnimationSpeedType AnimationSpeedType { get; set; }
 
+                public float XOffset => (ParentLayer?.XOffset ?? 0) + (Sprite?.Textures.FirstOrDefault()?.Texture?.TargetX ?? 0);
+                public float YOffset => (ParentLayer?.YOffset ?? 0) + (Sprite?.Textures.FirstOrDefault()?.Texture?.TargetY ?? 0);
+
                 public event PropertyChangedEventHandler PropertyChanged;
                 protected void OnPropertyChanged([CallerMemberName] string name = null)
                 {
@@ -1367,8 +1373,12 @@ namespace UndertaleModLib.Models
             public float SafeFrameIndex { get => FrameIndex; set { FrameIndex = Math.Clamp(value, 0, (Sprite?.Textures.Count ?? 1) - 1); OnPropertyChanged(); } }
             public float Rotation { get; set; }
             public float OppositeRotation => 360F - Rotation;
-            public int XOffset => X - (Sprite?.OriginX ?? 0);
-            public int YOffset => Y - (Sprite?.OriginY ?? 0);
+            public int XOffset => Sprite is not null
+                                  ? X - Sprite.OriginX + (Sprite.Textures.ElementAtOrDefault((int)FrameIndex)?.Texture?.TargetX ?? 0)
+                                  : X;
+            public int YOffset => Sprite is not null
+                                  ? Y - Sprite.OriginY + (Sprite.Textures.ElementAtOrDefault((int)FrameIndex)?.Texture?.TargetY ?? 0)
+                                  : Y;
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
