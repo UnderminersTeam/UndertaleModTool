@@ -452,6 +452,120 @@ namespace UndertaleModTool
         bool placingTiles = false;
         List<Point> placedTiles = new();
 
+        private UndertaleObject AddObjectCopy(UndertaleRoom room, Layer layer, UndertaleObject obj, bool showErrors, Point pos = new())
+        {
+            if (room is null || obj is null)
+                return null;
+
+            UndertaleObject newObj = null;
+
+            if (obj is Tile tile)
+            {
+                if (layer != null && layer.AssetsData == null)
+                {
+                    MainWindow.ShowError("Please select an assets layer.");
+                    return null;
+                }
+
+                var newTile = new Tile
+                {
+                    X = (int)pos.X,
+                    Y = (int)pos.Y,
+                    spriteMode = tile.spriteMode,
+                    ObjectDefinition = tile.ObjectDefinition,
+                    SpriteDefinition = tile.SpriteDefinition,
+                    SourceX = tile.SourceX,
+                    SourceY = tile.SourceY,
+                    Width = tile.Width,
+                    Height = tile.Height,
+                    TileDepth = tile.TileDepth,
+                    InstanceID = mainWindow.Data.GeneralInfo.LastTile++,
+                    ScaleX = tile.ScaleX,
+                    ScaleY = tile.ScaleY,
+                    Color = tile.Color
+                };
+
+                newObj = newTile;
+
+                if (layer != null)
+                {
+                    layer.AssetsData.LegacyTiles.Add(newTile);
+                    roomObjDict.TryAdd(newTile.InstanceID, layer);
+                }
+                else
+                    room.Tiles.Add(newTile);
+
+                room.SetupRoom();
+            }
+            else if (obj is GameObject gameObj)
+            {
+                if (layer != null && layer.InstancesData == null)
+                {
+                    MainWindow.ShowError("Please select an instance layer.");
+                    return null;
+                }
+
+                var newGameObj = new GameObject
+                {
+                    X = (int)pos.X,
+                    Y = (int)pos.Y,
+                    ObjectDefinition = gameObj.ObjectDefinition,
+                    InstanceID = mainWindow.Data.GeneralInfo.LastObj++,
+                    CreationCode = gameObj.CreationCode,
+                    ScaleX = gameObj.ScaleX,
+                    ScaleY = gameObj.ScaleY,
+                    Color = gameObj.Color,
+                    Rotation = gameObj.Rotation,
+                    PreCreateCode = gameObj.PreCreateCode,
+                    ImageSpeed = gameObj.ImageSpeed,
+                    ImageIndex = gameObj.ImageIndex
+                };
+
+                newObj = newGameObj;
+
+                room.GameObjects.Add(newGameObj);
+                if (layer != null)
+                {
+                    layer.InstancesData.Instances.Add(newGameObj);
+                    roomObjDict.TryAdd(newGameObj.InstanceID, layer);
+                }
+            }
+            else if (obj is SpriteInstance sprInst)
+            {
+                if (layer != null && layer.AssetsData == null)
+                {
+                    MainWindow.ShowError("Please select an assets layer.");
+                    return null;
+                }
+
+                string graphicName = "graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8");
+
+                var newSprInst = new SpriteInstance
+                {
+                    Name = new UndertaleString(graphicName),
+                    Sprite = sprInst.Sprite,
+                    X = (int)pos.X,
+                    Y = (int)pos.Y,
+                    ScaleX = sprInst.ScaleX,
+                    ScaleY = sprInst.ScaleY,
+                    Color = sprInst.Color,
+                    AnimationSpeed = sprInst.AnimationSpeed,
+                    AnimationSpeedType = sprInst.AnimationSpeedType,
+                    FrameIndex = sprInst.FrameIndex,
+                    Rotation = sprInst.Rotation,
+                };
+
+                newObj = newSprInst;
+
+                if (layer != null)
+                {
+                    layer.AssetsData.Sprites.Add(newSprInst);
+                    sprInstDict.TryAdd(newSprInst, layer);
+                }
+            }
+
+            return newObj;
+        }
         private void PaintObjects(Point gridMouse, UndertaleObject other, UndertaleRoom room)
         {
             if ((Mouse.LeftButton != MouseButtonState.Pressed) || !(Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)))
@@ -480,91 +594,10 @@ namespace UndertaleModTool
             placedTiles.Add(gridMouse);
             placingTiles = true;
 
-            if (other is Tile)
-            {
-                var otherTile = other as Tile;
-                var newObj = new Tile
-                {
-                    X = (int)gridMouse.X,
-                    Y = (int)gridMouse.Y,
-                    spriteMode = otherTile.spriteMode,
-                    ObjectDefinition = otherTile.ObjectDefinition,
-                    SpriteDefinition = otherTile.SpriteDefinition,
-                    SourceX = otherTile.SourceX,
-                    SourceY = otherTile.SourceY,
-                    Width = otherTile.Width,
-                    Height = otherTile.Height,
-                    TileDepth = otherTile.TileDepth,
-                    InstanceID = mainWindow.Data.GeneralInfo.LastTile++,
-                    ScaleX = otherTile.ScaleX,
-                    ScaleY = otherTile.ScaleY,
-                    Color = otherTile.Color
-                };
+            UndertaleObject newObj = AddObjectCopy(room, layer, other, false, gridMouse);
 
-                if (layer != null)
-                {
-                    layer.AssetsData.LegacyTiles.Add(newObj);
-                    roomObjDict.TryAdd(newObj.InstanceID, layer);
-                }
-                else
-                    room.Tiles.Add(newObj);
-
+            if (newObj is not null)
                 SelectObject(newObj);
-            }
-            else if (other is GameObject)
-            {
-                var otherObject = other as GameObject;
-                var newObj = new GameObject
-                {
-                    X = (int)gridMouse.X,
-                    Y = (int)gridMouse.Y,
-                    ObjectDefinition = otherObject.ObjectDefinition,
-                    InstanceID = mainWindow.Data.GeneralInfo.LastObj++,
-                    CreationCode = otherObject.CreationCode,
-                    ScaleX = otherObject.ScaleX,
-                    ScaleY = otherObject.ScaleY,
-                    Color = otherObject.Color,
-                    Rotation = otherObject.Rotation,
-                    PreCreateCode = otherObject.PreCreateCode
-                };
-
-                room.GameObjects.Add(newObj);
-                if (layer != null)
-                {
-                    layer.InstancesData.Instances.Add(newObj);
-                    roomObjDict.TryAdd(newObj.InstanceID, layer);
-                }
-
-                SelectObject(newObj);
-            }
-            else if (other is SpriteInstance)
-            {
-                string graphicName = "graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8");
-
-                var otherObject = other as SpriteInstance;
-                var newObj = new SpriteInstance
-                {
-                    Name = new UndertaleString(graphicName),
-                    Sprite = otherObject.Sprite,
-                    X = (int)gridMouse.X,
-                    Y = (int)gridMouse.Y,
-                    ScaleX = otherObject.ScaleX,
-                    ScaleY = otherObject.ScaleY,
-                    Color = otherObject.Color,
-                    AnimationSpeed = otherObject.AnimationSpeed,
-                    AnimationSpeedType = otherObject.AnimationSpeedType,
-                    FrameIndex = otherObject.FrameIndex,
-                    Rotation = otherObject.Rotation,
-                };
-
-                if (layer != null)
-                {
-                    layer.AssetsData.Sprites.Add(newObj);
-                    sprInstDict.TryAdd(newObj, layer);
-                }
-
-                SelectObject(newObj);
-            }
         }
 
         private void RectangleBackground_MouseDown(object sender, MouseButtonEventArgs e)
@@ -895,12 +928,12 @@ namespace UndertaleModTool
                     Layer layer = ObjectEditor.Content as Layer;
                     if (mainWindow.IsGMS2 == Visibility.Visible && layer == null)
                     {
-                        MainWindow.ShowError("Must have a layer selected");
+                        MainWindow.ShowError("Please select a layer.");
                         return;
                     }
                     if (layer != null && layer.InstancesData == null)
                     {
-                        MainWindow.ShowError("Must be on an instances layer");
+                        MainWindow.ShowError("Please select an instances layer.");
                         return;
                     }
 
@@ -1133,88 +1166,35 @@ namespace UndertaleModTool
                 Debug.WriteLine("Paste");
                 Debug.WriteLine(obj);
             }*/
-
+            
             if (copied != null)
             {
                 UndertaleRoom room = this.DataContext as UndertaleRoom;
-
                 Layer layer = null;
                 if (room.Layers.Count > 0)
-                    layer = copied switch
+                {
+                    object utObj = ObjectEditor.Content;
+                    layer = utObj switch
                     {
-                        Tile or GameObject => roomObjDict[(copied as RoomObject).InstanceID],
+                        Tile or GameObject => roomObjDict[(utObj as RoomObject).InstanceID],
                         SpriteInstance spr => sprInstDict[spr],
+                        Layer l => l,
                         _ => null
                     };
+                }
 
                 if (mainWindow.IsGMS2 == Visibility.Visible && layer == null)
                 {
-                    MainWindow.ShowError("Must paste onto a layer");
+                    MainWindow.ShowError("Please select a layer.");
                     return;
                 }
 
-                if (copied is GameObject)
-                {
-                    if (layer != null && layer.InstancesData == null)
-                    {
-                        MainWindow.ShowError("Must be on an instances layer");
-                        return;
-                    }
-                    var other = copied as GameObject;
-                    var obj = new GameObject();
-                    obj.X = other.X;
-                    obj.Y = other.Y;
-                    obj.ObjectDefinition = other.ObjectDefinition;
-                    obj.InstanceID = mainWindow.Data.GeneralInfo.LastObj++;
-                    obj.CreationCode = other.CreationCode;
-                    obj.ScaleX = other.ScaleX;
-                    obj.ScaleY = other.ScaleY;
-                    obj.Color = other.Color;
-                    obj.Rotation = other.Rotation;
-                    obj.PreCreateCode = other.PreCreateCode;
-                    room.GameObjects.Add(obj);
-                    if (layer != null)
-                    {
-                        roomObjDict.TryAdd(obj.InstanceID, layer);
-                        layer.InstancesData.Instances.Add(obj);
-                    }
+                Point mousePos = roomCanvas.IsMouseOver ? Mouse.GetPosition(roomCanvas) : new();
+                UndertaleObject newObj = AddObjectCopy(room, layer, copied, true, mousePos);
 
-                    SelectObject(obj);
-                }
-                if (copied is Tile)
-                {
-                    if (layer != null && layer.AssetsData == null)
-                    {
-                        MainWindow.ShowError("Must be on an assets layer");
-                        return;
-                    }
-                    var other = copied as Tile;
-                    var obj = new Tile();
-                    obj.X = other.X;
-                    obj.Y = other.Y;
-                    obj.spriteMode = other.spriteMode;
-                    obj.ObjectDefinition = other.ObjectDefinition;
-                    obj.SourceX = other.SourceX;
-                    obj.SourceY = other.SourceY;
-                    obj.Width = other.Width;
-                    obj.Height = other.Height;
-                    obj.TileDepth = other.TileDepth;
-                    obj.InstanceID = mainWindow.Data.GeneralInfo.LastTile++;
-                    obj.ScaleX = other.ScaleX;
-                    obj.ScaleY = other.ScaleY;
-                    obj.Color = other.Color;
-                    if (layer != null)
-                    {
-                        roomObjDict.TryAdd(obj.InstanceID, layer);
-                        layer.AssetsData.LegacyTiles.Add(obj);
-                    }
-                    else
-                        room.Tiles.Add(obj);
-                    SelectObject(obj);
-                }
+                if (newObj is not null)
+                    SelectObject(newObj);
             }
-
-            (this.DataContext as UndertaleRoom)?.SetupRoom(false);
         }
 
         private void AddLayer<T>(LayerType type, string name) where T : Layer.LayerData, new()
