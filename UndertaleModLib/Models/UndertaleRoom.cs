@@ -728,10 +728,25 @@ namespace UndertaleModLib.Models
             public int ImageIndex { get; set; }
 
             /// <summary>
-            /// A wrapper of <see cref="ImageIndex"/> that prevents using an out of bounds index.
+            /// A wrapper for <see cref="ImageIndex"/> that returns the value being wrapped around available frames of the sprite
             /// </summary>
-            public int SafeImageIndex { get => ImageIndex; set { ImageIndex = Math.Clamp(value, 0, (ObjectDefinition?.Sprite?.Textures.Count ?? 1) - 1); OnPropertyChanged(); } }
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
+            public int WrappedImageIndex
+            { 
+                get
+                {
+                    if (ObjectDefinition?.Sprite is null)
+                        return 0;
 
+                    int count = ObjectDefinition.Sprite.Textures.Count;
+                    if (count == 0)
+                        return 0;
+
+                    return ((ImageIndex % count) + count) % count;
+                }
+            }
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -1383,7 +1398,20 @@ namespace UndertaleModLib.Models
             public float AnimationSpeed { get; set; }
             public AnimationSpeedType AnimationSpeedType { get; set; }
             public float FrameIndex { get; set; }
-            public float SafeFrameIndex { get => FrameIndex; set { FrameIndex = Math.Clamp(value, 0, (Sprite?.Textures.Count ?? 1) - 1); OnPropertyChanged(); } }
+            public int WrappedFrameIndex
+            {
+                get
+                {
+                    if (Sprite is null)
+                        return 0;
+
+                    int count = Sprite.Textures.Count;
+                    if (count == 0)
+                        return 0;
+
+                    return (((int)FrameIndex % count) + count) % count;
+                }
+            }
             public float Rotation { get; set; }
             public float OppositeRotation => 360F - Rotation;
             public int XOffset => Sprite is not null

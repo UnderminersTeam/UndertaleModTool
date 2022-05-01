@@ -571,7 +571,7 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Frame index</TextBlock>
-                                <TextBox Grid.Row="0" Grid.Column="2" Margin="3" Text="{Binding SafeImageIndex}"/>
+                                <TextBox Grid.Row="0" Grid.Column="2" Margin="3" Text="{Binding ImageIndex}"/>
 
                                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Image speed</TextBlock>
                                 <TextBox Grid.Row="1" Grid.Column="2" Margin="3" Text="{Binding ImageSpeed}"/>
@@ -959,7 +959,7 @@
                             </Grid>
 
                             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Frame index</TextBlock>
-                            <TextBox Grid.Row="7" Grid.Column="2" Margin="3" Text="{Binding SafeFrameIndex}"/>
+                            <TextBox Grid.Row="7" Grid.Column="2" Margin="3" Text="{Binding FrameIndex}"/>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Rotation</TextBlock>
                             <TextBox Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
@@ -1098,7 +1098,7 @@
                                     <ImageBrush.ImageSource>
                                         <MultiBinding Converter="{StaticResource CachedImageLoaderWithIndex}">
                                             <Binding Path="ObjectDefinition.Sprite.Textures" Mode="OneWay"/>
-                                            <Binding Path="ImageIndex" Mode="OneWay"/>
+                                            <Binding Path="WrappedImageIndex" Mode="OneWay"/>
                                         </MultiBinding>
                                     </ImageBrush.ImageSource>
                                 </ImageBrush>
@@ -1153,7 +1153,7 @@
                                     <ImageBrush.ImageSource>
                                         <MultiBinding Converter="{StaticResource CachedImageLoaderWithIndex}">
                                             <Binding Path="Sprite.Textures" Mode="OneWay"/>
-                                            <Binding Path="FrameIndex" Mode="OneWay"/>
+                                            <Binding Path="WrappedFrameIndex" Mode="OneWay"/>
                                         </MultiBinding>
                                     </ImageBrush.ImageSource>
                                 </ImageBrush>

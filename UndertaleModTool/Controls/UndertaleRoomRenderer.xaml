@@ -152,7 +152,7 @@
                                 <ImageBrush.ImageSource>
                                     <MultiBinding Converter="{StaticResource CachedImageLoaderWithIndex}" Mode="OneTime">
                                         <Binding Path="ObjectDefinition.Sprite.Textures" Mode="OneTime"/>
-                                        <Binding Path="ImageIndex" Mode="OneTime"/>
+                                        <Binding Path="WrappedImageIndex" Mode="OneTime"/>
                                     </MultiBinding>
                                 </ImageBrush.ImageSource>
                             </ImageBrush>
@@ -191,7 +191,7 @@
                                 <ImageBrush.ImageSource>
                                     <MultiBinding Converter="{StaticResource CachedImageLoaderWithIndex}" Mode="OneTime">
                                         <Binding Path="Sprite.Textures" Mode="OneTime"/>
-                                        <Binding Path="FrameIndex" Mode="OneTime"/>
+                                        <Binding Path="WrappedFrameIndex" Mode="OneTime"/>
                                     </MultiBinding>
                                 </ImageBrush.ImageSource>
                             </ImageBrush>
