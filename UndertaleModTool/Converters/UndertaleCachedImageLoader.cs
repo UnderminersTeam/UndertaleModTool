@@ -119,8 +119,8 @@ namespace UndertaleModTool
 
                 if (isTile)
                 {
-                    diffW = (int)(tile.SourceX + texture.TargetX + tile.Width - texture.BoundingWidth);
-                    diffH = (int)(tile.SourceY + texture.TargetY + tile.Height - texture.BoundingHeight);
+                    diffW = (int)(tile.SourceX + tile.Width - texture.SourceWidth);
+                    diffH = (int)(tile.SourceY + tile.Height - texture.SourceHeight);
                     rect = new((int)(texture.SourceX + tile.SourceX), (int)(texture.SourceY + tile.SourceY), (int)tile.Width, (int)tile.Height);
                 }
                 else
