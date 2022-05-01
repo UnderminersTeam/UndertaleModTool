@@ -1393,10 +1393,10 @@ namespace UndertaleModLib.Models
             public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sprite))); } }
             public int X { get; set; }
             public int Y { get; set; }
-            public float ScaleX { get; set; }
-            public float ScaleY { get; set; }
-            public uint Color { get; set; }
-            public float AnimationSpeed { get; set; }
+            public float ScaleX { get; set; } = 1;
+            public float ScaleY { get; set; } = 1;
+            public uint Color { get; set; } = 0xFFFFFFFF;
+            public float AnimationSpeed { get; set; } = 1;
             public AnimationSpeedType AnimationSpeedType { get; set; }
             public float FrameIndex { get; set; }
             public int WrappedFrameIndex
