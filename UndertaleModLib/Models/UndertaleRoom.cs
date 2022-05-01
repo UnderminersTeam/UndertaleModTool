@@ -682,7 +682,7 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// The game object that is used.
             /// </summary>
-            public UndertaleGameObject ObjectDefinition { get => _objectDefinition.Resource; set { _objectDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("CurrentTexture"); } }
+            public UndertaleGameObject ObjectDefinition { get => _objectDefinition.Resource; set { _objectDefinition.Resource = value; OnPropertyChanged(); } }
 
             /// <summary>
             /// The instance id of this object.
