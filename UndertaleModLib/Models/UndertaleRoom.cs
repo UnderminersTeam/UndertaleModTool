@@ -486,7 +486,20 @@ namespace UndertaleModLib.Models
             /// </summary>
             public bool TiledVertically { get => TileY > 0; set { TileY = value ? 1 : 0; OnPropertyChanged(); } }
 
+            /// <summary>
+            /// A horizontal offset used for proper background display in the UndertaleModTool room editor.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public int XOffset => X + (BackgroundDefinition?.Texture?.TargetX ?? 0);
+
+            /// <summary>
+            /// A vertical offset used for proper background display in the UndertaleModTool room editor.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public int YOffset => Y + (BackgroundDefinition?.Texture?.TargetY ?? 0);
 
             public event PropertyChangedEventHandler PropertyChanged;
