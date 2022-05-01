@@ -223,7 +223,7 @@ namespace UndertaleModTool
                 // (for example, tile 10055649 of "room_fire_core_topright")
                 // (both examples are from Undertale)
                 // This algorithm doesn't support that, so this tile will be processed by "CreateSpriteSource()"
-                if (w > data.Width || h > data.Height || x + w > data.Width || y + h > data.Height)
+                if (w > data.Width || h > data.Height || x < 0 || y < 0 || x + w > data.Width || y + h > data.Height)
                     return;
 
                 int bufferResLen = w * h * depth;
