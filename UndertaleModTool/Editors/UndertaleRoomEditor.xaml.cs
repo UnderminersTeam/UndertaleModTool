@@ -1698,7 +1698,7 @@ namespace UndertaleModTool
 
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values.Any(x => x is null))
+            if (values.Any(x => x is null || x == DependencyProperty.UnsetValue))
                 return null;
 
             bool isGMS2 = ((RoomEntryFlags)values[1]).HasFlag(RoomEntryFlags.IsGMS2);

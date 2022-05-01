@@ -1193,8 +1193,8 @@
                                             <Binding Path="TiledHorizontally" Mode="OneWay"/>
                                             <Binding Path="Stretch" Mode="OneWay"/>
                                             <!-- for notification only -->
-                                            <Binding RelativeSource="{RelativeSource AncestorType=Rectangle}" Path="XOffset" Mode="OneWay"/>
-                                            <Binding RelativeSource="{RelativeSource AncestorType=Rectangle}" Path="YOffset" Mode="OneWay"/>
+                                            <Binding Path="XOffset" Mode="OneWay"/>
+                                            <Binding Path="YOffset" Mode="OneWay"/>
                                             <Binding Path="ParentLayer.ParentRoom.Width" Mode="OneWay"/>
                                             <Binding Path="ParentLayer.ParentRoom.Height" Mode="OneWay"/>
                                             <Binding RelativeSource="{RelativeSource Self}" Path="ImageSource" Mode="OneWay"/>

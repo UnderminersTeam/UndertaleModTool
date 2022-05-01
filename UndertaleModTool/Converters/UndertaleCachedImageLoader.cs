@@ -97,7 +97,7 @@ namespace UndertaleModTool
             if (tileRectList is not null)
             {
                 Rectangle rect = new(texture.SourceX, texture.SourceY, texture.SourceWidth, texture.SourceHeight);
-                ProcessTileSet(texName, CreateSpriteBitmap(rect, in texture), tileRectList);
+                ProcessTileSet(texName, CreateSpriteBitmap(rect, in texture), tileRectList, texture.TargetX, texture.TargetY);
 
                 return null;
             }
@@ -119,14 +119,14 @@ namespace UndertaleModTool
 
                 if (isTile)
                 {
-                    diffW = (int)(tile.SourceX + tile.Width - texture.BoundingWidth);
-                    diffH = (int)(tile.SourceY + tile.Height - texture.BoundingHeight);
+                    diffW = (int)(tile.SourceX + texture.TargetX + tile.Width - texture.BoundingWidth);
+                    diffH = (int)(tile.SourceY + texture.TargetY + tile.Height - texture.BoundingHeight);
                     rect = new((int)(texture.SourceX + tile.SourceX), (int)(texture.SourceY + tile.SourceY), (int)tile.Width, (int)tile.Height);
                 }
                 else
                     rect = new(texture.SourceX, texture.SourceY, texture.SourceWidth, texture.SourceHeight);
 
-                spriteSrc = CreateSpriteSource(in rect, in texture, diffW, diffH);
+                spriteSrc = CreateSpriteSource(in rect, in texture, diffW, diffH, isTile);
 
                 if (cacheEnabled)
                 {
@@ -153,25 +153,27 @@ namespace UndertaleModTool
             currBufferSize = 1048576;
         }
 
-        public static Bitmap CreateSpriteBitmap(Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0)
+        public static Bitmap CreateSpriteBitmap(Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
         {
             using MemoryStream stream = new(texture.TexturePage.TextureData.TextureBlob);
             Bitmap spriteBMP = new(rect.Width, rect.Height);
 
             rect.Width -= (diffW > 0) ? diffW : 0;
             rect.Height -= (diffH > 0) ? diffH : 0;
+            int x = isTile ? texture.TargetX : 0;
+            int y = isTile ? texture.TargetY : 0;
 
             using (Graphics g = Graphics.FromImage(spriteBMP))
             {
                 using Image img = Image.FromStream(stream); // "ImageConverter.ConvertFrom()" does the same, except it doesn't explicitly dispose MemoryStream
-                g.DrawImage(img, new Rectangle(0, 0, rect.Width, rect.Height), rect, GraphicsUnit.Pixel);
+                g.DrawImage(img, new Rectangle(x, y, rect.Width, rect.Height), rect, GraphicsUnit.Pixel);
             }
 
             return spriteBMP;
         }
-        private ImageSource CreateSpriteSource(in Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0)
+        private ImageSource CreateSpriteSource(in Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
         {
-            Bitmap spriteBMP = CreateSpriteBitmap(rect, in texture, diffW, diffH);
+            Bitmap spriteBMP = CreateSpriteBitmap(rect, in texture, diffW, diffH, isTile);
 
             IntPtr bmpPtr = spriteBMP.GetHbitmap();
             ImageSource spriteSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(bmpPtr, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
@@ -181,7 +183,7 @@ namespace UndertaleModTool
 
             return spriteSrc;
         }
-        private void ProcessTileSet(string textureName, Bitmap bmp, List<Tuple<uint, uint, uint, uint>> tileRectList)
+        private void ProcessTileSet(string textureName, Bitmap bmp, List<Tuple<uint, uint, uint, uint>> tileRectList, int targetX, int targetY)
         {
             BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, bmp.PixelFormat);
             int depth = Image.GetPixelFormatSize(data.PixelFormat) / 8;
@@ -205,8 +207,10 @@ namespace UndertaleModTool
 
             _ = Parallel.ForEach(tileRectList, (tileRect) =>
             {
-                int x = (int)tileRect.Item1;
-                int y = (int)tileRect.Item2;
+                int origX = (int)tileRect.Item1;
+                int origY = (int)tileRect.Item2;
+                int x = origX - targetX;
+                int y = origY - targetY;
                 int w = (int)tileRect.Item3;
                 int h = (int)tileRect.Item4;
 
@@ -251,7 +255,7 @@ namespace UndertaleModTool
 
                 spriteSrc.Freeze(); // allow UI thread access
 
-                Tuple<string, Tuple<uint, uint, uint, uint>> tileKey = new(textureName, new((uint)x, (uint)y, (uint)w, (uint)h));
+                Tuple<string, Tuple<uint, uint, uint, uint>> tileKey = new(textureName, new((uint)origX, (uint)origY, (uint)w, (uint)h));
                 tileCache.TryAdd(tileKey, spriteSrc);
             });
 
