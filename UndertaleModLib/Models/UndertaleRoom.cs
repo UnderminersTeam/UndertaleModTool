@@ -728,7 +728,8 @@ namespace UndertaleModLib.Models
             public int ImageIndex { get; set; }
 
             /// <summary>
-            /// A wrapper for <see cref="ImageIndex"/> that returns the value being wrapped around available frames of the sprite
+            /// A wrapper for <see cref="ImageIndex"/> that returns the value being wrapped around available frames of the sprite.<br/>
+            /// For example, if this sprite has 3 frames, and the index is 5, then this will return 2.
             /// </summary>
             /// <remarks>
             /// This attribute is UMT-only and does not exist in GameMaker.
