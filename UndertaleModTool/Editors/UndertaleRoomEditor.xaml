@@ -571,7 +571,7 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Frame index</TextBlock>
-                                <TextBox Grid.Row="0" Grid.Column="2" Margin="3" Text="{Binding SafeImageIndex}"/>
+                                <TextBox Grid.Row="0" Grid.Column="2" Margin="3" Text="{Binding ImageIndex}"/>
 
                                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Image speed</TextBlock>
                                 <TextBox Grid.Row="1" Grid.Column="2" Margin="3" Text="{Binding ImageSpeed}"/>
@@ -959,7 +959,7 @@
                             </Grid>
 
                             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Frame index</TextBlock>
-                            <TextBox Grid.Row="7" Grid.Column="2" Margin="3" Text="{Binding SafeFrameIndex}"/>
+                            <TextBox Grid.Row="7" Grid.Column="2" Margin="3" Text="{Binding FrameIndex}"/>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Rotation</TextBlock>
                             <TextBox Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
@@ -1047,7 +1047,7 @@
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
                                     <!-- Giving names to transform elements prevents random "Cannot find governing FrameworkElement or FrameworkContentElement for target element." errors -->
-                                    <TranslateTransform x:Name="transform0_0" X="{Binding X, Mode=OneWay}" Y="{Binding Y, Mode=OneWay}"/>
+                                    <TranslateTransform x:Name="transform0_0" X="{Binding XOffset, Mode=OneWay}" Y="{Binding YOffset, Mode=OneWay}"/>
                                     <ScaleTransform x:Name="transform0_1" ScaleX="{Binding CalcScaleX, Mode=OneWay}" ScaleY="{Binding CalcScaleY, Mode=OneWay}" CenterX="0" CenterY="0"/>
                                 </TransformGroup>
                             </Rectangle.RenderTransform>
@@ -1069,8 +1069,8 @@
                                             <Binding Path="Stretch" Mode="OneWay"/>
                                             <!-- for notification only -->
                                             <Binding RelativeSource="{RelativeSource Self}" Path="ImageSource" Mode="OneWay"/>
-                                            <Binding Path="X" Mode="OneWay"/>
-                                            <Binding Path="Y" Mode="OneWay"/>
+                                            <Binding Path="XOffset" Mode="OneWay"/>
+                                            <Binding Path="YOffset" Mode="OneWay"/>
                                         </MultiBinding>
                                     </ImageBrush.Viewport>
                                 </ImageBrush>
@@ -1078,7 +1078,7 @@
                         </Rectangle>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
-                        <Rectangle Width="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth, Mode=OneWay}" Height="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight, Mode=OneWay}"
+                        <Rectangle Width="{Binding Fill.ImageSource.Width, RelativeSource={RelativeSource Self}, Mode=OneWay}" Height="{Binding Fill.ImageSource.Height, RelativeSource={RelativeSource Self}, Mode=OneWay}"
                                    MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp"
                                    Opacity="{Binding Color, Mode=OneWay, Converter={StaticResource ColorToOpacityConverter}}">
                             <Rectangle.Style>
@@ -1098,7 +1098,7 @@
                                     <ImageBrush.ImageSource>
                                         <MultiBinding Converter="{StaticResource CachedImageLoaderWithIndex}">
                                             <Binding Path="ObjectDefinition.Sprite.Textures" Mode="OneWay"/>
-                                            <Binding Path="ImageIndex" Mode="OneWay"/>
+                                            <Binding Path="WrappedImageIndex" Mode="OneWay"/>
                                         </MultiBinding>
                                     </ImageBrush.ImageSource>
                                 </ImageBrush>
@@ -1133,7 +1133,7 @@
                         </Rectangle>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+SpriteInstance}">
-                        <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth, Mode=OneWay}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight, Mode=OneWay}"
+                        <Rectangle Width="{Binding Fill.ImageSource.Width, RelativeSource={RelativeSource Self}, Mode=OneWay}" Height="{Binding Fill.ImageSource.Height, RelativeSource={RelativeSource Self}, Mode=OneWay}"
                                    MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp"
                                    Opacity="{Binding Color, Mode=OneWay, Converter={StaticResource ColorToOpacityConverter}}">
                             <Rectangle.Style>
@@ -1153,7 +1153,7 @@
                                     <ImageBrush.ImageSource>
                                         <MultiBinding Converter="{StaticResource CachedImageLoaderWithIndex}">
                                             <Binding Path="Sprite.Textures" Mode="OneWay"/>
-                                            <Binding Path="FrameIndex" Mode="OneWay"/>
+                                            <Binding Path="WrappedFrameIndex" Mode="OneWay"/>
                                         </MultiBinding>
                                     </ImageBrush.ImageSource>
                                 </ImageBrush>
@@ -1173,7 +1173,7 @@
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform x:Name="transform3_0" ScaleX="{Binding CalcScaleX, Mode=OneWay}" ScaleY="{Binding CalcScaleY, Mode=OneWay}" CenterX="0" CenterY="0"/>
-                                    <TranslateTransform x:Name="transform3_1" X="{Binding ParentLayer.XOffset, Mode=OneWay}" Y="{Binding ParentLayer.YOffset, Mode=OneWay}"/>
+                                    <TranslateTransform x:Name="transform3_1" X="{Binding XOffset, Mode=OneWay}" Y="{Binding YOffset, Mode=OneWay}"/>
                                 </TransformGroup>
                             </Rectangle.RenderTransform>
                             <Rectangle.Style>
@@ -1193,8 +1193,8 @@
                                             <Binding Path="TiledHorizontally" Mode="OneWay"/>
                                             <Binding Path="Stretch" Mode="OneWay"/>
                                             <!-- for notification only -->
-                                            <Binding RelativeSource="{RelativeSource AncestorType=Rectangle}" Path="DataContext.ParentLayer.XOffset" Mode="OneWay"/>
-                                            <Binding RelativeSource="{RelativeSource AncestorType=Rectangle}" Path="DataContext.ParentLayer.YOffset" Mode="OneWay"/>
+                                            <Binding Path="XOffset" Mode="OneWay"/>
+                                            <Binding Path="YOffset" Mode="OneWay"/>
                                             <Binding Path="ParentLayer.ParentRoom.Width" Mode="OneWay"/>
                                             <Binding Path="ParentLayer.ParentRoom.Height" Mode="OneWay"/>
                                             <Binding RelativeSource="{RelativeSource Self}" Path="ImageSource" Mode="OneWay"/>

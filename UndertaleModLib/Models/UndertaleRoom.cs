@@ -86,7 +86,7 @@ namespace UndertaleModLib.Models
         /// </summary>
         public bool DrawBackgroundColor { get; set; } = true;
 
-        private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCodeId = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
+        private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCodeId = new();
 
         /// <summary>
         /// The creation code of this room.
@@ -438,7 +438,7 @@ namespace UndertaleModLib.Models
             /// Whether this acts as a foreground.
             /// </summary>
             public bool Foreground { get; set; } = false;
-            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>();
+            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new();
 
             /// <summary>
             /// The background asset this uses.
@@ -485,6 +485,22 @@ namespace UndertaleModLib.Models
             /// Whether this background is tiled vertically.
             /// </summary>
             public bool TiledVertically { get => TileY > 0; set { TileY = value ? 1 : 0; OnPropertyChanged(); } }
+
+            /// <summary>
+            /// A horizontal offset used for proper background display in the UndertaleModTool room editor.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
+            public int XOffset => X + (BackgroundDefinition?.Texture?.TargetX ?? 0);
+
+            /// <summary>
+            /// A vertical offset used for proper background display in the UndertaleModTool room editor.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
+            public int YOffset => Y + (BackgroundDefinition?.Texture?.TargetY ?? 0);
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -598,7 +614,7 @@ namespace UndertaleModLib.Models
             /// </summary>
             public int SpeedY { get; set; } = -1;
 
-            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
+            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId = new();
 
             /// <summary>
             /// The object the view should follow.
@@ -649,9 +665,9 @@ namespace UndertaleModLib.Models
         /// </summary>
         public class GameObject : UndertaleObjectLenCheck, RoomObject, INotifyPropertyChanged
         {
-            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectDefinition = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
-            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CreationCode = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
-            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _PreCreateCode = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
+            private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _objectDefinition = new();
+            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _creationCode = new();
+            private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _preCreateCode = new();
 
             /// <summary>
             /// The x coordinate of this object.
@@ -666,7 +682,7 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// The game object that is used.
             /// </summary>
-            public UndertaleGameObject ObjectDefinition { get => _ObjectDefinition.Resource; set { _ObjectDefinition.Resource = value; OnPropertyChanged(); } }
+            public UndertaleGameObject ObjectDefinition { get => _objectDefinition.Resource; set { _objectDefinition.Resource = value; OnPropertyChanged(); } }
 
             /// <summary>
             /// The instance id of this object.
@@ -676,7 +692,7 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// The creation code for this object.
             /// </summary>
-            public UndertaleCode CreationCode { get => _CreationCode.Resource; set { _CreationCode.Resource = value; OnPropertyChanged(); } }
+            public UndertaleCode CreationCode { get => _creationCode.Resource; set { _creationCode.Resource = value; OnPropertyChanged(); } }
 
             /// <summary>
             /// The x scale that's applied for this object.
@@ -699,7 +715,7 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// The pre creation code of this object.
             /// </summary>
-            public UndertaleCode PreCreateCode { get => _PreCreateCode.Resource; set { _PreCreateCode.Resource = value; OnPropertyChanged(); } }
+            public UndertaleCode PreCreateCode { get => _preCreateCode.Resource; set { _preCreateCode.Resource = value; OnPropertyChanged(); } }
 
             /// <summary>
             /// The image speed of this object. Game Maker: Studio 2 only.
@@ -710,10 +726,28 @@ namespace UndertaleModLib.Models
             /// The image index of this object. Game Maker: Studio 2 only.
             /// </summary>
             public int ImageIndex { get; set; }
+
             /// <summary>
-            /// A wrapper of <see cref="ImageIndex"/> that prevents using an out of bounds index.
+            /// A wrapper for <see cref="ImageIndex"/> that returns the value being wrapped around available frames of the sprite.<br/>
+            /// For example, if this sprite has 3 frames, and the index is 5, then this will return 2.
             /// </summary>
-            public int SafeImageIndex { get => ImageIndex; set { ImageIndex = Math.Clamp(value, 0, (ObjectDefinition?.Sprite?.Textures?.Count ?? 1) - 1); OnPropertyChanged(); } }
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
+            public int WrappedImageIndex
+            { 
+                get
+                {
+                    if (ObjectDefinition?.Sprite is null)
+                        return 0;
+
+                    int count = ObjectDefinition.Sprite.Textures.Count;
+                    if (count == 0)
+                        return 0;
+
+                    return ((ImageIndex % count) + count) % count;
+                }
+            }
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -725,20 +759,34 @@ namespace UndertaleModLib.Models
             /// The opposite angle of the current rotation.
             /// </summary>
             public float OppositeRotation => 360F - (Rotation % 360);
-            public int XOffset => ObjectDefinition.Sprite != null
-                                  ? X - ObjectDefinition.Sprite.OriginX + (ObjectDefinition.Sprite.Textures.FirstOrDefault()?.Texture?.TargetX ?? 0)
+
+            /// <summary>
+            /// A horizontal offset used for proper game object display in the UndertaleModTool room editor.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
+            public int XOffset => ObjectDefinition?.Sprite != null
+                                  ? X - ObjectDefinition.Sprite.OriginX + (ObjectDefinition.Sprite.Textures.ElementAtOrDefault(ImageIndex)?.Texture?.TargetX ?? 0)
                                   : X;
-            public int YOffset => ObjectDefinition.Sprite != null
-                                  ? Y - ObjectDefinition.Sprite.OriginY + (ObjectDefinition.Sprite.Textures.FirstOrDefault()?.Texture?.TargetY ?? 0)
+
+            /// <summary>
+            /// A vertical offset used for proper game object display in the UndertaleModTool room editor.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
+            public int YOffset => ObjectDefinition?.Sprite != null
+                                  ? Y - ObjectDefinition.Sprite.OriginY + (ObjectDefinition.Sprite.Textures.ElementAtOrDefault(ImageIndex)?.Texture?.TargetY ?? 0)
                                   : Y;
 
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(X);
                 writer.Write(Y);
-                writer.WriteUndertaleObject(_ObjectDefinition);
+                writer.WriteUndertaleObject(_objectDefinition);
                 writer.Write(InstanceID);
-                writer.WriteUndertaleObject(_CreationCode);
+                writer.WriteUndertaleObject(_creationCode);
                 writer.Write(ScaleX);
                 writer.Write(ScaleY);
                 if (writer.undertaleData.GMS2_2_2_302)
@@ -749,7 +797,7 @@ namespace UndertaleModLib.Models
                 writer.Write(Color);
                 writer.Write(Rotation);
                 if (writer.undertaleData.GeneralInfo.BytecodeVersion >= 16) // TODO: is that dependent on bytecode or something else?
-                    writer.WriteUndertaleObject(_PreCreateCode);         // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
+                    writer.WriteUndertaleObject(_preCreateCode);         // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
             }
 
             public void Unserialize(UndertaleReader reader)
@@ -761,9 +809,9 @@ namespace UndertaleModLib.Models
             {
                 X = reader.ReadInt32();
                 Y = reader.ReadInt32();
-                _ObjectDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
+                _objectDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
                 InstanceID = reader.ReadUInt32();
-                _CreationCode = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
+                _creationCode = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
                 ScaleX = reader.ReadSingle();
                 ScaleY = reader.ReadSingle();
                 if (length == 48)
@@ -775,7 +823,7 @@ namespace UndertaleModLib.Models
                 Color = reader.ReadUInt32();
                 Rotation = reader.ReadSingle();
                 if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 16) // TODO: is that dependent on bytecode or something else?
-                    _PreCreateCode = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>(); // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
+                    _preCreateCode = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>(); // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
             }
 
             public override string ToString()
@@ -792,9 +840,9 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// Whether this tile is from an asset layer. Game Maker Studio: 2 exclusive.
             /// </summary>
-            public bool _SpriteMode = false;
-            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>();
-            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _SpriteDefinition = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
+            public bool spriteMode = false;
+            private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _backgroundDefinition = new();
+            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _spriteDefinition = new();
 
             /// <summary>
             /// The x coordinate of the tile in the room.
@@ -809,18 +857,18 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// From which tileset / background the tile stems from.
             /// </summary>
-            public UndertaleBackground BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("ObjectDefinition"); } }
+            public UndertaleBackground BackgroundDefinition { get => _backgroundDefinition.Resource; set { _backgroundDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("ObjectDefinition"); } }
 
             /// <summary>
             /// From which sprite this tile stems from.
             /// </summary>
-            public UndertaleSprite SpriteDefinition { get => _SpriteDefinition.Resource; set { _SpriteDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("ObjectDefinition"); } }
+            public UndertaleSprite SpriteDefinition { get => _spriteDefinition.Resource; set { _spriteDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("ObjectDefinition"); } }
 
             /// <summary>
             /// From which object this tile stems from.
-            /// Will return a <see cref="UndertaleBackground"/> if <see cref="_SpriteMode"/> is disabled, a <see cref="UndertaleSprite"/> if it's enabled.
+            /// Will return a <see cref="UndertaleBackground"/> if <see cref="spriteMode"/> is disabled, a <see cref="UndertaleSprite"/> if it's enabled.
             /// </summary>
-            public UndertaleNamedResource ObjectDefinition { get => _SpriteMode ? SpriteDefinition : BackgroundDefinition; set { if (_SpriteMode) SpriteDefinition = (UndertaleSprite)value; else BackgroundDefinition = (UndertaleBackground)value; } }
+            public UndertaleNamedResource ObjectDefinition { get => spriteMode ? SpriteDefinition : BackgroundDefinition; set { if (spriteMode) SpriteDefinition = (UndertaleSprite)value; else BackgroundDefinition = (UndertaleBackground)value; } }
 
             /// <summary>
             /// The x coordinate of the tile in <see cref="ObjectDefinition"/>.
@@ -865,7 +913,7 @@ namespace UndertaleModLib.Models
             //TODO?
             public uint Color { get; set; } = 0xFFFFFFFF;
 
-            public UndertaleTexturePageItem Tpag => _SpriteMode ? SpriteDefinition?.Textures?.FirstOrDefault()?.Texture : BackgroundDefinition?.Texture; // TODO: what happens on sprites with multiple textures?
+            public UndertaleTexturePageItem Tpag => spriteMode ? SpriteDefinition?.Textures.FirstOrDefault()?.Texture : BackgroundDefinition?.Texture; // TODO: what happens on sprites with multiple textures?
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -877,12 +925,12 @@ namespace UndertaleModLib.Models
             {
                 writer.Write(X);
                 writer.Write(Y);
-                if (_SpriteMode != (writer.undertaleData.GeneralInfo.Major >= 2))
+                if (spriteMode != (writer.undertaleData.GeneralInfo.Major >= 2))
                     throw new Exception("Unsupported in GMS" + writer.undertaleData.GeneralInfo.Major);
-                if (_SpriteMode)
-                    writer.WriteUndertaleObject(_SpriteDefinition);
+                if (spriteMode)
+                    writer.WriteUndertaleObject(_spriteDefinition);
                 else
-                    writer.WriteUndertaleObject(_BackgroundDefinition);
+                    writer.WriteUndertaleObject(_backgroundDefinition);
                 writer.Write(SourceX);
                 writer.Write(SourceY);
                 writer.Write(Width);
@@ -898,11 +946,11 @@ namespace UndertaleModLib.Models
             {
                 X = reader.ReadInt32();
                 Y = reader.ReadInt32();
-                _SpriteMode = reader.undertaleData.GeneralInfo.Major >= 2;
-                if (_SpriteMode)
-                    _SpriteDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
+                spriteMode = reader.undertaleData.GeneralInfo.Major >= 2;
+                if (spriteMode)
+                    _spriteDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
                 else
-                    _BackgroundDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>>();
+                    _backgroundDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>>();
                 SourceX = reader.ReadUInt32();
                 SourceY = reader.ReadUInt32();
                 Width = reader.ReadUInt32();
@@ -1084,7 +1132,7 @@ namespace UndertaleModLib.Models
 
             public class LayerTilesData : LayerData, INotifyPropertyChanged
             {
-                private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _Background = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>(); // In GMS2 backgrounds are just tilesets
+                private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _Background = new(); // In GMS2 backgrounds are just tilesets
                 private uint _TilesX;
                 private uint _TilesY;
                 private uint[][] _TileData; // Each is simply an ID from the tileset/background/sprite
@@ -1170,7 +1218,7 @@ namespace UndertaleModLib.Models
             {
                 private Layer _ParentLayer;
 
-                private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>(); // Apparently there's a mode where it's a background reference, but probably not necessary
+                private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new(); // Apparently there's a mode where it's a background reference, but probably not necessary
                 private bool _TiledHorizontally;
                 private bool _TiledVertically;
                 private bool _Stretch;
@@ -1189,6 +1237,9 @@ namespace UndertaleModLib.Models
                 public float FirstFrame { get; set; }
                 public float AnimationSpeed { get; set; }
                 public AnimationSpeedType AnimationSpeedType { get; set; }
+
+                public float XOffset => (ParentLayer?.XOffset ?? 0) + (Sprite?.Textures.FirstOrDefault()?.Texture?.TargetX ?? 0);
+                public float YOffset => (ParentLayer?.YOffset ?? 0) + (Sprite?.Textures.FirstOrDefault()?.Texture?.TargetY ?? 0);
 
                 public event PropertyChangedEventHandler PropertyChanged;
                 protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -1336,23 +1387,40 @@ namespace UndertaleModLib.Models
 
         public class SpriteInstance : UndertaleObject, INotifyPropertyChanged
         {
-            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
+            private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new();
 
             public UndertaleString Name { get; set; }
             public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sprite))); } }
             public int X { get; set; }
             public int Y { get; set; }
-            public float ScaleX { get; set; }
-            public float ScaleY { get; set; }
-            public uint Color { get; set; }
-            public float AnimationSpeed { get; set; }
+            public float ScaleX { get; set; } = 1;
+            public float ScaleY { get; set; } = 1;
+            public uint Color { get; set; } = 0xFFFFFFFF;
+            public float AnimationSpeed { get; set; } = 1;
             public AnimationSpeedType AnimationSpeedType { get; set; }
             public float FrameIndex { get; set; }
-            public float SafeFrameIndex { get => FrameIndex; set { FrameIndex = Math.Clamp(value, 0, (Sprite?.Textures?.Count ?? 1) - 1); OnPropertyChanged(); } }
+            public int WrappedFrameIndex
+            {
+                get
+                {
+                    if (Sprite is null)
+                        return 0;
+
+                    int count = Sprite.Textures.Count;
+                    if (count == 0)
+                        return 0;
+
+                    return (((int)FrameIndex % count) + count) % count;
+                }
+            }
             public float Rotation { get; set; }
             public float OppositeRotation => 360F - Rotation;
-            public int XOffset => Sprite is not null ? X - Sprite.OriginX : X;
-            public int YOffset => Sprite is not null ? Y - Sprite.OriginY : Y;
+            public int XOffset => Sprite is not null
+                                  ? X - Sprite.OriginX + (Sprite.Textures.ElementAtOrDefault((int)FrameIndex)?.Texture?.TargetX ?? 0)
+                                  : X;
+            public int YOffset => Sprite is not null
+                                  ? Y - Sprite.OriginY + (Sprite.Textures.ElementAtOrDefault((int)FrameIndex)?.Texture?.TargetY ?? 0)
+                                  : Y;
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -1398,7 +1466,7 @@ namespace UndertaleModLib.Models
 
         public class SequenceInstance : UndertaleObject, INotifyPropertyChanged
         {
-            private UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN> _Sequence = new UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>();
+            private UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN> _Sequence = new();
 
             public UndertaleString Name { get; set; }
             public UndertaleSequence Sequence { get => _Sequence.Resource; set { _Sequence.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sequence))); } }
