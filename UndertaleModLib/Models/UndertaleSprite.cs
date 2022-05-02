@@ -115,6 +115,42 @@ namespace UndertaleModLib.Models
         public int OriginY { get; set; }
 
         /// <summary>
+        /// A <see cref="OriginX"/> wrapper than also sets horizontal origin of <see cref="V2Sequence"/>.
+        /// </summary>
+        /// <remarks>
+        /// This attribute is used only in UndertaleModTool and doesn't exist in GameMaker.
+        /// </remarks>
+        public int OriginXWrapper
+        {
+            get => OriginX;
+            set
+            {
+                OriginX = value;
+
+                if (IsSpecialType && SVersion > 1 && V2Sequence is not null)
+                    V2Sequence.OriginX = value;
+            }
+        }
+
+        /// <summary>
+        /// A <see cref="OriginY"/> wrapper than also sets vertical origin of <see cref="V2Sequence"/>.
+        /// </summary>
+        /// <remarks>
+        /// This attribute is used only in UndertaleModTool and doesn't exist in GameMaker.
+        /// </remarks>
+        public int OriginYWrapper
+        {
+            get => OriginY;
+            set
+            {
+                OriginY = value;
+
+                if (IsSpecialType && SVersion > 1 && V2Sequence is not null)
+                    V2Sequence.OriginY = value;
+            }
+        }
+
+        /// <summary>
         /// The frames of the sprite.
         /// </summary>
         public UndertaleSimpleList<TextureEntry> Textures { get; private set; } = new UndertaleSimpleList<TextureEntry>();

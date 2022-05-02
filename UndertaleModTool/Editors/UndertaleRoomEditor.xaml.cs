@@ -1586,64 +1586,6 @@ namespace UndertaleModTool
         }
     }
 
-
-    [ValueConversion(typeof(ObservableCollection<GameObject>), typeof(int))]
-    public class ObjCenterXConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            GameObject obj = value as GameObject;
-            if (obj == null)
-                return 0;
-            if (obj.ObjectDefinition == null || obj.ObjectDefinition.Sprite == null)
-                return obj.X;
-            return (obj.X + (obj.ObjectDefinition.Sprite.OriginX * obj.ScaleX));
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    [ValueConversion(typeof(ObservableCollection<GameObject>), typeof(int))]
-    public class ObjXOffsetConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            GameObject obj = value as GameObject;
-            if (obj == null)
-                return 0;
-            if (obj.ObjectDefinition == null || obj.ObjectDefinition.Sprite == null)
-                return obj.X;
-            return obj.X + obj.ObjectDefinition.Sprite.OriginX;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    [ValueConversion(typeof(ObservableCollection<GameObject>), typeof(int))]
-    public class ObjCenterYConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            GameObject obj = value as GameObject;
-            if (obj == null)
-                return 0;
-            if (obj.ObjectDefinition == null || obj.ObjectDefinition.Sprite == null)
-                return obj.Y;
-            return (obj.Y + (obj.ObjectDefinition.Sprite.OriginY * obj.ScaleY));
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     public class LayerDataTemplateSelector : DataTemplateSelector
     {
         public DataTemplate InstancesDataTemplate { get; set; }

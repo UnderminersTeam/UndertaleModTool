@@ -27,6 +27,7 @@
         <local:TileLayerTemplateSelector x:Key="TileLayerTemplateSelector"/>
         <local:TileRectanglesConverter x:Key="TileRectanglesConverter"/>
         <local:CachedImageLoaderWithIndex x:Key="CachedImageLoaderWithIndex"/>
+        <local:NegateNumberConverter x:Key="NegateNumberConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomRenderer}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomRenderer}, Path=DataContext.Tiles}"/>
@@ -141,7 +142,9 @@
                         <Rectangle.RenderTransform>
                             <TransformGroup>
                                 <ScaleTransform x:Name="transform1_0" ScaleX="{Binding ScaleX, Mode=OneTime}" ScaleY="{Binding ScaleY, Mode=OneTime}"/>
-                                <RotateTransform x:Name="transform1_1" CenterX="{Binding X, Mode=OneTime}" CenterY="{Binding Y, Mode=OneTime}" Angle="{Binding OppositeRotation, Mode=OneTime}"/>
+                                <RotateTransform x:Name="transform1_1" Angle="{Binding OppositeRotation, Mode=OneTime}"
+                                                 CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"
+                                                 CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"/>
                                 <TranslateTransform x:Name="transform1_2" X="{Binding XOffset, Mode=OneTime}" Y="{Binding YOffset, Mode=OneTime}"/>
                             </TransformGroup>
                         </Rectangle.RenderTransform>
@@ -180,7 +183,9 @@
                         <Rectangle.RenderTransform>
                             <TransformGroup>
                                 <ScaleTransform x:Name="transform4_0" ScaleX="{Binding ScaleX, Mode=OneTime}" ScaleY="{Binding ScaleY, Mode=OneTime}"/>
-                                <RotateTransform x:Name="transform4_1" CenterX="{Binding X, Mode=OneTime}" CenterY="{Binding Y, Mode=OneTime}" Angle="{Binding OppositeRotation, Mode=OneTime}"/>
+                                <RotateTransform x:Name="transform4_1" Angle="{Binding OppositeRotation, Mode=OneTime}"
+                                                 CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"
+                                                 CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"/>
                                 <TranslateTransform x:Name="transform4_2" X="{Binding XOffset, Mode=OneTime}" Y="{Binding YOffset, Mode=OneTime}"/>
                             </TransformGroup>
                         </Rectangle.RenderTransform>

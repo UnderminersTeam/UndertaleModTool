@@ -13,9 +13,6 @@
         <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
         <local:ColorConverter x:Key="ColorConverter"/>
         <local:SimplePointsDisplayConverter x:Key="SimplePointsDisplayConverter"/>
-        <local:ObjCenterXConverter x:Key="ObjCenterXConverter" />
-        <local:ObjXOffsetConverter x:Key="ObjXOffsetConverter" />
-        <local:ObjCenterYConverter x:Key="ObjCenterYConverter" />
         <local:LayerFlattenerConverter x:Key="LayerFlattenerConverter" />
         <local:IsGMS2Converter x:Key="IsGMS2Converter" />
         <local:BGColorConverter x:Key="BGColorConverter"/>
@@ -32,6 +29,7 @@
         <local:TileRectanglesConverter x:Key="TileRectanglesConverter"/>
         <local:CachedImageLoaderWithIndex x:Key="CachedImageLoaderWithIndex"/>
         <local:DataFieldOneTimeConverter x:Key="DataFieldOneTimeConverter"/>
+        <local:NegateNumberConverter x:Key="NegateNumberConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Tiles}"/>
@@ -1087,7 +1085,9 @@
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform x:Name="transform1_0" ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"/>
-                                    <RotateTransform x:Name="transform1_1" Angle="{Binding OppositeRotation, Mode=OneWay}"/>
+                                    <RotateTransform x:Name="transform1_1" Angle="{Binding OppositeRotation, Mode=OneWay}"
+                                                     CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"
+                                                     CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"/>
                                     <TranslateTransform x:Name="transform1_2" X="{Binding XOffset, Mode=OneWay}" Y="{Binding YOffset, Mode=OneWay}"/>
                                 </TransformGroup>
                             </Rectangle.RenderTransform>
@@ -1142,7 +1142,9 @@
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform x:Name="transform4_0" ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"/>
-                                    <RotateTransform x:Name="transform4_1" Angle="{Binding OppositeRotation, Mode=OneWay}"/>
+                                    <RotateTransform x:Name="transform4_1" Angle="{Binding OppositeRotation, Mode=OneWay}"
+                                                     CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"
+                                                     CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"/>
                                     <TranslateTransform x:Name="transform4_2" X="{Binding XOffset, Mode=OneWay}" Y="{Binding YOffset, Mode=OneWay}"/>
                                 </TransformGroup>
                             </Rectangle.RenderTransform>

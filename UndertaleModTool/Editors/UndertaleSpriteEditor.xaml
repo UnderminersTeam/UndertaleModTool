@@ -100,8 +100,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Margin="3" Text="{Binding OriginX}"/>
-            <TextBox Grid.Column="1" Margin="3" Text="{Binding OriginY}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding OriginXWrapper}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding OriginYWrapper}"/>
         </Grid>
 
         <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Textures</TextBlock>

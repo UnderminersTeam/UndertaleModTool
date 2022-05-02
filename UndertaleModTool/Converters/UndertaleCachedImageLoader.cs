@@ -21,6 +21,9 @@ using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModTool
 {
+    // TODO: "Bitmap" is Windows-only.
+
+    #pragma warning disable CA1416
     public class UndertaleCachedImageLoader : IValueConverter
     {
         [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
@@ -523,4 +526,5 @@ namespace UndertaleModTool
             return spriteSrc;
         }
     }
+    #pragma warning restore CA1416
 }
