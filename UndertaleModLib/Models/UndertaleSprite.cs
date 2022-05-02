@@ -441,7 +441,7 @@ namespace UndertaleModLib.Models
                         break;
                     case SpriteType.SWF:
                         {
-                            //// ATTENTION: This code does not work all the time for some reason. ////
+                            //// TODO: This code does not work all the time for some reason. ////
 
                             SWFVersion = reader.ReadInt32();
                             Util.DebugUtil.Assert(SWFVersion == 8 || SWFVersion == 7, "Invalid SWF sprite format, expected 7 or 8, got " + SWFVersion);
