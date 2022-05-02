@@ -11,7 +11,7 @@ namespace UndertaleModTool
             double num;
             try
             {
-                num = System.Convert.ToDouble(value);
+                num = -1 * System.Convert.ToDouble(value);
             }
             catch
             {

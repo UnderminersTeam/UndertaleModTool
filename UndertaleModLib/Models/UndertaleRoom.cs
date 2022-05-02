@@ -768,7 +768,7 @@ namespace UndertaleModLib.Models
             /// This attribute is UMT-only and does not exist in GameMaker.
             /// </remarks>
             public int SpriteXOffset => ObjectDefinition?.Sprite != null
-                                        ? ObjectDefinition.Sprite.OriginXWrapper + (ObjectDefinition.Sprite.Textures.ElementAtOrDefault(ImageIndex)?.Texture?.TargetX ?? 0)
+                                        ? (-1 * ObjectDefinition.Sprite.OriginXWrapper) + (ObjectDefinition.Sprite.Textures.ElementAtOrDefault(ImageIndex)?.Texture?.TargetX ?? 0)
                                         : 0;
 
             /// <summary>
@@ -779,7 +779,7 @@ namespace UndertaleModLib.Models
             /// This attribute is UMT-only and does not exist in GameMaker.
             /// </remarks>
             public int SpriteYOffset => ObjectDefinition?.Sprite != null
-                                        ? ObjectDefinition.Sprite.OriginYWrapper + (ObjectDefinition.Sprite.Textures.ElementAtOrDefault(ImageIndex)?.Texture?.TargetY ?? 0)
+                                        ? (-1 * ObjectDefinition.Sprite.OriginYWrapper) + (ObjectDefinition.Sprite.Textures.ElementAtOrDefault(ImageIndex)?.Texture?.TargetY ?? 0)
                                         : 0;
             /// <summary>
             /// A horizontal offset used for proper game object position display in the UndertaleModTool room editor.
@@ -787,7 +787,7 @@ namespace UndertaleModLib.Models
             /// <remarks>
             /// This attribute is UMT-only and does not exist in GameMaker.
             /// </remarks>
-            public int XOffset => X - SpriteXOffset;
+            public int XOffset => X + SpriteXOffset;
 
             /// <summary>
             /// A vertical offset used for proper game object display in the UndertaleModTool room editor.
@@ -795,7 +795,7 @@ namespace UndertaleModLib.Models
             /// <remarks>
             /// This attribute is UMT-only and does not exist in GameMaker.
             /// </remarks>
-            public int YOffset => Y - SpriteYOffset;
+            public int YOffset => Y + SpriteYOffset;
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -1440,13 +1440,13 @@ namespace UndertaleModLib.Models
             public float OppositeRotation => 360F - Rotation;
 
             public int SpriteXOffset => Sprite != null
-                                        ? Sprite.OriginXWrapper + (Sprite.Textures.ElementAtOrDefault(WrappedFrameIndex)?.Texture?.TargetX ?? 0)
+                                        ? (-1 * Sprite.OriginXWrapper) + (Sprite.Textures.ElementAtOrDefault(WrappedFrameIndex)?.Texture?.TargetX ?? 0)
                                         : 0;
             public int SpriteYOffset => Sprite != null
-                                        ? Sprite.OriginYWrapper + (Sprite.Textures.ElementAtOrDefault(WrappedFrameIndex)?.Texture?.TargetY ?? 0)
+                                        ? (-1 * Sprite.OriginYWrapper) + (Sprite.Textures.ElementAtOrDefault(WrappedFrameIndex)?.Texture?.TargetY ?? 0)
                                         : 0;
-            public int XOffset => X - SpriteXOffset;
-            public int YOffset => Y - SpriteYOffset;
+            public int XOffset => X + SpriteXOffset;
+            public int YOffset => Y + SpriteYOffset;
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
