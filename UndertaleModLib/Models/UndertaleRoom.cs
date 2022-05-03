@@ -166,20 +166,26 @@ namespace UndertaleModLib.Models
         /// </summary>
         public UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>> Sequences { get; private set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
 
-        private Layer GetBGColorLayer()
-        {
-            return _layers?.Where(l => l.LayerType is LayerType.Background
-                                    && l.BackgroundData.Sprite is null
-                                    && l.BackgroundData.Color != 0)
-                           .OrderBy(l => l?.LayerDepth ?? 0)
-                           .FirstOrDefault();
-        }
         public void UpdateBGColorLayer() => OnPropertyChanged("BGColorLayer");
 
         /// <summary>
-        /// The layer containing the background color.
+        /// The layer containing the background color.<br/>
+        /// Used by "BGColorConverter" of the UndertaleModTool room editor.
         /// </summary>
-        public Layer BGColorLayer => GetBGColorLayer();
+        /// <remarks>
+        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// </remarks>
+        public Layer BGColorLayer
+        {
+            get
+            {
+                return _layers?.Where(l => l.LayerType is LayerType.Background
+                                        && l.BackgroundData.Sprite is null
+                                        && l.BackgroundData.Color != 0)
+                               .OrderBy(l => l?.LayerDepth ?? 0)
+                               .FirstOrDefault();
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -421,8 +427,12 @@ namespace UndertaleModLib.Models
             private UndertaleRoom _ParentRoom;
 
             /// <summary>
-            /// The room parent this background belongs to.
+            /// The room parent this background belongs to.<br/>
+            /// Set by <see cref="SetupRoom(bool)"/>.
             /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; OnPropertyChanged(); UpdateStretch(); } }
 
             /// <summary>
@@ -491,13 +501,19 @@ namespace UndertaleModLib.Models
             public bool Stretch { get => _Stretch; set { _Stretch = value; OnPropertyChanged(); UpdateStretch(); } }
 
             /// <summary>
-            /// Whether this background is tiled horizontally.
+            /// A wrapper of <see cref="TileX"/> that indicates whether this background is tiled horizontally.
             /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public bool TiledHorizontally { get => TileX > 0; set { TileX = value ? 1 : 0; OnPropertyChanged(); } }
 
             /// <summary>
-            /// Whether this background is tiled vertically.
+            /// A wrapper of <see cref="TileY"/> that indicates whether this background is tiled vertically.
             /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public bool TiledVertically { get => TileY > 0; set { TileY = value ? 1 : 0; OnPropertyChanged(); } }
 
             /// <summary>
@@ -770,8 +786,11 @@ namespace UndertaleModLib.Models
             }
 
             /// <summary>
-            /// The opposite angle of the current rotation.
+            /// A wrapper of <see cref="Rotation"/> that returns an opposite angle of the current rotation.
             /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public float OppositeRotation => 360F - (Rotation % 360);
 
             /// <summary>
@@ -869,9 +888,14 @@ namespace UndertaleModLib.Models
         public class Tile : UndertaleObject, RoomObject, INotifyPropertyChanged
         {
             /// <summary>
-            /// Whether this tile is from an asset layer. Game Maker Studio: 2 exclusive.
+            /// Whether this tile is from an asset layer.<br/>
+            /// Equals true if it's Game Maker Studio: 2.
             /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public bool spriteMode = false;
+
             private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _backgroundDefinition = new();
             private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _spriteDefinition = new();
 
@@ -896,8 +920,8 @@ namespace UndertaleModLib.Models
             public UndertaleSprite SpriteDefinition { get => _spriteDefinition.Resource; set { _spriteDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("ObjectDefinition"); } }
 
             /// <summary>
-            /// From which object this tile stems from.
-            /// Will return a <see cref="UndertaleBackground"/> if <see cref="spriteMode"/> is disabled, a <see cref="UndertaleSprite"/> if it's enabled.
+            /// From which object this tile stems from.<br/>
+            /// Will return a <see cref="UndertaleBackground"/> if <see cref="spriteMode"/> is true, a <see cref="UndertaleSprite"/> if it's false.
             /// </summary>
             public UndertaleNamedResource ObjectDefinition { get => spriteMode ? SpriteDefinition : BackgroundDefinition; set { if (spriteMode) SpriteDefinition = (UndertaleSprite)value; else BackgroundDefinition = (UndertaleBackground)value; } }
 
@@ -944,6 +968,12 @@ namespace UndertaleModLib.Models
             //TODO?
             public uint Color { get; set; } = 0xFFFFFFFF;
 
+            /// <summary>
+            /// Returns a texture page item of the tile.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public UndertaleTexturePageItem Tpag => spriteMode ? SpriteDefinition?.Textures.FirstOrDefault()?.Texture : BackgroundDefinition?.Texture; // TODO: what happens on sprites with multiple textures?
 
             public event PropertyChangedEventHandler PropertyChanged;
