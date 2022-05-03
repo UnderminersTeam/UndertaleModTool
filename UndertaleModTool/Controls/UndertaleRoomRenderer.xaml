@@ -141,7 +141,9 @@
                                Opacity="{Binding Color, Mode=OneTime, Converter={StaticResource ColorToOpacityConverter}}">
                         <Rectangle.RenderTransform>
                             <TransformGroup>
-                                <ScaleTransform x:Name="transform1_0" ScaleX="{Binding ScaleX, Mode=OneTime}" ScaleY="{Binding ScaleY, Mode=OneTime}"/>
+                                <ScaleTransform x:Name="transform1_0" ScaleX="{Binding ScaleX, Mode=OneTime}" ScaleY="{Binding ScaleY, Mode=OneTime}"
+                                                CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"
+                                                CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"/>
                                 <RotateTransform x:Name="transform1_1" Angle="{Binding OppositeRotation, Mode=OneTime}"
                                                  CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"
                                                  CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"/>
@@ -182,7 +184,9 @@
                                Opacity="{Binding Color, Mode=OneTime, Converter={StaticResource ColorToOpacityConverter}}">
                         <Rectangle.RenderTransform>
                             <TransformGroup>
-                                <ScaleTransform x:Name="transform4_0" ScaleX="{Binding ScaleX, Mode=OneTime}" ScaleY="{Binding ScaleY, Mode=OneTime}"/>
+                                <ScaleTransform x:Name="transform4_0" ScaleX="{Binding ScaleX, Mode=OneTime}" ScaleY="{Binding ScaleY, Mode=OneTime}"
+                                                CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"
+                                                CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"/>
                                 <RotateTransform x:Name="transform4_1" Angle="{Binding OppositeRotation, Mode=OneTime}"
                                                  CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"
                                                  CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"/>

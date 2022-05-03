@@ -1084,7 +1084,9 @@
                             </Rectangle.Style>
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
-                                    <ScaleTransform x:Name="transform1_0" ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"/>
+                                    <ScaleTransform x:Name="transform1_0" ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"
+                                                    CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"
+                                                    CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"/>
                                     <RotateTransform x:Name="transform1_1" Angle="{Binding OppositeRotation, Mode=OneWay}"
                                                      CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"
                                                      CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"/>
@@ -1141,7 +1143,9 @@
                             </Rectangle.Style>
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
-                                    <ScaleTransform x:Name="transform4_0" ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"/>
+                                    <ScaleTransform x:Name="transform4_0" ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"
+                                                    CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"
+                                                    CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"/>
                                     <RotateTransform x:Name="transform4_1" Angle="{Binding OppositeRotation, Mode=OneWay}"
                                                      CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"
                                                      CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"/>

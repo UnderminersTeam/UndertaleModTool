@@ -425,8 +425,22 @@ namespace UndertaleModLib.Models
             /// </summary>
             public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; OnPropertyChanged(); UpdateStretch(); } }
 
-            //TODO:
+            /// <summary>
+            /// The calculated horizontal render scale for the background texture.<br/>
+            /// Used in the UndertaleModTool room editor.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public float CalcScaleX { get; set; } = 1;
+
+            /// <summary>
+            /// The calculated vertical render scale for the background texture.<br/>
+            /// Used in the UndertaleModTool room editor.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public float CalcScaleY { get; set; } = 1;
 
             /// <summary>
