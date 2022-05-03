@@ -233,7 +233,7 @@
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Backgrounds &amp; Tile sets" ItemsSource="{Binding Backgrounds, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Backgrounds, Converter={StaticResource VisibleIfNotNull}}">
+                        <TreeViewItem Name="BackgroundsItemsList" Header="Backgrounds &amp; Tile sets" ItemsSource="{Binding Backgrounds, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Backgrounds, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleBackground}">
                                     <TextBlock Text="{Binding Name.Content}" />

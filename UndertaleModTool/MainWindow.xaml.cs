@@ -593,6 +593,10 @@ namespace UndertaleModTool
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilePath)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGMS2)));
 
+            BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible
+                                          ? "Tile sets"
+                                          : "Backgrounds & Tile sets";
+
             CurrentTab = null;
             Tabs.Clear();
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P");
@@ -930,6 +934,10 @@ namespace UndertaleModTool
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilePath)));
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGMS2)));
 
+                        BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible
+                                                      ? "Tile sets"
+                                                      : "Backgrounds & Tile sets";
+
                         #pragma warning disable CA1416
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
@@ -939,7 +947,6 @@ namespace UndertaleModTool
                         OpenInTab(Highlighted);
                         SelectionHistory.Clear();
                         ClosedTabsHistory.Clear();
-
                     }
                     else
                     {

@@ -43,7 +43,7 @@ namespace UndertaleModTool
                 new FrameworkPropertyMetadata(null));
 
         public static readonly PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
         public UndertalePath PreviewPath
         {
