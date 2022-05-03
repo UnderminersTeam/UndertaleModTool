@@ -284,7 +284,7 @@ namespace UndertaleModTool
             if (values[0] is null) // tile
                 return null;
 
-            if ((uint)values[3] == 0 || (uint)values[4] == 0) // width, height
+            if ((uint)values[1] == 0 || (uint)values[2] == 0) // width, height
                 return null;
 
             return loader.Convert(values[0], null, "tile", null);

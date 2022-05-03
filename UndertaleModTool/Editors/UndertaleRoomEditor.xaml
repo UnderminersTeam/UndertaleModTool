@@ -920,7 +920,7 @@
                             <local:UndertaleStringReference Grid.Row="0" Grid.Column="2" Margin="3" ObjectReference="{Binding Name}"/>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Definition</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="2" Margin="3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleGameObject}" CanRemove="False"/>
+                            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="2" Margin="3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleSprite}" CanRemove="False"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Position</TextBlock>
                             <Grid Grid.Row="2" Grid.Column="2">
@@ -1124,10 +1124,12 @@
                                     <ImageBrush.ImageSource>
                                         <MultiBinding Converter="{StaticResource CachedTileImageLoader}">
                                             <Binding Mode="OneTime"/>
-                                            <Binding Path="SourceX" Mode="OneWay"/>
-                                            <Binding Path="SourceY" Mode="OneWay"/>
                                             <Binding Path="Width" Mode="OneWay"/>
                                             <Binding Path="Height" Mode="OneWay"/>
+                                            <!-- for notification only -->
+                                            <Binding Path="Tpag" Mode="OneWay"/>
+                                            <Binding Path="SourceX" Mode="OneWay"/>
+                                            <Binding Path="SourceY" Mode="OneWay"/>
                                         </MultiBinding>
                                     </ImageBrush.ImageSource>
                                 </ImageBrush>
