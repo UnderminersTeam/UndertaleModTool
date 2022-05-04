@@ -1,5 +1,8 @@
+using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace UndertaleModLib.Util;
 
@@ -30,47 +33,33 @@ public static class GitVersion
     /// <returns>The git commit and branch name.</returns>
     public static string GetGitVersion()
     {
-        string commitOutput;
-        string branchOutput;
+        string gitOutput = "";
 
+        // try to access the embedded resource
         try
         {
-            // Start git, get the commit number and assign that to commitOutput
-            using (Process process = new Process())
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "UndertaleModLib.gitversion.txt";
+
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            using (StreamReader reader = new StreamReader(stream))
             {
-                process.StartInfo.FileName = Git;
-                process.StartInfo.Arguments = GitCommit;
-                process.StartInfo.RedirectStandardOutput = true;
-                process.StartInfo.CreateNoWindow = true;
-                process.Start();
-                StreamReader reader = process.StandardOutput;
-                string output = reader.ReadToEnd();
-                commitOutput = output.Trim();
-                process.WaitForExit();
+                // \r is getting nuked just in case Windows is weird.
+                gitOutput = reader.ReadToEnd().Trim().Replace("\r", "");
             }
 
-            // Start git, get the branch name and assign that to branchOutput
-            using (Process process = new Process())
-            {
-                process.StartInfo.FileName = Git;
-                process.StartInfo.Arguments = GitBranch;
-                process.StartInfo.RedirectStandardOutput = true;
-                process.StartInfo.CreateNoWindow = true;
-                process.Start();
-                StreamReader reader = process.StandardOutput;
-                string output = reader.ReadToEnd();
-                branchOutput = output.Trim();
-                process.WaitForExit();
-            }
+            // gets formatted as "<commit> (<branch>)"
+            var outputAsArray = gitOutput.Split('\n');
+            gitOutput = $"{outputAsArray[0]} ({outputAsArray[1]})";
         }
-        // If git can't be found, assign default values
+        // If accessing it fails, give it a default output
         catch
         {
-            commitOutput = branchOutput = "unavailable";
+            gitOutput = "unavailable";
         }
 
         // return combined commit + branch
-        string finalGitVersion = $"{commitOutput} ({branchOutput})";
-        return finalGitVersion;
+        if (String.IsNullOrWhiteSpace(gitOutput)) gitOutput = "unavailable";
+        return gitOutput;
     }
 }
