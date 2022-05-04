@@ -30,6 +30,7 @@
         <local:CachedImageLoaderWithIndex x:Key="CachedImageLoaderWithIndex"/>
         <local:DataFieldOneTimeConverter x:Key="DataFieldOneTimeConverter"/>
         <local:NegateNumberConverter x:Key="NegateNumberConverter"/>
+        <local:ParentGridHeightConverter x:Key="ParentGridHeightConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Tiles}"/>
@@ -59,7 +60,8 @@
 
     <Grid Height="{Binding RelativeSource={RelativeSource FindAncestor,
                            AncestorType={x:Type ScrollViewer}},
-                           Path=ActualHeight}">
+                           Path=ActualHeight,
+                           Converter={StaticResource ParentGridHeightConverter}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
