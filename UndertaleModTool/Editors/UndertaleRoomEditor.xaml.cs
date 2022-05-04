@@ -43,7 +43,7 @@ namespace UndertaleModTool
                 new FrameworkPropertyMetadata(null));
 
         public static readonly PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
         public UndertalePath PreviewPath
         {
@@ -1297,13 +1297,15 @@ namespace UndertaleModTool
             {
                 // add pointer list if one doesn't already exist
                 layer.AssetsData.Sprites ??= new UndertalePointerList<SpriteInstance>();
+                
+                SpriteInstance spriteInstance = new();
+                string spriteName = "graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8");
+                spriteInstance.Name = new UndertaleString(spriteName);
 
-                // add tile to list
-                var spriteinstance = new SpriteInstance();
-                layer.AssetsData.Sprites.Add(spriteinstance);
-                sprInstDict.TryAdd(spriteinstance, layer);
+                layer.AssetsData.Sprites.Add(spriteInstance);
+                sprInstDict.TryAdd(spriteInstance, layer);
 
-                SelectObject(spriteinstance);
+                SelectObject(spriteInstance);
             }
         }
 
@@ -1583,64 +1585,6 @@ namespace UndertaleModTool
 
             if (visualRemoved is ContentPresenter presRemoved && presRemoved.DataContext is UndertaleObject objRemoved)
                 ObjectDict.Remove(objRemoved);
-        }
-    }
-
-
-    [ValueConversion(typeof(ObservableCollection<GameObject>), typeof(int))]
-    public class ObjCenterXConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            GameObject obj = value as GameObject;
-            if (obj == null)
-                return 0;
-            if (obj.ObjectDefinition == null || obj.ObjectDefinition.Sprite == null)
-                return obj.X;
-            return (obj.X + (obj.ObjectDefinition.Sprite.OriginX * obj.ScaleX));
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    [ValueConversion(typeof(ObservableCollection<GameObject>), typeof(int))]
-    public class ObjXOffsetConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            GameObject obj = value as GameObject;
-            if (obj == null)
-                return 0;
-            if (obj.ObjectDefinition == null || obj.ObjectDefinition.Sprite == null)
-                return obj.X;
-            return obj.X + obj.ObjectDefinition.Sprite.OriginX;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    [ValueConversion(typeof(ObservableCollection<GameObject>), typeof(int))]
-    public class ObjCenterYConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            GameObject obj = value as GameObject;
-            if (obj == null)
-                return 0;
-            if (obj.ObjectDefinition == null || obj.ObjectDefinition.Sprite == null)
-                return obj.Y;
-            return (obj.Y + (obj.ObjectDefinition.Sprite.OriginY * obj.ScaleY));
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 

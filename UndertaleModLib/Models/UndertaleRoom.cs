@@ -166,20 +166,26 @@ namespace UndertaleModLib.Models
         /// </summary>
         public UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>> Sequences { get; private set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
 
-        private Layer GetBGColorLayer()
-        {
-            return _layers?.Where(l => l.LayerType is LayerType.Background
-                                    && l.BackgroundData.Sprite is null
-                                    && l.BackgroundData.Color != 0)
-                           .OrderBy(l => l?.LayerDepth ?? 0)
-                           .FirstOrDefault();
-        }
         public void UpdateBGColorLayer() => OnPropertyChanged("BGColorLayer");
 
         /// <summary>
-        /// The layer containing the background color.
+        /// The layer containing the background color.<br/>
         /// </summary>
-        public Layer BGColorLayer => GetBGColorLayer();
+        /// <remarks>
+        /// Used by "BGColorConverter" of the UndertaleModTool room editor.
+        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// </remarks>
+        public Layer BGColorLayer
+        {
+            get
+            {
+                return _layers?.Where(l => l.LayerType is LayerType.Background
+                                        && l.BackgroundData.Sprite is null
+                                        && l.BackgroundData.Color != 0)
+                               .OrderBy(l => l.LayerDepth)
+                               .FirstOrDefault();
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -423,10 +429,27 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// The room parent this background belongs to.
             /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; OnPropertyChanged(); UpdateStretch(); } }
 
-            //TODO:
+            /// <summary>
+            /// The calculated horizontal render scale for the background texture.
+            /// </summary>
+            /// <remarks>
+            /// Used in the room editor.<br/>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public float CalcScaleX { get; set; } = 1;
+
+            /// <summary>
+            /// The calculated vertical render scale for the background texture.
+            /// </summary>
+            /// <remarks>
+            /// Used in the room editor.<br/>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public float CalcScaleY { get; set; } = 1;
 
             /// <summary>
@@ -477,17 +500,23 @@ namespace UndertaleModLib.Models
             public bool Stretch { get => _Stretch; set { _Stretch = value; OnPropertyChanged(); UpdateStretch(); } }
 
             /// <summary>
-            /// Whether this background is tiled horizontally.
+            /// Indicates whether this background is tiled horizontally.
             /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public bool TiledHorizontally { get => TileX > 0; set { TileX = value ? 1 : 0; OnPropertyChanged(); } }
 
             /// <summary>
-            /// Whether this background is tiled vertically.
+            /// Indicates whether this background is tiled vertically.
             /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public bool TiledVertically { get => TileY > 0; set { TileY = value ? 1 : 0; OnPropertyChanged(); } }
 
             /// <summary>
-            /// A horizontal offset used for proper background display in the UndertaleModTool room editor.
+            /// A horizontal offset used for proper background display in the room editor.
             /// </summary>
             /// <remarks>
             /// This attribute is UMT-only and does not exist in GameMaker.
@@ -495,7 +524,7 @@ namespace UndertaleModLib.Models
             public int XOffset => X + (BackgroundDefinition?.Texture?.TargetX ?? 0);
 
             /// <summary>
-            /// A vertical offset used for proper background display in the UndertaleModTool room editor.
+            /// A vertical offset used for proper background display in the room editor.
             /// </summary>
             /// <remarks>
             /// This attribute is UMT-only and does not exist in GameMaker.
@@ -758,27 +787,47 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// The opposite angle of the current rotation.
             /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public float OppositeRotation => 360F - (Rotation % 360);
 
             /// <summary>
-            /// A horizontal offset used for proper game object display in the UndertaleModTool room editor.
+            /// A horizontal offset relative to top-left corner of the game object.
             /// </summary>
             /// <remarks>
+            /// Used for proper game object rotation display in the room editor and for determining <see cref="XOffset"/>.<br/>
             /// This attribute is UMT-only and does not exist in GameMaker.
             /// </remarks>
-            public int XOffset => ObjectDefinition?.Sprite != null
-                                  ? X - ObjectDefinition.Sprite.OriginX + (ObjectDefinition.Sprite.Textures.ElementAtOrDefault(ImageIndex)?.Texture?.TargetX ?? 0)
-                                  : X;
+            public int SpriteXOffset => ObjectDefinition?.Sprite != null
+                                        ? (-1 * ObjectDefinition.Sprite.OriginXWrapper) + (ObjectDefinition.Sprite.Textures.ElementAtOrDefault(ImageIndex)?.Texture?.TargetX ?? 0)
+                                        : 0;
 
             /// <summary>
-            /// A vertical offset used for proper game object display in the UndertaleModTool room editor.
+            /// A vertical offset relative to top-left corner of the game object.
+            /// </summary>
+            /// <remarks>
+            /// Used for proper game object rotation display in the room editor and for determining <see cref="YOffset"/>.<br/>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
+            public int SpriteYOffset => ObjectDefinition?.Sprite != null
+                                        ? (-1 * ObjectDefinition.Sprite.OriginYWrapper) + (ObjectDefinition.Sprite.Textures.ElementAtOrDefault(ImageIndex)?.Texture?.TargetY ?? 0)
+                                        : 0;
+            /// <summary>
+            /// A horizontal offset used for proper game object position display in the room editor.
             /// </summary>
             /// <remarks>
             /// This attribute is UMT-only and does not exist in GameMaker.
             /// </remarks>
-            public int YOffset => ObjectDefinition?.Sprite != null
-                                  ? Y - ObjectDefinition.Sprite.OriginY + (ObjectDefinition.Sprite.Textures.ElementAtOrDefault(ImageIndex)?.Texture?.TargetY ?? 0)
-                                  : Y;
+            public int XOffset => X + SpriteXOffset;
+
+            /// <summary>
+            /// A vertical offset used for proper game object display in the room editor.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
+            public int YOffset => Y + SpriteYOffset;
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -838,9 +887,14 @@ namespace UndertaleModLib.Models
         public class Tile : UndertaleObject, RoomObject, INotifyPropertyChanged
         {
             /// <summary>
-            /// Whether this tile is from an asset layer. Game Maker Studio: 2 exclusive.
+            /// Whether this tile is from an asset layer.<br/>
+            /// <see langword="true"/> for GameMaker Studio: 2 games, otherwise <see langword="false"/>.
             /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public bool spriteMode = false;
+
             private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _backgroundDefinition = new();
             private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _spriteDefinition = new();
 
@@ -865,8 +919,8 @@ namespace UndertaleModLib.Models
             public UndertaleSprite SpriteDefinition { get => _spriteDefinition.Resource; set { _spriteDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("ObjectDefinition"); } }
 
             /// <summary>
-            /// From which object this tile stems from.
-            /// Will return a <see cref="UndertaleBackground"/> if <see cref="spriteMode"/> is disabled, a <see cref="UndertaleSprite"/> if it's enabled.
+            /// From which object this tile stems from.<br/>
+            /// Will return a <see cref="UndertaleBackground"/> if <see cref="spriteMode"/> is <see langword="true"/>, a <see cref="UndertaleSprite"/> if it's <see langword="false"/>.
             /// </summary>
             public UndertaleNamedResource ObjectDefinition { get => spriteMode ? SpriteDefinition : BackgroundDefinition; set { if (spriteMode) SpriteDefinition = (UndertaleSprite)value; else BackgroundDefinition = (UndertaleBackground)value; } }
 
@@ -913,6 +967,12 @@ namespace UndertaleModLib.Models
             //TODO?
             public uint Color { get; set; } = 0xFFFFFFFF;
 
+            /// <summary>
+            /// Returns the texture page item of the tile.
+            /// </summary>
+            /// <remarks>
+            /// This attribute is UMT-only and does not exist in GameMaker.
+            /// </remarks>
             public UndertaleTexturePageItem Tpag => spriteMode ? SpriteDefinition?.Textures.FirstOrDefault()?.Texture : BackgroundDefinition?.Texture; // TODO: what happens on sprites with multiple textures?
 
             public event PropertyChangedEventHandler PropertyChanged;
@@ -1238,8 +1298,14 @@ namespace UndertaleModLib.Models
                 public float AnimationSpeed { get; set; }
                 public AnimationSpeedType AnimationSpeedType { get; set; }
 
-                public float XOffset => (ParentLayer?.XOffset ?? 0) + (Sprite?.Textures.FirstOrDefault()?.Texture?.TargetX ?? 0);
-                public float YOffset => (ParentLayer?.YOffset ?? 0) + (Sprite?.Textures.FirstOrDefault()?.Texture?.TargetY ?? 0);
+                public float XOffset => (ParentLayer?.XOffset ?? 0) +
+                                        (Sprite is not null
+                                         ? (Sprite.Textures.FirstOrDefault()?.Texture?.TargetX ?? 0) - Sprite.OriginXWrapper
+                                         : 0);
+                public float YOffset => (ParentLayer?.YOffset ?? 0) +
+                                        (Sprite is not null
+                                         ? (Sprite.Textures.FirstOrDefault()?.Texture?.TargetY ?? 0) - Sprite.OriginYWrapper
+                                         : 0);
 
                 public event PropertyChangedEventHandler PropertyChanged;
                 protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -1415,12 +1481,15 @@ namespace UndertaleModLib.Models
             }
             public float Rotation { get; set; }
             public float OppositeRotation => 360F - Rotation;
-            public int XOffset => Sprite is not null
-                                  ? X - Sprite.OriginX + (Sprite.Textures.ElementAtOrDefault((int)FrameIndex)?.Texture?.TargetX ?? 0)
-                                  : X;
-            public int YOffset => Sprite is not null
-                                  ? Y - Sprite.OriginY + (Sprite.Textures.ElementAtOrDefault((int)FrameIndex)?.Texture?.TargetY ?? 0)
-                                  : Y;
+
+            public int SpriteXOffset => Sprite != null
+                                        ? (-1 * Sprite.OriginXWrapper) + (Sprite.Textures.ElementAtOrDefault(WrappedFrameIndex)?.Texture?.TargetX ?? 0)
+                                        : 0;
+            public int SpriteYOffset => Sprite != null
+                                        ? (-1 * Sprite.OriginYWrapper) + (Sprite.Textures.ElementAtOrDefault(WrappedFrameIndex)?.Texture?.TargetY ?? 0)
+                                        : 0;
+            public int XOffset => X + SpriteXOffset;
+            public int YOffset => Y + SpriteYOffset;
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)

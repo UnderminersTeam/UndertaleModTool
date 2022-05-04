@@ -13,9 +13,6 @@
         <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
         <local:ColorConverter x:Key="ColorConverter"/>
         <local:SimplePointsDisplayConverter x:Key="SimplePointsDisplayConverter"/>
-        <local:ObjCenterXConverter x:Key="ObjCenterXConverter" />
-        <local:ObjXOffsetConverter x:Key="ObjXOffsetConverter" />
-        <local:ObjCenterYConverter x:Key="ObjCenterYConverter" />
         <local:LayerFlattenerConverter x:Key="LayerFlattenerConverter" />
         <local:IsGMS2Converter x:Key="IsGMS2Converter" />
         <local:BGColorConverter x:Key="BGColorConverter"/>
@@ -32,6 +29,7 @@
         <local:TileRectanglesConverter x:Key="TileRectanglesConverter"/>
         <local:CachedImageLoaderWithIndex x:Key="CachedImageLoaderWithIndex"/>
         <local:DataFieldOneTimeConverter x:Key="DataFieldOneTimeConverter"/>
+        <local:NegateNumberConverter x:Key="NegateNumberConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Tiles}"/>
@@ -922,7 +920,7 @@
                             <local:UndertaleStringReference Grid.Row="0" Grid.Column="2" Margin="3" ObjectReference="{Binding Name}"/>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Definition</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="2" Margin="3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleGameObject}" CanRemove="False"/>
+                            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="2" Margin="3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleSprite}" CanRemove="False"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Position</TextBlock>
                             <Grid Grid.Row="2" Grid.Column="2">
@@ -1086,8 +1084,12 @@
                             </Rectangle.Style>
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
-                                    <ScaleTransform x:Name="transform1_0" ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"/>
-                                    <RotateTransform x:Name="transform1_1" Angle="{Binding OppositeRotation, Mode=OneWay}"/>
+                                    <ScaleTransform x:Name="transform1_0" ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"
+                                                    CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"
+                                                    CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"/>
+                                    <RotateTransform x:Name="transform1_1" Angle="{Binding OppositeRotation, Mode=OneWay}"
+                                                     CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"
+                                                     CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"/>
                                     <TranslateTransform x:Name="transform1_2" X="{Binding XOffset, Mode=OneWay}" Y="{Binding YOffset, Mode=OneWay}"/>
                                 </TransformGroup>
                             </Rectangle.RenderTransform>
@@ -1122,10 +1124,12 @@
                                     <ImageBrush.ImageSource>
                                         <MultiBinding Converter="{StaticResource CachedTileImageLoader}">
                                             <Binding Mode="OneTime"/>
-                                            <Binding Path="SourceX" Mode="OneWay"/>
-                                            <Binding Path="SourceY" Mode="OneWay"/>
                                             <Binding Path="Width" Mode="OneWay"/>
                                             <Binding Path="Height" Mode="OneWay"/>
+                                            <!-- for notification only -->
+                                            <Binding Path="Tpag" Mode="OneWay"/>
+                                            <Binding Path="SourceX" Mode="OneWay"/>
+                                            <Binding Path="SourceY" Mode="OneWay"/>
                                         </MultiBinding>
                                     </ImageBrush.ImageSource>
                                 </ImageBrush>
@@ -1141,8 +1145,12 @@
                             </Rectangle.Style>
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
-                                    <ScaleTransform x:Name="transform4_0" ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"/>
-                                    <RotateTransform x:Name="transform4_1" Angle="{Binding OppositeRotation, Mode=OneWay}"/>
+                                    <ScaleTransform x:Name="transform4_0" ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"
+                                                    CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"
+                                                    CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"/>
+                                    <RotateTransform x:Name="transform4_1" Angle="{Binding OppositeRotation, Mode=OneWay}"
+                                                     CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"
+                                                     CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneWay}"/>
                                     <TranslateTransform x:Name="transform4_2" X="{Binding XOffset, Mode=OneWay}" Y="{Binding YOffset, Mode=OneWay}"/>
                                 </TransformGroup>
                             </Rectangle.RenderTransform>

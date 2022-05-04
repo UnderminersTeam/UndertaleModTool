@@ -115,6 +115,42 @@ namespace UndertaleModLib.Models
         public int OriginY { get; set; }
 
         /// <summary>
+        /// A <see cref="OriginX"/> wrapper that also sets <see cref="V2Sequence.OriginX"/> accordingly.
+        /// </summary>
+        /// <remarks>
+        /// This attribute is used only in UndertaleModTool and doesn't exist in GameMaker.
+        /// </remarks>
+        public int OriginXWrapper
+        {
+            get => OriginX;
+            set
+            {
+                OriginX = value;
+
+                if (IsSpecialType && SVersion > 1 && V2Sequence is not null)
+                    V2Sequence.OriginX = value;
+            }
+        }
+
+        /// <summary>
+        /// A <see cref="OriginY"/> wrapper that also sets <see cref="V2Sequence.OriginY"/> accordingly.
+        /// </summary>
+        /// <remarks>
+        /// This attribute is used only in UndertaleModTool and doesn't exist in GameMaker.
+        /// </remarks>
+        public int OriginYWrapper
+        {
+            get => OriginY;
+            set
+            {
+                OriginY = value;
+
+                if (IsSpecialType && SVersion > 1 && V2Sequence is not null)
+                    V2Sequence.OriginY = value;
+            }
+        }
+
+        /// <summary>
         /// The frames of the sprite.
         /// </summary>
         public UndertaleSimpleList<TextureEntry> Textures { get; private set; } = new UndertaleSimpleList<TextureEntry>();
@@ -441,7 +477,7 @@ namespace UndertaleModLib.Models
                         break;
                     case SpriteType.SWF:
                         {
-                            //// ATTENTION: This code does not work all the time for some reason. ////
+                            //// TODO: This code does not work all the time for some reason. ////
 
                             SWFVersion = reader.ReadInt32();
                             Util.DebugUtil.Assert(SWFVersion == 8 || SWFVersion == 7, "Invalid SWF sprite format, expected 7 or 8, got " + SWFVersion);
