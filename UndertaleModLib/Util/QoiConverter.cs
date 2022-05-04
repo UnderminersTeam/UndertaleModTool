@@ -6,7 +6,10 @@ using System.IO;
 
 namespace UndertaleModLib.Util
 {
-    // NOTE: Ported over from DogScepter's QOI converter at https://github.com/colinator27/dog-scepter/
+    /// <summary>
+    /// A class that converts to and from the GM-custom QOI format.
+    /// </summary>
+    /// <remarks>Ported over from DogScepter's QOI converter at <see href="https://github.com/colinator27/dog-scepter/"/>.</remarks>
     public static class QoiConverter
     {
         private const byte QOI_INDEX = 0x00;
@@ -21,6 +24,12 @@ namespace UndertaleModLib.Util
         private const byte QOI_MASK_3 = 0xe0;
         private const byte QOI_MASK_4 = 0xf0;
 
+        /// <summary>
+        /// Creates a Bitmap from a <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="s">The stream to create the PNG image from.</param>
+        /// <returns>The QOI image as a PNG.</returns>
+        /// <exception cref="Exception">If there is an invalid QOIF magic header or there was an error with stride width.</exception>
         public unsafe static Bitmap GetImageFromStream(Stream s)
         {
             byte[] header = new byte[12];
@@ -129,6 +138,13 @@ namespace UndertaleModLib.Util
             return bmp;
         }
 
+        /// <summary>
+        /// Creates a QOI image as a byte array from a Bitmap.
+        /// </summary>
+        /// <param name="bmp">The bitmap to create the QOI image from.</param>
+        /// <param name="padding">The amount of bytes of padding that should be used.</param>
+        /// <returns>A QOI Image as a byte array.</returns>
+        /// <exception cref="Exception">If there was an error with stride width.</exception>
         public unsafe static byte[] GetArrayFromImage(Bitmap bmp, int padding = 4)
         {
             byte[] res = new byte[(bmp.Width * bmp.Height * 4 * 12) + padding]; // default capacity

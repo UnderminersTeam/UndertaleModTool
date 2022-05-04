@@ -189,21 +189,21 @@ namespace UndertaleModTests
         {
             Console.Write("ReplaceTextInGML(): " + code.ToString() + ", " + keyword + ", " + replacement + ", " + case_sensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
         }
-        public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false)
+        public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool replaceWithEmptyStringOnFail = false)
         {
             Console.Write("ImportGMLString(): " + codeName + ", " + gmlCode + ", " + doParse.ToString());
         }
-        public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
+        public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool nukeProfile = true, bool replaceWithEmptyStringOnFail = false)
         {
             Console.Write("ImportASMString(): " + codeName + ", " + gmlCode + ", " + doParse.ToString());
         }
-        public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false, bool throwOnError = false)
+        public void ImportGMLFile(string fileName, bool doParse = true, bool replaceWithEmptyStringOnFail = false, bool throwOnError = false)
         {
-            Console.Write($"ImportGMLFile(): \"{fileName}\", {doParse}, {CheckDecompiler}, {throwOnError}");
+            Console.Write($"ImportGMLFile(): \"{fileName}\", {doParse}, {replaceWithEmptyStringOnFail}, {throwOnError}");
         }
-        public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
+        public void ImportASMFile(string fileName, bool doParse = true, bool nukeProfile = true, bool replaceWithEmptyStringOnFail = false, bool throwOnError = false)
         {
-            Console.Write($"ImportASMFile(): \"{fileName}\", {doParse}, {destroyASM}, {CheckDecompiler}, {throwOnError}");
+            Console.Write($"ImportASMFile(): \"{fileName}\", {doParse}, {nukeProfile}, {replaceWithEmptyStringOnFail}, {throwOnError}");
         }
 
         public void SetFinishedMessage(bool isFinishedMessageEnabled)
