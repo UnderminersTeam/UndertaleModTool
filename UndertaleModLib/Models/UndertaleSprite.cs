@@ -115,7 +115,7 @@ namespace UndertaleModLib.Models
         public int OriginY { get; set; }
 
         /// <summary>
-        /// A <see cref="OriginX"/> wrapper than also sets horizontal origin of <see cref="V2Sequence"/>.
+        /// A <see cref="OriginX"/> wrapper that also sets <see cref="V2Sequence.OriginX"/> accordingly.
         /// </summary>
         /// <remarks>
         /// This attribute is used only in UndertaleModTool and doesn't exist in GameMaker.
@@ -133,7 +133,7 @@ namespace UndertaleModLib.Models
         }
 
         /// <summary>
-        /// A <see cref="OriginY"/> wrapper than also sets vertical origin of <see cref="V2Sequence"/>.
+        /// A <see cref="OriginY"/> wrapper that also sets <see cref="V2Sequence.OriginY"/> accordingly.
         /// </summary>
         /// <remarks>
         /// This attribute is used only in UndertaleModTool and doesn't exist in GameMaker.

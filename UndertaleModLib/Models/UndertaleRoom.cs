@@ -182,7 +182,7 @@ namespace UndertaleModLib.Models
                 return _layers?.Where(l => l.LayerType is LayerType.Background
                                         && l.BackgroundData.Sprite is null
                                         && l.BackgroundData.Color != 0)
-                               .OrderBy(l => l?.LayerDepth ?? 0)
+                               .OrderBy(l => l.LayerDepth ?? 0)
                                .FirstOrDefault();
             }
         }
@@ -796,7 +796,7 @@ namespace UndertaleModLib.Models
             /// A horizontal offset relative to top-left corner of the game object.
             /// </summary>
             /// <remarks>
-            /// Used for proper game object rotation display in the room editor and in <see cref="XOffset"/>.<br/>
+            /// Used for proper game object rotation display in the room editor and for determining <see cref="XOffset"/>.<br/>
             /// This attribute is UMT-only and does not exist in GameMaker.
             /// </remarks>
             public int SpriteXOffset => ObjectDefinition?.Sprite != null
@@ -807,7 +807,7 @@ namespace UndertaleModLib.Models
             /// A vertical offset relative to top-left corner of the game object.
             /// </summary>
             /// <remarks>
-            /// Used for proper game object rotation display in the room editor and in <see cref="YOffset"/>.<br/>
+            /// Used for proper game object rotation display in the room editor and for determining <see cref="YOffset"/>.<br/>
             /// This attribute is UMT-only and does not exist in GameMaker.
             /// </remarks>
             public int SpriteYOffset => ObjectDefinition?.Sprite != null
@@ -888,7 +888,7 @@ namespace UndertaleModLib.Models
         {
             /// <summary>
             /// Whether this tile is from an asset layer.<br/>
-            /// Equals true if it's Game Maker Studio: 2.
+            /// <see langword="true"/> for GameMaker Studio: 2 games, otherwise <see langword="false"/>.
             /// </summary>
             /// <remarks>
             /// This attribute is UMT-only and does not exist in GameMaker.
