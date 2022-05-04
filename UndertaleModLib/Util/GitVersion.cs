@@ -13,21 +13,6 @@ namespace UndertaleModLib.Util;
 public static class GitVersion
 {
     /// <summary>
-    /// The constant for the git executable.
-    /// </summary>
-    private const string Git = "git";
-
-    /// <summary>
-    /// The constant to receive commit name.
-    /// </summary>
-    private const string GitCommit = "describe --always --dirty";
-
-    /// <summary>
-    /// The constant to receive branch name.
-    /// </summary>
-    private const string GitBranch = "rev-parse --abbrev-ref HEAD";
-
-    /// <summary>
     /// Gets and returns the git commit and branch name.
     /// </summary>
     /// <returns>The git commit and branch name.</returns>
