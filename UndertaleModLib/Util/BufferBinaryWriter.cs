@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -84,6 +86,17 @@ namespace UndertaleModLib.Util
         {
             ResizeToFit((int)(offset + value.Length));
             Buffer.BlockCopy(value.GetBuffer(), 0, buffer, (int)offset, (int)value.Length);
+            offset += value.Length;
+        }
+
+        public void Write(Span<byte> value)
+        {
+            ResizeToFit((int)offset + value.Length);
+            // basically reimplements Buffer.BlockCopy but using Span as the source
+            ref byte valueRef = ref MemoryMarshal.GetReference(value);
+            ref byte bufferRef =
+                ref Unsafe.AddByteOffset(ref MemoryMarshal.GetArrayDataReference(buffer), (nuint)offset);
+            Unsafe.CopyBlock(ref bufferRef, ref valueRef, (uint)value.Length);
             offset += value.Length;
         }
 

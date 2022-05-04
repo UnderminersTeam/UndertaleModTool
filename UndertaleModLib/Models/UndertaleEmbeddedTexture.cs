@@ -146,9 +146,7 @@ namespace UndertaleModLib.Models
                     }
                     else
                     {
-                        // Encode the PNG data back to QOI
-                        writer.Write(QoiConverter.GetArrayFromImage(TextureWorker.GetImageFromByteArray(TextureBlob),
-                            writer.undertaleData.GM2022_3 ? 0 : 4));
+                        writer.Write(QoiConverter.GetSpanFromImage(Image, writer.undertaleData.GM2022_3 ? 0 : 4));
                     }
                 }
                 else
@@ -186,10 +184,8 @@ namespace UndertaleModLib.Models
                         reader.undertaleData.UseQoiFormat = true;
                         reader.undertaleData.UseBZipFormat = false;
 
-                        using MemoryStream ms = new MemoryStream(reader.Buffer);
-                        ms.Seek(reader.Offset, SeekOrigin.Begin);
-                        Image = QoiConverter.GetImageFromStream(ms);
-                        reader.Offset = (int)ms.Position;
+                        Image = QoiConverter.GetImageFromSpan(reader.Buffer.AsSpan()[reader.Offset..], out int dataLength);
+                        reader.Offset += dataLength;
                         return;
                     }
                     else

@@ -46,14 +46,23 @@ namespace UndertaleModLib.Util
         /// <param name="bytes">The span to create the PNG image from.</param>
         /// <returns>The QOI image as a PNG.</returns>
         /// <exception cref="Exception">If there is an invalid QOIF magic header or there was an error with stride width.</exception>
-        public unsafe static Bitmap GetImageFromSpan(ReadOnlySpan<byte> bytes) {
+        public static Bitmap GetImageFromSpan(ReadOnlySpan<byte> bytes) => GetImageFromSpan(bytes, out _);
+
+        /// <summary>
+        /// Creates a Bitmap from a <see cref="ReadOnlySpan"/>.
+        /// </summary>
+        /// <param name="bytes">The span to create the PNG image from.</param>
+        /// <param name="length">The total amount of data read from the span.</param>
+        /// <returns>The QOI image as a PNG.</returns>
+        /// <exception cref="Exception">If there is an invalid QOIF magic header or there was an error with stride width.</exception>
+        public unsafe static Bitmap GetImageFromSpan(ReadOnlySpan<byte> bytes, out int length) {
             ReadOnlySpan<byte> header = bytes[..12];
             if (header[0] != (byte)'f' || header[1] != (byte)'i' || header[2] != (byte)'o' || header[3] != (byte)'q')
                 throw new Exception("Invalid little-endian QOIF image magic");
 
             int width = header[4] + (header[5] << 8);
             int height = header[6] + (header[7] << 8);
-            int length = header[8] + (header[9] << 8) + (header[10] << 16) + (header[11] << 24);
+            length = header[8] + (header[9] << 8) + (header[10] << 16) + (header[11] << 24);
 
             ReadOnlySpan<byte> pixelData = bytes.Slice(12, length);
 
