@@ -24,10 +24,9 @@ namespace UndertaleModLib.Util
 
         public Bitmap GetEmbeddedTexture(UndertaleEmbeddedTexture embeddedTexture)
         {
-            lock (embeddedDictionary)
-            {
-                if (!embeddedDictionary.ContainsKey(embeddedTexture))
-                    embeddedDictionary[embeddedTexture] = GetImageFromByteArray(embeddedTexture.TextureData.TextureBlob);
+            lock (embeddedDictionary) {
+                if(!embeddedDictionary.ContainsKey(embeddedTexture))
+                    embeddedDictionary[embeddedTexture] = embeddedTexture.TextureData.Image;
                 return embeddedDictionary[embeddedTexture];
             }
         }

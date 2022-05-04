@@ -30,10 +30,24 @@ namespace UndertaleModLib.Util
         /// <param name="s">The stream to create the PNG image from.</param>
         /// <returns>The QOI image as a PNG.</returns>
         /// <exception cref="Exception">If there is an invalid QOIF magic header or there was an error with stride width.</exception>
-        public unsafe static Bitmap GetImageFromStream(Stream s)
-        {
-            byte[] header = new byte[12];
-            s.Read(header, 0, 12);
+        public static Bitmap GetImageFromStream(Stream s) {
+            Span<byte> header = stackalloc byte[12];
+            s.Read(header);
+            int length = header[8] + (header[9] << 8) + (header[10] << 16) + (header[11] << 24);
+            byte[] bytes = new byte[12 + length];
+            s.Position -= 12;
+            s.Read(bytes, 0, bytes.Length);
+            return GetImageFromSpan(bytes);
+        }
+
+        /// <summary>
+        /// Creates a Bitmap from a <see cref="ReadOnlySpan"/>.
+        /// </summary>
+        /// <param name="bytes">The span to create the PNG image from.</param>
+        /// <returns>The QOI image as a PNG.</returns>
+        /// <exception cref="Exception">If there is an invalid QOIF magic header or there was an error with stride width.</exception>
+        public unsafe static Bitmap GetImageFromSpan(ReadOnlySpan<byte> bytes) {
+            ReadOnlySpan<byte> header = bytes[..12];
             if (header[0] != (byte)'f' || header[1] != (byte)'i' || header[2] != (byte)'o' || header[3] != (byte)'q')
                 throw new Exception("Invalid little-endian QOIF image magic");
 
@@ -41,8 +55,7 @@ namespace UndertaleModLib.Util
             int height = header[6] + (header[7] << 8);
             int length = header[8] + (header[9] << 8) + (header[10] << 16) + (header[11] << 24);
 
-            byte[] pixelData = new byte[length];
-            s.Read(pixelData, 0, length);
+            ReadOnlySpan<byte> pixelData = bytes.Slice(12, length);
 
             Bitmap bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
 
@@ -56,7 +69,7 @@ namespace UndertaleModLib.Util
             int pos = 0;
             int run = 0;
             byte r = 0, g = 0, b = 0, a = 255;
-            byte[] index = new byte[64 * 4];
+            Span<byte> index = stackalloc byte[64 * 4];
             while (bmpPtr < bmpEnd)
             {
                 if (run > 0)
@@ -145,7 +158,16 @@ namespace UndertaleModLib.Util
         /// <param name="padding">The amount of bytes of padding that should be used.</param>
         /// <returns>A QOI Image as a byte array.</returns>
         /// <exception cref="Exception">If there was an error with stride width.</exception>
-        public unsafe static byte[] GetArrayFromImage(Bitmap bmp, int padding = 4)
+        public static byte[] GetArrayFromImage(Bitmap bmp, int padding = 4) => GetSpanFromImage(bmp, padding).ToArray();
+
+        /// <summary>
+        /// Creates a QOI image as a span of bytes from a Bitmap.
+        /// </summary>
+        /// <param name="bmp">The bitmap to create the QOI image from.</param>
+        /// <param name="padding">The amount of bytes of padding that should be used.</param>
+        /// <returns>A QOI Image as a byte array.</returns>
+        /// <exception cref="Exception">If there was an error with stride width.</exception>
+        public unsafe static Span<byte> GetSpanFromImage(Bitmap bmp, int padding = 4)
         {
             byte[] res = new byte[(bmp.Width * bmp.Height * 4 * 12) + padding]; // default capacity
             // Little-endian QOIF image magic
@@ -169,7 +191,7 @@ namespace UndertaleModLib.Util
             byte r = 0, g = 0, b = 0, a = 255;
             int run = 0;
             int v = 0, vPrev = 0xff;
-            int[] index = new int[64];
+            Span<int> index = stackalloc int[64];
             while (bmpPtr < bmpEnd)
             {
                 b = *bmpPtr;
@@ -267,7 +289,7 @@ namespace UndertaleModLib.Util
             res[10] = (byte)((length >> 16) & 0xff);
             res[11] = (byte)((length >> 24) & 0xff);
 
-            return res[..resPos];
+            return res.AsSpan()[..resPos];
         }
     }
 }

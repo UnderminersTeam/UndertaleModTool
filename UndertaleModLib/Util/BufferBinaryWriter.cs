@@ -80,6 +80,13 @@ namespace UndertaleModLib.Util
             offset += value.Length;
         }
 
+        public void Write(MemoryStream value)
+        {
+            ResizeToFit((int)(offset + value.Length));
+            Buffer.BlockCopy(value.GetBuffer(), 0, buffer, (int)offset, (int)value.Length);
+            offset += value.Length;
+        }
+
         public void Write(char[] value)
         {
             ResizeToFit((int)offset + value.Length);
