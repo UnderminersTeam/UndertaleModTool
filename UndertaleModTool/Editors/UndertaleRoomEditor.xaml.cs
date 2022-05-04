@@ -1298,14 +1298,14 @@ namespace UndertaleModTool
                 // add pointer list if one doesn't already exist
                 layer.AssetsData.Sprites ??= new UndertalePointerList<SpriteInstance>();
                 
-                SpriteInstance sprInst = new();
-                string sprName = "graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8");
-                sprInst.Name = new UndertaleString(sprName);
+                SpriteInstance spriteInstance = new();
+                string spriteName = "graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8");
+                spriteInstance.Name = new UndertaleString(spriteName);
 
-                layer.AssetsData.Sprites.Add(sprInst);
-                sprInstDict.TryAdd(sprInst, layer);
+                layer.AssetsData.Sprites.Add(spriteInstance);
+                sprInstDict.TryAdd(spriteInstance, layer);
 
-                SelectObject(sprInst);
+                SelectObject(spriteInstance);
             }
         }
 
