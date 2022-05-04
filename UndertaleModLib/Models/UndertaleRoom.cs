@@ -500,7 +500,7 @@ namespace UndertaleModLib.Models
             public bool Stretch { get => _Stretch; set { _Stretch = value; OnPropertyChanged(); UpdateStretch(); } }
 
             /// <summary>
-            /// A wrapper of <see cref="TileX"/> that indicates whether this background is tiled horizontally.
+            /// Indicates whether this background is tiled horizontally.
             /// </summary>
             /// <remarks>
             /// This attribute is UMT-only and does not exist in GameMaker.
@@ -508,7 +508,7 @@ namespace UndertaleModLib.Models
             public bool TiledHorizontally { get => TileX > 0; set { TileX = value ? 1 : 0; OnPropertyChanged(); } }
 
             /// <summary>
-            /// A wrapper of <see cref="TileY"/> that indicates whether this background is tiled vertically.
+            /// Indicates whether this background is tiled vertically.
             /// </summary>
             /// <remarks>
             /// This attribute is UMT-only and does not exist in GameMaker.
@@ -785,7 +785,7 @@ namespace UndertaleModLib.Models
             }
 
             /// <summary>
-            /// A wrapper of <see cref="Rotation"/> that returns an opposite angle of the current rotation.
+            /// The opposite angle of the current rotation.
             /// </summary>
             /// <remarks>
             /// This attribute is UMT-only and does not exist in GameMaker.
