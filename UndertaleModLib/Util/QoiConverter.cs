@@ -30,7 +30,8 @@ namespace UndertaleModLib.Util
         /// <param name="s">The stream to create the PNG image from.</param>
         /// <returns>The QOI image as a PNG.</returns>
         /// <exception cref="Exception">If there is an invalid QOIF magic header or there was an error with stride width.</exception>
-        public static Bitmap GetImageFromStream(Stream s) {
+        public static Bitmap GetImageFromStream(Stream s)
+        {
             Span<byte> header = stackalloc byte[12];
             s.Read(header);
             int length = header[8] + (header[9] << 8) + (header[10] << 16) + (header[11] << 24);
@@ -55,7 +56,8 @@ namespace UndertaleModLib.Util
         /// <param name="length">The total amount of data read from the span.</param>
         /// <returns>The QOI image as a PNG.</returns>
         /// <exception cref="Exception">If there is an invalid QOIF magic header or there was an error with stride width.</exception>
-        public unsafe static Bitmap GetImageFromSpan(ReadOnlySpan<byte> bytes, out int length) {
+        public unsafe static Bitmap GetImageFromSpan(ReadOnlySpan<byte> bytes, out int length)
+        {
             ReadOnlySpan<byte> header = bytes[..12];
             if (header[0] != (byte)'f' || header[1] != (byte)'i' || header[2] != (byte)'o' || header[3] != (byte)'q')
                 throw new Exception("Invalid little-endian QOIF image magic");

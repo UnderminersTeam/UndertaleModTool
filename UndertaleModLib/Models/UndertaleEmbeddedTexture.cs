@@ -107,8 +107,10 @@ namespace UndertaleModLib.Models
             /// The PNG image data of the texture.
             /// </summary>
             [Obsolete($"{nameof(TextureBlob)} is obsolete. Use {nameof(Image)} instead.", false)]
-            public byte[] TextureBlob {
-                get {
+            public byte[] TextureBlob
+            {
+                get
+                {
                     using MemoryStream final = new();
                     Image.Save(final, ImageFormat.Png);
                     return final.ToArray();
