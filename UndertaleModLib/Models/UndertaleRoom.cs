@@ -182,7 +182,7 @@ namespace UndertaleModLib.Models
                 return _layers?.Where(l => l.LayerType is LayerType.Background
                                         && l.BackgroundData.Sprite is null
                                         && l.BackgroundData.Color != 0)
-                               .OrderBy(l => l.LayerDepth ?? 0)
+                               .OrderBy(l => l.LayerDepth)
                                .FirstOrDefault();
             }
         }
