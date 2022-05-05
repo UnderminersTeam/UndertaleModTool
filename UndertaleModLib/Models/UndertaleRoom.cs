@@ -1527,10 +1527,10 @@ namespace UndertaleModLib.Models
                 Rotation = reader.ReadSingle();
             }
 
-            public static UndertaleString GenerateRandomName()
+            public static UndertaleString GenerateRandomName(UndertaleData data)
             {
                 // The same format as in "GameMaker Studio: 2".
-                return new UndertaleString("graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8"));
+                return data.Strings.MakeString("graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8"));
             } 
 
             public override string ToString()
