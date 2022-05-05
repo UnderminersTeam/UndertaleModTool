@@ -159,6 +159,7 @@ namespace UndertaleModLib.Util
 
             bmp.UnlockBits(data);
 
+            length += header.Length;
             return bmp;
         }
 
