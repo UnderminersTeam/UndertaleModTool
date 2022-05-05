@@ -27,6 +27,7 @@ using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
+using UndertaleModLib.Util;
 using UndertaleModTool.Windows;
 using System.IO.Pipes;
 using Ookii.Dialogs.Wpf;
@@ -93,7 +94,7 @@ namespace UndertaleModTool
             else if (obj is UndertaleNamedResource namedRes)
             {
                 string content = namedRes.Name?.Content;
-                
+
                 string header = obj switch
                 {
                     UndertaleAudioGroup => "Audio Group",
@@ -301,7 +302,13 @@ namespace UndertaleModTool
 
         // Version info
         public static string Edition = "";
+
+        // On debug, build with git versions. Otherwise, use the provided release version.
+#if DEBUG
+        public static string Version = GitVersion.GetGitVersion();
+#else
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? "-" + Edition : "");
+#endif
 
         public MainWindow()
         {
@@ -313,7 +320,7 @@ namespace UndertaleModTool
             SelectionHistory.Clear();
             ClosedTabsHistory.Clear();
 
-            TitleMain = "UndertaleModTool by krzys_h v" + Version;
+            TitleMain = "UndertaleModTool by krzys_h v:" + Version;
 
             CanSave = false;
             CanSafelySave = false;
@@ -1739,7 +1746,7 @@ namespace UndertaleModTool
             if (Highlighted is UndertaleObject obj)
                 DeleteItem(obj);
         }
-        
+
         private void MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
             object source = null;
@@ -2524,7 +2531,12 @@ namespace UndertaleModTool
             httpClient = new();
             httpClient.DefaultRequestHeaders.Accept.Clear();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
-            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("UndertaleModTool", Version));
+
+            // remove the invalid characters (everything within square brackets) from the version string.
+            // Probably needs to be expanded later, these are just the ones I know of.
+            Regex invalidChars = new Regex(@"[  ()]");
+            string version = invalidChars.Replace(Version, "");
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("UndertaleModTool", version));
 
             double bytesToMB = 1024 * 1024;
 
@@ -3238,7 +3250,7 @@ result in loss of work.");
                         Tabs[i].TabIndex = i;
 
                     // if closing the currently open tab
-                    if (currIndex == tabIndex)                            
+                    if (currIndex == tabIndex)
                     {
                         // and if that tab is not the last
                         if (Tabs.Count > 1 && tabIndex < Tabs.Count - 1)

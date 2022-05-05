@@ -35,4 +35,17 @@
     <PackageReference Include="SharpZipLib" Version="1.3.3" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="version.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="gitversion.txt" />
+    <EmbeddedResource Include="gitversion.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <!-- puts the git commit name and branch name into gitversion.txt which is an embedded resource -->
+    <Exec Command="( git describe --always --dirty &amp;&amp; git rev-parse --abbrev-ref HEAD  ) &gt; &quot;$(ProjectDir)/gitversion.txt&quot;" />
+  </Target>
 </Project>
