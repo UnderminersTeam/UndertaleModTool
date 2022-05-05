@@ -351,11 +351,10 @@ namespace UndertaleModTool
                         return;
                     }
 
-                    string graphicName = "graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8");
                     var other = clickedObj as SpriteInstance;
                     var newObj = new SpriteInstance
                     {
-                        Name = new UndertaleString(graphicName),
+                        Name = SpriteInstance.GenerateRandomName(),
                         Sprite = other.Sprite,
                         X = other.X,
                         Y = other.Y,
@@ -538,11 +537,9 @@ namespace UndertaleModTool
                     return null;
                 }
 
-                string graphicName = "graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8");
-
                 var newSprInst = new SpriteInstance
                 {
-                    Name = new UndertaleString(graphicName),
+                    Name = SpriteInstance.GenerateRandomName(),
                     Sprite = sprInst.Sprite,
                     X = (int)pos.X,
                     Y = (int)pos.Y,
@@ -904,7 +901,14 @@ namespace UndertaleModTool
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[^1]) as UndertaleObject; // TODO: make this more reliable
 
-            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && (sourceItem is UndertaleGameObject || sourceItem is UndertalePath) ? DragDropEffects.Link : DragDropEffects.None;
+            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null
+                        && ((mainWindow.IsGMS2 == Visibility.Collapsed && sourceItem is UndertaleBackground)
+                            || sourceItem is UndertaleGameObject
+                            || sourceItem is UndertalePath
+                            || (mainWindow.IsGMS2 == Visibility.Visible && sourceItem is UndertaleSprite))
+                        ? DragDropEffects.Link
+                        : DragDropEffects.None;
+
             e.Handled = true;
         }
 
@@ -912,20 +916,47 @@ namespace UndertaleModTool
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[^1]) as UndertaleObject;
 
-            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && (sourceItem is UndertaleGameObject || sourceItem is UndertalePath) ? DragDropEffects.Link : DragDropEffects.None;
+            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null
+                        && ((mainWindow.IsGMS2 == Visibility.Collapsed && sourceItem is UndertaleBackground)
+                            || sourceItem is UndertaleGameObject
+                            || sourceItem is UndertalePath
+                            || (mainWindow.IsGMS2 == Visibility.Visible && sourceItem is UndertaleSprite))
+                        ? DragDropEffects.Link
+                        : DragDropEffects.None;
+
             if (e.Effects == DragDropEffects.Link)
             {
-                if (sourceItem is UndertaleBackground)
+                UndertaleRoom room = DataContext as UndertaleRoom;
+                Layer layer = null;
+                if (room.Layers.Count > 0)
                 {
-
+                    object utObj = ObjectEditor.Content;
+                    layer = utObj switch
+                    {
+                        GameObject gameObj => roomObjDict[gameObj.InstanceID],
+                        SpriteInstance sprInst => sprInstDict[sprInst],
+                        Layer l => l,
+                        _ => null
+                    };
                 }
-                else if (sourceItem is UndertaleGameObject)
+
+                if (sourceItem is UndertaleBackground droppedBG)
                 {
-                    UndertaleGameObject droppedObject = sourceItem as UndertaleGameObject;
+                    Background firstBG = room.Backgrounds.FirstOrDefault(x => x.BackgroundDefinition is null);
+                    if (firstBG is not null)
+                    {
+                        firstBG.Enabled = true;
+                        firstBG.BackgroundDefinition = droppedBG;
+
+                        SelectObject(firstBG);
+                    }
+                    else
+                        MainWindow.ShowError("No empty room backgrounds.");
+                }
+                else if (sourceItem is UndertaleGameObject droppedObj)
+                {
                     var mousePos = e.GetPosition(roomCanvas);
 
-                    UndertaleRoom room = this.DataContext as UndertaleRoom;
-                    Layer layer = ObjectEditor.Content as Layer;
                     if (mainWindow.IsGMS2 == Visibility.Visible && layer == null)
                     {
                         MainWindow.ShowError("Please select a layer.");
@@ -937,11 +968,11 @@ namespace UndertaleModTool
                         return;
                     }
 
-                    var obj = new GameObject()
+                    GameObject obj = new()
                     {
                         X = (int)mousePos.X,
                         Y = (int)mousePos.Y,
-                        ObjectDefinition = droppedObject,
+                        ObjectDefinition = droppedObj,
                         InstanceID = mainWindow.Data.GeneralInfo.LastObj++
                     };
                     room.GameObjects.Add(obj);
@@ -951,15 +982,41 @@ namespace UndertaleModTool
 
                     SelectObject(obj);
                 }
-
-                if (sourceItem is UndertalePath)
+                else if (sourceItem is UndertalePath)
                 {
                     PreviewPath = sourceItem as UndertalePath;
                 }
-            }
-            e.Handled = true;
+                else if (sourceItem is UndertaleSprite droppedSprite)
+                {
+                    var mousePos = e.GetPosition(roomCanvas);
 
-            (this.DataContext as UndertaleRoom)?.SetupRoom(false);
+                    if (mainWindow.IsGMS2 == Visibility.Visible && layer == null)
+                    {
+                        MainWindow.ShowError("Please select a layer.");
+                        return;
+                    }
+                    if (layer != null && layer.AssetsData == null)
+                    {
+                        MainWindow.ShowError("Please select an assets layer.");
+                        return;
+                    }
+
+                    SpriteInstance sprInst = new()
+                    {
+                        X = (int)mousePos.X,
+                        Y = (int)mousePos.Y,
+                        Name = SpriteInstance.GenerateRandomName(),
+                        Sprite = droppedSprite
+                    };
+
+                    sprInstDict.TryAdd(sprInst, layer);
+                    layer.AssetsData.Sprites.Add(sprInst);
+
+                    SelectObject(sprInst);
+                }
+            }
+
+            e.Handled = true;
         }
 
         private void RoomObjectsTree_KeyDown(object sender, KeyEventArgs e)
@@ -1297,10 +1354,11 @@ namespace UndertaleModTool
             {
                 // add pointer list if one doesn't already exist
                 layer.AssetsData.Sprites ??= new UndertalePointerList<SpriteInstance>();
-                
-                SpriteInstance spriteInstance = new();
-                string spriteName = "graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8");
-                spriteInstance.Name = new UndertaleString(spriteName);
+
+                SpriteInstance spriteInstance = new()
+                {
+                    Name = SpriteInstance.GenerateRandomName()
+                };
 
                 layer.AssetsData.Sprites.Add(spriteInstance);
                 sprInstDict.TryAdd(spriteInstance, layer);
