@@ -13,18 +13,18 @@
 # Downloads
 
 Both the latest stable release and the most cutting edge version can be downloaded from the table below!
+Note, that you can update to the bleeding edge releases at any time from within the settings menu of UndertaleModTool.  
 
 | Releases 	| Status 	|
 |:---:	|----------	|
-| Stable¹ ² 	| [![GitHub release (latest by date)](https://img.shields.io/github/downloads/krzys-h/UndertaleModTool/latest/total)](https://github.com/krzys-h/UndertaleModTool/releases/latest) |
-| Bleeding edge¹ 	| [![Build tool NET Bundled](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml) |
+| Stable 	| [![GitHub release (latest by date)](https://img.shields.io/github/downloads/krzys-h/UndertaleModTool/latest/total)](https://github.com/krzys-h/UndertaleModTool/releases/latest) |
+| Bleeding edge 	| [![Build tool NET Bundled](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml) |
 
-¹: UndertaleModTool has different builds per release. The differences are as follows:
+It's worth noting that UndertaleModTool has different builds per release. The differences are as follows:
+
 * `.NET bundled` - bundles the required .NET runtime version needed to run the tool alongside it. All stable releases are .NET bundled, so you don't have to worry about installing the necessary runtime.
 * `Single file` - the tool is only one executable, with all dependencies embedded within it. This does make your folders cleaner, however it also causes some unexpected stability issues.
 * `Non-single File` - all dependencies are not embedded within the executable, but are now located right next to it. Choose this if you don't care about finding the right executable in-between of ~300 dll's, or if the stability issues from the `Single file` build affect you.
-
-²: You can update to the bleeding edge releases at any time from within the settings menu of UndertaleModTool.
 
 # Main Features
 
@@ -42,8 +42,8 @@ Both the latest stable release and the most cutting edge version can be download
 
 Here's some screenshots of what UTMT can do:
 
-## [AM2R: Horde Mode Mod](https://github.com/Hornoads/AM2R-The-Horde-Multitroid/releases)
-<img src="images/am2r.png" alt="AM2R: Horde Mode" width="640" height="480"/>
+## [AM2R: The Horde](https://github.com/Hornoads/AM2R-The-Horde-Multitroid/releases)
+<img src="images/am2r-horde.png" alt="AM2R: The Horde" width="640" height="480"/>
 
 ## [Undertale: Bits and Pieces Mod](https://gamejolt.com/games/UndertaleBnP/574044)
 <img src="images/bnp-ut.png" alt="BnP" width="640" height="480"/>
@@ -56,13 +56,11 @@ Here's some screenshots of what UTMT can do:
 Included are some test scripts. They are, but not limited to:
 
 * Universal:
-  * EnableDebug: does just that, makes the global variable 'debug' be enabled at game start. If you don't know about Undertale's debug mode, check out [this write up of Undertale's Debug Mode](https://tcrf.net/Undertale/Debug_Mode)
-  * DebugToggler: similar to the above, but instead toggles the debug mode on and off with F1
-  * GoToRoom: Replaces the debug mode functionality of the F3 button with a dialog that lets you jump to any room by ID
-  * ShowRoomName: Displays the current room name and ID on screen in debug mode
   * Search: Simple search for text in decompiled code entries
   * Scripts to batch import and export various types of asset files.
 * Undertale only:
+  * EnableDebug: does just that, makes the global variable 'debug' be enabled at game start. If you don't know about Undertale's debug mode, check out [this write up of Undertale's Debug Mode](https://tcrf.net/Undertale/Debug_Mode)
+  * DebugToggler: similar to the above, but instead toggles the debug mode on and off with F1
   * BorderEnabler: lets you import the PlayStation exclusive borders into the PC version and patches all version checks so that they display properly
   * testing: nothing important, just displays random text on the main menu - the first script I ever made
   * TTFFonts: Makes the game load fonts in TTF format from current directory instead of using the spritesheet fonts. You will need to track down all the font files yourself, I can't host them here for licensing reasons :(
@@ -71,7 +69,10 @@ Included are some test scripts. They are, but not limited to:
   * DeltaHATE: [HATE](https://www.reddit.com/r/Undertale/comments/41lb16/hate_the_undertale_corruptor/)-inspired script for corrupting Deltarune
   * DeltaMILK: Replaces every non-background sprite with the K.Round healing milk. Don't ask why.
   * TheWholeWorldRevolving: The world is spinning, spinning
-
+* Undertale and Deltarune only:
+  * GoToRoom: Replaces the debug mode functionality of the F3 button with a dialog that lets you jump to any room by ID
+  * ShowRoomName: Displays the current room name and ID on screen in debug mode
+ 
 Additionally, included are some community-made scripts. For more information, consult the [SCRIPTS.md](https://github.com/krzys-h/UndertaleModTool/blob/master/SCRIPTS.md) file.
 
 # Contributing
@@ -101,7 +102,7 @@ The following projects can be compiled:
 #### Compiling Via Command Line
 - Open a terminal and navigate to the directory of `UndertaleModTool.sln`
 - Execute `dotnet publish <Project>` where `<Project>` is one of the projects listed above.
-You can also provide arguments for compiling, such as `--no-self-contained` or `-c release`. For a full list of arguments, consult the [Microsoft Documentation](https://docs.microsoft.com/dotnet/core/tools/dotnet-publish)
+You can also provide arguments for compiling, such as `--no-self-contained` or `-c release`. For a full list of arguments, consult the [Microsoft Documentation](https://docs.microsoft.com/dotnet/core/tools/dotnet-publish).
 
 # GameMaker Data File Format
 
