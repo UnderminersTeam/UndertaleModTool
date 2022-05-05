@@ -292,7 +292,7 @@ namespace UndertaleModTool
 
             SelectObject(clickedObj);
 
-            var mousePos = e.GetPosition(RoomGraphics);
+            var mousePos = e.GetPosition(roomCanvas);
             if (clickedObj is GameObject || clickedObj is Tile || clickedObj is SpriteInstance)
             {
                 movingObj = clickedObj;
@@ -361,6 +361,11 @@ namespace UndertaleModTool
                     hotpointY = mousePos.Y - (movingObj as SpriteInstance).Y;
                 }
             }
+        }
+        private void Rectangle_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+            movingObj = null;
         }
 
         bool placingTiles = false;
@@ -538,6 +543,8 @@ namespace UndertaleModTool
         {
             placingTiles = false;
             placedTiles.Clear();
+
+            movingObj = null;
         }
 
         private void RectangleBackground_MouseMove(object sender, MouseEventArgs e)
@@ -561,7 +568,7 @@ namespace UndertaleModTool
             {
                 UndertaleRoom room = this.DataContext as UndertaleRoom;
 
-                var mousePos = e.GetPosition(RoomGraphics);
+                var mousePos = e.GetPosition(roomCanvas);
 
                 int tgtX = (int)(mousePos.X - hotpointX);
                 int tgtY = (int)(mousePos.Y - hotpointY);
@@ -698,12 +705,6 @@ namespace UndertaleModTool
                 scrollViewerTemp.ScrollToHorizontalOffset(offsetX);
                 scrollViewerTemp.ScrollToVerticalOffset(offsetY);
             }
-        }
-
-        private void Rectangle_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            e.Handled = true;
-            movingObj = null;
         }
 
         private UndertaleObject selectedObject;
