@@ -179,9 +179,10 @@ namespace UndertaleModLib.Util
         /// <param name="padding">The amount of bytes of padding that should be used.</param>
         /// <returns>A QOI Image as a byte array.</returns>
         /// <exception cref="Exception">If there was an error with stride width.</exception>
-        public unsafe static Span<byte> GetSpanFromImage(Bitmap bmp, int padding = 4)
-        {
-            byte[] res = new byte[(bmp.Width * bmp.Height * 4 * 12) + padding]; // default capacity
+        public unsafe static Span<byte> GetSpanFromImage(Bitmap bmp, int padding = 4) {
+            const int maxChunkSize = 5; // according to the QOI spec: https://qoiformat.org/qoi-specification.pdf
+            const int headerSize = 12;
+            byte[] res = new byte[bmp.Width * bmp.Height * maxChunkSize + headerSize + padding]; // default capacity
             // Little-endian QOIF image magic
             res[0] = (byte)'f';
             res[1] = (byte)'i';
@@ -199,7 +200,7 @@ namespace UndertaleModLib.Util
             byte* bmpPtr = (byte*)data.Scan0;
             byte* bmpEnd = bmpPtr + (4 * bmp.Width * bmp.Height);
 
-            int resPos = 12;
+            int resPos = headerSize;
             byte r = 0, g = 0, b = 0, a = 255;
             int run = 0;
             int v = 0, vPrev = 0xff;
@@ -295,7 +296,7 @@ namespace UndertaleModLib.Util
             resPos += padding;
 
             // Write final length
-            int length = resPos - 12;
+            int length = resPos - headerSize;
             res[8] = (byte)(length & 0xff);
             res[9] = (byte)((length >> 8) & 0xff);
             res[10] = (byte)((length >> 16) & 0xff);
