@@ -2526,6 +2526,8 @@ namespace UndertaleModTool
         }
         public async void UpdateApp(SettingsWindow window)
         {
+            //TODO: rewrite this slightly + comment this out so this is clearer on what this does.
+
             window.UpdateButtonEnabled = false;
 
             httpClient = new();
@@ -2559,13 +2561,13 @@ namespace UndertaleModTool
                 return;
             }
 
-            bool isNonSingleFile = File.Exists(Path.Combine(ExePath, "UndertaleModTool.dll"));
+            bool isSingleFile = !File.Exists(Path.Combine(ExePath, "UndertaleModTool.dll"));
             string assemblyLocation = AppDomain.CurrentDomain.GetAssemblies()
                                       .First(x => x.GetName().Name.StartsWith("System.Collections")).Location; // any of currently used assemblies
-            bool isSelfContained = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
+            bool isBundled = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
 
             string baseUrl = "https://api.github.com/repos/krzys-h/UndertaleModTool/actions/";
-            string detectedActionName = $"Build tool{(isSelfContained ? " NET Bundled" : "")}{(isNonSingleFile ? " non-single file" : "")}";
+            string detectedActionName = $"Publish GUI{(!Environment.Is64BitOperatingSystem ? " 32Bit" : "")}";
 
             // Fetch the latest workflow run
             var result = await HttpGetAsync(baseUrl + "runs?branch=master&status=success&per_page=20");
@@ -2630,17 +2632,21 @@ namespace UndertaleModTool
             }
 
             JObject artifact = null;
-            for (int index = 0; index < artifactList.Count; index++) {
+            for (int index = 0; index < artifactList.Count; index++)
+            {
                 var currentArtifact = (JObject) artifactList[index];
                 string artifactName = (string)currentArtifact["name"];
 
                 if (Environment.Is64BitOperatingSystem)
                 {
-                    if (artifactName.Contains("x64"))
+                    if (artifactName.Contains($"isBundled-{isBundled.ToString().ToLower()}-isSingleFile-{isSingleFile.ToString().ToLower()}"))
                         artifact = currentArtifact;
                 }
-                else if (artifactName.Contains("x86"))
-                    artifact = currentArtifact;
+                else
+                {
+                    if (artifactName.Contains($"isSingleFile-{isSingleFile.ToString().ToLower()}"))
+                        artifact = currentArtifact;
+                }
             }
             if (artifact is null)
             {
