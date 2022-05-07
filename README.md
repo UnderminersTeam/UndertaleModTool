@@ -42,9 +42,6 @@ It's worth noting that UndertaleModTool has different builds per release. The di
 
 Here's some screenshots of what UTMT can do:
 
-## [AM2R: The Horde](https://github.com/Hornoads/AM2R-The-Horde-Multitroid/releases)
-<img src="images/am2r-horde.png" alt="AM2R: The Horde" width="640" height="480"/>
-
 ## [Undertale: Bits and Pieces Mod](https://gamejolt.com/games/UndertaleBnP/574044)
 <img src="images/bnp-ut.png" alt="BnP" width="640" height="480"/>
 
