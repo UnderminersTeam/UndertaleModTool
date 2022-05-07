@@ -145,7 +145,7 @@ namespace UndertaleModLib.Models
                 g.DrawImage(finalImage, SourceX, SourceY);
                 g.Dispose();
 
-                TexturePage.TextureData.TextureBlob = TextureWorker.GetImageBytes(embImage);
+                TexturePage.TextureData.Image = embImage;
                 worker.Cleanup();
             }
 
