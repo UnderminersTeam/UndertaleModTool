@@ -113,6 +113,7 @@ namespace UndertaleModLib.Models
                 {
                     // for whatever weird reason the getter is called before the setter
                     // even tho the getter shouldn't be called at all...
+                    // TODO: investigate why this happens
                     if (Image is null)
                         return Array.Empty<byte>();
                     using MemoryStream final = new();
