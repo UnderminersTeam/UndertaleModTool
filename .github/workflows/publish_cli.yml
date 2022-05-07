@@ -35,13 +35,13 @@ jobs:
     - name: Build
       run: dotnet build UndertaleModCli --no-restore
     - name: Publish ${{ matrix.os }} CLI
-      run: dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output cli_${{ matrix.os }}
+      run: dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output CLI-${{ matrix.os }}
     - name: Copy external files
       run: |
-        cp ./README.md ./cli_${{ matrix.os }}/
-        cp ./LICENSE.txt ./cli_${{ matrix.os }}/
+        cp ./README.md ./CLI-${{ matrix.os }}/
+        cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
     - name: Upload ${{ matrix.os }} CLI
       uses: actions/upload-artifact@v2
       with:
-        name: cli_${{ matrix.os }}
-        path: cli_${{ matrix.os }}
+        name: CLI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}
+        path: CLI-${{ matrix.os }}

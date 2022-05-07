@@ -1,4 +1,4 @@
-name: Compile test
+name: Compile Projects
 
 on:
   pull_request:
@@ -35,7 +35,7 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
-      run: dotnet restore UndertaleModToolCli
+      run: dotnet restore UndertaleModCli
     - name: Build
       run: |
-        dotnet build UndertaleModToolCli --no-restore
+        dotnet build UndertaleModCli --no-restore
