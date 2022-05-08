@@ -6,7 +6,7 @@
 
 Heya. I heard you like digging deep into GameMaker games like Undertale/Deltarune, so here's a tool just for you!
 
-  <img src="images/flowey.gif" alt="Flowey"/>
+<img src="images/flowey.gif" alt="Flowey"/>
 
 
 # Downloads
@@ -16,8 +16,8 @@ Note, that you can update to the bleeding edge releases at any time from within 
 
 | Releases 	| Status 	|
 |:---:	|----------	|
-| Stable 	| [![GitHub release (latest by date)](https://img.shields.io/github/downloads/krzys-h/UndertaleModTool/latest/total)](https://github.com/krzys-h/UndertaleModTool/releases/latest) |
-| Bleeding edge 	| [![Build tool NET Bundled](https://github.com/krzys-h/UndertaleModTool/actions/workflows/publish_gui.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/publish_gui.yml) |
+| Stable 	| [![Latest Stable Release](https://img.shields.io/github/downloads/krzys-h/UndertaleModTool/latest/total)](https://github.com/krzys-h/UndertaleModTool/releases/latest) |
+| Bleeding edge 	| [![Latest Bleeding Edge](https://github.com/krzys-h/UndertaleModTool/actions/workflows/publish_gui.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/publish_gui.yml) |
 
 It's worth noting that UndertaleModTool has different builds per release. The differences are as follows:
 
