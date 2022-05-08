@@ -158,6 +158,7 @@ namespace UndertaleModTool
 
         public static Bitmap CreateSpriteBitmap(Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
         {
+            using MemoryStream stream = new(texture.TexturePage.TextureData.TextureBlob);
             Bitmap spriteBMP = new(rect.Width, rect.Height);
 
             rect.Width -= (diffW > 0) ? diffW : 0;
@@ -165,8 +166,11 @@ namespace UndertaleModTool
             int x = isTile ? texture.TargetX : 0;
             int y = isTile ? texture.TargetY : 0;
 
-            using Graphics g = Graphics.FromImage(spriteBMP);
-            g.DrawImage(texture.TexturePage.TextureData.Image, new Rectangle(x, y, rect.Width, rect.Height), rect, GraphicsUnit.Pixel);
+            using (Graphics g = Graphics.FromImage(spriteBMP))
+            {
+                using Image img = Image.FromStream(stream); // "ImageConverter.ConvertFrom()" does the same, except it doesn't explicitly dispose MemoryStream
+                g.DrawImage(img, new Rectangle(x, y, rect.Width, rect.Height), rect, GraphicsUnit.Pixel);
+            }
 
             return spriteBMP;
         }
