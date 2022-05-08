@@ -1,14 +1,13 @@
-<p align="center">
-  <img src="images/logo.png" alt="UndertaleModTool Logo"/>
-</p>
+# UndertaleModTool
 
 [![Underminers Discord](https://img.shields.io/discord/566861759210586112?label=Discord&logo=discord&logoColor=white)](https://discord.gg/UMwccfs2Hb) [![GitHub](https://img.shields.io/github/license/krzys-h/UndertaleModTool?logo=github)](https://github.com/krzys-h/UndertaleModTool/blob/master/LICENSE.txt)
 
-<p align="center">(seeing such an amazing tool it fills you with DETERMINATION.)</p>
-<p align="center">Heya. I heard you like digging deep into Undertale/Deltarune or any GameMaker game data so I made a tool just for you!</p>
-<p align="center">
-  <img src="images/flowey.gif" alt="Flowey"/>
-</p>
+(seeing such an amazing tool fills you with DETERMINATION.)
+
+Heya. I heard you like digging deep into GameMaker games like Undertale/Deltarune, so here's a tool just for you!
+
+<img src="images/flowey.gif" alt="Flowey"/>
+
 
 # Downloads
 
@@ -17,8 +16,8 @@ Note, that you can update to the bleeding edge releases at any time from within 
 
 | Releases 	| Status 	|
 |:---:	|----------	|
-| Stable 	| [![GitHub release (latest by date)](https://img.shields.io/github/downloads/krzys-h/UndertaleModTool/latest/total)](https://github.com/krzys-h/UndertaleModTool/releases/latest) |
-| Bleeding edge 	| [![Build tool NET Bundled](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/build_net.yml) |
+| Stable 	| [![Latest Stable Release](https://img.shields.io/github/downloads/krzys-h/UndertaleModTool/latest/total)](https://github.com/krzys-h/UndertaleModTool/releases/latest) |
+| Bleeding edge 	| [![Latest Bleeding Edge](https://github.com/krzys-h/UndertaleModTool/actions/workflows/publish_gui.yml/badge.svg)](https://github.com/krzys-h/UndertaleModTool/actions/workflows/publish_gui.yml) |
 
 It's worth noting that UndertaleModTool has different builds per release. The differences are as follows:
 
@@ -31,7 +30,7 @@ It's worth noting that UndertaleModTool has different builds per release. The di
 * Can read every single byte from the data file for lastest version of Undertale, Deltarune, and most other GameMaker: Studio games (GM:S 1.4 and GMS2 bytecode versions 13 to 17 are currently supported) for every platform and then recreate a byte-for-byte exact copy from the decoded data.
 * Properly handles all of the pointers in the file so that if you add/remove stuff, make things longer/shorter, move them around etc. the file format won't break.
 * An editor which lets you change (almost) every single value, including unknown ones.
-* Includes a (very) simple room/level editor.
+* Includes a simple room/level editor.
 * Allows for code disassembly and editing. This means you can add any custom code to the game, either using the built-in GML compiler or GML assembly.
 * Experimental high-level decompiler. The output is accurate (except for the latest GameMaker versions), but it could use some more cleaning up of the high-level structures.
 * Support for running scripts that automatically modify your data file (or perform other nefarious tasks) - this is the way to distribute mods, but creating them is a manual job for now. It also serves as a replacement for sharing hex editor offsets - if you make it into a file-format-aware script instead, there is much smaller change of it breaking after an update.
@@ -40,7 +39,7 @@ It's worth noting that UndertaleModTool has different builds per release. The di
 
 # Screenshots
 
-Here's some screenshots of what UTMT can do:
+Here are some screenshots of what UTMT can do:
 
 ## [Undertale: Bits and Pieces Mod](https://gamejolt.com/games/UndertaleBnP/574044)
 <img src="images/bnp-ut.png" alt="BnP" width="640" height="480"/>
@@ -74,17 +73,17 @@ Additionally, included are some community-made scripts. For more information, co
 
 # Contributing
 
-All contributions are welcome! If you find a bug, a data file that does not load etc. please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is a current list of stuff that needs to be worked on:
+All contributions are welcome! If you find a bug, a data file that does not load etc., please report it on the [issues page](https://github.com/krzys-h/UndertaleModTool/issues). Pull requests and help with decoding the format is welcome too! Here is a current list of stuff that needs to be worked on:
 
 * Work on the profile system
 * Decompiler improvements
 * Dark mode / theming support
 * Add support for latest versions of GameMaker (notably, 2.3) - decompiler cannot function in most cases currently
-* Eventually, making the tool cross-platform if possible
+* Eventually, making the GUI cross-platform if possible
 
 # Compilation Instructions
 
-In order to compile the repo yourself, the `.NET Core 5 SDK` or later is required.
+In order to compile the repo yourself, the `.NET Core 6 SDK` or later is required.
 
 The following projects can be compiled:  
 - `UndertaleModLib`: The core library used by all other projects.
