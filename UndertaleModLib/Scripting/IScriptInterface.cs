@@ -544,9 +544,9 @@ namespace UndertaleModLib.Scripting
         /// Obsolete.
         /// </summary>
         [Obsolete("Use StopProgressBarUpdater instead!")]
-        sealed void StopUpdater ()
+        sealed Task StopUpdater ()
         {
-            StopProgressBarUpdater();
+            return StopProgressBarUpdater();
         }
 
         /// <summary>
