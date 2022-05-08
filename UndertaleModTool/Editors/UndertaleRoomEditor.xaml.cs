@@ -1021,12 +1021,7 @@ namespace UndertaleModTool
                     room.Layers.Remove(layer);
 
                     if (layer.LayerType == LayerType.Background)
-                    {
-                        (RoomGraphics.ItemsSource as CompositeCollection).Remove(layer.BackgroundData);
                         room.UpdateBGColorLayer();
-                    }
-                    else if (layer.LayerType == LayerType.Tiles)
-                        (RoomGraphics.ItemsSource as CompositeCollection).Remove(layer.TilesData);
 
                     ObjectEditor.Content = null;
                 }
