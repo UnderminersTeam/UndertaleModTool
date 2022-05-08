@@ -953,7 +953,7 @@ namespace UndertaleModLib.Decompiler
 
             public TempVar(int id)
             {
-                Name = MakeTemporaryVarName(id); ;
+                Name = MakeTemporaryVarName(id);
             }
 
             public static string MakeTemporaryVarName(int id)
@@ -989,6 +989,7 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
+                //TODO: why is there a GMS2Check for this? var exists in gms1.4 as well
                 if (context.GlobalContext.Data?.IsGameMaker2() ?? false && !HasVarKeyword && context.LocalVarDefines.Add(Var.Var.Name))
                     HasVarKeyword = true;
 
@@ -1117,7 +1118,9 @@ namespace UndertaleModLib.Decompiler
 
             private bool _isStructDefinition, _checkedForDefinition;
             public bool IsStructDefinition
-            { get {
+            {
+                get
+                {
                     // Quick hack
                     if (!_checkedForDefinition)
                     {
@@ -1728,7 +1731,7 @@ namespace UndertaleModLib.Decompiler
                     {
                         var arg11 = (arg1 as ExpressionTwo).Argument1;
                         var arg12 = (arg1 as ExpressionTwo).Argument2;
-                        if (arg12 is ExpressionConstant && (arg12 as ExpressionConstant).Value.GetType() == typeof(int) && (int)(arg12 as ExpressionConstant).Value == 32000)
+                        if (arg12 is ExpressionConstant && (arg12 as ExpressionConstant).Value is int && (int)(arg12 as ExpressionConstant).Value == 32000)
                         {
                             ind1 = arg11;
                             ind2 = arg2;

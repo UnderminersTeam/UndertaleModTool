@@ -58,7 +58,7 @@ namespace UndertaleModLib
         void UnserializePrePadding(UndertaleReader reader);
     }
 
-    public enum ResourceType : int
+    public enum ResourceType
     {
         None = -1,
         Object = 0,

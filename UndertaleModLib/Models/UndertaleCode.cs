@@ -891,7 +891,7 @@ namespace UndertaleModLib.Models
                             sb.Append(TypeInst.ToString().ToLower());
                             sb.Append('.');
                         }
-                        sb.Append(Destination.ToString());
+                        sb.Append(Destination);
                     }
                     break;
 
@@ -909,7 +909,7 @@ namespace UndertaleModLib.Models
                 case InstructionType.CallInstruction:
                     sb.Append("." + Type1.ToOpcodeParam());
                     sb.Append(' ');
-                    sb.Append(Function.ToString());
+                    sb.Append(Function);
                     sb.Append("(argc=");
                     sb.Append(ArgumentsCount.ToString());
                     sb.Append(')');
@@ -920,7 +920,7 @@ namespace UndertaleModLib.Models
                     if (unknownBreak)
                     {
                         sb.Append(" ");
-                        sb.Append(Value.ToString());
+                        sb.Append(Value);
                     }
                     break;
             }
@@ -1234,7 +1234,7 @@ namespace UndertaleModLib.Models
             }
             catch (Exception exc)
             {
-                throw new Exception("Error during writing of GML code to profile:\n" + exc.ToString());
+                throw new Exception("Error during writing of GML code to profile:\n" + exc);
             }
         }
 
@@ -1267,7 +1267,7 @@ namespace UndertaleModLib.Models
             }
             catch (Exception exc)
             {
-                throw new Exception("Error during writing of GML code to profile:\n" + exc.ToString());
+                throw new Exception("Error during writing of GML code to profile:\n" + exc);
             }
         }
 

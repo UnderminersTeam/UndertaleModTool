@@ -35,7 +35,7 @@ namespace UndertaleModTool
         {
             get
             {
-                return !ProgressBar.IsIndeterminate ? ProgressBar.Maximum : (double?)null;
+                return !ProgressBar.IsIndeterminate ? ProgressBar.Maximum : null;
             }
 
             set

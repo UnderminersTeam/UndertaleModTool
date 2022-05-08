@@ -491,7 +491,9 @@ public partial class Program : IScriptInterface
                     }
                     catch (Exception e)
                     {
+                        // ignored
                     }
+
                     break;
                 }
 
