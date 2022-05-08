@@ -1981,7 +1981,8 @@ namespace UndertaleModTool
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value is LayerType.Instances ? Visibility.Collapsed : Visibility.Visible;
+            bool includeBGLayer = parameter is string par && par == "Canvas";
+            return value is LayerType.Instances || (includeBGLayer && value is LayerType.Background) ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
