@@ -13,7 +13,8 @@
         <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
         <local:ColorConverter x:Key="ColorConverter"/>
         <local:SimplePointsDisplayConverter x:Key="SimplePointsDisplayConverter"/>
-        <local:LayerFlattenerConverter x:Key="LayerFlattenerConverter" />
+        <local:LayerItemsSourceConverter x:Key="LayerItemsSourceConverter"/>
+        <local:LayerZIndexConverter x:Key="LayerZIndexConverter"/>
         <local:IsGMS2Converter x:Key="IsGMS2Converter" />
         <local:BGColorConverter x:Key="BGColorConverter"/>
         <local:BGViewportConverter x:Key="BGViewportConverter"/>
@@ -976,11 +977,30 @@
             <ItemsControl Name="RoomGraphics" Background="Black" MouseDown="RectangleBackground_MouseDown" MouseMove="RectangleBackground_MouseMove" MouseUp="RectangleBackground_MouseUp" MouseWheel="Canvas_MouseWheel">
                 <ItemsControl.Style>
                     <Style TargetType="ItemsControl">
-                        <Setter Property="ItemsSource" Value="{Binding Source={StaticResource AllObjectsGMS1}, Mode=OneTime}"/>
                         <Style.Triggers>
+                            <DataTrigger Binding="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" Value="True">
+                                <DataTrigger.Setters>
+                                    <Setter Property="ItemsSource" Value="{Binding Source={StaticResource AllObjectsGMS1}, Mode=OneTime}"/>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
                             <DataTrigger Binding="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" Value="False">
                                 <DataTrigger.Setters>
-                                    <Setter Property="ItemsSource" Value="{Binding Layers, Converter={StaticResource LayerFlattenerConverter}}"/>
+                                    <Setter Property="ItemsSource" Value="{Binding Layers, Mode=OneWay}"/>
+                                    <Setter Property="ItemContainerStyle">
+                                        <Setter.Value>
+                                            <Style TargetType="ContentPresenter">
+                                                <Setter Property="Visibility" Value="{Binding IsVisible, Mode=OneWay, Converter={StaticResource BoolToVisConverter}}"/>
+                                                <Setter Property="Canvas.ZIndex">
+                                                    <Setter.Value>
+                                                        <MultiBinding Converter="{StaticResource LayerZIndexConverter}">
+                                                            <Binding Path="ParentRoom.Layers" Mode="OneWay"/>
+                                                            <Binding Path="LayerDepth" Mode="OneWay"/>
+                                                        </MultiBinding>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </Setter.Value>
+                                    </Setter>
                                 </DataTrigger.Setters>
                             </DataTrigger>
                         </Style.Triggers>
@@ -988,7 +1008,7 @@
                 </ItemsControl.Style>
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <local:CanvasWithDict x:Name="RoomCanvas" Width="{Binding Width, Mode=OneWay}" Height="{Binding Height, Mode=OneWay}" IsItemsHost="True" AllowDrop="True"
+                        <Canvas x:Name="RoomCanvas" Width="{Binding Width, Mode=OneWay}" Height="{Binding Height, Mode=OneWay}" IsItemsHost="True" AllowDrop="True"
                                 DragOver="Canvas_DragOver" Drop="Canvas_Drop" Loaded="RoomCanvas_Loaded">
                             <Canvas.Background>
                                 <DrawingBrush TileMode="Tile" ViewportUnits="Absolute">
@@ -1024,7 +1044,7 @@
                                     </DrawingBrush.Drawing>
                                 </DrawingBrush>
                             </Canvas.Background>
-                        </local:CanvasWithDict>
+                        </Canvas>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.Resources>
@@ -1039,7 +1059,34 @@
                         <Setter Property="RenderOptions.BitmapScalingMode" Value="NearestNeighbor"/>
                         <Setter Property="UIElement.SnapsToDevicePixels" Value="True"/>
                     </Style>
-                    
+
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer}">
+                        <ItemsControl ItemsSource="{Binding ., Mode=OneWay, Converter={StaticResource LayerItemsSourceConverter}}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <local:LayerCanvas Initialized="LayerCanvas_Initialized" Unloaded="LayerCanvas_Unloaded"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.Style>
+                                <Style TargetType="ItemsControl">
+                                    <Style.Triggers>
+                                        <!-- Offset doesn't work for instances layer -->
+                                        <DataTrigger Binding="{Binding LayerType, Mode=OneTime, Converter={StaticResource LayerTypeConverter}}" Value="Visible">
+                                            <Setter Property="ItemContainerStyle">
+                                                <Setter.Value>
+                                                    <Style>
+                                                        <Setter Property="Canvas.Left" Value="{Binding DataContext.XOffset, Mode=OneWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Canvas}}"/>
+                                                        <Setter Property="Canvas.Top" Value="{Binding DataContext.YOffset, Mode=OneWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Canvas}}" />
+                                                    </Style>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ItemsControl.Style>
+                        </ItemsControl>
+                    </DataTemplate>
+
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Background}">
                         <Rectangle Width="{Binding BackgroundDefinition.Texture.SourceWidth, Mode=OneWay}" Height="{Binding BackgroundDefinition.Texture.SourceHeight, Mode=OneWay}"
                                    MouseDown="Rectangle_MouseDown"
@@ -1225,8 +1272,7 @@
                         <local:TileLayerImage
                             LayerTilesData="{Binding ., Mode=OneWay}"
                             Width="{Binding ParentLayer.ParentRoom.Width, Mode=OneWay}" Height="{Binding ParentLayer.ParentRoom.Height, Mode=OneWay}"
-                            MouseDown="Rectangle_MouseDown"
-                            Visibility="{Binding ParentLayer.IsVisible, Mode=OneWay, Converter={StaticResource BoolToVisConverter}}">
+                            MouseDown="Rectangle_MouseDown">
                             <Image.Style>
                                 <Style BasedOn="{StaticResource NearestNeighbor}"/>
                             </Image.Style>
@@ -1250,8 +1296,7 @@
                                 <ItemsPanelTemplate>
                                     <Canvas 
                                         Width="{Binding ParentLayer.ParentRoom.Width, Mode=OneWay}" Height="{Binding ParentLayer.ParentRoom.Height, Mode=OneWay}"
-                                        MouseDown="Rectangle_MouseDown"
-                                        Visibility="{Binding ParentLayer.IsVisible, Mode=OneWay, Converter={StaticResource BoolToVisConverter}}"/>
+                                        MouseDown="Rectangle_MouseDown"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.Resources>

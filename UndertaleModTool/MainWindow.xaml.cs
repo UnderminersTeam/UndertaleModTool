@@ -1551,7 +1551,7 @@ namespace UndertaleModTool
             e.Handled = true;
         }
 
-        private static T VisualUpwardSearch<T>(DependencyObject element) where T : class
+        public static T VisualUpwardSearch<T>(DependencyObject element) where T : class
         {
             T container = element as T;
             while (container == null && element != null)
@@ -1561,8 +1561,7 @@ namespace UndertaleModTool
             }
             return container;
         }
-
-        private static T GetNearestParent<T>(DependencyObject item) where T : class
+        public static T GetNearestParent<T>(DependencyObject item) where T : class
         {
             DependencyObject parent = VisualTreeHelper.GetParent(item);
             while (parent is not T)
@@ -1572,7 +1571,6 @@ namespace UndertaleModTool
 
             return parent as T;
         }
-
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
             if (depObj != null)
@@ -1592,7 +1590,6 @@ namespace UndertaleModTool
                 }
             }
         }
-
         public static childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
         {
             foreach (childItem child in FindVisualChildren<childItem>(obj))

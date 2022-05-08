@@ -1058,7 +1058,7 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// The room this layer belongs to.
             /// </summary>
-            public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ParentRoom))); UpdateParentRoom(); } }
+            public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; OnPropertyChanged(); UpdateParentRoom(); } }
 
             /// <summary>
             /// The name of the layer.
@@ -1084,7 +1084,7 @@ namespace UndertaleModLib.Models
             public float YOffset { get; set; }
             public float HSpeed { get; set; }
             public float VSpeed { get; set; }
-            public bool IsVisible { get; set; }
+            public bool IsVisible { get; set; } = true;
             public LayerData Data { get; set; }
             public LayerInstancesData InstancesData => Data as LayerInstancesData;
             public LayerTilesData TilesData => Data as LayerTilesData;
@@ -1093,6 +1093,10 @@ namespace UndertaleModLib.Models
             public LayerEffectData EffectData => Data as LayerEffectData;
 
             public event PropertyChangedEventHandler PropertyChanged;
+            protected void OnPropertyChanged([CallerMemberName] string name = null)
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            }
 
             // GMS 2022.1+
             public bool EffectEnabled { get; set; }
@@ -1106,6 +1110,7 @@ namespace UndertaleModLib.Models
                 if (TilesData != null)
                     TilesData.ParentLayer = this;
             }
+            public void UpdateZIndex() => OnPropertyChanged("LayerDepth");
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -1165,6 +1170,11 @@ namespace UndertaleModLib.Models
                     case LayerType.Effect: Data = reader.ReadUndertaleObject<LayerEffectData>(); break;
                     default: throw new Exception("Unsupported layer type " + LayerType);
                 }
+            }
+
+            public override string ToString()
+            {
+                return GetType().FullName + " - \"" + LayerName?.Content + '\"';
             }
 
             public class LayerInstancesData : LayerData
@@ -1355,7 +1365,7 @@ namespace UndertaleModLib.Models
                 public UndertalePointerList<Tile> LegacyTiles { get; set; }
                 public UndertalePointerList<SpriteInstance> Sprites { get; set; }
                 public UndertalePointerList<SequenceInstance> Sequences { get; set; }
-                public UndertalePointerList<SpriteInstance> NineSlices { get; set; } // Removed in 2.3.2, before ever used
+                public UndertalePointerList<SpriteInstance> NineSlices { get; set; } // Removed in 2.3.2, before never used
 
                 public void Serialize(UndertaleWriter writer)
                 {
