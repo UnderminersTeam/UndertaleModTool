@@ -26,8 +26,8 @@ namespace UndertaleModLib.Util
         {
             lock (embeddedDictionary)
             {
-                if(!embeddedDictionary.ContainsKey(embeddedTexture))
-                    embeddedDictionary[embeddedTexture] = embeddedTexture.TextureData.Image;
+                if (!embeddedDictionary.ContainsKey(embeddedTexture))
+                    embeddedDictionary[embeddedTexture] = GetImageFromByteArray(embeddedTexture.TextureData.TextureBlob);
                 return embeddedDictionary[embeddedTexture];
             }
         }
