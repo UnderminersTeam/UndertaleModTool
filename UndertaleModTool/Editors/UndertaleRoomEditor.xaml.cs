@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -44,6 +45,7 @@ namespace UndertaleModTool
 
         public static readonly PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        private static readonly Regex endNumberEx = new(@"\d+$", RegexOptions.Compiled);
 
         // used for the flashing animation
         public static Dictionary<UndertaleObject, ContentPresenter> ObjElemDict { get; } = new();
@@ -1216,6 +1218,38 @@ namespace UndertaleModTool
                 }
                 else
                     layerDepth += 100;
+            }
+
+            string baseName = null;
+            int nameNum = 0;
+            while (room.Layers.Any(l => l.LayerName.Content == name))
+            {
+                if (baseName is null)
+                {
+                    // "name123" => "123"
+                    Match numMatch = endNumberEx.Match(name);
+
+                    if (numMatch.Success)
+                    {
+                        if (baseName is null)
+                        {
+                            baseName = name[..^numMatch.Length];
+                            nameNum = Int32.Parse(numMatch.Groups[0].Value) + 1;
+                        }
+                        else
+                            nameNum++;
+
+                        // "name9" => "name10" 
+                        name = baseName + nameNum;
+                    }
+                    else
+                    {
+                        // "name" => "name1"
+                        name += 1;
+                    }
+                }
+                else
+                    name = baseName + (++nameNum);
             }
 
             Layer layer = new();
