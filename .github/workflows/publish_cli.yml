@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish:
+  publish_cli:
 
     strategy:
       fail-fast: false
