@@ -228,8 +228,13 @@ namespace UndertaleModTool
 
                     DependencyObject obj1 = null;
 
-                    if (obj is Layer)
+                    if (obj is Layer layer)
+                    {
+                        if (!layer.IsVisible)
+                            return;
+
                         obj1 = ObjElemDict[obj];
+                    }
                     else
                         obj1 = VisualTreeHelper.GetChild(ObjElemDict[obj], 0);
 
