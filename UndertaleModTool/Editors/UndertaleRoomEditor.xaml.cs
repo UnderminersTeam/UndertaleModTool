@@ -1772,42 +1772,6 @@ namespace UndertaleModTool
         }
     }
 
-    public class LayerFlattenerConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            CompositeCollection collection = new();
-            IList<Layer> layers = value as IList<Layer>;
-            foreach (var layer in layers.OrderByDescending((x) => x?.LayerDepth ?? 0))
-            {
-                if (layer == null)
-                    continue;
-
-                switch (layer.LayerType)
-                {
-                    case LayerType.Background:
-                        collection.Add(layer.BackgroundData);
-                        break;
-                    case LayerType.Instances:
-                        collection.Add(new CollectionContainer() { Collection = layer.InstancesData.Instances });
-                        break;
-                    case LayerType.Assets:
-                        collection.Add(new CollectionContainer() { Collection = layer.AssetsData.LegacyTiles });
-                        collection.Add(new CollectionContainer() { Collection = layer.AssetsData.Sprites });
-                        break;
-                    case LayerType.Tiles:
-                        collection.Add(layer.TilesData);
-                        break;
-                }
-            }
-            return collection;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
-        }
-    }
     public class LayerItemsSourceConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

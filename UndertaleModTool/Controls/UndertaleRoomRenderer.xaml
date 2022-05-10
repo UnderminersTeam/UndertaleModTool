@@ -318,6 +318,7 @@
                                     </Rectangle.RenderTransform>
                                     <Rectangle.Fill>
                                         <ImageBrush
+                                            x:Name="TileImageSource"
                                             ImageSource="{Binding ImageSrc, Mode=OneTime}"
                                             TileMode="None"
                                             Stretch="UniformToFill">
