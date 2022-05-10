@@ -1646,12 +1646,6 @@ namespace UndertaleModTool
                 ObjElemDict[layer] = canvas;
             }
         }
-
-        private void ContentPresenter_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-
-        }
-
         private void LayerCanvas_Initialized(object sender, EventArgs e)
         {
             LayerCanvas canvas = sender as LayerCanvas;
