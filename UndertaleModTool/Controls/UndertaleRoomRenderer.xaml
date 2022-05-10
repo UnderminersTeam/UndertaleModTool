@@ -129,7 +129,7 @@
                         <ItemsControl.Style>
                             <Style TargetType="ItemsControl">
                                 <Style.Triggers>
-                                    <!-- Offset doesn't work for instances layer -->
+                                    <!-- Offset doesn't work for instances layer; BG layer has its own translate transform -->
                                     <DataTrigger Binding="{Binding LayerType, Mode=OneTime, Converter={StaticResource LayerTypeConverter}, ConverterParameter=Canvas}" Value="Visible">
                                         <Setter Property="ItemContainerStyle">
                                             <Setter.Value>
