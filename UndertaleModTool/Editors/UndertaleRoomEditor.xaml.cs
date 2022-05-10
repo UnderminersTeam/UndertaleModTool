@@ -48,7 +48,7 @@ namespace UndertaleModTool
         private static readonly Regex endNumberEx = new(@"\d+$", RegexOptions.Compiled);
 
         // used for the flashing animation
-        public static Dictionary<UndertaleObject, ContentPresenter> ObjElemDict { get; } = new();
+        public static Dictionary<UndertaleObject, FrameworkElement> ObjElemDict { get; } = new();
 
         public UndertalePath PreviewPath
         {
@@ -155,8 +155,6 @@ namespace UndertaleModTool
             roomObjDict.Clear();
             sprInstDict.Clear();
 
-            LayerZIndexConverter.ProcessOnce = true;
-
             if (DataContext is UndertaleRoom room)
             {
                 GameObjItems.Header = room.Flags.HasFlag(RoomEntryFlags.IsGMS2)
@@ -167,6 +165,19 @@ namespace UndertaleModTool
 
                 if (room.Layers.Count > 0) // if GMS 2+
                 {
+                    LayerZIndexConverter.ProcessOnce = true;
+
+                    bool ordered = true;
+                    for (int i = 0; i < room.Layers.Count - 1; i++)
+                    {
+                        if (room.Layers[i].LayerDepth > room.Layers[i + 1].LayerDepth)
+                            ordered = false;
+                    }
+
+                    if (!ordered)
+                        if (MainWindow.ShowQuestion("Room layers are not ordered by depth.\nRearrange them?", MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                            room.RearrangeLayers();
+
                     Parallel.ForEach(room.Layers, (layer) =>
                     {
                         if (layer.LayerType == LayerType.Assets)
@@ -209,11 +220,16 @@ namespace UndertaleModTool
             else if (e.NewValue is UndertaleObject obj)
             {
                 ObjectEditor.Content = obj;
+
                 try
                 {
-                    DependencyObject obj1 = null;
                     if (obj is View)
                         return;
+
+                    DependencyObject obj1 = null;
+
+                    if (obj is Layer)
+                        obj1 = ObjElemDict[obj];
                     else
                         obj1 = VisualTreeHelper.GetChild(ObjElemDict[obj], 0);
 
@@ -226,10 +242,24 @@ namespace UndertaleModTool
                     currStoryboard.Children.Add(flashAnim);
                     currStoryboard.Begin(this, true);
                 }
-                catch
+                catch (KeyNotFoundException)
                 {
                     Debug.WriteLine($"Flash animation error - \"{obj}\" is missing from the room object dictionary.");
                 }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Flash animation error - {ex}");
+                }
+            }
+            else if (e.NewValue is null && ObjectEditor.Content is Layer layer)
+            {
+                // if layers were rearranged and there was a layer selected
+                if ((DataContext as UndertaleRoom).Layers.Contains(layer))
+                {
+                    TreeViewItem layerItem = LayerItems.ItemContainerGenerator.ContainerFromItem(layer) as TreeViewItem;
+                    if (layerItem is not null)
+                        layerItem.IsSelected = true;
+                }    
             }
         }
 
@@ -1605,26 +1635,47 @@ namespace UndertaleModTool
             }
         }
 
+        private void LayerCanvas_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            // raised on layers rearrange
+            if (e.NewValue is Layer layer)
+            {
+                LayerCanvas canvas = sender as LayerCanvas;
+
+                canvas.CurrentLayer = layer;
+                ObjElemDict[layer] = canvas;
+            }
+        }
+
+        private void ContentPresenter_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+
+        }
+
         private void LayerCanvas_Initialized(object sender, EventArgs e)
         {
-            Canvas canvas = sender as Canvas;
+            LayerCanvas canvas = sender as LayerCanvas;
 
-            ContentPresenter layerContPres = MainWindow.GetNearestParent<ContentPresenter>(canvas);
-            if (layerContPres?.DataContext is Layer layer)
-                ObjElemDict[layer] = layerContPres;
+            if (canvas?.DataContext is Layer layer)
+            {
+                canvas.CurrentLayer = layer;
+                ObjElemDict[layer] = canvas;
+            }
         }
         private void LayerCanvas_Unloaded(object sender, RoutedEventArgs e)
         {
-            Canvas canvas = sender as Canvas;
+            LayerCanvas canvas = sender as LayerCanvas;
 
-            ContentPresenter layerContPres = MainWindow.GetNearestParent<ContentPresenter>(canvas);
-            if (layerContPres?.DataContext is Layer layer)
-                ObjElemDict.Remove(layer);
+            if (canvas.CurrentLayer is not null)
+                ObjElemDict.Remove(canvas.CurrentLayer);
         }
     }
 
     public partial class LayerCanvas : Canvas
     {
+        // "DataContext" on "Unloaded" event is "{DisconnectedItem}"
+        public UndertaleObject CurrentLayer { get; set; }
+
         protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved)
         {
             if (visualAdded is ContentPresenter presAdded && presAdded.DataContext is UndertaleObject objAdded)
@@ -1776,58 +1827,46 @@ namespace UndertaleModTool
     {
         public static bool ProcessOnce { get; set; }
 
-        private static bool updating;
-        private static Layer[] currOrderedLayers;
-        private static int remainingCount;
+        private static bool suspended;
+        private static int remainingCount = -1;
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values[0] is IList<Layer> layers && values[1] is int depth)
+            if (values[0] is Layer layer && layer.ParentRoom is UndertaleRoom room)
             {
-                int layerIndex = -1;
+                int layerIndex = room.Layers.Count - room.Layers.IndexOf(layer) - 1;
 
-                if (currOrderedLayers is null)
+                if (ProcessOnce)
                 {
-                    currOrderedLayers = layers.OrderBy(l => l.LayerDepth).ToArray();
-                    remainingCount = currOrderedLayers.Length;
-                }
-
-                int i = 0;
-                foreach (Layer layer in currOrderedLayers)
-                {
-                    if (layer is not null && layerIndex == -1 && layer.LayerDepth == depth)
+                    if (remainingCount == -1 && room.Layers.Count > 0)
+                        remainingCount = room.Layers.Count - 1;
+                    else if (remainingCount > 0)
                     {
-                        layerIndex = currOrderedLayers.Length - 1 - i;
-                        currOrderedLayers[i] = null;
                         remainingCount--;
-                        break;
-                    }
 
-                    i++;
-                }
-
-                if (remainingCount > 0)
-                {
-                    if (!updating && !ProcessOnce)
-                    {
-                        updating = true;
-
-                        Layer[] layersCopy = currOrderedLayers.Where(x => x is not null).ToArray();
-                        _ = Task.Run(() =>
+                        if (remainingCount == 0)
                         {
-                            foreach (Layer layer in layersCopy)
-                                layer.UpdateZIndex();
-                        });
+                            ProcessOnce = false;
+                            remainingCount = -1;
+                        }
                     }
                 }
-                else
+                else if (!suspended)
                 {
-                    ProcessOnce = false;
-                    updating = false;
-                    currOrderedLayers = null;
-                }
+                    bool ordered = true;
+                    for (int i = 0; i < room.Layers.Count - 1; i++)
+                    {
+                        if (room.Layers[i].LayerDepth > room.Layers[i + 1].LayerDepth)
+                            ordered = false;
+                    }
 
-                if (layerIndex == -1)
-                    Debug.WriteLine($"Warning - \"LayerZIndexConverter\" returned -1 for the layer with depth {depth}");
+                    if (!ordered)
+                    {
+                        suspended = true;
+                        var roomEditor = MainWindow.FindVisualChild<UndertaleRoomEditor>((Application.Current.MainWindow as MainWindow).DataEditor);
+                        room.RearrangeLayers(roomEditor?.RoomObjectsTree.SelectedItem as Layer);
+                        suspended = false;
+                    }
+                }
 
                 return layerIndex;
             }
@@ -2073,19 +2112,6 @@ namespace UndertaleModTool
             }
 
             return GridLength.Auto;
-        }
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class BGLayerVisConverter : IMultiValueConverter
-    {
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-        {
-            return (bool)values[0] && (bool)values[1] ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

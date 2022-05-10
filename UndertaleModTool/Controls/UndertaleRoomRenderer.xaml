@@ -23,7 +23,6 @@
         <local:BGViewportConverter x:Key="BGViewportConverter"/>
         <local:LayerTypeConverter x:Key="LayerTypeConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
-        <local:BGLayerVisConverter x:Key="BGLayerVisConverter"/>
         <local:ColorToOpacityConverter x:Key="ColorToOpacityConverter"/>
         <local:CachedTileDataLoader x:Key="CachedTileDataLoader"/>
         <local:TileLayerTemplateSelector x:Key="TileLayerTemplateSelector"/>
@@ -249,13 +248,8 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
                     <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth, Mode=OneTime}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight, Mode=OneTime}"
-                               Opacity="{Binding Color, Mode=OneTime, Converter={StaticResource ColorToOpacityConverter}}">
-                        <Rectangle.Visibility>
-                            <MultiBinding Converter="{StaticResource BGLayerVisConverter}">
-                                <Binding Path="Visible" Mode="OneTime"/>
-                                <Binding Path="ParentLayer.IsVisible" Mode="OneTime"/>
-                            </MultiBinding>
-                        </Rectangle.Visibility>
+                               Opacity="{Binding Color, Mode=OneTime, Converter={StaticResource ColorToOpacityConverter}}"
+                               Visibility="{Binding Visible, Mode=OneTime, Converter={StaticResource BoolToVisConverter}}">
                         <Rectangle.RenderTransform>
                             <TransformGroup>
                                 <ScaleTransform x:Name="transform3_0" ScaleX="{Binding CalcScaleX, Mode=OneWay}" ScaleY="{Binding CalcScaleY, Mode=OneWay}" CenterX="0" CenterY="0"/>

@@ -167,6 +167,23 @@ namespace UndertaleModLib.Models
         public UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>> Sequences { get; private set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
 
         public void UpdateBGColorLayer() => OnPropertyChanged("BGColorLayer");
+        public void RearrangeLayers(Layer selectedLayer = null)
+        {
+            if (Layers.Count > 0)
+            {
+                Layer[] orderedLayers = Layers.OrderBy(l => l.LayerDepth).ToArray();
+
+                // ensure that room objects tree will have the layer to re-select
+                if (selectedLayer is not null)
+                    Layers[Array.IndexOf(orderedLayers, selectedLayer)] = selectedLayer;
+
+                for (int i = 0; i < orderedLayers.Length; i++)
+                {
+                    if (Layers[i] != orderedLayers[i])
+                        Layers[i] = orderedLayers[i];
+                }
+            }
+        }
 
         /// <summary>
         /// The layer containing the background color.<br/>
@@ -1297,13 +1314,13 @@ namespace UndertaleModLib.Models
                 public float CalcScaleX { get; set; }
                 public float CalcScaleY { get; set; }
 
-                public bool Visible { get; set; }
+                public bool Visible { get; set; } = true;
                 public bool Foreground { get; set; }
                 public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; OnPropertyChanged(); ParentLayer.ParentRoom.UpdateBGColorLayer(); } }
                 public bool TiledHorizontally { get => _TiledHorizontally; set { _TiledHorizontally = value; OnPropertyChanged(); } }
                 public bool TiledVertically { get => _TiledVertically; set { _TiledVertically = value; OnPropertyChanged(); } }
                 public bool Stretch { get => _Stretch; set { _Stretch = value; OnPropertyChanged(); } }
-                public uint Color { get; set; }
+                public uint Color { get; set; } = 0xFF000000;
                 public float FirstFrame { get; set; }
                 public float AnimationSpeed { get; set; }
                 public AnimationSpeedType AnimationSpeedType { get; set; }

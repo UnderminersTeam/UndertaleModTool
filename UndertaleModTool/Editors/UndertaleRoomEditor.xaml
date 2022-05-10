@@ -22,7 +22,6 @@
         <local:GridSizeGroupConverter x:Key="GridSizeGroupConverter"/>
         <local:GridColumnSizeConverter x:Key="GridColumnSizeConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
-        <local:BGLayerVisConverter x:Key="BGLayerVisConverter"/>
         <local:ColorToOpacityConverter x:Key="ColorToOpacityConverter"/>
         <local:CachedTileImageLoader x:Key="CachedTileImageLoader"/>
         <local:CachedTileDataLoader x:Key="CachedTileDataLoader"/>
@@ -993,8 +992,10 @@
                                                 <Setter Property="Canvas.ZIndex">
                                                     <Setter.Value>
                                                         <MultiBinding Converter="{StaticResource LayerZIndexConverter}">
-                                                            <Binding Path="ParentRoom.Layers" Mode="OneWay"/>
+                                                            <Binding Mode="OneTime"/>
+                                                            <!-- for notification only -->
                                                             <Binding Path="LayerDepth" Mode="OneWay"/>
+                                                            <Binding Path="ParentRoom.Layers" Mode="OneWay"/>
                                                         </MultiBinding>
                                                     </Setter.Value>
                                                 </Setter>
@@ -1048,13 +1049,6 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.Resources>
-                    <Storyboard x:Key="flashAnimation">
-                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0" AutoReverse="True" Duration="0:0:0.75" RepeatBehavior="Forever">
-                            <DoubleAnimation.EasingFunction>
-                                <CubicEase EasingMode="EaseIn"/>
-                            </DoubleAnimation.EasingFunction>
-                        </DoubleAnimation>
-                    </Storyboard>
                     <Style x:Key="NearestNeighbor">
                         <Setter Property="RenderOptions.BitmapScalingMode" Value="NearestNeighbor"/>
                         <Setter Property="UIElement.SnapsToDevicePixels" Value="True"/>
@@ -1064,7 +1058,7 @@
                         <ItemsControl ItemsSource="{Binding ., Mode=OneWay, Converter={StaticResource LayerItemsSourceConverter}}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <local:LayerCanvas Initialized="LayerCanvas_Initialized" Unloaded="LayerCanvas_Unloaded"/>
+                                    <local:LayerCanvas Initialized="LayerCanvas_Initialized" Unloaded="LayerCanvas_Unloaded" DataContextChanged="LayerCanvas_DataContextChanged"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.Style>
@@ -1074,7 +1068,8 @@
                                         <DataTrigger Binding="{Binding LayerType, Mode=OneTime, Converter={StaticResource LayerTypeConverter}, ConverterParameter=Canvas}" Value="Visible">
                                             <Setter Property="ItemContainerStyle">
                                                 <Setter.Value>
-                                                    <Style>
+                                                    <Style TargetType="ContentPresenter">
+                                                        <!-- TODO: get rid of "Cannot find source for binding with reference 'RelativeSource FindAncestor..." error on layer rearrange -->
                                                         <Setter Property="Canvas.Left" Value="{Binding DataContext.XOffset, Mode=OneWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Canvas}}"/>
                                                         <Setter Property="Canvas.Top" Value="{Binding DataContext.YOffset, Mode=OneWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Canvas}}" />
                                                     </Style>
@@ -1220,13 +1215,8 @@
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
                         <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth, Mode=OneWay}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight, Mode=OneWay}"
                                    MouseDown="Rectangle_MouseDown"
-                                   Opacity="{Binding Color, Mode=OneWay, Converter={StaticResource ColorToOpacityConverter}}">
-                            <Rectangle.Visibility>
-                                <MultiBinding Converter="{StaticResource BGLayerVisConverter}">
-                                    <Binding Path="Visible" Mode="OneWay"/>
-                                    <Binding Path="ParentLayer.IsVisible" Mode="OneWay"/>
-                                </MultiBinding>
-                            </Rectangle.Visibility>
+                                   Opacity="{Binding Color, Mode=OneWay, Converter={StaticResource ColorToOpacityConverter}}"
+                                   Visibility="{Binding Visible, Mode=OneWay, Converter={StaticResource BoolToVisConverter}}">
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform x:Name="transform3_0" ScaleX="{Binding CalcScaleX, Mode=OneWay}" ScaleY="{Binding CalcScaleY, Mode=OneWay}" CenterX="0" CenterY="0"/>
