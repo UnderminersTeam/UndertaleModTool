@@ -1665,6 +1665,24 @@ namespace UndertaleModTool
         }
     }
 
+    public partial class RoomCanvas : Canvas
+    {
+        private readonly bool isGMS2 = (Application.Current.MainWindow as MainWindow).IsGMS2 == Visibility.Visible;
+
+        protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved)
+        {
+            if (!isGMS2)
+            {
+                if (visualAdded is ContentPresenter presAdded && presAdded.DataContext is UndertaleObject objAdded)
+                    UndertaleRoomEditor.ObjElemDict[objAdded] = presAdded;
+
+                if (visualRemoved is ContentPresenter presRemoved && presRemoved.DataContext is UndertaleObject objRemoved)
+                    UndertaleRoomEditor.ObjElemDict.Remove(objRemoved);
+            }
+
+            base.OnVisualChildrenChanged(visualAdded, visualRemoved);
+        }
+    }
     public partial class LayerCanvas : Canvas
     {
         // "DataContext" on "Unloaded" event is "{DisconnectedItem}"
@@ -1677,6 +1695,8 @@ namespace UndertaleModTool
 
             if (visualRemoved is ContentPresenter presRemoved && presRemoved.DataContext is UndertaleObject objRemoved)
                 UndertaleRoomEditor.ObjElemDict.Remove(objRemoved);
+
+            base.OnVisualChildrenChanged(visualAdded, visualRemoved);
         }
     }
 
