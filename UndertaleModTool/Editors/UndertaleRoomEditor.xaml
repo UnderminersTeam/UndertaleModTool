@@ -1262,6 +1262,7 @@
                         <local:TileLayerImage
                             LayerTilesData="{Binding ., Mode=OneWay}"
                             Width="{Binding ParentLayer.ParentRoom.Width, Mode=OneWay}" Height="{Binding ParentLayer.ParentRoom.Height, Mode=OneWay}"
+                            Stretch="None"
                             MouseDown="Rectangle_MouseDown">
                             <Image.Style>
                                 <Style BasedOn="{StaticResource NearestNeighbor}"/>

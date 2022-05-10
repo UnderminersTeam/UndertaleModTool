@@ -285,7 +285,8 @@
                 <DataTemplate x:Key="TileLayerImageTemplate">
                     <local:TileLayerImage
                         LayerTilesData="{Binding ., Mode=OneTime}"
-                        Width="{Binding ParentLayer.ParentRoom.Width, Mode=OneTime}" Height="{Binding ParentLayer.ParentRoom.Height, Mode=OneTime}">
+                        Width="{Binding ParentLayer.ParentRoom.Width, Mode=OneTime}" Height="{Binding ParentLayer.ParentRoom.Height, Mode=OneTime}"
+                        Stretch="None">
                         <Image.Source>
                             <MultiBinding Converter="{StaticResource CachedTileDataLoader}">
                                 <Binding Mode="OneTime"/>
