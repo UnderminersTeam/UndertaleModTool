@@ -167,6 +167,23 @@ namespace UndertaleModLib.Models
         public UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>> Sequences { get; private set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
 
         public void UpdateBGColorLayer() => OnPropertyChanged("BGColorLayer");
+        public void RearrangeLayers(Layer selectedLayer = null)
+        {
+            if (Layers.Count == 0)
+                return;
+
+            Layer[] orderedLayers = Layers.OrderBy(l => l.LayerDepth).ToArray();
+
+            // ensure that room objects tree will have the layer to re-select
+            if (selectedLayer is not null)
+                Layers[Array.IndexOf(orderedLayers, selectedLayer)] = selectedLayer;
+
+            for (int i = 0; i < orderedLayers.Length; i++)
+            {
+                if (Layers[i] != orderedLayers[i])
+                    Layers[i] = orderedLayers[i];
+            }
+        }
 
         /// <summary>
         /// The layer containing the background color.<br/>
@@ -1058,7 +1075,7 @@ namespace UndertaleModLib.Models
             /// <summary>
             /// The room this layer belongs to.
             /// </summary>
-            public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ParentRoom))); UpdateParentRoom(); } }
+            public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; OnPropertyChanged(); UpdateParentRoom(); } }
 
             /// <summary>
             /// The name of the layer.
@@ -1084,7 +1101,7 @@ namespace UndertaleModLib.Models
             public float YOffset { get; set; }
             public float HSpeed { get; set; }
             public float VSpeed { get; set; }
-            public bool IsVisible { get; set; }
+            public bool IsVisible { get; set; } = true;
             public LayerData Data { get; set; }
             public LayerInstancesData InstancesData => Data as LayerInstancesData;
             public LayerTilesData TilesData => Data as LayerTilesData;
@@ -1093,6 +1110,10 @@ namespace UndertaleModLib.Models
             public LayerEffectData EffectData => Data as LayerEffectData;
 
             public event PropertyChangedEventHandler PropertyChanged;
+            protected void OnPropertyChanged([CallerMemberName] string name = null)
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            }
 
             // GMS 2022.1+
             public bool EffectEnabled { get; set; }
@@ -1106,6 +1127,7 @@ namespace UndertaleModLib.Models
                 if (TilesData != null)
                     TilesData.ParentLayer = this;
             }
+            public void UpdateZIndex() => OnPropertyChanged("LayerDepth");
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -1165,6 +1187,11 @@ namespace UndertaleModLib.Models
                     case LayerType.Effect: Data = reader.ReadUndertaleObject<LayerEffectData>(); break;
                     default: throw new Exception("Unsupported layer type " + LayerType);
                 }
+            }
+
+            public override string ToString()
+            {
+                return GetType().FullName + " - \"" + LayerName?.Content + '\"';
             }
 
             public class LayerInstancesData : LayerData
@@ -1287,13 +1314,13 @@ namespace UndertaleModLib.Models
                 public float CalcScaleX { get; set; }
                 public float CalcScaleY { get; set; }
 
-                public bool Visible { get; set; }
+                public bool Visible { get; set; } = true;
                 public bool Foreground { get; set; }
                 public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; OnPropertyChanged(); ParentLayer.ParentRoom.UpdateBGColorLayer(); } }
                 public bool TiledHorizontally { get => _TiledHorizontally; set { _TiledHorizontally = value; OnPropertyChanged(); } }
                 public bool TiledVertically { get => _TiledVertically; set { _TiledVertically = value; OnPropertyChanged(); } }
                 public bool Stretch { get => _Stretch; set { _Stretch = value; OnPropertyChanged(); } }
-                public uint Color { get; set; }
+                public uint Color { get; set; } = 0xFF000000;
                 public float FirstFrame { get; set; }
                 public float AnimationSpeed { get; set; }
                 public AnimationSpeedType AnimationSpeedType { get; set; }
@@ -1355,7 +1382,7 @@ namespace UndertaleModLib.Models
                 public UndertalePointerList<Tile> LegacyTiles { get; set; }
                 public UndertalePointerList<SpriteInstance> Sprites { get; set; }
                 public UndertalePointerList<SequenceInstance> Sequences { get; set; }
-                public UndertalePointerList<SpriteInstance> NineSlices { get; set; } // Removed in 2.3.2, before ever used
+                public UndertalePointerList<SpriteInstance> NineSlices { get; set; } // Removed in 2.3.2, before never used
 
                 public void Serialize(UndertaleWriter writer)
                 {
@@ -1526,6 +1553,12 @@ namespace UndertaleModLib.Models
                 FrameIndex = reader.ReadSingle();
                 Rotation = reader.ReadSingle();
             }
+
+            public static UndertaleString GenerateRandomName(UndertaleData data)
+            {
+                // The same format as in "GameMaker Studio: 2".
+                return data.Strings.MakeString("graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8"));
+            } 
 
             public override string ToString()
             {

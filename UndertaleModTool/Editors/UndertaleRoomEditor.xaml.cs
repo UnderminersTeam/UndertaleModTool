@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -44,6 +45,10 @@ namespace UndertaleModTool
 
         public static readonly PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        private static readonly Regex trailingNumberRegex = new(@"\d+$", RegexOptions.Compiled);
+
+        // used for the flashing animation when a room object is selected
+        public static Dictionary<UndertaleObject, FrameworkElement> ObjElemDict { get; } = new();
 
         public UndertalePath PreviewPath
         {
@@ -52,7 +57,7 @@ namespace UndertaleModTool
         }
 
         private Stack<UndertaleObject> undoStack = new();
-        private CanvasWithDict roomCanvas;
+        private Canvas roomCanvas;
 
         public static readonly DoubleAnimation flashAnim = new(1, 0, TimeSpan.FromSeconds(0.75))
         {
@@ -70,14 +75,15 @@ namespace UndertaleModTool
             InitializeComponent();
 
             Loaded += UndertaleRoomEditor_Loaded;
+            Unloaded += UndertaleRoomEditor_Unloaded;
             DataContextChanged += UndertaleRoomEditor_DataContextChanged;
-        }
+        }        
 
         public void SaveImagePNG(Stream outfile)
         {
             if (roomCanvas is null)
             {
-                if (MainWindow.FindVisualChild<CanvasWithDict>(RoomGraphics) is CanvasWithDict canv && canv.Name == "RoomCanvas")
+                if (MainWindow.FindVisualChild<Canvas>(RoomGraphics) is Canvas canv && canv.Name == "RoomCanvas")
                     roomCanvas = canv;
                 else
                     throw new Exception("\"RoomCanvas\" not found.");
@@ -125,6 +131,10 @@ namespace UndertaleModTool
         {
             RoomRootItem.IsSelected = true;
         }
+        private void UndertaleRoomEditor_Unloaded(object sender, RoutedEventArgs e)
+        {
+            ObjElemDict.Clear();
+        }
 
         private void UndertaleRoomEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -141,7 +151,7 @@ namespace UndertaleModTool
 
             UndertaleCachedImageLoader.Reset();
             CachedTileDataLoader.Reset();
-            roomCanvas?.ObjectDict.Clear();
+            ObjElemDict.Clear();
             roomObjDict.Clear();
             sprInstDict.Clear();
 
@@ -155,6 +165,22 @@ namespace UndertaleModTool
 
                 if (room.Layers.Count > 0) // if GMS 2+
                 {
+                    LayerZIndexConverter.ProcessOnce = true;
+
+                    bool ordered = true;
+                    for (int i = 0; i < room.Layers.Count - 1; i++)
+                    {
+                        if (room.Layers[i].LayerDepth > room.Layers[i + 1].LayerDepth)
+                        {
+                            ordered = false;
+                            break;
+                        }
+                    }
+
+                    if (!ordered)
+                        if (MainWindow.ShowQuestion("Room layers are not ordered by depth.\nRearrange them?", MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                            room.RearrangeLayers();
+
                     Parallel.ForEach(room.Layers, (layer) =>
                     {
                         if (layer.LayerType == LayerType.Assets)
@@ -177,7 +203,7 @@ namespace UndertaleModTool
 
         private void RoomCanvas_Loaded(object sender, RoutedEventArgs e)
         {
-            roomCanvas = sender as CanvasWithDict;
+            roomCanvas = sender as Canvas;
         }
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -197,22 +223,23 @@ namespace UndertaleModTool
             else if (e.NewValue is UndertaleObject obj)
             {
                 ObjectEditor.Content = obj;
+
                 try
                 {
+                    if (obj is View)
+                        return;
+
                     DependencyObject obj1 = null;
+
                     if (obj is Layer layer)
                     {
-                        if (layer.LayerType == LayerType.Background)
-                            obj1 = VisualTreeHelper.GetChild(roomCanvas.ObjectDict[layer.BackgroundData], 0);
-                        else if (layer.LayerType == LayerType.Tiles)
-                            obj1 = VisualTreeHelper.GetChild(roomCanvas.ObjectDict[layer.TilesData], 0);
-                        else
+                        if (!layer.IsVisible)
                             return;
+
+                        obj1 = ObjElemDict[obj];
                     }
-                    else if (obj is View)
-                        return;
                     else
-                        obj1 = VisualTreeHelper.GetChild(roomCanvas.ObjectDict[obj], 0);
+                        obj1 = VisualTreeHelper.GetChild(ObjElemDict[obj], 0);
 
                     (obj1 as FrameworkElement).BringIntoView();
 
@@ -223,10 +250,24 @@ namespace UndertaleModTool
                     currStoryboard.Children.Add(flashAnim);
                     currStoryboard.Begin(this, true);
                 }
-                catch
+                catch (KeyNotFoundException)
                 {
                     Debug.WriteLine($"Flash animation error - \"{obj}\" is missing from the room object dictionary.");
                 }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Flash animation error - {ex}");
+                }
+            }
+            else if (e.NewValue is null && ObjectEditor.Content is Layer layer)
+            {
+                // if layers were rearranged and there was a layer selected
+                if ((DataContext as UndertaleRoom).Layers.Contains(layer))
+                {
+                    TreeViewItem layerItem = LayerItems.ItemContainerGenerator.ContainerFromItem(layer) as TreeViewItem;
+                    if (layerItem is not null)
+                        layerItem.IsSelected = true;
+                }    
             }
         }
 
@@ -268,117 +309,31 @@ namespace UndertaleModTool
 
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
             {
-                if (clickedObj is GameObject)
+                IList collection = clickedObj switch
                 {
-                    if (layer != null && layer.InstancesData == null)
-                    {
-                        MainWindow.ShowError("Must be on an instances layer");
-                        return;
-                    }
-                    var other = clickedObj as GameObject;
-                    var newObj = new GameObject
-                    {
-                        X = other.X,
-                        Y = other.Y,
-                        ObjectDefinition = other.ObjectDefinition,
-                        InstanceID = mainWindow.Data.GeneralInfo.LastObj++,
-                        CreationCode = other.CreationCode,
-                        ScaleX = other.ScaleX,
-                        ScaleY = other.ScaleY,
-                        Color = other.Color,
-                        Rotation = other.Rotation,
-                        PreCreateCode = other.PreCreateCode
-                    };
-
-                    if (layer != null)
-                    {
-                        int index = layer.InstancesData.Instances.IndexOf(other);
-                        layer.InstancesData.Instances.Insert(index + 1, newObj);
-                        roomObjDict.TryAdd(newObj.InstanceID, layer);
-                    }
-                    else
-                    {
-                        int index = room.GameObjects.IndexOf(other);
-                        room.GameObjects.Insert(index + 1, newObj);
-                    }
-
-                    clickedObj = newObj;
-                }
-                else if (clickedObj is Tile)
+                    GameObject => layer is null ? room.GameObjects : layer.InstancesData.Instances,
+                    Tile => layer is null ? room.Tiles : layer.AssetsData.LegacyTiles,
+                    SpriteInstance => layer.AssetsData.Sprites,
+                    _ => null
+                };
+                if (collection is not null)
                 {
-                    if (layer != null && layer.AssetsData == null)
+                    int index = collection.IndexOf(clickedObj) + 1;
+                    Point pos = clickedObj switch
                     {
-                        MainWindow.ShowError("Must be on an assets layer");
-                        return;
-                    }
-                    var other = clickedObj as Tile;
-                    var newObj = new Tile
-                    {
-                        X = other.X,
-                        Y = other.Y,
-                        spriteMode = other.spriteMode,
-                        ObjectDefinition = other.ObjectDefinition,
-                        SourceX = other.SourceX,
-                        SourceY = other.SourceY,
-                        Width = other.Width,
-                        Height = other.Height,
-                        TileDepth = other.TileDepth,
-                        InstanceID = mainWindow.Data.GeneralInfo.LastTile++,
-                        ScaleX = other.ScaleX,
-                        ScaleY = other.ScaleY,
-                        Color = other.Color
+                        RoomObject roomObj => new(roomObj.X, roomObj.Y),
+                        SpriteInstance sprInst => new(sprInst.X, sprInst.Y),
+                        _ => new()
                     };
-
-                    if (layer != null)
-                    {
-                        int index = layer.AssetsData.LegacyTiles.IndexOf(other);
-                        layer.AssetsData.LegacyTiles.Insert(index + 1, newObj);
-                        roomObjDict.TryAdd(newObj.InstanceID, layer);
-                    }
-                    else
-                    {
-                        int index = room.Tiles.IndexOf(other);
-                        room.Tiles.Insert(index + 1, newObj);
-                    }
-
-                    clickedObj = newObj;
-                }
-                else if (clickedObj is SpriteInstance)
-                {
-                    if (layer != null && layer.AssetsData == null)
-                    {
-                        MainWindow.ShowError("Must be on an assets layer");
-                        return;
-                    }
-
-                    string graphicName = "graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8");
-                    var other = clickedObj as SpriteInstance;
-                    var newObj = new SpriteInstance
-                    {
-                        Name = new UndertaleString(graphicName),
-                        Sprite = other.Sprite,
-                        X = other.X,
-                        Y = other.Y,
-                        ScaleX = other.ScaleX,
-                        ScaleY = other.ScaleY,
-                        Color = other.Color,
-                        AnimationSpeed = other.AnimationSpeed,
-                        AnimationSpeedType = other.AnimationSpeedType,
-                        FrameIndex = other.FrameIndex,
-                        Rotation = other.Rotation,
-                    };
-
-                    int index = layer.AssetsData.Sprites.IndexOf(other);
-                    layer.AssetsData.Sprites.Insert(index + 1, newObj);
-                    sprInstDict.TryAdd(newObj, layer);
-
-                    clickedObj = newObj;
+                    clickedObj = AddObjectCopy(room, layer, clickedObj, true, index, pos);
                 }
             }
+            if (clickedObj is null)
+                return;
 
             SelectObject(clickedObj);
 
-            var mousePos = e.GetPosition(RoomGraphics);
+            var mousePos = e.GetPosition(roomCanvas);
             if (clickedObj is GameObject || clickedObj is Tile || clickedObj is SpriteInstance)
             {
                 movingObj = clickedObj;
@@ -448,11 +403,17 @@ namespace UndertaleModTool
                 }
             }
         }
+        private void Rectangle_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+            movingObj = null;
+        }
 
         bool placingTiles = false;
         List<Point> placedTiles = new();
 
-        private UndertaleObject AddObjectCopy(UndertaleRoom room, Layer layer, UndertaleObject obj, bool showErrors, Point pos = new())
+        // if "insertIndex" equals -1, then append
+        private UndertaleObject AddObjectCopy(UndertaleRoom room, Layer layer, UndertaleObject obj, bool showErrors, int insertIndex = -1, Point pos = new())
         {
             if (room is null || obj is null)
                 return null;
@@ -487,14 +448,20 @@ namespace UndertaleModTool
 
                 newObj = newTile;
 
+                int index;
                 if (layer != null)
                 {
-                    layer.AssetsData.LegacyTiles.Add(newTile);
+                    index = insertIndex > -1 ? insertIndex : layer.AssetsData.LegacyTiles.Count;
+                    layer.AssetsData.LegacyTiles.Insert(index, newTile);
                     roomObjDict.TryAdd(newTile.InstanceID, layer);
                 }
                 else
-                    room.Tiles.Add(newTile);
+                {
+                    index = insertIndex > -1 ? insertIndex : room.Tiles.Count;
+                    room.Tiles.Insert(index, newTile);
+                }
 
+                // recalculates room grid size
                 room.SetupRoom();
             }
             else if (obj is GameObject gameObj)
@@ -523,10 +490,12 @@ namespace UndertaleModTool
 
                 newObj = newGameObj;
 
-                room.GameObjects.Add(newGameObj);
+                int index = insertIndex > -1 ? insertIndex : room.GameObjects.Count;
+                room.GameObjects.Insert(index, newGameObj);
                 if (layer != null)
                 {
-                    layer.InstancesData.Instances.Add(newGameObj);
+                    index = insertIndex > -1 ? insertIndex : layer.InstancesData.Instances.Count;
+                    layer.InstancesData.Instances.Insert(index, newGameObj);
                     roomObjDict.TryAdd(newGameObj.InstanceID, layer);
                 }
             }
@@ -538,11 +507,9 @@ namespace UndertaleModTool
                     return null;
                 }
 
-                string graphicName = "graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8");
-
                 var newSprInst = new SpriteInstance
                 {
-                    Name = new UndertaleString(graphicName),
+                    Name = SpriteInstance.GenerateRandomName(mainWindow.Data),
                     Sprite = sprInst.Sprite,
                     X = (int)pos.X,
                     Y = (int)pos.Y,
@@ -559,7 +526,8 @@ namespace UndertaleModTool
 
                 if (layer != null)
                 {
-                    layer.AssetsData.Sprites.Add(newSprInst);
+                    int index = insertIndex > -1 ? insertIndex : layer.AssetsData.Sprites.Count;
+                    layer.AssetsData.Sprites.Insert(index, newSprInst);
                     sprInstDict.TryAdd(newSprInst, layer);
                 }
             }
@@ -594,7 +562,7 @@ namespace UndertaleModTool
             placedTiles.Add(gridMouse);
             placingTiles = true;
 
-            UndertaleObject newObj = AddObjectCopy(room, layer, other, false, gridMouse);
+            UndertaleObject newObj = AddObjectCopy(room, layer, other, false, -1, gridMouse);
 
             if (newObj is not null)
                 SelectObject(newObj);
@@ -616,6 +584,8 @@ namespace UndertaleModTool
         {
             placingTiles = false;
             placedTiles.Clear();
+
+            movingObj = null;
         }
 
         private void RectangleBackground_MouseMove(object sender, MouseEventArgs e)
@@ -639,7 +609,7 @@ namespace UndertaleModTool
             {
                 UndertaleRoom room = this.DataContext as UndertaleRoom;
 
-                var mousePos = e.GetPosition(RoomGraphics);
+                var mousePos = e.GetPosition(roomCanvas);
 
                 int tgtX = (int)(mousePos.X - hotpointX);
                 int tgtY = (int)(mousePos.Y - hotpointY);
@@ -778,12 +748,6 @@ namespace UndertaleModTool
             }
         }
 
-        private void Rectangle_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            e.Handled = true;
-            movingObj = null;
-        }
-
         private UndertaleObject selectedObject;
         private void SelectObject(UndertaleObject obj)
         {
@@ -904,7 +868,14 @@ namespace UndertaleModTool
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[^1]) as UndertaleObject; // TODO: make this more reliable
 
-            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && (sourceItem is UndertaleGameObject || sourceItem is UndertalePath) ? DragDropEffects.Link : DragDropEffects.None;
+            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null
+                        && ((mainWindow.IsGMS2 == Visibility.Collapsed && sourceItem is UndertaleBackground)
+                            || sourceItem is UndertaleGameObject
+                            || sourceItem is UndertalePath
+                            || (mainWindow.IsGMS2 == Visibility.Visible && sourceItem is UndertaleSprite))
+                        ? DragDropEffects.Link
+                        : DragDropEffects.None;
+
             e.Handled = true;
         }
 
@@ -912,20 +883,47 @@ namespace UndertaleModTool
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[^1]) as UndertaleObject;
 
-            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && (sourceItem is UndertaleGameObject || sourceItem is UndertalePath) ? DragDropEffects.Link : DragDropEffects.None;
+            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null
+                        && ((mainWindow.IsGMS2 == Visibility.Collapsed && sourceItem is UndertaleBackground)
+                            || sourceItem is UndertaleGameObject
+                            || sourceItem is UndertalePath
+                            || (mainWindow.IsGMS2 == Visibility.Visible && sourceItem is UndertaleSprite))
+                        ? DragDropEffects.Link
+                        : DragDropEffects.None;
+
             if (e.Effects == DragDropEffects.Link)
             {
-                if (sourceItem is UndertaleBackground)
+                UndertaleRoom room = DataContext as UndertaleRoom;
+                Layer layer = null;
+                if (room.Layers.Count > 0)
                 {
-
+                    object utObj = ObjectEditor.Content;
+                    layer = utObj switch
+                    {
+                        GameObject gameObj => roomObjDict[gameObj.InstanceID],
+                        SpriteInstance sprInst => sprInstDict[sprInst],
+                        Layer l => l,
+                        _ => null
+                    };
                 }
-                else if (sourceItem is UndertaleGameObject)
+
+                if (sourceItem is UndertaleBackground droppedBG)
                 {
-                    UndertaleGameObject droppedObject = sourceItem as UndertaleGameObject;
+                    Background firstBG = room.Backgrounds.FirstOrDefault(x => x.BackgroundDefinition is null);
+                    if (firstBG is not null)
+                    {
+                        firstBG.Enabled = true;
+                        firstBG.BackgroundDefinition = droppedBG;
+
+                        SelectObject(firstBG);
+                    }
+                    else
+                        MainWindow.ShowError("No empty room backgrounds.");
+                }
+                else if (sourceItem is UndertaleGameObject droppedObj)
+                {
                     var mousePos = e.GetPosition(roomCanvas);
 
-                    UndertaleRoom room = this.DataContext as UndertaleRoom;
-                    Layer layer = ObjectEditor.Content as Layer;
                     if (mainWindow.IsGMS2 == Visibility.Visible && layer == null)
                     {
                         MainWindow.ShowError("Please select a layer.");
@@ -937,11 +935,11 @@ namespace UndertaleModTool
                         return;
                     }
 
-                    var obj = new GameObject()
+                    GameObject obj = new()
                     {
                         X = (int)mousePos.X,
                         Y = (int)mousePos.Y,
-                        ObjectDefinition = droppedObject,
+                        ObjectDefinition = droppedObj,
                         InstanceID = mainWindow.Data.GeneralInfo.LastObj++
                     };
                     room.GameObjects.Add(obj);
@@ -951,15 +949,41 @@ namespace UndertaleModTool
 
                     SelectObject(obj);
                 }
-
-                if (sourceItem is UndertalePath)
+                else if (sourceItem is UndertalePath)
                 {
                     PreviewPath = sourceItem as UndertalePath;
                 }
-            }
-            e.Handled = true;
+                else if (sourceItem is UndertaleSprite droppedSprite)
+                {
+                    var mousePos = e.GetPosition(roomCanvas);
 
-            (this.DataContext as UndertaleRoom)?.SetupRoom(false);
+                    if (mainWindow.IsGMS2 == Visibility.Visible && layer == null)
+                    {
+                        MainWindow.ShowError("Please select a layer.");
+                        return;
+                    }
+                    if (layer != null && layer.AssetsData == null)
+                    {
+                        MainWindow.ShowError("Please select an assets layer.");
+                        return;
+                    }
+
+                    SpriteInstance sprInst = new()
+                    {
+                        X = (int)mousePos.X,
+                        Y = (int)mousePos.Y,
+                        Name = SpriteInstance.GenerateRandomName(mainWindow.Data),
+                        Sprite = droppedSprite
+                    };
+
+                    sprInstDict.TryAdd(sprInst, layer);
+                    layer.AssetsData.Sprites.Add(sprInst);
+
+                    SelectObject(sprInst);
+                }
+            }
+
+            e.Handled = true;
         }
 
         private void RoomObjectsTree_KeyDown(object sender, KeyEventArgs e)
@@ -1037,12 +1061,7 @@ namespace UndertaleModTool
                     room.Layers.Remove(layer);
 
                     if (layer.LayerType == LayerType.Background)
-                    {
-                        (RoomGraphics.ItemsSource as CompositeCollection).Remove(layer.BackgroundData);
                         room.UpdateBGColorLayer();
-                    }
-                    else if (layer.LayerType == LayerType.Tiles)
-                        (RoomGraphics.ItemsSource as CompositeCollection).Remove(layer.TilesData);
 
                     ObjectEditor.Content = null;
                 }
@@ -1069,9 +1088,9 @@ namespace UndertaleModTool
 
                 IList list = selectedObj switch
                 {
-                    Tile tile => layer is null ? room.Tiles : layer.AssetsData.LegacyTiles,
-                    GameObject gameObj => layer is null ? room.GameObjects : layer.InstancesData.Instances,
-                    SpriteInstance sprInst => layer.AssetsData.Sprites,
+                    Tile => layer is null ? room.Tiles : layer.AssetsData.LegacyTiles,
+                    GameObject => layer is null ? room.GameObjects : layer.InstancesData.Instances,
+                    SpriteInstance => layer.AssetsData.Sprites,
                     _ => null
                 };
                 if (list is null)
@@ -1091,13 +1110,13 @@ namespace UndertaleModTool
                     if (layer is not null)
                     {
                         // swap back objects in "ObjectDict"
-                        var rect = roomCanvas.ObjectDict[selectedObj];
-                        var rectPrev = roomCanvas.ObjectDict[prevIndexObj as UndertaleObject];
-                        roomCanvas.ObjectDict[selectedObj] = rectPrev;
-                        roomCanvas.ObjectDict[prevIndexObj as UndertaleObject] = rect;
+                        var rect = ObjElemDict[selectedObj];
+                        var rectPrev = ObjElemDict[prevIndexObj as UndertaleObject];
+                        ObjElemDict[selectedObj] = rectPrev;
+                        ObjElemDict[prevIndexObj as UndertaleObject] = rect;
                     }
                 }
-
+                
                 SelectObject(selectedObj);
             }
         }
@@ -1190,7 +1209,7 @@ namespace UndertaleModTool
                 }
 
                 Point mousePos = roomCanvas.IsMouseOver ? Mouse.GetPosition(roomCanvas) : new();
-                UndertaleObject newObj = AddObjectCopy(room, layer, copied, true, mousePos);
+                UndertaleObject newObj = AddObjectCopy(room, layer, copied, true, -1, mousePos);
 
                 if (newObj is not null)
                     SelectObject(newObj);
@@ -1221,22 +1240,74 @@ namespace UndertaleModTool
                 }
             }
 
+            int layerDepth = 0;
+            if (room.Layers.Count > 0)
+            {
+                layerDepth = room.Layers.Select(l => l.LayerDepth).Max();
+                if (layerDepth + 100 > int.MaxValue)
+                {
+                    if (layerDepth + 1 > int.MaxValue)
+                    {
+                        layerDepth -= 1;
+                        MainWindow.ShowWarning("Warning - the maximum layer depth is reached.\nYou probably should change the depth of the new layer.");
+                    }
+                    else
+                        layerDepth += 1;
+                }
+                else
+                    layerDepth += 100;
+            }
+
+            string baseName = null;
+            int nameNum = 0;
+            while (room.Layers.Any(l => l.LayerName.Content == name))
+            {
+                if (baseName is null)
+                {
+                    // Get the trailing number from the name ("name123" => "123")
+                    Match numMatch = trailingNumberRegex.Match(name);
+
+                    // Name has a trailing number, so we parse the basename and number, increment the number and
+                    // set the new name to the basename and incremented number ("name123" -> "name124")
+                    if (numMatch.Success)
+                    {
+                        baseName = name[..^numMatch.Length];
+                        nameNum = Int32.Parse(numMatch.Groups[0].Value) + 1;
+
+                        name = baseName + nameNum;
+                    }
+                    // Name doesn't have a trailing number, so it's the first duplicate.
+                    // Thus we append append "1" to it ("name" -> "name1")
+                    else
+                        name += "1";
+                }
+                // If base name is already extracted, increment "nameNum" and append it to the base name
+                else
+                {
+                    nameNum++;
+                    name = baseName + nameNum;
+                }
+            }
+
             Layer layer = new();
             layer.LayerName = data.Strings.MakeString(name);
             layer.LayerId = largest_layerid + 1;
             layer.LayerType = type;
+            layer.LayerDepth = layerDepth;
             layer.Data = new T();
             room.Layers.Add(layer);
             room.UpdateBGColorLayer();
 
             if (layer.LayerType == LayerType.Assets)
             {
-                // create a new pointer list (if null)
+                // "??=" - assign if null
                 layer.AssetsData.LegacyTiles ??= new UndertalePointerList<Tile>();
-                // create new sprite pointer list (if null)
                 layer.AssetsData.Sprites ??= new UndertalePointerList<SpriteInstance>();
-                // create new sequence pointer list (if null)
                 layer.AssetsData.Sequences ??= new UndertalePointerList<SequenceInstance>();
+
+                // if it's needed to set "NineSlices"
+                if (!data.GMS2_3_2)
+                    layer.AssetsData.NineSlices ??= new UndertalePointerList<SpriteInstance>();
             }
             else if (layer.LayerType == LayerType.Tiles)
             {
@@ -1250,10 +1321,10 @@ namespace UndertaleModTool
 
         private void AddObjectInstance(UndertaleRoom room)
         {
-            var newobject = new GameObject { InstanceID = mainWindow.Data.GeneralInfo.LastObj++ };
-            room.GameObjects.Add(newobject);
+            var newObject = new GameObject { InstanceID = mainWindow.Data.GeneralInfo.LastObj++ };
+            room.GameObjects.Add(newObject);
 
-            SelectObject(newobject);
+            SelectObject(newObject);
         }
 
         private void AddGMS2ObjectInstance(Layer layer)
@@ -1297,10 +1368,11 @@ namespace UndertaleModTool
             {
                 // add pointer list if one doesn't already exist
                 layer.AssetsData.Sprites ??= new UndertalePointerList<SpriteInstance>();
-                
-                SpriteInstance spriteInstance = new();
-                string spriteName = "graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8");
-                spriteInstance.Name = new UndertaleString(spriteName);
+
+                SpriteInstance spriteInstance = new()
+                {
+                    Name = SpriteInstance.GenerateRandomName(mainWindow.Data)
+                };
 
                 layer.AssetsData.Sprites.Add(spriteInstance);
                 sprInstDict.TryAdd(spriteInstance, layer);
@@ -1355,111 +1427,14 @@ namespace UndertaleModTool
             AddSprite(menuitem.DataContext as Layer);
         }
 
-        private void MenuItem_NewGMS1Tile_Click(object sender, RoutedEventArgs e)
-        {
-            AddGMS1Tile(this.DataContext as UndertaleRoom);
-        }
-
-        private void TileDataExport_Click(object sender, RoutedEventArgs e)
-        {
-            if (RoomObjectsTree.SelectedItem is Layer layer)
-            {
-                if (layer.TilesData.TileData.Length == 0)
-                {
-                    MainWindow.ShowError("Tile data is empty.");
-                    return;
-                }
-
-                StringBuilder sb = new();
-                foreach (uint[] dataRow in layer.TilesData.TileData)
-                    sb.AppendLine(String.Join(";", dataRow.Select(x => x.ToString())));
-
-                string dataFolder = System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
-                string filePath = System.IO.Path.Combine(dataFolder, $"{layer.LayerName.Content}_tiledata.csv");
-
-                try
-                {
-                    File.WriteAllText(filePath, sb.ToString());
-                }
-                catch (Exception ex)
-                {
-                    MainWindow.ShowError($"Error while saving the file - \"{ex.Message}\".");
-                    return;
-                }
-
-                MainWindow.ShowMessage("Exported file path: " + filePath);
-            }
-        }
-        private void TileDataImport_Click(object sender, RoutedEventArgs e)
-        {
-            if (RoomObjectsTree.SelectedItem is Layer layer)
-            {
-                if (layer.TilesData.TilesX == 0 || layer.TilesData.TilesY == 0)
-                {
-                    MainWindow.ShowError("Tile data size can't be zero.");
-                    return;
-                }
-
-                OpenFileDialog dlg = new()
-                {
-                    DefaultExt = "csv",
-                    Filter = "CSV table|*.csv|All files|*"
-                };
-
-                if (dlg.ShowDialog() == true)
-                {
-                    uint[][] tileDataNew = (uint[][])layer.TilesData.TileData.Clone();
-                    string[] tileDataLines = null;
-                    try
-                    {
-                        tileDataLines = File.ReadAllLines(dlg.FileName);
-                    }
-                    catch (Exception ex)
-                    {
-                        MainWindow.ShowError($"Error while opening file - \"{ex.Message}\".");
-                        return;
-                    }
-
-                    if (tileDataLines?.Length != tileDataNew.Length)
-                    {
-                        MainWindow.ShowError("Error - selected file line count doesn't match tile layer height.");
-                        return;
-                    }
-
-                    for (int i = 0; i < tileDataLines.Length; i++)
-                    {
-                        uint[] dataRow;
-                        try
-                        {
-                            dataRow = tileDataLines[i].Split(';').Select(x => UInt32.Parse(x)).ToArray();
-                        }
-                        catch (Exception ex)
-                        {
-                            MainWindow.ShowError($"Error while parsing line {i + 1} - \"{ex.Message}\".");
-                            return;
-                        }
-
-                        if (dataRow.Length != layer.TilesData.TilesX)
-                        {
-                            MainWindow.ShowError($"Length of line {i + 1} is not equal to the tile data width.");
-                            return;
-                        }
-
-                        tileDataNew[i] = dataRow;
-                    }
-
-                    layer.TilesData.TileData = tileDataNew;
-
-                    MainWindow.ShowMessage("Imported successfully.");
-                }
-            }
-        }
-
         private void MenuItem_NewObjectInstance_Click(object sender, RoutedEventArgs e)
         {
             AddObjectInstance(this.DataContext as UndertaleRoom);
         }
-
+        private void MenuItem_NewGMS1Tile_Click(object sender, RoutedEventArgs e)
+        {
+            AddGMS1Tile(this.DataContext as UndertaleRoom);
+        }
 
         public static void GenerateSpriteCache(UndertaleRoom room)
         {
@@ -1571,20 +1546,164 @@ namespace UndertaleModTool
                 loader.Convert(texture, null, "generate", null);
             });
         }
+
+        private void TileDataExport_Click(object sender, RoutedEventArgs e)
+        {
+            if (RoomObjectsTree.SelectedItem is not Layer layer)
+                return;
+
+            if (layer.TilesData.TileData.Length == 0)
+            {
+                MainWindow.ShowError("Tile data is empty.");
+                return;
+            }
+
+            StringBuilder sb = new();
+            foreach (uint[] dataRow in layer.TilesData.TileData)
+                sb.AppendLine(String.Join(";", dataRow.Select(x => x.ToString())));
+
+            string dataFolder = System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
+            string filePath = System.IO.Path.Combine(dataFolder, $"{layer.LayerName.Content}_tiledata.csv");
+
+            try
+            {
+                File.WriteAllText(filePath, sb.ToString());
+            }
+            catch (Exception ex)
+            {
+                MainWindow.ShowError($"Error while saving the file - \"{ex.Message}\".");
+                return;
+            }
+
+            MainWindow.ShowMessage("Exported file path: " + filePath);
+        }
+        private void TileDataImport_Click(object sender, RoutedEventArgs e)
+        {
+            if (RoomObjectsTree.SelectedItem is not Layer layer)
+                return;
+
+            if (layer.TilesData.TilesX == 0 || layer.TilesData.TilesY == 0)
+            {
+                MainWindow.ShowError("Tile data size can't be zero.");
+                return;
+            }
+
+            OpenFileDialog dlg = new()
+            {
+                DefaultExt = "csv",
+                Filter = "CSV table|*.csv|All files|*"
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                uint[][] tileDataNew = (uint[][])layer.TilesData.TileData.Clone();
+                string[] tileDataLines = null;
+                try
+                {
+                    tileDataLines = File.ReadAllLines(dlg.FileName);
+                }
+                catch (Exception ex)
+                {
+                    MainWindow.ShowError($"Error while opening file - \"{ex.Message}\".");
+                    return;
+                }
+
+                if (tileDataLines?.Length != tileDataNew.Length)
+                {
+                    MainWindow.ShowError("Error - selected file line count doesn't match tile layer height.");
+                    return;
+                }
+
+                for (int i = 0; i < tileDataLines.Length; i++)
+                {
+                    uint[] dataRow;
+                    try
+                    {
+                        dataRow = tileDataLines[i].Split(';').Select(x => UInt32.Parse(x)).ToArray();
+                    }
+                    catch (Exception ex)
+                    {
+                        MainWindow.ShowError($"Error while parsing line {i + 1} - \"{ex.Message}\".");
+                        return;
+                    }
+
+                    if (dataRow.Length != layer.TilesData.TilesX)
+                    {
+                        MainWindow.ShowError($"Length of line {i + 1} is not equal to the tile data width.");
+                        return;
+                    }
+
+                    tileDataNew[i] = dataRow;
+                }
+
+                layer.TilesData.TileData = tileDataNew;
+
+                MainWindow.ShowMessage("Imported successfully.");
+            }
+        }
+
+        private void LayerCanvas_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            // raised on layers rearrange
+            if (e.NewValue is not Layer layer)
+                return;
+
+            LayerCanvas canvas = sender as LayerCanvas;
+
+            canvas.CurrentLayer = layer;
+            ObjElemDict[layer] = canvas;
+        }
+        private void LayerCanvas_Initialized(object sender, EventArgs e)
+        {
+            LayerCanvas canvas = sender as LayerCanvas;
+
+            if (canvas?.DataContext is not Layer layer)
+                return;
+
+            canvas.CurrentLayer = layer;
+            ObjElemDict[layer] = canvas;
+        }
+        private void LayerCanvas_Unloaded(object sender, RoutedEventArgs e)
+        {
+            LayerCanvas canvas = sender as LayerCanvas;
+
+            if (canvas.CurrentLayer is not null)
+                ObjElemDict.Remove(canvas.CurrentLayer);
+        }
     }
 
-
-    public partial class CanvasWithDict : Canvas
+    public partial class RoomCanvas : Canvas
     {
-        public Dictionary<UndertaleObject, FrameworkElement> ObjectDict { get; } = new();
+        private readonly bool isGMS2 = (Application.Current.MainWindow as MainWindow).IsGMS2 == Visibility.Visible;
+
+        protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved)
+        {
+            if (!isGMS2)
+            {
+                if (visualAdded is ContentPresenter presAdded && presAdded.DataContext is UndertaleObject objAdded)
+                    UndertaleRoomEditor.ObjElemDict[objAdded] = presAdded;
+
+                if (visualRemoved is ContentPresenter presRemoved && presRemoved.DataContext is UndertaleObject objRemoved)
+                    UndertaleRoomEditor.ObjElemDict.Remove(objRemoved);
+            }
+
+            base.OnVisualChildrenChanged(visualAdded, visualRemoved);
+        }
+    }
+    public partial class LayerCanvas : Canvas
+    {
+        // "DataContext" on "Unloaded" event is "{DisconnectedItem}"
+        public UndertaleObject CurrentLayer { get; set; }
 
         protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved)
         {
             if (visualAdded is ContentPresenter presAdded && presAdded.DataContext is UndertaleObject objAdded)
-                ObjectDict[objAdded] = visualAdded as FrameworkElement;
+                UndertaleRoomEditor.ObjElemDict[objAdded] = presAdded;
 
             if (visualRemoved is ContentPresenter presRemoved && presRemoved.DataContext is UndertaleObject objRemoved)
-                ObjectDict.Remove(objRemoved);
+                UndertaleRoomEditor.ObjElemDict.Remove(objRemoved);
+
+            base.OnVisualChildrenChanged(visualAdded, visualRemoved);
         }
     }
 
@@ -1660,40 +1779,92 @@ namespace UndertaleModTool
         }
     }
 
-    public class LayerFlattenerConverter : IValueConverter
+    public class LayerItemsSourceConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            CompositeCollection collection = new();
-            IList<Layer> layers = value as IList<Layer>;
-            foreach (var layer in layers.OrderByDescending((x) => x?.LayerDepth ?? 0))
+            if (value is Layer layer)
             {
-                if (layer == null)
-                    continue;
-
-                switch (layer.LayerType)
+                return layer.LayerType switch
                 {
-                    case LayerType.Background:
-                        collection.Add(layer.BackgroundData);
-                        break;
-                    case LayerType.Instances:
-                        collection.Add(new CollectionContainer() { Collection = layer.InstancesData.Instances });
-                        break;
-                    case LayerType.Assets:
-                        collection.Add(new CollectionContainer() { Collection = layer.AssetsData.LegacyTiles });
-                        collection.Add(new CollectionContainer() { Collection = layer.AssetsData.Sprites });
-                        break;
-                    case LayerType.Tiles:
-                        collection.Add(layer.TilesData);
-                        break;
-                }
+                    // TODO: implement "LayerType.Effects"
+                    LayerType.Assets => new CompositeCollection(2)
+                                        {
+                                          new CollectionContainer() { Collection = layer.AssetsData.LegacyTiles },
+                                          new CollectionContainer() { Collection = layer.AssetsData.Sprites }
+                                        },
+                    LayerType.Background => new List<Layer.LayerBackgroundData>() { layer.BackgroundData },
+                    LayerType.Instances => layer.InstancesData.Instances,
+                    LayerType.Tiles => new List<Layer.LayerTilesData>() { layer.TilesData },
+                    _ => null
+                };
             }
-            return collection;
+            else
+                return null;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotSupportedException();
+            throw new NotImplementedException();
+        }
+    }
+    public class LayerZIndexConverter : IMultiValueConverter
+    {
+        public static bool ProcessOnce { get; set; }
+
+        private static bool suspended;
+        private static int remainingCount = -1;
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values[0] is Layer layer && layer.ParentRoom is UndertaleRoom room)
+            {
+                int layerIndex = room.Layers.Count - room.Layers.IndexOf(layer) - 1;
+
+                if (ProcessOnce)
+                {
+                    if (remainingCount == -1 && room.Layers.Count > 0)
+                        remainingCount = room.Layers.Count - 1;
+                    else if (remainingCount > 0)
+                    {
+                        remainingCount--;
+
+                        if (remainingCount == 0)
+                        {
+                            ProcessOnce = false;
+                            remainingCount = -1;
+                        }
+                    }
+                }
+                else if (!suspended)
+                {
+                    bool ordered = true;
+                    for (int i = 0; i < room.Layers.Count - 1; i++)
+                    {
+                        if (room.Layers[i].LayerDepth > room.Layers[i + 1].LayerDepth)
+                        {
+                            ordered = false;
+                            break;
+                        }
+                    }
+
+                    if (!ordered)
+                    {
+                        suspended = true;
+                        var roomEditor = MainWindow.FindVisualChild<UndertaleRoomEditor>((Application.Current.MainWindow as MainWindow).DataEditor);
+                        room.RearrangeLayers(roomEditor?.RoomObjectsTree.SelectedItem as Layer);
+                        suspended = false;
+                    }
+                }
+
+                return layerIndex;
+            }
+            else
+                return -1;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -1866,7 +2037,8 @@ namespace UndertaleModTool
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value is LayerType.Instances ? Visibility.Collapsed : Visibility.Visible;
+            bool includeBGLayer = parameter is string par && par == "Canvas";
+            return value is LayerType.Instances || (includeBGLayer && value is LayerType.Background) ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -1928,19 +2100,6 @@ namespace UndertaleModTool
             }
 
             return GridLength.Auto;
-        }
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class BGLayerVisConverter : IMultiValueConverter
-    {
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-        {
-            return (bool)values[0] && (bool)values[1] ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
@@ -2129,6 +2288,22 @@ namespace UndertaleModTool
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ParentGridHeightConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is double h)
+                return h - 22; // "TabController" has predefined height
+            else
+                return 0;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

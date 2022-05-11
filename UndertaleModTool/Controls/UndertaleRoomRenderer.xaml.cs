@@ -121,4 +121,20 @@ namespace UndertaleModTool
             throw new NotSupportedException();
         }
     }
+
+    public class LayersOrderedConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is IList<UndertaleRoom.Layer> layers)
+                return layers.OrderByDescending(l => l.LayerDepth);
+            else
+                return null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
