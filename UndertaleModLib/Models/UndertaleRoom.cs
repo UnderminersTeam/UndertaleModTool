@@ -169,19 +169,19 @@ namespace UndertaleModLib.Models
         public void UpdateBGColorLayer() => OnPropertyChanged("BGColorLayer");
         public void RearrangeLayers(Layer selectedLayer = null)
         {
-            if (Layers.Count > 0)
+            if (Layers.Count == 0)
+                return;
+
+            Layer[] orderedLayers = Layers.OrderBy(l => l.LayerDepth).ToArray();
+
+            // ensure that room objects tree will have the layer to re-select
+            if (selectedLayer is not null)
+                Layers[Array.IndexOf(orderedLayers, selectedLayer)] = selectedLayer;
+
+            for (int i = 0; i < orderedLayers.Length; i++)
             {
-                Layer[] orderedLayers = Layers.OrderBy(l => l.LayerDepth).ToArray();
-
-                // ensure that room objects tree will have the layer to re-select
-                if (selectedLayer is not null)
-                    Layers[Array.IndexOf(orderedLayers, selectedLayer)] = selectedLayer;
-
-                for (int i = 0; i < orderedLayers.Length; i++)
-                {
-                    if (Layers[i] != orderedLayers[i])
-                        Layers[i] = orderedLayers[i];
-                }
+                if (Layers[i] != orderedLayers[i])
+                    Layers[i] = orderedLayers[i];
             }
         }
 

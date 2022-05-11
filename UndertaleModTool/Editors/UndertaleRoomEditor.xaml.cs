@@ -45,9 +45,9 @@ namespace UndertaleModTool
 
         public static readonly PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
-        private static readonly Regex endNumberEx = new(@"\d+$", RegexOptions.Compiled);
+        private static readonly Regex trailingNumberRegex = new(@"\d+$", RegexOptions.Compiled);
 
-        // used for the flashing animation
+        // used for the flashing animation when a room object is selected
         public static Dictionary<UndertaleObject, FrameworkElement> ObjElemDict { get; } = new();
 
         public UndertalePath PreviewPath
@@ -171,7 +171,10 @@ namespace UndertaleModTool
                     for (int i = 0; i < room.Layers.Count - 1; i++)
                     {
                         if (room.Layers[i].LayerDepth > room.Layers[i + 1].LayerDepth)
+                        {
                             ordered = false;
+                            break;
+                        }
                     }
 
                     if (!ordered)
@@ -1261,30 +1264,29 @@ namespace UndertaleModTool
             {
                 if (baseName is null)
                 {
-                    // "name123" => "123"
-                    Match numMatch = endNumberEx.Match(name);
+                    // Get the trailing number from the name ("name123" => "123")
+                    Match numMatch = trailingNumberRegex.Match(name);
 
+                    // Name has a trailing number, so we parse the basename and number, increment the number and
+                    // set the new name to the basename and incremented number ("name123" -> "name124")
                     if (numMatch.Success)
                     {
-                        if (baseName is null)
-                        {
-                            baseName = name[..^numMatch.Length];
-                            nameNum = Int32.Parse(numMatch.Groups[0].Value) + 1;
-                        }
-                        else
-                            nameNum++;
+                        baseName = name[..^numMatch.Length];
+                        nameNum = Int32.Parse(numMatch.Groups[0].Value) + 1;
 
-                        // "name9" => "name10" 
                         name = baseName + nameNum;
                     }
+                    // Name doesn't have a trailing number, so it's the first duplicate.
+                    // Thus we append append "1" to it ("name" -> "name1")
                     else
-                    {
-                        // "name" => "name1"
-                        name += 1;
-                    }
+                        name += "1";
                 }
+                // If base name is already extracted, increment "nameNum" and append it to the base name
                 else
-                    name = baseName + (++nameNum);
+                {
+                    nameNum++;
+                    name = baseName + nameNum;
+                }
             }
 
             Layer layer = new();
@@ -1303,7 +1305,7 @@ namespace UndertaleModTool
                 layer.AssetsData.Sprites ??= new UndertalePointerList<SpriteInstance>();
                 layer.AssetsData.Sequences ??= new UndertalePointerList<SequenceInstance>();
 
-                // if GMS version is less that 2.3.2
+                // if it's needed to set "NineSlices"
                 if (!data.GMS2_3_2)
                     layer.AssetsData.NineSlices ??= new UndertalePointerList<SpriteInstance>();
             }
@@ -1547,119 +1549,119 @@ namespace UndertaleModTool
 
         private void TileDataExport_Click(object sender, RoutedEventArgs e)
         {
-            if (RoomObjectsTree.SelectedItem is Layer layer)
+            if (RoomObjectsTree.SelectedItem is not Layer layer)
+                return;
+
+            if (layer.TilesData.TileData.Length == 0)
             {
-                if (layer.TilesData.TileData.Length == 0)
-                {
-                    MainWindow.ShowError("Tile data is empty.");
-                    return;
-                }
-
-                StringBuilder sb = new();
-                foreach (uint[] dataRow in layer.TilesData.TileData)
-                    sb.AppendLine(String.Join(";", dataRow.Select(x => x.ToString())));
-
-                string dataFolder = System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
-                string filePath = System.IO.Path.Combine(dataFolder, $"{layer.LayerName.Content}_tiledata.csv");
-
-                try
-                {
-                    File.WriteAllText(filePath, sb.ToString());
-                }
-                catch (Exception ex)
-                {
-                    MainWindow.ShowError($"Error while saving the file - \"{ex.Message}\".");
-                    return;
-                }
-
-                MainWindow.ShowMessage("Exported file path: " + filePath);
+                MainWindow.ShowError("Tile data is empty.");
+                return;
             }
+
+            StringBuilder sb = new();
+            foreach (uint[] dataRow in layer.TilesData.TileData)
+                sb.AppendLine(String.Join(";", dataRow.Select(x => x.ToString())));
+
+            string dataFolder = System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
+            string filePath = System.IO.Path.Combine(dataFolder, $"{layer.LayerName.Content}_tiledata.csv");
+
+            try
+            {
+                File.WriteAllText(filePath, sb.ToString());
+            }
+            catch (Exception ex)
+            {
+                MainWindow.ShowError($"Error while saving the file - \"{ex.Message}\".");
+                return;
+            }
+
+            MainWindow.ShowMessage("Exported file path: " + filePath);
         }
         private void TileDataImport_Click(object sender, RoutedEventArgs e)
         {
-            if (RoomObjectsTree.SelectedItem is Layer layer)
+            if (RoomObjectsTree.SelectedItem is not Layer layer)
+                return;
+
+            if (layer.TilesData.TilesX == 0 || layer.TilesData.TilesY == 0)
             {
-                if (layer.TilesData.TilesX == 0 || layer.TilesData.TilesY == 0)
+                MainWindow.ShowError("Tile data size can't be zero.");
+                return;
+            }
+
+            OpenFileDialog dlg = new()
+            {
+                DefaultExt = "csv",
+                Filter = "CSV table|*.csv|All files|*"
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                uint[][] tileDataNew = (uint[][])layer.TilesData.TileData.Clone();
+                string[] tileDataLines = null;
+                try
                 {
-                    MainWindow.ShowError("Tile data size can't be zero.");
+                    tileDataLines = File.ReadAllLines(dlg.FileName);
+                }
+                catch (Exception ex)
+                {
+                    MainWindow.ShowError($"Error while opening file - \"{ex.Message}\".");
                     return;
                 }
 
-                OpenFileDialog dlg = new()
+                if (tileDataLines?.Length != tileDataNew.Length)
                 {
-                    DefaultExt = "csv",
-                    Filter = "CSV table|*.csv|All files|*"
-                };
+                    MainWindow.ShowError("Error - selected file line count doesn't match tile layer height.");
+                    return;
+                }
 
-                if (dlg.ShowDialog() == true)
+                for (int i = 0; i < tileDataLines.Length; i++)
                 {
-                    uint[][] tileDataNew = (uint[][])layer.TilesData.TileData.Clone();
-                    string[] tileDataLines = null;
+                    uint[] dataRow;
                     try
                     {
-                        tileDataLines = File.ReadAllLines(dlg.FileName);
+                        dataRow = tileDataLines[i].Split(';').Select(x => UInt32.Parse(x)).ToArray();
                     }
                     catch (Exception ex)
                     {
-                        MainWindow.ShowError($"Error while opening file - \"{ex.Message}\".");
+                        MainWindow.ShowError($"Error while parsing line {i + 1} - \"{ex.Message}\".");
                         return;
                     }
 
-                    if (tileDataLines?.Length != tileDataNew.Length)
+                    if (dataRow.Length != layer.TilesData.TilesX)
                     {
-                        MainWindow.ShowError("Error - selected file line count doesn't match tile layer height.");
+                        MainWindow.ShowError($"Length of line {i + 1} is not equal to the tile data width.");
                         return;
                     }
 
-                    for (int i = 0; i < tileDataLines.Length; i++)
-                    {
-                        uint[] dataRow;
-                        try
-                        {
-                            dataRow = tileDataLines[i].Split(';').Select(x => UInt32.Parse(x)).ToArray();
-                        }
-                        catch (Exception ex)
-                        {
-                            MainWindow.ShowError($"Error while parsing line {i + 1} - \"{ex.Message}\".");
-                            return;
-                        }
-
-                        if (dataRow.Length != layer.TilesData.TilesX)
-                        {
-                            MainWindow.ShowError($"Length of line {i + 1} is not equal to the tile data width.");
-                            return;
-                        }
-
-                        tileDataNew[i] = dataRow;
-                    }
-
-                    layer.TilesData.TileData = tileDataNew;
-
-                    MainWindow.ShowMessage("Imported successfully.");
+                    tileDataNew[i] = dataRow;
                 }
+
+                layer.TilesData.TileData = tileDataNew;
+
+                MainWindow.ShowMessage("Imported successfully.");
             }
         }
 
         private void LayerCanvas_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             // raised on layers rearrange
-            if (e.NewValue is Layer layer)
-            {
-                LayerCanvas canvas = sender as LayerCanvas;
+            if (e.NewValue is not Layer layer)
+                return;
 
-                canvas.CurrentLayer = layer;
-                ObjElemDict[layer] = canvas;
-            }
+            LayerCanvas canvas = sender as LayerCanvas;
+
+            canvas.CurrentLayer = layer;
+            ObjElemDict[layer] = canvas;
         }
         private void LayerCanvas_Initialized(object sender, EventArgs e)
         {
             LayerCanvas canvas = sender as LayerCanvas;
 
-            if (canvas?.DataContext is Layer layer)
-            {
-                canvas.CurrentLayer = layer;
-                ObjElemDict[layer] = canvas;
-            }
+            if (canvas?.DataContext is not Layer layer)
+                return;
+
+            canvas.CurrentLayer = layer;
+            ObjElemDict[layer] = canvas;
         }
         private void LayerCanvas_Unloaded(object sender, RoutedEventArgs e)
         {
@@ -1839,7 +1841,10 @@ namespace UndertaleModTool
                     for (int i = 0; i < room.Layers.Count - 1; i++)
                     {
                         if (room.Layers[i].LayerDepth > room.Layers[i + 1].LayerDepth)
+                        {
                             ordered = false;
+                            break;
+                        }
                     }
 
                     if (!ordered)
