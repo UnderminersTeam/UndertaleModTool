@@ -607,7 +607,7 @@ namespace UndertaleModLib.Models
             public bool Enabled { get; set; }
             public TileMode[] TileModes { get; set; } = new TileMode[5];
 
-            public enum TileMode : int
+            public enum TileMode
             {
                 Stretch = 0,
                 Repeat = 1,
@@ -834,7 +834,7 @@ namespace UndertaleModLib.Models
         ItemSprite
     }
 
-    public enum UndertaleYYSWFFillType : int
+    public enum UndertaleYYSWFFillType
     {
         FillInvalid,
         FillSolid,
@@ -842,7 +842,7 @@ namespace UndertaleModLib.Models
         FillBitmap
     }
 
-    public enum UndertaleYYSWFBitmapFillType : int
+    public enum UndertaleYYSWFBitmapFillType
     {
         FillRepeat,
         FillClamp,
@@ -850,7 +850,7 @@ namespace UndertaleModLib.Models
         FillClampPoint
     }
 
-    public enum UndertaleYYSWFGradientFillType : int
+    public enum UndertaleYYSWFGradientFillType
     {
         FillLinear,
         FillRadial
@@ -1351,7 +1351,7 @@ namespace UndertaleModLib.Models
         }
     }
 
-    public enum UndertaleYYSWFBitmapType : int
+    public enum UndertaleYYSWFBitmapType
     {
         TypeJPEGNoHeader,
         TypeJPEG,

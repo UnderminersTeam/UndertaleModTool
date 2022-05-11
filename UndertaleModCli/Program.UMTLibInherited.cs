@@ -696,7 +696,7 @@ public partial class Program : IScriptInterface
             }
             catch (Exception exc)
             {
-                throw new Exception("Error during GML code replacement:\n" + exc.ToString());
+                throw new Exception("Error during GML code replacement:\n" + exc);
             }
         }
         else if (Data.ToolInfo.ProfileMode && !Data.GMS2_3)
@@ -713,12 +713,12 @@ public partial class Program : IScriptInterface
                 }
                 catch (Exception exc)
                 {
-                    throw new Exception("Error during GML code replacement:\n" + exc.ToString());
+                    throw new Exception("Error during GML code replacement:\n" + exc);
                 }
             }
             catch (Exception exc)
             {
-                throw new Exception("Error during writing of GML code to profile:\n" + exc.ToString() + "\n\nCode:\n\n" + passBack);
+                throw new Exception("Error during writing of GML code to profile:\n" + exc + "\n\nCode:\n\n" + passBack);
             }
         }
     }
@@ -1018,7 +1018,7 @@ public partial class Program : IScriptInterface
         {
             if (!CheckDecompiler)
             {
-                Console.Error.WriteLine("Import" + (IsGML ? "GML" : "ASM") + "File error! Send the following error to Grossley#2869 (Discord) and make an issue on Github:\n\n" + exc.ToString());
+                Console.Error.WriteLine("Import" + (IsGML ? "GML" : "ASM") + "File error! Send the following error to Grossley#2869 (Discord) and make an issue on Github:\n\n" + exc);
 
                 if (throwOnError)
                     throw new ScriptException("Code files importation stopped because of error(s).");

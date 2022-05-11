@@ -1466,7 +1466,7 @@ namespace UndertaleModTool
                     "General info" => new GeneralInfoEditor(Data?.GeneralInfo, Data?.Options, Data?.Language),
                     "Global init" => new GlobalInitEditor(Data?.GlobalInitScripts),
                     "Game End scripts" => new GameEndEditor(Data?.GameEndScripts),
-                    "Variables" => (object)Data.FORM.Chunks["VARI"],
+                    "Variables" => Data.FORM.Chunks["VARI"],
                     _ => new DescriptionView(item, "Expand the list on the left to edit items"),
                 };
             }

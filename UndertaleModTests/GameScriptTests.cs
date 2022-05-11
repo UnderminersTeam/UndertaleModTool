@@ -240,7 +240,7 @@ namespace UndertaleModTests
 
         public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
         {
-            Console.WriteLine(string.Format("GenerateGMLCache(): *decompileContext*{0}, *dialog*{1}, {2}",
+            Console.WriteLine(String.Format("GenerateGMLCache(): *decompileContext*{0}, *dialog*{1}, {2}",
                                             decompileContext is null ? " (null)" : "",
                                             dialog is null ? " (null)" : "",
                                             clearGMLEditedBefore.ToString().ToLower())

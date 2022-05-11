@@ -59,7 +59,7 @@ namespace UndertaleModLib.Models
             StudioVersionB3 = 0x0800,
 
             /// <summary>
-            /// studioVersion = (infoFlags & InfoFlags.StudioVersionMask) >> 9
+            /// studioVersion = (infoFlags &amp; InfoFlags.StudioVersionMask) >> 9
             /// </summary>
             StudioVersionMask = 0x0E00,
             /// <summary>

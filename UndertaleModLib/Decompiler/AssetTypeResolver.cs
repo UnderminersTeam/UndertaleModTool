@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UndertaleModLib.Models;
-using UndertaleModLib.Compiler;
 
 namespace UndertaleModLib.Decompiler
 {
@@ -51,29 +50,29 @@ namespace UndertaleModLib.Decompiler
 
         TileSet, // Identical to AssetIDType.Background, used internally for GMS2 to prevent tileset functions from resolving incorrectly.
         Layer // GMS2
-    };
+    }
 
-    public enum HAlign : int
+    public enum HAlign
     {
         fa_left = 0,
         fa_center = 1,
         fa_right = 2
-    };
+    }
 
-    public enum VAlign : int
+    public enum VAlign
     {
         fa_top = 0,
         fa_middle = 1,
         fa_bottom = 2
     }
 
-    public enum GameSpeed : int
+    public enum GameSpeed
     {
         gamespeed_fps,
         gamespeed_microseconds
     }
 
-    public enum MouseCursor : int
+    public enum MouseCursor
     {
         cr_size_all = -22,
         cr_handpoint = -21,
@@ -92,7 +91,7 @@ namespace UndertaleModLib.Decompiler
         cr_default = 0
     }
 
-    public enum OSType : int
+    public enum OSType
     {
         os_windows = 0, // legacy constant os_win32 is equal to os_windows
         os_macosx = 1,
@@ -119,7 +118,7 @@ namespace UndertaleModLib.Decompiler
         os_unknown = -1
     }
 
-    public enum GamepadButton : int
+    public enum GamepadButton
     {
         gp_face1 = 32769,
         gp_face2 = 32770,
@@ -143,7 +142,7 @@ namespace UndertaleModLib.Decompiler
         gp_axisrv = 32788,
     }
 
-    public enum PathEndAction : int
+    public enum PathEndAction
     {
         path_action_stop = 0,
         path_action_restart = 1,
@@ -151,7 +150,7 @@ namespace UndertaleModLib.Decompiler
         path_action_reverse = 3
     }
 
-    public enum BufferKind : int
+    public enum BufferKind
     {
         buffer_fixed = 0,
         buffer_grow = 1,
@@ -161,7 +160,7 @@ namespace UndertaleModLib.Decompiler
         buffer_network = 5
     }
 
-    public enum BufferType : int
+    public enum BufferType
     {
         buffer_u8 = 1,
         buffer_s8 = 2,
@@ -178,14 +177,14 @@ namespace UndertaleModLib.Decompiler
         buffer_text = 13
     }
 
-    public enum BufferSeek : int
+    public enum BufferSeek
     {
         buffer_seek_start = 0,
         buffer_seek_relative = 1,
         buffer_seek_end = 2
     }
 
-    public enum MouseButton : int
+    public enum MouseButton
     {
         mb_any = -1,
         mb_none,
@@ -194,7 +193,7 @@ namespace UndertaleModLib.Decompiler
         mb_middle
     }
 
-    public enum e__VW : int
+    public enum e__VW
     {
         XView = 0,
         YView = 1,
@@ -213,8 +212,8 @@ namespace UndertaleModLib.Decompiler
         HPort = 14,
         Camera = 15,
         SurfaceID = 16,
-    };
-    public enum e__BG : int
+    }
+    public enum e__BG
     {
         Visible = 0,
         Foreground = 1,
@@ -231,21 +230,21 @@ namespace UndertaleModLib.Decompiler
         VSpeed = 12,
         Blend = 13,
         Alpha = 14
-    };
+    }
 
-    public enum Boolean : int
+    public enum Boolean
     {
         @false = 0,
         @true = 1
     }
 
-    public enum Steam_UGC_FileType : int
+    public enum Steam_UGC_FileType
     {
         ugc_filetype_community,
         ugc_filetype_microtrans
     }
 
-    public enum Steam_UGC_MatchType : int
+    public enum Steam_UGC_MatchType
     {
         ugc_match_Items,
         ugc_match_Items_Mtx,
@@ -261,7 +260,7 @@ namespace UndertaleModLib.Decompiler
         ugc_match_ControllerBindings,
     }
 
-    public enum Steam_UGC_QueryType : int
+    public enum Steam_UGC_QueryType
     {
         ugc_query_RankedByVote,
         ugc_query_RankedByPublicationDate,
@@ -277,7 +276,7 @@ namespace UndertaleModLib.Decompiler
         ugc_query_RankedByTextSearch,
     }
 
-    public enum Steam_UGC_List : int
+    public enum Steam_UGC_List
     {
         ugc_list_Published,
         ugc_list_VotedOn,
@@ -290,7 +289,7 @@ namespace UndertaleModLib.Decompiler
         ugc_list_Followed
     }
 
-    public enum Steam_UGC_SortOrder : int
+    public enum Steam_UGC_SortOrder
     {
         ugc_sortorder_CreationOrderDesc,
         ugc_sortorder_CreationOrderAsc,
@@ -301,14 +300,14 @@ namespace UndertaleModLib.Decompiler
         ugc_sortorder_ForModeration
     }
 
-    public enum Steam_LeaderBoard_Sort : int
+    public enum Steam_LeaderBoard_Sort
     {
         lb_sort_none,
         lb_sort_ascending,
         lb_sort_descending,
     }
 
-    public enum Steam_LeaderBoard_Display : int
+    public enum Steam_LeaderBoard_Display
     {
         lb_disp_none,
         lb_disp_numeric,
@@ -316,7 +315,7 @@ namespace UndertaleModLib.Decompiler
         lb_disp_time_ms,
     }
 
-    public enum Steam_Overlay : int
+    public enum Steam_Overlay
     {
         ov_friends,
         ov_community,
@@ -326,10 +325,10 @@ namespace UndertaleModLib.Decompiler
         ov_achievements,
     }
 
-    // Subtypes are pulled from the builtin list case frankly I 
+    // Subtypes are pulled from the builtin list case frankly I
     // don't care enough to type them all out manually.
     // There's like a hundred subtypes.
-    public enum Enum_EventType : int
+    public enum Enum_EventType
     {
         ev_create,
         ev_destroy,
@@ -359,7 +358,7 @@ namespace UndertaleModLib.Decompiler
 
         public static Dictionary<string, AssetIDType> return_types; // keys are script names (< GMS2.3) or member function variable names (>= GMS2.3)
 
-        internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, DecompileContext context) 
+        internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, DecompileContext context)
         {
             return AnnotateTypesForFunctionCall(function_name, arguments, context, null);
         }
@@ -402,22 +401,22 @@ namespace UndertaleModLib.Decompiler
                             func_types[i] = AssetIDType.Sprite;
                     }
                 }
-                
-                if (overloaded) 
+
+                if (overloaded)
                 {
                     // Copy the array to make sure we don't overwrite existing known types
                     func_types = (AssetIDType[]) func_types.Clone();
                     AssetIDType scriptArgType;
 
-                    for (int i = 0; i < arguments.Length && i < func_types.Length && i < scriptArgs[function_name].Length; i++) 
+                    for (int i = 0; i < arguments.Length && i < func_types.Length && i < scriptArgs[function_name].Length; i++)
                     {
                         scriptArgType = scriptArgs[function_name][i];
 
                         // Merge types together
-                        if (func_types[i] == AssetIDType.Other && scriptArgType != AssetIDType.Other) 
+                        if (func_types[i] == AssetIDType.Other && scriptArgType != AssetIDType.Other)
                             func_types[i] = scriptArgType;
                         // Conflicting types - do not resolve
-                        else if (func_types[i] != AssetIDType.Other && scriptArgType != AssetIDType.Other && func_types[i] != scriptArgType) 
+                        else if (func_types[i] != AssetIDType.Other && scriptArgType != AssetIDType.Other && func_types[i] != scriptArgType)
                             func_types[i] = AssetIDType.Other;
                         // func_types[i] is correct, do not replace
                     }
@@ -437,13 +436,13 @@ namespace UndertaleModLib.Decompiler
                 // This is done by reading the literal values passed to the function and resolving
                 // the first argument as a function, then recursively calling the asset resolver on it.
                 // There's probably a better way to do this.
-                
-                if (function != null) 
+
+                if (function != null)
                 {
-                    if (function.Arguments[0] is Decompiler.ExpressionCast) 
+                    if (function.Arguments[0] is Decompiler.ExpressionCast)
                     {
                         var firstArg = (function.Arguments[0] as Decompiler.ExpressionCast).Argument;
-                        if ((firstArg is Decompiler.ExpressionConstant) && firstArg.Type == UndertaleInstruction.DataType.Int16) 
+                        if ((firstArg is Decompiler.ExpressionConstant) && firstArg.Type == UndertaleInstruction.DataType.Int16)
                         {
                             short script_id = (short) (firstArg as Decompiler.ExpressionConstant).Value;
                             if (script_id >= 0 && script_id < context.GlobalContext.Data.Scripts.Count)
@@ -473,7 +472,7 @@ namespace UndertaleModLib.Decompiler
             if (overrides.ContainsKey(variable_name))
                 return overrides[variable_name];
 
-            if (context.Object != null) 
+            if (context.Object != null)
             {
                 overrides = GetTypeOverridesFor(context.Object.Name.Content);
                 if (overrides.ContainsKey(variable_name))
@@ -557,453 +556,453 @@ namespace UndertaleModLib.Decompiler
 
             return_types = new Dictionary<string, AssetIDType>();
 
-            builtin_funcs = new Dictionary<string, AssetIDType[]>()
+            builtin_funcs = new Dictionary<string, AssetIDType[]>
             {
-                { "action_create_object", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
-                { "instance_activate_object", new AssetIDType[] { AssetIDType.GameObject } },
-                { "script_exists", new AssetIDType[] { AssetIDType.Script } },
-                { "script_get_name", new AssetIDType[] { AssetIDType.Script } },
+                { "action_create_object", new[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
+                { "instance_activate_object", new[] { AssetIDType.GameObject } },
+                { "script_exists", new[] { AssetIDType.Script } },
+                { "script_get_name", new[] { AssetIDType.Script } },
                 // script_execute handled separately
 
-                { "instance_change", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Boolean } },
-                { "instance_copy", new AssetIDType[] { AssetIDType.Boolean } },
-                { "instance_create", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
-                { "instance_destroy", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Boolean } },
-                { "instance_exists", new AssetIDType[] { AssetIDType.GameObject } },
-                { "instance_find", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
-                { "instance_furthest", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
-                { "instance_nearest", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
-                { "instance_number", new AssetIDType[] { AssetIDType.GameObject } },
-                { "instance_place", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
-                { "instance_position", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
-                { "instance_deactivate_all", new AssetIDType[] { AssetIDType.Boolean } },
-                { "application_surface_enable", new AssetIDType[] { AssetIDType.Boolean } },
-                { "application_surface_draw_enable", new AssetIDType[] { AssetIDType.Boolean } },
-                { "instance_deactivate_object", new AssetIDType[] { AssetIDType.GameObject } },
-                { "instance_activate_region", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean } },
-                { "instance_deactivate_region", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean , AssetIDType.Boolean } },
+                { "instance_change", new[] { AssetIDType.GameObject, AssetIDType.Boolean } },
+                { "instance_copy", new[] { AssetIDType.Boolean } },
+                { "instance_create", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+                { "instance_destroy", new[] { AssetIDType.GameObject, AssetIDType.Boolean } },
+                { "instance_exists", new[] { AssetIDType.GameObject } },
+                { "instance_find", new[] { AssetIDType.GameObject, AssetIDType.Other } },
+                { "instance_furthest", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+                { "instance_nearest", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+                { "instance_number", new[] { AssetIDType.GameObject } },
+                { "instance_place", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+                { "instance_position", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+                { "instance_deactivate_all", new[] { AssetIDType.Boolean } },
+                { "application_surface_enable", new[] { AssetIDType.Boolean } },
+                { "application_surface_draw_enable", new[] { AssetIDType.Boolean } },
+                { "instance_deactivate_object", new[] { AssetIDType.GameObject } },
+                { "instance_activate_region", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean } },
+                { "instance_deactivate_region", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean , AssetIDType.Boolean } },
 
-                { "instance_activate_layer", new AssetIDType[] { AssetIDType.Layer } }, // GMS2
-                { "instance_deactivate_layer", new AssetIDType[] { AssetIDType.Layer } }, // GMS2
-                { "instance_create_depth", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } }, // GMS2
-                { "instance_create_layer", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } }, // GMS2
+                { "instance_activate_layer", new[] { AssetIDType.Layer } }, // GMS2
+                { "instance_deactivate_layer", new[] { AssetIDType.Layer } }, // GMS2
+                { "instance_create_depth", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } }, // GMS2
+                { "instance_create_layer", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } }, // GMS2
 
-                { "sprite_get_name", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_get_number", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_get_width", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_get_height", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_get_xoffset", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_get_yoffset", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_get_bbox_bottom", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_get_bbox_left", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_get_bbox_right", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_get_bbox_top", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_get_tpe", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other } },
-                { "sprite_get_texture", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other } },
-                { "sprite_get_uvs", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other } },
+                { "sprite_get_name", new[] { AssetIDType.Sprite } },
+                { "sprite_get_number", new[] { AssetIDType.Sprite } },
+                { "sprite_get_width", new[] { AssetIDType.Sprite } },
+                { "sprite_get_height", new[] { AssetIDType.Sprite } },
+                { "sprite_get_xoffset", new[] { AssetIDType.Sprite } },
+                { "sprite_get_yoffset", new[] { AssetIDType.Sprite } },
+                { "sprite_get_bbox_bottom", new[] { AssetIDType.Sprite } },
+                { "sprite_get_bbox_left", new[] { AssetIDType.Sprite } },
+                { "sprite_get_bbox_right", new[] { AssetIDType.Sprite } },
+                { "sprite_get_bbox_top", new[] { AssetIDType.Sprite } },
+                { "sprite_get_tpe", new[] { AssetIDType.Sprite, AssetIDType.Other } },
+                { "sprite_get_texture", new[] { AssetIDType.Sprite, AssetIDType.Other } },
+                { "sprite_get_uvs", new[] { AssetIDType.Sprite, AssetIDType.Other } },
 
-                { "sprite_exists", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_add", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other } },
-                { "sprite_replace", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other } },
-                { "sprite_duplicate", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_assign", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Sprite } },
-                { "sprite_merge", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Sprite } },
-                { "sprite_create_from_surface", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other } },
-                { "sprite_add_from_surface", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean } },
-                { "sprite_collision_mask", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "sprite_set_offset", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other } },
-                { "sprite_delete", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_set_alpha_from_sprite", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Sprite } },
-                { "sprite_set_cache_size", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other } },
-                { "sprite_set_cache_size_ext", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other } },
-                { "sprite_save", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other } },
-                { "sprite_save_strip", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other } },
-                { "sprite_flush", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_flush_multi", new AssetIDType[] { AssetIDType.Sprite } }, // sprite ARRAY
-                { "sprite_prefetch", new AssetIDType[] { AssetIDType.Sprite } },
-                { "sprite_prefetch_multi", new AssetIDType[] { AssetIDType.Sprite } }, // sprite ARRAY
+                { "sprite_exists", new[] { AssetIDType.Sprite } },
+                { "sprite_add", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other } },
+                { "sprite_replace", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other } },
+                { "sprite_duplicate", new[] { AssetIDType.Sprite } },
+                { "sprite_assign", new[] { AssetIDType.Sprite, AssetIDType.Sprite } },
+                { "sprite_merge", new[] { AssetIDType.Sprite, AssetIDType.Sprite } },
+                { "sprite_create_from_surface", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other } },
+                { "sprite_add_from_surface", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean } },
+                { "sprite_collision_mask", new[] { AssetIDType.Sprite, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "sprite_set_offset", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other } },
+                { "sprite_delete", new[] { AssetIDType.Sprite } },
+                { "sprite_set_alpha_from_sprite", new[] { AssetIDType.Sprite, AssetIDType.Sprite } },
+                { "sprite_set_cache_size", new[] { AssetIDType.Sprite, AssetIDType.Other } },
+                { "sprite_set_cache_size_ext", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other } },
+                { "sprite_save", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other } },
+                { "sprite_save_strip", new[] { AssetIDType.Sprite, AssetIDType.Other } },
+                { "sprite_flush", new[] { AssetIDType.Sprite } },
+                { "sprite_flush_multi", new[] { AssetIDType.Sprite } }, // sprite ARRAY
+                { "sprite_prefetch", new[] { AssetIDType.Sprite } },
+                { "sprite_prefetch_multi", new[] { AssetIDType.Sprite } }, // sprite ARRAY
 
-                { "background_get_name", new AssetIDType[] { AssetIDType.Background } },
-                { "background_get_width", new AssetIDType[] { AssetIDType.Background } },
-                { "background_get_height", new AssetIDType[] { AssetIDType.Background } },
-                { "background_get_texture", new AssetIDType[] { AssetIDType.Background } },
-                { "background_get_uvs", new AssetIDType[] { AssetIDType.Background } },
-                { "background_exists", new AssetIDType[] { AssetIDType.Background } },
-                { "background_add", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "background_replace", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "background_duplicate", new AssetIDType[] { AssetIDType.Background } },
-                { "background_assign", new AssetIDType[] { AssetIDType.Background, AssetIDType.Background } },
-                { "background_create_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color } },
-                { "background_create_gradient", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
-                { "background_create_from_surface", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "background_set_alpha_from_background", new AssetIDType[] { AssetIDType.Background, AssetIDType.Background } },
-                { "background_save", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other } },
-                { "background_delete", new AssetIDType[] { AssetIDType.Background } },
-                { "background_flush", new AssetIDType[] { AssetIDType.Background } },
-                { "background_flush_multi", new AssetIDType[] { AssetIDType.Background } }, // array
-                { "background_prefetch", new AssetIDType[] { AssetIDType.Background } },
-                { "background_prefetch_multi", new AssetIDType[] { AssetIDType.Background } }, // array
+                { "background_get_name", new[] { AssetIDType.Background } },
+                { "background_get_width", new[] { AssetIDType.Background } },
+                { "background_get_height", new[] { AssetIDType.Background } },
+                { "background_get_texture", new[] { AssetIDType.Background } },
+                { "background_get_uvs", new[] { AssetIDType.Background } },
+                { "background_exists", new[] { AssetIDType.Background } },
+                { "background_add", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "background_replace", new[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "background_duplicate", new[] { AssetIDType.Background } },
+                { "background_assign", new[] { AssetIDType.Background, AssetIDType.Background } },
+                { "background_create_colour", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color } },
+                { "background_create_gradient", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+                { "background_create_from_surface", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "background_set_alpha_from_background", new[] { AssetIDType.Background, AssetIDType.Background } },
+                { "background_save", new[] { AssetIDType.Background, AssetIDType.Other } },
+                { "background_delete", new[] { AssetIDType.Background } },
+                { "background_flush", new[] { AssetIDType.Background } },
+                { "background_flush_multi", new[] { AssetIDType.Background } }, // array
+                { "background_prefetch", new[] { AssetIDType.Background } },
+                { "background_prefetch_multi", new[] { AssetIDType.Background } }, // array
 
                 // only a few relevant ones for tiles
-                { "tile_add", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "tile_set_background", new AssetIDType[] { AssetIDType.Other, AssetIDType.Background } },
-                { "tile_set_blend", new AssetIDType[] { AssetIDType.Other, AssetIDType.Color } },
+                { "tile_add", new[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "tile_set_background", new[] { AssetIDType.Other, AssetIDType.Background } },
+                { "tile_set_blend", new[] { AssetIDType.Other, AssetIDType.Color } },
 
-                { "audio_exists", new AssetIDType[] { AssetIDType.Sound } },
-                { "audio_get_name", new AssetIDType[] { AssetIDType.Sound } },
-                { "audio_get_type", new AssetIDType[] { AssetIDType.Sound } },
-                { "audio_play_sound", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Boolean } },
-                { "audio_play_sound_at", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other } },
-                { "audio_pause_sound", new AssetIDType[] { AssetIDType.Sound } },
+                { "audio_exists", new[] { AssetIDType.Sound } },
+                { "audio_get_name", new[] { AssetIDType.Sound } },
+                { "audio_get_type", new[] { AssetIDType.Sound } },
+                { "audio_play_sound", new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Boolean } },
+                { "audio_play_sound_at", new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other } },
+                { "audio_pause_sound", new[] { AssetIDType.Sound } },
                 { "audio_pause_all", Array.Empty<AssetIDType>() },
-                { "audio_resume_sound", new AssetIDType[] { AssetIDType.Sound } },
+                { "audio_resume_sound", new[] { AssetIDType.Sound } },
                 { "audio_resume_all", Array.Empty<AssetIDType>() },
-                { "audio_stop_sound", new AssetIDType[] { AssetIDType.Sound } },
+                { "audio_stop_sound", new[] { AssetIDType.Sound } },
                 { "audio_stop_all", Array.Empty<AssetIDType>() },
-                { "audio_is_playing", new AssetIDType[] { AssetIDType.Sound } },
-                { "audio_is_paused", new AssetIDType[] { AssetIDType.Sound } },
-                { "audio_create_streaam", new AssetIDType[] { AssetIDType.Other } },
-                { "audio_destroy_streaam", new AssetIDType[] { AssetIDType.Other } },
+                { "audio_is_playing", new[] { AssetIDType.Sound } },
+                { "audio_is_paused", new[] { AssetIDType.Sound } },
+                { "audio_create_streaam", new[] { AssetIDType.Other } },
+                { "audio_destroy_streaam", new[] { AssetIDType.Other } },
 
-                { "audio_sound_set_track_position", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other } },
-                { "audio_sound_get_track_position", new AssetIDType[] { AssetIDType.Sound } },
-                { "audio_sound_length", new AssetIDType[] { AssetIDType.Sound } },
-                { "audio_sound_pitch", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other } },
-                { "audio_sound_get_pitch", new AssetIDType[] { AssetIDType.Sound } },
-                { "audio_falloff_set_model", new AssetIDType[] { AssetIDType.Other } },
-                { "audio_sound_gain", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other } },
-                { "audio_sound_get_gain", new AssetIDType[] { AssetIDType.Sound } },
-                { "audio_master_gain", new AssetIDType[] { AssetIDType.Other } },
-                { "audio_play_sound_on", new AssetIDType[] { AssetIDType.Other, AssetIDType.Sound, AssetIDType.Boolean, AssetIDType.Other } },
-                { "audio_play_in_sync_group", new AssetIDType[] { AssetIDType.Other, AssetIDType.Sound } },
+                { "audio_sound_set_track_position", new[] { AssetIDType.Sound, AssetIDType.Other } },
+                { "audio_sound_get_track_position", new[] { AssetIDType.Sound } },
+                { "audio_sound_length", new[] { AssetIDType.Sound } },
+                { "audio_sound_pitch", new[] { AssetIDType.Sound, AssetIDType.Other } },
+                { "audio_sound_get_pitch", new[] { AssetIDType.Sound } },
+                { "audio_falloff_set_model", new[] { AssetIDType.Other } },
+                { "audio_sound_gain", new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other } },
+                { "audio_sound_get_gain", new[] { AssetIDType.Sound } },
+                { "audio_master_gain", new[] { AssetIDType.Other } },
+                { "audio_play_sound_on", new[] { AssetIDType.Other, AssetIDType.Sound, AssetIDType.Boolean, AssetIDType.Other } },
+                { "audio_play_in_sync_group", new[] { AssetIDType.Other, AssetIDType.Sound } },
                 // TODO? I don't know if the ones with only asset type Other are worth adding here
 
                 // Legacy sound functions
-                { "sound_exists", new AssetIDType[] { AssetIDType.Sound } },
-                { "sound_get_name", new AssetIDType[] { AssetIDType.Sound } },
-                { "sound_play", new AssetIDType[] { AssetIDType.Sound } },
-                { "sound_loop", new AssetIDType[] { AssetIDType.Sound } },
-                { "sound_stop", new AssetIDType[] { AssetIDType.Sound } },
+                { "sound_exists", new[] { AssetIDType.Sound } },
+                { "sound_get_name", new[] { AssetIDType.Sound } },
+                { "sound_play", new[] { AssetIDType.Sound } },
+                { "sound_loop", new[] { AssetIDType.Sound } },
+                { "sound_stop", new[] { AssetIDType.Sound } },
                 { "sound_stop_all", Array.Empty<AssetIDType>() },
-                { "sound_isplaying", new AssetIDType[] { AssetIDType.Sound } },
-                { "sound_volume", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other } },
-                { "sound_fade", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other } },
-                { "sound_global_volume", new AssetIDType[] { AssetIDType.Other } },
+                { "sound_isplaying", new[] { AssetIDType.Sound } },
+                { "sound_volume", new[] { AssetIDType.Sound, AssetIDType.Other } },
+                { "sound_fade", new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other } },
+                { "sound_global_volume", new[] { AssetIDType.Other } },
                 // Deprecated legacy functions (wait what)
-                { "sound_add", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "sound_replace", new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "sound_delete", new AssetIDType[] { AssetIDType.Sound } },
+                { "sound_add", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "sound_replace", new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "sound_delete", new[] { AssetIDType.Sound } },
 
-                { "font_get_name", new AssetIDType[] { AssetIDType.Font } },
-                { "font_get_fontname", new AssetIDType[] { AssetIDType.Font } },
-                { "font_get_first", new AssetIDType[] { AssetIDType.Font } },
-                { "font_get_last", new AssetIDType[] { AssetIDType.Font } },
-                { "font_get_italic", new AssetIDType[] { AssetIDType.Font } },
-                { "font_get_bold", new AssetIDType[] { AssetIDType.Font } },
-                { "font_get_size", new AssetIDType[] { AssetIDType.Font } },
-                { "font_get_texture", new AssetIDType[] { AssetIDType.Font } },
-                { "font_get_uvs", new AssetIDType[] { AssetIDType.Font } },
+                { "font_get_name", new[] { AssetIDType.Font } },
+                { "font_get_fontname", new[] { AssetIDType.Font } },
+                { "font_get_first", new[] { AssetIDType.Font } },
+                { "font_get_last", new[] { AssetIDType.Font } },
+                { "font_get_italic", new[] { AssetIDType.Font } },
+                { "font_get_bold", new[] { AssetIDType.Font } },
+                { "font_get_size", new[] { AssetIDType.Font } },
+                { "font_get_texture", new[] { AssetIDType.Font } },
+                { "font_get_uvs", new[] { AssetIDType.Font } },
 
-                { "font_set_cache_size", new AssetIDType[] { AssetIDType.Font, AssetIDType.Other } },
-                { "font_exists", new AssetIDType[] { AssetIDType.Font } },
-                { "font_add", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "font_add_sprite", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "font_add_sprite_ext", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "font_replace", new AssetIDType[] { AssetIDType.Font, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "font_replace_sprite", new AssetIDType[] { AssetIDType.Font, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "font_replace_sprite_ext", new AssetIDType[] { AssetIDType.Font, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "font_delete", new AssetIDType[] { AssetIDType.Font } },
+                { "font_set_cache_size", new[] { AssetIDType.Font, AssetIDType.Other } },
+                { "font_exists", new[] { AssetIDType.Font } },
+                { "font_add", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "font_add_sprite", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "font_add_sprite_ext", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "font_replace", new[] { AssetIDType.Font, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "font_replace_sprite", new[] { AssetIDType.Font, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "font_replace_sprite_ext", new[] { AssetIDType.Font, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "font_delete", new[] { AssetIDType.Font } },
 
-                { "path_start", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Enum_PathEndAction, AssetIDType.Other } },
+                { "path_start", new[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Enum_PathEndAction, AssetIDType.Other } },
                 { "path_end", Array.Empty<AssetIDType>() },
 
-                { "path_exists", new AssetIDType[] { AssetIDType.Path } },
-                { "path_get_closed", new AssetIDType[] { AssetIDType.Path } },
-                { "path_get_kind", new AssetIDType[] { AssetIDType.Path } },
-                { "path_get_length", new AssetIDType[] { AssetIDType.Path } },
-                { "path_get_name", new AssetIDType[] { AssetIDType.Path } },
-                { "path_get_number", new AssetIDType[] { AssetIDType.Path } },
-                { "path_get_point_speed", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
-                { "path_get_point_x", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
-                { "path_get_point_y", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
-                { "path_get_precision", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
-                { "path_get_speed", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
-                { "path_get_x", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
-                { "path_get_y", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other} },
+                { "path_exists", new[] { AssetIDType.Path } },
+                { "path_get_closed", new[] { AssetIDType.Path } },
+                { "path_get_kind", new[] { AssetIDType.Path } },
+                { "path_get_length", new[] { AssetIDType.Path } },
+                { "path_get_name", new[] { AssetIDType.Path } },
+                { "path_get_number", new[] { AssetIDType.Path } },
+                { "path_get_point_speed", new[] { AssetIDType.Path, AssetIDType.Other } },
+                { "path_get_point_x", new[] { AssetIDType.Path, AssetIDType.Other } },
+                { "path_get_point_y", new[] { AssetIDType.Path, AssetIDType.Other } },
+                { "path_get_precision", new[] { AssetIDType.Path, AssetIDType.Other } },
+                { "path_get_speed", new[] { AssetIDType.Path, AssetIDType.Other } },
+                { "path_get_x", new[] { AssetIDType.Path, AssetIDType.Other } },
+                { "path_get_y", new[] { AssetIDType.Path, AssetIDType.Other} },
 
                 { "path_add", Array.Empty<AssetIDType>() },
-                { "path_add_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "path_change_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "path_insert_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "path_delete_point", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
-                { "path_clear_points", new AssetIDType[] { AssetIDType.Path } },
-                { "path_append", new AssetIDType[] { AssetIDType.Path, AssetIDType.Path } },
-                { "path_assign", new AssetIDType[] { AssetIDType.Path, AssetIDType.Path } },
-                { "path_delete", new AssetIDType[] { AssetIDType.Path } },
-                { "path_duplicate", new AssetIDType[] { AssetIDType.Path } },
-                { "path_flip", new AssetIDType[] { AssetIDType.Path } },
-                { "path_mirror", new AssetIDType[] { AssetIDType.Path } },
-                { "path_reverse", new AssetIDType[] { AssetIDType.Path } },
-                { "path_rotate", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
-                { "path_scale", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other } },
-                { "path_set_closed", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
-                { "path_set_kind", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
-                { "path_set_precision", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other } },
-                { "path_shift", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other } },
+                { "path_add_point", new[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "path_change_point", new[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "path_insert_point", new[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "path_delete_point", new[] { AssetIDType.Path, AssetIDType.Other } },
+                { "path_clear_points", new[] { AssetIDType.Path } },
+                { "path_append", new[] { AssetIDType.Path, AssetIDType.Path } },
+                { "path_assign", new[] { AssetIDType.Path, AssetIDType.Path } },
+                { "path_delete", new[] { AssetIDType.Path } },
+                { "path_duplicate", new[] { AssetIDType.Path } },
+                { "path_flip", new[] { AssetIDType.Path } },
+                { "path_mirror", new[] { AssetIDType.Path } },
+                { "path_reverse", new[] { AssetIDType.Path } },
+                { "path_rotate", new[] { AssetIDType.Path, AssetIDType.Other } },
+                { "path_scale", new[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other } },
+                { "path_set_closed", new[] { AssetIDType.Path, AssetIDType.Other } },
+                { "path_set_kind", new[] { AssetIDType.Path, AssetIDType.Other } },
+                { "path_set_precision", new[] { AssetIDType.Path, AssetIDType.Other } },
+                { "path_shift", new[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other } },
 
-                { "timeline_exists", new AssetIDType[] { AssetIDType.Timeline } },
-                { "timeline_get_name", new AssetIDType[] { AssetIDType.Timeline } },
-                { "timeline_delete", new AssetIDType[] { AssetIDType.Timeline } },
-                { "timeline_moment_add_script", new AssetIDType[] { AssetIDType.Timeline, AssetIDType.Other, AssetIDType.Other } },
-                { "timeline_moment_clear", new AssetIDType[] { AssetIDType.Timeline, AssetIDType.Other } },
-                { "timeline_clear", new AssetIDType[] { AssetIDType.Timeline } },
-                { "timeline_size", new AssetIDType[] { AssetIDType.Timeline } },
-                { "timeline_max_moment", new AssetIDType[] { AssetIDType.Timeline } },
+                { "timeline_exists", new[] { AssetIDType.Timeline } },
+                { "timeline_get_name", new[] { AssetIDType.Timeline } },
+                { "timeline_delete", new[] { AssetIDType.Timeline } },
+                { "timeline_moment_add_script", new[] { AssetIDType.Timeline, AssetIDType.Other, AssetIDType.Other } },
+                { "timeline_moment_clear", new[] { AssetIDType.Timeline, AssetIDType.Other } },
+                { "timeline_clear", new[] { AssetIDType.Timeline } },
+                { "timeline_size", new[] { AssetIDType.Timeline } },
+                { "timeline_max_moment", new[] { AssetIDType.Timeline } },
 
-                { "room_exists", new AssetIDType[] { AssetIDType.Room } },
-                { "room_next", new AssetIDType[] { AssetIDType.Room } },
-                { "room_previous", new AssetIDType[] { AssetIDType.Room } },
-                { "room_get_name", new AssetIDType[] { AssetIDType.Room } },
+                { "room_exists", new[] { AssetIDType.Room } },
+                { "room_next", new[] { AssetIDType.Room } },
+                { "room_previous", new[] { AssetIDType.Room } },
+                { "room_get_name", new[] { AssetIDType.Room } },
 
-                { "room_goto", new AssetIDType[] { AssetIDType.Room } },
+                { "room_goto", new[] { AssetIDType.Room } },
                 { "room_goto_next", Array.Empty<AssetIDType>() },
                 { "room_goto_previous", Array.Empty<AssetIDType>() },
                 { "room_restart", Array.Empty<AssetIDType>() },
 
                 { "room_add", Array.Empty<AssetIDType>() },
-                { "room_duplicate", new AssetIDType[] { AssetIDType.Room } },
-                { "room_assign", new AssetIDType[] { AssetIDType.Room, AssetIDType.Room } },
-                { "room_instance_add", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
-                { "room_instance_clear", new AssetIDType[] { AssetIDType.Room } },
-                { "room_tile_add", new AssetIDType[] { AssetIDType.Room, AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "room_tile_add_ext", new AssetIDType[] { AssetIDType.Room, AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "room_tile_clear", new AssetIDType[] { AssetIDType.Room } },
-                { "room_set_background", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "room_set_background_colour", new AssetIDType[] { AssetIDType.Room, AssetIDType.Color, AssetIDType.Other } },
-                { "room_set_height", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } },
-                { "room_set_width", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } },
-                { "room_set_persistent", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } },
-                { "room_set_view_enabled", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } },
+                { "room_duplicate", new[] { AssetIDType.Room } },
+                { "room_assign", new[] { AssetIDType.Room, AssetIDType.Room } },
+                { "room_instance_add", new[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+                { "room_instance_clear", new[] { AssetIDType.Room } },
+                { "room_tile_add", new[] { AssetIDType.Room, AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "room_tile_add_ext", new[] { AssetIDType.Room, AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "room_tile_clear", new[] { AssetIDType.Room } },
+                { "room_set_background", new[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "room_set_background_colour", new[] { AssetIDType.Room, AssetIDType.Color, AssetIDType.Other } },
+                { "room_set_height", new[] { AssetIDType.Room, AssetIDType.Other } },
+                { "room_set_width", new[] { AssetIDType.Room, AssetIDType.Other } },
+                { "room_set_persistent", new[] { AssetIDType.Room, AssetIDType.Other } },
+                { "room_set_view_enabled", new[] { AssetIDType.Room, AssetIDType.Other } },
 
-                { "room_set_viewport", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } }, // GMS2 only
-                { "room_get_viewport", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } }, // GMS2 only
-                { "room_get_camera", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other } }, // GMS2 only
-                { "room_set_camera", new AssetIDType[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Other } }, // GMS2 only
+                { "room_set_viewport", new[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } }, // GMS2 only
+                { "room_get_viewport", new[] { AssetIDType.Room, AssetIDType.Other } }, // GMS2 only
+                { "room_get_camera", new[] { AssetIDType.Room, AssetIDType.Other } }, // GMS2 only
+                { "room_set_camera", new[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Other } }, // GMS2 only
 
                 // GMS2 viewport compatibility scripts
-                { "__view_get", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other } }, // Don't ask why this is here I was going somewhere with this
-                { "__view_set", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.ContextDependent } },
+                { "__view_get", new[] { AssetIDType.Other, AssetIDType.Other } }, // Don't ask why this is here I was going somewhere with this
+                { "__view_set", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.ContextDependent } },
 
-                { "object_exists", new AssetIDType[] { AssetIDType.GameObject } },
-                { "object_get_depth", new AssetIDType[] { AssetIDType.GameObject } },
-                { "object_get_mask", new AssetIDType[] { AssetIDType.GameObject } },
-                { "object_get_name", new AssetIDType[] { AssetIDType.GameObject } },
-                { "object_get_parent", new AssetIDType[] { AssetIDType.GameObject } },
-                { "object_get_persistent", new AssetIDType[] { AssetIDType.GameObject } },
-                { "object_get_solid", new AssetIDType[] { AssetIDType.GameObject } },
-                { "object_get_sprite", new AssetIDType[] { AssetIDType.GameObject } },
-                { "object_get_visible", new AssetIDType[] { AssetIDType.GameObject } },
-                { "object_get_physics", new AssetIDType[] { AssetIDType.GameObject } },
-                { "object_is_ancestor", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.GameObject } },
-                { "object_set_depth", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
-                { "object_set_mask", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
-                { "object_set_persistent", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
-                { "object_set_solid", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
-                { "object_set_sprite", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
-                { "object_set_visible", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other } },
+                { "object_exists", new[] { AssetIDType.GameObject } },
+                { "object_get_depth", new[] { AssetIDType.GameObject } },
+                { "object_get_mask", new[] { AssetIDType.GameObject } },
+                { "object_get_name", new[] { AssetIDType.GameObject } },
+                { "object_get_parent", new[] { AssetIDType.GameObject } },
+                { "object_get_persistent", new[] { AssetIDType.GameObject } },
+                { "object_get_solid", new[] { AssetIDType.GameObject } },
+                { "object_get_sprite", new[] { AssetIDType.GameObject } },
+                { "object_get_visible", new[] { AssetIDType.GameObject } },
+                { "object_get_physics", new[] { AssetIDType.GameObject } },
+                { "object_is_ancestor", new[] { AssetIDType.GameObject, AssetIDType.GameObject } },
+                { "object_set_depth", new[] { AssetIDType.GameObject, AssetIDType.Other } },
+                { "object_set_mask", new[] { AssetIDType.GameObject, AssetIDType.Other } },
+                { "object_set_persistent", new[] { AssetIDType.GameObject, AssetIDType.Other } },
+                { "object_set_solid", new[] { AssetIDType.GameObject, AssetIDType.Other } },
+                { "object_set_sprite", new[] { AssetIDType.GameObject, AssetIDType.Other } },
+                { "object_set_visible", new[] { AssetIDType.GameObject, AssetIDType.Other } },
 
                 // Event functions
-                { "event_perform_object", new AssetIDType[] { AssetIDType.GameObject, AssetIDType.EventType, AssetIDType.ContextDependent } },
-                { "event_perform", new AssetIDType[] { AssetIDType.EventType, AssetIDType.ContextDependent } },
+                { "event_perform_object", new[] { AssetIDType.GameObject, AssetIDType.EventType, AssetIDType.ContextDependent } },
+                { "event_perform", new[] { AssetIDType.EventType, AssetIDType.ContextDependent } },
 
-                { "merge_colour", new AssetIDType[] { AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+                { "merge_colour", new[] { AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
 
                 // incomplete
-                { "draw_clear", new AssetIDType[] { AssetIDType.Color } },
-                { "draw_clear_alpha", new AssetIDType[] { AssetIDType.Color, AssetIDType.Other } },
-                { "draw_set_colour", new AssetIDType[] { AssetIDType.Color } },
+                { "draw_clear", new[] { AssetIDType.Color } },
+                { "draw_clear_alpha", new[] { AssetIDType.Color, AssetIDType.Other } },
+                { "draw_set_colour", new[] { AssetIDType.Color } },
 
-                { "draw_circle_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_ellipse_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_line_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color } },
-                { "draw_line_width_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color } },
-                { "draw_point_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color } },
-                { "draw_rectangle", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean } },
-                { "draw_rectangle_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_roundrect_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_roundrect_colour_ext", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_healthbar", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "draw_set_alpha", new AssetIDType[] { AssetIDType.Other } },
+                { "draw_circle_colour", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_ellipse_colour", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_line_colour", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color } },
+                { "draw_line_width_colour", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color } },
+                { "draw_point_colour", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color } },
+                { "draw_rectangle", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean } },
+                { "draw_rectangle_colour", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_roundrect_colour", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_roundrect_colour_ext", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_healthbar", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "draw_set_alpha", new[] { AssetIDType.Other } },
 
-                { "draw_set_blend_mode", new AssetIDType[] { AssetIDType.ContextDependent } },
-                { "draw_set_blend_mode_ext", new AssetIDType[] { AssetIDType.ContextDependent, AssetIDType.ContextDependent } },
-                { "gpu_set_blendmode", new AssetIDType[] { AssetIDType.ContextDependent } },
-                { "gpu_set_blendmode_ext", new AssetIDType[] { AssetIDType.ContextDependent, AssetIDType.ContextDependent } },
+                { "draw_set_blend_mode", new[] { AssetIDType.ContextDependent } },
+                { "draw_set_blend_mode_ext", new[] { AssetIDType.ContextDependent, AssetIDType.ContextDependent } },
+                { "gpu_set_blendmode", new[] { AssetIDType.ContextDependent } },
+                { "gpu_set_blendmode_ext", new[] { AssetIDType.ContextDependent, AssetIDType.ContextDependent } },
 
-                { "d3d_set_fog", new AssetIDType[] { AssetIDType.Boolean, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other } },
-                { "gpu_set_fog", new AssetIDType[] { AssetIDType.Boolean, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other } },
+                { "d3d_set_fog", new[] { AssetIDType.Boolean, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other } },
+                { "gpu_set_fog", new[] { AssetIDType.Boolean, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other } },
 
-                { "layer_script_begin", new AssetIDType[] { AssetIDType.Other, AssetIDType.Script } },
-                { "layer_background_create", new AssetIDType[] { AssetIDType.Other, AssetIDType.Sprite } },
-                { "layer_background_blend", new AssetIDType[] { AssetIDType.Other, AssetIDType.Color } },
-                { "layer_background_visible", new AssetIDType[] { AssetIDType.Other, AssetIDType.Boolean } },
-                { "layer_sprite_change", new AssetIDType[] { AssetIDType.Other, AssetIDType.Sprite } },
-                { "gpu_set_blendenable", new AssetIDType[] { AssetIDType.Boolean } },
-                { "layer_script_end", new AssetIDType[] { AssetIDType.Other, AssetIDType.Script } },
-                { "draw_sprite", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "draw_sprite_ext", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_sprite_general", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_sprite_part", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "draw_sprite_part_ext", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_sprite_stretched", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "draw_sprite_stretched_ext", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_sprite_pos", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "draw_sprite_tiled", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "draw_sprite_tiled_ext", new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+                { "layer_script_begin", new[] { AssetIDType.Other, AssetIDType.Script } },
+                { "layer_background_create", new[] { AssetIDType.Other, AssetIDType.Sprite } },
+                { "layer_background_blend", new[] { AssetIDType.Other, AssetIDType.Color } },
+                { "layer_background_visible", new[] { AssetIDType.Other, AssetIDType.Boolean } },
+                { "layer_sprite_change", new[] { AssetIDType.Other, AssetIDType.Sprite } },
+                { "gpu_set_blendenable", new[] { AssetIDType.Boolean } },
+                { "layer_script_end", new[] { AssetIDType.Other, AssetIDType.Script } },
+                { "draw_sprite", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "draw_sprite_ext", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_sprite_general", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_sprite_part", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "draw_sprite_part_ext", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_sprite_stretched", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "draw_sprite_stretched_ext", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_sprite_pos", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "draw_sprite_tiled", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "draw_sprite_tiled_ext", new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
 
-                { "draw_background", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other } },
-                { "draw_background_ext", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_background_part", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "draw_background_part_ext", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_background_stretched", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "draw_background_stretched_ext", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_background_tiled", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other } },
-                { "draw_background_tiled_ext", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_background_general", new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_background", new[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other } },
+                { "draw_background_ext", new[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_background_part", new[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "draw_background_part_ext", new[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_background_stretched", new[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "draw_background_stretched_ext", new[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_background_tiled", new[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other } },
+                { "draw_background_tiled_ext", new[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_background_general", new[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
 
-                { "draw_set_font", new AssetIDType[] { AssetIDType.Font } },
-                { "draw_set_halign", new AssetIDType[] { AssetIDType.Enum_HAlign } },
-                { "draw_set_valign", new AssetIDType[] { AssetIDType.Enum_VAlign } },
-                { "draw_text_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_text_ext_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_text_transformed_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_text_transformed_ext_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_set_font", new[] { AssetIDType.Font } },
+                { "draw_set_halign", new[] { AssetIDType.Enum_HAlign } },
+                { "draw_set_valign", new[] { AssetIDType.Enum_VAlign } },
+                { "draw_text_colour", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_text_ext_colour", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_text_transformed_colour", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_text_transformed_ext_colour", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Color, AssetIDType.Other } },
 
-                { "draw_vertex_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
-                { "draw_vertex_texture_colour", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_vertex_colour", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_vertex_texture_colour", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
 
-                { "distance_to_object", new AssetIDType[] { AssetIDType.GameObject } },
+                { "distance_to_object", new[] { AssetIDType.GameObject } },
 
-                { "place_meeting", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
-                { "position_meeting", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
-                { "position_change", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other } },
-                { "collision_circle", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
-                { "collision_ellipse", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
-                { "collision_line", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Boolean, AssetIDType.Boolean } },
-                { "collision_point", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
-                { "collision_rectangle", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
+                { "place_meeting", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+                { "position_meeting", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+                { "position_change", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other } },
+                { "collision_circle", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
+                { "collision_ellipse", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
+                { "collision_line", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Boolean, AssetIDType.Boolean } },
+                { "collision_point", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
+                { "collision_rectangle", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
 
-                { "mp_linear_step", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "mp_linear_step_object", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
-                { "mp_linear_path", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "mp_linear_path_object", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
-                { "mp_potential_settings", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "mp_potential_step", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "mp_potential_step_object", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
-                { "mp_potential_path", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "mp_potential_path_object", new AssetIDType[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+                { "mp_linear_step", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "mp_linear_step_object", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+                { "mp_linear_path", new[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "mp_linear_path_object", new[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+                { "mp_potential_settings", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "mp_potential_step", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "mp_potential_step_object", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+                { "mp_potential_path", new[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "mp_potential_path_object", new[] { AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
                 // mp_grid only relevant ones because I'm lazy
-                { "mp_grid_path", new AssetIDType[] { AssetIDType.Other, AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean } },
-                { "mp_grid_add_instances", new AssetIDType[] { AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other } },
+                { "mp_grid_path", new[] { AssetIDType.Other, AssetIDType.Path, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean } },
+                { "mp_grid_add_instances", new[] { AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other } },
 
                 // TODO: 3D drawing, didn't bother
 
                 // TODO: surface drawing
-                { "draw_surface_ext", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
+                { "draw_surface_ext", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other } },
 
-                { "shader_is_compiled", new AssetIDType[] { AssetIDType.Shader } },
-                { "shader_set", new AssetIDType[] { AssetIDType.Shader } },
-                { "shader_get_uniform", new AssetIDType[] { AssetIDType.Shader, AssetIDType.Other } },
-                { "shader_get_sampler_index", new AssetIDType[] { AssetIDType.Shader, AssetIDType.Other } },
-                { "shader_enable_corner_id", new AssetIDType[] { AssetIDType.Boolean } },
+                { "shader_is_compiled", new[] { AssetIDType.Shader } },
+                { "shader_set", new[] { AssetIDType.Shader } },
+                { "shader_get_uniform", new[] { AssetIDType.Shader, AssetIDType.Other } },
+                { "shader_get_sampler_index", new[] { AssetIDType.Shader, AssetIDType.Other } },
+                { "shader_enable_corner_id", new[] { AssetIDType.Boolean } },
 
                 // { "shader_current", new AssetIDType[] { } }, returns shader.
 
                 // Interpolation
-                { "texture_set_interpolation", new AssetIDType[] { AssetIDType.Boolean } },
-                { "texture_set_tiled", new AssetIDType[] { AssetIDType.Boolean } },
-                { "gpu_set_texfilter", new AssetIDType[] { AssetIDType.Boolean } }, // GMS2 equivalent of texture_set_interpolation.
+                { "texture_set_interpolation", new[] { AssetIDType.Boolean } },
+                { "texture_set_tiled", new[] { AssetIDType.Boolean } },
+                { "gpu_set_texfilter", new[] { AssetIDType.Boolean } }, // GMS2 equivalent of texture_set_interpolation.
 
                 // TODO: GMS2 tilemaps
-                { "tileset_get_texture", new AssetIDType[] { AssetIDType.TileSet } },
-                { "tileset_get_uvs", new AssetIDType[] { AssetIDType.TileSet } },
+                { "tileset_get_texture", new[] { AssetIDType.TileSet } },
+                { "tileset_get_uvs", new[] { AssetIDType.TileSet } },
 
                 // TODO: GMS2 layers
 
                 // GMS2 only equivalents of room_speed.
-                { "game_get_speed", new AssetIDType[] { AssetIDType.Enum_GameSpeed } },
-                { "game_set_speed", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GameSpeed } },
+                { "game_get_speed", new[] { AssetIDType.Enum_GameSpeed } },
+                { "game_set_speed", new[] { AssetIDType.Other, AssetIDType.Enum_GameSpeed } },
 
                 // window_ functions
-                { "window_set_cursor", new AssetIDType[] { AssetIDType.Enum_MouseCursor } },
-                { "window_set_fullscreen", new AssetIDType[] { AssetIDType.Boolean } },
-                { "window_set_color", new AssetIDType[] { AssetIDType.Color } },
+                { "window_set_cursor", new[] { AssetIDType.Enum_MouseCursor } },
+                { "window_set_fullscreen", new[] { AssetIDType.Boolean } },
+                { "window_set_color", new[] { AssetIDType.Color } },
 
                 { "io_clear", Array.Empty<AssetIDType>() },
-                { "keyboard_check", new AssetIDType[] { AssetIDType.KeyboardKey } },
-                { "keyboard_check_pressed", new AssetIDType[] { AssetIDType.KeyboardKey } },
-                { "keyboard_check_released", new AssetIDType[] { AssetIDType.KeyboardKey } },
-                { "keyboard_check_direct", new AssetIDType[] { AssetIDType.KeyboardKey } },
-                { "keyboard_clear", new AssetIDType[] { AssetIDType.KeyboardKey } },
-                { "keyboard_key_press", new AssetIDType[] { AssetIDType.KeyboardKey } },
-                { "keyboard_key_release", new AssetIDType[] { AssetIDType.KeyboardKey } },
-                { "keyboard_set_map", new AssetIDType[] { AssetIDType.KeyboardKey, AssetIDType.KeyboardKey } },
-                { "keyboard_get_map", new AssetIDType[] { AssetIDType.KeyboardKey } },
-                { "keyboard_unset_map", new AssetIDType[] { AssetIDType.KeyboardKey } },
-                { "keyboard_set_numlock", new AssetIDType[] { AssetIDType.Boolean } },
+                { "keyboard_check", new[] { AssetIDType.KeyboardKey } },
+                { "keyboard_check_pressed", new[] { AssetIDType.KeyboardKey } },
+                { "keyboard_check_released", new[] { AssetIDType.KeyboardKey } },
+                { "keyboard_check_direct", new[] { AssetIDType.KeyboardKey } },
+                { "keyboard_clear", new[] { AssetIDType.KeyboardKey } },
+                { "keyboard_key_press", new[] { AssetIDType.KeyboardKey } },
+                { "keyboard_key_release", new[] { AssetIDType.KeyboardKey } },
+                { "keyboard_set_map", new[] { AssetIDType.KeyboardKey, AssetIDType.KeyboardKey } },
+                { "keyboard_get_map", new[] { AssetIDType.KeyboardKey } },
+                { "keyboard_unset_map", new[] { AssetIDType.KeyboardKey } },
+                { "keyboard_set_numlock", new[] { AssetIDType.Boolean } },
                 { "keyboard_get_numlock", Array.Empty<AssetIDType>() },
 
                 // Mouse functions
-                { "mouse_check_button", new AssetIDType[] { AssetIDType.MouseButton } },
-                { "mouse_check_button_pressed", new AssetIDType[] { AssetIDType.MouseButton } },
-                { "mouse_check_button_released", new AssetIDType[] { AssetIDType.MouseButton } },
-                { "mouse_clear", new AssetIDType[] { AssetIDType.MouseButton } },
+                { "mouse_check_button", new[] { AssetIDType.MouseButton } },
+                { "mouse_check_button_pressed", new[] { AssetIDType.MouseButton } },
+                { "mouse_check_button_released", new[] { AssetIDType.MouseButton } },
+                { "mouse_clear", new[] { AssetIDType.MouseButton } },
 
                 // Device Mouse functions
-                { "device_mouse_check_button", new AssetIDType[] { AssetIDType.Other, AssetIDType.MouseButton } },
-                { "device_mouse_check_button_pressed", new AssetIDType[] { AssetIDType.Other, AssetIDType.MouseButton } },
-                { "device_mouse_check_button_released", new AssetIDType[] { AssetIDType.Other, AssetIDType.MouseButton } },
-                { "device_mouse_dbclick_enable", new AssetIDType[] { AssetIDType.Boolean } },
+                { "device_mouse_check_button", new[] { AssetIDType.Other, AssetIDType.MouseButton } },
+                { "device_mouse_check_button_pressed", new[] { AssetIDType.Other, AssetIDType.MouseButton } },
+                { "device_mouse_check_button_released", new[] { AssetIDType.Other, AssetIDType.MouseButton } },
+                { "device_mouse_dbclick_enable", new[] { AssetIDType.Boolean } },
 
-                { "gamepad_button_value", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
-                { "gamepad_button_check", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
-                { "gamepad_button_check_pressed", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
-                { "gamepad_button_check_released", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
-                { "gamepad_axis_value", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
-                { "gamepad_set_color", new AssetIDType[] { AssetIDType.Other, AssetIDType.Color } }, // PS4 only, DualShock pads have an LED panel.
+                { "gamepad_button_value", new[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
+                { "gamepad_button_check", new[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
+                { "gamepad_button_check_pressed", new[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
+                { "gamepad_button_check_released", new[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
+                { "gamepad_axis_value", new[] { AssetIDType.Other, AssetIDType.Enum_GamepadButton } },
+                { "gamepad_set_color", new[] { AssetIDType.Other, AssetIDType.Color } }, // PS4 only, DualShock pads have an LED panel.
 
-                { "buffer_create", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferKind, AssetIDType.Other } },
-                { "buffer_create_from_vertex_buffer", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferKind, AssetIDType.Other } },
-                { "buffer_create_from_vertex_buffer_ext", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferKind, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "buffer_read", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferType } },
-                { "buffer_write", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferType, AssetIDType.Other } },
-                { "buffer_peek", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Enum_BufferType } },
-                { "buffer_poke", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Enum_BufferType, AssetIDType.Other } },
-                { "buffer_fill", new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Enum_BufferType, AssetIDType.Other, AssetIDType.Other } },
-                { "buffer_sizeof", new AssetIDType[] { AssetIDType.Enum_BufferType } },
-                { "buffer_seek", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_BufferSeek, AssetIDType.Other } },
+                { "buffer_create", new[] { AssetIDType.Other, AssetIDType.Enum_BufferKind, AssetIDType.Other } },
+                { "buffer_create_from_vertex_buffer", new[] { AssetIDType.Other, AssetIDType.Enum_BufferKind, AssetIDType.Other } },
+                { "buffer_create_from_vertex_buffer_ext", new[] { AssetIDType.Other, AssetIDType.Enum_BufferKind, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "buffer_read", new[] { AssetIDType.Other, AssetIDType.Enum_BufferType } },
+                { "buffer_write", new[] { AssetIDType.Other, AssetIDType.Enum_BufferType, AssetIDType.Other } },
+                { "buffer_peek", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Enum_BufferType } },
+                { "buffer_poke", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Enum_BufferType, AssetIDType.Other } },
+                { "buffer_fill", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Enum_BufferType, AssetIDType.Other, AssetIDType.Other } },
+                { "buffer_sizeof", new[] { AssetIDType.Enum_BufferType } },
+                { "buffer_seek", new[] { AssetIDType.Other, AssetIDType.Enum_BufferSeek, AssetIDType.Other } },
 
                 // Steam functions
-                { "steam_ugc_create_item", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_Steam_UGC_FileType } },
-                { "steam_ugc_create_query_user", new AssetIDType[] { AssetIDType.Enum_Steam_UGC_List, AssetIDType.Enum_Steam_UGC_MatchType, AssetIDType.Enum_Steam_UGC_SortOrder, AssetIDType.Other } },
-                { "steam_ugc_create_query_user_ex", new AssetIDType[] { AssetIDType.Enum_Steam_UGC_List, AssetIDType.Enum_Steam_UGC_MatchType, AssetIDType.Enum_Steam_UGC_SortOrder, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
-                { "steam_ugc_create_query_all", new AssetIDType[] { AssetIDType.Enum_Steam_UGC_QueryType, AssetIDType.Enum_Steam_UGC_MatchType, AssetIDType.Other } },
-                { "steam_ugc_create_query_all_ex", new AssetIDType[] { AssetIDType.Enum_Steam_UGC_QueryType, AssetIDType.Enum_Steam_UGC_MatchType, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "steam_ugc_create_item", new[] { AssetIDType.Other, AssetIDType.Enum_Steam_UGC_FileType } },
+                { "steam_ugc_create_query_user", new[] { AssetIDType.Enum_Steam_UGC_List, AssetIDType.Enum_Steam_UGC_MatchType, AssetIDType.Enum_Steam_UGC_SortOrder, AssetIDType.Other } },
+                { "steam_ugc_create_query_user_ex", new[] { AssetIDType.Enum_Steam_UGC_List, AssetIDType.Enum_Steam_UGC_MatchType, AssetIDType.Enum_Steam_UGC_SortOrder, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
+                { "steam_ugc_create_query_all", new[] { AssetIDType.Enum_Steam_UGC_QueryType, AssetIDType.Enum_Steam_UGC_MatchType, AssetIDType.Other } },
+                { "steam_ugc_create_query_all_ex", new[] { AssetIDType.Enum_Steam_UGC_QueryType, AssetIDType.Enum_Steam_UGC_MatchType, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other } },
 
-                { "steam_ugc_query_set_cloud_filename_filter", new AssetIDType[] { AssetIDType.Other, AssetIDType.Boolean } },
-                { "steam_ugc_query_set_match_any_tag", new AssetIDType[] { AssetIDType.Other, AssetIDType.Boolean } },
-                { "steam_ugc_query_set_return_long_description", new AssetIDType[] { AssetIDType.Other, AssetIDType.Boolean } },
-                { "steam_ugc_query_set_return_total_only", new AssetIDType[] { AssetIDType.Other, AssetIDType.Boolean } },
-                { "steam_ugc_query_set_allow_cached_response", new AssetIDType[] { AssetIDType.Other, AssetIDType.Boolean } },
+                { "steam_ugc_query_set_cloud_filename_filter", new[] { AssetIDType.Other, AssetIDType.Boolean } },
+                { "steam_ugc_query_set_match_any_tag", new[] { AssetIDType.Other, AssetIDType.Boolean } },
+                { "steam_ugc_query_set_return_long_description", new[] { AssetIDType.Other, AssetIDType.Boolean } },
+                { "steam_ugc_query_set_return_total_only", new[] { AssetIDType.Other, AssetIDType.Boolean } },
+                { "steam_ugc_query_set_allow_cached_response", new[] { AssetIDType.Other, AssetIDType.Boolean } },
 
-                { "steam_create_leaderboard", new AssetIDType[] { AssetIDType.Other, AssetIDType.Enum_Steam_LeaderBoard_Sort, AssetIDType.Enum_Steam_LeaderBoard_Display } },
+                { "steam_create_leaderboard", new[] { AssetIDType.Other, AssetIDType.Enum_Steam_LeaderBoard_Sort, AssetIDType.Enum_Steam_LeaderBoard_Display } },
 
-                { "steam_activate_overlay", new AssetIDType[] { AssetIDType.Enum_Steam_Overlay } },
+                { "steam_activate_overlay", new[] { AssetIDType.Enum_Steam_Overlay } },
 
                 // Also big TODO: Implement Boolean type for all these functions
 
                 // Special internal functions
-                { "@@GetInstance@@", new AssetIDType[] { AssetIDType.GameObject } },
+                { "@@GetInstance@@", new[] { AssetIDType.GameObject } },
             };
 
             builtin_var_overrides = new Dictionary<string, Dictionary<string, AssetIDType>>();
@@ -1014,7 +1013,7 @@ namespace UndertaleModLib.Decompiler
                     builtin_var_overrides[code.Name.Content] = new Dictionary<string, AssetIDType>();
             }
 
-            builtin_vars = new Dictionary<string, AssetIDType>()
+            builtin_vars = new Dictionary<string, AssetIDType>
             {
                 // only the relevant ones because I'm sick of writing this
                 { "background_index", AssetIDType.Background }, // array
@@ -1061,8 +1060,8 @@ namespace UndertaleModLib.Decompiler
 
                 // Sometimes used as a bool, should not matter though and be an improvement overall.
                 builtin_vars.Add("king", AssetIDType.GameObject);
-                builtin_funcs["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
-                // I should confirm adding this causes no adverse effects later. 
+                builtin_funcs["SCR_TEXTSETUP"] = new[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                // I should confirm adding this causes no adverse effects later.
                 builtin_vars.Add("myroom", AssetIDType.Room);
                 // gml_Object_obj_dummytrigger_Collision_1576
                 builtin_vars.Add("dummy", AssetIDType.GameObject);
@@ -1070,7 +1069,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("sm", AssetIDType.GameObject);
                 // This should do something to fix the piano room
                 builtin_vars.Add("sprite_id", AssetIDType.Sprite);
-                builtin_funcs["scr_getsprite"] = new AssetIDType[] { AssetIDType.Sprite };
+                builtin_funcs["scr_getsprite"] = new[] { AssetIDType.Sprite };
                 // gml_Object_obj_barabody_Create_0
                 builtin_vars.Add("hand1pic", AssetIDType.Sprite);
                 builtin_vars.Add("hand2pic", AssetIDType.Sprite);
@@ -1234,7 +1233,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("fadecolor", AssetIDType.Color);
                 builtin_vars.Add("color", AssetIDType.Color);
                 // Scripts
-                builtin_funcs["SCR_TEXTSETUP"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["SCR_TEXTSETUP"] = new[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
             }
 
             // Both UT and DR
@@ -1259,209 +1258,209 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("myfont", AssetIDType.Font);
 
                 // Hope this script works!
-                builtin_funcs["scr_bouncer"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_bouncer"] = new[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other };
 
                 // Deltarune Chapter 2 asset resolutions:
                 // Seems to be x, y, measure of distance (maybe)
 
-                builtin_funcs["gml_Script_c_soundplay_wait"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["gml_Script_snd_pitch_time"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_draw_sprite_ext_glow"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["c_soundplay_wait"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["snd_pitch_time"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["draw_sprite_ext_glow"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_c_soundplay_wait"] = new[] { AssetIDType.Sound };
+                builtin_funcs["gml_Script_snd_pitch_time"] = new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_draw_sprite_ext_glow"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["c_soundplay_wait"] = new[] { AssetIDType.Sound };
+                builtin_funcs["snd_pitch_time"] = new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["draw_sprite_ext_glow"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
 
-                builtin_funcs["gml_Script__background_set"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
-                builtin_funcs["gml_Script_c_addxy"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color };
-                builtin_funcs["gml_Script_c_autowalk"] = new AssetIDType[] { AssetIDType.Boolean };
-                builtin_funcs["gml_Script_c_fadeout"] = new AssetIDType[] { AssetIDType.Other };
-                builtin_funcs["gml_Script_c_pan"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_c_pannable"] = new AssetIDType[] { AssetIDType.Boolean };
-                builtin_funcs["gml_Script_c_panobj"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other };
-                builtin_funcs["gml_Script_c_panspeed"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_c_script_instance"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Script, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_c_script_instance_stop"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Script };
-                builtin_funcs["gml_Script_c_setxy"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_c_soundplay"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["gml_Script_c_soundplay_x"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_c_sprite"] = new AssetIDType[] { AssetIDType.Sprite };
-                builtin_funcs["gml_Script_c_stickto"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other };
-                builtin_funcs["gml_Script_c_wait"] = new AssetIDType[] { AssetIDType.Other };
-                builtin_funcs["gml_Script_c_walkdirect"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_c_walkdirect_wait"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_d3d_set_fog_ch1"] = new AssetIDType[] { AssetIDType.Boolean, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_draw_background_ext_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
-                builtin_funcs["gml_Script_draw_background_part_ext_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
-                builtin_funcs["gml_Script_draw_background_tiled_ext_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
-                builtin_funcs["gml_Script_draw_enable_alphablend_ch1"] = new AssetIDType[] { AssetIDType.Boolean };
-                builtin_funcs["gml_Script_draw_enable_alphablend"] = new AssetIDType[] { AssetIDType.Boolean };
-                builtin_funcs["draw_enable_alphablend"] = new AssetIDType[] { AssetIDType.Boolean };
-                builtin_funcs["gml_Script_draw_monster_body_part"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_draw_monster_body_part_ext"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
-                builtin_funcs["gml_Script_draw_sprite_ext_centerscale"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
-                builtin_funcs["gml_Script_draw_sprite_ext_flash"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
-                builtin_funcs["gml_Script_draw_sprite_skew_ext_cute"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_draw_text_outline"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_i_ex"] = new AssetIDType[] { AssetIDType.GameObject };
-                builtin_funcs["gml_Script_instance_create_ch1"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
-                builtin_funcs["gml_Script_msgsetloc"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_mus_loop"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["gml_Script_mus_loop_ext"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_safe_delete"] = new AssetIDType[] { AssetIDType.GameObject };
-                builtin_funcs["gml_Script_scr_84_debug"] = new AssetIDType[] { AssetIDType.Boolean };
-                builtin_funcs["gml_Script_scr_act_charsprite"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Boolean };
-                builtin_funcs["gml_Script_scr_anim"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_anim_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_battle"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_battle_marker"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
-                builtin_funcs["gml_Script_scr_bullet_create"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
-                builtin_funcs["gml_Script_scr_bulletspawner"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
-                builtin_funcs["gml_Script_scr_caterpillar_facing_ch1"] = new AssetIDType[] { AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_custom_afterimage"] = new AssetIDType[] { AssetIDType.Sprite };
-                builtin_funcs["gml_Script_scr_custom_afterimage_ext"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_dark_marker"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
-                builtin_funcs["gml_Script_scr_dark_marker_ch1"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
-                builtin_funcs["gml_Script_scr_dark_marker_depth"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
-                builtin_funcs["gml_Script_scr_debug_keycheck"] = new AssetIDType[] { AssetIDType.KeyboardKey };
-                builtin_funcs["gml_Script_scr_draw_background_ps4_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_draw_outline_ext"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_draw_sprite_crop_ext"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_ds_list_write"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_enemyblcon"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_following_afterimage"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.GameObject };
-                builtin_funcs["gml_Script_scr_forcefield"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean };
-                builtin_funcs["gml_Script_scr_fx_housesquare"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color };
-                builtin_funcs["gml_Script_scr_guardpeek"] = new AssetIDType[] { AssetIDType.GameObject };
-                builtin_funcs["gml_Script_scr_marker"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
-                builtin_funcs["gml_Script_scr_marker_ch1"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
-                builtin_funcs["gml_Script_scr_mercyadd"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_monster_add"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.GameObject };
-                builtin_funcs["gml_Script_scr_monster_change"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
-                builtin_funcs["gml_Script_scr_move_to_point_over_time"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_pan_ch1"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_pan_to_obj"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_pan_to_obj_ch1"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_script_delayed"] = new AssetIDType[] { AssetIDType.Script, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_textsetup"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_textsetup_ch1"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_snd_is_playing"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["gml_Script_snd_loop"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["gml_Script_snd_loop_ch1"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["gml_Script_snd_pitch"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other };
-                builtin_funcs["gml_Script_snd_play"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["gml_Script_snd_play_ch1"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["gml_Script_snd_play_pitch"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other };
-                builtin_funcs["gml_Script_snd_play_x"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_snd_stop"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["gml_Script_snd_stop_ch1"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["gml_Script_snd_volume"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_act_charsprite"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean };
-                builtin_funcs["gml_Script_draw_sprite_part_ext_glow"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_draw_sprite_part_ext_glow"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["draw_sprite_part_ext_glow"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_draw_sprite_part_ext_glow"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_draw_sprite_ext_glow"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["draw_sprite_ext_glow"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_draw_sprite_tiled_area"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Boolean };
-                builtin_funcs["gml_Script_c_actorsetsprites"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
-                builtin_funcs["gml_Script_scr_marker_animated"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other };
-                builtin_funcs["scr_marker_animated"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other };
-                builtin_funcs["gml_Script_c_jump_sprite"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Sprite };
-                builtin_funcs["gml_Script_scr_dark_marker_animated"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
-                builtin_funcs["scr_act_charsprite"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean };
-                builtin_funcs["scr_draw_sprite_tiled_area"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Boolean };
-                builtin_funcs["c_actorsetsprites"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
-                builtin_funcs["c_jump_sprite"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Sprite };
-                builtin_funcs["scr_dark_marker_animated"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
-                builtin_funcs["_background_set"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
-                builtin_funcs["c_addxy"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color };
-                builtin_funcs["c_autowalk"] = new AssetIDType[] { AssetIDType.Boolean };
-                builtin_funcs["c_fadeout"] = new AssetIDType[] { AssetIDType.Other };
-                builtin_funcs["c_pan"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["c_pannable"] = new AssetIDType[] { AssetIDType.Boolean };
-                builtin_funcs["c_panobj"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other };
-                builtin_funcs["c_panspeed"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["c_script_instance"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Script, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["c_script_instance_stop"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Script };
-                builtin_funcs["c_setxy"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["c_soundplay"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["c_soundplay_x"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["c_sprite"] = new AssetIDType[] { AssetIDType.Sprite };
-                builtin_funcs["c_stickto"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other };
-                builtin_funcs["c_wait"] = new AssetIDType[] { AssetIDType.Other };
-                builtin_funcs["c_walkdirect"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["c_walkdirect_wait"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["d3d_set_fog_ch1"] = new AssetIDType[] { AssetIDType.Boolean, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["draw_background_ext_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
-                builtin_funcs["draw_background_part_ext_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
-                builtin_funcs["draw_background_tiled_ext_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
-                builtin_funcs["draw_enable_alphablend_ch1"] = new AssetIDType[] { AssetIDType.Boolean };
-                builtin_funcs["draw_monster_body_part"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["draw_monster_body_part_ext"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
-                builtin_funcs["draw_sprite_ext_centerscale"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
-                builtin_funcs["draw_sprite_ext_flash"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
-                builtin_funcs["draw_sprite_skew_ext_cute"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["draw_text_outline"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["i_ex"] = new AssetIDType[] { AssetIDType.GameObject };
-                builtin_funcs["instance_create_ch1"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
-                builtin_funcs["msgsetloc"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["mus_loop"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["mus_loop_ext"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["gml_Script_scr_bullet_inherit_ch1"] = new AssetIDType[] { AssetIDType.GameObject };
-                builtin_funcs["scr_bullet_inherit_ch1"] = new AssetIDType[] { AssetIDType.GameObject };
-                builtin_funcs["safe_delete"] = new AssetIDType[] { AssetIDType.GameObject };
-                builtin_funcs["scr_84_debug"] = new AssetIDType[] { AssetIDType.Boolean };
-                builtin_funcs["gml_Script_texture_set_interpolation"] = new AssetIDType[] { AssetIDType.Boolean };
-                builtin_funcs["texture_set_interpolation"] = new AssetIDType[] { AssetIDType.Boolean };
-                builtin_funcs["gml_Script_texture_set_interpolation_ch1"] = new AssetIDType[] { AssetIDType.Boolean };
-                builtin_funcs["texture_set_interpolation_ch1"] = new AssetIDType[] { AssetIDType.Boolean };
-                builtin_funcs["scr_act_charsprite"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Boolean };
-                builtin_funcs["scr_anim"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other };
-                builtin_funcs["scr_anim_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other };
-                builtin_funcs["scr_battle"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_battle_marker"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
-                builtin_funcs["scr_bullet_create"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
-                builtin_funcs["scr_bulletspawner"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
-                builtin_funcs["scr_caterpillar_facing_ch1"] = new AssetIDType[] { AssetIDType.Other };
-                builtin_funcs["scr_custom_afterimage"] = new AssetIDType[] { AssetIDType.Sprite };
-                builtin_funcs["scr_custom_afterimage_ext"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_dark_marker"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
-                builtin_funcs["scr_dark_marker_ch1"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
-                builtin_funcs["scr_dark_marker_depth"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
-                builtin_funcs["scr_debug_keycheck"] = new AssetIDType[] { AssetIDType.KeyboardKey };
-                builtin_funcs["scr_draw_background_ps4_ch1"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_draw_outline_ext"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_draw_sprite_crop_ext"] = new AssetIDType[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_ds_list_write"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_enemyblcon"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_following_afterimage"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.GameObject };
-                builtin_funcs["scr_forcefield"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean };
-                builtin_funcs["scr_fx_housesquare"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color };
-                builtin_funcs["scr_guardpeek"] = new AssetIDType[] { AssetIDType.GameObject };
-                builtin_funcs["scr_marker"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
-                builtin_funcs["scr_marker_ch1"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
-                builtin_funcs["scr_mercyadd"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_monster_add"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.GameObject };
-                builtin_funcs["scr_monster_change"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
-                builtin_funcs["scr_move_to_point_over_time"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_pan_ch1"] = new AssetIDType[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_pan_to_obj"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other };
-                builtin_funcs["scr_pan_to_obj_ch1"] = new AssetIDType[] { AssetIDType.GameObject, AssetIDType.Other };
-                builtin_funcs["scr_script_delayed"] = new AssetIDType[] { AssetIDType.Script, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_textsetup"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_textsetup_ch1"] = new AssetIDType[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["snd_is_playing"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["snd_loop"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["snd_loop_ch1"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["snd_pitch"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other };
-                builtin_funcs["snd_play"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["snd_play_ch1"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["snd_play_pitch"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other };
-                builtin_funcs["snd_play_x"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["snd_stop"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["snd_stop_ch1"] = new AssetIDType[] { AssetIDType.Sound };
-                builtin_funcs["snd_volume"] = new AssetIDType[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_valid_room"] = new AssetIDType[] { AssetIDType.Room, AssetIDType.Other };
+                builtin_funcs["gml_Script__background_set"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["gml_Script_c_addxy"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color };
+                builtin_funcs["gml_Script_c_autowalk"] = new[] { AssetIDType.Boolean };
+                builtin_funcs["gml_Script_c_fadeout"] = new[] { AssetIDType.Other };
+                builtin_funcs["gml_Script_c_pan"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_c_pannable"] = new[] { AssetIDType.Boolean };
+                builtin_funcs["gml_Script_c_panobj"] = new[] { AssetIDType.GameObject, AssetIDType.Other };
+                builtin_funcs["gml_Script_c_panspeed"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_c_script_instance"] = new[] { AssetIDType.GameObject, AssetIDType.Script, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_c_script_instance_stop"] = new[] { AssetIDType.GameObject, AssetIDType.Script };
+                builtin_funcs["gml_Script_c_setxy"] = new[] { AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_c_soundplay"] = new[] { AssetIDType.Sound };
+                builtin_funcs["gml_Script_c_soundplay_x"] = new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_c_sprite"] = new[] { AssetIDType.Sprite };
+                builtin_funcs["gml_Script_c_stickto"] = new[] { AssetIDType.GameObject, AssetIDType.Other };
+                builtin_funcs["gml_Script_c_wait"] = new[] { AssetIDType.Other };
+                builtin_funcs["gml_Script_c_walkdirect"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_c_walkdirect_wait"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_d3d_set_fog_ch1"] = new[] { AssetIDType.Boolean, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_draw_background_ext_ch1"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["gml_Script_draw_background_part_ext_ch1"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["gml_Script_draw_background_tiled_ext_ch1"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["gml_Script_draw_enable_alphablend_ch1"] = new[] { AssetIDType.Boolean };
+                builtin_funcs["gml_Script_draw_enable_alphablend"] = new[] { AssetIDType.Boolean };
+                builtin_funcs["draw_enable_alphablend"] = new[] { AssetIDType.Boolean };
+                builtin_funcs["gml_Script_draw_monster_body_part"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_draw_monster_body_part_ext"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["gml_Script_draw_sprite_ext_centerscale"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["gml_Script_draw_sprite_ext_flash"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["gml_Script_draw_sprite_skew_ext_cute"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_draw_text_outline"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_i_ex"] = new[] { AssetIDType.GameObject };
+                builtin_funcs["gml_Script_instance_create_ch1"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["gml_Script_msgsetloc"] = new[] { AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_mus_loop"] = new[] { AssetIDType.Sound };
+                builtin_funcs["gml_Script_mus_loop_ext"] = new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_safe_delete"] = new[] { AssetIDType.GameObject };
+                builtin_funcs["gml_Script_scr_84_debug"] = new[] { AssetIDType.Boolean };
+                builtin_funcs["gml_Script_scr_act_charsprite"] = new[] { AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Boolean };
+                builtin_funcs["gml_Script_scr_anim"] = new[] { AssetIDType.Sprite, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_anim_ch1"] = new[] { AssetIDType.Sprite, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_battle"] = new[] { AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_battle_marker"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["gml_Script_scr_bullet_create"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["gml_Script_scr_bulletspawner"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["gml_Script_scr_caterpillar_facing_ch1"] = new[] { AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_custom_afterimage"] = new[] { AssetIDType.Sprite };
+                builtin_funcs["gml_Script_scr_custom_afterimage_ext"] = new[] { AssetIDType.GameObject, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_dark_marker"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["gml_Script_scr_dark_marker_ch1"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["gml_Script_scr_dark_marker_depth"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["gml_Script_scr_debug_keycheck"] = new[] { AssetIDType.KeyboardKey };
+                builtin_funcs["gml_Script_scr_draw_background_ps4_ch1"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_draw_outline_ext"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_draw_sprite_crop_ext"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_ds_list_write"] = new[] { AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_enemyblcon"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_following_afterimage"] = new[] { AssetIDType.GameObject, AssetIDType.GameObject };
+                builtin_funcs["gml_Script_scr_forcefield"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean };
+                builtin_funcs["gml_Script_scr_fx_housesquare"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color };
+                builtin_funcs["gml_Script_scr_guardpeek"] = new[] { AssetIDType.GameObject };
+                builtin_funcs["gml_Script_scr_marker"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["gml_Script_scr_marker_ch1"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["gml_Script_scr_mercyadd"] = new[] { AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_monster_add"] = new[] { AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["gml_Script_scr_monster_change"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["gml_Script_scr_move_to_point_over_time"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_pan_ch1"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_pan_to_obj"] = new[] { AssetIDType.GameObject, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_pan_to_obj_ch1"] = new[] { AssetIDType.GameObject, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_script_delayed"] = new[] { AssetIDType.Script, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_textsetup"] = new[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_textsetup_ch1"] = new[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_snd_is_playing"] = new[] { AssetIDType.Sound };
+                builtin_funcs["gml_Script_snd_loop"] = new[] { AssetIDType.Sound };
+                builtin_funcs["gml_Script_snd_loop_ch1"] = new[] { AssetIDType.Sound };
+                builtin_funcs["gml_Script_snd_pitch"] = new[] { AssetIDType.Sound, AssetIDType.Other };
+                builtin_funcs["gml_Script_snd_play"] = new[] { AssetIDType.Sound };
+                builtin_funcs["gml_Script_snd_play_ch1"] = new[] { AssetIDType.Sound };
+                builtin_funcs["gml_Script_snd_play_pitch"] = new[] { AssetIDType.Sound, AssetIDType.Other };
+                builtin_funcs["gml_Script_snd_play_x"] = new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_snd_stop"] = new[] { AssetIDType.Sound };
+                builtin_funcs["gml_Script_snd_stop_ch1"] = new[] { AssetIDType.Sound };
+                builtin_funcs["gml_Script_snd_volume"] = new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_act_charsprite"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean };
+                builtin_funcs["gml_Script_draw_sprite_part_ext_glow"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_draw_sprite_part_ext_glow"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["draw_sprite_part_ext_glow"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_draw_sprite_part_ext_glow"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_draw_sprite_ext_glow"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["draw_sprite_ext_glow"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_draw_sprite_tiled_area"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Boolean };
+                builtin_funcs["gml_Script_c_actorsetsprites"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
+                builtin_funcs["gml_Script_scr_marker_animated"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other };
+                builtin_funcs["scr_marker_animated"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other };
+                builtin_funcs["gml_Script_c_jump_sprite"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Sprite };
+                builtin_funcs["gml_Script_scr_dark_marker_animated"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
+                builtin_funcs["scr_act_charsprite"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean };
+                builtin_funcs["scr_draw_sprite_tiled_area"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Boolean };
+                builtin_funcs["c_actorsetsprites"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
+                builtin_funcs["c_jump_sprite"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Sprite };
+                builtin_funcs["scr_dark_marker_animated"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
+                builtin_funcs["_background_set"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["c_addxy"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color };
+                builtin_funcs["c_autowalk"] = new[] { AssetIDType.Boolean };
+                builtin_funcs["c_fadeout"] = new[] { AssetIDType.Other };
+                builtin_funcs["c_pan"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["c_pannable"] = new[] { AssetIDType.Boolean };
+                builtin_funcs["c_panobj"] = new[] { AssetIDType.GameObject, AssetIDType.Other };
+                builtin_funcs["c_panspeed"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["c_script_instance"] = new[] { AssetIDType.GameObject, AssetIDType.Script, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["c_script_instance_stop"] = new[] { AssetIDType.GameObject, AssetIDType.Script };
+                builtin_funcs["c_setxy"] = new[] { AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["c_soundplay"] = new[] { AssetIDType.Sound };
+                builtin_funcs["c_soundplay_x"] = new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["c_sprite"] = new[] { AssetIDType.Sprite };
+                builtin_funcs["c_stickto"] = new[] { AssetIDType.GameObject, AssetIDType.Other };
+                builtin_funcs["c_wait"] = new[] { AssetIDType.Other };
+                builtin_funcs["c_walkdirect"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["c_walkdirect_wait"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["d3d_set_fog_ch1"] = new[] { AssetIDType.Boolean, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["draw_background_ext_ch1"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["draw_background_part_ext_ch1"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["draw_background_tiled_ext_ch1"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["draw_enable_alphablend_ch1"] = new[] { AssetIDType.Boolean };
+                builtin_funcs["draw_monster_body_part"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["draw_monster_body_part_ext"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["draw_sprite_ext_centerscale"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["draw_sprite_ext_flash"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["draw_sprite_skew_ext_cute"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["draw_text_outline"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["i_ex"] = new[] { AssetIDType.GameObject };
+                builtin_funcs["instance_create_ch1"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["msgsetloc"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["mus_loop"] = new[] { AssetIDType.Sound };
+                builtin_funcs["mus_loop_ext"] = new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["gml_Script_scr_bullet_inherit_ch1"] = new[] { AssetIDType.GameObject };
+                builtin_funcs["scr_bullet_inherit_ch1"] = new[] { AssetIDType.GameObject };
+                builtin_funcs["safe_delete"] = new[] { AssetIDType.GameObject };
+                builtin_funcs["scr_84_debug"] = new[] { AssetIDType.Boolean };
+                builtin_funcs["gml_Script_texture_set_interpolation"] = new[] { AssetIDType.Boolean };
+                builtin_funcs["texture_set_interpolation"] = new[] { AssetIDType.Boolean };
+                builtin_funcs["gml_Script_texture_set_interpolation_ch1"] = new[] { AssetIDType.Boolean };
+                builtin_funcs["texture_set_interpolation_ch1"] = new[] { AssetIDType.Boolean };
+                builtin_funcs["scr_act_charsprite"] = new[] { AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Boolean };
+                builtin_funcs["scr_anim"] = new[] { AssetIDType.Sprite, AssetIDType.Other };
+                builtin_funcs["scr_anim_ch1"] = new[] { AssetIDType.Sprite, AssetIDType.Other };
+                builtin_funcs["scr_battle"] = new[] { AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_battle_marker"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["scr_bullet_create"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["scr_bulletspawner"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["scr_caterpillar_facing_ch1"] = new[] { AssetIDType.Other };
+                builtin_funcs["scr_custom_afterimage"] = new[] { AssetIDType.Sprite };
+                builtin_funcs["scr_custom_afterimage_ext"] = new[] { AssetIDType.GameObject, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_dark_marker"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["scr_dark_marker_ch1"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["scr_dark_marker_depth"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["scr_debug_keycheck"] = new[] { AssetIDType.KeyboardKey };
+                builtin_funcs["scr_draw_background_ps4_ch1"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_draw_outline_ext"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_draw_sprite_crop_ext"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_ds_list_write"] = new[] { AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_enemyblcon"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_following_afterimage"] = new[] { AssetIDType.GameObject, AssetIDType.GameObject };
+                builtin_funcs["scr_forcefield"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Boolean };
+                builtin_funcs["scr_fx_housesquare"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Color };
+                builtin_funcs["scr_guardpeek"] = new[] { AssetIDType.GameObject };
+                builtin_funcs["scr_marker"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["scr_marker_ch1"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["scr_mercyadd"] = new[] { AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_monster_add"] = new[] { AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["scr_monster_change"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["scr_move_to_point_over_time"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_pan_ch1"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_pan_to_obj"] = new[] { AssetIDType.GameObject, AssetIDType.Other };
+                builtin_funcs["scr_pan_to_obj_ch1"] = new[] { AssetIDType.GameObject, AssetIDType.Other };
+                builtin_funcs["scr_script_delayed"] = new[] { AssetIDType.Script, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_textsetup"] = new[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_textsetup_ch1"] = new[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["snd_is_playing"] = new[] { AssetIDType.Sound };
+                builtin_funcs["snd_loop"] = new[] { AssetIDType.Sound };
+                builtin_funcs["snd_loop_ch1"] = new[] { AssetIDType.Sound };
+                builtin_funcs["snd_pitch"] = new[] { AssetIDType.Sound, AssetIDType.Other };
+                builtin_funcs["snd_play"] = new[] { AssetIDType.Sound };
+                builtin_funcs["snd_play_ch1"] = new[] { AssetIDType.Sound };
+                builtin_funcs["snd_play_pitch"] = new[] { AssetIDType.Sound, AssetIDType.Other };
+                builtin_funcs["snd_play_x"] = new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["snd_stop"] = new[] { AssetIDType.Sound };
+                builtin_funcs["snd_stop_ch1"] = new[] { AssetIDType.Sound };
+                builtin_funcs["snd_volume"] = new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_valid_room"] = new[] { AssetIDType.Room, AssetIDType.Other };
 
                 builtin_vars.Add("_instruments", AssetIDType.Sound);
                 builtin_vars.Add("_instrumentsB", AssetIDType.Sound);
@@ -1515,7 +1514,7 @@ namespace UndertaleModLib.Decompiler
 
                 builtin_vars.Add("input_k", AssetIDType.KeyboardKey);
 
-/*                
+/*
                 builtin_vars.Add("_pacified", AssetIDType.Boolean);
                 builtin_vars.Add("_spared", AssetIDType.Boolean);
                 builtin_vars.Add("_violenced", AssetIDType.Boolean);
@@ -1853,9 +1852,9 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("walkpoint", AssetIDType.Other);
                 builtin_vars.Add("xx", AssetIDType.Other);
                 builtin_vars.Add("yy", AssetIDType.Other);
-                
+
                 // Undertale 1.05+ and Deltarune console versions.
-                builtin_funcs["scr_draw_background_ps4"] = new AssetIDType[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_draw_background_ps4"] = new[] { AssetIDType.Background, AssetIDType.Other, AssetIDType.Other };
                 builtin_vars.Add("room_id", AssetIDType.Room);
 
                 builtin_vars.Add("currentroom", AssetIDType.Room);
@@ -1946,7 +1945,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("alpha_changed", AssetIDType.Boolean);
                 builtin_vars.Add("charinstance", AssetIDType.GameObject);
                 builtin_vars.Add("reset", AssetIDType.Boolean);
-                // globals pertaining to monsters in Deltarune 
+                // globals pertaining to monsters in Deltarune
                 builtin_vars.Add("monsterstatus", AssetIDType.Boolean);
                 builtin_vars.Add("monster", AssetIDType.Boolean);
                 // Cutscene
