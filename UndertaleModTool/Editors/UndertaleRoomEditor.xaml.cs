@@ -1249,7 +1249,7 @@ namespace UndertaleModTool
                     if (layerDepth + 1 > int.MaxValue)
                     {
                         layerDepth -= 1;
-                        MainWindow.ShowWarning("Warning - a maximum layer depth is reached.\nYou probably should change the depth of the new layer.");
+                        MainWindow.ShowWarning("Warning - the maximum layer depth is reached.\nYou probably should change the depth of the new layer.");
                     }
                     else
                         layerDepth += 1;
