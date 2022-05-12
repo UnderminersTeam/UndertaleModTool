@@ -13,6 +13,7 @@ namespace UndertaleModLib
 {
     public class UndertaleSimpleList<T> : ObservableCollection<T>, UndertaleObject where T : UndertaleObject, new()
     {
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((uint)Count);
@@ -29,6 +30,7 @@ namespace UndertaleModLib
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             uint count = reader.ReadUInt32();
@@ -49,6 +51,7 @@ namespace UndertaleModLib
 
     public class UndertaleSimpleListString : ObservableCollection<UndertaleString>, UndertaleObject
     {
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((uint)Count);
@@ -65,6 +68,7 @@ namespace UndertaleModLib
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             uint count = reader.ReadUInt32();
@@ -96,6 +100,7 @@ namespace UndertaleModLib
                 throw new InvalidOperationException("Count of short SimpleList exceeds maximum number allowed.");
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((ushort)Count);
@@ -112,6 +117,7 @@ namespace UndertaleModLib
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             ushort count = reader.ReadUInt16();
@@ -132,6 +138,7 @@ namespace UndertaleModLib
 
     public class UndertalePointerList<T> : ObservableCollection<T>, UndertaleObject where T : UndertaleObject, new()
     {
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((uint)Count);
@@ -167,6 +174,7 @@ namespace UndertaleModLib
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             uint count = reader.ReadUInt32();
@@ -212,6 +220,7 @@ namespace UndertaleModLib
 
     public class UndertalePointerListLenCheck<T> : UndertalePointerList<T>, UndertaleObjectEndPos where T : UndertaleObjectLenCheck, new()
     {
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader, uint endPosition)
         {
             uint count = reader.ReadUInt32();
