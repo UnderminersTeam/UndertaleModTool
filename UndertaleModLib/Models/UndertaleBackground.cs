@@ -16,12 +16,12 @@ public class UndertaleBackground : UndertaleNamedResource
     /// </summary>
     public class TileID : UndertaleObject, INotifyPropertyChanged
     {
-        private uint _ID;
+        private uint _id;
 
         /// <summary>
         /// The id of a specific tile.
         /// </summary>
-        public uint ID { get => _ID; set { _ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ID))); } }
+        public uint ID { get => _id; set { _id = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ID))); } }
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;

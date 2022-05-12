@@ -1,8 +1,14 @@
 ﻿namespace UndertaleModLib.Models;
 
+/// <summary>
+/// A filter effect as it's used in a GameMaker data file.
+/// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleFilterEffect : UndertaleNamedResource
 {
+    /// <summary>
+    /// The name of the <see cref="UndertaleFilterEffect"/>.
+    /// </summary>
     public UndertaleString Name { get; set; }
     public UndertaleString Value { get; set; }
 

@@ -30,7 +30,7 @@ public class UndertaleShader : UndertaleNamedResource
         }
     }
 
-    public uint _EntryEnd;
+    public uint EntryEnd;
 
     /// <summary>
     /// The name of the shader.
@@ -47,7 +47,6 @@ public class UndertaleShader : UndertaleNamedResource
     /// The GLSL ES vertex code this shader uses.
     /// </summary>
     public UndertaleString GLSL_ES_Vertex { get; set; }
-
 
     /// <summary>
     /// The GLSL ES fragment code this shader uses.
@@ -74,19 +73,59 @@ public class UndertaleShader : UndertaleNamedResource
     /// </summary>
     public UndertaleString HLSL9_Fragment { get; set; }
 
+    /// <summary>
+    /// The version of this shader entry.
+    /// </summary>
     public int Version { get; set; } = 2;
 
+    /// <summary>
+    /// The HLSL11 Vertex data of this shader.
+    /// </summary>
     public UndertaleRawShaderData HLSL11_VertexData;
+
+    /// <summary>
+    /// The HLSL11 Pixel data of this shader.
+    /// </summary>
     public UndertaleRawShaderData HLSL11_PixelData;
+
+    /// <summary>
+    /// The PSSL Vertex data of this shader.
+    /// </summary>
     public UndertaleRawShaderData PSSL_VertexData;
+
+    /// <summary>
+    /// The PSSL Pixel data of this shader.
+    /// </summary>
     public UndertaleRawShaderData PSSL_PixelData;
+
+    /// <summary>
+    /// The Cg_PSVita Vertex data of this shader.
+    /// </summary>
     public UndertaleRawShaderData Cg_PSVita_VertexData;
+
+    /// <summary>
+    /// The Cg_PSVita Pixel data of this shader.
+    /// </summary>
     public UndertaleRawShaderData Cg_PSVita_PixelData;
+
+    /// <summary>
+    /// The Cg_PS3 Vertex data of this shader.
+    /// </summary>
     public UndertaleRawShaderData Cg_PS3_VertexData;
+
+    /// <summary>
+    /// The Cg_PS3 Pixel data of this shader.
+    /// </summary>
     public UndertaleRawShaderData Cg_PS3_PixelData;
 
+    /// <summary>
+    /// A list of Vertex Shader attributes this shader uses.
+    /// </summary>
     public UndertaleSimpleList<VertexShaderAttribute> VertexShaderAttributes { get; set; } = new UndertaleSimpleList<VertexShaderAttribute>();
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="UndertaleShader"/>.
+    /// </summary>
     public UndertaleShader()
     {
         HLSL11_VertexData = new UndertaleRawShaderData();
@@ -248,7 +287,7 @@ public class UndertaleShader : UndertaleNamedResource
             if (!HLSL11_PixelData.IsNull)
                 next = HLSL11_PixelData._Position;
             else
-                next = _EntryEnd;
+                next = EntryEnd;
             int length = (int)(next - reader.Position);
             HLSL11_VertexData.ReadData(reader, length);
         }
@@ -261,7 +300,7 @@ public class UndertaleShader : UndertaleNamedResource
             if (!PSSL_VertexData.IsNull)
                 next = PSSL_VertexData._Position;
             else
-                next = _EntryEnd;
+                next = EntryEnd;
             int length = (int)(next - reader.Position);
             HLSL11_PixelData.ReadData(reader, length);
         }
@@ -275,7 +314,7 @@ public class UndertaleShader : UndertaleNamedResource
             if (!PSSL_PixelData.IsNull)
                 next = PSSL_PixelData._Position;
             else
-                next = _EntryEnd;
+                next = EntryEnd;
             int length = (int)(next - reader.Position);
             PSSL_VertexData.ReadData(reader, length);
         }
@@ -288,7 +327,7 @@ public class UndertaleShader : UndertaleNamedResource
             if (!Cg_PSVita_VertexData.IsNull)
                 next = Cg_PSVita_VertexData._Position;
             else
-                next = _EntryEnd;
+                next = EntryEnd;
             int length = (int)(next - reader.Position);
             PSSL_PixelData.ReadData(reader, length);
         }
@@ -302,7 +341,7 @@ public class UndertaleShader : UndertaleNamedResource
             if (!Cg_PSVita_PixelData.IsNull)
                 next = Cg_PSVita_PixelData._Position;
             else
-                next = _EntryEnd;
+                next = EntryEnd;
             int length = (int)(next - reader.Position);
             Cg_PSVita_VertexData.ReadData(reader, length);
         }
@@ -315,7 +354,7 @@ public class UndertaleShader : UndertaleNamedResource
             if (!Cg_PS3_VertexData.IsNull)
                 next = Cg_PS3_VertexData._Position;
             else
-                next = _EntryEnd;
+                next = EntryEnd;
             int length = (int)(next - reader.Position);
             Cg_PSVita_PixelData.ReadData(reader, length);
         }
@@ -331,7 +370,7 @@ public class UndertaleShader : UndertaleNamedResource
                 if (!Cg_PS3_PixelData.IsNull)
                     next = Cg_PS3_PixelData._Position;
                 else
-                    next = _EntryEnd;
+                    next = EntryEnd;
                 int length = (int)(next - reader.Position);
                 Cg_PS3_VertexData.ReadData(reader, length);
             }
@@ -340,7 +379,7 @@ public class UndertaleShader : UndertaleNamedResource
                 ReadPadding(reader, 15);
 
                 // Calculate length of data
-                uint next = _EntryEnd; // final possible data, nothing else to check for
+                uint next = EntryEnd; // final possible data, nothing else to check for
                 int length = (int)(next - reader.Position);
                 Cg_PS3_PixelData.ReadData(reader, length);
             }

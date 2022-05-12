@@ -2,33 +2,70 @@
 
 namespace UndertaleModLib.Models;
 
+/// <summary>
+/// Details the possible extension kinds for a GameMaker data file.
+/// </summary>
 public enum UndertaleExtensionKind : uint
 {
+    /// <summary>
+    /// TODO: unknown, needs more research.
+    /// </summary>
     [Obsolete("Likely unused")]
     Unknown0 = 0,
+    /// <summary>
+    /// A DLL extension.
+    /// </summary>
     DLL = 1,
+    /// <summary>
+    /// A GML extension.
+    /// </summary>
     GML = 2,
     ActionLib = 3,
     Generic = 4,
+    /// <summary>
+    /// A JavaScript extension.
+    /// </summary>
     JS = 5
 }
 
+/// <summary>
+/// Details the possible variable types for GameMaker extensions.
+/// </summary>
 public enum UndertaleExtensionVarType : uint
 {
+    /// <summary>
+    /// A string variable.
+    /// </summary>
     String = 1,
+    /// <summary>
+    /// A double variable.
+    /// </summary>
     Double = 2
 }
 
+/// <summary>
+/// A class representing an argument for <see cref="UndertaleExtensionFunction"/>s.
+/// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleExtensionFunctionArg : UndertaleObject
 {
+    /// <summary>
+    /// The variable type of this argument.
+    /// </summary>
     public UndertaleExtensionVarType Type { get; set; }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="UndertaleExtensionFunctionArg"/>.
+    /// </summary>
     public UndertaleExtensionFunctionArg()
     {
         Type = UndertaleExtensionVarType.Double;
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="UndertaleExtensionFunctionArg"/> with a specified <see cref="UndertaleExtensionVarType"/>.
+    /// </summary>
+    /// <param name="type"></param>
     public UndertaleExtensionFunctionArg(UndertaleExtensionVarType type)
     {
         Type = type;
@@ -47,14 +84,32 @@ public class UndertaleExtensionFunctionArg : UndertaleObject
     }
 }
 
+/// <summary>
+/// A function in a <see cref="UndertaleExtension"/>.
+/// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleExtensionFunction : UndertaleObject
 {
+    /// <summary>
+    /// The name of the function.
+    /// </summary>
     public UndertaleString Name { get; set; }
+
+    /// <summary>
+    /// An identification number of the function.
+    /// </summary>
     public uint ID { get; set; }
     public uint Kind { get; set; }
+
+    /// <summary>
+    /// The return type of the function.
+    /// </summary>
     public UndertaleExtensionVarType RetType { get; set; }
     public UndertaleString ExtName { get; set; }
+
+    /// <summary>
+    /// A list of arguments this function takes.
+    /// </summary>
     public UndertaleSimpleList<UndertaleExtensionFunctionArg> Arguments { get; set; } = new UndertaleSimpleList<UndertaleExtensionFunctionArg>();
 
     /// <inheritdoc />
@@ -129,13 +184,22 @@ public class UndertaleExtensionFile : UndertaleObject
     }
 }
 
+/// <summary>
+/// An extension entry in a GameMaker data file.
+/// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleExtension : UndertaleNamedResource
 {
-    // Folder Name thing is a remnant from the legacy GM7-8.1 extension editor(aka ExtMaker).
-    // The runner reads the name but ignores it.
-    // Though you probably shouldn't change it anyways.
+    /// <summary>
+    /// In which folder the extension is located. TODO: needs more GM8 research.
+    /// </summary>
+    /// <remarks>This is a remnant from the legacy GameMaker7-8.1 extension editor (aka ExtMaker). <br/>
+    /// The runner reads this name, but ignores it. This probably shouldn't be changed anyway.</remarks>
     public UndertaleString FolderName { get; set; }
+
+    /// <summary>
+    /// The name of the extension.
+    /// </summary>
     public UndertaleString Name { get; set; }
     public UndertaleString ClassName { get; set; }
 
