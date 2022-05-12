@@ -116,6 +116,7 @@ namespace UndertaleModLib.Models
             private static readonly byte[] QOIHeader = new byte[4] { 102, 105, 111, 113 };
 
             public static void ClearSharedStream() => sharedStream = null;
+            public static void InitSharedStream(int size) => sharedStream = new(size);
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -131,9 +132,9 @@ namespace UndertaleModLib.Models
                         writer.Write((short)bmp.Height);
                         byte[] data = QoiConverter.GetArrayFromImage(bmp, writer.undertaleData.GM2022_3 ? 0 : 4);
                         using MemoryStream input = new MemoryStream(data);
-                        using MemoryStream output = new MemoryStream(1024);
-                        BZip2.Compress(input, output, false, 9);
-                        writer.Write(output);
+                        sharedStream.Seek(0, SeekOrigin.Begin);
+                        BZip2.Compress(input, sharedStream, false, 9);
+                        writer.Write(sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position]);
                     }
                     else
                     {
