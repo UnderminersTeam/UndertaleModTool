@@ -167,51 +167,6 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public bool SendAUMIMessage(IpcMessage_t ipMessage, ref IpcReply_t outReply)
-    {
-        // Implementation Copy-pasted from UndertaleModTool/MainWindow.xaml.cs
-
-        // By Archie
-        const int replySize = 132;
-
-        // Create the pipe
-        using var pPipeServer = new NamedPipeServerStream("AUMI-IPC", PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
-
-        // Wait 1/8th of a second for AUMI to connect.
-        // If it doesn't connect in time (which it should), just return false to avoid a deadlock.
-        if (!pPipeServer.IsConnected)
-        {
-            pPipeServer.WaitForConnectionAsync();
-            Thread.Sleep(125);
-            if (!pPipeServer.IsConnected)
-            {
-                pPipeServer.DisposeAsync();
-                return false;
-            }
-        }
-
-        try
-        {
-            //Send the message
-            pPipeServer.Write(ipMessage.RawBytes());
-            pPipeServer.Flush();
-        }
-        catch (Exception e)
-        {
-            // Catch any errors that might arise if the connection is broken
-            ScriptError("Could not write data to the pipe!\nError: " + e.Message);
-            return false;
-        }
-
-        // Read the reply, the length of which is always a pre-set amount of bytes.
-        byte[] bBuffer = new byte[replySize];
-        pPipeServer.Read(bBuffer, 0, replySize);
-
-        outReply = IpcReply_t.FromBytes(bBuffer);
-        return true;
-    }
-
-    /// <inheritdoc/>
     public bool RunUMTScript(string path)
     {
         try
