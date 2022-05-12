@@ -102,19 +102,19 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
     /// </summary>
     public class TexData : UndertaleObject, INotifyPropertyChanged
     {
-        private byte[] _TextureBlob;
+        private byte[] _textureBlob;
 
         /// <summary>
         /// The image data of the texture.
         /// </summary>
-        public byte[] TextureBlob { get => _TextureBlob; set { _TextureBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextureBlob))); } }
+        public byte[] TextureBlob { get => _textureBlob; set { _textureBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextureBlob))); } }
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private static readonly byte[] PNGHeader = new byte[8] { 137, 80, 78, 71, 13, 10, 26, 10 };
-        private static readonly byte[] QOIandBZipHeader = new byte[4] { 50, 122, 111, 113 };
-        private static readonly byte[] QOIHeader = new byte[4] { 102, 105, 111, 113 };
+        private static readonly byte[] pngHeader = { 137, 80, 78, 71, 13, 10, 26, 10 };
+        private static readonly byte[] qoiAndBZipHeader = { 50, 122, 111, 113 };
+        private static readonly byte[] qoiHeader = { 102, 105, 111, 113 };
 
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
@@ -123,7 +123,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
             {
                 if (writer.undertaleData.UseBZipFormat)
                 {
-                    writer.Write(QOIandBZipHeader);
+                    writer.Write(qoiAndBZipHeader);
 
                     // Encode the PNG data back to QOI+BZip2
                     using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
@@ -152,11 +152,11 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
             uint startAddress = reader.Position;
 
             byte[] header = reader.ReadBytes(8);
-            if (!header.SequenceEqual(PNGHeader))
+            if (!header.SequenceEqual(pngHeader))
             {
                 reader.Position = startAddress;
 
-                if (header.Take(4).SequenceEqual(QOIandBZipHeader))
+                if (header.Take(4).SequenceEqual(qoiAndBZipHeader))
                 {
                     reader.undertaleData.UseQoiFormat = true;
                     reader.undertaleData.UseBZipFormat = true;
@@ -177,7 +177,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
                     TextureBlob = final.ToArray();
                     return;
                 }
-                else if (header.Take(4).SequenceEqual(QOIHeader))
+                else if (header.Take(4).SequenceEqual(qoiHeader))
                 {
                     reader.undertaleData.UseQoiFormat = true;
                     reader.undertaleData.UseBZipFormat = false;

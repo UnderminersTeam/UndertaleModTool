@@ -97,7 +97,7 @@ public class UndertaleFont : UndertaleNamedResource
     public class Glyph : UndertaleObject
     {
         /// <summary>
-        /// The character for the glyph.
+        /// The code point of character for the glyph.
         /// </summary>
         public ushort Character { get; set; }
 
@@ -112,12 +112,12 @@ public class UndertaleFont : UndertaleNamedResource
         public ushort SourceY { get; set; }
 
         /// <summary>
-        /// The width of the glyph.
+        /// The width of the glyph in pixel.
         /// </summary>
         public ushort SourceWidth { get; set; }
 
         /// <summary>
-        /// The height of the glyph.
+        /// The height of the glyph in pixel.
         /// </summary>
         public ushort SourceHeight { get; set; }
 
