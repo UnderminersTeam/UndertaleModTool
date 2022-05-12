@@ -22,6 +22,7 @@ namespace UndertaleModTool
         public bool AssetOrderSwappingEnabled { get; set; } = false;
         public bool ProfileModeEnabled { get; set; } = false;
         public bool Warn_About_GMS23 { get; set; } = true;
+        public bool KeepDataOnLoad { get; set; } = true;
         public bool UseGMLCache { get; set; } = false;
         public bool ProfileMessageShown { get; set; } = false;
         public bool AutomaticFileAssociation { get; set; } = true;

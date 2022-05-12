@@ -81,6 +81,16 @@ namespace UndertaleModTool
             }
         }
 
+        public static bool KeepDataOnLoad
+        {
+            get => Settings.Instance.KeepDataOnLoad;
+            set
+            {
+                Settings.Instance.KeepDataOnLoad = value;
+                Settings.Save();
+            }
+        }
+
         public static bool UseGMLCache
         {
             get => Settings.Instance.UseGMLCache;

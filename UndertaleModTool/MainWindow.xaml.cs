@@ -852,11 +852,33 @@ namespace UndertaleModTool
             dialog.Owner = this;
 
             // temporary save the current tabs in case of loading error
-            Tab[] tempTabs = Tabs.ToArray();
-            int lastTabIndex = CurrentTabIndex;
+            Tab[] tempTabs = null;
+            int lastTabIndex = 0;
+            if (SettingsWindow.KeepDataOnLoad)
+            {
+                tempTabs = Tabs.ToArray();
+                lastTabIndex = CurrentTabIndex;
+            }
 
             CurrentTab = null;
             Tabs.Clear(); // clear the current tabs to destroy game object references
+
+            if (tempTabs is null)
+            {
+                SelectionHistory.Clear();
+                ClosedTabsHistory.Clear();
+
+                if (Data is not null)
+                {
+                    Data = null;
+
+                    GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                    GC.Collect();
+                }
+
+                Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
+                OpenInTab(Highlighted);
+            }
 
             Task t = Task.Run(() =>
             {
@@ -957,7 +979,7 @@ namespace UndertaleModTool
                         SelectionHistory.Clear();
                         ClosedTabsHistory.Clear();
                     }
-                    else
+                    else if (tempTabs is not null)
                     {
                         // restore the tabs because new data hasn't been loaded
                         Tabs = new(tempTabs);
