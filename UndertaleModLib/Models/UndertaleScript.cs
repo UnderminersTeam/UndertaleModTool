@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace UndertaleModLib.Models
 {
@@ -27,10 +22,12 @@ namespace UndertaleModLib.Models
         /// <summary>
         /// Whether or not this script is a constructor.
         /// </summary>
-        public bool IsConstructor { get; set; } = false;
+        public bool IsConstructor { get; set; }
 
+        /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
@@ -40,6 +37,7 @@ namespace UndertaleModLib.Models
                 writer.WriteUndertaleObject(_Code);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -52,6 +50,7 @@ namespace UndertaleModLib.Models
             _Code.UnserializeById(reader, id);
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";

@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Drawing;
 using UndertaleModLib.Util;
 
@@ -79,8 +78,10 @@ namespace UndertaleModLib.Models
         /// </summary>
         public UndertaleEmbeddedTexture TexturePage { get => _TexturePage.Resource; set { _TexturePage.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TexturePage))); } }
 
+        /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(SourceX);
@@ -96,6 +97,7 @@ namespace UndertaleModLib.Models
             writer.Write((short)_TexturePage.SerializeById(writer));
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             SourceX = reader.ReadUInt16();
@@ -112,6 +114,7 @@ namespace UndertaleModLib.Models
             _TexturePage.UnserializeById(reader, reader.ReadInt16()); // This one is special as it uses a short instead of int
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             try

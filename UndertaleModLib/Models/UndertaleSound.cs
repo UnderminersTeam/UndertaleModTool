@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
@@ -63,7 +59,7 @@ namespace UndertaleModLib.Models
         /// </summary>
         /// <remarks>The exact way this works is unknown. But following values are possible:
         /// <c>Chorus</c>, <c>Echo</c>, <c>Flanger</c>, <c>Reverb</c>, <c>Gargle</c>, all possible to be combined with one another.</remarks>
-        public uint Effects { get; set; } = 0;
+        public uint Effects { get; set; }
 
         /// <summary>
         /// The volume the audio entry is played at.
@@ -103,8 +99,10 @@ namespace UndertaleModLib.Models
         /// </summary>
         public int GroupID { get => _AudioGroup.CachedId; set { _AudioGroup.CachedId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GroupID))); } }
 
+        /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
@@ -125,6 +123,7 @@ namespace UndertaleModLib.Models
                 writer.Write(_AudioFile.CachedId);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -157,6 +156,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";
@@ -174,16 +174,19 @@ namespace UndertaleModLib.Models
         /// </summary>
         public UndertaleString Name { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";
