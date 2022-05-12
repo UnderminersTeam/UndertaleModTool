@@ -2,13 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
@@ -204,6 +200,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
@@ -220,6 +217,7 @@ namespace UndertaleModLib.Models
                 Views[0].Enabled = true;
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             if (writer.undertaleData.GeneralInfo.Major >= 2)
@@ -279,6 +277,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -410,6 +409,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";
@@ -418,7 +418,7 @@ namespace UndertaleModLib.Models
         /// <summary>
         /// Interface for objects within rooms.
         /// </summary>
-        public interface RoomObject
+        public interface IRoomObject
         {
             /// <summary>
             /// X coordinate of the object.
@@ -548,6 +548,7 @@ namespace UndertaleModLib.Models
             /// </remarks>
             public int YOffset => Y + (BackgroundDefinition?.Texture?.TargetY ?? 0);
 
+            /// <inheritdoc />
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
             {
@@ -561,6 +562,7 @@ namespace UndertaleModLib.Models
                 CalcScaleY = (hasRoom && Stretch) ? (ParentRoom.Height / (float)BackgroundDefinition.Texture.SourceHeight) : 1;
             }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(Enabled);
@@ -575,6 +577,7 @@ namespace UndertaleModLib.Models
                 writer.Write(Stretch);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Enabled = reader.ReadBoolean();
@@ -667,8 +670,10 @@ namespace UndertaleModLib.Models
             /// </summary>
             public UndertaleGameObject ObjectId { get => _ObjectId.Resource; set { _ObjectId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ObjectId))); } }
 
+            /// <inheritdoc />
             public event PropertyChangedEventHandler PropertyChanged;
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(Enabled);
@@ -687,6 +692,7 @@ namespace UndertaleModLib.Models
                 writer.WriteUndertaleObject(_ObjectId);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Enabled = reader.ReadBoolean();
@@ -709,7 +715,7 @@ namespace UndertaleModLib.Models
         /// <summary>
         /// A game object with properties as it's used in a room.
         /// </summary>
-        public class GameObject : UndertaleObjectLenCheck, RoomObject, INotifyPropertyChanged
+        public class GameObject : UndertaleObjectLenCheck, IRoomObject, INotifyPropertyChanged
         {
             private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _objectDefinition = new();
             private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _creationCode = new();
@@ -781,7 +787,7 @@ namespace UndertaleModLib.Models
             /// This attribute is UMT-only and does not exist in GameMaker.
             /// </remarks>
             public int WrappedImageIndex
-            { 
+            {
                 get
                 {
                     if (ObjectDefinition?.Sprite is null)
@@ -795,6 +801,7 @@ namespace UndertaleModLib.Models
                 }
             }
 
+            /// <inheritdoc />
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
             {
@@ -846,6 +853,7 @@ namespace UndertaleModLib.Models
             /// </remarks>
             public int YOffset => Y + SpriteYOffset;
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(X);
@@ -866,11 +874,13 @@ namespace UndertaleModLib.Models
                     writer.WriteUndertaleObject(_preCreateCode);         // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Unserialize(reader, -1);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader, int length)
             {
                 X = reader.ReadInt32();
@@ -901,7 +911,7 @@ namespace UndertaleModLib.Models
         /// <summary>
         /// A tile with properties as it's used in a room.
         /// </summary>
-        public class Tile : UndertaleObject, RoomObject, INotifyPropertyChanged
+        public class Tile : UndertaleObject, IRoomObject, INotifyPropertyChanged
         {
             /// <summary>
             /// Whether this tile is from an asset layer.<br/>
@@ -925,21 +935,49 @@ namespace UndertaleModLib.Models
             /// </summary>
             public int Y { get; set; }
 
+            //TODO: both should be private and instead accessed via objectDefinition.
             /// <summary>
             /// From which tileset / background the tile stems from.
             /// </summary>
-            public UndertaleBackground BackgroundDefinition { get => _backgroundDefinition.Resource; set { _backgroundDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("ObjectDefinition"); } }
+            public UndertaleBackground BackgroundDefinition
+            {
+                get => _backgroundDefinition.Resource;
+                set
+                {
+                    _backgroundDefinition.Resource = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged("ObjectDefinition");
+                }
+            }
 
             /// <summary>
             /// From which sprite this tile stems from.
             /// </summary>
-            public UndertaleSprite SpriteDefinition { get => _spriteDefinition.Resource; set { _spriteDefinition.Resource = value; OnPropertyChanged(); OnPropertyChanged("ObjectDefinition"); } }
+            public UndertaleSprite SpriteDefinition
+            {
+                get => _spriteDefinition.Resource;
+                set
+                {
+                    _spriteDefinition.Resource = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged("ObjectDefinition");
+                }
+            }
 
             /// <summary>
             /// From which object this tile stems from.<br/>
-            /// Will return a <see cref="UndertaleBackground"/> if <see cref="spriteMode"/> is <see langword="true"/>, a <see cref="UndertaleSprite"/> if it's <see langword="false"/>.
+            /// Will return a <see cref="UndertaleBackground"/> if <see cref="spriteMode"/> is <see langword="true"/>,
+            /// a <see cref="UndertaleSprite"/> if it's <see langword="false"/>.
             /// </summary>
-            public UndertaleNamedResource ObjectDefinition { get => spriteMode ? SpriteDefinition : BackgroundDefinition; set { if (spriteMode) SpriteDefinition = (UndertaleSprite)value; else BackgroundDefinition = (UndertaleBackground)value; } }
+            public UndertaleNamedResource ObjectDefinition
+            {
+                get => spriteMode ? SpriteDefinition : BackgroundDefinition;
+                set
+                {
+                    if (spriteMode) SpriteDefinition = (UndertaleSprite)value;
+                    else BackgroundDefinition = (UndertaleBackground)value;
+                }
+            }
 
             /// <summary>
             /// The x coordinate of the tile in <see cref="ObjectDefinition"/>.
@@ -992,12 +1030,14 @@ namespace UndertaleModLib.Models
             /// </remarks>
             public UndertaleTexturePageItem Tpag => spriteMode ? SpriteDefinition?.Textures.FirstOrDefault()?.Texture : BackgroundDefinition?.Texture; // TODO: what happens on sprites with multiple textures?
 
+            /// <inheritdoc />
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
             {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
             }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(X);
@@ -1019,6 +1059,7 @@ namespace UndertaleModLib.Models
                 writer.Write(Color);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 X = reader.ReadInt32();
@@ -1039,6 +1080,7 @@ namespace UndertaleModLib.Models
                 Color = reader.ReadUInt32();
             }
 
+            /// <inheritdoc />
             public override string ToString()
             {
                 return "Tile " + InstanceID + " of " + (ObjectDefinition?.Name?.Content ?? "?") + " (UndertaleRoom+Tile)";
@@ -1109,6 +1151,7 @@ namespace UndertaleModLib.Models
             public LayerAssetsData AssetsData => Data as LayerAssetsData;
             public LayerEffectData EffectData => Data as LayerEffectData;
 
+            /// <inheritdoc />
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
             {
@@ -1129,6 +1172,7 @@ namespace UndertaleModLib.Models
             }
             public void UpdateZIndex() => OnPropertyChanged("LayerDepth");
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.WriteUndertaleString(LayerName);
@@ -1159,6 +1203,7 @@ namespace UndertaleModLib.Models
                 }
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 LayerName = reader.ReadUndertaleString();
@@ -1189,6 +1234,7 @@ namespace UndertaleModLib.Models
                 }
             }
 
+            /// <inheritdoc />
             public override string ToString()
             {
                 return GetType().FullName + " - \"" + LayerName?.Content + '\"';
@@ -1199,6 +1245,7 @@ namespace UndertaleModLib.Models
                 internal uint[] _InstanceIds { get; private set; } // 100000, 100001, 100002, 100003 - instance ids from GameObjects list in the room
                 public ObservableCollection<UndertaleRoom.GameObject> Instances { get; private set; } = new();
 
+                /// <inheritdoc />
                 public void Serialize(UndertaleWriter writer)
                 {
                     writer.Write((uint)Instances.Count);
@@ -1206,6 +1253,7 @@ namespace UndertaleModLib.Models
                         writer.Write(obj.InstanceID);
                 }
 
+                /// <inheritdoc />
                 public void Unserialize(UndertaleReader reader)
                 {
                     uint InstanceCount = reader.ReadUInt32();
@@ -1260,12 +1308,14 @@ namespace UndertaleModLib.Models
                 }
                 public uint[][] TileData { get => _TileData; set { _TileData = value; OnPropertyChanged(); } }
 
+                /// <inheritdoc />
                 public event PropertyChangedEventHandler PropertyChanged;
                 protected void OnPropertyChanged([CallerMemberName] string name = null)
                 {
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
                 }
 
+                /// <inheritdoc />
                 public void Serialize(UndertaleWriter writer)
                 {
                     _Background.Serialize(writer); // see comment below
@@ -1282,6 +1332,7 @@ namespace UndertaleModLib.Models
                     }
                 }
 
+                /// <inheritdoc />
                 public void Unserialize(UndertaleReader reader)
                 {
                     _Background = new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>(); // see comment in UndertaleGlobalInit.Unserialize
@@ -1334,6 +1385,7 @@ namespace UndertaleModLib.Models
                                          ? (Sprite.Textures.FirstOrDefault()?.Texture?.TargetY ?? 0) - Sprite.OriginYWrapper
                                          : 0);
 
+                /// <inheritdoc />
                 public event PropertyChangedEventHandler PropertyChanged;
                 protected void OnPropertyChanged([CallerMemberName] string name = null)
                 {
@@ -1347,6 +1399,7 @@ namespace UndertaleModLib.Models
                     CalcScaleY = (hasRoom && Stretch) ? (ParentLayer.ParentRoom.Height / (float)Sprite.Height) : 1;
                 }
 
+                /// <inheritdoc />
                 public void Serialize(UndertaleWriter writer)
                 {
                     writer.Write(Visible);
@@ -1361,6 +1414,7 @@ namespace UndertaleModLib.Models
                     writer.Write((uint)AnimationSpeedType);
                 }
 
+                /// <inheritdoc />
                 public void Unserialize(UndertaleReader reader)
                 {
                     Visible = reader.ReadBoolean();
@@ -1384,6 +1438,7 @@ namespace UndertaleModLib.Models
                 public UndertalePointerList<SequenceInstance> Sequences { get; set; }
                 public UndertalePointerList<SpriteInstance> NineSlices { get; set; } // Removed in 2.3.2, before never used
 
+                /// <inheritdoc />
                 public void Serialize(UndertaleWriter writer)
                 {
                     writer.WriteUndertaleObjectPointer(LegacyTiles);
@@ -1404,6 +1459,7 @@ namespace UndertaleModLib.Models
                     }
                 }
 
+                /// <inheritdoc />
                 public void Unserialize(UndertaleReader reader)
                 {
                     LegacyTiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<Tile>>();
@@ -1431,6 +1487,7 @@ namespace UndertaleModLib.Models
                 public UndertaleString EffectType;
                 public UndertaleSimpleList<EffectProperty> Properties;
 
+                /// <inheritdoc />
                 public void Serialize(UndertaleWriter writer)
                 {
                     if (writer.undertaleData.GMS2022_1)
@@ -1439,6 +1496,7 @@ namespace UndertaleModLib.Models
                     writer.WriteUndertaleObject(Properties);
                 }
 
+                /// <inheritdoc />
                 public void Unserialize(UndertaleReader reader)
                 {
                     if (reader.undertaleData.GMS2022_1)
@@ -1463,6 +1521,7 @@ namespace UndertaleModLib.Models
             public UndertaleString Name { get; set; }
             public UndertaleString Value { get; set; }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write((int)Kind);
@@ -1470,6 +1529,7 @@ namespace UndertaleModLib.Models
                 writer.WriteUndertaleString(Value);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Kind = (PropertyType)reader.ReadInt32();
@@ -1518,12 +1578,14 @@ namespace UndertaleModLib.Models
             public int XOffset => X + SpriteXOffset;
             public int YOffset => Y + SpriteYOffset;
 
+            /// <inheritdoc />
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)
             {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
             }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.WriteUndertaleString(Name);
@@ -1539,6 +1601,7 @@ namespace UndertaleModLib.Models
                 writer.Write(Rotation);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Name = reader.ReadUndertaleString();
@@ -1554,12 +1617,14 @@ namespace UndertaleModLib.Models
                 Rotation = reader.ReadSingle();
             }
 
+            //TODO: rework this method slightly.
             public static UndertaleString GenerateRandomName(UndertaleData data)
             {
                 // The same format as in "GameMaker Studio: 2".
                 return data.Strings.MakeString("graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8"));
-            } 
+            }
 
+            /// <inheritdoc />
             public override string ToString()
             {
                 return "Sprite " + Name?.Content + " of " + (Sprite?.Name?.Content ?? "?") + " (UndertaleRoom+SpriteInstance)";
@@ -1584,6 +1649,7 @@ namespace UndertaleModLib.Models
 
             public event PropertyChangedEventHandler PropertyChanged;
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.WriteUndertaleString(Name);
@@ -1599,6 +1665,7 @@ namespace UndertaleModLib.Models
                 writer.Write(Rotation);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Name = reader.ReadUndertaleString();
@@ -1614,6 +1681,7 @@ namespace UndertaleModLib.Models
                 Rotation = reader.ReadSingle();
             }
 
+            /// <inheritdoc />
             public override string ToString()
             {
                 return "Sequence " + Name?.Content + " of " + (Sequence?.Name?.Content ?? "?") + " (UndertaleRoom+SequenceInstance)";
@@ -1629,7 +1697,7 @@ namespace UndertaleModLib.Models
 
     public static class UndertaleRoomExtensions
     {
-        public static T ByInstanceID<T>(this IList<T> list, uint instance) where T : UndertaleRoom.RoomObject
+        public static T ByInstanceID<T>(this IList<T> list, uint instance) where T : UndertaleRoom.IRoomObject
         {
             return list.Where((x) => x.InstanceID == instance).FirstOrDefault();
         }

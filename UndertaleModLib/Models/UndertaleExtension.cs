@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel;
-using System.Collections.ObjectModel;
 
 namespace UndertaleModLib.Models
 {
@@ -40,11 +34,13 @@ namespace UndertaleModLib.Models
             Type = type;
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((uint)Type);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Type = (UndertaleExtensionVarType)reader.ReadUInt32();
@@ -55,12 +51,13 @@ namespace UndertaleModLib.Models
     public class UndertaleExtensionFunction : UndertaleObject
     {
         public UndertaleString Name { get; set; }
-        public uint ID { get; set; } 
+        public uint ID { get; set; }
         public uint Kind { get; set; }
         public UndertaleExtensionVarType RetType { get; set; }
         public UndertaleString ExtName { get; set; }
         public UndertaleSimpleList<UndertaleExtensionFunctionArg> Arguments { get; set; } = new UndertaleSimpleList<UndertaleExtensionFunctionArg>();
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
@@ -71,6 +68,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObject(Arguments);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -81,6 +79,7 @@ namespace UndertaleModLib.Models
             Arguments = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleExtensionFunctionArg>>();
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + ExtName.Content + ")";
@@ -96,6 +95,7 @@ namespace UndertaleModLib.Models
         public UndertaleExtensionKind Kind { get; set; }
         public UndertalePointerList<UndertaleExtensionFunction> Functions { get; set; } = new UndertalePointerList<UndertaleExtensionFunction>();
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Filename);
@@ -105,6 +105,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObject(Functions);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Filename = reader.ReadUndertaleString();
@@ -114,6 +115,7 @@ namespace UndertaleModLib.Models
             Functions = reader.ReadUndertaleObject<UndertalePointerList<UndertaleExtensionFunction>>();
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             try
@@ -132,18 +134,20 @@ namespace UndertaleModLib.Models
     {
         // Folder Name thing is a remnant from the legacy GM7-8.1 extension editor(aka ExtMaker).
         // The runner reads the name but ignores it.
-        // Though you probably shouldn't change it anyways. 
+        // Though you probably shouldn't change it anyways.
         public UndertaleString FolderName { get; set; }
         public UndertaleString Name { get; set; }
         public UndertaleString ClassName { get; set; }
 
         public UndertalePointerList<UndertaleExtensionFile> Files { get; set; } = new UndertalePointerList<UndertaleExtensionFile>();
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(FolderName);
@@ -152,6 +156,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObject(Files);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             FolderName = reader.ReadUndertaleString();

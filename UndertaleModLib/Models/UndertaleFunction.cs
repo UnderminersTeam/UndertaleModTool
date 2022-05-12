@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static UndertaleModLib.Models.UndertaleGeneralInfo;
 
 namespace UndertaleModLib.Models
@@ -26,6 +20,7 @@ namespace UndertaleModLib.Models
         [Obsolete("This variable has been renamed to NameStringID.")]
         public int UnknownChainEndingValue { get => NameStringID; set => NameStringID = value; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
@@ -42,6 +37,7 @@ namespace UndertaleModLib.Models
                 writer.Write((int)-1);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -62,6 +58,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content;
@@ -76,6 +73,7 @@ namespace UndertaleModLib.Models
         public UndertaleString Name { get; set; }
         public ObservableCollection<LocalVar> Locals { get; } = new ObservableCollection<LocalVar>();
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((uint)Locals.Count);
@@ -86,6 +84,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             uint count = reader.ReadUInt32();
@@ -102,19 +101,21 @@ namespace UndertaleModLib.Models
         {
             return Locals.Any(local=>local.Name.Content == varName);
         }
-        
+
         // TODO: INotifyPropertyChanged
         public class LocalVar : UndertaleObject
         {
             public uint Index { get; set; }
             public UndertaleString Name { get; set; }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(Index);
                 writer.WriteUndertaleString(Name);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Index = reader.ReadUInt32();
@@ -122,6 +123,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";
