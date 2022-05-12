@@ -168,7 +168,8 @@ namespace UndertaleModLib.Models
                         // Need to fully decompress and convert the QOI data to PNG for compatibility purposes (at least for now)
                         using MemoryStream bufferWrapper = new MemoryStream(reader.Buffer);
                         bufferWrapper.Seek(reader.Offset, SeekOrigin.Begin);
-                        sharedStream.Seek(0, SeekOrigin.Begin);
+                        if (sharedStream.Length != 0)
+                            sharedStream.Seek(0, SeekOrigin.Begin);
                         BZip2.Decompress(bufferWrapper, sharedStream, false);
                         reader.Position = (uint)bufferWrapper.Position;
                         using Bitmap bmp = QoiConverter.GetImageFromSpan(sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position]);
@@ -187,9 +188,12 @@ namespace UndertaleModLib.Models
                         // Need to convert the QOI data to PNG for compatibility purposes (at least for now)
                         using Bitmap bmp = QoiConverter.GetImageFromSpan(reader.Buffer.AsSpan()[reader.Offset..], out int dataLength);
                         reader.Offset += dataLength;
-                        using MemoryStream final = new MemoryStream();
-                        bmp.Save(final, ImageFormat.Png);
-                        TextureBlob = final.ToArray();
+                        if (sharedStream.Length != 0)
+                            sharedStream.Seek(0, SeekOrigin.Begin);
+                        bmp.Save(sharedStream, ImageFormat.Png);
+                        TextureBlob = new byte[(int)sharedStream.Position];
+                        sharedStream.Seek(0, SeekOrigin.Begin);
+                        sharedStream.Read(TextureBlob, 0, TextureBlob.Length);
                         return;
                     }
                     else
