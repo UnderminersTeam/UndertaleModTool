@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
@@ -133,6 +128,7 @@ namespace UndertaleModLib.Models
 
             public UndertaleSimpleListShort<GlyphKerning> Kerning { get; set; } = new UndertaleSimpleListShort<GlyphKerning>();
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(Character);
@@ -145,6 +141,7 @@ namespace UndertaleModLib.Models
                 writer.WriteUndertaleObject(Kerning);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Character = reader.ReadUInt16();
@@ -162,12 +159,14 @@ namespace UndertaleModLib.Models
                 public short Other;
                 public short Amount;
 
+                /// <inheritdoc />
                 public void Serialize(UndertaleWriter writer)
                 {
                     writer.Write(Other);
                     writer.Write(Amount);
                 }
 
+                /// <inheritdoc />
                 public void Unserialize(UndertaleReader reader)
                 {
                     Other = reader.ReadInt16();
@@ -176,6 +175,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
@@ -207,6 +207,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObject(Glyphs);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -238,6 +239,7 @@ namespace UndertaleModLib.Models
             Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";
