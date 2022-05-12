@@ -1,66 +1,65 @@
 ﻿using System;
 using System.IO;
 
-namespace UndertaleModLib.Models
+namespace UndertaleModLib.Models;
+
+/// <summary>
+/// An embedded audio entry in a data file.
+/// </summary>
+[PropertyChanged.AddINotifyPropertyChangedInterface]
+public class UndertaleEmbeddedAudio : UndertaleNamedResource, PaddedObject
 {
     /// <summary>
-    /// An embedded audio entry in a data file.
+    /// The name of the embedded audio entry.
     /// </summary>
-    [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class UndertaleEmbeddedAudio : UndertaleNamedResource, PaddedObject
+    public UndertaleString Name { get; set; }
+
+    /// <summary>
+    /// The audio data of the embedded audio entry.
+    /// </summary>
+    public byte[] Data { get; set; } = Array.Empty<byte>();
+
+    /// <inheritdoc />
+    public void Serialize(UndertaleWriter writer)
     {
-        /// <summary>
-        /// The name of the embedded audio entry.
-        /// </summary>
-        public UndertaleString Name { get; set; }
+        writer.Write((uint)Data.Length);
+        writer.Write(Data);
+    }
 
-        /// <summary>
-        /// The audio data of the embedded audio entry.
-        /// </summary>
-        public byte[] Data { get; set; } = Array.Empty<byte>();
+    /// <inheritdoc />
+    public void SerializePadding(UndertaleWriter writer)
+    {
+        while (writer.Position % 4 != 0)
+            writer.Write((byte)0);
+    }
 
-        /// <inheritdoc />
-        public void Serialize(UndertaleWriter writer)
+    /// <inheritdoc />
+    public void Unserialize(UndertaleReader reader)
+    {
+        uint len = reader.ReadUInt32();
+        Data = reader.ReadBytes((int)len);
+        Util.DebugUtil.Assert(Data.Length == len);
+    }
+
+    /// <inheritdoc />
+    public void UnserializePadding(UndertaleReader reader)
+    {
+        while (reader.Position % 4 != 0)
+            if (reader.ReadByte() != 0)
+                throw new IOException("Padding error!");
+    }
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        try
         {
-            writer.Write((uint)Data.Length);
-            writer.Write(Data);
-        }
-
-        /// <inheritdoc />
-        public void SerializePadding(UndertaleWriter writer)
-        {
-            while (writer.Position % 4 != 0)
-                writer.Write((byte)0);
-        }
-
-        /// <inheritdoc />
-        public void Unserialize(UndertaleReader reader)
-        {
-            uint len = reader.ReadUInt32();
-            Data = reader.ReadBytes((int)len);
-            Util.DebugUtil.Assert(Data.Length == len);
-        }
-
-        /// <inheritdoc />
-        public void UnserializePadding(UndertaleReader reader)
-        {
-            while (reader.Position % 4 != 0)
-                if (reader.ReadByte() != 0)
-                    throw new IOException("Padding error!");
-        }
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            try
-            {
-                return Name.Content + " (" + GetType().Name + ")";
-            }
-            catch
-            {
-                Name = new UndertaleString("EmbeddedSound Unknown Index");
-            }
             return Name.Content + " (" + GetType().Name + ")";
         }
+        catch
+        {
+            Name = new UndertaleString("EmbeddedSound Unknown Index");
+        }
+        return Name.Content + " (" + GetType().Name + ")";
     }
 }
