@@ -234,7 +234,7 @@ namespace UndertaleModLib
             // so that they don't immediately discard.
             for (int i = 0; i < count; i++)
             {
-                UndertaleShader s = new UndertaleShader { _EntryEnd = objectLocations[i + 1] };
+                UndertaleShader s = new UndertaleShader { EntryEnd = objectLocations[i + 1] };
                 objPool.Add(objectLocations[i], s);
                 objPoolRev.Add(s, objectLocations[i]);
             }
