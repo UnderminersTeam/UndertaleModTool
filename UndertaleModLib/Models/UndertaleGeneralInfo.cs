@@ -17,35 +17,35 @@ public class UndertaleGeneralInfo : UndertaleObject
     public enum InfoFlags : uint
     {
         /// <summary>
-        /// Start fullscreen
+        /// Start the game as fullscreen.
         /// </summary>
         Fullscreen = 0x0001,
         /// <summary>
-        /// Use synchronization to avoid tearing
+        /// Use synchronization to avoid tearing.
         /// </summary>
         SyncVertex1 = 0x0002,
         /// <summary>
-        /// Use synchronization to avoid tearing
+        /// Use synchronization to avoid tearing. TODO: difference?
         /// </summary>
         SyncVertex2 = 0x0004,
         /// <summary>
-        /// Interpolate colours between pixels
+        /// Interpolate colours between pixels.
         /// </summary>
         Interpolate = 0x0008,
         /// <summary>
-        /// Scaling: Keep aspect
+        /// Keep aspect ratio during scaling.
         /// </summary>
         Scale = 0x0010,
         /// <summary>
-        /// Display cursor
+        /// Display mouse cursor.
         /// </summary>
         ShowCursor = 0x0020,
         /// <summary>
-        /// Allow window resize
+        /// Allows window to be resized.
         /// </summary>
         Sizeable = 0x0040,
         /// <summary>
-        /// Allow fullscreen switching
+        /// Allows fullscreen switching TODO: ???
         /// </summary>
         ScreenKey = 0x0080,
 
@@ -59,14 +59,14 @@ public class UndertaleGeneralInfo : UndertaleObject
         /// </summary>
         StudioVersionMask = 0x0E00,
         /// <summary>
-        /// Enable Steam
+        /// Whether Steam is enabled.
         /// </summary>
         SteamEnabled = 0x1000,
 
         LocalDataEnabled = 0x2000,
 
         /// <summary>
-        /// Borderless Window
+        /// Whether the game supports borderless window
         /// </summary>
         BorderlessWindow = 0x4000,
         /// <summary>
@@ -151,16 +151,29 @@ public class UndertaleGeneralInfo : UndertaleObject
         VertexBuffers = 9223372036854775808UL
     }
 
-    public bool DisableDebugger { get; set; } = true;
+    /// <summary>
+    /// Indicates whether debugging support is disabled.
+    /// </summary>
+    public bool IsDebuggerDisabled { get; set; } = true;
 
     /// <summary>
     /// The bytecode version of the data file.
     /// </summary>
     public byte BytecodeVersion { get; set; } = 0x10;
 
+    /// <summary>
+    /// TODO: currently unknown value.
+    /// </summary>
     public ushort Unknown { get; set; } = 0;
 
-    public UndertaleString Filename { get; set; }
+    /// <summary>
+    /// The file name of the runner.
+    /// </summary>
+    public UndertaleString FileName { get; set; }
+
+    /// <summary>
+    /// Which GameMaker configuration the data file was compiled with.
+    /// </summary>
     public UndertaleString Config { get; set; }
 
     /// <summary>
@@ -184,7 +197,9 @@ public class UndertaleGeneralInfo : UndertaleObject
     /// <remarks>This is always empty in Game Maker: Studio.</remarks>
     public Guid DirectPlayGuid { get; set; } = Guid.Empty;
 
-
+    /// <summary>
+    /// The name of the game.
+    /// </summary>
     public UndertaleString Name { get; set; }
 
     /// <summary>
@@ -244,7 +259,11 @@ public class UndertaleGeneralInfo : UndertaleObject
 
 
     public ulong ActiveTargets { get; set; } = 0;
-    public FunctionClassification FunctionClassifications { get; set; } = FunctionClassification.None; // Initializing it with None is a very bad idea.
+
+    /// <summary>
+    /// The function classifications of this data file.
+    /// </summary>
+    public FunctionClassification FunctionClassifications { get; set; } = FunctionClassification.None; // Initializing it with None is a very bad idea. TODO: then do something about it?
 
     /// <summary>
     /// The Steam app id of the game.
@@ -261,7 +280,10 @@ public class UndertaleGeneralInfo : UndertaleObject
     /// </summary>
     public UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM> RoomOrder { get; private set; } = new UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>();
 
-    public List<long> GMS2RandomUID { get; set; } = new List<long>(); // Some sort of checksum
+    /// <summary>
+    /// TODO: unknown, some sort of checksum.
+    /// </summary>
+    public List<long> GMS2RandomUID { get; set; } = new List<long>();
 
     /// <summary>
     /// The FPS of the data file. Game Maker Studio: 2 only.
@@ -273,17 +295,19 @@ public class UndertaleGeneralInfo : UndertaleObject
     /// </summary>
     public bool GMS2AllowStatistics { get; set; } = true;
 
-
-    public byte[] GMS2GameGUID { get; set; } = new byte[16]; // more high entropy data
+    /// <summary>
+    /// TODO: more unknown checksum data.
+    /// </summary>
+    public byte[] GMS2GameGUID { get; set; } = new byte[16];
 
     /// <inheritdoc/>
     /// <exception cref="IOException">If <see cref="LicenseMD5"/> or <see cref="GMS2GameGUID"/> has an invalid length.</exception>
     public void Serialize(UndertaleWriter writer)
     {
-        writer.Write(DisableDebugger ? (byte)1 : (byte)0);
+        writer.Write(IsDebuggerDisabled ? (byte)1 : (byte)0);
         writer.Write(BytecodeVersion);
         writer.Write(Unknown);
-        writer.WriteUndertaleString(Filename);
+        writer.WriteUndertaleString(FileName);
         writer.WriteUndertaleString(Config);
         writer.Write(LastObj);
         writer.Write(LastTile);
@@ -364,10 +388,10 @@ public class UndertaleGeneralInfo : UndertaleObject
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
-        DisableDebugger = reader.ReadByte() != 0;
+        IsDebuggerDisabled = reader.ReadByte() != 0;
         BytecodeVersion = reader.ReadByte();
         Unknown = reader.ReadUInt16();
-        Filename = reader.ReadUndertaleString();
+        FileName = reader.ReadUndertaleString();
         Config = reader.ReadUndertaleString();
         LastObj = reader.ReadUInt32();
         LastTile = reader.ReadUInt32();
@@ -460,7 +484,7 @@ public class UndertaleOptions : UndertaleObject
     public enum OptionsFlags : ulong
     {
         /// <summary>
-        /// If game should start in fullscreen.
+        /// If the game should start in fullscreen.
         /// </summary>
         FullScreen = 0x1,
         /// <summary>
@@ -515,7 +539,14 @@ public class UndertaleOptions : UndertaleObject
         DisableSandbox = 0x10000000
     }
 
+    /// <summary>
+    /// TODO: unknown value, needs research. Tends to be 2^31?
+    /// </summary>
     public uint Unknown1 { get; set; } = 0x80000000;
+
+    /// <summary>
+    /// TODO: another unknown value, also needs research.
+    /// </summary>
     public uint Unknown2 { get; set; } = 0x00000002;
 
     /// <summary>
@@ -529,32 +560,37 @@ public class UndertaleOptions : UndertaleObject
     public int Scale { get; set; } = -1;
 
     /// <summary>
-    /// The window color.
+    /// The window color. TODO: unused? Legacy GM remnant?
     /// </summary>
     public uint WindowColor { get; set; } = 0;
 
     /// <summary>
-    /// The Color depth.
+    /// The Color depth. TODO: unused? Legacy GM remnant?
     /// </summary>
     public uint ColorDepth { get; set; } = 0;
 
     /// <summary>
-    /// The game's resolution.
+    /// The game's resolution. TODO: unused? Legacy GM remnant?
     /// </summary>
     public uint Resolution { get; set; } = 0;
 
     /// <summary>
-    /// The game's refresh rate.
+    /// The game's refresh rate. TODO: unused? Legacy GM remnant?
     /// </summary>
     public uint Frequency { get; set; } = 0;
 
     /// <summary>
-    /// Whether the game uses V-Sync.
+    /// Whether the game uses V-Sync. TODO: unused? Legacy GM remnant?
     /// </summary>
     public uint VertexSync { get; set; } = 0;
 
+    /// <summary>
+    /// TODO: unused? Legacy GM remnant?
+    /// </summary>
     public uint Priority { get; set; } = 0;
-    public UndertaleSprite.TextureEntry BackImage { get; set; } = new UndertaleSprite.TextureEntry(); // Apparently these exist, but I can't find any examples of it
+
+    // Apparently these exist, but I can't find any examples of it. They're also only used in "old format".
+    public UndertaleSprite.TextureEntry BackImage { get; set; } = new UndertaleSprite.TextureEntry();
     public UndertaleSprite.TextureEntry FrontImage { get; set; } = new UndertaleSprite.TextureEntry();
     public UndertaleSprite.TextureEntry LoadImage { get; set; } = new UndertaleSprite.TextureEntry();
     public uint LoadAlpha { get; set; } = 255;
@@ -564,6 +600,7 @@ public class UndertaleOptions : UndertaleObject
     /// </summary>
     public UndertaleSimpleList<Constant> Constants { get; private set; } = new UndertaleSimpleList<Constant>();
 
+    //TODO: not shown in GUI right now!!!
     public bool NewFormat { get; set; } = true;
 
     /// <summary>
@@ -786,6 +823,10 @@ public class UndertaleLanguage : UndertaleObject
         public List<UndertaleString> Entries { get; set; } = new List<UndertaleString>();
         // values that correspond to IDs in the main chunk content
 
+        /// <summary>
+        /// Serializes the data file into a specified <see cref="UndertaleWriter"/>.
+        /// </summary>
+        /// <param name="writer">Where to serialize to.</param>
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);

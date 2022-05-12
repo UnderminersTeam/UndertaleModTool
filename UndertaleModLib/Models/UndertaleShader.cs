@@ -47,8 +47,7 @@ public class UndertaleShader : UndertaleNamedResource
     /// The GLSL ES vertex code this shader uses.
     /// </summary>
     public UndertaleString GLSL_ES_Vertex { get; set; }
-
-
+    
     /// <summary>
     /// The GLSL ES fragment code this shader uses.
     /// </summary>

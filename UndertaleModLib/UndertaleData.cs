@@ -590,7 +590,7 @@ namespace UndertaleModLib
             data.FORM.GEN8.Object = new UndertaleGeneralInfo();
             data.FORM.OPTN.Object = new UndertaleOptions();
             data.FORM.LANG.Object = new UndertaleLanguage();
-            data.GeneralInfo.Filename = data.Strings.MakeString("NewGame");
+            data.GeneralInfo.FileName = data.Strings.MakeString("NewGame");
             data.GeneralInfo.Config = data.Strings.MakeString("Default");
             data.GeneralInfo.Name = data.Strings.MakeString("NewGame");
             data.GeneralInfo.DisplayName = data.Strings.MakeString("New UndertaleModTool Game");
