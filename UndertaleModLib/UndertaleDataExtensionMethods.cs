@@ -35,9 +35,17 @@ public static class UndertaleDataExtensionMethods
 	public static UndertaleCodeLocals For(this IList<UndertaleCodeLocals> list, UndertaleCode code)
 	{
 		// TODO: I'm not sure if the runner looks these up by name or by index
-		return list.Where((x) => code.Name == x.Name).FirstOrDefault();
+		return list.FirstOrDefault(x => code.Name == x.Name);
 	}
 
+	/// <summary>
+	/// Creates <paramref name="content"/> as a new <see cref="UndertaleString"/>,
+	/// adds it to a <see cref="List{T}"/> of <see cref="UndertaleString"/> if it does not exist yet, and returns it.
+	/// </summary>
+	/// <param name="list">The <see cref="List{T}"/> of <see cref="UndertaleString"/>.</param>
+	/// <param name="content">The string to create a <see cref="UndertaleString"/> of.</param>
+	/// <returns><paramref name="content"/> as a <see cref="UndertaleString"/>.</returns>
+	/// <exception cref="ArgumentNullException"><paramref name="content"/> is null.</exception>
 	public static UndertaleString MakeString(this IList<UndertaleString> list, string content)
 	{
 		if (content == null)
@@ -55,6 +63,15 @@ public static class UndertaleDataExtensionMethods
 		return newString;
 	}
 
+	/// <summary>
+	/// Creates <paramref name="content"/> as a new <see cref="UndertaleString"/>,
+	/// adds it to a <see cref="List{T}"/> of <see cref="UndertaleString"/> if it does not exist yet, and returns it.
+	/// </summary>
+	/// <param name="list">The <see cref="List{T}"/> of <see cref="UndertaleString"/>.</param>
+	/// <param name="content">The string to create a <see cref="UndertaleString"/> of.</param>
+	/// <param name="index">The index where the newly created <see cref="UndertaleString"/> is located in <paramref name="list"/>.</param>
+	/// <returns><paramref name="content"/> as a <see cref="UndertaleString"/>.</returns>
+	/// <exception cref="ArgumentNullException"><paramref name="content"/> is null.</exception>
 	public static UndertaleString MakeString(this IList<UndertaleString> list, string content, out int index)
 	{
 		if (content == null)

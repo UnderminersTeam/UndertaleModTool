@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel;
-
-namespace UndertaleModLib.Models
+﻿namespace UndertaleModLib.Models
 {
     /// <summary>
     /// A shader entry for a data file.
@@ -24,11 +17,13 @@ namespace UndertaleModLib.Models
             /// </summary>
             public UndertaleString Name { get; set; }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.WriteUndertaleString(Name);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Name = reader.ReadUndertaleString();
@@ -47,10 +42,12 @@ namespace UndertaleModLib.Models
         /// </summary>
         public ShaderType Type { get; set; }
 
+        //TODO: these all should get renamed properly akin to naming conventions.
         /// <summary>
         /// The GLSL ES vertex code this shader uses.
         /// </summary>
         public UndertaleString GLSL_ES_Vertex { get; set; }
+
 
         /// <summary>
         /// The GLSL ES fragment code this shader uses.

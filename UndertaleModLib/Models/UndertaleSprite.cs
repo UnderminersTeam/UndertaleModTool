@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
@@ -23,6 +20,7 @@ namespace UndertaleModLib.Models
         public int PageHeight { get; set; }
         public byte[] PNGBlob { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(PageWidth);
@@ -31,6 +29,7 @@ namespace UndertaleModLib.Models
             writer.Write(PNGBlob);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             PageWidth = reader.ReadInt32();
@@ -38,6 +37,7 @@ namespace UndertaleModLib.Models
             PNGBlob = reader.ReadBytes(reader.ReadInt32());
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"UndertaleSpineTextureEntry ({PageWidth};{PageHeight})";
@@ -99,8 +99,14 @@ namespace UndertaleModLib.Models
         /// </summary>
         public bool Preload { get; set; }
 
-
+        /// <summary>
+        /// The bounding box mode of the sprite. TODO: double check if the possible values here are automatic, full image and manual
+        /// </summary>
         public uint BBoxMode { get; set; }
+
+        /// <summary>
+        /// The separation mask type this sprite has.
+        /// </summary>
         public SepMaskType SepMasks { get; set; }
 
 
@@ -185,8 +191,10 @@ namespace UndertaleModLib.Models
 
         public NineSlice V3NineSlice;
 
+        /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";
@@ -234,11 +242,13 @@ namespace UndertaleModLib.Models
         {
             public UndertaleTexturePageItem Texture { get; set; }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.WriteUndertaleObjectPointer(Texture);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Texture = reader.ReadUndertaleObjectPointer<UndertaleTexturePageItem>();
@@ -260,6 +270,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
@@ -429,6 +440,7 @@ namespace UndertaleModLib.Models
             return blob;
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -587,11 +599,13 @@ namespace UndertaleModLib.Models
             return dataBytes;
         }
 
+        /// <inheritdoc />
         public void SerializePrePadding(UndertaleWriter writer)
         {
             writer.Align(4);
         }
 
+        /// <inheritdoc />
         public void UnserializePrePadding(UndertaleReader reader)
         {
             reader.Align(4);
@@ -616,6 +630,7 @@ namespace UndertaleModLib.Models
                 Hide = 4
             }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(Left);
@@ -627,6 +642,7 @@ namespace UndertaleModLib.Models
                     writer.Write((int)TileModes[i]);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Left = reader.ReadInt32();
@@ -641,15 +657,15 @@ namespace UndertaleModLib.Models
     }
 
     /// <summary>
-    /// Some dirty hacks to make SWF work, they'll be removed later.
+    /// Some dirty hacks to make SWF work, they'll be removed later. TODO:
     /// </summary>
     public static class UndertaleYYSWFUtils
     {
         /// <summary>
         /// Reads an object ignoring the Reader's object pool.
         /// </summary>
-        /// <typeparam name="T">UndertaleObject's child</typeparam>
-        /// <param name="reader">An instance of UndertaleReader</param>
+        /// <typeparam name="T"><see cref="UndertaleObject"/>'s child.</typeparam>
+        /// <param name="reader">An instance of <see cref="UndertaleReader"/>.</param>
         /// <returns>The object</returns>
         public static T ReadUndertaleObjectNoPool<T>(this UndertaleReader reader) where T : UndertaleObject, new()
         {
@@ -667,6 +683,7 @@ namespace UndertaleModLib.Models
         public int[] Additive { get; set; }
         public int[] Multiply { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             foreach (int v in Additive)
@@ -675,6 +692,7 @@ namespace UndertaleModLib.Models
                 writer.Write(v);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Additive = new int[MATRIX_SIZE];
@@ -692,12 +710,14 @@ namespace UndertaleModLib.Models
         private const int MATRIX_SIZE = 9;
         public float[] Values { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             foreach (float v in Values)
                 writer.Write(v);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Values = new float[MATRIX_SIZE];
@@ -720,6 +740,7 @@ namespace UndertaleModLib.Models
         public float MinY { get; set; }
         public float MaxY { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(CharID);
@@ -734,6 +755,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObject(TransformationMatrix);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             CharID = reader.ReadInt32();
@@ -758,6 +780,7 @@ namespace UndertaleModLib.Models
         public float MinY { get; set; }
         public float MaxY { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(FrameObjects.Count);
@@ -771,6 +794,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             int ii = reader.ReadInt32();
@@ -792,6 +816,7 @@ namespace UndertaleModLib.Models
     {
         public byte[] RLEData { get; set; } // heavily compressed and pre-processed!
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             /*
@@ -811,6 +836,7 @@ namespace UndertaleModLib.Models
             writer.Align(4);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             int rlelen = reader.ReadInt32();
@@ -864,6 +890,7 @@ namespace UndertaleModLib.Models
         public byte Blue { get; set; }
         public byte Alpha { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(Red);
@@ -872,6 +899,7 @@ namespace UndertaleModLib.Models
             writer.Write(Alpha);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Red = reader.ReadByte();
@@ -890,6 +918,7 @@ namespace UndertaleModLib.Models
         public byte Blue { get; set; }
         public byte Alpha { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(Ratio);
@@ -899,6 +928,7 @@ namespace UndertaleModLib.Models
             writer.Write(Alpha);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Ratio = reader.ReadInt32();
@@ -916,6 +946,7 @@ namespace UndertaleModLib.Models
         public UndertaleYYSWFMatrix33 TransformationMatrix { get; set; }
         public UndertaleSimpleList<UndertaleYYSWFGradientRecord> Records { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((int)GradientFillType);
@@ -923,6 +954,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObject(Records);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             GradientFillType = (UndertaleYYSWFGradientFillType)reader.ReadInt32();
@@ -943,6 +975,7 @@ namespace UndertaleModLib.Models
         public int CharID { get; set; }
         public UndertaleYYSWFMatrix33 TransformationMatrix { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((int)BitmapFillType);
@@ -950,6 +983,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObject(TransformationMatrix);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             BitmapFillType = (UndertaleYYSWFBitmapFillType)reader.ReadInt32();
@@ -966,6 +1000,7 @@ namespace UndertaleModLib.Models
         public UndertaleYYSWFGradientFillData GradientFillData { get; set; }
         public UndertaleYYSWFSolidFillData SolidFillData { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((int)Type);
@@ -997,6 +1032,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Type = (UndertaleYYSWFFillType)reader.ReadInt32();
@@ -1038,6 +1074,7 @@ namespace UndertaleModLib.Models
         public byte Blue { get; set; }
         public byte Alpha { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(Red);
@@ -1046,6 +1083,7 @@ namespace UndertaleModLib.Models
             writer.Write(Alpha);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Red = reader.ReadByte();
@@ -1054,6 +1092,7 @@ namespace UndertaleModLib.Models
             Alpha = reader.ReadByte();
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"UndertaleYYSWFLineStyleData ({Red};{Green};{Blue};{Alpha})";
@@ -1066,18 +1105,21 @@ namespace UndertaleModLib.Models
         public int X { get; set; }
         public int Y { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(X);
             writer.Write(Y);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             X = reader.ReadInt32();
             Y = reader.ReadInt32();
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"UndertaleYYSWFVector2 ({X};{Y})";
@@ -1090,18 +1132,21 @@ namespace UndertaleModLib.Models
         public float X { get; set; }
         public float Y { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(X);
             writer.Write(Y);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             X = reader.ReadSingle();
             Y = reader.ReadSingle();
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"UndertaleYYSWFVector2F ({X};{Y})";
@@ -1128,6 +1173,7 @@ namespace UndertaleModLib.Models
         public UndertaleSimpleList<UndertaleYYSWFVector2> LineAALines { get; set; }
         public UndertaleSimpleList<UndertaleYYSWFVector2F> LineAAVectors { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(FillStyleOne);
@@ -1189,6 +1235,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             FillStyleOne = reader.ReadInt32();
@@ -1271,6 +1318,7 @@ namespace UndertaleModLib.Models
         public UndertaleSimpleList<UndertaleYYSWFStyleGroup> StyleGroups { get; set; }
 
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(MinX);
@@ -1280,6 +1328,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObject(StyleGroups);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             MinX = reader.ReadSingle();
@@ -1302,6 +1351,7 @@ namespace UndertaleModLib.Models
         public UndertaleSimpleList<UndertaleYYSWFLineStyleData> LineStyles { get; set; }
         public UndertaleSimpleList<UndertaleYYSWFSubshapeData> Subshapes { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(FillStyles.Count);
@@ -1324,6 +1374,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             int f = reader.ReadInt32();
@@ -1376,6 +1427,7 @@ namespace UndertaleModLib.Models
         public byte[] ColorPaletteData { get; set; }
 
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((int)Type);
@@ -1396,6 +1448,7 @@ namespace UndertaleModLib.Models
             writer.Align(4);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Type = (UndertaleYYSWFBitmapType)reader.ReadInt32();
@@ -1431,6 +1484,7 @@ namespace UndertaleModLib.Models
             ID = -1;
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((int)ItemType);
@@ -1452,6 +1506,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             ItemType = (UndertaleYYSWFItemType)reader.ReadInt32();
@@ -1478,12 +1533,13 @@ namespace UndertaleModLib.Models
                 case UndertaleYYSWFItemType.ItemSprite:
                 default:
                 {
-                    reader.SubmitWarning("Tried to read unknown YYSWFItem, " + ItemType.ToString());
+                    reader.SubmitWarning("Tried to read unknown YYSWFItem, " + ItemType);
                     break;
                 }
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"UndertaleYYSWFItem ({ItemType}, {ID})";
@@ -1504,6 +1560,7 @@ namespace UndertaleModLib.Models
         public UndertaleSimpleList<UndertaleYYSWFTimelineFrame> Frames { get; set; }
         public UndertaleSimpleList<UndertaleYYSWFCollisionMask> CollisionMasks { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleObject(UsedItems);
@@ -1528,6 +1585,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             //UsedItems = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleYYSWFItem>>();
@@ -1571,10 +1629,11 @@ namespace UndertaleModLib.Models
         public int Version { get; set; }
         public UndertaleYYSWFTimeline Timeline { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Align(4);
-            int len = (JPEGTable is null ? 0 : JPEGTable.Length) | int.MinValue;
+            int len = (JPEGTable?.Length ?? 0) | Int32.MinValue;
 
             writer.Write(len);
             writer.Write(Version);
@@ -1587,6 +1646,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObject(Timeline);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             reader.Align(4);
@@ -1603,6 +1663,7 @@ namespace UndertaleModLib.Models
             Timeline = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFTimeline>();
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"UndertaleYYSWF ({Version})";

@@ -69,6 +69,9 @@
         /// </summary>
         public UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND> Tilesets { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="UndertaleTextureGroupInfo"/>.
+        /// </summary>
         public UndertaleTextureGroupInfo()
         {
             TexturePages = new UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();

@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
@@ -31,6 +27,7 @@ namespace UndertaleModLib.Models
         public UndertaleSimpleList<Track> Tracks { get; set; }
         public Dictionary<int, UndertaleString> FunctionIDs { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
@@ -56,6 +53,7 @@ namespace UndertaleModLib.Models
             Moments.Serialize(writer);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -90,6 +88,7 @@ namespace UndertaleModLib.Models
             public bool Disabled { get; set; }
             public Dictionary<int, T> Channels { get; set; }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(Key);
@@ -104,6 +103,7 @@ namespace UndertaleModLib.Models
                 }
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Key = reader.ReadSingle();
@@ -126,23 +126,26 @@ namespace UndertaleModLib.Models
         {
             public UndertaleSimpleListString Messages;
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 Messages.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Messages = new UndertaleSimpleListString();
                 Messages.Unserialize(reader);
             }
         }
-        
+
         public class Moment : UndertaleObject
         {
             public int InternalCount; // Should be 0 if none, 1 if there's a message?
             public UndertaleString Event;
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(InternalCount);
@@ -150,6 +153,7 @@ namespace UndertaleModLib.Models
                     writer.WriteUndertaleString(Event);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 InternalCount = reader.ReadInt32();
@@ -172,6 +176,7 @@ namespace UndertaleModLib.Models
 
             public UndertaleString GMAnimCurveString;
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.WriteUndertaleString(ModelName);
@@ -238,6 +243,7 @@ namespace UndertaleModLib.Models
                 }
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 // This reads the string content immediately, if necessary (which it should be)
@@ -322,12 +328,14 @@ namespace UndertaleModLib.Models
 
         public class TrackKeyframes : UndertaleObject
         {
+            /// <inheritdoc />
             public virtual void Serialize(UndertaleWriter writer)
             {
                 while (writer.Position % 4 != 0)
                     writer.Write((byte)0);
             }
 
+            /// <inheritdoc />
             public virtual void Unserialize(UndertaleReader reader)
             {
                 while (reader.Position % 4 != 0)
@@ -340,11 +348,13 @@ namespace UndertaleModLib.Models
         {
             public T Resource { get; set; }
 
+            /// <inheritdoc />
             public virtual void Serialize(UndertaleWriter writer)
             {
                 Resource.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public virtual void Unserialize(UndertaleReader reader)
             {
                 Resource = new T();
@@ -358,6 +368,7 @@ namespace UndertaleModLib.Models
             {
                 public int Mode { get; set; }
 
+                /// <inheritdoc />
                 public override void Serialize(UndertaleWriter writer)
                 {
                     base.Serialize(writer);
@@ -365,6 +376,7 @@ namespace UndertaleModLib.Models
                     writer.Write(Mode);
                 }
 
+                /// <inheritdoc />
                 public override void Unserialize(UndertaleReader reader)
                 {
                     base.Unserialize(reader);
@@ -376,12 +388,14 @@ namespace UndertaleModLib.Models
 
             public UndertaleSimpleList<Keyframe<Data>> List;
 
+            /// <inheritdoc />
             public override void Serialize(UndertaleWriter writer)
             {
                 base.Serialize(writer);
                 List.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public override void Unserialize(UndertaleReader reader)
             {
                 base.Unserialize(reader);
@@ -395,12 +409,14 @@ namespace UndertaleModLib.Models
             public class Data : ResourceData<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>> { }
             public UndertaleSimpleList<Keyframe<Data>> List;
 
+            /// <inheritdoc />
             public override void Serialize(UndertaleWriter writer)
             {
                 base.Serialize(writer);
                 List.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public override void Unserialize(UndertaleReader reader)
             {
                 base.Unserialize(reader);
@@ -414,12 +430,14 @@ namespace UndertaleModLib.Models
             public class Data : ResourceData<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>> { }
             public UndertaleSimpleList<Keyframe<Data>> List;
 
+            /// <inheritdoc />
             public override void Serialize(UndertaleWriter writer)
             {
                 base.Serialize(writer);
                 List.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public override void Unserialize(UndertaleReader reader)
             {
                 base.Unserialize(reader);
@@ -433,12 +451,14 @@ namespace UndertaleModLib.Models
             public class Data : ResourceData<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>> { }
             public UndertaleSimpleList<Keyframe<Data>> List;
 
+            /// <inheritdoc />
             public override void Serialize(UndertaleWriter writer)
             {
                 base.Serialize(writer);
                 List.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public override void Unserialize(UndertaleReader reader)
             {
                 base.Unserialize(reader);
@@ -451,11 +471,13 @@ namespace UndertaleModLib.Models
         {
             public int Value { get; set; }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(Value);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Value = reader.ReadInt32();
@@ -466,12 +488,14 @@ namespace UndertaleModLib.Models
         {
             public UndertaleSimpleList<Keyframe<SpriteFramesData>> List;
 
+            /// <inheritdoc />
             public override void Serialize(UndertaleWriter writer)
             {
                 base.Serialize(writer);
                 List.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public override void Unserialize(UndertaleReader reader)
             {
                 base.Unserialize(reader);
@@ -484,11 +508,13 @@ namespace UndertaleModLib.Models
         {
             public int Value { get; set; }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(Value);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Value = reader.ReadInt32();
@@ -499,12 +525,14 @@ namespace UndertaleModLib.Models
         {
             public UndertaleSimpleList<Keyframe<BoolData>> List;
 
+            /// <inheritdoc />
             public override void Serialize(UndertaleWriter writer)
             {
                 base.Serialize(writer);
                 List.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public override void Unserialize(UndertaleReader reader)
             {
                 base.Unserialize(reader);
@@ -517,11 +545,13 @@ namespace UndertaleModLib.Models
         {
             public UndertaleString Value { get; set; }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.WriteUndertaleString(Value);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Value = reader.ReadUndertaleString();
@@ -532,12 +562,14 @@ namespace UndertaleModLib.Models
         {
             public UndertaleSimpleList<Keyframe<StringData>> List;
 
+            /// <inheritdoc />
             public override void Serialize(UndertaleWriter writer)
             {
                 base.Serialize(writer);
                 List.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public override void Unserialize(UndertaleReader reader)
             {
                 base.Unserialize(reader);
@@ -551,7 +583,8 @@ namespace UndertaleModLib.Models
             public bool IsCurveEmbedded { get; set; }
             public UndertaleAnimationCurve EmbeddedAnimCurve { get; set; }
             public UndertaleResourceById<UndertaleAnimationCurve, UndertaleChunkACRV> AssetAnimCurve { get; set; }
-            
+
+            /// <inheritdoc />
             public virtual void Serialize(UndertaleWriter writer)
             {
                 writer.Write(IsCurveEmbedded);
@@ -566,6 +599,7 @@ namespace UndertaleModLib.Models
                 }
             }
 
+            /// <inheritdoc />
             public virtual void Unserialize(UndertaleReader reader)
             {
                 if (reader.ReadBoolean())
@@ -591,12 +625,14 @@ namespace UndertaleModLib.Models
         {
             public int Value { get; set; }
 
+            /// <inheritdoc />
             public override void Serialize(UndertaleWriter writer)
             {
                 writer.Write(Value);
                 base.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public override void Unserialize(UndertaleReader reader)
             {
                 Value = reader.ReadInt32();
@@ -609,6 +645,7 @@ namespace UndertaleModLib.Models
             public UndertaleSimpleList<Keyframe<IntData>> List;
             public int Interpolation;
 
+            /// <inheritdoc />
             public override void Serialize(UndertaleWriter writer)
             {
                 base.Serialize(writer);
@@ -618,6 +655,7 @@ namespace UndertaleModLib.Models
                 List.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public override void Unserialize(UndertaleReader reader)
             {
                 base.Unserialize(reader);
@@ -633,12 +671,14 @@ namespace UndertaleModLib.Models
         {
             public float Value { get; set; }
 
+            /// <inheritdoc />
             public override void Serialize(UndertaleWriter writer)
             {
                 writer.Write(Value);
                 base.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public override void Unserialize(UndertaleReader reader)
             {
                 Value = reader.ReadSingle();
@@ -651,6 +691,7 @@ namespace UndertaleModLib.Models
             public UndertaleSimpleList<Keyframe<RealData>> List;
             public int Interpolation;
 
+            /// <inheritdoc />
             public override void Serialize(UndertaleWriter writer)
             {
                 base.Serialize(writer);
@@ -660,6 +701,7 @@ namespace UndertaleModLib.Models
                 List.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public override void Unserialize(UndertaleReader reader)
             {
                 base.Unserialize(reader);
