@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 
 namespace UndertaleModLib.Models
 {
@@ -52,11 +46,13 @@ namespace UndertaleModLib.Models
                 Event = events;
             }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 // Since GM:S stores Steps first, and then Events, we can't serialize a single entry in a single function :(
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 // Same goes for unserializing.
@@ -73,11 +69,13 @@ namespace UndertaleModLib.Models
         /// </summary>
         public ObservableCollection<UndertaleTimelineMoment> Moments { get; set; } = new ObservableCollection<UndertaleTimelineMoment>();
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
@@ -99,6 +97,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();

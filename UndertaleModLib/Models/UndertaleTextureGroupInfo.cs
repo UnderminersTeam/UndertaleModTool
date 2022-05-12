@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UndertaleModLib.Models
+﻿namespace UndertaleModLib.Models
 {
     /// <summary>
     /// A texture group info entry in a data file.
@@ -77,6 +69,9 @@ namespace UndertaleModLib.Models
         /// </summary>
         public UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND> Tilesets { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="UndertaleTextureGroupInfo"/>.
+        /// </summary>
         public UndertaleTextureGroupInfo()
         {
             TexturePages = new UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();
@@ -86,6 +81,7 @@ namespace UndertaleModLib.Models
             Tilesets = new UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND>();
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
@@ -103,6 +99,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObject(Tilesets);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -122,6 +119,7 @@ namespace UndertaleModLib.Models
             reader.ReadUndertaleObject(Tilesets);
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";

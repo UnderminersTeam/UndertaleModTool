@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
@@ -25,18 +19,21 @@ namespace UndertaleModLib.Models
         /// </summary>
         public byte[] Data { get; set; } = Array.Empty<byte>();
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((uint)Data.Length);
             writer.Write(Data);
         }
 
+        /// <inheritdoc />
         public void SerializePadding(UndertaleWriter writer)
         {
             while (writer.Position % 4 != 0)
                 writer.Write((byte)0);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             uint len = reader.ReadUInt32();
@@ -44,6 +41,7 @@ namespace UndertaleModLib.Models
             Util.DebugUtil.Assert(Data.Length == len);
         }
 
+        /// <inheritdoc />
         public void UnserializePadding(UndertaleReader reader)
         {
             while (reader.Position % 4 != 0)
@@ -51,6 +49,7 @@ namespace UndertaleModLib.Models
                     throw new IOException("Padding error!");
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             try

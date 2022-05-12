@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using UndertaleModLib.Decompiler;
-
-namespace UndertaleModLib.Models
+﻿namespace UndertaleModLib.Models
 {
     /// <summary>
     /// A string entry a data file can have.
@@ -37,16 +27,19 @@ namespace UndertaleModLib.Models
             this.Content = content;
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteGMString(Content);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Content = reader.ReadGMString();
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return ToString(true);
@@ -96,6 +89,7 @@ namespace UndertaleModLib.Models
             return res;
         }
 
+        /// <inheritdoc />
         public bool SearchMatches(string filter)
         {
             return Content?.ToLower().Contains(filter.ToLower()) ?? false;

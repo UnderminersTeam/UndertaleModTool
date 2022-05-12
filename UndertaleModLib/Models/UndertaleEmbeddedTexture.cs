@@ -1,13 +1,11 @@
 ﻿using ICSharpCode.SharpZipLib.BZip2;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models
@@ -24,7 +22,7 @@ namespace UndertaleModLib.Models
         public UndertaleString Name { get; set; }
 
         /// <summary>
-        /// Whether or not this embedded texture is scaled.
+        /// Whether or not this embedded texture is scaled. TODO: i think this is wrong?
         /// </summary>
         public uint Scaled { get; set; } = 0;
 
@@ -41,6 +39,7 @@ namespace UndertaleModLib.Models
         /// </summary>
         public TexData TextureData { get; set; } = new TexData();
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(Scaled);
@@ -51,6 +50,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObjectPointer(TextureData);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Scaled = reader.ReadUInt32();
@@ -87,6 +87,7 @@ namespace UndertaleModLib.Models
             reader.ReadUndertaleObject(TextureData);
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             if (Name != null)
@@ -108,12 +109,14 @@ namespace UndertaleModLib.Models
             /// </summary>
             public byte[] TextureBlob { get => _TextureBlob; set { _TextureBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextureBlob))); } }
 
+            /// <inheritdoc />
             public event PropertyChangedEventHandler PropertyChanged;
 
             private static readonly byte[] PNGHeader = new byte[8] { 137, 80, 78, 71, 13, 10, 26, 10 };
             private static readonly byte[] QOIandBZipHeader = new byte[4] { 50, 122, 111, 113 };
             private static readonly byte[] QOIHeader = new byte[4] { 102, 105, 111, 113 };
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 if (writer.undertaleData.UseQoiFormat)
@@ -143,6 +146,7 @@ namespace UndertaleModLib.Models
                     writer.Write(TextureBlob);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 uint startAddress = reader.Position;

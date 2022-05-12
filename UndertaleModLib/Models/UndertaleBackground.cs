@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
@@ -28,13 +23,16 @@ namespace UndertaleModLib.Models
             /// </summary>
             public uint ID { get => _ID; set { _ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ID))); } }
 
+            /// <inheritdoc />
             public event PropertyChangedEventHandler PropertyChanged;
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(ID);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 ID = reader.ReadUInt32();
@@ -122,6 +120,7 @@ namespace UndertaleModLib.Models
         /// </summary>
         public List<TileID> GMS2TileIds { get; set; } = new List<TileID>();
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
@@ -148,6 +147,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -177,6 +177,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";

@@ -20,13 +20,16 @@ namespace UndertaleModLib.Models
         /// </summary>
         public UndertaleCode Code { get => _Code.Resource; set { _Code.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Code))); } }
 
+        /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             _Code.Serialize(writer);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             _Code = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();

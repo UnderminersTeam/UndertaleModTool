@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UndertaleModLib.Models
+﻿namespace UndertaleModLib.Models
 {
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertalePath : UndertaleNamedResource
@@ -23,6 +16,7 @@ namespace UndertaleModLib.Models
             public float Y { get; set; }
             public float Speed { get; set; }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(X);
@@ -30,6 +24,7 @@ namespace UndertaleModLib.Models
                 writer.Write(Speed);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 X = reader.ReadSingle();
@@ -38,6 +33,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
@@ -47,6 +43,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObject(Points);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -56,6 +53,7 @@ namespace UndertaleModLib.Models
             Points = reader.ReadUndertaleObject<UndertaleSimpleList<PathPoint>>();
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";

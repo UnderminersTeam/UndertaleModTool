@@ -1,27 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
     // TODO: INotifyPropertyChanged
     public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleInstruction.ReferencedObject
     {
+        /// <inheritdoc />
         public UndertaleString Name { get; set; }
         public UndertaleInstruction.InstanceType InstanceType { get; set; }
         public int VarID { get; set; }
 
+        /// <inheritdoc />
         public uint Occurrences { get; set; }
+
+        /// <inheritdoc />
         public UndertaleInstruction FirstAddress { get; set; }
+
+        /// <inheritdoc />
         public int NameStringID { get; set; }
 
+        /// <summary>
+        /// OBSOLETE. This variable is now located at <see cref="NameStringID"/>.
+        /// </summary>
         [Obsolete("This variable has been renamed to NameStringID.")]
         public int UnknownChainEndingValue { get => NameStringID; set => NameStringID = value; }
 
+
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
@@ -34,9 +39,10 @@ namespace UndertaleModLib.Models
             if (Occurrences > 0)
                 writer.Write(writer.GetAddressForUndertaleObject(FirstAddress));
             else
-                writer.Write((int)-1);
+                writer.Write(-1);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -59,11 +65,13 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name != null && Name.Content != null ? Name.Content : "<NULL_VAR_NAME>";
         }
 
+        /// <inheritdoc />
         public bool SearchMatches(string filter)
         {
             return Name?.SearchMatches(filter) ?? false;

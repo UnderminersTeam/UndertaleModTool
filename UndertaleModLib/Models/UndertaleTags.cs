@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace UndertaleModLib.Models
 {
+    /// <summary>
+    /// A tag entry in a GameMaker data file.
+    /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleTags : UndertaleObject
     {
         public UndertaleSimpleListString Tags { get; set; }
         public Dictionary<int, UndertaleSimpleListString> AssetTags { get; set; }
 
+        //TODO: condense these all into one method
         public static int GetAssetTagID(UndertaleData data, UndertaleGameObject res)
         {
             return ((int)ResourceType.Object << 24) | (data.GameObjects.IndexOf(res) & 0xFFFFFF);
@@ -74,6 +73,7 @@ namespace UndertaleModLib.Models
             return ((int)ResourceType.AnimCurve << 24) | (data.AnimationCurves.IndexOf(res) & 0xFFFFFF);
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             Tags.Serialize(writer);
@@ -83,6 +83,7 @@ namespace UndertaleModLib.Models
             temp.Serialize(writer);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Tags = new UndertaleSimpleListString();
@@ -98,12 +99,14 @@ namespace UndertaleModLib.Models
             public int ID { get; set; }
             public UndertaleSimpleListString Tags { get; set; }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(ID);
                 Tags.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 ID = reader.ReadInt32();

@@ -54,7 +54,17 @@ namespace UndertaleModLib
 
     public interface PrePaddedObject
     {
+
+        /// <summary>
+        /// TODO!
+        /// </summary>
+        /// <param name="writer">Where to serialize to.</param>
         void SerializePrePadding(UndertaleWriter writer);
+
+        /// <summary>
+        /// TODO!
+        /// </summary>
+        /// <param name="reader">Where to deserialize from.</param>
         void UnserializePrePadding(UndertaleReader reader);
     }
 
