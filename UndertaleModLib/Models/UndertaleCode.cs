@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
-using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Models
 {
@@ -220,6 +217,7 @@ namespace UndertaleModLib.Models
                 Type = (VariableType)(int32Value >> 24);
             }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 NextOccurrenceOffset = 0xdead;
@@ -227,12 +225,14 @@ namespace UndertaleModLib.Models
                 writer.Write((byte)Type);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 NextOccurrenceOffset = reader.ReadUInt24();
                 Type = (VariableType)reader.ReadByte();
             }
 
+            /// <inheritdoc />
             public override string ToString()
             {
                 if (typeof(T) == typeof(UndertaleVariable) && Type != VariableType.Normal)
@@ -333,6 +333,7 @@ namespace UndertaleModLib.Models
             return res;
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             switch (GetInstructionType(Kind))
@@ -532,6 +533,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             uint instructionStartAddress = reader.Position;
@@ -801,6 +803,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return ToString(null);
@@ -1040,6 +1043,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
@@ -1074,6 +1078,7 @@ namespace UndertaleModLib.Models
 
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -1271,6 +1276,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";

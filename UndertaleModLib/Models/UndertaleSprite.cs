@@ -662,9 +662,9 @@ namespace UndertaleModLib.Models
     public static class UndertaleYYSWFUtils
     {
         /// <summary>
-        /// Reads an object ignoring the Reader's object pool.
+        /// Reads an <see cref="UndertaleObject"/> ignoring the <paramref name="reader"/>s object pool.
         /// </summary>
-        /// <typeparam name="T"><see cref="UndertaleObject"/>'s child.</typeparam>
+        /// <typeparam name="T"><see cref="UndertaleObject"/>s child.</typeparam>
         /// <param name="reader">An instance of <see cref="UndertaleReader"/>.</param>
         /// <returns>The object</returns>
         public static T ReadUndertaleObjectNoPool<T>(this UndertaleReader reader) where T : UndertaleObject, new()

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UndertaleModLib.Models
+﻿namespace UndertaleModLib.Models
 {
     /// <summary>
     /// An animation curve entry in a data file.
@@ -32,6 +25,7 @@ namespace UndertaleModLib.Models
 
         public UndertaleSimpleList<Channel> Channels { get; set; }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             Serialize(writer, true);
@@ -50,6 +44,7 @@ namespace UndertaleModLib.Models
             Channels.Serialize(writer);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Unserialize(reader, true);
@@ -68,6 +63,7 @@ namespace UndertaleModLib.Models
             Channels = reader.ReadUndertaleObject<UndertaleSimpleList<Channel>>();
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content;
@@ -87,6 +83,7 @@ namespace UndertaleModLib.Models
             public uint Iterations { get; set; }
             public UndertaleSimpleList<Point> Points { get; set; }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.WriteUndertaleString(Name);
@@ -95,6 +92,7 @@ namespace UndertaleModLib.Models
                 Points.Serialize(writer);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Name = reader.ReadUndertaleString();
@@ -113,6 +111,7 @@ namespace UndertaleModLib.Models
                 public float BezierX1;
                 public float BezierY1;
 
+                /// <inheritdoc />
                 public void Serialize(UndertaleWriter writer)
                 {
                     writer.Write(X);
@@ -129,6 +128,7 @@ namespace UndertaleModLib.Models
                         writer.Write(0);
                 }
 
+                /// <inheritdoc />
                 public void Unserialize(UndertaleReader reader)
                 {
                     X = reader.ReadSingle();

@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
@@ -146,6 +142,7 @@ namespace UndertaleModLib.Models
         /// </summary>
         public UndertalePointerList<UndertalePointerList<Event>> Events { get; private set; } = new UndertalePointerList<UndertalePointerList<Event>>();
 
+        /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
         public UndertaleGameObject()
@@ -154,6 +151,7 @@ namespace UndertaleModLib.Models
                 Events.Add(new UndertalePointerList<Event>());
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
@@ -192,6 +190,7 @@ namespace UndertaleModLib.Models
             writer.WriteUndertaleObject(Events);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
@@ -349,6 +348,7 @@ namespace UndertaleModLib.Models
             return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Content + " (" + GetType().Name + ")";
@@ -372,6 +372,7 @@ namespace UndertaleModLib.Models
             /// <remarks>This seems to always have 1 entry, it would need testing if maybe the games using drag-and-drop code are different</remarks>
             public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>();
 
+            //TODO: not used, condense.
             public EventSubtypeKey EventSubtypeKey
             {
                 get => (EventSubtypeKey)EventSubtype;
@@ -408,12 +409,14 @@ namespace UndertaleModLib.Models
                 set => EventSubtype = (uint)value;
             }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(EventSubtype);
                 writer.WriteUndertaleObject(Actions);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 EventSubtype = reader.ReadUInt32();
@@ -454,6 +457,7 @@ namespace UndertaleModLib.Models
 
             public event PropertyChangedEventHandler PropertyChanged;
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(LibID);
@@ -472,6 +476,7 @@ namespace UndertaleModLib.Models
                 writer.Write(UnknownAlwaysZero);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 LibID = reader.ReadUInt32();
@@ -507,12 +512,14 @@ namespace UndertaleModLib.Models
             /// </summary>
             public float Y { get; set; }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.Write(X);
                 writer.Write(Y);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 X = reader.ReadSingle();

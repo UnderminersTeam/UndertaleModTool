@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UndertaleModLib.Models
 {
@@ -365,6 +361,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             DisableDebugger = reader.ReadByte() != 0;
@@ -375,8 +372,8 @@ namespace UndertaleModLib.Models
             LastObj = reader.ReadUInt32();
             LastTile = reader.ReadUInt32();
             GameID = reader.ReadUInt32();
-            byte[] GuidData = reader.ReadBytes(16);
-            DirectPlayGuid = new Guid(GuidData);
+            byte[] guidData = reader.ReadBytes(16);
+            DirectPlayGuid = new Guid(guidData);
             Name = reader.ReadUndertaleString();
             Major = reader.ReadUInt32();
             Minor = reader.ReadUInt32();
@@ -443,6 +440,7 @@ namespace UndertaleModLib.Models
             reader.Bytecode14OrLower = BytecodeVersion <= 14;
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return DisplayName + " (GMS " + Major + "." + Minor + "." + Release + "." + Build + ", bytecode " + BytecodeVersion + ")";
@@ -584,12 +582,14 @@ namespace UndertaleModLib.Models
             /// </summary>
             public UndertaleString Value { get; set; }
 
+            /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
                 writer.WriteUndertaleString(Name);
                 writer.WriteUndertaleString(Value);
             }
 
+            /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
                 Name = reader.ReadUndertaleString();
@@ -597,6 +597,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             if (NewFormat)
@@ -616,7 +617,8 @@ namespace UndertaleModLib.Models
                 writer.WriteUndertaleObject(LoadImage);
                 writer.Write(LoadAlpha);
                 writer.WriteUndertaleObject(Constants);
-            } else
+            }
+            else
             {
                 writer.Write((Info & OptionsFlags.FullScreen) == OptionsFlags.FullScreen);
                 writer.Write((Info & OptionsFlags.InterpolatePixels) == OptionsFlags.InterpolatePixels);
@@ -657,6 +659,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             NewFormat = reader.ReadInt32() == int.MinValue;
@@ -733,6 +736,7 @@ namespace UndertaleModLib.Models
         public List<UndertaleString> EntryIDs { get; set; } = new List<UndertaleString>();
         public List<LanguageData> Languages { get; set; } = new List<LanguageData>();
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write(Unknown1);
@@ -752,6 +756,7 @@ namespace UndertaleModLib.Models
             }
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             Unknown1 = reader.ReadUInt32();
