@@ -132,7 +132,8 @@ namespace UndertaleModLib.Models
                         writer.Write((short)bmp.Height);
                         byte[] data = QoiConverter.GetArrayFromImage(bmp, writer.undertaleData.GM2022_3 ? 0 : 4);
                         using MemoryStream input = new MemoryStream(data);
-                        sharedStream.Seek(0, SeekOrigin.Begin);
+                        if (sharedStream.Length != 0)
+                            sharedStream.Seek(0, SeekOrigin.Begin);
                         BZip2.Compress(input, sharedStream, false, 9);
                         writer.Write(sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position]);
                     }
