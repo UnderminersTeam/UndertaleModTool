@@ -875,6 +875,7 @@ namespace UndertaleModTool
                             FileMessageEvent?.Invoke(message);
                         });
                     }
+                    UndertaleEmbeddedTexture.TexData.ClearSharedStream();
                 }
                 catch (Exception e)
                 {

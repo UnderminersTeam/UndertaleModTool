@@ -102,6 +102,7 @@ namespace UndertaleModLib.Models
         public class TexData : UndertaleObject, INotifyPropertyChanged
         {
             private byte[] _TextureBlob;
+            private static MemoryStream sharedStream;
 
             /// <summary>
             /// The image data of the texture.
@@ -113,6 +114,8 @@ namespace UndertaleModLib.Models
             private static readonly byte[] PNGHeader = new byte[8] { 137, 80, 78, 71, 13, 10, 26, 10 };
             private static readonly byte[] QOIandBZipHeader = new byte[4] { 50, 122, 111, 113 };
             private static readonly byte[] QOIHeader = new byte[4] { 102, 105, 111, 113 };
+
+            public static void ClearSharedStream() => sharedStream = null;
 
             public void Serialize(UndertaleWriter writer)
             {
@@ -145,6 +148,8 @@ namespace UndertaleModLib.Models
 
             public void Unserialize(UndertaleReader reader)
             {
+                sharedStream ??= new();
+
                 uint startAddress = reader.Position;
 
                 byte[] header = reader.ReadBytes(8);
@@ -163,14 +168,15 @@ namespace UndertaleModLib.Models
                         // Need to fully decompress and convert the QOI data to PNG for compatibility purposes (at least for now)
                         using MemoryStream bufferWrapper = new MemoryStream(reader.Buffer);
                         bufferWrapper.Seek(reader.Offset, SeekOrigin.Begin);
-                        using MemoryStream result = new MemoryStream(1024);
-                        BZip2.Decompress(bufferWrapper, result, false);
+                        sharedStream.Seek(0, SeekOrigin.Begin);
+                        BZip2.Decompress(bufferWrapper, sharedStream, false);
                         reader.Position = (uint)bufferWrapper.Position;
-                        result.Seek(0, SeekOrigin.Begin);
-                        using Bitmap bmp = QoiConverter.GetImageFromSpan(result.GetBuffer());
-                        using MemoryStream final = new MemoryStream();
-                        bmp.Save(final, ImageFormat.Png);
-                        TextureBlob = final.ToArray();
+                        using Bitmap bmp = QoiConverter.GetImageFromSpan(sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position]);
+                        sharedStream.Seek(0, SeekOrigin.Begin);
+                        bmp.Save(sharedStream, ImageFormat.Png);
+                        TextureBlob = new byte[(int)sharedStream.Position];
+                        sharedStream.Seek(0, SeekOrigin.Begin);
+                        sharedStream.Read(TextureBlob, 0, TextureBlob.Length);
                         return;
                     }
                     else if (header.Take(4).SequenceEqual(QOIHeader))
