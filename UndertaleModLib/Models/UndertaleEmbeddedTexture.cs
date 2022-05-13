@@ -10,214 +10,213 @@ using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
-namespace UndertaleModLib.Models
+namespace UndertaleModLib.Models;
+
+/// <summary>
+/// An embedded texture entry in the data file.
+/// </summary>
+[PropertyChanged.AddINotifyPropertyChangedInterface]
+public class UndertaleEmbeddedTexture : UndertaleNamedResource
 {
     /// <summary>
-    /// An embedded texture entry in the data file.
+    /// The name of the embedded texture entry.
     /// </summary>
-    [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class UndertaleEmbeddedTexture : UndertaleNamedResource
+    public UndertaleString Name { get; set; }
+
+    /// <summary>
+    /// Whether or not this embedded texture is scaled.
+    /// </summary>
+    public uint Scaled { get; set; } = 0;
+
+    /// <summary>
+    /// The amount of generated mipmap levels.
+    /// </summary>
+    public uint GeneratedMips { get; set; }
+
+
+    public uint TextureBlockSize { get; set; }
+
+    /// <summary>
+    /// The texture data in the embedded image.
+    /// </summary>
+    public TexData TextureData { get; set; } = new TexData();
+
+    public void Serialize(UndertaleWriter writer)
     {
-        /// <summary>
-        /// The name of the embedded texture entry.
-        /// </summary>
-        public UndertaleString Name { get; set; }
+        writer.Write(Scaled);
+        if (writer.undertaleData.GeneralInfo.Major >= 2)
+            writer.Write(GeneratedMips);
+        if (writer.undertaleData.GM2022_3)
+            writer.Write(TextureBlockSize);
+        writer.WriteUndertaleObjectPointer(TextureData);
+    }
+
+    public void Unserialize(UndertaleReader reader)
+    {
+        Scaled = reader.ReadUInt32();
+        if (reader.undertaleData.GeneralInfo.Major >= 2)
+            GeneratedMips = reader.ReadUInt32();
+        if (reader.undertaleData.GM2022_3)
+            TextureBlockSize = reader.ReadUInt32();
+        TextureData = reader.ReadUndertaleObjectPointer<TexData>();
+    }
+
+    /// <summary>
+    /// TODO!
+    /// </summary>
+    /// <param name="writer">Where to serialize to.</param>
+    public void SerializeBlob(UndertaleWriter writer)
+    {
+        // padding
+        while (writer.Position % 0x80 != 0)
+            writer.Write((byte)0);
+
+        writer.WriteUndertaleObject(TextureData);
+    }
+
+    /// <summary>
+    /// TODO!
+    /// </summary>
+    /// <param name="reader">Where to deserialize from.</param>
+    public void UnserializeBlob(UndertaleReader reader)
+    {
+        while (reader.Position % 0x80 != 0)
+            if (reader.ReadByte() != 0)
+                throw new IOException("Padding error!");
+
+        reader.ReadUndertaleObject(TextureData);
+    }
+
+    public override string ToString()
+    {
+        if (Name != null)
+            return Name.Content + " (" + GetType().Name + ")";
+        else
+            Name = new UndertaleString("Texture Unknown Index");
+        return Name.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <summary>
+    /// Texture data in an <see cref="UndertaleEmbeddedTexture"/>.
+    /// </summary>
+    public class TexData : UndertaleObject, INotifyPropertyChanged
+    {
+        private byte[] _TextureBlob;
+        private static MemoryStream sharedStream;
 
         /// <summary>
-        /// Whether or not this embedded texture is scaled.
+        /// The image data of the texture.
         /// </summary>
-        public uint Scaled { get; set; } = 0;
+        public byte[] TextureBlob { get => _TextureBlob; set { _TextureBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextureBlob))); } }
 
-        /// <summary>
-        /// The amount of generated mipmap levels.
-        /// </summary>
-        public uint GeneratedMips { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
 
+        private static readonly byte[] PNGHeader = new byte[8] { 137, 80, 78, 71, 13, 10, 26, 10 };
+        private static readonly byte[] QOIandBZipHeader = new byte[4] { 50, 122, 111, 113 };
+        private static readonly byte[] QOIHeader = new byte[4] { 102, 105, 111, 113 };
 
-        public uint TextureBlockSize { get; set; }
-
-        /// <summary>
-        /// The texture data in the embedded image.
-        /// </summary>
-        public TexData TextureData { get; set; } = new TexData();
+        public static void ClearSharedStream() => sharedStream = null;
+        public static void InitSharedStream(int size) => sharedStream = new(size);
 
         public void Serialize(UndertaleWriter writer)
         {
-            writer.Write(Scaled);
-            if (writer.undertaleData.GeneralInfo.Major >= 2)
-                writer.Write(GeneratedMips);
-            if (writer.undertaleData.GM2022_3)
-                writer.Write(TextureBlockSize);
-            writer.WriteUndertaleObjectPointer(TextureData);
+            if (writer.undertaleData.UseQoiFormat)
+            {
+                if (writer.undertaleData.UseBZipFormat)
+                {
+                    writer.Write(QOIandBZipHeader);
+
+                    // Encode the PNG data back to QOI+BZip2
+                    using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
+                    writer.Write((short)bmp.Width);
+                    writer.Write((short)bmp.Height);
+                    byte[] data = QoiConverter.GetArrayFromImage(bmp, writer.undertaleData.GM2022_3 ? 0 : 4);
+                    using MemoryStream input = new MemoryStream(data);
+                    if (sharedStream.Length != 0)
+                        sharedStream.Seek(0, SeekOrigin.Begin);
+                    BZip2.Compress(input, sharedStream, false, 9);
+                    writer.Write(sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position]);
+                }
+                else
+                {
+                    // Encode the PNG data back to QOI
+                    writer.Write(QoiConverter.GetSpanFromImage(TextureWorker.GetImageFromByteArray(TextureBlob),
+                        writer.undertaleData.GM2022_3 ? 0 : 4));
+                }
+            }
+            else
+                writer.Write(TextureBlob);
         }
 
         public void Unserialize(UndertaleReader reader)
         {
-            Scaled = reader.ReadUInt32();
-            if (reader.undertaleData.GeneralInfo.Major >= 2)
-                GeneratedMips = reader.ReadUInt32();
-            if (reader.undertaleData.GM2022_3)
-                TextureBlockSize = reader.ReadUInt32();
-            TextureData = reader.ReadUndertaleObjectPointer<TexData>();
-        }
+            sharedStream ??= new();
 
-        /// <summary>
-        /// TODO!
-        /// </summary>
-        /// <param name="writer">Where to serialize to.</param>
-        public void SerializeBlob(UndertaleWriter writer)
-        {
-            // padding
-            while (writer.Position % 0x80 != 0)
-                writer.Write((byte)0);
+            uint startAddress = reader.Position;
 
-            writer.WriteUndertaleObject(TextureData);
-        }
-
-        /// <summary>
-        /// TODO!
-        /// </summary>
-        /// <param name="reader">Where to deserialize from.</param>
-        public void UnserializeBlob(UndertaleReader reader)
-        {
-            while (reader.Position % 0x80 != 0)
-                if (reader.ReadByte() != 0)
-                    throw new IOException("Padding error!");
-
-            reader.ReadUndertaleObject(TextureData);
-        }
-
-        public override string ToString()
-        {
-            if (Name != null)
-                return Name.Content + " (" + GetType().Name + ")";
-            else
-                Name = new UndertaleString("Texture Unknown Index");
-            return Name.Content + " (" + GetType().Name + ")";
-        }
-
-        /// <summary>
-        /// Texture data in an <see cref="UndertaleEmbeddedTexture"/>.
-        /// </summary>
-        public class TexData : UndertaleObject, INotifyPropertyChanged
-        {
-            private byte[] _TextureBlob;
-            private static MemoryStream sharedStream;
-
-            /// <summary>
-            /// The image data of the texture.
-            /// </summary>
-            public byte[] TextureBlob { get => _TextureBlob; set { _TextureBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextureBlob))); } }
-
-            public event PropertyChangedEventHandler PropertyChanged;
-
-            private static readonly byte[] PNGHeader = new byte[8] { 137, 80, 78, 71, 13, 10, 26, 10 };
-            private static readonly byte[] QOIandBZipHeader = new byte[4] { 50, 122, 111, 113 };
-            private static readonly byte[] QOIHeader = new byte[4] { 102, 105, 111, 113 };
-
-            public static void ClearSharedStream() => sharedStream = null;
-            public static void InitSharedStream(int size) => sharedStream = new(size);
-
-            public void Serialize(UndertaleWriter writer)
+            byte[] header = reader.ReadBytes(8);
+            if (!header.SequenceEqual(PNGHeader))
             {
-                if (writer.undertaleData.UseQoiFormat)
-                {
-                    if (writer.undertaleData.UseBZipFormat)
-                    {
-                        writer.Write(QOIandBZipHeader);
+                reader.Position = startAddress;
 
-                        // Encode the PNG data back to QOI+BZip2
-                        using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
-                        writer.Write((short)bmp.Width);
-                        writer.Write((short)bmp.Height);
-                        byte[] data = QoiConverter.GetArrayFromImage(bmp, writer.undertaleData.GM2022_3 ? 0 : 4);
-                        using MemoryStream input = new MemoryStream(data);
-                        if (sharedStream.Length != 0)
-                            sharedStream.Seek(0, SeekOrigin.Begin);
-                        BZip2.Compress(input, sharedStream, false, 9);
-                        writer.Write(sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position]);
-                    }
-                    else
-                    {
-                        // Encode the PNG data back to QOI
-                        writer.Write(QoiConverter.GetSpanFromImage(TextureWorker.GetImageFromByteArray(TextureBlob),
-                            writer.undertaleData.GM2022_3 ? 0 : 4));
-                    }
+                if (header.Take(4).SequenceEqual(QOIandBZipHeader))
+                {
+                    reader.undertaleData.UseQoiFormat = true;
+                    reader.undertaleData.UseBZipFormat = true;
+
+                    // Don't really care about the width/height, so skip them, as well as header
+                    reader.Position += 8;
+
+                    // Need to fully decompress and convert the QOI data to PNG for compatibility purposes (at least for now)
+                    using MemoryStream bufferWrapper = new MemoryStream(reader.Buffer);
+                    bufferWrapper.Seek(reader.Offset, SeekOrigin.Begin);
+                    if (sharedStream.Length != 0)
+                        sharedStream.Seek(0, SeekOrigin.Begin);
+                    BZip2.Decompress(bufferWrapper, sharedStream, false);
+                    reader.Position = (uint)bufferWrapper.Position;
+                    using Bitmap bmp = QoiConverter.GetImageFromSpan(sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position]);
+                    sharedStream.Seek(0, SeekOrigin.Begin);
+                    bmp.Save(sharedStream, ImageFormat.Png);
+                    TextureBlob = new byte[(int)sharedStream.Position];
+                    sharedStream.Seek(0, SeekOrigin.Begin);
+                    sharedStream.Read(TextureBlob, 0, TextureBlob.Length);
+                    return;
+                }
+                else if (header.Take(4).SequenceEqual(QOIHeader))
+                {
+                    reader.undertaleData.UseQoiFormat = true;
+                    reader.undertaleData.UseBZipFormat = false;
+
+                    // Need to convert the QOI data to PNG for compatibility purposes (at least for now)
+                    using Bitmap bmp = QoiConverter.GetImageFromSpan(reader.Buffer.AsSpan()[reader.Offset..], out int dataLength);
+                    reader.Offset += dataLength;
+                    if (sharedStream.Length != 0)
+                        sharedStream.Seek(0, SeekOrigin.Begin);
+                    bmp.Save(sharedStream, ImageFormat.Png);
+                    TextureBlob = new byte[(int)sharedStream.Position];
+                    sharedStream.Seek(0, SeekOrigin.Begin);
+                    sharedStream.Read(TextureBlob, 0, TextureBlob.Length);
+                    return;
                 }
                 else
-                    writer.Write(TextureBlob);
+                    throw new IOException("Didn't find PNG or QOI+BZip2 header");
             }
 
-            public void Unserialize(UndertaleReader reader)
+            // There is no length for the PNG anywhere as far as I can see
+            // The only thing we can do is parse the image to find the end
+            while (true)
             {
-                sharedStream ??= new();
-
-                uint startAddress = reader.Position;
-
-                byte[] header = reader.ReadBytes(8);
-                if (!header.SequenceEqual(PNGHeader))
-                {
-                    reader.Position = startAddress;
-
-                    if (header.Take(4).SequenceEqual(QOIandBZipHeader))
-                    {
-                        reader.undertaleData.UseQoiFormat = true;
-                        reader.undertaleData.UseBZipFormat = true;
-
-                        // Don't really care about the width/height, so skip them, as well as header
-                        reader.Position += 8;
-
-                        // Need to fully decompress and convert the QOI data to PNG for compatibility purposes (at least for now)
-                        using MemoryStream bufferWrapper = new MemoryStream(reader.Buffer);
-                        bufferWrapper.Seek(reader.Offset, SeekOrigin.Begin);
-                        if (sharedStream.Length != 0)
-                            sharedStream.Seek(0, SeekOrigin.Begin);
-                        BZip2.Decompress(bufferWrapper, sharedStream, false);
-                        reader.Position = (uint)bufferWrapper.Position;
-                        using Bitmap bmp = QoiConverter.GetImageFromSpan(sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position]);
-                        sharedStream.Seek(0, SeekOrigin.Begin);
-                        bmp.Save(sharedStream, ImageFormat.Png);
-                        TextureBlob = new byte[(int)sharedStream.Position];
-                        sharedStream.Seek(0, SeekOrigin.Begin);
-                        sharedStream.Read(TextureBlob, 0, TextureBlob.Length);
-                        return;
-                    }
-                    else if (header.Take(4).SequenceEqual(QOIHeader))
-                    {
-                        reader.undertaleData.UseQoiFormat = true;
-                        reader.undertaleData.UseBZipFormat = false;
-
-                        // Need to convert the QOI data to PNG for compatibility purposes (at least for now)
-                        using Bitmap bmp = QoiConverter.GetImageFromSpan(reader.Buffer.AsSpan()[reader.Offset..], out int dataLength);
-                        reader.Offset += dataLength;
-                        if (sharedStream.Length != 0)
-                            sharedStream.Seek(0, SeekOrigin.Begin);
-                        bmp.Save(sharedStream, ImageFormat.Png);
-                        TextureBlob = new byte[(int)sharedStream.Position];
-                        sharedStream.Seek(0, SeekOrigin.Begin);
-                        sharedStream.Read(TextureBlob, 0, TextureBlob.Length);
-                        return;
-                    }
-                    else
-                        throw new IOException("Didn't find PNG or QOI+BZip2 header");
-                }
-
-                // There is no length for the PNG anywhere as far as I can see
-                // The only thing we can do is parse the image to find the end
-                while (true)
-                {
-                    // PNG is big endian and BinaryRead can't handle that (damn)
-                    uint len = (uint)reader.ReadByte() << 24 | (uint)reader.ReadByte() << 16 | (uint)reader.ReadByte() << 8 | (uint)reader.ReadByte();
-                    string type = Encoding.UTF8.GetString(reader.ReadBytes(4));
-                    reader.Position += len + 4;
-                    if (type == "IEND")
-                        break;
-                }
-
-                uint length = reader.Position - startAddress;
-                reader.Position = startAddress;
-                TextureBlob = reader.ReadBytes((int)length);
+                // PNG is big endian and BinaryRead can't handle that (damn)
+                uint len = (uint)reader.ReadByte() << 24 | (uint)reader.ReadByte() << 16 | (uint)reader.ReadByte() << 8 | (uint)reader.ReadByte();
+                string type = Encoding.UTF8.GetString(reader.ReadBytes(4));
+                reader.Position += len + 4;
+                if (type == "IEND")
+                    break;
             }
+
+            uint length = reader.Position - startAddress;
+            reader.Position = startAddress;
+            TextureBlob = reader.ReadBytes((int)length);
         }
     }
 }
