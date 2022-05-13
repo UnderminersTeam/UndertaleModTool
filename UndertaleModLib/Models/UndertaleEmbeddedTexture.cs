@@ -1,13 +1,11 @@
 ﻿using ICSharpCode.SharpZipLib.BZip2;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models;
@@ -24,9 +22,9 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
     public UndertaleString Name { get; set; }
 
     /// <summary>
-    /// Whether or not this embedded texture is scaled.
+    /// Whether or not this embedded texture is scaled. TODO: i think this is wrong?
     /// </summary>
-    public uint Scaled { get; set; } = 0;
+    public uint Scaled { get; set; }
 
     /// <summary>
     /// The amount of generated mipmap levels.
@@ -41,6 +39,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
     /// </summary>
     public TexData TextureData { get; set; } = new TexData();
 
+    /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
     {
         writer.Write(Scaled);
@@ -51,6 +50,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
         writer.WriteUndertaleObjectPointer(TextureData);
     }
 
+    /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
         Scaled = reader.ReadUInt32();
@@ -87,6 +87,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
         reader.ReadUndertaleObject(TextureData);
     }
 
+    /// <inheritdoc />
     public override string ToString()
     {
         if (Name != null)
@@ -101,30 +102,32 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
     /// </summary>
     public class TexData : UndertaleObject, INotifyPropertyChanged
     {
-        private byte[] _TextureBlob;
+        private byte[] _textureBlob;
         private static MemoryStream sharedStream;
 
         /// <summary>
         /// The image data of the texture.
         /// </summary>
-        public byte[] TextureBlob { get => _TextureBlob; set { _TextureBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextureBlob))); } }
+        public byte[] TextureBlob { get => _textureBlob; set { _textureBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextureBlob))); } }
 
+        /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private static readonly byte[] PNGHeader = new byte[8] { 137, 80, 78, 71, 13, 10, 26, 10 };
-        private static readonly byte[] QOIandBZipHeader = new byte[4] { 50, 122, 111, 113 };
-        private static readonly byte[] QOIHeader = new byte[4] { 102, 105, 111, 113 };
+        private static readonly byte[] pngHeader = { 137, 80, 78, 71, 13, 10, 26, 10 };
+        private static readonly byte[] qoiAndBZipHeader = { 50, 122, 111, 113 };
+        private static readonly byte[] qoiHeader = { 102, 105, 111, 113 };
 
         public static void ClearSharedStream() => sharedStream = null;
         public static void InitSharedStream(int size) => sharedStream = new(size);
 
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             if (writer.undertaleData.UseQoiFormat)
             {
                 if (writer.undertaleData.UseBZipFormat)
                 {
-                    writer.Write(QOIandBZipHeader);
+                    writer.Write(qoiAndBZipHeader);
 
                     // Encode the PNG data back to QOI+BZip2
                     using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
@@ -148,6 +151,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
                 writer.Write(TextureBlob);
         }
 
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             sharedStream ??= new();
@@ -155,11 +159,11 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
             uint startAddress = reader.Position;
 
             byte[] header = reader.ReadBytes(8);
-            if (!header.SequenceEqual(PNGHeader))
+            if (!header.SequenceEqual(pngHeader))
             {
                 reader.Position = startAddress;
 
-                if (header.Take(4).SequenceEqual(QOIandBZipHeader))
+                if (header.Take(4).SequenceEqual(qoiAndBZipHeader))
                 {
                     reader.undertaleData.UseQoiFormat = true;
                     reader.undertaleData.UseBZipFormat = true;

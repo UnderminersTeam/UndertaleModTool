@@ -302,7 +302,7 @@ namespace UndertaleModTool
             if (room.Layers.Count > 0)
                 layer = clickedObj switch
                 {
-                    Tile or GameObject => roomObjDict[(clickedObj as RoomObject).InstanceID],
+                    Tile or GameObject => roomObjDict[(clickedObj as IRoomObject).InstanceID],
                     SpriteInstance spr => sprInstDict[spr],
                     _ => null
                 };
@@ -321,7 +321,7 @@ namespace UndertaleModTool
                     int index = collection.IndexOf(clickedObj) + 1;
                     Point pos = clickedObj switch
                     {
-                        RoomObject roomObj => new(roomObj.X, roomObj.Y),
+                        IRoomObject roomObj => new(roomObj.X, roomObj.Y),
                         SpriteInstance sprInst => new(sprInst.X, sprInst.Y),
                         _ => new()
                     };
@@ -549,7 +549,7 @@ namespace UndertaleModTool
             if (room.Layers.Count > 0)
                 layer = other switch
                 {
-                    Tile or GameObject => roomObjDict[(other as RoomObject).InstanceID],
+                    Tile or GameObject => roomObjDict[(other as IRoomObject).InstanceID],
                     SpriteInstance spr => sprInstDict[spr],
                     _ => null
                 };
@@ -1081,7 +1081,7 @@ namespace UndertaleModTool
                 if (room.Layers.Count > 0)
                     layer = selectedObj switch
                     {
-                        Tile or GameObject => roomObjDict[(selectedObj as RoomObject).InstanceID],
+                        Tile or GameObject => roomObjDict[(selectedObj as IRoomObject).InstanceID],
                         SpriteInstance spr => sprInstDict[spr],
                         _ => null
                     };
@@ -1195,7 +1195,7 @@ namespace UndertaleModTool
                     object utObj = ObjectEditor.Content;
                     layer = utObj switch
                     {
-                        Tile or GameObject => roomObjDict[(utObj as RoomObject).InstanceID],
+                        Tile or GameObject => roomObjDict[(utObj as IRoomObject).InstanceID],
                         SpriteInstance spr => sprInstDict[spr],
                         Layer l => l,
                         _ => null

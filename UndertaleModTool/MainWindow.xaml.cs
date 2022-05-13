@@ -482,7 +482,7 @@ namespace UndertaleModTool
                 }
                 else if (args[2] == "launch")
                 {
-                    string gameExeName = Data?.GeneralInfo?.Filename?.Content;
+                    string gameExeName = Data?.GeneralInfo?.FileName?.Content;
                     if (gameExeName == null || FilePath == null)
                     {
                         ScriptError("Null game executable name or location");
@@ -942,7 +942,7 @@ namespace UndertaleModTool
                         }
                         if (data.GeneralInfo != null)
                         {
-                            if (!data.GeneralInfo.DisableDebugger)
+                            if (!data.GeneralInfo.IsDebuggerDisabled)
                             {
                                 MessageBox.Show("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
                             }
@@ -1015,7 +1015,7 @@ namespace UndertaleModTool
                 CloseChildFiles();
 
             DebugDataDialog.DebugDataMode debugMode = DebugDataDialog.DebugDataMode.NoDebug;
-            if (!suppressDebug && Data.GeneralInfo != null && !Data.GeneralInfo.DisableDebugger)
+            if (!suppressDebug && Data.GeneralInfo != null && !Data.GeneralInfo.IsDebuggerDisabled)
                 MessageBox.Show("You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
             Task t = Task.Run(async () =>
             {
@@ -2843,15 +2843,15 @@ result in loss of work.");
             string oldFilePath = FilePath;
             bool oldDisableDebuggerState = true;
             int oldSteamValue = 0;
-            oldDisableDebuggerState = Data.GeneralInfo.DisableDebugger;
+            oldDisableDebuggerState = Data.GeneralInfo.IsDebuggerDisabled;
             oldSteamValue = Data.GeneralInfo.SteamAppID;
             Data.GeneralInfo.SteamAppID = 0;
-            Data.GeneralInfo.DisableDebugger = true;
+            Data.GeneralInfo.IsDebuggerDisabled = true;
             string TempFilesFolder = (oldFilePath != null ? Path.Combine(Path.GetDirectoryName(oldFilePath), "MyMod.temp") : "");
             await SaveFile(TempFilesFolder, false);
             Data.GeneralInfo.SteamAppID = oldSteamValue;
             FilePath = oldFilePath;
-            Data.GeneralInfo.DisableDebugger = oldDisableDebuggerState;
+            Data.GeneralInfo.IsDebuggerDisabled = oldDisableDebuggerState;
             if (TempFilesFolder == null)
             {
                 ShowWarning("Temp folder is null.");
@@ -2859,7 +2859,7 @@ result in loss of work.");
             }
             else if (saveOk)
             {
-                string gameExeName = Data?.GeneralInfo?.Filename?.Content;
+                string gameExeName = Data?.GeneralInfo?.FileName?.Content;
                 if (gameExeName == null || FilePath == null)
                 {
                     ScriptError("Null game executable name or location");
@@ -2896,15 +2896,15 @@ result in loss of work.");
                 return;
 
             bool saveOk = true;
-            if (!Data.GeneralInfo.DisableDebugger)
+            if (!Data.GeneralInfo.IsDebuggerDisabled)
             {
                 if (ShowQuestion("The game has the debugger enabled. Would you like to disable it so the game will run?") == MessageBoxResult.Yes)
                 {
-                    Data.GeneralInfo.DisableDebugger = true;
+                    Data.GeneralInfo.IsDebuggerDisabled = true;
                     if (!await DoSaveDialog())
                     {
                         ShowError("You must save your changes to run.");
-                        Data.GeneralInfo.DisableDebugger = false;
+                        Data.GeneralInfo.IsDebuggerDisabled = false;
                         return;
                     }
                 }
@@ -2916,7 +2916,7 @@ result in loss of work.");
             }
             else
             {
-                Data.GeneralInfo.DisableDebugger = true;
+                Data.GeneralInfo.IsDebuggerDisabled = true;
                 if (ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
                     saveOk = await DoSaveDialog();
             }
@@ -2940,8 +2940,8 @@ result in loss of work.");
             if (Data == null)
                 return;
 
-            bool origDbg = Data.GeneralInfo.DisableDebugger;
-            Data.GeneralInfo.DisableDebugger = false;
+            bool origDbg = Data.GeneralInfo.IsDebuggerDisabled;
+            Data.GeneralInfo.IsDebuggerDisabled = false;
 
             bool saveOk = await DoSaveDialog(true);
             if (FilePath == null)
@@ -2986,7 +2986,7 @@ result in loss of work.");
                 Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
                 Process.Start(runtime.DebuggerPath, "-d=\"" + Path.ChangeExtension(FilePath, ".yydebug") + "\" -t=\"127.0.0.1\" -tp=" + Data.GeneralInfo.DebuggerPort + " -p=\"" + tempProject + "\"");
             }
-            Data.GeneralInfo.DisableDebugger = origDbg;
+            Data.GeneralInfo.IsDebuggerDisabled = origDbg;
         }
 
         private void Command_Settings(object sender, ExecutedRoutedEventArgs e)

@@ -194,11 +194,19 @@ namespace UndertaleModLib
         public uint VarCount2 { get => FORM.VARI.VarCount2; set => FORM.VARI.VarCount2 = value; }
 
         /// <summary>
-        /// TODO: Unknown value, need more research.
+        /// TODO: Unknown value, need more research. Also obsolete.
         /// </summary>
         public bool DifferentVarCounts { get => FORM.VARI.DifferentVarCounts; set => FORM.VARI.DifferentVarCounts = value; }
+
+        /// <summary>
+        /// TODO: Unknown value, need more research. Also obsolete.
+        /// </summary>
         [Obsolete]
         public uint InstanceVarCount { get => VarCount1; set => VarCount1 = value; }
+
+        /// <summary>
+        /// TODO: Unknown value, need more research. Also obsolete.
+        /// </summary>
         [Obsolete]
         public uint InstanceVarCountAgain { get => VarCount2; set => VarCount2 = value; }
 
@@ -243,6 +251,9 @@ namespace UndertaleModLib
         /// </summary>
         public IList<UndertaleEmbeddedAudio> EmbeddedAudio => FORM.AUDO?.List;
 
+        /// <summary>
+        /// The used tags of the data file.
+        /// </summary>
         public UndertaleTags Tags => FORM.TAGS?.Object;
 
         /// <summary>
@@ -304,17 +315,17 @@ namespace UndertaleModLib
         /// Whether the data file is from version GMS2022.1.
         /// </summary>
         public bool GMS2022_1 = false;
-      
+
         /// <summary>
         /// Whether the data file is from version GMS2022.2.
         /// </summary>
         public bool GMS2022_2 = false;
-      
+
         /// <summary>
         /// Whether the data file is from version GMS2022.3.
         /// </summary>
         public bool GM2022_3 = false;
-      
+
         /// <summary>
         /// Some info for the editor to store data on.
         /// </summary>
@@ -579,7 +590,7 @@ namespace UndertaleModLib
             data.FORM.GEN8.Object = new UndertaleGeneralInfo();
             data.FORM.OPTN.Object = new UndertaleOptions();
             data.FORM.LANG.Object = new UndertaleLanguage();
-            data.GeneralInfo.Filename = data.Strings.MakeString("NewGame");
+            data.GeneralInfo.FileName = data.Strings.MakeString("NewGame");
             data.GeneralInfo.Config = data.Strings.MakeString("Default");
             data.GeneralInfo.Name = data.Strings.MakeString("NewGame");
             data.GeneralInfo.DisplayName = data.Strings.MakeString("New UndertaleModTool Game");
@@ -591,198 +602,6 @@ namespace UndertaleModLib
             data.BuiltinList = new BuiltinList(data);
             Decompiler.AssetTypeResolver.InitializeTypes(data);
             return data;
-        }
-    }
-
-    public static class UndertaleDataExtensionMethods
-    {
-        public static T ByName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
-        {
-            if (ignoreCase)
-            {
-                foreach (var item in list)
-                    if (item.Name.Content.Equals(name, StringComparison.OrdinalIgnoreCase))
-                        return item;
-            }
-            else
-            {
-                foreach (var item in list)
-                    if (item.Name.Content == name)
-                        return item;
-            }
-            return default(T);
-        }
-
-        public static UndertaleCodeLocals For(this IList<UndertaleCodeLocals> list, UndertaleCode code)
-        {
-            // TODO: I'm not sure if the runner looks these up by name or by index
-            return list.Where((x) => code.Name == x.Name).FirstOrDefault();
-        }
-
-        public static UndertaleString MakeString(this IList<UndertaleString> list, string content)
-        {
-            if (content == null)
-                throw new ArgumentNullException(nameof(content));
-
-            // TODO: without reference counting the strings, this may leave unused strings in the array
-            foreach (UndertaleString str in list)
-            {
-                if (str.Content == content)
-                    return str;
-            }
-
-            UndertaleString newString = new UndertaleString(content);
-            list.Add(newString);
-            return newString;
-        }
-
-        public static UndertaleString MakeString(this IList<UndertaleString> list, string content, out int index)
-        {
-            if (content == null)
-                throw new ArgumentNullException(nameof(content));
-
-            // TODO: without reference counting the strings, this may leave unused strings in the array
-            for (int i = 0; i < list.Count; i++)
-            {
-                UndertaleString str = list[i];
-                if (str.Content == content)
-                {
-                    index = i;
-                    return str;
-                }
-            }
-
-            UndertaleString newString = new UndertaleString(content);
-            index = list.Count;
-            list.Add(newString);
-            return newString;
-        }
-
-        public static UndertaleFunction EnsureDefined(this IList<UndertaleFunction> list, string name, IList<UndertaleString> strg, bool fast = false)
-        {
-            UndertaleFunction func = fast ? null : list.ByName(name);
-            if (func == null)
-            {
-                var str = strg.MakeString(name, out int id);
-                func = new UndertaleFunction()
-                {
-                    Name = str,
-                    NameStringID = id
-                };
-                list.Add(func);
-            }
-            return func;
-        }
-
-        public static UndertaleVariable EnsureDefined(this IList<UndertaleVariable> list, string name, UndertaleInstruction.InstanceType inst, bool isBuiltin, IList<UndertaleString> strg, UndertaleData data, bool fast = false)
-        {
-            if (inst == UndertaleInstruction.InstanceType.Local)
-                throw new InvalidOperationException("Use DefineLocal instead");
-            bool bytecode14 = (data?.GeneralInfo?.BytecodeVersion <= 14);
-            if (bytecode14)
-                inst = UndertaleInstruction.InstanceType.Undefined;
-            UndertaleVariable vari = fast ? null : list.Where((x) => x.Name?.Content == name && x.InstanceType == inst).FirstOrDefault();
-            if (vari == null)
-            {
-                var str = strg.MakeString(name, out int id);
-
-                var oldId = data.VarCount1;
-                if (!bytecode14)
-                {
-                    if (data.GMS2_3)
-                    {
-                        // GMS 2.3+
-                        if (!isBuiltin)
-                        {
-                            data.VarCount1++;
-                            data.VarCount2 = data.VarCount1;
-                        }
-                        oldId = (uint)id;
-                    }
-                    else if (!data.DifferentVarCounts)
-                    {
-                        // Bytecode 16+
-                        data.VarCount1++;
-                        data.VarCount2++;
-                    }
-                    else
-                    {
-                        // Bytecode 15
-                        if (inst == UndertaleInstruction.InstanceType.Self && !isBuiltin)
-                        {
-                            oldId = data.VarCount2;
-                            data.VarCount2++;
-                        }
-                        else if (inst == UndertaleInstruction.InstanceType.Global)
-                        {
-                            data.VarCount1++;
-                        }
-                    }
-                }
-
-                vari = new UndertaleVariable()
-                {
-                    Name = str,
-                    InstanceType = inst,
-                    VarID = bytecode14 ? 0 : (isBuiltin ? (int)UndertaleInstruction.InstanceType.Builtin : (int)oldId),
-                    NameStringID = id
-                };
-                list.Add(vari);
-            }
-            return vari;
-        }
-
-        public static UndertaleVariable DefineLocal(this IList<UndertaleVariable> list, IList<UndertaleVariable> originalReferencedLocalVars, int localId, string name, IList<UndertaleString> strg, UndertaleData data)
-        {
-            bool bytecode14 = (data?.GeneralInfo?.BytecodeVersion <= 14);
-            if (bytecode14)
-            {
-                UndertaleVariable search = list.Where((x) => x.Name.Content == name).FirstOrDefault();
-                if (search != null)
-                    return search;
-            }
-
-            // Use existing registered variables.
-            if (originalReferencedLocalVars != null)
-            {
-                UndertaleVariable refvar;
-                if (data?.GMS2_3 == true)
-                    refvar = originalReferencedLocalVars.Where((x) => x.Name.Content == name).FirstOrDefault();
-                else
-                    refvar = originalReferencedLocalVars.Where((x) => x.Name.Content == name && x.VarID == localId).FirstOrDefault();
-                if (refvar != null)
-                    return refvar;
-            }
-
-            var str = strg.MakeString(name, out int id);
-            if (data?.GMS2_3 == true)
-                localId = id;
-            UndertaleVariable vari = new UndertaleVariable()
-            {
-                Name = str,
-                InstanceType = bytecode14 ? UndertaleInstruction.InstanceType.Undefined : UndertaleInstruction.InstanceType.Local,
-                VarID = bytecode14 ? 0 : localId,
-                NameStringID = id
-            };
-            list.Add(vari);
-            return vari;
-        }
-
-        public static UndertaleExtensionFunction DefineExtensionFunction(this IList<UndertaleExtensionFunction> extfuncs, IList<UndertaleFunction> funcs, IList<UndertaleString> strg, uint id, uint kind, string name, UndertaleExtensionVarType rettype, string extname, params UndertaleExtensionVarType[] args)
-        {
-            var func = new UndertaleExtensionFunction()
-            {
-                ID = id,
-                Name = strg.MakeString(name),
-                ExtName = strg.MakeString(extname),
-                Kind = kind,
-                RetType = rettype
-            };
-            foreach(var a in args)
-                func.Arguments.Add(new UndertaleExtensionFunctionArg() { Type = a });
-            extfuncs.Add(func);
-            funcs.EnsureDefined(name, strg);
-            return func;
         }
     }
 
