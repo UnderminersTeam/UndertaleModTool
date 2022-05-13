@@ -2,6 +2,7 @@ using System.IO;
 
 namespace UndertaleModCli;
 
+// ReSharper disable NotNullMemberIsNotInitialized - Properties are applied via reflection.
 /// <summary>
 /// Cli options for the New command
 /// </summary>
