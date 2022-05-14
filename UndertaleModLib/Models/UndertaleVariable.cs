@@ -2,12 +2,23 @@
 
 namespace UndertaleModLib.Models;
 
+/// <summary>
+/// A variable entry in a GameMaker data file.
+/// </summary>
 // TODO: INotifyPropertyChanged
 public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleInstruction.ReferencedObject
 {
-    /// <inheritdoc />
+    /// The name of the Variable.
     public UndertaleString Name { get; set; }
+
+    /// <summary>
+    /// The type of the variable.
+    /// </summary>
     public UndertaleInstruction.InstanceType InstanceType { get; set; }
+
+    /// <summary>
+    /// TODO: some id?
+    /// </summary>
     public int VarID { get; set; }
 
     /// <inheritdoc />

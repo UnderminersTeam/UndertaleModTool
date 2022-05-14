@@ -207,6 +207,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="UndertaleRoom"/>.
+    /// </summary>
     public UndertaleRoom()
     {
         for (int i = 0; i < 8; i++)
@@ -441,7 +444,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
     /// </summary>
     public class Background : UndertaleObject, INotifyPropertyChanged
     {
-        private UndertaleRoom _ParentRoom;
+        private UndertaleRoom _parentRoom;
 
         /// <summary>
         /// The room parent this background belongs to.
@@ -449,7 +452,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
         /// <remarks>
         /// This attribute is UMT-only and does not exist in GameMaker.
         /// </remarks>
-        public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; OnPropertyChanged(); UpdateStretch(); } }
+        public UndertaleRoom ParentRoom { get => _parentRoom; set { _parentRoom = value; OnPropertyChanged(); UpdateStretch(); } }
 
         /// <summary>
         /// The calculated horizontal render scale for the background texture.
@@ -478,24 +481,24 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
         /// Whether this acts as a foreground.
         /// </summary>
         public bool Foreground { get; set; } = false;
-        private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _BackgroundDefinition = new();
+        private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _backgroundDefinition = new();
 
         /// <summary>
         /// The background asset this uses.
         /// </summary>
-        public UndertaleBackground BackgroundDefinition { get => _BackgroundDefinition.Resource; set { _BackgroundDefinition.Resource = value; OnPropertyChanged(); } }
-        private int _X = 0;
-        private int _Y = 0;
+        public UndertaleBackground BackgroundDefinition { get => _backgroundDefinition.Resource; set { _backgroundDefinition.Resource = value; OnPropertyChanged(); } }
+        private int _x = 0;
+        private int _y = 0;
 
         /// <summary>
         /// The x coordinate of the background in the room.
         /// </summary>
-        public int X { get => _X; set { _X = value; OnPropertyChanged(); UpdateStretch(); } }
+        public int X { get => _x; set { _x = value; OnPropertyChanged(); UpdateStretch(); } }
 
         /// <summary>
         /// The y coordinate of the background in the room.
         /// </summary>
-        public int Y { get => _Y; set { _Y = value; OnPropertyChanged(); UpdateStretch(); } }
+        public int Y { get => _y; set { _y = value; OnPropertyChanged(); UpdateStretch(); } }
         public int TileX { get; set; } = 1;
         public int TileY { get; set; } = 1;
 
@@ -509,12 +512,12 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
         /// </summary>
         public int SpeedY { get; set; } = 0;
 
-        private bool _Stretch = false;
+        private bool _stretch = false;
 
         /// <summary>
         /// Whether this background is stretched
         /// </summary>
-        public bool Stretch { get => _Stretch; set { _Stretch = value; OnPropertyChanged(); UpdateStretch(); } }
+        public bool Stretch { get => _stretch; set { _stretch = value; OnPropertyChanged(); UpdateStretch(); } }
 
         /// <summary>
         /// Indicates whether this background is tiled horizontally.
@@ -567,7 +570,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
         {
             writer.Write(Enabled);
             writer.Write(Foreground);
-            writer.WriteUndertaleObject(_BackgroundDefinition);
+            writer.WriteUndertaleObject(_backgroundDefinition);
             writer.Write(X);
             writer.Write(Y);
             writer.Write(TileX);
@@ -582,7 +585,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
         {
             Enabled = reader.ReadBoolean();
             Foreground = reader.ReadBoolean();
-            _BackgroundDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>>();
+            _backgroundDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>>();
             X = reader.ReadInt32();
             Y = reader.ReadInt32();
             TileX = reader.ReadInt32();
@@ -663,12 +666,12 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
         /// </summary>
         public int SpeedY { get; set; } = -1;
 
-        private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ObjectId = new();
+        private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _objectId = new();
 
         /// <summary>
         /// The object the view should follow.
         /// </summary>
-        public UndertaleGameObject ObjectId { get => _ObjectId.Resource; set { _ObjectId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ObjectId))); } }
+        public UndertaleGameObject ObjectId { get => _objectId.Resource; set { _objectId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ObjectId))); } }
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
@@ -689,7 +692,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
             writer.Write(BorderY);
             writer.Write(SpeedX);
             writer.Write(SpeedY);
-            writer.WriteUndertaleObject(_ObjectId);
+            writer.WriteUndertaleObject(_objectId);
         }
 
         /// <inheritdoc />
@@ -708,7 +711,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
             BorderY = reader.ReadUInt32();
             SpeedX = reader.ReadInt32();
             SpeedY = reader.ReadInt32();
-            _ObjectId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
+            _objectId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
         }
     }
 
@@ -1087,17 +1090,31 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
         }
     }
 
-    // For GMS2, Backgrounds and Tiles are empty and this is used instead
     /// <summary>
     /// The layer type for a specific layer. In Game Maker: Studio 2, <see cref="UndertaleRoom.Backgrounds"/>, <see cref="UndertaleRoom.Tiles"/>
-    /// are empty and this is used instead.
+    /// are empty and <see cref="UndertaleRoom.Layers"/> are used instead.
     /// </summary>
     public enum LayerType
     {
+        /// <summary>
+        /// The layer is a background layer.
+        /// </summary>
         Background = 1,
+        /// <summary>
+        /// The layer is an instances layer.
+        /// </summary>
         Instances = 2,
+        /// <summary>
+        /// The layer is an assets layer.
+        /// </summary>
         Assets = 3,
+        /// <summary>
+        /// The layer is a tiles layer.
+        /// </summary>
         Tiles = 4,
+        /// <summary>
+        /// The layer is an effects layer.
+        /// </summary>
         Effect = 6
     }
 
@@ -1111,13 +1128,13 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
         {
         }
 
-        private UndertaleRoom _ParentRoom;
+        private UndertaleRoom _parentRoom;
         private int _layerDepth;
 
         /// <summary>
         /// The room this layer belongs to.
         /// </summary>
-        public UndertaleRoom ParentRoom { get => _ParentRoom; set { _ParentRoom = value; OnPropertyChanged(); UpdateParentRoom(); } }
+        public UndertaleRoom ParentRoom { get => _parentRoom; set { _parentRoom = value; OnPropertyChanged(); UpdateParentRoom(); } }
 
         /// <summary>
         /// The name of the layer.

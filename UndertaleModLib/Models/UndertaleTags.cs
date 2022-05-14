@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace UndertaleModLib.Models;
 
 /// <summary>
-/// A tag entry in a GameMaker data file.
+/// A tag entry in a GameMaker data file. Tags are a GameMaker: Studio 2.3+ feature.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleTags : UndertaleObject

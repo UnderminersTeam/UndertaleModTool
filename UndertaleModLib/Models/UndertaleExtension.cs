@@ -15,17 +15,23 @@ public enum UndertaleExtensionKind : uint
     /// <summary>
     /// A DLL extension.
     /// </summary>
-    DLL = 1,
+    Dll = 1,
     /// <summary>
     /// A GML extension.
     /// </summary>
     GML = 2,
+    /// <summary>
+    /// TODO: unknown
+    /// </summary>
     ActionLib = 3,
+    /// <summary>
+    /// TODO: unknown
+    /// </summary>
     Generic = 4,
     /// <summary>
     /// A JavaScript extension.
     /// </summary>
-    JS = 5
+    Js = 5
 }
 
 /// <summary>
