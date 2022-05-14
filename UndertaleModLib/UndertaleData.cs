@@ -648,6 +648,7 @@ namespace UndertaleModLib
             }
 
             // Clear other references
+            FORM = null;
             KnownSubFunctions = null;
             GMLCache = null;
             GMLCacheFailed = null;
