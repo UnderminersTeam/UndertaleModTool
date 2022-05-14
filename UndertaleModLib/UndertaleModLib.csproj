@@ -40,9 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="gitversion.txt" />
-    <EmbeddedResource Include="gitversion.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <EmbeddedResource Include="gitversion.txt" />
   </ItemGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <!-- puts the git commit name and branch name into gitversion.txt which is an embedded resource -->
