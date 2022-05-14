@@ -1,4 +1,6 @@
-﻿namespace UndertaleModLib.Models;
+﻿using System;
+
+namespace UndertaleModLib.Models;
 
 /// <summary>
 /// A texture group info entry in a data file.
@@ -37,7 +39,7 @@
 /// </code>
 /// <see href="https://github.com/krzys-h/UndertaleModTool/wiki/Bytecode-17#tgin-new-chunk"/>.</remarks>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleTextureGroupInfo : UndertaleNamedResource
+public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
 {
     /// <summary>
     /// The name of the texture group info entry.
@@ -122,6 +124,19 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content + " (" + GetType().Name + ")";
+        return Name?.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        Name = null;
+        TexturePages = null;
+        Sprites = null;
+        SpineSprites = null;
+        Fonts = null;
+        Tilesets = null;
     }
 }

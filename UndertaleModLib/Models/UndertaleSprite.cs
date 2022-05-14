@@ -14,7 +14,7 @@ public enum AnimSpeedType : uint
 }
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleSpineTextureEntry : UndertaleObject
+public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
 {
     public int PageWidth { get; set; }
     public int PageHeight { get; set; }
@@ -41,6 +41,14 @@ public class UndertaleSpineTextureEntry : UndertaleObject
     public override string ToString()
     {
         return $"UndertaleSpineTextureEntry ({PageWidth};{PageHeight})";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        PNGBlob = null;
     }
 }
 
@@ -197,7 +205,27 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content + " (" + GetType().Name + ")";
+        return Name?.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        foreach (TextureEntry entry in Textures)
+            entry?.Dispose();
+        foreach (MaskEntry entry in CollisionMasks)
+            entry?.Dispose();
+        if (SpineTextures is not null)
+            foreach (var spineEntry in SpineTextures)
+                spineEntry?.Dispose();
+        Textures = new();
+        CollisionMasks.Clear();
+        SpineTextures = null;
+        _YYSWF = null;
+        V2Sequence = null;
+        V3NineSlice = null;
     }
 
     public MaskEntry NewMaskEntry()
@@ -238,7 +266,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     }
 
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class TextureEntry : UndertaleObject
+    public class TextureEntry : UndertaleObject, IDisposable
     {
         public UndertaleTexturePageItem Texture { get; set; }
 
@@ -253,10 +281,18 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         {
             Texture = reader.ReadUndertaleObjectPointer<UndertaleTexturePageItem>();
         }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            Texture = null;
+        }
     }
 
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class MaskEntry
+    public class MaskEntry : IDisposable
     {
         public byte[] Data { get; set; }
 
@@ -267,6 +303,14 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         public MaskEntry(byte[] data)
         {
             this.Data = data;
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            Data = null;
         }
     }
 
@@ -656,6 +700,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     }
 }
 
+// TODO: make all these classes "IDisposable"
 /// <summary>
 /// Some dirty hacks to make SWF work, they'll be removed later. TODO:
 /// </summary>

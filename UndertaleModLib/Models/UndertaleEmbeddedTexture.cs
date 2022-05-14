@@ -14,7 +14,7 @@ namespace UndertaleModLib.Models;
 /// An embedded texture entry in the data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleEmbeddedTexture : UndertaleNamedResource
+public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
 {
     /// <summary>
     /// The name of the embedded texture entry.
@@ -101,10 +101,19 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
         return Name.Content + " (" + GetType().Name + ")";
     }
 
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        TextureData.Dispose();
+        Name = null;
+    }
+
     /// <summary>
     /// Texture data in an <see cref="UndertaleEmbeddedTexture"/>.
     /// </summary>
-    public class TexData : UndertaleObject, INotifyPropertyChanged
+    public class TexData : UndertaleObject, INotifyPropertyChanged, IDisposable
     {
         private byte[] _textureBlob;
 
@@ -213,6 +222,15 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
             uint length = reader.Position - startAddress;
             reader.Position = startAddress;
             TextureBlob = reader.ReadBytes((int)length);
+        }
+
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            _textureBlob = null;
         }
     }
 }

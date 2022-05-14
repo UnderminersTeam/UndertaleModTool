@@ -1,10 +1,12 @@
-﻿namespace UndertaleModLib.Models;
+﻿using System;
+
+namespace UndertaleModLib.Models;
 
 /// <summary>
 /// An animation curve entry in a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleAnimationCurve : UndertaleNamedResource
+public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
 {
     public enum GraphTypeEnum : uint
     {
@@ -66,11 +68,23 @@ public class UndertaleAnimationCurve : UndertaleNamedResource
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content;
+        return Name?.Content;
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        if (Channels is not null)
+            foreach (Channel channel in Channels)
+                channel?.Dispose();
+        Name = null;
+        Channels = null;
     }
 
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class Channel : UndertaleObject
+    public class Channel : UndertaleObject, IDisposable
     {
         public enum FunctionType : uint
         {
@@ -99,6 +113,15 @@ public class UndertaleAnimationCurve : UndertaleNamedResource
             Function = (FunctionType)reader.ReadUInt32();
             Iterations = reader.ReadUInt32();
             Points = reader.ReadUndertaleObject<UndertaleSimpleList<Point>>();
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            Name = null;
+            Points = null;
         }
 
         public class Point : UndertaleObject

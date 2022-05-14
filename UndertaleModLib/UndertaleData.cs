@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
 
@@ -15,7 +18,7 @@ namespace UndertaleModLib
     /// It includes all the data within it accessible by either the <see cref="FORM"/>-Chunk attribute,
     /// but also via already organized attributes such as <see cref="Backgrounds"/> or <see cref="GameObjects"/>.
     /// TODO: add more documentation about how a data file works at one point.</remarks>
-    public class UndertaleData
+    public class UndertaleData : IDisposable
     {
         /// <summary>
         /// Indexer to access the resource list by its name.
@@ -602,6 +605,55 @@ namespace UndertaleModLib
             data.BuiltinList = new BuiltinList(data);
             Decompiler.AssetTypeResolver.InitializeTypes(data);
             return data;
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            Type listType = typeof(IList<>);
+            Type disposableType = typeof(IDisposable);
+            PropertyInfo[] dataProperties = GetType().GetProperties();
+            var dataListProperties = dataProperties.Where(x => x.PropertyType.IsGenericType
+                                                               && x.PropertyType.GetGenericTypeDefinition() == listType);
+            var dataDisposableProps = dataProperties.Except(dataListProperties)
+                                                    .Where(x => disposableType.IsAssignableFrom(x.PropertyType));
+
+            // Dispose disposable properties
+            foreach (PropertyInfo disposableProp in dataDisposableProps)
+            {
+                // If property is null
+                if (disposableProp.GetValue(this) is not IDisposable disposable)
+                    continue;
+
+                disposable.Dispose();
+            }
+
+            // Clear all object lists (sprites, code, etc.)
+            foreach (PropertyInfo dataListProperty in dataListProperties)
+            {
+                // If list is null
+                if (dataListProperty.GetValue(this) is not IList list)
+                    continue;
+
+                // If list elements are disposable
+                if (disposableType.IsAssignableFrom(list.GetType().GetGenericArguments()[0]))
+                {
+                    foreach (IDisposable disposable in list)
+                        disposable.Dispose();
+                }
+
+                list.Clear();
+            }
+
+            // Clear other references
+            FORM = null;
+            KnownSubFunctions = null;
+            GMLCache = null;
+            GMLCacheFailed = null;
+            GMLCacheChanged = new();
+            GMLEditedBefore = null;
         }
     }
 
