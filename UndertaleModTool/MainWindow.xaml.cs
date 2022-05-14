@@ -592,6 +592,9 @@ namespace UndertaleModTool
             });
 
             await SaveGMLCache(FilePath, false);
+
+            DisposeGameData();
+
             FilePath = null;
             Data = UndertaleData.CreateNew();
             Data.ToolInfo.AppDataProfiles = ProfilesFolder;
@@ -604,18 +607,11 @@ namespace UndertaleModTool
                                           ? "Tile sets"
                                           : "Backgrounds & Tile sets";
 
-            CurrentTab = null;
-            Tabs.Clear();
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P");
             OpenInTab(Highlighted);
-            SelectionHistory.Clear();
-            ClosedTabsHistory.Clear();
 
             CanSave = true;
             CanSafelySave = true;
-
-            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; //clean "GC holes" left in the memory by previous game data
-            GC.Collect();                                                                           //https://docs.microsoft.com/en-us/dotnet/api/system.runtime.gcsettings.largeobjectheapcompactionmode?view=net-5.0
 
             return true;
         }
@@ -841,6 +837,27 @@ namespace UndertaleModTool
                 CurrentTabIndex--;
         }
 
+        private void DisposeGameData()
+        {
+            if (Data is not null)
+            {
+                // This also clears all theirs game object references
+                CurrentTab = null;
+                Tabs.Clear();
+                SelectionHistory.Clear();
+                ClosedTabsHistory.Clear();
+
+                // Update GUI and wait for all background processes to finish
+                UpdateLayout();
+                Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+
+                Data.Dispose();
+                Data = null;
+
+                GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                GC.Collect();
+            }
+        }
         private async Task LoadFile(string filename, bool preventClose = false)
         {
             LoaderDialog dialog = new LoaderDialog("Loading", "Loading, please wait...");
@@ -851,34 +868,9 @@ namespace UndertaleModTool
             });
             dialog.Owner = this;
 
-            // temporary save the current tabs in case of loading error
-            Tab[] tempTabs = null;
-            int lastTabIndex = 0;
-            if (SettingsWindow.KeepDataOnLoad)
-            {
-                tempTabs = Tabs.ToArray();
-                lastTabIndex = CurrentTabIndex;
-            }
-
-            CurrentTab = null;
-            Tabs.Clear(); // clear the current tabs to destroy game object references
-
-            if (tempTabs is null)
-            {
-                SelectionHistory.Clear();
-                ClosedTabsHistory.Clear();
-
-                if (Data is not null)
-                {
-                    Data = null;
-
-                    GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
-                    GC.Collect();
-                }
-
-                Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
-                OpenInTab(Highlighted);
-            }
+            DisposeGameData();
+            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
+            OpenInTab(Highlighted);
 
             Task t = Task.Run(() =>
             {
@@ -973,18 +965,6 @@ namespace UndertaleModTool
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
                         #pragma warning restore CA1416
-
-                        Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
-                        OpenInTab(Highlighted);
-                        SelectionHistory.Clear();
-                        ClosedTabsHistory.Clear();
-                    }
-                    else if (tempTabs is not null)
-                    {
-                        // restore the tabs because new data hasn't been loaded
-                        Tabs = new(tempTabs);
-                        CurrentTab = Tabs[lastTabIndex];
-                        CurrentTabIndex = lastTabIndex;
                     }
 
                     dialog.Hide();
@@ -993,8 +973,10 @@ namespace UndertaleModTool
             dialog.ShowDialog();
             await t;
 
-            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; //clean "GC holes" left in the memory by previous game data
-            GC.Collect();                                                                           //https://docs.microsoft.com/en-us/dotnet/api/system.runtime.gcsettings.largeobjectheapcompactionmode?view=net-5.0
+            // Clear "GC holes" left in the memory in process of data unserializing
+            // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.gcsettings.largeobjectheapcompactionmode?view=net-6.0
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; 
+            GC.Collect();
         }
 
         private async Task SaveFile(string filename, bool suppressDebug = false)

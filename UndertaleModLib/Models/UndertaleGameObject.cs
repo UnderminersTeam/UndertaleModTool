@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace UndertaleModLib.Models;
 
@@ -28,11 +29,11 @@ public enum CollisionShapeFlags : uint
 /// <summary>
 /// A game object in a data file.
 /// </summary>
-public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChanged
+public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
 {
-    public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _Sprite = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
-    public UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _ParentId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
-    public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _TextureMaskId = new UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>();
+    public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _sprite = new();
+    public UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _parentId = new();
+    public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _textureMaskId = new();
 
     /// <summary>
     /// The name of the game object.
@@ -42,7 +43,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// The sprite this game object uses.
     /// </summary>
-    public UndertaleSprite Sprite { get => _Sprite.Resource; set { _Sprite.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sprite))); } }
+    public UndertaleSprite Sprite { get => _sprite.Resource; set { _sprite.Resource = value; OnPropertyChanged(); } }
 
     /// <summary>
     /// Whether the game object is visible.
@@ -67,12 +68,12 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// The parent game object this is inheriting from.
     /// </summary>
-    public UndertaleGameObject ParentId { get => _ParentId.Resource; set { _ParentId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ParentId))); } }
+    public UndertaleGameObject ParentId { get => _parentId.Resource; set { _parentId.Resource = value; OnPropertyChanged(); } }
 
     /// <summary>
     /// The texture mask this game object is using.
     /// </summary>
-    public UndertaleSprite TextureMaskId { get => _TextureMaskId.Resource; set { _TextureMaskId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextureMaskId))); } }
+    public UndertaleSprite TextureMaskId { get => _textureMaskId.Resource; set { _textureMaskId.Resource = value; OnPropertyChanged(); } }
 
     #region Physics related properties
     /// <summary>
@@ -140,10 +141,14 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// All the events that this game object has.
     /// </summary>
-    public UndertalePointerList<UndertalePointerList<Event>> Events { get; private set; } = new UndertalePointerList<UndertalePointerList<Event>>();
+    public UndertalePointerList<UndertalePointerList<Event>> Events { get; private set; } = new();
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
+    protected void OnPropertyChanged([CallerMemberName] string name = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
 
     public UndertaleGameObject()
     {
@@ -155,21 +160,21 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     public void Serialize(UndertaleWriter writer)
     {
         writer.WriteUndertaleString(Name);
-        writer.WriteUndertaleObject(_Sprite);
+        writer.WriteUndertaleObject(_sprite);
         writer.Write(Visible);
         writer.Write(Solid);
         writer.Write(Depth);
         writer.Write(Persistent);
         // This apparently has a different notation than everything else...
-        if (_ParentId.Resource == null)
+        if (_parentId.Resource == null)
         {
             writer.Write((int)-100);
         }
         else
         {
-            writer.WriteUndertaleObject(_ParentId);
+            writer.WriteUndertaleObject(_parentId);
         }
-        writer.WriteUndertaleObject(_TextureMaskId);
+        writer.WriteUndertaleObject(_textureMaskId);
         writer.Write(UsesPhysics);
         writer.Write(IsSensor);
         writer.Write((uint)CollisionShape);
@@ -194,24 +199,24 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     public void Unserialize(UndertaleReader reader)
     {
         Name = reader.ReadUndertaleString();
-        _Sprite = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
+        _sprite = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
         Visible = reader.ReadBoolean();
         Solid = reader.ReadBoolean();
         Depth = reader.ReadInt32();
         Persistent = reader.ReadBoolean();
-        _ParentId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
+        _parentId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
         int parent = reader.ReadInt32();
         if (parent == -100)
         {
-            _ParentId.UnserializeById(reader, -1);
+            _parentId.UnserializeById(reader, -1);
         }
         else
         {
             if (parent < 0 && parent != -1) // Technically can be -100 (undefined), -2 (other), or -1 (self). Other makes no sense here though
                 throw new Exception("Invalid value for parent - should be -100 or object id, got " + parent);
-            _ParentId.UnserializeById(reader, parent);
+            _parentId.UnserializeById(reader, parent);
         }
-        _TextureMaskId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
+        _textureMaskId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
         UsesPhysics = reader.ReadBoolean();
         IsSensor = reader.ReadBoolean();
         CollisionShape = (CollisionShapeFlags)reader.ReadUInt32();
@@ -234,6 +239,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         Events = reader.ReadUndertaleObject<UndertalePointerList<UndertalePointerList<Event>>>();
     }
 
+    #region EventHandlerFor() overloads
     //TODO: what do all these eventhandlers do? can't find any references right now.
 
     public UndertaleCode EventHandlerFor(EventType type, uint subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
@@ -347,18 +353,35 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
             throw new InvalidOperationException();
         return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
     }
+    #endregion
 
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content + " (" + GetType().Name + ")";
+        return Name?.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        _sprite.Dispose();
+        _parentId.Dispose();
+        _textureMaskId.Dispose();
+        PhysicsVertices = new();
+        foreach (var ev in Events)
+            foreach (var subEv in ev)
+                subEv?.Dispose();
+        Name = null;
+        Events = new();
     }
 
     /// <summary>
     /// Generic events that an <see cref="UndertaleGameObject"/> uses.
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class Event : UndertaleObject
+    public class Event : UndertaleObject, IDisposable
     {
         /// <summary>
         /// The subtype of this event.
@@ -422,12 +445,22 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
             EventSubtype = reader.ReadUInt32();
             Actions = reader.ReadUndertaleObject<UndertalePointerList<EventAction>>();
         }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            foreach (EventAction action in Actions)
+                action?.Dispose();
+            Actions = new();
+        }
     }
 
     /// <summary>
     /// An action in an event.
     /// </summary>
-    public class EventAction : UndertaleObject, INotifyPropertyChanged
+    public class EventAction : UndertaleObject, INotifyPropertyChanged, IDisposable
     {
         // All the unknown values seem to be provided for compatibility only - in older versions of GM:S they stored the drag and drop blocks,
         // but newer versions compile them down to GML bytecode anyway
@@ -443,12 +476,12 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         public bool UseApplyTo { get; set; } // always 1
         public uint ExeType { get; set; } // always 2
         public UndertaleString ActionName { get; set; } // always ""
-        private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _CodeId = new UndertaleModLib.UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
+        private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _codeId = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
 
         /// <summary>
         /// The code entry that gets executed.
         /// </summary>
-        public UndertaleCode CodeId { get => _CodeId.Resource; set { _CodeId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CodeId))); } }
+        public UndertaleCode CodeId { get => _codeId.Resource; set { _codeId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CodeId))); } }
         public uint ArgumentCount { get; set; } // always 1
         public int Who { get; set; } // always -1
         public bool Relative { get; set; } // always 0
@@ -468,7 +501,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
             writer.Write(UseApplyTo);
             writer.Write(ExeType);
             writer.WriteUndertaleString(ActionName);
-            writer.WriteUndertaleObject(_CodeId);
+            writer.WriteUndertaleObject(_codeId);
             writer.Write(ArgumentCount);
             writer.Write(Who);
             writer.Write(Relative);
@@ -487,12 +520,21 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
             UseApplyTo = reader.ReadBoolean();
             ExeType = reader.ReadUInt32();
             ActionName = reader.ReadUndertaleString();
-            _CodeId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
+            _codeId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
             ArgumentCount = reader.ReadUInt32();
             Who = reader.ReadInt32();
             Relative = reader.ReadBoolean();
             IsNot = reader.ReadBoolean();
             UnknownAlwaysZero = reader.ReadUInt32();
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            _codeId.Dispose();
+            ActionName = null;
         }
     }
 

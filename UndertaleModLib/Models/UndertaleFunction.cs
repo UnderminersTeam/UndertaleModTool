@@ -6,7 +6,7 @@ using static UndertaleModLib.Models.UndertaleGeneralInfo;
 namespace UndertaleModLib.Models;
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject
+public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject, IDisposable
 {
     public FunctionClassification Classification { get; set; }
     public UndertaleString Name { get; set; }
@@ -61,14 +61,23 @@ public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.Re
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content;
+        return Name?.Content;
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        Name = null;
+        FirstAddress = null;
     }
 }
 
 // Seems to be unused. You can remove all entries and the game still works normally.
 // Maybe the GM:S debugger uses this data?
 // TODO: INotifyPropertyChanged
-public class UndertaleCodeLocals : UndertaleNamedResource
+public class UndertaleCodeLocals : UndertaleNamedResource, IDisposable
 {
     public UndertaleString Name { get; set; }
     public ObservableCollection<LocalVar> Locals { get; } = new ObservableCollection<LocalVar>();
@@ -103,7 +112,7 @@ public class UndertaleCodeLocals : UndertaleNamedResource
     }
 
     // TODO: INotifyPropertyChanged
-    public class LocalVar : UndertaleObject
+    public class LocalVar : UndertaleObject, IDisposable
     {
         public uint Index { get; set; }
         public UndertaleString Name { get; set; }
@@ -121,11 +130,28 @@ public class UndertaleCodeLocals : UndertaleNamedResource
             Index = reader.ReadUInt32();
             Name = reader.ReadUndertaleString();
         }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            Name = null;
+        }
     }
 
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content + " (" + GetType().Name + ")";
+        return Name?.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        Name = null;
+        Locals.Clear();
     }
 }

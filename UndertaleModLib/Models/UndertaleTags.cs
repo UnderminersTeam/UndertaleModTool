@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace UndertaleModLib.Models;
@@ -7,71 +8,34 @@ namespace UndertaleModLib.Models;
 /// A tag entry in a GameMaker data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleTags : UndertaleObject
+public class UndertaleTags : UndertaleObject, IDisposable
 {
     public UndertaleSimpleListString Tags { get; set; }
     public Dictionary<int, UndertaleSimpleListString> AssetTags { get; set; }
 
     public static int GetAssetTagID(UndertaleData data, UndertaleNamedResource resource)
     {
-        ResourceType type;
-        IList<UndertaleNamedResource> list;
-        int offset = 0;
-
-        switch (resource)
+        ResourceType type = resource switch
         {
-            case UndertaleGameObject:
-                type = ResourceType.Object;
-                list = (IList<UndertaleNamedResource>) data.GameObjects;
-                break;
-            case UndertaleSprite:
-                type = ResourceType.Sprite;
-                list = (IList<UndertaleNamedResource>) data.Sprites;
-                break;
-            case UndertaleSound:
-                type = ResourceType.Sound;
-                list = (IList<UndertaleNamedResource>) data.Sounds;
-                break;
-            case UndertaleRoom:
-                type = ResourceType.Room;
-                list = (IList<UndertaleNamedResource>) data.Rooms;
-                break;
-            case UndertalePath:
-                type = ResourceType.Path;
-                list = (IList<UndertaleNamedResource>) data.Paths;
-                break;
-            case UndertaleScript:
-                type = ResourceType.Script;
-                list = (IList<UndertaleNamedResource>) data.Scripts;
-                offset = 100000;
-                break;
-            case UndertaleFont:
-                type = ResourceType.Font;
-                list = (IList<UndertaleNamedResource>) data.Fonts;
-                break;
-            case UndertaleTimeline:
-                type = ResourceType.Timeline;
-                list = (IList<UndertaleNamedResource>) data.Timelines;
-                break;
-            case UndertaleBackground:
-                type = ResourceType.Background;
-                list = (IList<UndertaleNamedResource>) data.Backgrounds;
-                break;
-            case UndertaleShader:
-                type = ResourceType.Shader;
-                list = (IList<UndertaleNamedResource>) data.Shaders;
-                break;
-            case UndertaleSequence:
-                type = ResourceType.Sequence;
-                list = (IList<UndertaleNamedResource>) data.Sequences;
-                break;
-            case UndertaleAnimationCurve:
-                type = ResourceType.AnimCurve;
-                list = (IList<UndertaleNamedResource>) data.AnimationCurves;
-                break;
+            UndertaleGameObject => ResourceType.Object,
+            UndertaleSprite => ResourceType.Sprite,
+            UndertaleSound => ResourceType.Sound,
+            UndertaleRoom => ResourceType.Room,
+            UndertalePath => ResourceType.Path,
+            UndertaleScript => ResourceType.Script,
+            UndertaleFont => ResourceType.Font,
+            UndertaleTimeline => ResourceType.Timeline,
+            UndertaleBackground => ResourceType.Background,
+            UndertaleShader => ResourceType.Shader,
+            UndertaleSequence => ResourceType.Sequence,
+            UndertaleAnimationCurve => ResourceType.AnimCurve,
+            _ => throw new ArgumentException("Invalid resource type!")
+        };
+        IList list = data[resource.GetType()] as IList;
 
-            default: throw new ArgumentException("Invalid resource type!");
-        }
+        int offset = 0;
+        if (resource is UndertaleScript)
+            offset = 100000;
 
         return ((int)type << 24) | ((list.IndexOf(resource) + offset) & 0xFFFFFF);
     }
@@ -98,7 +62,16 @@ public class UndertaleTags : UndertaleObject
             AssetTags[t.ID] = t.Tags;
     }
 
-    private class TempAssetTags : UndertaleObject
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        AssetTags = null;
+        Tags = null;
+    }
+
+    private class TempAssetTags : UndertaleObject, IDisposable
     {
         public int ID { get; set; }
         public UndertaleSimpleListString Tags { get; set; }
@@ -115,6 +88,14 @@ public class UndertaleTags : UndertaleObject
         {
             ID = reader.ReadInt32();
             Tags = reader.ReadUndertaleObject<UndertaleSimpleListString>();
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            Tags = null;
         }
     }
 }

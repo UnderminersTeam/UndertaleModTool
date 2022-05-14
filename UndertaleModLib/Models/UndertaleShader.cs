@@ -1,16 +1,18 @@
-﻿namespace UndertaleModLib.Models;
+﻿using System;
+
+namespace UndertaleModLib.Models;
 
 /// <summary>
 /// A shader entry for a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleShader : UndertaleNamedResource
+public class UndertaleShader : UndertaleNamedResource, IDisposable
 {
     /// <summary>
     /// The vertex shader attributes a shader can have.
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class VertexShaderAttribute : UndertaleObject
+    public class VertexShaderAttribute : UndertaleObject, IDisposable
     {
         /// <summary>
         /// The name of the vertex shader attribute.
@@ -27,6 +29,14 @@ public class UndertaleShader : UndertaleNamedResource
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            Name = null;
         }
     }
 
@@ -141,7 +151,41 @@ public class UndertaleShader : UndertaleNamedResource
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content + " (" + GetType().Name + ")";
+        return Name?.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        HLSL11_VertexData?.Dispose();
+        HLSL11_PixelData?.Dispose();
+        PSSL_VertexData?.Dispose();
+        PSSL_PixelData?.Dispose();
+        Cg_PSVita_VertexData?.Dispose();
+        Cg_PSVita_PixelData?.Dispose();
+        Cg_PS3_VertexData?.Dispose();
+        Cg_PS3_PixelData?.Dispose();
+        foreach (var attr in VertexShaderAttributes)
+            attr?.Dispose();
+
+        Name = null;
+        GLSL_ES_Vertex = null;
+        GLSL_ES_Fragment = null;
+        GLSL_Vertex = null;
+        GLSL_Fragment = null;
+        HLSL9_Vertex = null;
+        HLSL9_Fragment = null;
+        HLSL11_VertexData = null;
+        HLSL11_PixelData = null;
+        PSSL_VertexData = null;
+        PSSL_PixelData = null;
+        Cg_PSVita_VertexData = null;
+        Cg_PSVita_PixelData = null;
+        Cg_PS3_VertexData = null;
+        Cg_PS3_PixelData = null;
+        VertexShaderAttributes = new();
     }
 
     private static void WritePadding(UndertaleWriter writer, int amount)
@@ -426,7 +470,7 @@ public class UndertaleShader : UndertaleNamedResource
         Cg_PS3 = 7
     }
 
-    public class UndertaleRawShaderData
+    public class UndertaleRawShaderData : IDisposable
     {
         internal uint _Position;
         internal uint _PointerLocation;
@@ -485,6 +529,14 @@ public class UndertaleShader : UndertaleNamedResource
 
             _Length = (uint)length;
             Data = reader.ReadBytes(length);
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            Data = null;
         }
     }
 }

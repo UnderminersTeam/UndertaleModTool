@@ -14,7 +14,7 @@ namespace UndertaleModLib.Models;
 /// An embedded texture entry in the data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleEmbeddedTexture : UndertaleNamedResource
+public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
 {
     /// <summary>
     /// The name of the embedded texture entry.
@@ -97,10 +97,19 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
         return Name.Content + " (" + GetType().Name + ")";
     }
 
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        TextureData.Dispose();
+        Name = null;
+    }
+
     /// <summary>
     /// Texture data in an <see cref="UndertaleEmbeddedTexture"/>.
     /// </summary>
-    public class TexData : UndertaleObject, INotifyPropertyChanged
+    public class TexData : UndertaleObject, INotifyPropertyChanged, IDisposable
     {
         private byte[] _textureBlob;
         private static MemoryStream sharedStream;
@@ -117,7 +126,19 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
         private static readonly byte[] qoiAndBZipHeader = { 50, 122, 111, 113 };
         private static readonly byte[] qoiHeader = { 102, 105, 111, 113 };
 
-        public static void ClearSharedStream() => sharedStream = null;
+        /// <summary>
+        /// Frees up <see cref="sharedStream"/> from memory.
+        /// </summary>
+        public static void ClearSharedStream()
+        {
+            sharedStream?.Dispose();
+            sharedStream = null;
+        }
+
+        /// <summary>
+        /// Initializes <see cref="sharedStream"/> with defined initial size.
+        /// </summary>
+        /// <param name="size">Initial size of the stream in bytes</param>
         public static void InitSharedStream(int size) => sharedStream = new(size);
 
         /// <inheritdoc />
@@ -186,7 +207,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
                     sharedStream.Read(TextureBlob, 0, TextureBlob.Length);
                     return;
                 }
-                else if (header.Take(4).SequenceEqual(QOIHeader))
+                else if (header.Take(4).SequenceEqual(qoiHeader))
                 {
                     reader.undertaleData.UseQoiFormat = true;
                     reader.undertaleData.UseBZipFormat = false;
@@ -221,6 +242,16 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
             uint length = reader.Position - startAddress;
             reader.Position = startAddress;
             TextureBlob = reader.ReadBytes((int)length);
+        }
+
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            _textureBlob = null;
+            ClearSharedStream();
         }
     }
 }

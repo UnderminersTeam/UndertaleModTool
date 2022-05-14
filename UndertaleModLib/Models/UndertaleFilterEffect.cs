@@ -1,10 +1,12 @@
-﻿namespace UndertaleModLib.Models;
+﻿using System;
+
+namespace UndertaleModLib.Models;
 
 /// <summary>
 /// A filter effect as it's used in a GameMaker data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleFilterEffect : UndertaleNamedResource
+public class UndertaleFilterEffect : UndertaleNamedResource, IDisposable
 {
     /// <summary>
     /// The name of the <see cref="UndertaleFilterEffect"/>.
@@ -29,6 +31,15 @@ public class UndertaleFilterEffect : UndertaleNamedResource
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content + " (" + GetType().Name + ")";
+        return Name?.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        Name = null;
+        Value = null;
     }
 }
