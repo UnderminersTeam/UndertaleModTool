@@ -337,6 +337,11 @@ namespace UndertaleModTool
 
         public static void Reset()
         {
+            foreach (Bitmap bmp in TileCache.Values)
+                bmp.Dispose();
+            foreach (Bitmap bmp in tilePageCache.Values)
+                bmp.Dispose();
+
             TileCache.Clear();
             tilePageCache.Clear();
             TileRectanglesConverter.TileCache.Clear();
