@@ -618,7 +618,7 @@ namespace UndertaleModLib
         /// <summary>
         /// The location of the profiles folder.
         /// </summary>
-        public string AppDataProfiles = null;
+        public string AppDataProfiles = "";
 
         /// <summary>
         /// The MD5 hash of the current file.

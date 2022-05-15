@@ -772,8 +772,6 @@ public partial class Program : IScriptInterface
         {
             using FileStream fs = datafile.OpenRead();
             UndertaleData gmData = UndertaleIO.Read(fs, warningHandler, messageHandler);
-            //TODO: this should be handled in UTCode, not here
-            gmData.ToolInfo.AppDataProfiles = "";
             return gmData;
         }
         catch (FileNotFoundException e)
