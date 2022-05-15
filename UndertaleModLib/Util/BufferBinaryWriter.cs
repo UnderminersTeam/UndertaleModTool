@@ -224,7 +224,13 @@ namespace UndertaleModLib.Util
 
         public void Dispose()
         {
-            stream.Close();
+            buffer = null;
+
+            if (stream is not null)
+            {
+                stream.Close();
+                stream.Dispose();
+            }
         }
     }
 }

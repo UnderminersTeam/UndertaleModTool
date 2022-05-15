@@ -1147,6 +1147,9 @@ namespace UndertaleModTool
             });
             dialog.ShowDialog();
             await t;
+
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect();
         }
 
         public string GenerateMD5(string filename)
