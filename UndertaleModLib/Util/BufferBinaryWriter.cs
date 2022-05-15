@@ -45,7 +45,7 @@ namespace UndertaleModLib.Util
                 long newSize = (long)buffer.Length * 2;
                 if (newSize < 0 || newSize > (int.MaxValue - 1024))
                 {
-                    Array.Resize(ref buffer, (int.MaxValue - 1024));
+                    Array.Resize(ref buffer, int.MaxValue - 1024);
                     break;
                 }
                 else
