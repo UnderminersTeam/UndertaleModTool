@@ -126,11 +126,11 @@ namespace UndertaleModLib.Scripting
         }
 
         //TODO: i have absolutely no idea what any of these do.
-        void ReplaceTempWithMain(bool ImAnExpertBTW = false);
-        void ReplaceMainWithTemp(bool ImAnExpertBTW = false);
-        void ReplaceTempWithCorrections(bool ImAnExpertBTW = false);
-        void ReplaceCorrectionsWithTemp(bool ImAnExpertBTW = false);
-        void UpdateCorrections(bool ImAnExpertBTW = false);
+        void ReplaceTempWithMain(bool imAnExpertBtw = false);
+        void ReplaceMainWithTemp(bool imAnExpertBtw = false);
+        void ReplaceTempWithCorrections(bool imAnExpertBtw = false);
+        void ReplaceCorrectionsWithTemp(bool imAnExpertBtw = false);
+        void UpdateCorrections(bool imAnExpertBtw = false);
 
         /// <summary>
         /// Used in Scripts in order to show a message to the user.
@@ -549,10 +549,10 @@ namespace UndertaleModLib.Scripting
         /// <param name="gmlCode">The new GML code that shall replace the current GML code of <paramref name="codeName"/>.</param>
         /// <param name="doParse">Whether the code entry should get linked.
         /// In other words, have special handling for scripts, globals and object code.</param>
-        /// <param name="replaceWithEmptyStringOnFail">If this is <see langword="false"/> an empty string
+        /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
         /// will be used for replacing the code entry in the case that anything fails.
         /// If this is <see langword="true"/> then an error will be shown instead and the code entry will not get replaced.</param>
-        void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool replaceWithEmptyStringOnFail = false);
+        void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool checkDecompiler = false);
 
         /// <summary>
         /// Replaces/Imports all GM-Bytecode ASM in a specific code entry with a specified string.
@@ -563,10 +563,10 @@ namespace UndertaleModLib.Scripting
         /// <param name="doParse">Whether the code entry should get linked.
         /// In other words, have special handling for scripts, globals and object code.</param>
         /// <param name="nukeProfile">Whether or not to nuke the profile entry for profile mode.</param>
-        /// <param name="replaceWithEmptyStringOnFail">If this is <see langword="false"/> an empty string
+        /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
         /// will be used for replacing the code entry in the case that anything fails.
         /// If this is <see langword="true"/> then an error will be shown instead and the code entry will not get replaced.</param>
-        void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool nukeProfile = true, bool replaceWithEmptyStringOnFail = false);
+        void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false);
 
         /// <summary>
         /// Replaces/Imports all GML in a specific code entry with a specified file.
@@ -577,10 +577,10 @@ namespace UndertaleModLib.Scripting
         /// </param>
         /// <param name="doParse">Whether the code entry should get linked.
         /// In other words, have special handling for scripts, globals and object code.</param>
-        /// <param name="replaceWithEmptyStringOnFail">If this is <see langword="false"/> an empty string
+        /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
         /// will be used for replacing the code entry in the case that anything fails.</param>
         /// <param name="throwOnError">Whether a <see cref="ScriptException"/> will be thrown on any errors.</param>
-        void ImportGMLFile(string fileName, bool doParse = true, bool replaceWithEmptyStringOnFail = false, bool throwOnError = false);
+        void ImportGMLFile(string fileName, bool doParse = true, bool checkDecompiler = false, bool throwOnError = false);
 
         /// <summary>
         /// Replaces/Imports all GM-Bytecode ASM in a specific code entry with a specified file.
@@ -591,10 +591,10 @@ namespace UndertaleModLib.Scripting
         /// <param name="doParse">Whether the code entry should get linked.
         /// In other words, have special handling for scripts, globals and object code.</param>
         /// <param name="nukeProfile">Whether or not to nuke the profile entry for profile mode.</param>
-        /// <param name="replaceWithEmptyStringOnFail">If this is <see langword="false"/> an empty string
+        /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
         /// will be used for replacing the code entry in the case that anything fails.</param>
         /// <param name="throwOnError">Whether a <see cref="ScriptException"/> will be thrown on any errors.</param>
-        void ImportASMFile(string fileName, bool doParse = true, bool nukeProfile = true, bool replaceWithEmptyStringOnFail = false, bool throwOnError = false);
+        void ImportASMFile(string fileName, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false, bool throwOnError = false);
 
         /// <summary>
         /// Find a keyword in a GML code entry and replaces it with a replacement string.
