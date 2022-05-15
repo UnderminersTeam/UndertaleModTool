@@ -882,7 +882,11 @@ namespace UndertaleModTool
                     {
                         data = UndertaleIO.Read(stream, warning =>
                         {
-                            MessageBox.Show(warning, "Loading warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            Dispatcher.Invoke(() =>
+                            {
+                                MessageBox.Show(warning, "Loading warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            });
+                            
                             hadWarnings = true;
                         }, message =>
                         {
@@ -894,7 +898,10 @@ namespace UndertaleModTool
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("An error occured while trying to load:\n" + e.Message, "Load error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show("An error occured while trying to load:\n" + e.Message, "Load error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    });
                 }
 
                 Dispatcher.Invoke(async () =>
@@ -1095,7 +1102,11 @@ namespace UndertaleModTool
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("An error occured while trying to save:\n" + e.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show("An error occured while trying to save:\n" + e.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    });
+                    
                     SaveSucceeded = false;
                 }
                 // Don't make any changes unless the save succeeds.
@@ -1127,7 +1138,11 @@ namespace UndertaleModTool
                 }
                 catch (Exception exc)
                 {
-                    MessageBox.Show("An error occured while trying to save:\n" + exc.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show("An error occured while trying to save:\n" + exc.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    });
+                    
                     SaveSucceeded = false;
                 }
                 if (Data != null)

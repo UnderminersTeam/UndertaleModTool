@@ -198,7 +198,7 @@ namespace UndertaleModLib.Util
             if (Stream.ReadByte() != 0)
                 throw new IOException("String not null terminated!");
 #else
-            Position += length + 1;
+            Position++;
 #endif
             return res;
         }
