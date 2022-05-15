@@ -52,17 +52,17 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// Whether the game object is solid.
     /// </summary>
-    public bool Solid { get; set; } = false;
+    public bool Solid { get; set; }
 
     /// <summary>
     /// The depth level of the game object.
     /// </summary>
-    public int Depth { get; set; } = 0;
+    public int Depth { get; set; }
 
     /// <summary>
     /// Whether the game object is persistent.
     /// </summary>
-    public bool Persistent { get; set; } = false;
+    public bool Persistent { get; set; }
 
     /// <summary>
     /// The parent game object this is inheriting from.
@@ -78,12 +78,12 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// Whether this object uses Game Maker physics.
     /// </summary>
-    public bool UsesPhysics { get; set; } = false;
+    public bool UsesPhysics { get; set; }
 
     /// <summary>
     /// Whether this game object should act as a sensor fixture.
     /// </summary>
-    public bool IsSensor { get; set; } = false;
+    public bool IsSensor { get; set; }
 
     /// <summary>
     /// The collision shape the game object should use.
@@ -103,7 +103,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// The physics collision group this game object belongs to.
     /// </summary>
-    public uint Group { get; set; } = 0;
+    public uint Group { get; set; }
 
     /// <summary>
     /// The physics linear damping this game object uses.
@@ -123,12 +123,12 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// Whether this game object should start awake in the physics simulation.
     /// </summary>
-    public bool Awake { get; set; } = false;
+    public bool Awake { get; set; }
 
     /// <summary>
     /// Whether this game object is kinematic.
     /// </summary>
-    public bool Kinematic { get; set; } = false;
+    public bool Kinematic { get; set; }
 
     /// <summary>
     /// The vertices used for a <see cref="CollisionShape"/> of type <see cref="CollisionShapeFlags.Custom"/>.
@@ -145,6 +145,9 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
 
+    /// <summary>
+    /// Initialized an instance of <see cref="UndertaleGameObject"/>.
+    /// </summary>
     public UndertaleGameObject()
     {
         for (int i = 0; i < Enum.GetValues(typeof(EventType)).Length; i++)
@@ -163,7 +166,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         // This apparently has a different notation than everything else...
         if (_ParentId.Resource == null)
         {
-            writer.Write((int)-100);
+            writer.Write(-100);
         }
         else
         {
@@ -372,7 +375,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         /// <remarks>This seems to always have 1 entry, it would need testing if maybe the games using drag-and-drop code are different</remarks>
         public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>();
 
-        //TODO: not used, condense.
+        //TODO: not used, condense. Also UMT specific.
         public EventSubtypeKey EventSubtypeKey
         {
             get => (EventSubtypeKey)EventSubtype;

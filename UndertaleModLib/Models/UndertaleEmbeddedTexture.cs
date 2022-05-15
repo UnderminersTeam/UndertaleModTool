@@ -27,11 +27,15 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
     public uint Scaled { get; set; }
 
     /// <summary>
-    /// The amount of generated mipmap levels.
+    /// The amount of generated mipmap levels. <br/>
+    /// GameMaker Studio: 2 only.
     /// </summary>
     public uint GeneratedMips { get; set; }
 
-
+    /// <summary>
+    /// TODO: something. <br/>
+    /// GameMaker: Studio 2 only.
+    /// </summary>
     public uint TextureBlockSize { get; set; }
 
     /// <summary>
