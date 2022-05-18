@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DebugType>embedded</DebugType>
@@ -10,6 +10,7 @@
   <PropertyGroup>
     <StartupObject />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -19,6 +20,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile></DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -33,4 +35,15 @@
     <PackageReference Include="SharpZipLib" Version="1.3.3" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="version.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="gitversion.txt" />
+    <EmbeddedResource Include="gitversion.txt" />
+  </ItemGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <!-- puts the git commit name and branch name into gitversion.txt which is an embedded resource -->
+    <Exec Command="( git describe --always --dirty &amp;&amp; git rev-parse --abbrev-ref HEAD  ) &gt; &quot;$(ProjectDir)/gitversion.txt&quot;" />
+  </Target>
 </Project>

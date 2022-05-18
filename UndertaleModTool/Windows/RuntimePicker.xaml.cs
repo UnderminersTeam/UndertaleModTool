@@ -56,7 +56,7 @@ namespace UndertaleModTool
 
         private void DiscoverGameExe(string dataFilePath, UndertaleData data)
         {
-            string gameExeName = data?.GeneralInfo?.Filename?.Content;
+            string gameExeName = data?.GeneralInfo?.FileName?.Content;
             if (gameExeName == null)
                 return;
 

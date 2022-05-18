@@ -51,7 +51,7 @@ bool[] SpriteSheetsUsed = new bool[(DataEmbeddedTexturesCount + DonorDataEmbedde
 int lastTextPage = Data.EmbeddedTextures.Count - 1;
 
 SetProgressBar(null, "Textures Exported", 0, DonorData.TexturePageItems.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 SyncBinding("EmbeddedTextures, Strings, Backgrounds, Sprites, Fonts, TexturePageItems", true);
 await Task.Run(() => {
@@ -265,9 +265,9 @@ await Task.Run(() => {
     TexturePageItemsUsedUpdate();
     RemoveUnusedTexturePageItems();
 });
-SyncBinding(false);
+DisableAllSyncBindings();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 copiedAssetsCount = (copiedFontsCount + copiedBackgroundsCount + copiedSpritesCount);
 ScriptMessage(copiedAssetsCount.ToString() + " assets were copied (" + copiedSpritesCount.ToString() + " Sprites, " + copiedBackgroundsCount.ToString() + " Backgrounds, and " + copiedFontsCount.ToString() + " Fonts)");
@@ -330,7 +330,7 @@ void DumpFont(UndertaleFont font)
     tex_Name.Add(font.Name.Content);
     tex_Type.Add("fnt");
 
-    IncProgress();
+    IncrementProgress();
 }
 void DumpBackground(UndertaleBackground background)
 {
@@ -342,7 +342,7 @@ void DumpBackground(UndertaleBackground background)
     tex_Name.Add(background.Name.Content);
     tex_Type.Add("bg");
 
-    IncProgress();
+    IncrementProgress();
 }
 void NullHandler()
 {
@@ -475,7 +475,7 @@ List<string> GetSplitStringsList(string assetType)
     List<string> splitStringsList = new List<string>();
     string InputtedText = "";
     InputtedText = SimpleTextInput("Menu", "Enter the name(s) of the " + assetType + "(s)", InputtedText, true);
-    string[] IndividualLineArray = InputtedText.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+    string[] IndividualLineArray = InputtedText.Split('\n', StringSplitOptions.RemoveEmptyEntries);
     foreach (var OneLine in IndividualLineArray)
     {
         splitStringsList.Add(OneLine.Trim());

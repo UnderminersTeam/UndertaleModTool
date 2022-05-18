@@ -1,0 +1,41 @@
+name: Compile Projects
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  compile_gui:
+
+    name: Compile GUI
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: |
+        dotnet build UndertaleModTool --no-restore
+        dotnet build UndertaleModToolUpdater --no-restore
+
+  compile_cli:
+
+    name: Compile CLI
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore UndertaleModCli
+    - name: Build
+      run: |
+        dotnet build UndertaleModCli --no-restore

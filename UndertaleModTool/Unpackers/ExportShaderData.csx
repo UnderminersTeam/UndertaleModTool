@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 EnsureDataLoaded();
 
-string exportFolder = PromptChooseDirectory("Export to where");
+string exportFolder = PromptChooseDirectory();
 if (exportFolder == null)
     throw new ScriptException("The export folder was not set.");
 

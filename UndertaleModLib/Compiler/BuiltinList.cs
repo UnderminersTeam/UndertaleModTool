@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleGeneralInfo;
 
-/// <summary>
-/// HUGE file containing definitions for most GameMaker builtin variables, functions, etc.
-/// </summary>
+
+// HUGE file containing definitions for most GameMaker builtin variables, functions, etc.
+
 
 namespace UndertaleModLib.Compiler
 {
@@ -105,9 +105,10 @@ namespace UndertaleModLib.Compiler
         }
     }
 
-    // This is a really long list of known constants and variables, taken from code analysis
-    // This deserves to be in its own file for that reason...
-    // This will likely need to be updated with every new GameMaker version with new features
+    /// <summary>
+    /// A really long list of known Game Maker: Studio constants and variables, taken from code analysis. <br/>
+    /// Will likely need to be updated on every new Game Maker version with new features.
+    /// </summary>
     public class BuiltinList
     {
         public Dictionary<string, double> Constants = null;
@@ -132,7 +133,7 @@ namespace UndertaleModLib.Compiler
         {
             Initialize(data);
         }
-        
+
         public void Initialize(UndertaleData data)
         {
             // Functions

@@ -39,10 +39,10 @@ using static UndertaleModTool.MainWindow.CodeEditorMode;
 
 namespace UndertaleModTool
 {
-    [SupportedOSPlatform("windows7.0")]
     /// <summary>
     /// Logika interakcji dla klasy UndertaleCodeEditor.xaml
     /// </summary>
+    [SupportedOSPlatform("windows7.0")]
     public partial class UndertaleCodeEditor : DataUserControl
     {
         private static MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
@@ -178,7 +178,7 @@ namespace UndertaleModTool
             DisassemblyEditor.TextArea.SelectionCornerRadius = 0;
         }
 
-        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UndertaleCode code = this.DataContext as UndertaleCode;
             Directory.CreateDirectory(MainPath);
@@ -187,7 +187,7 @@ namespace UndertaleModTool
                 return;
             DecompiledSearchPanel.Close();
             DisassemblySearchPanel.Close();
-            DecompiledEditor_LostFocus(sender, null);
+            await DecompiledLostFocusBody(sender, null);
             DisassemblyEditor_LostFocus(sender, null);
             if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
             {
@@ -205,7 +205,7 @@ namespace UndertaleModTool
             }
         }
 
-        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private async void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
@@ -217,6 +217,7 @@ namespace UndertaleModTool
             {
                 DecompiledSkipped = true;
                 DecompiledEditor_LostFocus(sender, null);
+
             }
             else if (DisassemblyTab.IsSelected && DisassemblyFocused && DisassemblyChanged &&
                      CurrentDisassembled is not null && CurrentDisassembled != code)
@@ -648,7 +649,13 @@ namespace UndertaleModTool
                 code = this.DataContext as UndertaleCode;
 
             if (code == null)
-                return; // Probably loaded another data.win or something.
+            {
+                if (IsLoaded)
+                    code = CurrentDecompiled; // switched to the tab with different object type
+                else
+                    return;                   // probably loaded another data.win or something.
+            }
+            
             if (code.ParentEntry != null)
                 return;
 
@@ -784,9 +791,12 @@ namespace UndertaleModTool
                 code = this.DataContext as UndertaleCode;
 
             if (code == null)
-                return; // Probably loaded another data.win or something.
-            if (code.ParentEntry != null)
-                return;
+            {
+                if (IsLoaded)
+                    code = CurrentDisassembled; // switched to the tab with different object type
+                else
+                    return;                     // probably loaded another data.win or something.
+            }
 
             // Check to make sure this isn't an element inside of the textbox, or another tab
             IInputElement elem = Keyboard.FocusedElement;

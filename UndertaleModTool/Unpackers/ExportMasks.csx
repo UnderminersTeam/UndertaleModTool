@@ -22,17 +22,17 @@ if (Directory.Exists(texFolder))
 Directory.CreateDirectory(texFolder);
 
 SetProgressBar(null, "Sprites", 0, Data.Sprites.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await DumpSprites();
 worker.Cleanup();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 
 
-string GetFolder(string path) 
+string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
@@ -52,5 +52,5 @@ void DumpSprite(UndertaleSprite sprite)
         }
     }
 
-    IncProgressP();
+    IncrementProgressParallel();
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 EnsureDataLoaded();
 
 string sndFolder = GetFolder(FilePath) + "Export_Sounds" + Path.DirectorySeparatorChar;
-if (Directory.Exists(sndFolder)) 
+if (Directory.Exists(sndFolder))
 {
     ScriptError("A sound export already exists. Please remove it.", "Error");
     return;
@@ -16,11 +16,11 @@ if (Directory.Exists(sndFolder))
 Directory.CreateDirectory(sndFolder);
 
 SetProgressBar(null, "Sounds", 0, Data.Sounds.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await DumpSounds();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + sndFolder);
 
@@ -31,15 +31,15 @@ string GetFolder(string path)
 }
 
 
-async Task DumpSounds() 
+async Task DumpSounds()
 {
     await Task.Run(() => Parallel.ForEach(Data.Sounds, DumpSound));
 }
 
-void DumpSound(UndertaleSound sound) 
+void DumpSound(UndertaleSound sound)
 {
     if (sound.AudioFile != null && !File.Exists(sndFolder + sound.File.Content))
         File.WriteAllBytes(sndFolder + sound.File.Content, sound.AudioFile.Data);
 
-    IncProgressP();
+    IncrementProgress();
 }

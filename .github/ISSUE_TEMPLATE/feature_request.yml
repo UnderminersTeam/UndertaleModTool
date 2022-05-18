@@ -1,0 +1,21 @@
+name: Suggest a Feature
+description: Have an idea for something completely new that UndertaleModTool could benefit from having? Or for improving something that already exists? Let us know!
+title: "Feature: <Title>"
+labels: ["enhancement"]
+body:
+- type: dropdown
+  attributes:
+    label: Which component should be improved?
+    options: [UI/UX, Decompiler, Compiler, CLI, Lib, Other]
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Describe your feature suggestion in more detail
+    description: A clear description of your feature suggestion. Feel free to add pictures or videos directly to this description!
+    placeholder: |
+      Give a clear explanation of what you want us to add. 
+      Please don't give vague suggestions like "Make button look better" or "Add a new panel".
+      How exactly does it work? What are the inputs? What is the expected outcome?
+  validations:
+    required: true

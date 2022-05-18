@@ -27,6 +27,7 @@ using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
+using UndertaleModLib.Util;
 using UndertaleModTool.Windows;
 using System.IO.Pipes;
 using Ookii.Dialogs.Wpf;
@@ -34,6 +35,8 @@ using Ookii.Dialogs.Wpf;
 using ColorConvert = System.Windows.Media.ColorConverter;
 using System.Text.RegularExpressions;
 using System.Windows.Data;
+using System.Reflection.Metadata.Ecma335;
+using System.Windows.Media.Imaging;
 using System.Security.Cryptography;
 using System.Collections.Concurrent;
 using System.Runtime;
@@ -43,9 +46,135 @@ using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Globalization;
+using System.Windows.Controls.Primitives;
 
 namespace UndertaleModTool
 {
+    public class Tab : INotifyPropertyChanged
+    {
+        public static readonly BitmapImage ClosedIcon = new(new Uri(@"/Resources/X.png", UriKind.RelativeOrAbsolute));
+        public static readonly BitmapImage ClosedHoverIcon = new(new Uri(@"/Resources/X_Down.png", UriKind.RelativeOrAbsolute));
+
+        // it's actually used, but when it will be compiled (see the note in "MainWindow" class)
+        #pragma warning disable CS0067
+        public event PropertyChangedEventHandler PropertyChanged;
+        #pragma warning restore CS0067
+
+        public object OpenedObject { get; set; }
+        public string TabTitle { get; set; } = "Untitled";
+        public int TabIndex { get; set; }
+        public bool AutoClose { get; set; } = false;
+
+        public Tab(object obj, int tabIndex, string tabTitle = null)
+        {
+            OpenedObject = obj;
+            TabIndex = tabIndex;
+            TabTitle = tabTitle ?? GetTitleForObject(obj);
+            AutoClose = obj is DescriptionView;
+        }
+
+        public static string GetTitleForObject(object obj)
+        {
+            if (obj is null)
+                return null;
+
+            string title = null;
+
+            if (obj is DescriptionView view)
+            {
+                if (view.Heading.Contains("Welcome"))
+                {
+                    title = "Welcome!";
+                }
+                else
+                {
+                    title = view.Heading;
+                }
+            }
+            else if (obj is UndertaleNamedResource namedRes)
+            {
+                string content = namedRes.Name?.Content;
+
+                string header = obj switch
+                {
+                    UndertaleAudioGroup => "Audio Group",
+                    UndertaleSound => "Sound",
+                    UndertaleSprite => "Sprite",
+                    UndertaleBackground => "Background",
+                    UndertalePath => "Path",
+                    UndertaleScript => "Script",
+                    UndertaleShader => "Shader",
+                    UndertaleFont => "Font",
+                    UndertaleTimeline => "Timeline",
+                    UndertaleGameObject => "Game Object",
+                    UndertaleRoom => "Room",
+                    UndertaleExtension => "Extension",
+                    UndertaleTexturePageItem => "Texture Page Item",
+                    UndertaleCode => "Code",
+                    UndertaleVariable => "Variable",
+                    UndertaleFunction => "Function",
+                    UndertaleCodeLocals => "Code Locals",
+                    UndertaleEmbeddedTexture => "Embedded Texture",
+                    UndertaleEmbeddedAudio => "Embedded Audio",
+                    UndertaleTextureGroupInfo => "Texture Group Info",
+                    UndertaleEmbeddedImage => "Embedded Image",
+                    UndertaleSequence => "Sequence",
+                    UndertaleAnimationCurve => "Animation Curve",
+                    _ => null
+                };
+
+                if (header is not null)
+                    title = header + " - " + content;
+                else
+                    Debug.WriteLine($"Could not handle type {obj.GetType()}");
+            }
+            else if (obj is UndertaleString)
+            {
+                title = "String - " + ((UndertaleString)obj).Content;
+            }
+            else if (obj is UndertaleChunkVARI)
+            {
+                title = "Variables Overview";
+            }
+            else if (obj is GeneralInfoEditor)
+            {
+                title = "General Info";
+            }
+            else if (obj is GlobalInitEditor)
+            {
+                title = "Global Init";
+            }
+            else if (obj is GameEndEditor)
+            {
+                title = "Game End";
+            }
+            else
+            {
+                Debug.WriteLine($"Could not handle type {obj.GetType()}");
+            }
+
+            return title;
+        }
+
+        public override string ToString()
+        {
+            // for ease of debugging
+            return GetType().FullName + " - {" + OpenedObject?.ToString() + '}';
+        }
+    }
+    public class TabTitleConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Tab.GetTitleForObject(values[0]);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     /// <summary>
     /// Logika interakcji dla klasy MainWindow.xaml
     /// </summary>
@@ -60,13 +189,26 @@ namespace UndertaleModTool
         public string ScriptPath { get; set; } // For the scripting interface specifically
 
         public string TitleMain { get; set; }
+
+        public static RoutedUICommand CloseTabCommand = new RoutedUICommand("Close current tab", "CloseTab", typeof(MainWindow));
+        public static RoutedUICommand CloseAllTabsCommand = new RoutedUICommand("Close all tabs", "CloseAllTabs", typeof(MainWindow));
+        public static RoutedUICommand RestoreClosedTabCommand = new RoutedUICommand("Restore last closed tab", "RestoreClosedTab", typeof(MainWindow));
+        public static RoutedUICommand SwitchToNextTabCommand = new RoutedUICommand("Switch to the next tab", "SwitchToNextTab", typeof(MainWindow));
+        public static RoutedUICommand SwitchToPrevTabCommand = new RoutedUICommand("Switch to the previous tab", "SwitchToPrevTab", typeof(MainWindow));
+        public ObservableCollection<Tab> Tabs { get; set; } = new();
+        public Tab CurrentTab { get; set; }
+        public int CurrentTabIndex { get; set; } = 0;
+
         public object Highlighted { get; set; }
         public object Selected { get; set; }
+
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
         // God this is so ugly, if there's a better way, please, put in a pull request
         public Visibility IsExtProductIDEligible => (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && (((Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? Visibility.Visible : Visibility.Collapsed;
 
-        public ObservableCollection<object> SelectionHistory { get; } = new ObservableCollection<object>();
+        public ObservableCollection<Tab> SelectionHistory { get; } = new();
+        public List<Tab> ClosedTabsHistory { get; } = new();
+
         public bool CanSave { get; set; }
         public bool CanSafelySave = false;
         public bool WasWarnedAboutTempRun = false;
@@ -89,6 +231,11 @@ namespace UndertaleModTool
             Saved,
             Error
         }
+        public enum ScrollDirection
+        {
+            Left,
+            Right
+        }
         public static CodeEditorMode CodeEditorDecompile { get; set; } = CodeEditorMode.Unstated;
 
         private int progressValue;
@@ -100,6 +247,7 @@ namespace UndertaleModTool
         private bool _roomRendererEnabled;
 
         public bool GMLCacheEnabled => SettingsWindow.UseGMLCache;
+
         public bool RoomRendererEnabled
         {
             get => _roomRendererEnabled;
@@ -116,8 +264,8 @@ namespace UndertaleModTool
                 else
                 {
                     DataEditor.ContentTemplate = null;
-                    Selected = new DescriptionView("Welcome to UndertaleModTool!",
-                                                   "Open data.win file to get started, then double click on the items on the left to view them");
+                    Selected = LastOpenedObject;
+                    LastOpenedObject = null;
                     UndertaleCachedImageLoader.Reset();
                     CachedTileDataLoader.Reset();
                 }
@@ -125,6 +273,7 @@ namespace UndertaleModTool
                 _roomRendererEnabled = value;
             }
         }
+        public object LastOpenedObject { get; set; } // for restoring the object that was opened before room rendering
 
         public bool IsAppClosed { get; set; }
 
@@ -153,16 +302,25 @@ namespace UndertaleModTool
 
         // Version info
         public static string Edition = "";
+
+        // On debug, build with git versions. Otherwise, use the provided release version.
+#if DEBUG
+        public static string Version = GitVersion.GetGitVersion();
+#else
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? "-" + Edition : "");
+#endif
 
         public MainWindow()
         {
             InitializeComponent();
             this.DataContext = this;
-            ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them"));
-            SelectionHistory.Clear();
 
-            TitleMain = "UndertaleModTool by krzys_h v" + Version;
+            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open a data.win file to get started, then double click on the items on the left to view them.");
+            OpenInTab(Highlighted);
+            SelectionHistory.Clear();
+            ClosedTabsHistory.Clear();
+
+            TitleMain = "UndertaleModTool by krzys_h v:" + Version;
 
             CanSave = false;
             CanSafelySave = false;
@@ -198,7 +356,7 @@ namespace UndertaleModTool
             foreach (var child in (MainTree.Items[0] as TreeViewItem).Items)
                 ((child as TreeViewItem).ItemsSource as ICollectionView)?.Refresh();
         }
-/*
+        /*
         private static bool IsLikelyRunFromZipFolder()
         {
             var path = System.Environment.CurrentDirectory;
@@ -212,7 +370,7 @@ namespace UndertaleModTool
             var temp = Path.GetTempPath();
             return path.IndexOf(temp, StringComparison.OrdinalIgnoreCase) == 0;
         }
-*/
+        */
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Settings.Load();
@@ -324,7 +482,7 @@ namespace UndertaleModTool
                 }
                 else if (args[2] == "launch")
                 {
-                    string gameExeName = Data?.GeneralInfo?.Filename?.Content;
+                    string gameExeName = Data?.GeneralInfo?.FileName?.Content;
                     if (gameExeName == null || FilePath == null)
                     {
                         ScriptError("Null game executable name or location");
@@ -412,16 +570,16 @@ namespace UndertaleModTool
                     throw new Exception("ummmmm");
                 if (thingToOpen[0] != "AUDO") // Just pretend I'm not hacking it together that poorly
                     throw new Exception("errrrr");
-                ChangeSelection(Data.EmbeddedAudio[Int32.Parse(thingToOpen[1])]);
+                OpenInTab(Data.EmbeddedAudio[Int32.Parse(thingToOpen[1])], false, "Embedded Audio");
                 Activate();
             }
         }
 
         private async void Command_New(object sender, ExecutedRoutedEventArgs e)
         {
-            await Make_New_File();
+            await MakeNewDataFile();
         }
-        public async Task<bool> Make_New_File()
+        public async Task<bool> MakeNewDataFile()
         {
             if (Data != null)
             {
@@ -441,8 +599,17 @@ namespace UndertaleModTool
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Data)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilePath)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGMS2)));
-            ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open data.win, not create a new file! :P"));
+
+            BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible
+                                          ? "Tile sets"
+                                          : "Backgrounds & Tile sets";
+
+            CurrentTab = null;
+            Tabs.Clear();
+            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P");
+            OpenInTab(Highlighted);
             SelectionHistory.Clear();
+            ClosedTabsHistory.Clear();
 
             CanSave = true;
             CanSafelySave = true;
@@ -620,6 +787,60 @@ namespace UndertaleModTool
             }
         }
 
+        private void Command_CloseTab(object sender, ExecutedRoutedEventArgs e)
+        {
+            CloseTab();
+        }
+        private void Command_CloseAllTabs(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Tabs.Count == 1 && CurrentTab.TabTitle == "Welcome!")
+                return;
+
+            SelectionHistory.Clear();
+            ClosedTabsHistory.Clear();
+            Tabs.Clear();
+            CurrentTab = null;
+
+            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open data.win file to get started, then double click on the items on the left to view them");
+            OpenInTab(Highlighted);
+            CurrentTab = Tabs[CurrentTabIndex];
+
+            Selected = CurrentTab.OpenedObject;
+            UpdateObjectLabel(Selected);
+        }
+        private void Command_RestoreClosedTab(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (ClosedTabsHistory.Count > 0)
+            {
+                Tab lastTab = ClosedTabsHistory.Last();
+                ClosedTabsHistory.RemoveAt(ClosedTabsHistory.Count - 1);
+
+                if (CurrentTab.AutoClose)
+                    CloseTab(false);
+
+                Tabs.Insert(lastTab.TabIndex, lastTab);
+                CurrentTabIndex = lastTab.TabIndex;
+
+                for (int i = CurrentTabIndex + 1; i < Tabs.Count; i++)
+                    Tabs[i].TabIndex = i;
+
+                ScrollToTab(CurrentTabIndex);
+
+                Selected = lastTab.OpenedObject;
+                UpdateObjectLabel(Selected);
+            }
+        }
+        private void Command_SwitchToNextTab(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (CurrentTabIndex < Tabs.Count - 1)
+                CurrentTabIndex++;
+        }
+        private void Command_SwitchToPrevTab(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (CurrentTabIndex > 0)
+                CurrentTabIndex--;
+        }
+
         private async Task LoadFile(string filename, bool preventClose = false)
         {
             LoaderDialog dialog = new LoaderDialog("Loading", "Loading, please wait...");
@@ -629,6 +850,14 @@ namespace UndertaleModTool
                 CommandBox.Text = "";
             });
             dialog.Owner = this;
+
+            // temporary save the current tabs in case of loading error
+            Tab[] tempTabs = Tabs.ToArray();
+            int lastTabIndex = CurrentTabIndex;
+
+            CurrentTab = null;
+            Tabs.Clear(); // clear the current tabs to destroy game object references
+
             Task t = Task.Run(() =>
             {
                 bool hadWarnings = false;
@@ -689,7 +918,7 @@ namespace UndertaleModTool
                         }
                         if (data.GeneralInfo != null)
                         {
-                            if (!data.GeneralInfo.DisableDebugger)
+                            if (!data.GeneralInfo.IsDebuggerDisabled)
                             {
                                 MessageBox.Show("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
                             }
@@ -712,14 +941,28 @@ namespace UndertaleModTool
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilePath)));
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGMS2)));
 
+                        BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible
+                                                      ? "Tile sets"
+                                                      : "Backgrounds & Tile sets";
+
                         #pragma warning disable CA1416
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
                         #pragma warning restore CA1416
 
-                        ChangeSelection(Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!"));
+                        Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
+                        OpenInTab(Highlighted);
                         SelectionHistory.Clear();
+                        ClosedTabsHistory.Clear();
                     }
+                    else
+                    {
+                        // restore the tabs because new data hasn't been loaded
+                        Tabs = new(tempTabs);
+                        CurrentTab = Tabs[lastTabIndex];
+                        CurrentTabIndex = lastTabIndex;
+                    }
+
                     dialog.Hide();
                 });
             });
@@ -748,7 +991,7 @@ namespace UndertaleModTool
                 CloseChildFiles();
 
             DebugDataDialog.DebugDataMode debugMode = DebugDataDialog.DebugDataMode.NoDebug;
-            if (!suppressDebug && Data.GeneralInfo != null && !Data.GeneralInfo.DisableDebugger)
+            if (!suppressDebug && Data.GeneralInfo != null && !Data.GeneralInfo.IsDebuggerDisabled)
                 MessageBox.Show("You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
             Task t = Task.Run(async () =>
             {
@@ -1026,7 +1269,7 @@ namespace UndertaleModTool
                     if (updateCache)
                     {
                         await GenerateGMLCache(null, dialog, true);
-                        await StopUpdater();
+                        await StopProgressBarUpdater();
                     }
 
                     string[] codeNames = Data.Code.Where(x => x.ParentEntry is null).Select(x => x.Name.Content).ToArray();
@@ -1060,7 +1303,7 @@ namespace UndertaleModTool
             });
         }
 
-        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
+        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
         {
             if (!SettingsWindow.UseGMLCache)
                 return false;
@@ -1104,7 +1347,7 @@ namespace UndertaleModTool
             if (Data.GMLCache.IsEmpty)
             {
                 SetProgressBar(null, "Generating decompiled code cache...", 0, Data.Code.Count);
-                StartUpdater();
+                StartProgressBarUpdater();
 
                 await Task.Run(() => Parallel.ForEach(Data.Code, (code) =>
                 {
@@ -1120,7 +1363,7 @@ namespace UndertaleModTool
                         }
                     }
 
-                    IncProgressP();
+                    IncrementProgressParallel();
                 }));
 
                 Data.GMLEditedBefore = new(Data.GMLCacheChanged);
@@ -1152,7 +1395,7 @@ namespace UndertaleModTool
                 if (codeToUpdate.Count > 0)
                 {
                     SetProgressBar(null, "Updating decompiled code cache...", 0, codeToUpdate.Count);
-                    StartUpdater();
+                    StartProgressBarUpdater();
 
                     await Task.Run(() => Parallel.ForEach(codeToUpdate.Select(x => Data.Code.ByName(x)), (code) =>
                     {
@@ -1170,10 +1413,10 @@ namespace UndertaleModTool
                             }
                         }
 
-                        IncProgressP();
+                        IncrementProgressParallel();
                     }));
 
-                    if (isSaving)
+                    if (clearGMLEditedBefore)
                         Data.GMLEditedBefore.Clear();
                     else
                         Data.GMLEditedBefore = Data.GMLEditedBefore.Union(Data.GMLCacheChanged).ToList();
@@ -1182,7 +1425,7 @@ namespace UndertaleModTool
                     Data.GMLCacheFailed = Data.GMLCacheFailed.Union(failedBag).ToList();
                     Data.GMLCacheWasSaved = false;
                 }
-                else if (isSaving)
+                else if (clearGMLEditedBefore)
                     Data.GMLEditedBefore.Clear();
 
                 if (!existedDialog)
@@ -1190,7 +1433,7 @@ namespace UndertaleModTool
 
                 if (createdDialog)
                 {
-                    await StopUpdater();
+                    await StopProgressBarUpdater();
                     HideProgressBar();
                 }
             }
@@ -1223,7 +1466,7 @@ namespace UndertaleModTool
                     "General info" => new GeneralInfoEditor(Data?.GeneralInfo, Data?.Options, Data?.Language),
                     "Global init" => new GlobalInitEditor(Data?.GlobalInitScripts),
                     "Game End scripts" => new GameEndEditor(Data?.GameEndScripts),
-                    "Variables" => (object)Data.FORM.Chunks["VARI"],
+                    "Variables" => Data.FORM.Chunks["VARI"],
                     _ => new DescriptionView(item, "Expand the list on the left to edit items"),
                 };
             }
@@ -1235,14 +1478,14 @@ namespace UndertaleModTool
 
         private void MainTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ChangeSelection(Highlighted);
+            OpenInTab(Highlighted);
         }
 
         private void MainTree_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return)
             {
-                ChangeSelection(Highlighted);
+                OpenInTab(Highlighted);
             }
         }
 
@@ -1271,15 +1514,9 @@ namespace UndertaleModTool
                 }
             }
         }
-
         private void TreeView_DragOver(object sender, DragEventArgs e)
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[e.Data.GetFormats().Length - 1]) as UndertaleObject; // TODO: make this more reliable
-
-#if DEBUG
-            foreach (var s in e.Data.GetFormats())
-                Debug.WriteLine(s);
-#endif
 
             TreeViewItem targetTreeItem = VisualUpwardSearch<TreeViewItem>(e.OriginalSource as UIElement);
             UndertaleObject targetItem = targetTreeItem.DataContext as UndertaleObject;
@@ -1287,10 +1524,13 @@ namespace UndertaleModTool
             e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Move) && sourceItem != null && targetItem != null && sourceItem != targetItem && sourceItem.GetType() == targetItem.GetType() ? DragDropEffects.Move : DragDropEffects.None;
             e.Handled = true;
         }
-
         private void TreeView_Drop(object sender, DragEventArgs e)
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[e.Data.GetFormats().Length - 1]) as UndertaleObject;
+
+#if DEBUG
+            Debug.WriteLine("Format(s) of dropped TreeViewItem - " + String.Join(", ", e.Data.GetFormats()));
+#endif
 
             TreeViewItem targetTreeItem = VisualUpwardSearch<TreeViewItem>(e.OriginalSource as UIElement);
             UndertaleObject targetItem = targetTreeItem.DataContext as UndertaleObject;
@@ -1311,7 +1551,7 @@ namespace UndertaleModTool
             e.Handled = true;
         }
 
-        private static T VisualUpwardSearch<T>(DependencyObject element) where T : class
+        public static T VisualUpwardSearch<T>(DependencyObject element) where T : class
         {
             T container = element as T;
             while (container == null && element != null)
@@ -1321,8 +1561,7 @@ namespace UndertaleModTool
             }
             return container;
         }
-
-        private static T GetNearestParent<T>(DependencyObject item) where T : class
+        public static T GetNearestParent<T>(DependencyObject item) where T : class
         {
             DependencyObject parent = VisualTreeHelper.GetParent(item);
             while (parent is not T)
@@ -1332,7 +1571,6 @@ namespace UndertaleModTool
 
             return parent as T;
         }
-
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
             if (depObj != null)
@@ -1352,7 +1590,6 @@ namespace UndertaleModTool
                 }
             }
         }
-
         public static childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
         {
             foreach (childItem child in FindVisualChildren<childItem>(obj))
@@ -1383,7 +1620,6 @@ namespace UndertaleModTool
             if (MessageBox.Show("Delete " + obj.ToString() + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), "Confirmation", MessageBoxButton.YesNo, isLast ? MessageBoxImage.Question : MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
                 list.Remove(obj);
-
                 if (obj is UndertaleCode codeObj)
                 {
                     string codeName = codeObj.Name.Content;
@@ -1393,24 +1629,38 @@ namespace UndertaleModTool
                     Data.GMLEditedBefore?.Remove(codeName);
                 }
 
-                while (SelectionHistory.Remove(obj)) ;
-                if (Selected == obj)
-                    ChangeSelection(null);
-                if (Highlighted == obj)
-                    Highlighted = null;
+                CloseTab(obj);
                 UpdateTree();
+
+                // remove all tabs with deleted object occurrences from the closed tab history
+                for (int i = 0; i < ClosedTabsHistory.Count; i++)
+                {
+                    if (ClosedTabsHistory[i].OpenedObject == obj)
+                        ClosedTabsHistory.RemoveAt(i);
+                }
+
+                // remove consecutive duplicates ( { 1, 1, 2 } -> { 1, 2 } )
+                for (int i = 0; i < ClosedTabsHistory.Count - 1; i++)
+                {
+                    if (ClosedTabsHistory[i] == ClosedTabsHistory[i + 1])
+                        ClosedTabsHistory.RemoveAt(i);
+                }
             }
+        }
+        private void CopyItemName(UndertaleNamedResource namedRes)
+        {
+            if (namedRes.Name?.Content is not null)
+                Clipboard.SetText(namedRes.Name.Content);
+            else
+                ShowWarning("Item name is null.");
         }
 
         private void MainTree_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Delete)
             {
-                if (Highlighted != null && Highlighted is UndertaleObject)
-                {
-                    UndertaleObject obj = Highlighted as UndertaleObject;
+                if (Highlighted is UndertaleObject obj)
                     DeleteItem(obj);
-                }
             }
         }
 
@@ -1479,10 +1729,19 @@ namespace UndertaleModTool
             }
         }
 
+        private void MenuItem_OpenInNewTab_Click(object sender, RoutedEventArgs e)
+        {
+            OpenInTab(Highlighted, true);
+        }
+        private void MenuItem_CopyName_Click(object sender, RoutedEventArgs e)
+        {
+            if (Highlighted is UndertaleNamedResource namedRes)
+                CopyItemName(namedRes);
+        }
         private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
         {
-            if (Highlighted != null && Highlighted is UndertaleObject)
-                DeleteItem(Highlighted as UndertaleObject);
+            if (Highlighted is UndertaleObject obj)
+                DeleteItem(obj);
         }
 
         private void MenuItem_Add_Click(object sender, RoutedEventArgs e)
@@ -1575,7 +1834,7 @@ namespace UndertaleModTool
             list.Add(obj);
             UpdateTree();
             HighlightObject(obj);
-            ChangeSelection(obj);
+            OpenInTab(obj, true);
         }
 
         private void MenuItem_RunBuiltinScript_SubmenuOpened(object sender, RoutedEventArgs e)
@@ -1653,22 +1912,24 @@ namespace UndertaleModTool
             if (scriptDialog != null && !scriptDialog.IsVisible)
                 scriptDialog.Dispatcher.Invoke(scriptDialog.Show);
         }
+
         public void UpdateProgressValue(double progressValue)
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action) (() => {
                     scriptDialog.ReportProgress(progressValue);
                 }));
             }
         }
+
         public void UpdateProgressStatus(string status)
         {
             if (scriptDialog != null)
             {
                 scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
                     scriptDialog.ReportProgress(status);
-                }));;
+                }));
             }
         }
 
@@ -1682,15 +1943,15 @@ namespace UndertaleModTool
         {
             progressValue += amount;
         }
-        public void IncProgress()
+        public void IncrementProgress()
         {
             progressValue++;
         }
-        public void AddProgressP(int amount) //P - Parallel (multithreaded)
+        public void AddProgressParallel(int amount) //P - Parallel (multithreaded)
         {
             Interlocked.Add(ref progressValue, amount); //thread-safe add operation (not the same as "lock ()")
         }
-        public void IncProgressP()
+        public void IncrementProgressParallel()
         {
             Interlocked.Increment(ref progressValue); //thread-safe increment
         }
@@ -1751,7 +2012,7 @@ namespace UndertaleModTool
                         BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
 
                         syncBindings.Add(resourceType);
-                    } 
+                    }
                 }
                 else if (syncBindings.Contains(resourceType))
                 {
@@ -1761,15 +2022,14 @@ namespace UndertaleModTool
                 }
             }
         }
-        public void SyncBinding(bool enable = false) //disable all sync. bindings
+        public void DisableAllSyncBindings() //disable all sync. bindings
         {
-            if (syncBindings.Count != 0)
-            {
-                foreach (string resType in syncBindings)
-                    BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
+            if (syncBindings.Count <= 0) return;
 
-                syncBindings.Clear();
-            }
+            foreach (string resType in syncBindings)
+                BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
+
+            syncBindings.Clear();
         }
 
         private void ProgressUpdater()
@@ -1799,7 +2059,7 @@ namespace UndertaleModTool
                 Thread.Sleep(100); //10 times per second
             }
         }
-        public void StartUpdater()
+        public void StartProgressBarUpdater()
         {
             if (cts is not null)
                 ScriptWarning("Warning - there is another progress bar updater task running (hangs) in the background.\nRestart the application to prevent some unexpected behavior.");
@@ -1809,22 +2069,22 @@ namespace UndertaleModTool
 
             updater = Task.Run(ProgressUpdater);
         }
-        public async Task StopUpdater() //async because "Wait()" blocks UI thread
+        public async Task StopProgressBarUpdater() //async because "Wait()" blocks UI thread
         {
-            if (cts is not null)
+            if (cts is null) return;
+
+            cts.Cancel();
+
+            if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
+                ScriptError("Stopping the progress bar updater task is failed.\nIt's highly recommended to restart the application.",
+                    "Script error", false);
+            else
             {
-                cts.Cancel();
-
-                if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
-                    ScriptError("Stopping the progress bar updater task is failed.\nIt's highly recommended to restart the application.", "Script error", false);
-                else
-                {
-                    cts.Dispose();
-                    cts = null;
-                }
-
-                updater.Dispose();
+                cts.Dispose();
+                cts = null;
             }
+
+            updater.Dispose();
         }
 
         public void OpenCodeFile(string name, CodeEditorMode editorDecompile)
@@ -1989,7 +2249,7 @@ namespace UndertaleModTool
                 if (!isScriptException)
                     excString = ProcessException(in exc, in scriptText);
 
-                await StopUpdater();
+                await StopProgressBarUpdater();
 
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
@@ -2010,7 +2270,7 @@ namespace UndertaleModTool
         }
 
         #pragma warning disable CA1416
-        public string PromptChooseDirectory(string prompt)
+        public string PromptChooseDirectory()
         {
             VistaFolderBrowserDialog folderBrowser = new VistaFolderBrowserDialog();
             // vista dialog doesn't suffix the folder name with "/", so we're fixing it here.
@@ -2100,7 +2360,7 @@ namespace UndertaleModTool
                 input.Dispose();
 
                 if (result == System.Windows.Forms.DialogResult.OK)
-                    return input.ReturnString;            //values preserved after close
+                    return input.ReturnString.Replace('\v', '\n'); //values preserved after close; Shift+Enter -> '\v'
                 else
                     return null;
             }
@@ -2112,16 +2372,16 @@ namespace UndertaleModTool
             }
         }
 
-        public void SimpleTextOutput(string titleText, string labelText, string defaultText, bool isMultiline)
+        public void SimpleTextOutput(string titleText, string labelText, string message, bool isMultiline)
         {
-            TextInput textOutput = new TextInput(labelText, titleText, defaultText, isMultiline, true); //read-only mode
+            TextInput textOutput = new TextInput(labelText, titleText, message, isMultiline, true); //read-only mode
             textOutput.Show();
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
         {
             await Task.Delay(150); //wait until progress bar status is displayed
 
-            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, editorDecompile, failedList);
+            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, showInDecompiledView, failedList);
 
             await textOutput.Dispatcher.InvokeAsync(textOutput.GenerateResults);
             _ = Task.Factory.StartNew(textOutput.FillingNotifier, TaskCreationOptions.LongRunning); //"LongRunning" = prefer creating a new thread
@@ -2130,11 +2390,11 @@ namespace UndertaleModTool
 
             PlayInformationSound();
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
         {
             await Task.Delay(150);
 
-            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, editorDecompile, failedList);
+            ClickableTextOutput textOutput = new(title, query, resultsCount, resultsDict, showInDecompiledView, failedList);
 
             await textOutput.Dispatcher.InvokeAsync(textOutput.GenerateResults);
             _ = Task.Factory.StartNew(textOutput.FillingNotifier, TaskCreationOptions.LongRunning);
@@ -2149,9 +2409,9 @@ namespace UndertaleModTool
             OpenBrowser(url);
         }
 
-        public string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
+        public string ScriptInputDialog(string title, string label, string defaultInput, string cancelText, string submitText, bool isMultiline, bool preventClose)
         {
-            TextInputDialog dlg = new TextInputDialog(titleText, labelText, defaultInputBoxText, cancelButtonText, submitButtonText, isMultiline, preventClose);
+            TextInputDialog dlg = new TextInputDialog(title, label, defaultInput, cancelText, submitText, isMultiline, preventClose);
             bool? dlgResult = dlg.ShowDialog();
 
             if (!dlgResult.HasValue || dlgResult == false)
@@ -2263,12 +2523,19 @@ namespace UndertaleModTool
         }
         public async void UpdateApp(SettingsWindow window)
         {
+            //TODO: rewrite this slightly + comment this out so this is clearer on what this does.
+
             window.UpdateButtonEnabled = false;
 
             httpClient = new();
             httpClient.DefaultRequestHeaders.Accept.Clear();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
-            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("UndertaleModTool", Version));
+
+            // remove the invalid characters (everything within square brackets) from the version string.
+            // Probably needs to be expanded later, these are just the ones I know of.
+            Regex invalidChars = new Regex(@"[  ()]");
+            string version = invalidChars.Replace(Version, "");
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("UndertaleModTool", version));
 
             double bytesToMB = 1024 * 1024;
 
@@ -2291,13 +2558,13 @@ namespace UndertaleModTool
                 return;
             }
 
-            bool isNonSingleFile = File.Exists(Path.Combine(ExePath, "UndertaleModTool.dll"));
+            bool isSingleFile = !File.Exists(Path.Combine(ExePath, "UndertaleModTool.dll"));
             string assemblyLocation = AppDomain.CurrentDomain.GetAssemblies()
                                       .First(x => x.GetName().Name.StartsWith("System.Collections")).Location; // any of currently used assemblies
-            bool isSelfContained = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
+            bool isBundled = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
 
             string baseUrl = "https://api.github.com/repos/krzys-h/UndertaleModTool/actions/";
-            string detectedActionName = $"Build tool{(isSelfContained ? " NET Bundled" : "")}{(isNonSingleFile ? " non-single file" : "")}";
+            string detectedActionName = $"Publish GUI{(!Environment.Is64BitOperatingSystem ? " 32Bit" : "")}";
 
             // Fetch the latest workflow run
             var result = await HttpGetAsync(baseUrl + "runs?branch=master&status=success&per_page=20");
@@ -2362,17 +2629,21 @@ namespace UndertaleModTool
             }
 
             JObject artifact = null;
-            for (int index = 0; index < artifactList.Count; index++) {
+            for (int index = 0; index < artifactList.Count; index++)
+            {
                 var currentArtifact = (JObject) artifactList[index];
                 string artifactName = (string)currentArtifact["name"];
 
                 if (Environment.Is64BitOperatingSystem)
                 {
-                    if (artifactName.Contains("x64"))
+                    if (artifactName.Contains($"isBundled-{isBundled.ToString().ToLower()}-isSingleFile-{isSingleFile.ToString().ToLower()}"))
                         artifact = currentArtifact;
                 }
-                else if (artifactName.Contains("x86"))
-                    artifact = currentArtifact;
+                else
+                {
+                    if (artifactName.Contains($"isSingleFile-{isSingleFile.ToString().ToLower()}"))
+                        artifact = currentArtifact;
+                }
             }
             if (artifact is null)
             {
@@ -2420,7 +2691,7 @@ namespace UndertaleModTool
                         // wait until progress bar updater loop is finished
                         while (!ended)
                             Thread.Sleep(100);
-                        
+
                         scriptDialog = null;
                     });
 
@@ -2546,15 +2817,15 @@ result in loss of work.");
             string oldFilePath = FilePath;
             bool oldDisableDebuggerState = true;
             int oldSteamValue = 0;
-            oldDisableDebuggerState = Data.GeneralInfo.DisableDebugger;
+            oldDisableDebuggerState = Data.GeneralInfo.IsDebuggerDisabled;
             oldSteamValue = Data.GeneralInfo.SteamAppID;
             Data.GeneralInfo.SteamAppID = 0;
-            Data.GeneralInfo.DisableDebugger = true;
+            Data.GeneralInfo.IsDebuggerDisabled = true;
             string TempFilesFolder = (oldFilePath != null ? Path.Combine(Path.GetDirectoryName(oldFilePath), "MyMod.temp") : "");
             await SaveFile(TempFilesFolder, false);
             Data.GeneralInfo.SteamAppID = oldSteamValue;
             FilePath = oldFilePath;
-            Data.GeneralInfo.DisableDebugger = oldDisableDebuggerState;
+            Data.GeneralInfo.IsDebuggerDisabled = oldDisableDebuggerState;
             if (TempFilesFolder == null)
             {
                 ShowWarning("Temp folder is null.");
@@ -2562,7 +2833,7 @@ result in loss of work.");
             }
             else if (saveOk)
             {
-                string gameExeName = Data?.GeneralInfo?.Filename?.Content;
+                string gameExeName = Data?.GeneralInfo?.FileName?.Content;
                 if (gameExeName == null || FilePath == null)
                 {
                     ScriptError("Null game executable name or location");
@@ -2599,15 +2870,15 @@ result in loss of work.");
                 return;
 
             bool saveOk = true;
-            if (!Data.GeneralInfo.DisableDebugger)
+            if (!Data.GeneralInfo.IsDebuggerDisabled)
             {
                 if (ShowQuestion("The game has the debugger enabled. Would you like to disable it so the game will run?") == MessageBoxResult.Yes)
                 {
-                    Data.GeneralInfo.DisableDebugger = true;
+                    Data.GeneralInfo.IsDebuggerDisabled = true;
                     if (!await DoSaveDialog())
                     {
                         ShowError("You must save your changes to run.");
-                        Data.GeneralInfo.DisableDebugger = false;
+                        Data.GeneralInfo.IsDebuggerDisabled = false;
                         return;
                     }
                 }
@@ -2619,7 +2890,7 @@ result in loss of work.");
             }
             else
             {
-                Data.GeneralInfo.DisableDebugger = true;
+                Data.GeneralInfo.IsDebuggerDisabled = true;
                 if (ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
                     saveOk = await DoSaveDialog();
             }
@@ -2643,8 +2914,8 @@ result in loss of work.");
             if (Data == null)
                 return;
 
-            bool origDbg = Data.GeneralInfo.DisableDebugger;
-            Data.GeneralInfo.DisableDebugger = false;
+            bool origDbg = Data.GeneralInfo.IsDebuggerDisabled;
+            Data.GeneralInfo.IsDebuggerDisabled = false;
 
             bool saveOk = await DoSaveDialog(true);
             if (FilePath == null)
@@ -2689,7 +2960,7 @@ result in loss of work.");
                 Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
                 Process.Start(runtime.DebuggerPath, "-d=\"" + Path.ChangeExtension(FilePath, ".yydebug") + "\" -t=\"127.0.0.1\" -tp=" + Data.GeneralInfo.DebuggerPort + " -p=\"" + tempProject + "\"");
             }
-            Data.GeneralInfo.DisableDebugger = origDbg;
+            Data.GeneralInfo.IsDebuggerDisabled = origDbg;
         }
 
         private void Command_Settings(object sender, ExecutedRoutedEventArgs e)
@@ -2710,12 +2981,6 @@ result in loss of work.");
             SetIDString(foundIndex == -1 ? "None" : (foundIndex == -2 ? "N/A" : Convert.ToString(foundIndex)));
         }
 
-        public void ChangeSelection(object newsel)
-        {
-            SelectionHistory.Add(Selected);
-            Selected = newsel;
-            UpdateObjectLabel(newsel);
-        }
         public void HighlightObject(object obj, bool silent = true)
         {
             UndertaleResource res = obj as UndertaleResource;
@@ -2802,9 +3067,20 @@ result in loss of work.");
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            Selected = SelectionHistory.Last();
+            TabController.SelectionChanged -= TabController_SelectionChanged;
+
+            Tab lastTab = SelectionHistory.Last();
             SelectionHistory.RemoveAt(SelectionHistory.Count - 1);
+
+            CurrentTab = lastTab;
+            CurrentTabIndex = lastTab.TabIndex;
+
+            ScrollToTab(CurrentTabIndex);
+
+            Selected = lastTab.OpenedObject;
             UpdateObjectLabel(Selected);
+
+            TabController.SelectionChanged += TabController_SelectionChanged;
         }
 
         public void EnsureDataLoaded()
@@ -2865,6 +3141,386 @@ result in loss of work.");
                 }
             }
         }
+
+        private void OpenInTab(object obj, bool isNewTab = false, string tabTitle = null)
+        {
+            if (obj is null)
+                return;
+
+            if (obj is DescriptionView && CurrentTab is not null && !CurrentTab.AutoClose)
+                return;
+
+            bool tabSwitched = true;
+
+            for (int i = 0; i < Tabs.Count; i++)
+            {
+                if (Tabs[i].OpenedObject == obj)
+                {
+                    if (i != CurrentTabIndex)
+                    {
+                        CurrentTabIndex = i;
+
+                        return;
+                    }
+                    else
+                        tabSwitched = false;
+
+                    break;
+                }
+            }
+
+            if (tabSwitched)
+            {
+                // close auto-closing tab
+                if (Tabs.Count > 0 && CurrentTabIndex >= 0 && CurrentTab.AutoClose)
+                    CloseTab(CurrentTab.TabIndex, false);
+            }
+            else
+                return;
+
+            int newIndex = isNewTab ? Tabs.Count : (CurrentTabIndex == -1 ? 0 : CurrentTabIndex);
+
+            Tab newTab = new(obj, newIndex, tabTitle);
+
+            if (isNewTab || Tabs.Count == 0)
+            {
+                Tabs.Add(newTab);
+                CurrentTabIndex = newIndex;
+            }
+            else
+            {
+                Tabs[CurrentTabIndex] = newTab;
+                CurrentTabIndex = newIndex;
+            }
+
+            if (!TabController.IsLoaded)
+                CurrentTab = newTab;
+        }
+
+        public void CloseTab(bool addDefaultTab = true) // close the current tab
+        {
+            CloseTab(CurrentTabIndex, addDefaultTab);
+        }
+        public void CloseTab(int tabIndex, bool addDefaultTab = true)
+        {
+            if (tabIndex >= 0 && tabIndex < Tabs.Count)
+            {
+                // remove all closed tab occurrences from the selection history
+                Tab closingTab = Tabs[tabIndex];
+                for (int i = 0; i < SelectionHistory.Count; i++)
+                {
+                    if (SelectionHistory[i].OpenedObject == closingTab.OpenedObject)
+                        SelectionHistory.RemoveAt(i);
+                }
+
+                // remove consecutive duplicates ( { 1, 1, 2 } -> { 1, 2 } )
+                for (int i = 0; i < SelectionHistory.Count - 1; i++)
+                {
+                    if (SelectionHistory[i] == SelectionHistory[i + 1])
+                        SelectionHistory.RemoveAt(i);
+                }
+
+                TabController.SelectionChanged -= TabController_SelectionChanged;
+
+                int currIndex = CurrentTabIndex;
+
+                // "CurrentTabIndex" changes here (bound to "TabController.SelectedIndex")
+                Tabs.RemoveAt(tabIndex);
+
+                if (!closingTab.AutoClose)
+                    ClosedTabsHistory.Add(closingTab);
+
+                if (Tabs.Count == 0)
+                {
+                    CurrentTabIndex = -1;
+                    CurrentTab = null;
+
+                    if (addDefaultTab)
+                    {
+                        Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open a data.win file to get started, then double click on the items on the left to view them");
+                        OpenInTab(Highlighted);
+                        CurrentTab = Tabs[CurrentTabIndex];
+
+                        Selected = CurrentTab.OpenedObject;
+                        UpdateObjectLabel(Selected);
+                    }
+
+                    TabController.SelectionChanged += TabController_SelectionChanged;
+                }
+                else
+                {
+                    for (int i = tabIndex; i < Tabs.Count; i++)
+                        Tabs[i].TabIndex = i;
+
+                    // if closing the currently open tab
+                    if (currIndex == tabIndex)
+                    {
+                        // and if that tab is not the last
+                        if (Tabs.Count > 1 && tabIndex < Tabs.Count - 1)
+                        {
+                            // switch to the last tab
+                            currIndex = Tabs.Count - 1;
+                        }
+                        else if (currIndex != 0)
+                            currIndex -= 1;
+                    }
+                    else if (currIndex > tabIndex)
+                    {
+                        currIndex -= 1;
+                    }
+
+                    TabController.SelectionChanged += TabController_SelectionChanged;
+
+                    CurrentTabIndex = currIndex;
+                    CurrentTab = Tabs[CurrentTabIndex];
+
+                    if (SelectionHistory.Count > 0 && CurrentTab == SelectionHistory.Last())
+                        SelectionHistory.RemoveAt(SelectionHistory.Count - 1);
+
+                    Selected = CurrentTab.OpenedObject;
+                }
+            }
+        }
+        public void CloseTab(object obj, bool addDefaultTab = true)
+        {
+            if (obj is not null)
+            {
+                int tabIndex = Tabs.FirstOrDefault(x => x.OpenedObject == obj)?.TabIndex ?? -1;
+                if (tabIndex != -1)
+                    CloseTab(tabIndex, addDefaultTab);
+            }
+            else
+                Debug.WriteLine("Can't close the tab - object is null.");
+        }
+
+        public void ChangeSelection(object newsel)
+        {
+            OpenInTab(newsel, true);
+        }
+
+        private void TabController_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (TabController.SelectedIndex >= 0)
+            {
+                if (CurrentTab is not null
+                    && Tabs.Contains(CurrentTab)
+                    && SelectionHistory.LastOrDefault()?.OpenedObject != CurrentTab.OpenedObject
+                    && CurrentTab.OpenedObject is not DescriptionView)
+                {
+                    SelectionHistory.Add(CurrentTab);
+                }
+
+                ScrollToTab(CurrentTabIndex);
+
+                CurrentTab = Tabs[CurrentTabIndex];
+                Selected = CurrentTab.OpenedObject;
+                UpdateObjectLabel(Selected);
+            }
+        }
+
+        private void ScrollTabs(ScrollDirection dir)
+        {
+            double offset = TabScrollViewer.HorizontalOffset;
+            double clearOffset = 0;
+            TabPanel tabPanel = FindVisualChild<TabPanel>(TabController);
+
+            if (Tabs.Count > 1
+                && ((dir == ScrollDirection.Left && offset > 0)
+                || (dir == ScrollDirection.Right && offset < TabController.ActualWidth)))
+            {
+                int count = VisualTreeHelper.GetChildrenCount(tabPanel);
+                List<TabItem> tabItems = new(count);
+                for (int i1 = 0; i1 < count; i1++)
+                    tabItems.Add(VisualTreeHelper.GetChild(tabPanel, i1) as TabItem);
+
+                // selected TabItem is in the end of child list somehow, so it should be fixed
+                if (CurrentTabIndex != count - 1)
+                {
+                    tabItems.Insert(CurrentTabIndex, tabItems[^1]);
+                    tabItems.RemoveAt(tabItems.Count - 1);
+                }
+
+                // get index of first visible tab
+                int i = 0;
+                foreach (TabItem item in tabItems)
+                {
+                    double actualWidth = item.ActualWidth;
+                    if (i == CurrentTabIndex)
+                        actualWidth -= 4; // selected tab is wider
+
+                    clearOffset += actualWidth;
+
+                    if (clearOffset > offset)
+                    {
+                        if (dir == ScrollDirection.Left)
+                            clearOffset -= actualWidth;
+
+                        break;
+                    }
+
+                    i++;
+                }
+
+                if (dir == ScrollDirection.Left && TabScrollViewer.ScrollableWidth != offset && i != 0)
+                    TabScrollViewer.ScrollToHorizontalOffset(clearOffset - tabItems[i - 1].ActualWidth);
+                else
+                    TabScrollViewer.ScrollToHorizontalOffset(clearOffset);
+            }
+        }
+        private void ScrollToTab(int tabIndex)
+        {
+            TabScrollViewer.UpdateLayout();
+
+            if (tabIndex == 0)
+                TabScrollViewer.ScrollToLeftEnd();
+            else if (tabIndex == Tabs.Count - 1)
+                TabScrollViewer.ScrollToRightEnd();
+            else
+            {
+                TabPanel tabPanel = FindVisualChild<TabPanel>(TabController);
+
+                int count = VisualTreeHelper.GetChildrenCount(tabPanel);
+                List<TabItem> tabItems = new(count);
+                for (int i1 = 0; i1 < count; i1++)
+                    tabItems.Add(VisualTreeHelper.GetChild(tabPanel, i1) as TabItem);
+
+                // selected TabItem is in the end of child list somehow, so it should be fixed
+                if (CurrentTabIndex != count - 1)
+                {
+                    tabItems.Insert(CurrentTabIndex, tabItems[^1]);
+                    tabItems.RemoveAt(tabItems.Count - 1);
+                }
+
+                TabItem currTabItem = null;
+                double offset = 0;
+                int i = 0;
+                foreach (TabItem item in tabItems)
+                {
+                    if (i == tabIndex)
+                    {
+                        currTabItem = item;
+                        break;
+                    }
+
+                    offset += item.ActualWidth;
+                    i++;
+                }
+
+                double endOffset = TabScrollViewer.HorizontalOffset + TabScrollViewer.ViewportWidth;
+                if (offset < TabScrollViewer.HorizontalOffset || offset > endOffset)
+                    TabScrollViewer.ScrollToHorizontalOffset(offset);
+                else
+                    currTabItem?.BringIntoView();
+            }
+        }
+        private void TabScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            ScrollTabs(e.Delta < 0 ? ScrollDirection.Right : ScrollDirection.Left);
+            e.Handled = true;
+        }
+        private void TabsScrollLeftButton_Click(object sender, RoutedEventArgs e)
+        {
+            ScrollTabs(ScrollDirection.Left);
+        }
+        private void TabsScrollRightButton_Click(object sender, RoutedEventArgs e)
+        {
+            ScrollTabs(ScrollDirection.Right);
+        }
+
+        private void TabCloseButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            int tabIndex = (button.DataContext as Tab).TabIndex;
+
+            CloseTab(tabIndex);
+        }
+        private void TabCloseButton_MouseEnter(object sender, MouseEventArgs e)
+        {
+            (sender as Button).Content = new Image() { Source = Tab.ClosedHoverIcon };
+        }
+        private void TabCloseButton_MouseLeave(object sender, MouseEventArgs e)
+        {
+            (sender as Button).Content = new Image() { Source = Tab.ClosedIcon };
+        }
+
+        private void TabItem_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == System.Windows.Input.MouseButton.Middle)
+            {
+                TabItem tabItem = sender as TabItem;
+                Tab tab = tabItem?.DataContext as Tab;
+                if (tab is null)
+                    return;
+
+                if (tab.TabTitle != "Welcome!")
+                    CloseTab(tab.OpenedObject);
+            }
+        }
+
+        // source - https://stackoverflow.com/a/10738247/12136394
+        private void TabItem_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Source is not TabItem tabItem || e.OriginalSource is Button)
+                return;
+
+            if (Mouse.PrimaryDevice.LeftButton == MouseButtonState.Pressed)
+            {
+                CurrentTabIndex = tabItem.TabIndex;
+                DragDrop.DoDragDrop(tabItem, tabItem, DragDropEffects.All);
+            }
+        }
+        private void TabItem_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Source is TabItem tabItemTarget &&
+                e.Data.GetData(typeof(TabItem)) is TabItem tabItemSource &&
+                !tabItemTarget.Equals(tabItemSource))
+            {
+                int sourceIndex = tabItemSource.TabIndex;
+                int targetIndex = tabItemTarget.TabIndex;
+                Tab sourceTab = tabItemSource.DataContext as Tab;
+                if (sourceTab is null)
+                    return;
+
+                TabController.SelectionChanged -= TabController_SelectionChanged;
+
+                Tabs.RemoveAt(sourceIndex);
+                Tabs.Insert(targetIndex, sourceTab);
+
+                for (int i = 0; i < Tabs.Count; i++)
+                    Tabs[i].TabIndex = i;
+
+                CurrentTabIndex = targetIndex;
+
+                TabController.SelectionChanged += TabController_SelectionChanged;
+            }
+        }
+
+        private void CloseTabMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Tab tab = (sender as MenuItem).DataContext as Tab;
+            if (tab is null)
+                return;
+
+            CloseTab(tab.TabIndex);
+        }
+        private void CloseOtherTabsMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Tab tab = (sender as MenuItem).DataContext as Tab;
+            if (tab is null)
+                return;
+
+            foreach (Tab t in Tabs.Reverse())
+            {
+                if (t == tab)
+                    continue;
+
+                ClosedTabsHistory.Add(t);
+            }
+
+            SelectionHistory.Clear();
+            Tabs = new() { tab };
+            CurrentTabIndex = 0;
+        }
     }
 
     public class GeneralInfoEditor
@@ -2905,6 +3561,11 @@ result in loss of work.");
     {
         public string Heading { get; private set; }
         public string Description { get; private set; }
+
+        // Used only by the "TabTitleConverter" to prevent the following WPF binding warning:
+        // "Name property not found on object of type DescriptionView".
+        // (within "TabControl.ItemTemplate")
+        public UndertaleString Name { get; } = new();
 
         public DescriptionView(string heading, string description)
         {

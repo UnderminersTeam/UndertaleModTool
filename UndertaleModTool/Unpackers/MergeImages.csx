@@ -9,17 +9,17 @@ using System.Linq;
 using System.Text;
 using UndertaleModLib.Util;
 
-string importFolderA = PromptChooseDirectory("Import From Where");
+string importFolderA = PromptChooseDirectory();
 if (importFolderA == null) {
     throw new ScriptException("The import folder was not set.");
 }
 
-string importFolderB = PromptChooseDirectory("Merge With Where");
+string importFolderB = PromptChooseDirectory();
 if (importFolderB == null) {
     throw new ScriptException("The import folder was not set.");
 }
 
-string exportFolder = PromptChooseDirectory("Export To Where");
+string exportFolder = PromptChooseDirectory();
 if (exportFolder == null) {
     throw new ScriptException("The export folder was not set.");
 }
@@ -43,12 +43,12 @@ foreach (FileInfo fileA in filesA) {
     if (bitmapB.Size.Width > height) {
         height = bitmapB.Size.Width;
     }
-    
+
     Bitmap outputBitmap = new Bitmap(width, height);
-    
+
     outputBitmap = SuperimposeOntoBitmap(bitmapA, outputBitmap, 0);
     outputBitmap = SuperimposeOntoBitmap(bitmapB, outputBitmap, bitmapA.Size.Width);
-    
+
     outputBitmap.Save(System.IO.Path.Combine(exportFolder, fileA.Name), ImageFormat.Png);
 }
 

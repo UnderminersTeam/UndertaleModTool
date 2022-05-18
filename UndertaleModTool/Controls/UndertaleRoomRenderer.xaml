@@ -15,17 +15,20 @@
         <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
         <local:ColorConverter x:Key="ColorConverter"/>
         <local:SimplePointsDisplayConverter x:Key="SimplePointsDisplayConverter"/>
-        <local:LayerFlattenerConverter x:Key="LayerFlattenerConverter" />
+        <local:LayersOrderedConverter x:Key="LayersOrderedConverter"/>
+        <local:LayerItemsSourceConverter x:Key="LayerItemsSourceConverter"/>
         <local:IsGMS2Converter x:Key="IsGMS2Converter" />
         <local:RoomCaptionConverter x:Key="RoomCaptionConverter" />
         <local:BGColorConverter x:Key="BGColorConverter"/>
         <local:BGViewportConverter x:Key="BGViewportConverter"/>
+        <local:LayerTypeConverter x:Key="LayerTypeConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
-        <local:BGLayerVisConverter x:Key="BGLayerVisConverter"/>
         <local:ColorToOpacityConverter x:Key="ColorToOpacityConverter"/>
         <local:CachedTileDataLoader x:Key="CachedTileDataLoader"/>
         <local:TileLayerTemplateSelector x:Key="TileLayerTemplateSelector"/>
         <local:TileRectanglesConverter x:Key="TileRectanglesConverter"/>
+        <local:CachedImageLoaderWithIndex x:Key="CachedImageLoaderWithIndex"/>
+        <local:NegateNumberConverter x:Key="NegateNumberConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomRenderer}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomRenderer}, Path=DataContext.Tiles}"/>
@@ -52,11 +55,22 @@
         <ItemsControl Grid.Column="0" Grid.Row="1" Panel.ZIndex="0" Name="RoomGraphics" Background="Black" ClipToBounds="True">
             <ItemsControl.Style>
                 <Style TargetType="ItemsControl">
-                    <Setter Property="ItemsSource" Value="{Binding Mode=OneTime, Source={StaticResource AllObjectsGMS1}}"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" Value="False">
                             <DataTrigger.Setters>
-                                <Setter Property="ItemsSource" Value="{Binding Layers, Mode=OneTime, Converter={StaticResource LayerFlattenerConverter}}"/>
+                                <Setter Property="ItemsSource" Value="{Binding Layers, Mode=OneTime, Converter={StaticResource LayersOrderedConverter}}"/>
+                                <Setter Property="ItemContainerStyle">
+                                    <Setter.Value>
+                                        <Style TargetType="ContentPresenter">
+                                            <Setter Property="Visibility" Value="{Binding IsVisible, Mode=OneTime, Converter={StaticResource BoolToVisConverter}}"/>
+                                        </Style>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger.Setters>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" Value="True">
+                            <DataTrigger.Setters>
+                                <Setter Property="ItemsSource" Value="{Binding Mode=OneTime, Source={StaticResource AllObjectsGMS1}}"/>
                             </DataTrigger.Setters>
                         </DataTrigger>
                     </Style.Triggers>
@@ -105,13 +119,40 @@
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.Resources>
+                <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer}">
+                    <ItemsControl ItemsSource="{Binding ., Mode=OneTime, Converter={StaticResource LayerItemsSourceConverter}}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.Style>
+                            <Style TargetType="ItemsControl">
+                                <Style.Triggers>
+                                    <!-- Offset doesn't work for instances layer; BG layer has its own translate transform -->
+                                    <DataTrigger Binding="{Binding LayerType, Mode=OneTime, Converter={StaticResource LayerTypeConverter}, ConverterParameter=Canvas}" Value="Visible">
+                                        <Setter Property="ItemContainerStyle">
+                                            <Setter.Value>
+                                                <Style>
+                                                    <Setter Property="Canvas.Left" Value="{Binding DataContext.XOffset, Mode=OneTime, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Canvas}}"/>
+                                                    <Setter Property="Canvas.Top" Value="{Binding DataContext.YOffset, Mode=OneTime, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Canvas}}" />
+                                                </Style>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ItemsControl.Style>
+                    </ItemsControl>
+                </DataTemplate>
+
                 <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Background}">
                     <Rectangle Width="{Binding BackgroundDefinition.Texture.SourceWidth, Mode=OneTime}" Height="{Binding BackgroundDefinition.Texture.SourceHeight, Mode=OneTime}"
                                Visibility="{Binding Enabled, Mode=OneTime, Converter={StaticResource BoolToVisConverter}}">
                         <Rectangle.RenderTransform>
                             <TransformGroup>
                                 <!-- Giving names to transform elements prevents random "Cannot find governing FrameworkElement or FrameworkContentElement for target element." errors -->
-                                <TranslateTransform x:Name="transform0_0" X="{Binding X, Mode=OneTime}" Y="{Binding Y, Mode=OneTime}"/>
+                                <TranslateTransform x:Name="transform0_0" X="{Binding XOffset, Mode=OneTime}" Y="{Binding YOffset, Mode=OneTime}"/>
                                 <ScaleTransform x:Name="transform0_1" ScaleX="{Binding CalcScaleX, Mode=OneWay}" ScaleY="{Binding CalcScaleY, Mode=OneWay}"  CenterX="{Binding X, Mode=OneTime}" CenterY="{Binding Y, Mode=OneTime}"/>
                             </TransformGroup>
                         </Rectangle.RenderTransform>
@@ -135,20 +176,29 @@
                     </Rectangle>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
-                    <Rectangle Width="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceWidth, Mode=OneTime}" Height="{Binding ObjectDefinition.Sprite.Textures[0].Texture.SourceHeight, Mode=OneTime}"
+                    <Rectangle Width="{Binding Fill.ImageSource.Width, RelativeSource={RelativeSource Self}, Mode=OneWay}" Height="{Binding Fill.ImageSource.Height, RelativeSource={RelativeSource Self}, Mode=OneWay}"
                                Opacity="{Binding Color, Mode=OneTime, Converter={StaticResource ColorToOpacityConverter}}">
                         <Rectangle.RenderTransform>
                             <TransformGroup>
-                                <ScaleTransform x:Name="transform1_0" ScaleX="{Binding ScaleX, Mode=OneTime}" ScaleY="{Binding ScaleY, Mode=OneTime}"/>
-                                <RotateTransform x:Name="transform1_1" CenterX="{Binding X, Mode=OneTime}" CenterY="{Binding Y, Mode=OneTime}" Angle="{Binding OppositeRotation, Mode=OneTime}"/>
+                                <ScaleTransform x:Name="transform1_0" ScaleX="{Binding ScaleX, Mode=OneTime}" ScaleY="{Binding ScaleY, Mode=OneTime}"
+                                                CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"
+                                                CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"/>
+                                <RotateTransform x:Name="transform1_1" Angle="{Binding OppositeRotation, Mode=OneTime}"
+                                                 CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"
+                                                 CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"/>
                                 <TranslateTransform x:Name="transform1_2" X="{Binding XOffset, Mode=OneTime}" Y="{Binding YOffset, Mode=OneTime}"/>
                             </TransformGroup>
                         </Rectangle.RenderTransform>
                         <Rectangle.Fill>
                             <ImageBrush
-                                ImageSource="{Binding ObjectDefinition.Sprite.Textures[0].Texture, Converter={StaticResource UndertaleCachedImageLoader}, Mode=OneTime}"
                                 TileMode="None"
                                 Stretch="UniformToFill">
+                                <ImageBrush.ImageSource>
+                                    <MultiBinding Converter="{StaticResource CachedImageLoaderWithIndex}" Mode="OneTime">
+                                        <Binding Path="ObjectDefinition.Sprite.Textures" Mode="OneTime"/>
+                                        <Binding Path="WrappedImageIndex" Mode="OneTime"/>
+                                    </MultiBinding>
+                                </ImageBrush.ImageSource>
                             </ImageBrush>
                         </Rectangle.Fill>
                     </Rectangle>
@@ -169,37 +219,41 @@
                     </Rectangle>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type undertale:UndertaleRoom+SpriteInstance}">
-                    <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth, Mode=OneTime}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight, Mode=OneTime}"
+                    <Rectangle Width="{Binding Fill.ImageSource.Width, RelativeSource={RelativeSource Self}, Mode=OneWay}" Height="{Binding Fill.ImageSource.Height, RelativeSource={RelativeSource Self}, Mode=OneWay}"
                                Opacity="{Binding Color, Mode=OneTime, Converter={StaticResource ColorToOpacityConverter}}">
                         <Rectangle.RenderTransform>
                             <TransformGroup>
-                                <ScaleTransform x:Name="transform4_0" ScaleX="{Binding ScaleX, Mode=OneTime}" ScaleY="{Binding ScaleY, Mode=OneTime}"/>
-                                <RotateTransform x:Name="transform4_1" CenterX="{Binding X, Mode=OneTime}" CenterY="{Binding Y, Mode=OneTime}" Angle="{Binding OppositeRotation, Mode=OneTime}"/>
+                                <ScaleTransform x:Name="transform4_0" ScaleX="{Binding ScaleX, Mode=OneTime}" ScaleY="{Binding ScaleY, Mode=OneTime}"
+                                                CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"
+                                                CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"/>
+                                <RotateTransform x:Name="transform4_1" Angle="{Binding OppositeRotation, Mode=OneTime}"
+                                                 CenterX="{Binding SpriteXOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"
+                                                 CenterY="{Binding SpriteYOffset, Converter={StaticResource NegateNumberConverter}, Mode=OneTime}"/>
                                 <TranslateTransform x:Name="transform4_2" X="{Binding XOffset, Mode=OneTime}" Y="{Binding YOffset, Mode=OneTime}"/>
                             </TransformGroup>
                         </Rectangle.RenderTransform>
                         <Rectangle.Fill>
                             <ImageBrush
-                                ImageSource="{Binding Sprite.Textures[0].Texture, Mode=OneTime, Converter={StaticResource UndertaleCachedImageLoader}}"
                                 TileMode="None"
                                 Stretch="UniformToFill">
+                                <ImageBrush.ImageSource>
+                                    <MultiBinding Converter="{StaticResource CachedImageLoaderWithIndex}" Mode="OneTime">
+                                        <Binding Path="Sprite.Textures" Mode="OneTime"/>
+                                        <Binding Path="WrappedFrameIndex" Mode="OneTime"/>
+                                    </MultiBinding>
+                                </ImageBrush.ImageSource>
                             </ImageBrush>
                         </Rectangle.Fill>
                     </Rectangle>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
                     <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth, Mode=OneTime}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight, Mode=OneTime}"
-                               Opacity="{Binding Color, Mode=OneTime, Converter={StaticResource ColorToOpacityConverter}}">
-                        <Rectangle.Visibility>
-                            <MultiBinding Converter="{StaticResource BGLayerVisConverter}">
-                                <Binding Path="Visible" Mode="OneTime"/>
-                                <Binding Path="ParentLayer.IsVisible" Mode="OneTime"/>
-                            </MultiBinding>
-                        </Rectangle.Visibility>
+                               Opacity="{Binding Color, Mode=OneTime, Converter={StaticResource ColorToOpacityConverter}}"
+                               Visibility="{Binding Visible, Mode=OneTime, Converter={StaticResource BoolToVisConverter}}">
                         <Rectangle.RenderTransform>
                             <TransformGroup>
                                 <ScaleTransform x:Name="transform3_0" ScaleX="{Binding CalcScaleX, Mode=OneWay}" ScaleY="{Binding CalcScaleY, Mode=OneWay}" CenterX="0" CenterY="0"/>
-                                <TranslateTransform x:Name="transform3_1" X="{Binding ParentLayer.XOffset, Mode=OneWay}" Y="{Binding ParentLayer.YOffset, Mode=OneWay}"/>
+                                <TranslateTransform x:Name="transform3_1" X="{Binding XOffset, Mode=OneWay}" Y="{Binding YOffset, Mode=OneWay}"/>
                             </TransformGroup>
                         </Rectangle.RenderTransform>
                         <Rectangle.Fill>
@@ -232,7 +286,7 @@
                     <local:TileLayerImage
                         LayerTilesData="{Binding ., Mode=OneTime}"
                         Width="{Binding ParentLayer.ParentRoom.Width, Mode=OneTime}" Height="{Binding ParentLayer.ParentRoom.Height, Mode=OneTime}"
-                        Visibility="{Binding ParentLayer.IsVisible, Mode=OneTime, Converter={StaticResource BoolToVisConverter}}">
+                        Stretch="None">
                         <Image.Source>
                             <MultiBinding Converter="{StaticResource CachedTileDataLoader}">
                                 <Binding Mode="OneTime"/>
@@ -249,9 +303,7 @@
                         </ItemsControl.ItemsSource>
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <Canvas 
-                                    Width="{Binding ParentLayer.ParentRoom.Width, Mode=OneTime}" Height="{Binding ParentLayer.ParentRoom.Height, Mode=OneTime}"
-                                    Visibility="{Binding ParentLayer.IsVisible, Mode=OneTime, Converter={StaticResource BoolToVisConverter}}"/>
+                                <Canvas Width="{Binding ParentLayer.ParentRoom.Width, Mode=OneTime}" Height="{Binding ParentLayer.ParentRoom.Height, Mode=OneTime}"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.Resources>
@@ -267,6 +319,7 @@
                                     </Rectangle.RenderTransform>
                                     <Rectangle.Fill>
                                         <ImageBrush
+                                            x:Name="TileImageSource"
                                             ImageSource="{Binding ImageSrc, Mode=OneTime}"
                                             TileMode="None"
                                             Stretch="UniformToFill">

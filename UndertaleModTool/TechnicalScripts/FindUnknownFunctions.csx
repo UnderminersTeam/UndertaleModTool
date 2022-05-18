@@ -8,14 +8,14 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-string exportFolder = PromptChooseDirectory("Export to where");
+string exportFolder = PromptChooseDirectory();
 if (exportFolder == null)
     throw new ScriptException("The export folder was not set.");
 
 //Overwrite Check One
 if (File.Exists(exportFolder + "unknown_functions.txt"))
 {
-    bool overwriteCheckOne = ScriptQuestion(@"A 'unknown_functions.txt' file already exists. 
+    bool overwriteCheckOne = ScriptQuestion(@"A 'unknown_functions.txt' file already exists.
 Would you like to overwrite it?");
     if (overwriteCheckOne)
     {
@@ -89,7 +89,7 @@ if (unknownFunctions.Count > 0)
             resultsToDisplay += (unknownFunctions[i] + "\r\n");
         }
         resultsToDisplay = SimpleTextInput("Prune Menu", "Delete one or more lines to remove those entries", resultsToDisplay, true);
-        string[] IndividualLineArray = resultsToDisplay.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        string[] IndividualLineArray = resultsToDisplay.Split('\n'}, StringSplitOptions.RemoveEmptyEntries);
         foreach (var OneLine in IndividualLineArray)
         {
             unknownFunctions2.Add(OneLine.Trim());
@@ -117,4 +117,3 @@ if (unknownFunctions.Count > 0)
         ScriptMessage(removed + "were removed.");
     }
 }
-

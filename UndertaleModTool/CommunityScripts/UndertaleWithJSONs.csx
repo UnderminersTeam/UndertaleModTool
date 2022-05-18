@@ -25,7 +25,7 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 string langFolder = GetFolder(FilePath) + "lang" + Path.DirectorySeparatorChar;
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
-if (Directory.Exists(langFolder)) 
+if (Directory.Exists(langFolder))
 {
     ScriptError("The lang files already exist.", "Error");
     return;
@@ -55,7 +55,7 @@ await Task.Run(() => {
 void IncProgressLocal()
 {
     if (GetProgress() < maxCount)
-        IncProgress();
+        IncrementProgress();
 }
 
 string GetFolder(string path) {
@@ -137,11 +137,11 @@ ScriptMessage("Complete.");
 void DumpJSON(string language)
 {
     var lang_file = Data.Code.ByName("gml_Script_textdata_" + language);
-    try 
+    try
     {
         File.WriteAllText(Path.Combine(langFolder, "lang_" + language + ".json"), (lang_file != null ? Decompiler.Decompile(lang_file, DECOMPILE_CONTEXT.Value) : ""));
-    } 
-    catch (Exception e) 
+    }
+    catch (Exception e)
     {
         throw new ScriptException("gml_Script_textdata_" + language + " has an error that prevents creation of JSONs.");
     }
@@ -177,11 +177,11 @@ void MakeJSON(string language)
         pattern = @""" \+ '""'";
         replacement = @"\""""";
         input = Regex.Replace(input, pattern, replacement);
-        
+
         pattern = @"'""'";
         replacement = @"\""";
         input = Regex.Replace(input, pattern, replacement);
-        
+
         input = input.Replace(@"\"",", @"\"""",");
 
         pattern = @"ds_map_add\(global\.text_data_.., ("".*""), ("".*"")\)";

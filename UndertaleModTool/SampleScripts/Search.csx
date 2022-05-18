@@ -44,19 +44,19 @@ if (regex_check)
 }
 
 bool cacheGenerated = await GenerateGMLCache(DECOMPILE_CONTEXT);
-await StopUpdater();
+await StopProgressBarUpdater();
 
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await DumpCode();
 
-await StopUpdater();
+await StopProgressBarUpdater();
 
 await Task.Run(SortResults);
 
 UpdateProgressStatus("Generating result list...");
-await ClickableTextOutput("Search results.", keyword, result_count, resultsSorted, true, failedSorted);
+await ClickableSearchOutput("Search results.", keyword, result_count, resultsSorted, true, failedSorted);
 
 HideProgressBar();
 EnableUI();
@@ -132,7 +132,7 @@ void DumpCode(UndertaleCode code)
         failedList.Add(code.Name.Content);
     }
 
-    IncProgressP();
+    IncrementProgressParallel();
 }
 void ScanCode(KeyValuePair<string, string> code)
 {
@@ -165,5 +165,5 @@ void ScanCode(KeyValuePair<string, string> code)
         failedList.Add(code.Key);
     }
 
-    IncProgressP();
+    IncrementProgressParallel();
 }

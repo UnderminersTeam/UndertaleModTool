@@ -36,31 +36,31 @@ namespace UndertaleModTests
 
         public bool IsAppClosed => throw new NotImplementedException();
 
-        public void ChangeSelection(object newsel)
+        public void ChangeSelection(object newSelection)
         {
         }
 
         public void EnsureDataLoaded()
         {
         }
-        public async Task<bool> Make_New_File()
+        public async Task<bool> MakeNewDataFile()
         {
             await Task.Delay(1); //dummy await
             return true;
         }
-        public void ReplaceTempWithMain(bool ImAnExpertBTW = false)
+        public void ReplaceTempWithMain(bool imAnExpertBtw = false)
         {
         }
-        public void ReplaceMainWithTemp(bool ImAnExpertBTW = false)
+        public void ReplaceMainWithTemp(bool imAnExpertBtw = false)
         {
         }
-        public void ReplaceTempWithCorrections(bool ImAnExpertBTW = false)
+        public void ReplaceTempWithCorrections(bool imAnExpertBtw = false)
         {
         }
-        public void ReplaceCorrectionsWithTemp(bool ImAnExpertBTW = false)
+        public void ReplaceCorrectionsWithTemp(bool imAnExpertBtw = false)
         {
         }
-        public void UpdateCorrections(bool ImAnExpertBTW = false)
+        public void UpdateCorrections(bool imAnExpertBtw = false)
         {
         }
         public void ReapplyProfileCode()
@@ -88,10 +88,6 @@ namespace UndertaleModTests
         public bool ScriptQuestion(string message)
         {
             Console.WriteLine(message);
-            return true;
-        }
-        public bool SendAUMIMessage(IpcMessage_t ipMessage, ref IpcReply_t outReply)
-        {
             return true;
         }
         public void ScriptOpenURL(string url)
@@ -127,17 +123,17 @@ namespace UndertaleModTests
         {
             Console.WriteLine($"AddProgress(): {amount}");
         }
-        public void IncProgress()
+        public void IncrementProgress()
         {
-            Console.WriteLine("IncProgress()");
+            Console.WriteLine("IncrementProgress()");
         }
-        public void AddProgressP(int amount)
+        public void AddProgressParallel(int amount)
         {
-            Console.WriteLine($"AddProgressP(): {amount}");
+            Console.WriteLine($"AddProgressParallel(): {amount}");
         }
-        public void IncProgressP()
+        public void IncrementProgressParallel()
         {
-            Console.WriteLine("IncProgressP()");
+            Console.WriteLine("IncrementProgressParallel()");
         }
         public int GetProgress()
         {
@@ -149,9 +145,9 @@ namespace UndertaleModTests
             Console.WriteLine($"SetProgress(): {value}");
         }
 
-        public string ScriptInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
+        public string ScriptInputDialog(string title, string label, string defaultInput, string cancelText, string submitText, bool isMultiline, bool preventClose)
         {
-            Console.Write(labelText + " ");
+            Console.Write(label + " ");
             string ret = Console.ReadLine();
 
             return ret;
@@ -160,19 +156,19 @@ namespace UndertaleModTests
         {
             return ScriptInputDialog(titleText, labelText, defaultInputBoxText, "Cancel", "Submit", isMultiline, false);
         }
-        public void SimpleTextOutput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline)
+        public void SimpleTextOutput(string titleText, string labelText, string message, bool isMultiline)
         {
-            Console.WriteLine($"SimpleTextOutput(): \"{titleText}\", \"{labelText}\", *defaultInputBoxText* (length - {defaultInputBoxText.Length}), {isMultiline}");
+            Console.WriteLine($"SimpleTextOutput(): \"{titleText}\", \"{labelText}\", *defaultInputBoxText* (length - {message.Length}), {isMultiline}");
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
         {
-            Console.WriteLine($"ClickableTextOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count()}), {editorDecompile.ToString().ToLower()}"
+            Console.WriteLine($"ClickableSearchOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count()}), {showInDecompiledView.ToString().ToLower()}"
                               + failedList is not null ? $", *failedList* (length - {failedList.Count()})" : string.Empty);
             await Task.Delay(1); //dummy await
         }
-        public async Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
         {
-            Console.WriteLine($"ClickableTextOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count}), {editorDecompile.ToString().ToLower()}"
+            Console.WriteLine($"ClickableSearchOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count}), {showInDecompiledView.ToString().ToLower()}"
                               + failedList is not null ? $", *failedList* (length - {failedList.Count()})" : string.Empty);
             await Task.Delay(1); //dummy await
         }
@@ -181,29 +177,29 @@ namespace UndertaleModTests
         {
             Console.Write("SetUMTConsoleText(): " + message);
         }
-        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
         {
-            Console.Write("ReplaceTextInGML(): " + codeName + ", " + keyword + ", " + replacement + ", " + case_sensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
+            Console.Write("ReplaceTextInGML(): " + codeName + ", " + keyword + ", " + replacement + ", " + caseSensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
         }
-        public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+        public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
         {
-            Console.Write("ReplaceTextInGML(): " + code.ToString() + ", " + keyword + ", " + replacement + ", " + case_sensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
+            Console.Write("ReplaceTextInGML(): " + code.ToString() + ", " + keyword + ", " + replacement + ", " + caseSensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
         }
-        public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false)
+        public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool checkDecompiler = false)
         {
             Console.Write("ImportGMLString(): " + codeName + ", " + gmlCode + ", " + doParse.ToString());
         }
-        public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
+        public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false)
         {
             Console.Write("ImportASMString(): " + codeName + ", " + gmlCode + ", " + doParse.ToString());
         }
-        public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false, bool throwOnError = false)
+        public void ImportGMLFile(string fileName, bool doParse = true, bool checkDecompiler = false, bool throwOnError = false)
         {
-            Console.Write($"ImportGMLFile(): \"{fileName}\", {doParse}, {CheckDecompiler}, {throwOnError}");
+            Console.Write($"ImportGMLFile(): \"{fileName}\", {doParse}, {checkDecompiler}, {throwOnError}");
         }
-        public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
+        public void ImportASMFile(string fileName, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false, bool throwOnError = false)
         {
-            Console.Write($"ImportASMFile(): \"{fileName}\", {doParse}, {destroyASM}, {CheckDecompiler}, {throwOnError}");
+            Console.Write($"ImportASMFile(): \"{fileName}\", {doParse}, {nukeProfile}, {checkDecompiler}, {throwOnError}");
         }
 
         public void SetFinishedMessage(bool isFinishedMessageEnabled)
@@ -224,30 +220,30 @@ namespace UndertaleModTests
         {
             Console.WriteLine($"SyncBinding(): \"{resourceType}\", {enable}");
         }
-        public void SyncBinding(bool enable = false)
+        public void DisableAllSyncBindings()
         {
-            Console.WriteLine($"SyncBinding(): {enable}");
+            Console.WriteLine($"Disabling all enabled synced bindings.");
         }
-        public void StartUpdater()
+        public void StartProgressBarUpdater()
         {
             Console.WriteLine("Starting progress bar updater...");
         }
-        public async Task StopUpdater()
+        public async Task StopProgressBarUpdater()
         {
             Console.WriteLine("Stopping progress bar updater...");
             await Task.Delay(1); //dummy await
         }
 
-        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
+        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
         {
-            Console.WriteLine(string.Format("GenerateGMLCache(): *decompileContext*{0}, *dialog*{1}, {2}",
+            Console.WriteLine(String.Format("GenerateGMLCache(): *decompileContext*{0}, *dialog*{1}, {2}",
                                             decompileContext is null ? " (null)" : "",
                                             dialog is null ? " (null)" : "",
-                                            isSaving.ToString().ToLower())
+                                            clearGMLEditedBefore.ToString().ToLower())
                               );
 
             await Task.Delay(1); //dummy await
-            
+
             return false;
         }
 
@@ -272,7 +268,7 @@ namespace UndertaleModTests
             throw new NotImplementedException();
         }
 
-        public string PromptChooseDirectory(string prompt)
+        public string PromptChooseDirectory()
         {
             throw new NotImplementedException();
         }
@@ -301,9 +297,9 @@ namespace UndertaleModTests
             Console.Write(output);
             return output;
         }
-        public bool AreFilesIdentical(string File01, string File02)
+        public bool AreFilesIdentical(string file1, string file2)
         {
-            string output = "AreFilesIdentical(): " + File01 + ", " + File02;
+            string output = "AreFilesIdentical(): " + file1 + ", " + file2;
             Console.Write(output);
             return true;
         }
@@ -355,7 +351,7 @@ namespace UndertaleModTests
         {
             await RunScript("ShowRoomName.csx");
         }
-        
+
         [TestMethod]
         [Ignore] // TODO: path problems
         public async Task BorderEnabler()

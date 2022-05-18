@@ -105,7 +105,7 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
 }
 
 SetProgressBar(null, "Code Entries", 0, codeToDump.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 await Task.Run(() => {
     for (var j = 0; j < codeToDump.Count; j++)
@@ -114,10 +114,10 @@ await Task.Run(() => {
     }
 });
 
-await StopUpdater();
+await StopProgressBarUpdater();
 
 UpdateProgressStatus("Generating result list...");
-await ClickableTextOutput("Search results.", keyword, result_count, resultsDict, true, failedList);
+await ClickableSearchOutput("Search results.", keyword, result_count, resultsDict, true, failedList);
 
 HideProgressBar();
 EnableUI();
@@ -166,5 +166,5 @@ void DumpCode(UndertaleCode code)
         failedList.Add(code.Name.Content);
     }
 
-    IncProgress();
+    IncrementProgress();
 }

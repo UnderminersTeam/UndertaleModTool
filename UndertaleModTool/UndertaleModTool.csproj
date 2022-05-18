@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net5.0-windows</TargetFramework>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <RollForward>LatestMajor</RollForward>
         <OutputType>WinExe</OutputType>
         <PublishUrl>publish\</PublishUrl>
         <Install>true</Install>
@@ -25,13 +26,21 @@
         <DebugType>embedded</DebugType>
         <Platforms>AnyCPU;x64</Platforms>
         <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
+        <LangVersion>9</LangVersion>
     </PropertyGroup>
     <PropertyGroup>
         <StartupObject>UndertaleModTool.Program</StartupObject>
     </PropertyGroup>
     <PropertyGroup>
         <ApplicationIcon>icon.ico</ApplicationIcon>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
     </PropertyGroup>
+    <ItemGroup>
+      <None Remove="Resources\tabs_left_button.png" />
+      <None Remove="Resources\tabs_right_button.png" />
+      <None Remove="Resources\X_Down.png" />
+      <None Remove="X.png" />
+    </ItemGroup>
     <ItemGroup>
         <None Update="About_Profile_Mode.txt">
             <CopyToOutputDirectory>Never</CopyToOutputDirectory>
@@ -44,6 +53,10 @@
         <None Update="CommunityScripts\BorderEnablerv1_11.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="CommunityScripts\FindObjectsWithSprite.csx">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="CommunityScripts\SafeBlaster.csx">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -3655,6 +3668,10 @@
         </None>
         <EmbeddedResource Include="Resources\GML.xshd" />
         <EmbeddedResource Include="Resources\VMASM.xshd" />
+        <Resource Include="Resources\tabs_left_button.png" />
+        <Resource Include="Resources\tabs_right_button.png" />
+        <Resource Include="Resources\X.png" />
+        <Resource Include="Resources\X_Down.png" />
         <None Update="Repackers\ReduceEmbeddedTexturePages.csx">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
           <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -3740,10 +3757,6 @@
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="CommunityScripts\DisableDogcheck.csx">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </None>
-        <None Update="CommunityScripts\EditGMS2TileData.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
@@ -4006,10 +4019,6 @@
         <None Update="DemoScripts\TextInputTestWPF.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </None>
-        <None Update="DemoScripts\TestAUMIConnection.csx">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="TechnicalScripts\ToggleAlignment.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
