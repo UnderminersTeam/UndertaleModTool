@@ -44,7 +44,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public ushort RangeStart { get; set; }
 
     /// <summary>
-    /// TODO: Currently unknown value.
+    /// TODO: Currently unknown value. Possibly related to ranges? (aka normal, ascii, digits, letters)
     /// </summary>
     public byte Charset { get; set; }
 
@@ -75,7 +75,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public float ScaleY { get; set; }
 
     /// <summary>
-    /// TODO: currently unknown, needs investigation.
+    /// TODO: currently unknown, needs investigation. GMS2022.2 specific?
     /// </summary>
     public uint Ascender { get; set; }
 
@@ -122,10 +122,19 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         public ushort SourceHeight { get; set; }
 
 
-        //TODO: From here on out is some kerning related stuff I don't know.
+        /// <summary>
+        /// TODO: something kerning related
+        /// </summary>
         public short Shift { get; set; }
+
+        /// <summary>
+        /// TODO: something kerning related.
+        /// </summary>
         public short Offset { get; set; }
 
+        /// <summary>
+        /// The kerning for each glyph.
+        /// </summary>
         public UndertaleSimpleListShort<GlyphKerning> Kerning { get; set; } = new UndertaleSimpleListShort<GlyphKerning>();
 
         /// <inheritdoc />
@@ -154,9 +163,19 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             Kerning = reader.ReadUndertaleObject<UndertaleSimpleListShort<GlyphKerning>>();
         }
 
+        /// <summary>
+        /// A class representing kerning for a glyph.
+        /// </summary>
         public class GlyphKerning : UndertaleObject
         {
+            /// <summary>
+            /// TODO: unknown?
+            /// </summary>
             public short Other;
+
+            /// <summary>
+            /// TODO: unknown?
+            /// </summary>
             public short Amount;
 
             /// <inheritdoc />

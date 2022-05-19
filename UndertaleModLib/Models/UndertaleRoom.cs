@@ -219,6 +219,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="UndertaleRoom"/>.
+    /// </summary>
     public UndertaleRoom()
     {
         for (int i = 0; i < 8; i++)
@@ -1181,17 +1184,31 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
     }
 
-    // For GMS2, Backgrounds and Tiles are empty and this is used instead
     /// <summary>
     /// The layer type for a specific layer. In Game Maker: Studio 2, <see cref="UndertaleRoom.Backgrounds"/>, <see cref="UndertaleRoom.Tiles"/>
-    /// are empty and this is used instead.
+    /// are empty and <see cref="UndertaleRoom.Layers"/> are used instead.
     /// </summary>
     public enum LayerType
     {
+        /// <summary>
+        /// The layer is a background layer.
+        /// </summary>
         Background = 1,
+        /// <summary>
+        /// The layer is an instances layer.
+        /// </summary>
         Instances = 2,
+        /// <summary>
+        /// The layer is an assets layer.
+        /// </summary>
         Assets = 3,
+        /// <summary>
+        /// The layer is a tiles layer.
+        /// </summary>
         Tiles = 4,
+        /// <summary>
+        /// The layer is an effects layer.
+        /// </summary>
         Effect = 6
     }
 

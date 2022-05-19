@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <Platforms>AnyCPU;x64</Platforms>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-	<Nullable>annotations</Nullable>
+	<Nullable>disable</Nullable>
 	<RollForward>LatestMajor</RollForward>
 	<PackageVersion>1.0.0</PackageVersion>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>

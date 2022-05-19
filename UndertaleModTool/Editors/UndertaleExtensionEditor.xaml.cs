@@ -37,7 +37,7 @@ namespace UndertaleModTool
 
             UndertaleExtensionFile obj = new UndertaleExtensionFile()
             {
-                Kind = UndertaleExtensionKind.DLL,
+                Kind = UndertaleExtensionKind.Dll,
                 Filename = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString($"NewExtensionFile{lastItem}.dll"),
                 Functions = new UndertalePointerList<UndertaleExtensionFunction>()
             };

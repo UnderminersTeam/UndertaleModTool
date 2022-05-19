@@ -5,13 +5,27 @@ using static UndertaleModLib.Models.UndertaleGeneralInfo;
 
 namespace UndertaleModLib.Models;
 
+/// <summary>
+/// A function entry as it's used in a GameMaker data file.
+/// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject, IDisposable
 {
     public FunctionClassification Classification { get; set; }
+
+    /// <summary>
+    /// The name of the <see cref="UndertaleFunction"/>.
+    /// </summary>
     public UndertaleString Name { get; set; }
+
+    /// <summary>
+    /// The index of <see cref="Name"/> in <see cref="UndertaleData.Strings"/>.
+    /// </summary>
     public int NameStringID { get; set; }
 
+    /// <summary>
+    /// How often this <see cref="UndertaleFunction"/> is referenced in code.
+    /// </summary>
     public uint Occurrences { get; set; }
     public UndertaleInstruction FirstAddress { get; set; }
 

@@ -51,7 +51,7 @@ public partial class Program : IScriptInterface
     /// <summary>
     /// File path or directory path that determines an output for the current Program.
     /// </summary>
-    private FileSystemInfo? Output { get; }
+    private FileSystemInfo Output { get; }
 
     /// <summary>
     /// Constant, used to indicate that the user wants to replace everything in a replace command.
@@ -114,6 +114,7 @@ public partial class Program : IScriptInterface
             //TODO: why no force overwrite here, but needed for new?
             new Option<FileInfo>(new []{"-o", "--output"}, "Where to save the modified data file"),
             new Option<string>(new []{"-l","--line"}, "Run C# string. Runs AFTER everything else"),
+            //TODO: make interactive another Command
             new Option<bool>(new []{"-i", "--interactive"}, "Interactive menu launch")
         };
         loadCommand.Handler = CommandHandler.Create<LoadOptions>(Program.Load);
@@ -169,11 +170,11 @@ public partial class Program : IScriptInterface
         return commandLine.Invoke(args);
     }
 
-    public Program(FileInfo datafile, FileInfo[]? scripts, FileInfo? output, bool verbose = false, bool interactive = false)
+    public Program(FileInfo datafile, FileInfo[] scripts, FileInfo output, bool verbose = false, bool interactive = false)
     {
         this.Verbose = verbose;
         IsInteractive = interactive;
-        Console.InputEncoding = System.Text.Encoding.UTF8;
+        Console.InputEncoding = Encoding.UTF8;
         Console.OutputEncoding = Console.InputEncoding;
 
 
@@ -203,6 +204,8 @@ public partial class Program : IScriptInterface
 
     public Program(FileInfo datafile, bool verbose, DirectoryInfo output = null)
     {
+        if (datafile == null) throw new ArgumentNullException(nameof(datafile));
+
         Console.WriteLine($"Trying to load file: '{datafile.FullName}'");
         this.Verbose = verbose;
         this.Data = ReadDataFile(datafile, verbose ? WarningHandler : null, verbose ? MessageHandler : null);
@@ -489,7 +492,7 @@ public partial class Program : IScriptInterface
                     {
                         RunCSharpFile(path);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         // ignored
                     }
@@ -712,7 +715,7 @@ public partial class Program : IScriptInterface
     /// <param name="code">The C# string to execute</param>
     /// <param name="scriptFile">The path to the script file where <see cref="code"/> was executed from.
     /// Leave as null, if it wasn't executed from a script file</param>
-    private void RunCSharpCode(string code, string? scriptFile = null)
+    private void RunCSharpCode(string code, string scriptFile = null)
     {
         if (Verbose)
             Console.WriteLine($"Attempting to execute '1{scriptFile ?? code}'...");
@@ -766,14 +769,12 @@ public partial class Program : IScriptInterface
     /// <param name="messageHandler">Handler for Messages</param>
     /// <returns></returns>
     /// <exception cref="FileNotFoundException">If the data file cannot be found</exception>
-    private static UndertaleData ReadDataFile(FileInfo datafile, WarningHandlerDelegate? warningHandler = null, MessageHandlerDelegate? messageHandler = null)
+    private static UndertaleData ReadDataFile(FileInfo datafile, WarningHandlerDelegate warningHandler = null, MessageHandlerDelegate messageHandler = null)
     {
         try
         {
             using FileStream fs = datafile.OpenRead();
             UndertaleData gmData = UndertaleIO.Read(fs, warningHandler, messageHandler);
-            //TODO: this should be handled in UTCode, not here
-            gmData.ToolInfo.AppDataProfiles = "";
             return gmData;
         }
         catch (FileNotFoundException e)
