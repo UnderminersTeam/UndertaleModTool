@@ -1,19 +1,17 @@
-name: Publish GUI
-
+name: Publish PR
 on:
-  push:
-    branches: [ master ]
+  pull_request:
   workflow_dispatch:
 
 jobs:
-  publish_gui:
+  build_gui:
 
     strategy:
       fail-fast: false
       matrix:
         os: [windows-latest]
         configuration: [Debug]
-        bundled: [true, false]
+        bundled: [false]
         singlefile: [true, false]
 
     runs-on: ${{ matrix.os }}
@@ -44,3 +42,43 @@ jobs:
       with:
         name: GUI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
         path: ${{ matrix.os }}
+
+  publish_cli:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        configuration: [Debug]
+        bundled: [false]
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: macOS-latest
+            rid: osx-x64
+          - os: windows-latest
+            rid: win-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore UndertaleModCli
+    - name: Build
+      run: dotnet build UndertaleModCli --no-restore
+    - name: Publish ${{ matrix.os }} CLI
+      run: dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output CLI-${{ matrix.os }}
+    - name: Copy external files
+      run: |
+        cp ./README.md ./CLI-${{ matrix.os }}/
+        cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
+    - name: Upload ${{ matrix.os }} CLI
+      uses: actions/upload-artifact@v2
+      with:
+        name: CLI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}
+        path: CLI-${{ matrix.os }}
