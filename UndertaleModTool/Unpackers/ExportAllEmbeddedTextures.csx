@@ -6,27 +6,32 @@ using System.Threading.Tasks;
 
 EnsureDataLoaded();
 
-string winFolder = GetFolder(FilePath); // The folder data.win is located in.
-string EmbFolder = Path.Combine(winFolder, "EmbeddedTextures"); // The folder to write the image data to.
+const string texturesName = "EmbeddedTextures";
+
+// The folder data.win is located in.
+string dataFolder = Path.GetDirectoryName(FilePath);
+// The folder to write the image data to.
+string texturesFolder = Path.Combine(FilePath, texturesName);
 
 if (!CanOverwrite())
     return;
 
-MakeFolder("EmbeddedTextures");
+MakeFolder(texturesFolder);
 
-SetProgressBar(null, "Embedded textures", 0, Data.EmbeddedTextures.Count);
+SetProgressBar(null, texturesName, 0, Data.EmbeddedTextures.Count);
 StartProgressBarUpdater();
 
-await Task.Run(() => {
-    for (var i = 0; i < Data.EmbeddedTextures.Count; i++)
+await Task.Run(() =>
+{
+    for (int i = 0; i < Data.EmbeddedTextures.Count; i++)
     {
         try
         {
-            File.WriteAllBytes(Path.Combine(EmbFolder, i + ".png"), Data.EmbeddedTextures[i].TextureData.TextureBlob);
+            File.WriteAllBytes(Path.Combine(texturesFolder, i + ".png"), Data.EmbeddedTextures[i].TextureData.TextureBlob);
         }
         catch (Exception ex)
         {
-            ScriptMessage("Failed to export file: " + ex.Message);
+            ScriptMessage($"Failed to export file: {ex.Message}");
         }
 
         IncrementProgress();
@@ -35,36 +40,35 @@ await Task.Run(() => {
 
 await StopProgressBarUpdater();
 HideProgressBar();
-ScriptMessage("Export Complete.\n\nLocation: " + EmbFolder);
+ScriptMessage("Export Complete.\n\nLocation: " + texturesFolder);
 
-/* Helper functions below.
-*/
+// Helper functions below. //
 
+// Gets the full directory of a file path
 string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
 
-void MakeFolder(String folderName)
+// Creates the folder, if it does not exist already
+void MakeFolder(string folder)
 {
-    string MakeFolderPath = Path.Combine(winFolder, folderName);
-    if (!Directory.Exists(MakeFolderPath))
-        Directory.CreateDirectory(MakeFolderPath);
+    if (!Directory.Exists(folder))
+        Directory.CreateDirectory(folder);
 }
 
+// Tries to delete the texturesFolder if it doesn't exist. Returns false if the user does not want the folder deleted.
 bool CanOverwrite()
 {
     // Overwrite Folder Check One
-    if (Directory.Exists(EmbFolder))
+    if (!Directory.Exists(texturesFolder)) return true;
+
+    bool overwriteCheckOne = ScriptQuestion($"An '{texturesName}' folder already exists.\nWould you like to remove it? This may some time.\n\nNote: If an error window stating that 'the directory is not empty' appears, please try again or delete the folder manually.");
+    if (!overwriteCheckOne)
     {
-        bool overwriteCheckOne = ScriptQuestion("An 'EmbeddedTextures' folder already exists.\r\nWould you like to remove it? This may some time.\r\n\r\nNote: If an error window stating that 'the directory is not empty' appears, please try again or delete the folder manually.\r\n");
-        if (!overwriteCheckOne)
-        {
-            ScriptError("An 'EmbeddedTextures' folder already exists. Please remove it.", "Error: Export already exists.");
-            return false;
-        }
-        Directory.Delete(EmbFolder, true);
-        return true;
+        ScriptError($"An '{texturesName}' folder already exists. Please remove it.", "Export already exists.");
+        return false;
     }
+    Directory.Delete(texturesFolder, true);
     return true;
 }
