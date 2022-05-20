@@ -137,6 +137,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
                     using MemoryStream input = new MemoryStream(data);
                     using MemoryStream output = new MemoryStream(1024);
                     BZip2.Compress(input, output, false, 9);
+                    output.Seek(0, SeekOrigin.Begin);
                     writer.Write(output);
                 }
                 else

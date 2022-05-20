@@ -587,6 +587,8 @@ namespace UndertaleModLib
             data.FORM.Chunks["STRG"] = new UndertaleChunkSTRG();
             data.FORM.Chunks["TXTR"] = new UndertaleChunkTXTR();
             data.FORM.Chunks["AUDO"] = new UndertaleChunkAUDO();
+            foreach (UndertaleChunk chunk in data.FORM.Chunks.Values)
+                data.FORM.ChunksTypeDict[chunk.GetType()] = chunk;
             data.FORM.GEN8.Object = new UndertaleGeneralInfo();
             data.FORM.OPTN.Object = new UndertaleOptions();
             data.FORM.LANG.Object = new UndertaleLanguage();
