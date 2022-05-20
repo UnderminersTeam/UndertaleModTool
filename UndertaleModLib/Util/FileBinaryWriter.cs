@@ -56,12 +56,18 @@ namespace UndertaleModLib.Util
         public void WriteGMString(string value)
         {
             int len = encoding.GetByteCount(value);
-            Span<byte> buffer = stackalloc byte[Math.Max(4, len)];
-            BinaryPrimitives.WriteInt32LittleEndian(buffer, len);
-            OutStream.Write(buffer[..4]);
+            Span<byte> buf = stackalloc byte[4];
+            BinaryPrimitives.WriteInt32LittleEndian(buf, len);
+            OutStream.Write(buf);
 
-            encoding.GetBytes(value.AsSpan(), buffer);
-            OutStream.Write(len < 4 ? buffer[..len] : buffer);
+            if (len > 1024)
+                OutStream.Write(encoding.GetBytes(value));
+            else
+            {
+                Span<byte> stringBuf = stackalloc byte[len];
+                encoding.GetBytes(value.AsSpan(), stringBuf);
+                OutStream.Write(stringBuf);
+            }
             OutStream.WriteByte(0);
         }
     }
