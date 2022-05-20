@@ -16,7 +16,8 @@ namespace UndertaleModLib
     {
         public override string Name => "FORM";
 
-        public Dictionary<string, UndertaleChunk> Chunks = new Dictionary<string, UndertaleChunk>();
+        public Dictionary<string, UndertaleChunk> Chunks = new();
+        public Dictionary<Type, UndertaleChunk> ChunksTypeDict = new();
 
         public UndertaleChunkGEN8 GEN8 => Chunks.GetValueOrDefault("GEN8") as UndertaleChunkGEN8;
         public UndertaleChunkOPTN OPTN => Chunks.GetValueOrDefault("OPTN") as UndertaleChunkOPTN;
@@ -61,6 +62,7 @@ namespace UndertaleModLib
         internal override void UnserializeChunk(UndertaleReader reader)
         {
             Chunks.Clear();
+            ChunksTypeDict.Clear();
             uint startPos = reader.Position;
 
             // First, find the last chunk in the file because of padding changes
@@ -89,6 +91,7 @@ namespace UndertaleModLib
                     if (Chunks.ContainsKey(chunk.Name))
                         throw new IOException("Duplicate chunk " + chunk.Name);
                     Chunks.Add(chunk.Name, chunk);
+                    ChunksTypeDict.Add(chunk.GetType(), chunk);
                 }
             }
         }
