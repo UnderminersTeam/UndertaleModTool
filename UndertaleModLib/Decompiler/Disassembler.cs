@@ -82,8 +82,10 @@ namespace UndertaleModLib.Decompiler
             if (code.Instructions.Count != 0)
                 addresses.Add(0);
 
+            int index = -1;
             foreach (var inst in code.Instructions)
             {
+                index++;
                 switch (inst.Kind)
                 {
                     case UndertaleInstruction.Opcode.B:
@@ -100,6 +102,14 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.Exit:
                     case UndertaleInstruction.Opcode.Ret:
                         addresses.Add(inst.Address + 1);
+                        break;
+                    case UndertaleInstruction.Opcode.Call:
+                        if (inst.Function?.Target.Name.Content == "@@try_hook@@" && code.Instructions.Count > index + 1)
+                        {
+                            UndertaleInstruction next = code.Instructions[index + 1];
+                            if (next.Kind == UndertaleInstruction.Opcode.Popz)
+                                addresses.Add(next.Address + 1);
+                        }
                         break;
                 }
             }

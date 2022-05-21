@@ -1232,6 +1232,32 @@ namespace UndertaleModLib.Decompiler
             }
         }
 
+        public class TempExceptionValue : Expression
+        {
+            private Block tryBlock, catchBlock;
+
+            public TempExceptionValue(Block tryBlock, Block catchBlock)
+            {
+                this.catchBlock = catchBlock;
+                this.tryBlock = tryBlock;
+            }
+
+            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
+            {
+                return this;
+            }
+
+            public override string ToString(DecompileContext context)
+            {
+                return "// TempExceptionValue " + tryBlock + " " + catchBlock;
+            }
+
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
+            {
+                return suggestedType;
+            }
+        }
+
         // Represents a high-level operation-equals statement, such as a += 1.
         public class OperationEqualsStatement : Statement
         {
@@ -1534,6 +1560,11 @@ namespace UndertaleModLib.Decompiler
 
                     return String.Format("new {0}({1})", constructor, argumentString);
                 }
+                else if (Function.Name.Content == "@@throw@@" && Arguments.Count == 1)
+                {
+                    context.currentFunction = this;
+                    return "throw " + Arguments[0].ToString(context);
+                }
                 else
                 {
                     foreach (Expression exp in Arguments)
@@ -1549,7 +1580,12 @@ namespace UndertaleModLib.Decompiler
                     if (Function.Name.Content == "@@NewGMLArray@@") // Inline array definitions
                         return "[" + argumentString.ToString() + "]";
 
-                    return String.Format("{0}({1})", OverridenName != string.Empty ? OverridenName : Function.Name.Content, argumentString.ToString());
+                    string ret = String.Format("{0}({1})", OverridenName != string.Empty ? OverridenName : Function.Name.Content, argumentString.ToString());
+
+                    if (ret.StartsWith("@@try_") || ret.StartsWith("@@finish_"))
+                        return "// " + ret;
+
+                    return ret;
                 }
 
                 
@@ -2173,7 +2209,7 @@ namespace UndertaleModLib.Decompiler
                                 target.InstType = stack.Pop();
                             }
 
-                            if (instr.Type1 == UndertaleInstruction.DataType.Variable)
+                            if (instr.Type1 == UndertaleInstruction.DataType.Variable && stack.Count > 0)
                                 val = stack.Pop();
                             if (val != null)
                             {
@@ -2307,20 +2343,25 @@ namespace UndertaleModLib.Decompiler
                     case UndertaleInstruction.Opcode.Call:
                         {
                             List<Expression> args = new List<Expression>();
+                            List<Expression> cleanArgs = new List<Expression>();
+                            Expression arg;
                             for (int j = 0; j < instr.ArgumentsCount; j++)
-                                args.Add(stack.Pop());
+                            {
+                                arg = stack.Pop();
+                                args.Add(arg);
+
+                                while (arg is ExpressionCast cast)
+                                    arg = cast.Argument;
+
+                                cleanArgs.Add(arg);
+                            }
 
                             if (instr.Function.Target.Name.Content == "method" && args.Count == 2)
                             {
                                 // Special case - method creation
                                 // See if the body should be inlined
 
-                                Expression arg1 = args[0];
-                                while (arg1 is ExpressionCast cast)
-                                    arg1 = cast.Argument;
-                                Expression arg2 = args[1];
-                                while (arg2 is ExpressionCast cast)
-                                    arg2 = cast.Argument;
+                                Expression arg1 = cleanArgs[0], arg2 = cleanArgs[1];
 
                                 if (arg2 is ExpressionConstant argCode && argCode.Type == UndertaleInstruction.DataType.Int32 &&
                                     argCode.Value is UndertaleInstruction.Reference<UndertaleFunction> argCodeFunc)
@@ -2348,6 +2389,51 @@ namespace UndertaleModLib.Decompiler
                                         break;
                                     }
                                 }
+                            }
+                            else if (instr.Function.Target.Name.Content == "@@try_hook@@" && args.Count == 2)
+                            {
+                                Block tryBlock = block.nextBlockFalse, catchBlock = null, tmp = block.nextBlockFalse;
+
+                                string catchStr = cleanArgs[0].ToString(context), endStr = cleanArgs[1].ToString(context);
+                                if (!uint.TryParse(catchStr, out uint catchAddr) || !uint.TryParse(endStr, out uint endAddr))
+                                    throw new InvalidDataException("Bad arguments to @@try_hook@@: " + catchStr + " " + endStr);
+
+                                catchAddr /= 4;
+                                endAddr /= 4;
+
+                                catchBlock = blocks[catchAddr];
+
+                                // Find first block that's not in the try block
+                                tmp = blocks[endAddr];
+
+                                // Set up a temporary reference as a placeholder
+                                // value for the localvar that holds the exception
+                                // in the catch block.
+                                
+                                var vars = new List<TempVarReference>();
+                                TempVar tempVar = context.NewTempVar();
+                                TempVarReference varRef = new TempVarReference(tempVar);
+                                context.TempVarMap[tempVar.Name] = new TempVarAssignmentStatement(varRef, new TempExceptionValue(tryBlock, catchBlock));
+                                vars.Add(varRef);
+
+                                //catchBlock.TempVarsOnEntry ??= new();
+                                //tryBlock.TempVarsOnEntry ??= new();
+
+                                //catchBlock.TempVarsOnEntry.Add(varRef);
+                                //tryBlock.TempVarsOnEntry.Add(varRef);
+
+                                // Decompile the try and catch blocks
+
+                                workQueue.Push(new Tuple<Block, List<TempVarReference>>(catchBlock, vars));
+                                workQueue.Push(new Tuple<Block, List<TempVarReference>>(tryBlock, new List<TempVarReference>()));
+
+                                statements.Add(new TryCatchHLStatement(tryBlock, catchBlock));
+                                stack.Push(new TempExceptionValue(tryBlock, catchBlock));
+                                //stack.Push(new TempExceptionValue(tryBlock));
+                                block.nextBlockFalse = null;
+                                block.nextBlockTrue = tmp;
+                                break;
+
                             }
 
                             UndertaleCode callTargetBody = context.GlobalContext.Data?.Code.FirstOrDefault(x => x.Name.Content == instr.Function.Target.Name.Content);
@@ -2532,14 +2618,21 @@ namespace UndertaleModLib.Decompiler
             List<TempVarReference> leftovers = new List<TempVarReference>();
             for (int i = stack.Count - 1; i >= 0; i--)
             {
-                if (i < tempvars.Count)
+                Expression val = stack.Pop();
+
+                // Skip throw statements; they don't have a corresponding pop instruction,
+                // within their block (as far as I can tell), so they will always leak onto the stack.
+                if (val is DirectFunctionCall call && call.Function.Name.Content == "@@throw@@" && call.Arguments.Count == 1)
+                    statements.Add(val);
+                else if (i < tempvars.Count)
                 {
-                    Expression val = stack.Pop();
-                    if (!(val is ExpressionTempVar) || (val as ExpressionTempVar).Var != tempvars[i]) {
+                    if (!(val is ExpressionTempVar) || (val as ExpressionTempVar).Var != tempvars[i])
+                    {
                         var assignment = new TempVarAssignmentStatement(tempvars[i], val);
                         statements.Add(assignment);
 
-                        if (val is ExpressionConstant) {
+                        if (val is ExpressionConstant)
+                        {
                             context.TempVarMap[tempvars[i].Var.Name] = assignment;
                         }
                     }
@@ -2548,7 +2641,6 @@ namespace UndertaleModLib.Decompiler
                 }
                 else
                 {
-                    Expression val = stack.Pop();
                     TempVar var = context.NewTempVar();
                     var.Type = val.Type;
                     TempVarReference varref = new TempVarReference(var);
@@ -2556,7 +2648,8 @@ namespace UndertaleModLib.Decompiler
                     statements.Add(assignment);
                     leftovers.Add(varref);
 
-                    if (val is ExpressionConstant) {
+                    if (val is ExpressionConstant)
+                    {
                         context.TempVarMap[var.Name] = assignment;
                     }
                 }
@@ -2600,8 +2693,17 @@ namespace UndertaleModLib.Decompiler
             blockByAddress[code.Length / 4] = finalBlock;
             Block currentBlock = entryBlock;
 
+            int index = -1;
+            bool skip = false;
             foreach (var instr in code.Instructions)
             {
+                index++;
+                if (skip)
+                {
+                    skip = false;
+                    continue;
+                }
+
                 if (blockByAddress.ContainsKey(instr.Address))
                 {
                     if (currentBlock != null)
@@ -2706,6 +2808,20 @@ namespace UndertaleModLib.Decompiler
                     currentBlock.nextBlockFalse = nextBlock;
                     currentBlock = null;
                 }
+                else if (instr.Kind == UndertaleInstruction.Opcode.Call && instr.Function?.Target.Name.Content == "@@try_hook@@")
+                {
+                    UndertaleInstruction next;
+                    if(code.Instructions.Count > index + 1 && (next = code.Instructions[index + 1]).Kind == UndertaleInstruction.Opcode.Popz)
+                    {
+                        skip = true;
+                        Block nextBlock = GetBlock(next.Address + 1);
+                        currentBlock.Instructions.Add(next);
+                        currentBlock.conditionalExit = false;
+                        currentBlock.nextBlockTrue = nextBlock;
+                        currentBlock.nextBlockFalse = nextBlock;
+                        currentBlock = null;
+                    }
+                }
             }
             if (currentBlock != null)
             {
@@ -2795,6 +2911,52 @@ namespace UndertaleModLib.Decompiler
                 return !(statement is IfHLStatement || statement is LoopHLStatement || statement is HLSwitchStatement || statement is WithHLStatement); // Nesting these can cause issues.
             }
         };
+
+        public class TryCatchHLStatement : BlockHLStatement
+        {
+            public Block tryBlock, catchBlock;
+
+            public TryCatchHLStatement(Block tryBlock, Block catchBlock = null)
+            {
+                this.catchBlock = catchBlock;
+                this.tryBlock = tryBlock;
+            }
+
+            public new BlockHLStatement CleanBlockStatement(DecompileContext context)
+            {
+                if (tryBlock.Statements != null)
+                    Statements = tryBlock.Statements;
+                return base.CleanBlockStatement(context);
+            }
+
+            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
+            {
+                return suggestedType;
+            }
+
+            public override string ToString(DecompileContext context)
+            {
+                StringBuilder sb = new StringBuilder();
+                Statements = tryBlock.Statements;
+                sb.AppendLine("try");
+                sb.Append(context.Indentation);
+                sb.AppendLine(ToString(context, false));
+
+                if (catchBlock != null)
+                {
+                    Statements = catchBlock.Statements.Skip(1).ToList();
+                    sb.Append(context.Indentation);
+                    sb.Append("catch(");
+                    sb.Append(catchBlock.Instructions[0].Destination.Target.Name.Content);
+                    sb.AppendLine(")");
+                    sb.Append(context.Indentation);
+                    sb.AppendLine(ToString(context, false));
+                    Statements = tryBlock.Statements;
+                }
+
+                return sb.ToString();
+            }
+        }
 
         public class IfHLStatement : HLStatement
         {
@@ -3391,7 +3553,7 @@ namespace UndertaleModLib.Decompiler
             if (depth > 200)
                 throw new Exception("Excessive recursion while processing blocks.");
 
-            BlockHLStatement output = new BlockHLStatement();
+             BlockHLStatement output = new BlockHLStatement();
 
             Block lastBlock = null;
             bool popenvDrop = false;

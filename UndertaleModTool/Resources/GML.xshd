@@ -45,6 +45,10 @@
             <Word>continue</Word>
             <Word>with</Word>
             <Word>new</Word>
+            <Word>throw</Word>
+            <Word>try</Word>
+            <Word>catch</Word>
+            <Word>finally</Word>
             <Word>constructor</Word>
             <Word>function</Word>
             <Word>return</Word>
