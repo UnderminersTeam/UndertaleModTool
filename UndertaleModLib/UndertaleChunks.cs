@@ -234,7 +234,7 @@ namespace UndertaleModLib
             // so that they don't immediately discard.
             for (int i = 0; i < count; i++)
             {
-                UndertaleShader s = new UndertaleShader { _EntryEnd = objectLocations[i + 1] };
+                UndertaleShader s = new UndertaleShader { EntryEnd = objectLocations[i + 1] };
                 objPool.Add(objectLocations[i], s);
                 objPoolRev.Add(s, objectLocations[i]);
             }
@@ -267,10 +267,12 @@ namespace UndertaleModLib
         {
             if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
             {
-                /* This code performs three checks to identify GM2022.2.
+                /* This code performs four checks to identify GM2022.2.
                  * First, as you've seen, is the bytecode version.
                  * Second, we assume it is. If there are no Glyphs, we are vindicated by the impossibility of null values there.
-                 * Third, in case of a terrible fluke causing this to appear valid erroneously, we verify that each pointer leads into the next.
+                 * Third, we check that the Glyph Length is less than the chunk length. If it's going outside the chunk, that means
+                 * that the length was misinterpreted.
+                 * Fourth, in case of a terrible fluke causing this to appear valid erroneously, we verify that each pointer leads into the next.
                  * And if someone builds their game so the first pointer is absolutely valid length data and the next font is valid glyph data-
                  * screw it, call Jacky720 when someone constructs that and you want to mod it.
                  * Maybe try..catch on the whole shebang?
@@ -282,7 +284,11 @@ namespace UndertaleModLib
                     reader.Position = firstFontPointer + 48; // There are 48 bytes of existing metadata.
                     uint glyphsLength = reader.ReadUInt32();
                     reader.undertaleData.GMS2022_2 = true;
-                    if (glyphsLength != 0)
+                    if ((glyphsLength * 4) > this.Length)
+                    {
+                        reader.undertaleData.GMS2022_2 = false;
+                    }
+                    else if (glyphsLength != 0)
                     {
                         List<uint> glyphPointers = new List<uint>();
                         for (uint i = 0; i < glyphsLength; i++)
@@ -294,11 +300,13 @@ namespace UndertaleModLib
                                 reader.undertaleData.GMS2022_2 = false;
                                 break;
                             }
+
                             reader.Position += 14;
                             ushort kerningLength = reader.ReadUInt16();
-                            reader.Position += (uint)4 * kerningLength; // combining read/write would apparently break
+                            reader.Position += (uint) 4 * kerningLength; // combining read/write would apparently break
                         }
                     }
+
                 }
                 reader.Position = positionToReturn;
             }
@@ -474,7 +482,7 @@ namespace UndertaleModLib
     public class UndertaleChunkVARI : UndertaleChunk
     {
         public override string Name => "VARI";
-        
+
         public uint VarCount1 { get; set; }
 
         public uint VarCount2 { get; set; }
@@ -660,7 +668,7 @@ namespace UndertaleModLib
                 obj.UnserializeBlob(reader);
                 obj.Name = new UndertaleString("Texture " + List.IndexOf(obj).ToString());
             }
-            
+
             // padding
             while (reader.Position % 4 != 0)
                 if (reader.ReadByte() != 0)

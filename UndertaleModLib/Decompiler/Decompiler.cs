@@ -953,7 +953,7 @@ namespace UndertaleModLib.Decompiler
 
             public TempVar(int id)
             {
-                Name = MakeTemporaryVarName(id); ;
+                Name = MakeTemporaryVarName(id);
             }
 
             public static string MakeTemporaryVarName(int id)
@@ -989,6 +989,7 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
+                //TODO: why is there a GMS2Check for this? var exists in gms1.4 as well
                 if (context.GlobalContext.Data?.IsGameMaker2() ?? false && !HasVarKeyword && context.LocalVarDefines.Add(Var.Var.Name))
                     HasVarKeyword = true;
 
@@ -1116,8 +1117,10 @@ namespace UndertaleModLib.Decompiler
             public bool HasVarKeyword;
 
             private bool _isStructDefinition, _checkedForDefinition;
-            public bool IsStructDefinition 
-            { get {
+            public bool IsStructDefinition
+            {
+                get
+                {
                     // Quick hack
                     if (!_checkedForDefinition)
                     {
@@ -1438,7 +1441,7 @@ namespace UndertaleModLib.Decompiler
                                 sb.Append(stmt.ToString(context));
                                 if (Subtype == FunctionType.Struct && count < numNotReturn)
                                     sb.Append(",");
-                            } 
+                            }
                             sb.Append("\n");
                         }
                         context.DecompilingStruct = oldDecompilingStruct;
@@ -1499,7 +1502,7 @@ namespace UndertaleModLib.Decompiler
             {
                 this.Function = function;
             }
-            
+
             public override string ToString(DecompileContext context)
             {
                 StringBuilder argumentString = new StringBuilder();
@@ -1547,7 +1550,7 @@ namespace UndertaleModLib.Decompiler
                         return "new " + call.ToString(context);
                     }
                     else
-                    {   
+                    {
                         foreach (Expression exp in actualArgs)
                         {
                             context.currentFunction = this;
@@ -1573,7 +1576,7 @@ namespace UndertaleModLib.Decompiler
                         if (argumentString.Length > 0)
                             argumentString.Append(", ");
                         argumentString.Append(exp.ToString(context));
-                        
+
                     }
                     context.currentFunction = null;
 
@@ -1588,7 +1591,7 @@ namespace UndertaleModLib.Decompiler
                     return ret;
                 }
 
-                
+
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
@@ -1764,7 +1767,7 @@ namespace UndertaleModLib.Decompiler
                     {
                         var arg11 = (arg1 as ExpressionTwo).Argument1;
                         var arg12 = (arg1 as ExpressionTwo).Argument2;
-                        if (arg12 is ExpressionConstant && (arg12 as ExpressionConstant).Value.GetType() == typeof(int) && (int)(arg12 as ExpressionConstant).Value == 32000)
+                        if (arg12 is ExpressionConstant && (arg12 as ExpressionConstant).Value is int && (int)(arg12 as ExpressionConstant).Value == 32000)
                         {
                             ind1 = arg11;
                             ind2 = arg2;
@@ -1800,7 +1803,7 @@ namespace UndertaleModLib.Decompiler
                     }
                 }
 
-                // NOTE: The "var" prefix is handled in Decompiler.Decompile. 
+                // NOTE: The "var" prefix is handled in Decompiler.Decompile.
 
                 if (VarType == UndertaleInstruction.VariableType.Instance)
                 {
@@ -2056,8 +2059,8 @@ namespace UndertaleModLib.Decompiler
 
                             bytesToDuplicate -= GetTypeSize(item);
                             if (bytesToDuplicate < 0)
-                                throw new InvalidOperationException("The stack got misaligned? Error 2: Attempted to duplicate " 
-                                    + GetTypeSize(item) 
+                                throw new InvalidOperationException("The stack got misaligned? Error 2: Attempted to duplicate "
+                                    + GetTypeSize(item)
                                     + " bytes, only found "
                                     + (bytesToDuplicate + GetTypeSize(item)));
                         }
@@ -2229,7 +2232,7 @@ namespace UndertaleModLib.Decompiler
                                             {
                                                 var v = arg as ExpressionVar;
                                                 if (v.Var == target.Var && v.InstType == target.InstType &&
-                                                    ((v.ArrayIndices == null && target.ArrayIndices == null) || 
+                                                    ((v.ArrayIndices == null && target.ArrayIndices == null) ||
                                                       v.ArrayIndices?.SequenceEqual(target.ArrayIndices) == true) && // even if null
                                                     (!(two.Argument2 is ExpressionConstant) || // Also check to make sure it's not a ++ or --
                                                     (!((two.Argument2 as ExpressionConstant).IsPushE && ExpressionConstant.ConvertToInt((two.Argument2 as ExpressionConstant).Value) == 1))))
@@ -2378,7 +2381,7 @@ namespace UndertaleModLib.Decompiler
                                     }
                                     else
                                         processChildEntry = context.AlreadyProcessed.Add(functionBody);
-                                        
+
                                     if (context.TargetCode.ChildEntries.Contains(functionBody) && processChildEntry)
                                     {
                                         // This function is somewhere inside this UndertaleCode block
@@ -2593,11 +2596,11 @@ namespace UndertaleModLib.Decompiler
                                     /* <push var>
                                      * chknullish
                                      * bf [block2]
-                                     * 
+                                     *
                                      * :[block1]
                                      * popz.v
                                      * <var is nullish, evaluate new value>
-                                     * 
+                                     *
                                      * :[block2]
                                      * <use value>
                                      */
@@ -2962,7 +2965,7 @@ namespace UndertaleModLib.Decompiler
         {
             public Expression condition;
             public BlockHLStatement trueBlock;
-            public List<Pair<Expression, BlockHLStatement>> elseConditions = new List<Pair<Expression, BlockHLStatement>>();
+            public List<ValueTuple<Expression, BlockHLStatement>> elseConditions = new List<ValueTuple<Expression, BlockHLStatement>>();
             public BlockHLStatement falseBlock;
 
             public bool HasElseIf { get => elseConditions != null && elseConditions.Count > 0; }
@@ -2990,7 +2993,7 @@ namespace UndertaleModLib.Decompiler
                 // Use if -> else if, instead of nesting ifs.
                 while (falseBlock.Statements.Count == 1 && falseBlock.Statements[0] is IfHLStatement nestedIf) // The condition of one if statement.
                 {
-                    elseConditions.Add(new Pair<Expression, BlockHLStatement>(nestedIf.condition, nestedIf.trueBlock));
+                    elseConditions.Add(new ValueTuple<Expression, BlockHLStatement>(nestedIf.condition, nestedIf.trueBlock));
                     elseConditions.AddRange(nestedIf.elseConditions);
                     falseBlock = nestedIf.falseBlock;
                 }
@@ -3038,7 +3041,7 @@ namespace UndertaleModLib.Decompiler
                         IfHLStatement loopCheckStatement = null;
                         bool hasBreak = false;
                         List<Statement> insideElseBlock = null;
-                        
+
                         if (loopCode.Count > 2)
                         {
                             repeatAssignment = loopCode[loopCode.Count - 2] as TempVarAssignmentStatement;
@@ -3082,8 +3085,9 @@ namespace UndertaleModLib.Decompiler
                     }
                 }
 
-                foreach (Pair<Expression, BlockHLStatement> pair in elseConditions)
+                for (int i = 0; i < elseConditions.Count; i++)
                 {
+                    var pair = elseConditions[i];
                     pair.Item1 = pair.Item1?.CleanExpression(context, block);
                     pair.Item2 = pair.Item2?.CleanBlockStatement(context);
                 }
@@ -3103,7 +3107,7 @@ namespace UndertaleModLib.Decompiler
                 sb.Append("if " + cond + "\n");
                 sb.Append(context.Indentation + trueBlock.ToString(context));
 
-                foreach (Pair<Expression, BlockHLStatement> tuple in elseConditions)
+                foreach (ValueTuple<Expression, BlockHLStatement> tuple in elseConditions)
                 {
                     if (tuple.Item1 is ExpressionCompare)
                         cond = (tuple.Item1 as ExpressionCompare).ToStringWithParen(context);

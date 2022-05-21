@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleGeneralInfo;
 
-/// <summary>
-/// HUGE file containing definitions for most GameMaker builtin variables, functions, etc.
-/// </summary>
+
+// HUGE file containing definitions for most GameMaker builtin variables, functions, etc.
+
 
 namespace UndertaleModLib.Compiler
 {

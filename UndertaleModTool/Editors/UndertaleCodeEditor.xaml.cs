@@ -39,10 +39,10 @@ using static UndertaleModTool.MainWindow.CodeEditorMode;
 
 namespace UndertaleModTool
 {
-    [SupportedOSPlatform("windows7.0")]
     /// <summary>
     /// Logika interakcji dla klasy UndertaleCodeEditor.xaml
     /// </summary>
+    [SupportedOSPlatform("windows7.0")]
     public partial class UndertaleCodeEditor : DataUserControl
     {
         private static MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
@@ -649,7 +649,13 @@ namespace UndertaleModTool
                 code = this.DataContext as UndertaleCode;
 
             if (code == null)
-                return; // Probably loaded another data.win or something.
+            {
+                if (IsLoaded)
+                    code = CurrentDecompiled; // switched to the tab with different object type
+                else
+                    return;                   // probably loaded another data.win or something.
+            }
+            
             if (code.ParentEntry != null)
                 return;
 
@@ -785,9 +791,12 @@ namespace UndertaleModTool
                 code = this.DataContext as UndertaleCode;
 
             if (code == null)
-                return; // Probably loaded another data.win or something.
-            if (code.ParentEntry != null)
-                return;
+            {
+                if (IsLoaded)
+                    code = CurrentDisassembled; // switched to the tab with different object type
+                else
+                    return;                     // probably loaded another data.win or something.
+            }
 
             // Check to make sure this isn't an element inside of the textbox, or another tab
             IInputElement elem = Keyboard.FocusedElement;

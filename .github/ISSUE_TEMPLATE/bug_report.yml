@@ -1,0 +1,33 @@
+name: Bug Report
+description: Something not behaving the way it should? Let us know!
+title: "Bug: <Title>"
+labels: ["bug"]
+body:
+- type: textarea
+  attributes:
+    label: Describe the bug
+    description: A clear description of what the bug is. Please consider adding pictures and/or videos, as they really help!
+    placeholder: |
+      When doing X, UndertaleModTool crashes.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Reproducing steps
+    description: Steps to reproduce the behavior.
+    placeholder: |
+      1. Open X ...
+      2. Do Y ...
+      3. See error
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Setup Details
+    description: A clear and concise description of your tools and enviroment used.
+    placeholder: |
+      1. UndertaleModTool version: What UndertaleModTool version did you use? If compiled from source, please specify the commit number.
+      2. Operating system: Specify the OS and version e.g. Windows 10, Mac OS X Catalina, Ubuntu 20.04, etc.
+      3. GameMaker Game: What GameMaker game was used? Link to it!
+  validations:
+    required: true

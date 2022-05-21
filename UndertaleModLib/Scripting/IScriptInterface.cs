@@ -34,6 +34,10 @@ namespace UndertaleModLib.Scripting
         }
     }
 
+    /// <summary>
+    /// Defines a generalized set of attributes and methods that a value type or class implements
+    /// to be able to interact with UndertaleModTool-Scripts.
+    /// </summary>
     public interface IScriptInterface
     {
         /// <summary>
@@ -92,8 +96,11 @@ namespace UndertaleModLib.Scripting
         /// </summary>
         bool GMLCacheEnabled { get; }
 
-        //TODO: Only GUI and ExportAllRoomsToPng.csx uses this, but nothing should ever need to access this value.
-        // "somehow Dispatcher.Invoke() in a loop creates executable code queue that doesn't clear on app closing."
+        /// <summary>
+        /// Indicating whether the Program is currently closed.
+        /// //TODO: Only GUI + ExportAllRoomsToPng.csx uses this, but nothing should ever need to access this value.
+        /// <c>"somehow Dispatcher.Invoke() in a loop creates executable code queue that doesn't clear on app closing."</c>
+        /// </summary>
         bool IsAppClosed { get; }
 
         /// <summary>
@@ -119,11 +126,11 @@ namespace UndertaleModLib.Scripting
         }
 
         //TODO: i have absolutely no idea what any of these do.
-        void ReplaceTempWithMain(bool ImAnExpertBTW = false);
-        void ReplaceMainWithTemp(bool ImAnExpertBTW = false);
-        void ReplaceTempWithCorrections(bool ImAnExpertBTW = false);
-        void ReplaceCorrectionsWithTemp(bool ImAnExpertBTW = false);
-        void UpdateCorrections(bool ImAnExpertBTW = false);
+        void ReplaceTempWithMain(bool imAnExpertBtw = false);
+        void ReplaceMainWithTemp(bool imAnExpertBtw = false);
+        void ReplaceTempWithCorrections(bool imAnExpertBtw = false);
+        void ReplaceCorrectionsWithTemp(bool imAnExpertBtw = false);
+        void UpdateCorrections(bool imAnExpertBtw = false);
 
         /// <summary>
         /// Used in Scripts in order to show a message to the user.
@@ -159,54 +166,6 @@ namespace UndertaleModLib.Scripting
         /// </summary>
         /// <param name="url">The URL to open.</param>
         void ScriptOpenURL(string url);
-
-        /// <summary>
-        /// Used for communicating with <a href="https://github.com/Archie-osu/AUMI">AUMI</a> (Archie's Undertale Modding Interface).
-        /// </summary>
-        /// <param name="ipMessage">The message to send.</param>
-        /// <param name="outReply">The reply from AUMI.</param>
-        /// <returns><see langword="false"/> if the message couldn't be sent. Otherwise, the function returns <see langword="true"/>.</returns>
-        bool SendAUMIMessage(IpcMessage_t ipMessage, ref IpcReply_t outReply)
-        {
-            // By Archie
-            const int ReplySize = 132;
-
-            // Create the pipe
-            using var pPipeServer = new NamedPipeServerStream("AUMI-IPC", PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
-
-            // Wait 1/8th of a second for AUMI to connect.
-            // If it doesn't connect in time (which it should), just return false to avoid a deadlock.
-            if (!pPipeServer.IsConnected)
-            {
-                pPipeServer.WaitForConnectionAsync();
-                Thread.Sleep(125);
-                if (!pPipeServer.IsConnected)
-                {
-                    pPipeServer.DisposeAsync();
-                    return false;
-                }
-            }
-
-            try
-            {
-                //Send the message
-                pPipeServer.Write(ipMessage.RawBytes());
-                pPipeServer.Flush();
-            }
-            catch (Exception e)
-            {
-                // Catch any errors that might arise if the connection is broken
-                ScriptError("Could not write data to the pipe!\nError: " + e.Message);
-                return false;
-            }
-
-            // Read the reply, the length of which is always a pre-set amount of bytes.
-            byte[] bBuffer = new byte[ReplySize];
-            pPipeServer.Read(bBuffer, 0, ReplySize);
-
-            outReply = IpcReply_t.FromBytes(bBuffer);
-            return true;
-        }
 
         /// <summary>
         /// Run a C# UndertaleModLib compatible script file.
@@ -537,9 +496,9 @@ namespace UndertaleModLib.Scripting
         /// Obsolete.
         /// </summary>
         [Obsolete("Use StopProgressBarUpdater instead!")]
-        sealed void StopUpdater ()
+        sealed Task StopUpdater ()
         {
-            StopProgressBarUpdater();
+            return StopProgressBarUpdater();
         }
 
         /// <summary>
@@ -582,12 +541,82 @@ namespace UndertaleModLib.Scripting
         string PromptLoadFile(string defaultExt, string filter);
 
         //TODO: so much stuff....
-        void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false);
-        void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false);
-        void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false, bool throwOnError = false);
-        void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false);
-        void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null);
-        void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null);
+        /// <summary>
+        /// Replaces/Imports all GML in a specific code entry with a specified string.
+        /// </summary>
+        /// <param name="codeName">The name of the code entry that shall get replaced. <br/>
+        /// <b> If the entry does not exist, it will be created!</b></param>
+        /// <param name="gmlCode">The new GML code that shall replace the current GML code of <paramref name="codeName"/>.</param>
+        /// <param name="doParse">Whether the code entry should get linked.
+        /// In other words, have special handling for scripts, globals and object code.</param>
+        /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
+        /// will be used for replacing the code entry in the case that anything fails.
+        /// If this is <see langword="true"/> then an error will be shown instead and the code entry will not get replaced.</param>
+        void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool checkDecompiler = false);
+
+        /// <summary>
+        /// Replaces/Imports all GM-Bytecode ASM in a specific code entry with a specified string.
+        /// </summary>
+        /// <param name="codeName">The name of the code entry that shall get replaced. <br/>
+        /// <b> If the entry does not exist, it will be created!</b></param>
+        /// <param name="gmlCode">The new ASM code that shall replace the current GML code of <paramref name="codeName"/>.</param>
+        /// <param name="doParse">Whether the code entry should get linked.
+        /// In other words, have special handling for scripts, globals and object code.</param>
+        /// <param name="nukeProfile">Whether or not to nuke the profile entry for profile mode.</param>
+        /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
+        /// will be used for replacing the code entry in the case that anything fails.
+        /// If this is <see langword="true"/> then an error will be shown instead and the code entry will not get replaced.</param>
+        void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false);
+
+        /// <summary>
+        /// Replaces/Imports all GML in a specific code entry with a specified file.
+        /// </summary>
+        /// <param name="fileName">The path to the GML file. This file needs to
+        /// <b>A)</b> contain valid GML and <b>B)</b> the filename needs to be the name of the code entry that shall get replaced <br/>
+        /// <b> If the entry does not exist, it will be created!</b>
+        /// </param>
+        /// <param name="doParse">Whether the code entry should get linked.
+        /// In other words, have special handling for scripts, globals and object code.</param>
+        /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
+        /// will be used for replacing the code entry in the case that anything fails.</param>
+        /// <param name="throwOnError">Whether a <see cref="ScriptException"/> will be thrown on any errors.</param>
+        void ImportGMLFile(string fileName, bool doParse = true, bool checkDecompiler = false, bool throwOnError = false);
+
+        /// <summary>
+        /// Replaces/Imports all GM-Bytecode ASM in a specific code entry with a specified file.
+        /// </summary>
+        /// <param name="fileName">The path to the ASM file. This file needs to
+        /// <b>A)</b> contain valid GM-Bytecode ASM and <b>B)</b> the filename needs to be the name of the code entry that shall get replaced <br/>
+        /// <b> If the entry does not exist, it will be created!</b></param>
+        /// <param name="doParse">Whether the code entry should get linked.
+        /// In other words, have special handling for scripts, globals and object code.</param>
+        /// <param name="nukeProfile">Whether or not to nuke the profile entry for profile mode.</param>
+        /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
+        /// will be used for replacing the code entry in the case that anything fails.</param>
+        /// <param name="throwOnError">Whether a <see cref="ScriptException"/> will be thrown on any errors.</param>
+        void ImportASMFile(string fileName, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false, bool throwOnError = false);
+
+        /// <summary>
+        /// Find a keyword in a GML code entry and replaces it with a replacement string.
+        /// </summary>
+        /// <param name="codeName">The name of the code entry that shall get replaced.</param>
+        /// <param name="keyword">The search term.</param>
+        /// <param name="replacement">The replacement term.</param>
+        /// <param name="caseSensitive">Whether the keyword search should be case-sensitive.</param>
+        /// <param name="isRegex">Whether <paramref name="keyword"/> should be treated as RegEx.</param>
+        /// <param name="context">The global decompile context.</param>
+        void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null);
+
+        /// <summary>
+        /// Find a keyword in a GML code entry and replaces it with a replacement string.
+        /// </summary>
+        /// <param name="code">The code entry that shall get replaced.</param>
+        /// <param name="keyword">The search term.</param>
+        /// <param name="replacement">The replacement term.</param>
+        /// <param name="caseSensitive">Whether the keyword search should be case-sensitive.</param>
+        /// <param name="isRegex">Whether <paramref name="keyword"/> should be treated as RegEx.</param>
+        /// <param name="context">The global decompile context.</param>
+        void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null);
 
         /// <summary>
         /// Method returning a dummy boolean value.

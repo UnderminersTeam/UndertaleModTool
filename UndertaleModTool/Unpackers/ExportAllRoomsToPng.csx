@@ -31,7 +31,7 @@ if (dataEditorChild is null)
 UndertaleRoomRenderer roomRenderer;
 int roomCount = Data.Rooms.Count;
 
-string exportedTexturesFolder = PromptChooseDirectory();
+string exportedTexturesFolder = PromptChooseDirectory("Choose an export folder");
 if (exportedTexturesFolder == null)
     throw new ScriptException("The export folder was not set, stopping script.");
 
@@ -44,13 +44,15 @@ if (mainWindow.IsGMS2 == Visibility.Visible)
 DirectoryInfo dir = new DirectoryInfo(exportedTexturesFolder);
 TextureWorker worker = new TextureWorker();
 
+mainWindow.LastOpenedObject = mainWindow.Selected;
+
 SetProgressBar(null, "Rooms Exported", 0, roomCount);
-StartProgressBarUpdater();
+StartUpdater();
 
 await DumpRooms();
 worker.Cleanup();
 
-await StopProgressBarUpdater();
+await StopUpdater();
 HideProgressBar();
 
 GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; // force full garbage collection
@@ -67,7 +69,7 @@ async Task DumpRooms()
 
         UndertaleRoom room = Data.Rooms[i];
 
-        mainWindow.Selected = room;
+        mainWindow.Selected = room; 
 
         if (roomRenderer is null)
         {
@@ -102,5 +104,5 @@ void DumpRoom(string roomName, bool last)
         }
     }
 
-    IncrementProgress();
+    IncProgress();
 }

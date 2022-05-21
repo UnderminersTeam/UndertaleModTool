@@ -48,19 +48,19 @@ namespace UndertaleModTests
             await Task.Delay(1); //dummy await
             return true;
         }
-        public void ReplaceTempWithMain(bool ImAnExpertBTW = false)
+        public void ReplaceTempWithMain(bool imAnExpertBtw = false)
         {
         }
-        public void ReplaceMainWithTemp(bool ImAnExpertBTW = false)
+        public void ReplaceMainWithTemp(bool imAnExpertBtw = false)
         {
         }
-        public void ReplaceTempWithCorrections(bool ImAnExpertBTW = false)
+        public void ReplaceTempWithCorrections(bool imAnExpertBtw = false)
         {
         }
-        public void ReplaceCorrectionsWithTemp(bool ImAnExpertBTW = false)
+        public void ReplaceCorrectionsWithTemp(bool imAnExpertBtw = false)
         {
         }
-        public void UpdateCorrections(bool ImAnExpertBTW = false)
+        public void UpdateCorrections(bool imAnExpertBtw = false)
         {
         }
         public void ReapplyProfileCode()
@@ -88,10 +88,6 @@ namespace UndertaleModTests
         public bool ScriptQuestion(string message)
         {
             Console.WriteLine(message);
-            return true;
-        }
-        public bool SendAUMIMessage(IpcMessage_t ipMessage, ref IpcReply_t outReply)
-        {
             return true;
         }
         public void ScriptOpenURL(string url)
@@ -181,29 +177,29 @@ namespace UndertaleModTests
         {
             Console.Write("SetUMTConsoleText(): " + message);
         }
-        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
         {
-            Console.Write("ReplaceTextInGML(): " + codeName + ", " + keyword + ", " + replacement + ", " + case_sensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
+            Console.Write("ReplaceTextInGML(): " + codeName + ", " + keyword + ", " + replacement + ", " + caseSensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
         }
-        public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool case_sensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+        public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
         {
-            Console.Write("ReplaceTextInGML(): " + code.ToString() + ", " + keyword + ", " + replacement + ", " + case_sensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
+            Console.Write("ReplaceTextInGML(): " + code.ToString() + ", " + keyword + ", " + replacement + ", " + caseSensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
         }
-        public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false)
+        public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool checkDecompiler = false)
         {
             Console.Write("ImportGMLString(): " + codeName + ", " + gmlCode + ", " + doParse.ToString());
         }
-        public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false)
+        public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false)
         {
             Console.Write("ImportASMString(): " + codeName + ", " + gmlCode + ", " + doParse.ToString());
         }
-        public void ImportGMLFile(string fileName, bool doParse = true, bool CheckDecompiler = false, bool throwOnError = false)
+        public void ImportGMLFile(string fileName, bool doParse = true, bool checkDecompiler = false, bool throwOnError = false)
         {
-            Console.Write($"ImportGMLFile(): \"{fileName}\", {doParse}, {CheckDecompiler}, {throwOnError}");
+            Console.Write($"ImportGMLFile(): \"{fileName}\", {doParse}, {checkDecompiler}, {throwOnError}");
         }
-        public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
+        public void ImportASMFile(string fileName, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false, bool throwOnError = false)
         {
-            Console.Write($"ImportASMFile(): \"{fileName}\", {doParse}, {destroyASM}, {CheckDecompiler}, {throwOnError}");
+            Console.Write($"ImportASMFile(): \"{fileName}\", {doParse}, {nukeProfile}, {checkDecompiler}, {throwOnError}");
         }
 
         public void SetFinishedMessage(bool isFinishedMessageEnabled)
@@ -240,7 +236,7 @@ namespace UndertaleModTests
 
         public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
         {
-            Console.WriteLine(string.Format("GenerateGMLCache(): *decompileContext*{0}, *dialog*{1}, {2}",
+            Console.WriteLine(String.Format("GenerateGMLCache(): *decompileContext*{0}, *dialog*{1}, {2}",
                                             decompileContext is null ? " (null)" : "",
                                             dialog is null ? " (null)" : "",
                                             clearGMLEditedBefore.ToString().ToLower())
