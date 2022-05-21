@@ -149,6 +149,8 @@ public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyC
             g.Dispose();
 
             TexturePage.TextureData.TextureBlob = TextureWorker.GetImageBytes(embImage);
+            TexturePage.TextureData.UpdateSize();
+
             worker.Cleanup();
         }
 
