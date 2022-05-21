@@ -6,69 +6,54 @@ EnsureDataLoaded();
 
 var obj = Data.GameObjects.ByName("obj_roomselector");
 
-if (obj == null)
-{
+if(obj == null) {
     obj = new UndertaleGameObject() { Name = Data.Strings.MakeString("obj_roomselector"), Persistent = true };
     Data.GameObjects.Add(obj);
 }
 
-if (Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE"))
-{
+if(Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE")) {
     // Remove existing F3 handler to avoid accidentally 
     // creating system_information_962
     Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);
 }
 
-bool gms2 = Data.IsVersionAtLeast(2, 0, 0, 0);
+bool gms2 = Data.IsVersionAtLeast(2,0,0,0);
 
 var entry_room = Data.GeneralInfo.RoomOrder[0].Resource;
 var object_list = entry_room.GameObjects;
 bool add_to_room = true;
 
-if (gms2)
-{
+if(gms2) {
     UndertaleRoom.Layer target_layer = null;
-    foreach (var layer in entry_room.Layers)
-    {
-        if (layer.LayerType == UndertaleRoom.LayerType.Instances)
-        {
-            foreach (var layer_obj in layer.InstancesData.Instances)
-            {
-                if (layer_obj.ObjectDefinition == obj)
-                {
+    foreach(var layer in entry_room.Layers) {
+        if(layer.LayerType == UndertaleRoom.LayerType.Instances) {
+            foreach(var layer_obj in layer.InstancesData.Instances) {
+                if(layer_obj.ObjectDefinition == obj) {
                     add_to_room = false;
                     break;
                 }
             }
-            if (!add_to_room)
-            {
+            if(!add_to_room) {
                 break;
             }
-            if (target_layer == null || target_layer.LayerDepth > layer.LayerDepth)
-            {
+            if(target_layer == null || target_layer.LayerDepth > layer.LayerDepth) {
                 target_layer = layer;
             }
         }
     }
-
-    if (add_to_room)
-    {
-        if (target_layer == null)
-        {
+    
+    if(add_to_room) {
+        if(target_layer == null) {
             uint layer_id = 0;
-            foreach (var room in Data.Rooms)
-            {
-                foreach (var layer in room.Layers)
-                {
-                    if (layer.LayerId > layer_id)
-                    {
+            foreach(var room in Data.Rooms) {
+                foreach(var layer in room.Layers) {
+                    if(layer.LayerId > layer_id) {
                         layer_id = (uint)layer.LayerId;
                     }
                 }
             }
-
-            target_layer = new UndertaleRoom.Layer()
-            {
+            
+            target_layer = new UndertaleRoom.Layer() {
                 LayerName = Data.Strings.MakeString("Room_Selector_Layer"),
                 Data = new UndertaleRoom.Layer.LayerInstancesData(),
                 LayerType = UndertaleRoom.LayerType.Instances,
@@ -76,40 +61,32 @@ if (gms2)
                 LayerId = layer_id,
                 IsVisible = true
             };
-
+            
             entry_room.Layers.Add(target_layer);
         }
-        var obj_to_add = new UndertaleRoom.GameObject()
-        {
+        var obj_to_add = new UndertaleRoom.GameObject() {
             InstanceID = Data.GeneralInfo.LastObj++,
             ObjectDefinition = obj,
-            X = 0,
-            Y = 0
+            X = 0, Y = 0
         };
         target_layer.InstancesData.Instances.Add(obj_to_add);
         object_list.Add(obj_to_add);
     }
 }
-else
-{
+else {
 
-    foreach (var room_obj in object_list)
-    {
-        if (room_obj.ObjectDefinition == obj)
-        {
+    foreach(var room_obj in object_list) {
+        if(room_obj.ObjectDefinition == obj) {
             add_to_room = false;
             break;
         }
     }
 
-    if (add_to_room)
-    {
-        object_list.Add(new UndertaleRoom.GameObject()
-        {
+    if(add_to_room) {
+        object_list.Add(new UndertaleRoom.GameObject() {
             InstanceID = Data.GeneralInfo.LastObj++,
             ObjectDefinition = obj,
-            X = 0,
-            Y = 0
+            X = 0, Y = 0
         });
     }
 }
@@ -139,8 +116,8 @@ update = 1
 scale = 1
 fnt = -4
 len = 0
-ss = -4"
-+ (!Data.GMS2_3
+ss = -4" 
++ (!Data.GMS2_3 
   ? "for (i = room_first; i <= room_last; i++)"
   : "for (i = 0; room_exists(i); i++)")
 + @"
