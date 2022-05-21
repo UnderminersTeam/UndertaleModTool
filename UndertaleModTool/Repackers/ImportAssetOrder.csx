@@ -11,9 +11,9 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-string assetNamePath = PromptLoadFile("Choose asset name text file", "Text files (.txt)|*.txt|All files|*");
+string assetNamePath = PromptLoadFile("txt", "Text files (.txt)|*.txt|All files|*");
 if (assetNamePath == null)
-    throw new ScriptException("The asset name text file was not chosen");
+    throw new ScriptException("The asset name text file was not chosen!");
 
 string[] lines = File.ReadAllLines(assetNamePath);
 
@@ -25,11 +25,9 @@ void Reorganize<T>(IList<T> list, List<string> order) where T : UndertaleNamedRe
         T asset = list[i];
         string assetName = asset.Name?.Content;
         if (order.Contains(assetName))
-        {
             temp[assetName] = asset;
-        }
     }
-    
+
     List<T> addOrder = new List<T>();
     for (int i = order.Count - 1; i >= 0; i--)
     {
@@ -37,13 +35,14 @@ void Reorganize<T>(IList<T> list, List<string> order) where T : UndertaleNamedRe
         try
         {
             asset = temp[order[i]];
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
-            throw new ScriptException("Missing asset with name \"" + order[i] + "\"");
+            throw new ScriptException($"Missing asset with name \"{order[i]}\"");
         }
         addOrder.Add(asset);
     }
-    
+
     foreach (T asset in addOrder)
         list.Remove(asset);
     foreach (T asset in addOrder)
@@ -57,7 +56,7 @@ void SubmitList()
 {
     if (currentList.Count == 0)
         return;
-    
+
     switch (currentType)
     {
         case "sounds":
@@ -103,7 +102,8 @@ foreach (string line in lines)
         SubmitList();
         currentType = line.Substring(2, line.Length - 4).ToLower();
         currentList.Clear();
-    } else
+    }
+    else
         currentList.Add(line.Trim());
 }
 SubmitList();

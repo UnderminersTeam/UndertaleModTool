@@ -58,16 +58,14 @@ foreach (Atlas atlas in packer.Atlasses)
             texturePageItem.BoundingHeight = (ushort)n.Bounds.Height;
             texturePageItem.TexturePage = texture;
             Data.TexturePageItems.Add(texturePageItem);
-            string stripped = Path.GetFileNameWithoutExtension(n.Texture.Source);
-            int lastUnderscore = stripped.LastIndexOf('_');
-            string spriteName = stripped.Substring(0, lastUnderscore);
+            string spriteName = Path.GetFileNameWithoutExtension(n.Texture.Source);
 
             UndertaleFont font = null;
-            font = Data.Fonts.ByName(stripped);
+            font = Data.Fonts.ByName(spriteName);
 
-            if(font == null)
+            if (font == null)
             {
-                UndertaleString fontUTString = Data.Strings.MakeString(stripped);
+                UndertaleString fontUTString = Data.Strings.MakeString(spriteName);
                 UndertaleFont newFont = new UndertaleFont();
                 newFont.Name = fontUTString;
 
