@@ -206,6 +206,8 @@ namespace UndertaleModTool
         }
         public void UpdateProfile(UndertaleData data, string filename)
         {
+            FileMessageEvent?.Invoke("Calculating MD5 hash...");
+
             try
             {
                 using (var md5Instance = MD5.Create())
@@ -306,6 +308,8 @@ an issue on GitHub.");
         }
         public void ProfileSaveEvent(UndertaleData data, string filename)
         {
+            FileMessageEvent?.Invoke("Calculating MD5 hash...");
+
             try
             {
                 string deleteIfModeActive = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();

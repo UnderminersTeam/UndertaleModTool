@@ -1,10 +1,12 @@
 ﻿using ICSharpCode.SharpZipLib.BZip2;
 using System;
+using System.Buffers.Binary;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UndertaleModLib.Util;
 
@@ -116,15 +118,47 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     public class TexData : UndertaleObject, INotifyPropertyChanged, IDisposable
     {
         private byte[] _textureBlob;
+        private int _width, _height;
         private static MemoryStream sharedStream;
 
         /// <summary>
         /// The image data of the texture.
         /// </summary>
-        public byte[] TextureBlob { get => _textureBlob; set { _textureBlob = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextureBlob))); } }
+        public byte[] TextureBlob
+        {
+            get => _textureBlob;
+            set
+            {
+                _textureBlob = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// A texture width.
+        /// </summary>
+        public int Width => _width;
+
+        /// <summary>
+        /// A texture height.
+        /// </summary>
+        public int Height => _height;
+
+        public void UpdateSize()
+        {
+            ReadOnlySpan<byte> span = _textureBlob.AsSpan();
+            _width = BinaryPrimitives.ReadInt32BigEndian(span[16..20]);
+            _height = BinaryPrimitives.ReadInt32BigEndian(span[20..24]);
+            OnPropertyChanged("Width");
+            OnPropertyChanged("Height");
+        }
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
 
         private static readonly byte[] pngHeader = { 137, 80, 78, 71, 13, 10, 26, 10 };
         private static readonly byte[] qoiAndBZipHeader = { 50, 122, 111, 113 };
@@ -158,7 +192,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                     using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
                     writer.Write((short)bmp.Width);
                     writer.Write((short)bmp.Height);
-                    byte[] data = QoiConverter.GetArrayFromImage(bmp, writer.undertaleData.GM2022_3 ? 0 : 4);
+                    byte[] data = QoiConverter.GetArrayFromImage(bmp, false, writer.undertaleData.GM2022_3 ? 0 : 4);
                     using MemoryStream input = new MemoryStream(data);
                     if (sharedStream.Length != 0)
                         sharedStream.Seek(0, SeekOrigin.Begin);
@@ -168,7 +202,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                 else
                 {
                     // Encode the PNG data back to QOI
-                    writer.Write(QoiConverter.GetSpanFromImage(TextureWorker.GetImageFromByteArray(TextureBlob),
+                    writer.Write(QoiConverter.GetSpanFromImage(TextureWorker.GetImageFromByteArray(TextureBlob), true,
                         writer.undertaleData.GM2022_3 ? 0 : 4));
                 }
             }
@@ -201,6 +235,8 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                         sharedStream.Seek(0, SeekOrigin.Begin);
                     BZip2.Decompress(reader.Stream, sharedStream, false);
                     using Bitmap bmp = QoiConverter.GetImageFromSpan(sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position]);
+                    _width = bmp.Width;
+                    _height = bmp.Height;
                     sharedStream.Seek(0, SeekOrigin.Begin);
                     bmp.Save(sharedStream, ImageFormat.Png);
                     TextureBlob = new byte[(int)sharedStream.Position];
@@ -215,6 +251,8 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
 
                     // Need to convert the QOI data to PNG for compatibility purposes (at least for now)
                     using Bitmap bmp = QoiConverter.GetImageFromStream(reader.Stream);
+                    _width = bmp.Width;
+                    _height = bmp.Height;
                     if (sharedStream.Length != 0)
                         sharedStream.Seek(0, SeekOrigin.Begin);
                     bmp.Save(sharedStream, ImageFormat.Png);
@@ -242,6 +280,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
             uint length = reader.Position - startAddress;
             reader.Position = startAddress;
             TextureBlob = reader.ReadBytes((int)length);
+            UpdateSize();
         }
 
 

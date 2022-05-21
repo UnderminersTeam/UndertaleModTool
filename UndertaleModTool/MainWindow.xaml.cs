@@ -1021,6 +1021,8 @@ namespace UndertaleModTool
                     }
 
                     UndertaleEmbeddedTexture.TexData.ClearSharedStream();
+                    if (Data.UseQoiFormat)
+                        QoiConverter.ClearSharedBuffer();
 
                     if (debugMode != DebugDataDialog.DebugDataMode.NoDebug)
                     {

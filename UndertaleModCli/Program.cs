@@ -685,6 +685,7 @@ public partial class Program : IScriptInterface
             Console.WriteLine("Replacing " + textureEntry);
 
         texture.TextureData.TextureBlob = File.ReadAllBytes(fileToReplace.FullName);
+        texture.TextureData.UpdateSize();
     }
 
     /// <summary>
