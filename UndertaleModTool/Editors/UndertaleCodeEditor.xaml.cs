@@ -45,7 +45,7 @@ namespace UndertaleModTool
     [SupportedOSPlatform("windows7.0")]
     public partial class UndertaleCodeEditor : DataUserControl
     {
-        private static MainWindow mainWindow = mainWindow;
+        private static MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
         public UndertaleCode CurrentDisassembled = null;
         public UndertaleCode CurrentDecompiled = null;
