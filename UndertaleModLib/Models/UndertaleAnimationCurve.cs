@@ -77,8 +77,10 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
         GC.SuppressFinalize(this);
 
         if (Channels is not null)
+        {
             foreach (Channel channel in Channels)
                 channel?.Dispose();
+         }
         Name = null;
         Channels = null;
     }

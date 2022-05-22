@@ -789,8 +789,10 @@ public class UndertaleOptions : UndertaleObject, IDisposable
         GC.SuppressFinalize(this);
 
         if (Constants is not null)
+        {
             foreach (Constant constant in Constants)
                 constant?.Dispose();
+         }
         BackImage = new();
         FrontImage = new();
         LoadImage = new();

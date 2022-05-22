@@ -1637,17 +1637,26 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 GC.SuppressFinalize(this);
 
                 if (LegacyTiles is not null)
+                {
                     foreach (Tile tile in LegacyTiles)
                         tile?.Dispose();
+                }
                 if (Sprites is not null)
+                {
                     foreach (SpriteInstance inst in Sprites)
                         inst?.Dispose();
+                }
                 if (Sequences is not null)
+                {
                     foreach (SequenceInstance inst in Sequences)
                         inst?.Dispose();
+                }
                 if (NineSlices is not null)
+                {
                     foreach (SpriteInstance inst in NineSlices)
                         inst?.Dispose();
+                }
+
                 LegacyTiles = null;
                 Sprites = null;
                 Sequences = null;
@@ -1685,8 +1694,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 GC.SuppressFinalize(this);
 
                 if (Properties is not null)
+                {
                     foreach (EffectProperty prop in Properties)
                         prop?.Dispose();
+                }
+
                 EffectType = null;
                 Properties = null;
             }
