@@ -86,7 +86,7 @@ namespace UndertaleModTool
                     Save();
             } catch (Exception e)
             {
-                MessageBox.Show(Application.Current.MainWindow as MainWindow, $"Failed to load settings.json! Using default values.\n{e.Message}");
+                MessageBox.Show($"Failed to load settings.json! Using default values.\n{e.Message}");
                 new Settings();
             }
         }
@@ -102,7 +102,7 @@ namespace UndertaleModTool
             }
             catch (Exception e)
             {
-                MessageBox.Show(Application.Current.MainWindow as MainWindow, $"Failed to save settings.json!\n{e.Message}");
+                MessageBox.Show($"Failed to save settings.json!\n{e.Message}");
             }
         }
     }

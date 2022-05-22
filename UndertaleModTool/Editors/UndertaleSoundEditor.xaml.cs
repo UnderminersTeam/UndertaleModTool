@@ -98,7 +98,7 @@ namespace UndertaleModTool
                 } catch (Exception ex)
                 {
                     waveOut = null;
-                    MessageBox.Show(Application.Current.MainWindow as MainWindow, "Failed to play audio!\r\n" + ex.Message, "Audio failure", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Failed to play audio!\r\n" + ex.Message, "Audio failure", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
                 return;
             }
@@ -131,7 +131,7 @@ namespace UndertaleModTool
                 } catch (Exception ex)
                 {
                     waveOut = null;
-                    MessageBox.Show(Application.Current.MainWindow as MainWindow, "Failed to play audio!\r\n" + ex.Message, "Audio failure", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Failed to play audio!\r\n" + ex.Message, "Audio failure", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
             } else
@@ -158,17 +158,17 @@ namespace UndertaleModTool
                             waveOut.Play();
                         }
                         else
-                            MessageBox.Show(Application.Current.MainWindow as MainWindow, "Failed to play audio!\r\nNot a WAV or OGG.", "Audio failure", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            MessageBox.Show("Failed to play audio!\r\nNot a WAV or OGG.", "Audio failure", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                     catch (Exception ex)
                     {
                         waveOut = null;
-                        MessageBox.Show(Application.Current.MainWindow as MainWindow, "Failed to play audio!\r\n" + ex.Message, "Audio failure", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBox.Show("Failed to play audio!\r\n" + ex.Message, "Audio failure", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                 }
             }
             else
-                MessageBox.Show(Application.Current.MainWindow as MainWindow, "Failed to play audio!\r\nNo options for playback worked.", "Audio failure", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Failed to play audio!\r\nNo options for playback worked.", "Audio failure", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
 
