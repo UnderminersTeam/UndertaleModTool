@@ -28,6 +28,7 @@ namespace UndertaleModLib.Util
         private const byte QOI_MASK_4 = 0xf0;
 
         private static byte[] sharedBuffer;
+        private static bool isBufferEmpty = true;
 
         /// <summary>
         /// Clears the shared buffer.
@@ -38,7 +39,11 @@ namespace UndertaleModLib.Util
         /// Initializes <see cref="sharedBuffer"/> with defined size.
         /// </summary>
         /// <param name="size">Size of the array in bytes</param>
-        public static void InitSharedBuffer(int size) => sharedBuffer = new byte[size];
+        public static void InitSharedBuffer(int size)
+        {
+            isBufferEmpty = true;
+            sharedBuffer = new byte[size];
+        } 
 
         /// <summary>
         /// Creates a <see cref="Bitmap"/> from a <see cref="Stream"/>.
@@ -197,7 +202,11 @@ namespace UndertaleModLib.Util
         /// <param name="padding">The amount of bytes of padding that should be used.</param>
         /// <returns>A QOI Image as a byte array.</returns>
         /// <exception cref="Exception">If there was an error with stride width.</exception>
-        public unsafe static Span<byte> GetSpanFromImage(Bitmap bmp, bool disposeBMP = true, int padding = 4) {
+        public unsafe static Span<byte> GetSpanFromImage(Bitmap bmp, bool disposeBMP = true, int padding = 4)
+        {
+            if (!isBufferEmpty)
+                Array.Clear(sharedBuffer);
+
             // Little-endian QOIF image magic
             sharedBuffer[0] = (byte)'f';
             sharedBuffer[1] = (byte)'i';
@@ -318,6 +327,8 @@ namespace UndertaleModLib.Util
             sharedBuffer[9] = (byte)((length >> 8) & 0xff);
             sharedBuffer[10] = (byte)((length >> 16) & 0xff);
             sharedBuffer[11] = (byte)((length >> 24) & 0xff);
+
+            isBufferEmpty = false;
 
             return sharedBuffer.AsSpan()[..resPos];
         }
