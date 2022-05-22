@@ -75,12 +75,12 @@ namespace UndertaleModTool
                         if (Directory.Exists(Path.Combine(ProfilesFolder, reportedHashOfCrashedFile)) &&
                             profileHashOfCrashedFile == reportedHashOfCrashedFile)
                         {
-                            if (MessageBox.Show(Application.Current.MainWindow as MainWindow, "UndertaleModTool crashed during usage last time while editing " + pathOfCrashedFile + ", would you like to recover your code now?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                            if (MessageBox.Show(this, "UndertaleModTool crashed during usage last time while editing " + pathOfCrashedFile + ", would you like to recover your code now?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                             {
                                 LoadFile(pathOfCrashedFile, true).ContinueWith((t) => { });
                                 if (Data == null)
                                 {
-                                    MessageBox.Show(Application.Current.MainWindow as MainWindow, "Failed to load data when recovering.");
+                                    MessageBox.Show(this, "Failed to load data when recovering.");
                                     return;
                                 }
                                 string[] dirFiles = Directory.GetFiles(dataRecoverLocation);
@@ -96,11 +96,11 @@ namespace UndertaleModTool
                                     codeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
                                 }
                                 codeLoadDialog.TryClose();
-                                MessageBox.Show(Application.Current.MainWindow as MainWindow, "Completed.");
+                                MessageBox.Show(this, "Completed.");
                             }
-                            else if (MessageBox.Show(Application.Current.MainWindow as MainWindow, "Would you like to move this code to the \"Recovered\" folder now? Any previous code there will be cleared!", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                            else if (MessageBox.Show(this, "Would you like to move this code to the \"Recovered\" folder now? Any previous code there will be cleared!", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                             {
-                                MessageBox.Show(Application.Current.MainWindow as MainWindow, "Your code can be recovered from the \"Recovered\" folder at any time.");
+                                MessageBox.Show(this, "Your code can be recovered from the \"Recovered\" folder at any time.");
                                 string recoveredDir = Path.Combine(AppDataFolder, "Recovered", reportedHashOfCrashedFile);
                                 if (!Directory.Exists(Path.Combine(AppDataFolder, "Recovered")))
                                     Directory.CreateDirectory(Path.Combine(AppDataFolder, "Recovered"));
@@ -111,19 +111,19 @@ namespace UndertaleModTool
                             }
                             else
                             {
-                                MessageBox.Show(Application.Current.MainWindow as MainWindow, "A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
+                                MessageBox.Show(this, "A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
                             }
                         }
                     }
                     else
                     {
-                        MessageBox.Show(Application.Current.MainWindow as MainWindow, "A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
+                        MessageBox.Show(this, "A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
                     }
                 }
             }
             catch (Exception exc)
             {
-                MessageBox.Show(Application.Current.MainWindow as MainWindow, "CrashCheck error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                MessageBox.Show(this, "CrashCheck error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
 
@@ -135,7 +135,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                MessageBox.Show(Application.Current.MainWindow as MainWindow, "ApplyCorrections error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                MessageBox.Show(this, "ApplyCorrections error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
 
@@ -147,7 +147,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                MessageBox.Show(Application.Current.MainWindow as MainWindow, "CreateUMTLastEdited error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                MessageBox.Show(this, "CreateUMTLastEdited error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
 
@@ -161,7 +161,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                MessageBox.Show(Application.Current.MainWindow as MainWindow, "DestroyUMTLastEdited error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                MessageBox.Show(this, "DestroyUMTLastEdited error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
 
@@ -180,7 +180,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                MessageBox.Show(Application.Current.MainWindow as MainWindow, "RevertProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                MessageBox.Show(this, "RevertProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
         public void SaveTempToMainProfile()
@@ -201,7 +201,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                MessageBox.Show(Application.Current.MainWindow as MainWindow, "SaveTempToMainProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                MessageBox.Show(this, "SaveTempToMainProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
         public void UpdateProfile(UndertaleData data, string filename)
@@ -226,7 +226,7 @@ namespace UndertaleModTool
                 {
                     if (data.GMS2_3)
                     {
-                        MessageBox.Show(Application.Current.MainWindow as MainWindow, "Profile mode is not currently supported for GameMaker Studio 2.3 games.");
+                        MessageBox.Show(this, "Profile mode is not currently supported for GameMaker Studio 2.3 games.");
                         return;
                     }
 
@@ -267,14 +267,14 @@ namespace UndertaleModTool
                     Directory.CreateDirectory(profDirTemp);
                     if (!Directory.Exists(profDir) || !Directory.Exists(profDirMain) || !Directory.Exists(profDirTemp))
                     {
-                        MessageBox.Show(Application.Current.MainWindow as MainWindow, "Profile should exist, but does not. Insufficient permissions? Profile mode is disabled.");
+                        MessageBox.Show(this, "Profile should exist, but does not. Insufficient permissions? Profile mode is disabled.");
                         SettingsWindow.ProfileModeEnabled = false;
                         return;
                     }
 
                     if (!SettingsWindow.ProfileMessageShown)
                     {
-                        MessageBox.Show(Application.Current.MainWindow as MainWindow, @"The profile for your game loaded successfully!
+                        MessageBox.Show(this, @"The profile for your game loaded successfully!
 
 UndertaleModTool now uses the ""Profile"" system by default for code.
 Using the profile system, many new features are available to you!
@@ -301,7 +301,7 @@ an issue on GitHub.");
             }
             catch (Exception exc)
             {
-                MessageBox.Show(Application.Current.MainWindow as MainWindow, "UpdateProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                MessageBox.Show(this, "UpdateProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
         public void ProfileSaveEvent(UndertaleData data, string filename)
@@ -371,7 +371,7 @@ an issue on GitHub.");
                     Directory.CreateDirectory(profDir);
                     Directory.CreateDirectory(Path.Combine(profDir, "Main"));
                     Directory.CreateDirectory(Path.Combine(profDir, "Temp"));
-                    MessageBox.Show(Application.Current.MainWindow as MainWindow, "Profile saved successfully to " + ProfileHash);
+                    MessageBox.Show(this, "Profile saved successfully to " + ProfileHash);
                 }
                 if (SettingsWindow.DeleteOldProfileOnSave && copyProfile)
                 {
@@ -380,7 +380,7 @@ an issue on GitHub.");
             }
             catch (Exception exc)
             {
-                MessageBox.Show(Application.Current.MainWindow as MainWindow, "ProfileSaveEvent error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                MessageBox.Show(this, "ProfileSaveEvent error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
         public void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
@@ -413,7 +413,7 @@ an issue on GitHub.");
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show(Application.Current.MainWindow as MainWindow, "An exception occurred while processing copying " + tempPath + "\nException: \n" + ex.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(this, "An exception occurred while processing copying " + tempPath + "\nException: \n" + ex.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                             return;
                         }
                     }
@@ -431,7 +431,7 @@ an issue on GitHub.");
             }
             catch (Exception exc)
             {
-                MessageBox.Show(Application.Current.MainWindow as MainWindow, "DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                MessageBox.Show(this, "DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
     }
