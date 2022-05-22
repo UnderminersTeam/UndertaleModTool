@@ -174,7 +174,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         }
 
         /// <summary>
-        /// Initializes <see cref="sharedStream"/> with defined initial size.
+        /// Initializes a <see cref="sharedStream"/> with a specified initial size.
         /// </summary>
         /// <param name="size">Initial size of the stream in bytes</param>
         public static void InitSharedStream(int size) => sharedStream = new(size);

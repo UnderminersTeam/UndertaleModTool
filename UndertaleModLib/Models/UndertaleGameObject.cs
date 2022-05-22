@@ -374,8 +374,10 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         _textureMaskId.Dispose();
         PhysicsVertices = new();
         foreach (var ev in Events)
+        {
             foreach (var subEv in ev)
                 subEv?.Dispose();
+         }
         Name = null;
         Events = new();
     }

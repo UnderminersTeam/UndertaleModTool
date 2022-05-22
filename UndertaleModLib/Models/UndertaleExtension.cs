@@ -205,8 +205,10 @@ public class UndertaleExtensionFile : UndertaleObject, IDisposable
         GC.SuppressFinalize(this);
 
         if (Functions is not null)
+        {
             foreach (UndertaleExtensionFunction func in Functions)
                 func?.Dispose();
+         }
         Filename = null;
         CleanupScript = null;
         InitScript = null;
