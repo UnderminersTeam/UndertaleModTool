@@ -28,7 +28,7 @@ namespace UndertaleModTool
         private WaveOutEvent waveOut;
         private WaveFileReader wavReader;
         private VorbisWaveReader oggReader;
-
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         public UndertaleEmbeddedAudioEditor()
         {
             InitializeComponent();
@@ -62,7 +62,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(Application.Current.MainWindow as MainWindow, "Failed to import file: " + ex.Message, "Failed to import file", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(mainWindow, "Failed to import file: " + ex.Message, "Failed to import file", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -84,7 +84,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(Application.Current.MainWindow as MainWindow, "Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(mainWindow, "Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -119,11 +119,11 @@ namespace UndertaleModTool
                         waveOut.Init(oggReader);
                         waveOut.Play();
                     } else
-                        MessageBox.Show(Application.Current.MainWindow as MainWindow, "Failed to play audio!\r\nNot a WAV or OGG.", "Audio failure", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBox.Show(mainWindow, "Failed to play audio!\r\nNot a WAV or OGG.", "Audio failure", MessageBoxButton.OK, MessageBoxImage.Warning);
                 } catch (Exception ex)
                 {
                     waveOut = null;
-                    MessageBox.Show(Application.Current.MainWindow as MainWindow, "Failed to play audio!\r\n" + ex.Message, "Audio failure", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(mainWindow, "Failed to play audio!\r\n" + ex.Message, "Audio failure", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
         }
