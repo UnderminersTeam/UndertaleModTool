@@ -122,7 +122,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(mainWindow, "Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
