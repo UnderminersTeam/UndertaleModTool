@@ -359,11 +359,11 @@ namespace UndertaleModTool
                     }
                     catch (ArgumentException)
                     {
-                        MessageBox.Show("There is a duplicate key in textdata_en, being " + m.Groups[1].Value + ". This may cause errors in the comment display of text.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Application.Current.MainWindow as MainWindow, "There is a duplicate key in textdata_en, being " + m.Groups[1].Value + ". This may cause errors in the comment display of text.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                     catch
                     {
-                        MessageBox.Show("Unknown error in textdata_en. This may cause errors in the comment display of text.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(Application.Current.MainWindow as MainWindow, "Unknown error in textdata_en. This may cause errors in the comment display of text.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
@@ -466,7 +466,7 @@ namespace UndertaleModTool
                     }
                     catch (Exception exc)
                     {
-                        MessageBox.Show(exc.ToString());
+                        MessageBox.Show(Application.Current.MainWindow as MainWindow, exc.ToString());
                     }
 
                     if (decompiled != null)
@@ -595,14 +595,14 @@ namespace UndertaleModTool
                     catch (Exception e)
                     {
                         Debug.WriteLine(e.ToString());
-                        if (MessageBox.Show("Unable to execute GraphViz: " + e.Message + "\nMake sure you have downloaded it and set the path in settings.\nDo you want to open the download page now?", "Graph generation failed", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.Yes)
+                        if (MessageBox.Show(Application.Current.MainWindow as MainWindow, "Unable to execute GraphViz: " + e.Message + "\nMake sure you have downloaded it and set the path in settings.\nDo you want to open the download page now?", "Graph generation failed", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.Yes)
                             MainWindow.OpenBrowser("https://graphviz.gitlab.io/_pages/Download/Download_windows.html");
                     }
                 }
                 catch (Exception e)
                 {
                     Debug.WriteLine(e.ToString());
-                    MessageBox.Show(e.Message, "Graph generation failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(Application.Current.MainWindow as MainWindow, e.Message, "Graph generation failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
                 Dispatcher.Invoke(() =>
@@ -692,21 +692,21 @@ namespace UndertaleModTool
             if (compileContext == null)
             {
                 dialog.TryClose();
-                MessageBox.Show("Compile context was null for some reason...", "This shouldn't happen", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.MainWindow as MainWindow, "Compile context was null for some reason...", "This shouldn't happen", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             if (compileContext.HasError)
             {
                 dialog.TryClose();
-                MessageBox.Show(Truncate(compileContext.ResultError, 512), "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.MainWindow as MainWindow, Truncate(compileContext.ResultError, 512), "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             if (!compileContext.SuccessfulCompile)
             {
                 dialog.TryClose();
-                MessageBox.Show("(unknown error message)", "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.MainWindow as MainWindow, "(unknown error message)", "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -733,7 +733,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception exc)
                 {
-                    MessageBox.Show("Error during writing of GML code to profile:\n" + exc.ToString());
+                    MessageBox.Show(Application.Current.MainWindow as MainWindow, "Error during writing of GML code to profile:\n" + exc.ToString());
                 }
             }
 
@@ -815,7 +815,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Application.Current.MainWindow as MainWindow, ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
