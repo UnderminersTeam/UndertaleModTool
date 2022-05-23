@@ -407,8 +407,15 @@ selector_active = 0
 exiting = 0
 ", Data);
 
+string version;
+if (Data.GMS2_3)
+    version = "2.3";
+else if (gms2)
+    version = "2";
+else
+    version = "1";
 
-ScriptMessage("Successfully applied for Gamemaker " + (Data.GMS2_3 ? "2.3" : (gms2 ? "2" : "1")) + @"
+ScriptMessage(@$"Successfully applied for Gamemaker {version}
 Controls:
 - F3: open/close menu
 - Escape: close menu

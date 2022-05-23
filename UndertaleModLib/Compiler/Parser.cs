@@ -693,14 +693,13 @@ namespace UndertaleModLib.Compiler
                 result.Children.Add(ParseStatement(context));
                 if (expression)
                     return result;
-                else // Whatever you call non-anonymous
+                else // Whatever you call non-anonymous definitions
                 {
-                    Statement trueresult = new Statement(Statement.StatementKind.Assign, new Lexer.Token(TokenKind.Assign));
-                    trueresult.Children.Add(destination);
-                    trueresult.Children.Add(new Statement(Statement.StatementKind.Token, trueresult.Token));
-                    trueresult.Children.Add(result);
-                    return trueresult;
-
+                    Statement trueResult = new Statement(Statement.StatementKind.Assign, new Lexer.Token(TokenKind.Assign));
+                    trueResult.Children.Add(destination);
+                    trueResult.Children.Add(new Statement(Statement.StatementKind.Token, trueResult.Token));
+                    trueResult.Children.Add(result);
+                    return trueResult;
                 }
             }
 
