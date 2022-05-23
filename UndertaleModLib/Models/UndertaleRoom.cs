@@ -1178,7 +1178,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
         // GMS 2022.1+
         public bool EffectEnabled { get; set; }
         public UndertaleString EffectType { get; set; }
-        public UndertaleSimpleList<EffectProperty> EffectProperties { get; set; }
+        public UndertaleSimpleList<EffectProperty> EffectProperties { get; set; } = new();
 
         public void UpdateParentRoom()
         {
