@@ -873,7 +873,7 @@ public class UndertaleLanguage : UndertaleObject, IDisposable
         // values that correspond to IDs in the main chunk content
 
         /// <summary>
-        /// Serializes the data file into a specified <see cref="UndertaleWriter"/>.
+        /// Serializes <see cref="LanguageData"/> into a specified <see cref="UndertaleWriter"/>.
         /// </summary>
         /// <param name="writer">Where to serialize to.</param>
         public void Serialize(UndertaleWriter writer)
@@ -887,9 +887,10 @@ public class UndertaleLanguage : UndertaleObject, IDisposable
         }
 
         /// <summary>
-        /// Deserializes the object from a specified <see cref="UndertaleReader"/>.
+        /// Deserializes <see cref="LanguageData"/> from a specified <see cref="UndertaleReader"/> and with a specified entries count.
         /// </summary>
         /// <param name="reader">Where to deserialize from.</param>
+        /// <param name="entryCount">Count of entries to read.</param>
         public void Unserialize(UndertaleReader reader, uint entryCount)
         {
             Name = reader.ReadUndertaleString();

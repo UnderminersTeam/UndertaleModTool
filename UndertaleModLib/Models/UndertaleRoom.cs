@@ -163,18 +163,15 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     public UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>> Sequences { get; private set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
 
     /// <summary>
-    /// Call <see cref="OnPropertyChanged(string)"/> for <see cref="BGColorLayer"/> to update the room background color.<br/>
-    /// Used for GMS 2 rooms.
+    /// Calls <see cref="OnPropertyChanged(string)"/> for <see cref="BGColorLayer"/> in order to update the room background color.<br/>
+    /// Only used for GameMaker: Studio 2 rooms.
     /// </summary>
     public void UpdateBGColorLayer() => OnPropertyChanged("BGColorLayer");
 
     /// <summary>
     /// Order the room layers list by depth.
     /// </summary>
-    /// <param name="selectedLayer">
-    /// Optional argument.<br/>
-    /// Should be present if called from the room editor to re-select the selected layer.
-    /// </param>
+    /// <param name="selectedLayer">Should be present if called from the room editor to re-select the selected layer.</param>
     public void RearrangeLayers(Layer selectedLayer = null)
     {
         if (Layers.Count == 0)
@@ -182,7 +179,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
         Layer[] orderedLayers = Layers.OrderBy(l => l.LayerDepth).ToArray();
 
-        // ensure that room objects tree will have the layer to re-select
+        // Ensure that room objects tree will have the layer to re-select
         if (selectedLayer is not null)
             Layers[Array.IndexOf(orderedLayers, selectedLayer)] = selectedLayer;
 
@@ -365,9 +362,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     }
 
     /// <summary>
-    /// Initialize room by setting <c>ParentRoom</c> property of backgrounds or layers, and calculate room grid size if necessary.
+    /// Initialize the room by setting every <see cref="Background.ParentRoom"/> or <see cref="Layer.ParentRoom"/>,
+    /// and optionally calculate the room grid size.
     /// </summary>
-    /// <param name="calculateGrid">Whether should room grid size be calculated.</param>
+    /// <param name="calculateGrid">Whether to calculate the room grid size.</param>
     public void SetupRoom(bool calculateGrid = true)
     {
         foreach (Layer layer in Layers)
@@ -495,7 +493,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         private UndertaleRoom _parentRoom;
 
         /// <summary>
-        /// The room parent this background belongs to.
+        /// The room parent this <see cref="Background"/> belongs to.
         /// </summary>
         /// <remarks>
         /// This attribute is UMT-only and does not exist in GameMaker.
@@ -521,7 +519,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public float CalcScaleY { get; set; } = 1;
 
         /// <summary>
-        /// Whether this background is enabled.
+        /// Whether this <see cref="Background"/> is enabled.
         /// </summary>
         public bool Enabled { get; set; } = false;
 
@@ -549,13 +547,13 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public int Y { get => _y; set { _y = value; OnPropertyChanged(); UpdateStretch(); } }
 
         /// <summary>
-        /// Whether this background is tiled horizontally.<br/>
+        /// Whether this <see cref="Background"/> is tiled horizontally.<br/>
         /// <c>0</c> - <see langword="false"/>, <c>1</c> - <see langword="true"/>.
         /// </summary>
         public int TileX { get; set; } = 1;
 
         /// <summary>
-        /// Whether this background is tiled vertically.<br/>
+        /// Whether this <see cref="Background"/> is tiled vertically.<br/>
         /// <c>0</c> - <see langword="false"/>, <c>1</c> - <see langword="true"/>.
         /// </summary>
         public int TileY { get; set; } = 1;
@@ -578,7 +576,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public bool Stretch { get => _stretch; set { _stretch = value; OnPropertyChanged(); UpdateStretch(); } }
 
         /// <summary>
-        /// Indicates whether this background is tiled horizontally.
+        /// Indicates whether this <see cref="Background"/> is tiled horizontally.
         /// </summary>
         /// <remarks>
         /// This attribute is UMT-only and does not exist in GameMaker.
@@ -586,7 +584,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public bool TiledHorizontally { get => TileX > 0; set { TileX = value ? 1 : 0; OnPropertyChanged(); } }
 
         /// <summary>
-        /// Indicates whether this background is tiled vertically.
+        /// Indicates whether this <see cref="Background"/> is tiled vertically.
         /// </summary>
         /// <remarks>
         /// This attribute is UMT-only and does not exist in GameMaker.
