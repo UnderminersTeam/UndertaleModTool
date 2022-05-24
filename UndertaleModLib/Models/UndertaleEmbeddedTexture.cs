@@ -192,7 +192,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                     using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
                     writer.Write((short)bmp.Width);
                     writer.Write((short)bmp.Height);
-                    byte[] data = QoiConverter.GetArrayFromImage(bmp, false, writer.undertaleData.GM2022_3 ? 0 : 4);
+                    byte[] data = QoiConverter.GetArrayFromImage(bmp, writer.undertaleData.GM2022_3 ? 0 : 4);
                     using MemoryStream input = new MemoryStream(data);
                     if (sharedStream.Length != 0)
                         sharedStream.Seek(0, SeekOrigin.Begin);
@@ -202,8 +202,8 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                 else
                 {
                     // Encode the PNG data back to QOI
-                    writer.Write(QoiConverter.GetSpanFromImage(TextureWorker.GetImageFromByteArray(TextureBlob), true,
-                        writer.undertaleData.GM2022_3 ? 0 : 4));
+                    using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
+                    writer.Write(QoiConverter.GetSpanFromImage(bmp, writer.undertaleData.GM2022_3 ? 0 : 4));
                 }
             }
             else
