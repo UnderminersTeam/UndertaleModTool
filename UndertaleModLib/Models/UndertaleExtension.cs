@@ -1,163 +1,237 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel;
-using System.Collections.ObjectModel;
 
-namespace UndertaleModLib.Models
+namespace UndertaleModLib.Models;
+
+/// <summary>
+/// Details the possible extension kinds for a GameMaker data file.
+/// </summary>
+public enum UndertaleExtensionKind : uint
 {
-    public enum UndertaleExtensionKind : uint
+    /// <summary>
+    /// TODO: unknown, needs more research.
+    /// </summary>
+    [Obsolete("Likely unused")]
+    Unknown0 = 0,
+    /// <summary>
+    /// A DLL extension.
+    /// </summary>
+    Dll = 1,
+    /// <summary>
+    /// A GML extension.
+    /// </summary>
+    GML = 2,
+    /// <summary>
+    /// TODO: unknown
+    /// </summary>
+    ActionLib = 3,
+    /// <summary>
+    /// TODO: unknown
+    /// </summary>
+    Generic = 4,
+    /// <summary>
+    /// A JavaScript extension.
+    /// </summary>
+    Js = 5
+}
+
+/// <summary>
+/// Details the possible variable types for GameMaker extensions.
+/// </summary>
+public enum UndertaleExtensionVarType : uint
+{
+    /// <summary>
+    /// A string variable.
+    /// </summary>
+    String = 1,
+    /// <summary>
+    /// A double variable.
+    /// </summary>
+    Double = 2
+}
+
+/// <summary>
+/// A class representing an argument for <see cref="UndertaleExtensionFunction"/>s.
+/// </summary>
+[PropertyChanged.AddINotifyPropertyChangedInterface]
+public class UndertaleExtensionFunctionArg : UndertaleObject
+{
+    /// <summary>
+    /// The variable type of this argument.
+    /// </summary>
+    public UndertaleExtensionVarType Type { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="UndertaleExtensionFunctionArg"/>.
+    /// </summary>
+    public UndertaleExtensionFunctionArg()
     {
-        [Obsolete("Likely unused")]
-        Unknown0 = 0,
-        DLL = 1,
-        GML = 2,
-        ActionLib = 3,
-        Generic = 4,
-        JS = 5
+        Type = UndertaleExtensionVarType.Double;
     }
 
-    public enum UndertaleExtensionVarType : uint
+    /// <summary>
+    /// Initializes a new instance of <see cref="UndertaleExtensionFunctionArg"/> with a specified <see cref="UndertaleExtensionVarType"/>.
+    /// </summary>
+    /// <param name="type"></param>
+    public UndertaleExtensionFunctionArg(UndertaleExtensionVarType type)
     {
-        String = 1,
-        Double = 2
+        Type = type;
     }
 
-    [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class UndertaleExtensionFunctionArg : UndertaleObject
+    /// <inheritdoc />
+    public void Serialize(UndertaleWriter writer)
     {
-        public UndertaleExtensionVarType Type { get; set; }
-
-        public UndertaleExtensionFunctionArg()
-        {
-            Type = UndertaleExtensionVarType.Double;
-        }
-
-        public UndertaleExtensionFunctionArg(UndertaleExtensionVarType type)
-        {
-            Type = type;
-        }
-
-        public void Serialize(UndertaleWriter writer)
-        {
-            writer.Write((uint)Type);
-        }
-
-        public void Unserialize(UndertaleReader reader)
-        {
-            Type = (UndertaleExtensionVarType)reader.ReadUInt32();
-        }
+        writer.Write((uint)Type);
     }
 
-    [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class UndertaleExtensionFunction : UndertaleObject
+    /// <inheritdoc />
+    public void Unserialize(UndertaleReader reader)
     {
-        public UndertaleString Name { get; set; }
-        public uint ID { get; set; } 
-        public uint Kind { get; set; }
-        public UndertaleExtensionVarType RetType { get; set; }
-        public UndertaleString ExtName { get; set; }
-        public UndertaleSimpleList<UndertaleExtensionFunctionArg> Arguments { get; set; } = new UndertaleSimpleList<UndertaleExtensionFunctionArg>();
+        Type = (UndertaleExtensionVarType)reader.ReadUInt32();
+    }
+}
 
-        public void Serialize(UndertaleWriter writer)
-        {
-            writer.WriteUndertaleString(Name);
-            writer.Write(ID);
-            writer.Write(Kind);
-            writer.Write((uint)RetType);
-            writer.WriteUndertaleString(ExtName);
-            writer.WriteUndertaleObject(Arguments);
-        }
+/// <summary>
+/// A function in a <see cref="UndertaleExtension"/>.
+/// </summary>
+[PropertyChanged.AddINotifyPropertyChangedInterface]
+public class UndertaleExtensionFunction : UndertaleObject
+{
+    /// <summary>
+    /// The name of the function.
+    /// </summary>
+    public UndertaleString Name { get; set; }
 
-        public void Unserialize(UndertaleReader reader)
-        {
-            Name = reader.ReadUndertaleString();
-            ID = reader.ReadUInt32();
-            Kind = reader.ReadUInt32();
-            RetType = (UndertaleExtensionVarType)reader.ReadUInt32();
-            ExtName = reader.ReadUndertaleString();
-            Arguments = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleExtensionFunctionArg>>();
-        }
+    /// <summary>
+    /// An identification number of the function.
+    /// </summary>
+    public uint ID { get; set; }
+    public uint Kind { get; set; }
 
-        public override string ToString()
-        {
-            return Name.Content + " (" + ExtName.Content + ")";
-        }
+    /// <summary>
+    /// The return type of the function.
+    /// </summary>
+    public UndertaleExtensionVarType RetType { get; set; }
+    public UndertaleString ExtName { get; set; }
+
+    /// <summary>
+    /// A list of arguments this function takes.
+    /// </summary>
+    public UndertaleSimpleList<UndertaleExtensionFunctionArg> Arguments { get; set; } = new UndertaleSimpleList<UndertaleExtensionFunctionArg>();
+
+    /// <inheritdoc />
+    public void Serialize(UndertaleWriter writer)
+    {
+        writer.WriteUndertaleString(Name);
+        writer.Write(ID);
+        writer.Write(Kind);
+        writer.Write((uint)RetType);
+        writer.WriteUndertaleString(ExtName);
+        writer.WriteUndertaleObject(Arguments);
     }
 
-    [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class UndertaleExtensionFile : UndertaleObject
+    /// <inheritdoc />
+    public void Unserialize(UndertaleReader reader)
     {
-        public UndertaleString Filename { get; set; }
-        public UndertaleString CleanupScript { get; set; }
-        public UndertaleString InitScript { get; set; }
-        public UndertaleExtensionKind Kind { get; set; }
-        public UndertalePointerList<UndertaleExtensionFunction> Functions { get; set; } = new UndertalePointerList<UndertaleExtensionFunction>();
-
-        public void Serialize(UndertaleWriter writer)
-        {
-            writer.WriteUndertaleString(Filename);
-            writer.WriteUndertaleString(CleanupScript);
-            writer.WriteUndertaleString(InitScript);
-            writer.Write((uint)Kind);
-            writer.WriteUndertaleObject(Functions);
-        }
-
-        public void Unserialize(UndertaleReader reader)
-        {
-            Filename = reader.ReadUndertaleString();
-            CleanupScript = reader.ReadUndertaleString();
-            InitScript = reader.ReadUndertaleString();
-            Kind = (UndertaleExtensionKind)reader.ReadUInt32();
-            Functions = reader.ReadUndertaleObject<UndertalePointerList<UndertaleExtensionFunction>>();
-        }
-
-        public override string ToString()
-        {
-            try
-            {
-                return Filename.Content + " (" + GetType().Name + ")";
-            }
-            catch
-            {
-                return "(Unknown extension file)";
-            }
-        }
+        Name = reader.ReadUndertaleString();
+        ID = reader.ReadUInt32();
+        Kind = reader.ReadUInt32();
+        RetType = (UndertaleExtensionVarType)reader.ReadUInt32();
+        ExtName = reader.ReadUndertaleString();
+        Arguments = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleExtensionFunctionArg>>();
     }
 
-    [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class UndertaleExtension : UndertaleNamedResource
+    /// <inheritdoc />
+    public override string ToString()
     {
-        // Folder Name thing is a remnant from the legacy GM7-8.1 extension editor(aka ExtMaker).
-        // The runner reads the name but ignores it.
-        // Though you probably shouldn't change it anyways. 
-        public UndertaleString FolderName { get; set; }
-        public UndertaleString Name { get; set; }
-        public UndertaleString ClassName { get; set; }
+        return Name.Content + " (" + ExtName.Content + ")";
+    }
+}
 
-        public UndertalePointerList<UndertaleExtensionFile> Files { get; set; } = new UndertalePointerList<UndertaleExtensionFile>();
+[PropertyChanged.AddINotifyPropertyChangedInterface]
+public class UndertaleExtensionFile : UndertaleObject
+{
+    public UndertaleString Filename { get; set; }
+    public UndertaleString CleanupScript { get; set; }
+    public UndertaleString InitScript { get; set; }
+    public UndertaleExtensionKind Kind { get; set; }
+    public UndertalePointerList<UndertaleExtensionFunction> Functions { get; set; } = new UndertalePointerList<UndertaleExtensionFunction>();
 
-        public override string ToString()
+    /// <inheritdoc />
+    public void Serialize(UndertaleWriter writer)
+    {
+        writer.WriteUndertaleString(Filename);
+        writer.WriteUndertaleString(CleanupScript);
+        writer.WriteUndertaleString(InitScript);
+        writer.Write((uint)Kind);
+        writer.WriteUndertaleObject(Functions);
+    }
+
+    /// <inheritdoc />
+    public void Unserialize(UndertaleReader reader)
+    {
+        Filename = reader.ReadUndertaleString();
+        CleanupScript = reader.ReadUndertaleString();
+        InitScript = reader.ReadUndertaleString();
+        Kind = (UndertaleExtensionKind)reader.ReadUInt32();
+        Functions = reader.ReadUndertaleObject<UndertalePointerList<UndertaleExtensionFunction>>();
+    }
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        try
         {
-            return Name.Content + " (" + GetType().Name + ")";
+            return Filename.Content + " (" + GetType().Name + ")";
         }
-
-        public void Serialize(UndertaleWriter writer)
+        catch
         {
-            writer.WriteUndertaleString(FolderName);
-            writer.WriteUndertaleString(Name);
-            writer.WriteUndertaleString(ClassName);
-            writer.WriteUndertaleObject(Files);
+            return "(Unknown extension file)";
         }
+    }
+}
 
-        public void Unserialize(UndertaleReader reader)
-        {
-            FolderName = reader.ReadUndertaleString();
-            Name = reader.ReadUndertaleString();
-            ClassName = reader.ReadUndertaleString();
-            Files = reader.ReadUndertaleObject<UndertalePointerList<UndertaleExtensionFile>>();
-        }
+/// <summary>
+/// An extension entry in a GameMaker data file.
+/// </summary>
+[PropertyChanged.AddINotifyPropertyChangedInterface]
+public class UndertaleExtension : UndertaleNamedResource
+{
+    /// <summary>
+    /// In which folder the extension is located. TODO: needs more GM8 research.
+    /// </summary>
+    /// <remarks>This is a remnant from the legacy GameMaker7-8.1 extension editor (aka ExtMaker). <br/>
+    /// The runner reads this name, but ignores it. This probably shouldn't be changed anyway.</remarks>
+    public UndertaleString FolderName { get; set; }
+
+    /// <summary>
+    /// The name of the extension.
+    /// </summary>
+    public UndertaleString Name { get; set; }
+    public UndertaleString ClassName { get; set; }
+
+    public UndertalePointerList<UndertaleExtensionFile> Files { get; set; } = new UndertalePointerList<UndertaleExtensionFile>();
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return Name.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc />
+    public void Serialize(UndertaleWriter writer)
+    {
+        writer.WriteUndertaleString(FolderName);
+        writer.WriteUndertaleString(Name);
+        writer.WriteUndertaleString(ClassName);
+        writer.WriteUndertaleObject(Files);
+    }
+
+    /// <inheritdoc />
+    public void Unserialize(UndertaleReader reader)
+    {
+        FolderName = reader.ReadUndertaleString();
+        Name = reader.ReadUndertaleString();
+        ClassName = reader.ReadUndertaleString();
+        Files = reader.ReadUndertaleObject<UndertalePointerList<UndertaleExtensionFile>>();
     }
 }

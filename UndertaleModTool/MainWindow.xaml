@@ -234,7 +234,7 @@
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Header="Backgrounds &amp; Tile sets" ItemsSource="{Binding Backgrounds, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Backgrounds, Converter={StaticResource VisibleIfNotNull}}">
+                        <TreeViewItem Name="BackgroundsItemsList" Header="Backgrounds &amp; Tile sets" ItemsSource="{Binding Backgrounds, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Backgrounds, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleBackground}">
                                     <TextBlock Text="{Binding Name.Content}" />
@@ -471,7 +471,7 @@
                         </Button>
                     </StackPanel>
                 </Grid>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="2">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="1">
                     <ContentControl Margin="10" Content="{Binding Selected, Mode=OneWay}" Name="DataEditor">
                         <ContentControl.Resources>
                             <DataTemplate DataType="{x:Type local:DescriptionView}">

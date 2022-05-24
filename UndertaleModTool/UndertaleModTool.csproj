@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net5.0-windows</TargetFramework>
+        <TargetFramework>net6.0-windows</TargetFramework>
         <RollForward>LatestMajor</RollForward>
         <OutputType>WinExe</OutputType>
         <PublishUrl>publish\</PublishUrl>
@@ -4003,10 +4003,6 @@
         <None Update="DemoScripts\TextInputTestWPF.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </None>
-        <None Update="DemoScripts\TestAUMIConnection.csx">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="TechnicalScripts\ToggleAlignment.csx">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

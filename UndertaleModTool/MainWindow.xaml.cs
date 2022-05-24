@@ -27,6 +27,7 @@ using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
+using UndertaleModLib.Util;
 using UndertaleModTool.Windows;
 using System.IO.Pipes;
 using Ookii.Dialogs.Wpf;
@@ -94,7 +95,7 @@ namespace UndertaleModTool
             else if (obj is UndertaleNamedResource namedRes)
             {
                 string content = namedRes.Name?.Content;
-                
+
                 string header = obj switch
                 {
                     UndertaleAudioGroup => "Audio Group",
@@ -302,7 +303,13 @@ namespace UndertaleModTool
 
         // Version info
         public static string Edition = "";
+
+        // On debug, build with git versions. Otherwise, use the provided release version.
+#if DEBUG
+        public static string Version = GitVersion.GetGitVersion();
+#else
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? "-" + Edition : "");
+#endif
 
         public MainWindow()
         {
@@ -314,7 +321,7 @@ namespace UndertaleModTool
             SelectionHistory.Clear();
             ClosedTabsHistory.Clear();
 
-            TitleMain = "UndertaleModTool by krzys_h v" + Version;
+            TitleMain = "UndertaleModTool by krzys_h v:" + Version;
 
             CanSave = false;
             CanSafelySave = false;
@@ -476,7 +483,7 @@ namespace UndertaleModTool
                 }
                 else if (args[2] == "launch")
                 {
-                    string gameExeName = Data?.GeneralInfo?.Filename?.Content;
+                    string gameExeName = Data?.GeneralInfo?.FileName?.Content;
                     if (gameExeName == null || FilePath == null)
                     {
                         ScriptError("Null game executable name or location");
@@ -593,6 +600,10 @@ namespace UndertaleModTool
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Data)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilePath)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGMS2)));
+
+            BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible
+                                          ? "Tile sets"
+                                          : "Backgrounds & Tile sets";
 
             CurrentTab = null;
             Tabs.Clear();
@@ -908,7 +919,7 @@ namespace UndertaleModTool
                         }
                         if (data.GeneralInfo != null)
                         {
-                            if (!data.GeneralInfo.DisableDebugger)
+                            if (!data.GeneralInfo.IsDebuggerDisabled)
                             {
                                 MessageBox.Show("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
                             }
@@ -931,6 +942,10 @@ namespace UndertaleModTool
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilePath)));
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGMS2)));
 
+                        BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible
+                                                      ? "Tile sets"
+                                                      : "Backgrounds & Tile sets";
+
                         #pragma warning disable CA1416
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
@@ -940,7 +955,6 @@ namespace UndertaleModTool
                         OpenInTab(Highlighted);
                         SelectionHistory.Clear();
                         ClosedTabsHistory.Clear();
-
                     }
                     else
                     {
@@ -978,7 +992,7 @@ namespace UndertaleModTool
                 CloseChildFiles();
 
             DebugDataDialog.DebugDataMode debugMode = DebugDataDialog.DebugDataMode.NoDebug;
-            if (!suppressDebug && Data.GeneralInfo != null && !Data.GeneralInfo.DisableDebugger)
+            if (!suppressDebug && Data.GeneralInfo != null && !Data.GeneralInfo.IsDebuggerDisabled)
                 MessageBox.Show("You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
             Task t = Task.Run(async () =>
             {
@@ -1453,7 +1467,7 @@ namespace UndertaleModTool
                     "General info" => new GeneralInfoEditor(Data?.GeneralInfo, Data?.Options, Data?.Language),
                     "Global init" => new GlobalInitEditor(Data?.GlobalInitScripts),
                     "Game End scripts" => new GameEndEditor(Data?.GameEndScripts),
-                    "Variables" => (object)Data.FORM.Chunks["VARI"],
+                    "Variables" => Data.FORM.Chunks["VARI"],
                     _ => new DescriptionView(item, "Expand the list on the left to edit items"),
                 };
             }
@@ -1538,7 +1552,7 @@ namespace UndertaleModTool
             e.Handled = true;
         }
 
-        private static T VisualUpwardSearch<T>(DependencyObject element) where T : class
+        public static T VisualUpwardSearch<T>(DependencyObject element) where T : class
         {
             T container = element as T;
             while (container == null && element != null)
@@ -1548,8 +1562,7 @@ namespace UndertaleModTool
             }
             return container;
         }
-
-        private static T GetNearestParent<T>(DependencyObject item) where T : class
+        public static T GetNearestParent<T>(DependencyObject item) where T : class
         {
             DependencyObject parent = VisualTreeHelper.GetParent(item);
             while (parent is not T)
@@ -1559,7 +1572,6 @@ namespace UndertaleModTool
 
             return parent as T;
         }
-
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
             if (depObj != null)
@@ -1579,7 +1591,6 @@ namespace UndertaleModTool
                 }
             }
         }
-
         public static childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
         {
             foreach (childItem child in FindVisualChildren<childItem>(obj))
@@ -1750,7 +1761,7 @@ namespace UndertaleModTool
             if (Highlighted is UndertaleObject obj)
                 DeleteItem(obj);
         }
-        
+
         private void MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
             object source = null;
@@ -2530,12 +2541,19 @@ namespace UndertaleModTool
         }
         public async void UpdateApp(SettingsWindow window)
         {
+            //TODO: rewrite this slightly + comment this out so this is clearer on what this does.
+
             window.UpdateButtonEnabled = false;
 
             httpClient = new();
             httpClient.DefaultRequestHeaders.Accept.Clear();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
-            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("UndertaleModTool", Version));
+
+            // remove the invalid characters (everything within square brackets) from the version string.
+            // Probably needs to be expanded later, these are just the ones I know of.
+            Regex invalidChars = new Regex(@"[  ()]");
+            string version = invalidChars.Replace(Version, "");
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("UndertaleModTool", version));
 
             double bytesToMB = 1024 * 1024;
 
@@ -2558,13 +2576,13 @@ namespace UndertaleModTool
                 return;
             }
 
-            bool isNonSingleFile = File.Exists(Path.Combine(ExePath, "UndertaleModTool.dll"));
+            bool isSingleFile = !File.Exists(Path.Combine(ExePath, "UndertaleModTool.dll"));
             string assemblyLocation = AppDomain.CurrentDomain.GetAssemblies()
                                       .First(x => x.GetName().Name.StartsWith("System.Collections")).Location; // any of currently used assemblies
-            bool isSelfContained = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
+            bool isBundled = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
 
             string baseUrl = "https://api.github.com/repos/krzys-h/UndertaleModTool/actions/";
-            string detectedActionName = $"Build tool{(isSelfContained ? " NET Bundled" : "")}{(isNonSingleFile ? " non-single file" : "")}";
+            string detectedActionName = $"Publish GUI{(!Environment.Is64BitOperatingSystem ? " 32Bit" : "")}";
 
             // Fetch the latest workflow run
             var result = await HttpGetAsync(baseUrl + "runs?branch=master&status=success&per_page=20");
@@ -2629,17 +2647,21 @@ namespace UndertaleModTool
             }
 
             JObject artifact = null;
-            for (int index = 0; index < artifactList.Count; index++) {
+            for (int index = 0; index < artifactList.Count; index++)
+            {
                 var currentArtifact = (JObject) artifactList[index];
                 string artifactName = (string)currentArtifact["name"];
 
                 if (Environment.Is64BitOperatingSystem)
                 {
-                    if (artifactName.Contains("x64"))
+                    if (artifactName.Contains($"isBundled-{isBundled.ToString().ToLower()}-isSingleFile-{isSingleFile.ToString().ToLower()}"))
                         artifact = currentArtifact;
                 }
-                else if (artifactName.Contains("x86"))
-                    artifact = currentArtifact;
+                else
+                {
+                    if (artifactName.Contains($"isSingleFile-{isSingleFile.ToString().ToLower()}"))
+                        artifact = currentArtifact;
+                }
             }
             if (artifact is null)
             {
@@ -2813,15 +2835,15 @@ result in loss of work.");
             string oldFilePath = FilePath;
             bool oldDisableDebuggerState = true;
             int oldSteamValue = 0;
-            oldDisableDebuggerState = Data.GeneralInfo.DisableDebugger;
+            oldDisableDebuggerState = Data.GeneralInfo.IsDebuggerDisabled;
             oldSteamValue = Data.GeneralInfo.SteamAppID;
             Data.GeneralInfo.SteamAppID = 0;
-            Data.GeneralInfo.DisableDebugger = true;
+            Data.GeneralInfo.IsDebuggerDisabled = true;
             string TempFilesFolder = (oldFilePath != null ? Path.Combine(Path.GetDirectoryName(oldFilePath), "MyMod.temp") : "");
             await SaveFile(TempFilesFolder, false);
             Data.GeneralInfo.SteamAppID = oldSteamValue;
             FilePath = oldFilePath;
-            Data.GeneralInfo.DisableDebugger = oldDisableDebuggerState;
+            Data.GeneralInfo.IsDebuggerDisabled = oldDisableDebuggerState;
             if (TempFilesFolder == null)
             {
                 ShowWarning("Temp folder is null.");
@@ -2829,7 +2851,7 @@ result in loss of work.");
             }
             else if (saveOk)
             {
-                string gameExeName = Data?.GeneralInfo?.Filename?.Content;
+                string gameExeName = Data?.GeneralInfo?.FileName?.Content;
                 if (gameExeName == null || FilePath == null)
                 {
                     ScriptError("Null game executable name or location");
@@ -2866,15 +2888,15 @@ result in loss of work.");
                 return;
 
             bool saveOk = true;
-            if (!Data.GeneralInfo.DisableDebugger)
+            if (!Data.GeneralInfo.IsDebuggerDisabled)
             {
                 if (ShowQuestion("The game has the debugger enabled. Would you like to disable it so the game will run?") == MessageBoxResult.Yes)
                 {
-                    Data.GeneralInfo.DisableDebugger = true;
+                    Data.GeneralInfo.IsDebuggerDisabled = true;
                     if (!await DoSaveDialog())
                     {
                         ShowError("You must save your changes to run.");
-                        Data.GeneralInfo.DisableDebugger = false;
+                        Data.GeneralInfo.IsDebuggerDisabled = false;
                         return;
                     }
                 }
@@ -2886,7 +2908,7 @@ result in loss of work.");
             }
             else
             {
-                Data.GeneralInfo.DisableDebugger = true;
+                Data.GeneralInfo.IsDebuggerDisabled = true;
                 if (ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
                     saveOk = await DoSaveDialog();
             }
@@ -2910,8 +2932,8 @@ result in loss of work.");
             if (Data == null)
                 return;
 
-            bool origDbg = Data.GeneralInfo.DisableDebugger;
-            Data.GeneralInfo.DisableDebugger = false;
+            bool origDbg = Data.GeneralInfo.IsDebuggerDisabled;
+            Data.GeneralInfo.IsDebuggerDisabled = false;
 
             bool saveOk = await DoSaveDialog(true);
             if (FilePath == null)
@@ -2956,7 +2978,7 @@ result in loss of work.");
                 Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
                 Process.Start(runtime.DebuggerPath, "-d=\"" + Path.ChangeExtension(FilePath, ".yydebug") + "\" -t=\"127.0.0.1\" -tp=" + Data.GeneralInfo.DebuggerPort + " -p=\"" + tempProject + "\"");
             }
-            Data.GeneralInfo.DisableDebugger = origDbg;
+            Data.GeneralInfo.IsDebuggerDisabled = origDbg;
         }
 
         private void Command_Settings(object sender, ExecutedRoutedEventArgs e)
@@ -3249,7 +3271,7 @@ result in loss of work.");
                         Tabs[i].TabIndex = i;
 
                     // if closing the currently open tab
-                    if (currIndex == tabIndex)                            
+                    if (currIndex == tabIndex)
                     {
                         // and if that tab is not the last
                         if (Tabs.Count > 1 && tabIndex < Tabs.Count - 1)
@@ -3557,6 +3579,11 @@ result in loss of work.");
     {
         public string Heading { get; private set; }
         public string Description { get; private set; }
+
+        // Used only by the "TabTitleConverter" to prevent the following WPF binding warning:
+        // "Name property not found on object of type DescriptionView".
+        // (within "TabControl.ItemTemplate")
+        public UndertaleString Name { get; } = new();
 
         public DescriptionView(string heading, string description)
         {

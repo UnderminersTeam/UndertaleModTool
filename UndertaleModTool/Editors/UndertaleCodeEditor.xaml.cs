@@ -39,10 +39,10 @@ using static UndertaleModTool.MainWindow.CodeEditorMode;
 
 namespace UndertaleModTool
 {
-    [SupportedOSPlatform("windows7.0")]
     /// <summary>
     /// Logika interakcji dla klasy UndertaleCodeEditor.xaml
     /// </summary>
+    [SupportedOSPlatform("windows7.0")]
     public partial class UndertaleCodeEditor : DataUserControl
     {
         private static MainWindow mainWindow = Application.Current.MainWindow as MainWindow;

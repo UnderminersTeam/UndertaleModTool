@@ -1,0 +1,46 @@
+name: Publish GUI
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  publish_gui:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        configuration: [Debug]
+        bundled: [true, false]
+        singlefile: [true, false]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: |
+        dotnet build UndertaleModTool --no-restore
+        dotnet build UndertaleModToolUpdater --no-restore
+    - name: Publish ${{ matrix.os }} GUI
+      run: |
+        dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r win-x64 --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.singlefile }} --output ${{ matrix.os }}
+        dotnet publish UndertaleModToolUpdater -c ${{ matrix.configuration }} -r win-x64 --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output ${{ matrix.os }}/Updater
+    - name: Copy external files
+      run: |
+        cp ./README.md ./${{ matrix.os }}
+        cp ./SCRIPTS.md ./${{ matrix.os }}
+        cp ./LICENSE.txt ./${{ matrix.os }}
+    - name: Upload ${{ matrix.os }} GUI
+      uses: actions/upload-artifact@v2
+      with:
+        name: GUI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
+        path: ${{ matrix.os }}
