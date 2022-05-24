@@ -9,6 +9,7 @@ using UndertaleModLib.Scripting;
 using System.Security.Cryptography;
 using UndertaleModLib.Models;
 using UndertaleModLib.Decompiler;
+using System.Threading.Tasks;
 
 namespace UndertaleModTool
 {
@@ -204,21 +205,24 @@ namespace UndertaleModTool
                 MessageBox.Show("SaveTempToMainProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
-        public void UpdateProfile(UndertaleData data, string filename)
+        public async Task UpdateProfile(UndertaleData data, string filename)
         {
             FileMessageEvent?.Invoke("Calculating MD5 hash...");
 
             try
             {
-                using (var md5Instance = MD5.Create())
+                await Task.Run(() =>
                 {
-                    using (var stream = File.OpenRead(filename))
+                    using (var md5Instance = MD5.Create())
                     {
-                        MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
-                        MD5PreviouslyLoaded = MD5CurrentlyLoaded;
-                        ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                        using (var stream = File.OpenRead(filename))
+                        {
+                            MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                            MD5PreviouslyLoaded = MD5CurrentlyLoaded;
+                            ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                        }
                     }
-                }
+                });
 
                 string profDir = Path.Combine(ProfilesFolder, ProfileHash);
                 string profDirTemp = Path.Combine(profDir, "Temp");
@@ -306,7 +310,7 @@ an issue on GitHub.");
                 MessageBox.Show("UpdateProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
             }
         }
-        public void ProfileSaveEvent(UndertaleData data, string filename)
+        public async Task ProfileSaveEvent(UndertaleData data, string filename)
         {
             FileMessageEvent?.Invoke("Calculating MD5 hash...");
 
@@ -314,17 +318,21 @@ an issue on GitHub.");
             {
                 string deleteIfModeActive = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                 bool copyProfile = false;
-                using (var md5Instance = MD5.Create())
+                await Task.Run(() =>
                 {
-                    using (var stream = File.OpenRead(filename))
+                    using (var md5Instance = MD5.Create())
                     {
-                        MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
-                        if (BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant() != BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant())
+                        using (var stream = File.OpenRead(filename))
                         {
-                            copyProfile = true;
+                            MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                            if (BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant() != BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant())
+                            {
+                                copyProfile = true;
+                            }
                         }
                     }
-                }
+                });
+
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Main"));
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Temp"));
                 if (!SettingsWindow.ProfileModeEnabled || data.GMS2_3 || data.IsYYC())

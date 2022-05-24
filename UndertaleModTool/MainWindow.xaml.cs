@@ -924,7 +924,7 @@ namespace UndertaleModTool
                         {
                             CanSave = true;
                             CanSafelySave = true;
-                            UpdateProfile(data, filename);
+                            await UpdateProfile(data, filename);
                             if (data != null)
                             {
                                 data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
@@ -1141,7 +1141,7 @@ namespace UndertaleModTool
                         await SaveGMLCache(filename, true, dialog, isDifferentPath);
 
                         // Also make the changes to the profile system.
-                        ProfileSaveEvent(Data, filename);
+                        await ProfileSaveEvent(Data, filename);
                         SaveTempToMainProfile();
                     }
                     else
@@ -2927,7 +2927,7 @@ result in loss of work.");
                 }
                 else
                 {
-                    ShowError("Use the \"Run game using debugger\" option to run this game.");
+                    ShowError("Use the \"Run game using debugger\" option to run this game.", false);
                     return;
                 }
             }
