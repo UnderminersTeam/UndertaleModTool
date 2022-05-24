@@ -135,12 +135,12 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         }
 
         /// <summary>
-        /// A texture width.
+        /// The width of the texture.
         /// </summary>
         public int Width => _width;
 
         /// <summary>
-        /// A texture height.
+        /// The height of the texture.
         /// </summary>
         public int Height => _height;
 
@@ -174,9 +174,9 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         }
 
         /// <summary>
-        /// Initializes a <see cref="sharedStream"/> with a specified initial size.
+        /// Initializes <see cref="sharedStream"/> with a specified initial size.
         /// </summary>
-        /// <param name="size">Initial size of the stream in bytes</param>
+        /// <param name="size">Initial size of <see cref="sharedStream"/> in bytes</param>
         public static void InitSharedStream(int size) => sharedStream = new(size);
 
         /// <inheritdoc />
@@ -234,7 +234,8 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                     if (sharedStream.Length != 0)
                         sharedStream.Seek(0, SeekOrigin.Begin);
                     BZip2.Decompress(reader.Stream, sharedStream, false);
-                    using Bitmap bmp = QoiConverter.GetImageFromSpan(sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position]);
+                    ReadOnlySpan<byte> decompressed = sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position];
+                    using Bitmap bmp = QoiConverter.GetImageFromSpan(decompressed);
                     _width = bmp.Width;
                     _height = bmp.Height;
                     sharedStream.Seek(0, SeekOrigin.Begin);
