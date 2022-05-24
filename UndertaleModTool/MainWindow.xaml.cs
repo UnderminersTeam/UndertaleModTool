@@ -2927,7 +2927,7 @@ result in loss of work.");
                 }
                 else
                 {
-                    ShowError("Use the \"Run game using debugger\" option to run this game.", false);
+                    ShowError("Use the \"Run game using debugger\" option to run this game.");
                     return;
                 }
             }
