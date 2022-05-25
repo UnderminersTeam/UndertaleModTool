@@ -1080,6 +1080,7 @@
                         <Setter Property="RenderOptions.BitmapScalingMode" Value="NearestNeighbor"/>
                         <Setter Property="UIElement.SnapsToDevicePixels" Value="True"/>
                     </Style>
+
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer}">
                         <ItemsControl ItemsSource="{Binding ., Mode=OneWay, Converter={StaticResource LayerItemsSourceConverter}}">
                             <ItemsControl.ItemsPanel>
@@ -1107,6 +1108,7 @@
                             </ItemsControl.Style>
                         </ItemsControl>
                     </DataTemplate>
+
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Background}">
                         <Rectangle Width="{Binding BackgroundDefinition.Texture.SourceWidth, Mode=OneWay}" Height="{Binding BackgroundDefinition.Texture.SourceHeight, Mode=OneWay}"
                                    MouseDown="Rectangle_MouseDown"
