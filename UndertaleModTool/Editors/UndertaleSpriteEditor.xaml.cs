@@ -212,8 +212,8 @@ namespace UndertaleModTool
         }
         private void Remove_Click_Override(object sender, RoutedEventArgs e)
         {
-            if (DataContext is UndertaleSprite spr && (sender as FrameworkElement).DataContext is UndertaleSprite.TextureEntry entry)
-                spr.Textures.Remove(entry);
+            if (DataContext is UndertaleSprite sprite && (sender as FrameworkElement).DataContext is UndertaleSprite.TextureEntry entry)
+                sprite.Textures.Remove(entry);
         }
     }
 }
