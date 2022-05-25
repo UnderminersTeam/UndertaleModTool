@@ -12,8 +12,11 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <TextBox Grid.Column="0" IsReadOnly="True" Cursor="Arrow" ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!" AllowDrop="True" PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" Text="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-        <Button Grid.Column="1" Click="Details_Click">
+        <TextBox Grid.Column="0" Name="ObjectText" IsReadOnly="True" Cursor="Arrow" AllowDrop="True"
+                 ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!"
+                 PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick"
+                 Text="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+        <Button Grid.Column="1" Name="DetailsButton" Click="Details_Click">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="Content" Value=" ... " />
@@ -36,7 +39,7 @@
                 </Style>
             </Button.Style>
         </Button>
-        <Button Grid.Column="2" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
+        <Button Grid.Column="2" Name="RemoveButton" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>

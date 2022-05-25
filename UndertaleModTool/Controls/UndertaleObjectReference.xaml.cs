@@ -91,6 +91,15 @@ namespace UndertaleModTool
             InitializeComponent();
         }
 
+        public void ClearRemoveClickHandler()
+        {
+            try
+            {
+                RemoveButton.Click -= Remove_Click;
+            }
+            catch { }
+        }
+
         private void Details_Click(object sender, RoutedEventArgs e)
         {
             if (ObjectReference is null)
