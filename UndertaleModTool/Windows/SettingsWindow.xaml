@@ -9,9 +9,13 @@
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="*" MinWidth="60"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -31,43 +35,63 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="GraphViz path" ToolTip="Required if you want code decompile graphs"/>
-        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GraphVizPath}"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" Margin="3" Text="{Binding GraphVizPath}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="Game Maker: Studio 1.4 path" ToolTip="Required only if you want to use the Studio runner rather than the .exe or run the game under debugger."/>
-        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GameMakerStudioPath}"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Margin="3" Text="{Binding GameMakerStudioPath}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="Game Maker: Studio 2 runtimes path" ToolTip="Required only if you want to run GMS2 games using the Studio runner rather than the .exe"/>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GameMakerStudio2RuntimesPath}"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Margin="3" Text="{Binding GameMakerStudio2RuntimesPath}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="Enable asset order swapping" ToolTip="Toggles dragging &amp; dropping assets in the asset tabs to different positions in the list. Disabled by default."/>
         <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding AssetOrderSwappingEnabled}"/>
+        <TextBlock Grid.Row="3" Grid.Column="2" Margin="3" Text="Warn about saving before closing" ToolTip="Warn about saving before closing. Enabled by default."/>
+        <CheckBox Grid.Row="3" Grid.Column="3" Margin="3" Content="" IsChecked="{Binding WarnOnClose}"/>
+        
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="Automatically associate .win files" ToolTip="Automatic file association. Enabled by default."/>
+        <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding AutomaticFileAssociation}"/>
+        <TextBlock Grid.Row="4" Grid.Column="2" Margin="3" Text="Warn about temp running" ToolTip="Warn about temp running. Enabled by default."/>
+        <CheckBox Grid.Row="4" Grid.Column="3" Margin="3" Content="" IsChecked="{Binding TempRunMessageShow}"/>
+        
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="Warn about GMS 2.3" ToolTip="Warn about GMS 2.3. Enabled by default."/>
+        <CheckBox Grid.Row="5" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding Warn_About_GMS23}"/>
+        <TextBlock Grid.Row="5" Grid.Column="2" Margin="3" Text="Use decompiled code cache (experimental)" ToolTip="Used by some scripts (e.g. &quot;Search.csx&quot;) for acceleration. Disabled by default."/>
+        <CheckBox Grid.Row="5" Grid.Column="3" Margin="3" Content="" IsChecked="{Binding UseGMLCache}"/>
+        
+        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="Global grid width" ToolTip="This option globally overrides the automatic assignment of a room's grid width based on the most used tile's width in that room."/>
+        <Grid Margin="3" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <CheckBox Grid.Column="0" Name="gridWidthCheckbox" Content="" IsChecked="{Binding GridWidthEnabled}"/>
+            <TextBox Grid.Column="1" IsEnabled="{Binding ElementName=gridWidthCheckbox, Path=IsChecked}" Text="{Binding GlobalGridWidth}"/>
+        </Grid>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="Warn about saving before closing" ToolTip="Warn about saving before closing. Enabled by default."/>
-        <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding WarnOnClose}"/>
-        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="Automatically associate .win files" ToolTip="Automatic file association. Enabled by default."/>
-        <CheckBox Grid.Row="5" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding AutomaticFileAssociation}"/>
-        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="Warn about temp running" ToolTip="Warn about temp running. Enabled by default."/>
-        <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding TempRunMessageShow}"/>
-        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" Text="Warn about GMS 2.3" ToolTip="Warn about GMS 2.3. Enabled by default."/>
-        <CheckBox Grid.Row="7" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding Warn_About_GMS23}"/>
-        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Text="Use decompiled code cache (experimental)" ToolTip="Used by some scripts (e.g. &quot;Search.csx&quot;) for acceleration. Disabled by default."/>
-        <CheckBox Grid.Row="8" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding UseGMLCache}"/>
+        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" Text="Global grid height" ToolTip="This option globally overrides the automatic assignment of a room's grid height based on the most used tile's height in that room."/>
+        <Grid Margin="3" Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <CheckBox Grid.Column="0" Name="gridHeightCheckbox" Content="" IsChecked="{Binding GridHeightEnabled}"/>
+            <TextBox Grid.Column="1" IsEnabled="{Binding ElementName=gridHeightCheckbox, Path=IsChecked}" Text="{Binding GlobalGridHeight}"/>
+        </Grid>
 
-        <Separator Grid.Row="9" Grid.ColumnSpan="2" Margin="10"/>
+        <Separator Grid.Row="11" Grid.ColumnSpan="4" Margin="10"/>
 
-        <TextBlock Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" TextWrapping="Wrap" Foreground="Red" FontWeight="Bold" Text="Warning: the following options are currently experimental, as the profile system is a work in progress. Usage of the system is at your own risk, and though it is relatively stable, it may not be compatible in the future."/>
+        <TextBlock Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" TextWrapping="Wrap" Foreground="Red" FontWeight="Bold" Text="Warning: the following options are currently experimental, as the profile system is a work in progress. Usage of the system is at your own risk, and though it is relatively stable, it may not be compatible in the future."/>
 
-        <TextBlock Grid.Row="11" Grid.Column="0" Margin="3" Text="Enable profile mode" ToolTip="Toggles the 'decompile once and compile many' profile mode. Enabled by default. May need to be disabled for certain operations."/>
-        <CheckBox Grid.Row="11" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding ProfileModeEnabled}"/>
+        <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" Text="Enable profile mode" ToolTip="Toggles the 'decompile once and compile many' profile mode. Enabled by default. May need to be disabled for certain operations."/>
+        <CheckBox Grid.Row="13" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding ProfileModeEnabled}"/>
+        <TextBlock Grid.Row="13" Grid.Column="2" Margin="3" Text="Profile mode message shown" ToolTip="On first load, this will show you the profile mode loaded message. If this somehow breaks, you can manually toggle it here."/>
+        <CheckBox Grid.Row="13" Grid.Column="3" Margin="3" Content="" IsChecked="{Binding ProfileMessageShown}"/>
 
-        <TextBlock Grid.Row="12" Grid.Column="0" Margin="3" Text="Profile mode message shown" ToolTip="On first load, this will show you the profile mode loaded message. If this somehow breaks, you can manually toggle it here."/>
-        <CheckBox Grid.Row="12" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding ProfileMessageShown}"/>
+        <TextBlock Grid.Row="15" Grid.Column="0" Margin="3" Text="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
+        <CheckBox Grid.Row="15" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding DeleteOldProfileOnSave}"/>
 
-        <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" Text="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
-        <CheckBox Grid.Row="13" Grid.Column="1" Margin="3" Content="" IsChecked="{Binding DeleteOldProfileOnSave}"/>
-
-        <Separator Grid.Row="14" Grid.ColumnSpan="2" Margin="10"/>
-        <Button Grid.Row="15" Grid.Column="0" Margin="5" Click="AppDataButton_Click">Open application data folder</Button>
-        <Button Grid.Row="15" Grid.Column="1" Margin="5" Click="UpdateAppButton_Click" Name="UpdateAppButton" HorizontalAlignment="Right" Width="223">Update app to latest commit</Button>
+        <Separator Grid.Row="16" Grid.ColumnSpan="4" Margin="10"/>
+        <Button Grid.Row="17" Grid.Column="0" Grid.ColumnSpan="1" Margin="5" Click="AppDataButton_Click">Open application data folder</Button>
+        <Button Grid.Row="17" Grid.Column="2" Grid.ColumnSpan="2" Margin="5" Click="UpdateAppButton_Click" Name="UpdateAppButton" HorizontalAlignment="Right" Width="223">Update app to latest commit</Button>
     </Grid>
 </Window>

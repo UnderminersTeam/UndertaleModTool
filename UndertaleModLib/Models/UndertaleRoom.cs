@@ -129,7 +129,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
     /// <summary>
     /// The thickness of the room grid in pixels.
     /// </summary>
-    public double GridThicknessPx { get; set; } = 1d;
+    public double GridThicknessPx { get; set; } = 0.5d;
     private UndertalePointerList<Layer> _layers = new();
 
     /// <summary>
@@ -352,7 +352,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
         }
     }
 
-    public void SetupRoom(bool calculateGrid = true)
+    public void SetupRoom(bool calculateGridWidth = true, bool calculateGridHeight = true)
     {
         foreach (Layer layer in Layers)
         {
@@ -362,7 +362,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
         foreach (UndertaleRoom.Background bgnd in Backgrounds)
             bgnd.ParentRoom = this;
 
-        if (calculateGrid)
+        if (calculateGridWidth || calculateGridHeight)
         {
             // Automagically set the grid size to whatever most tiles are sized
 
@@ -403,11 +403,18 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
             }
 
             // If tiles exist at all, grab the most used tile size and use that as our grid size
+            // If a default starting grid is set in the settings, use that instead
             if (tileSizes.Count > 0)
             {
                 var largestKey = tileSizes.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
-                GridWidth = largestKey.X;
-                GridHeight = largestKey.Y;
+                if (calculateGridWidth)
+                {
+                    GridWidth = largestKey.X;
+                }
+                if (calculateGridHeight)
+                {
+                    GridHeight = largestKey.Y;
+                }
             }
         }
     }

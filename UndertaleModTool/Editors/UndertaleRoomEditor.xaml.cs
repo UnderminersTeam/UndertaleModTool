@@ -160,7 +160,7 @@ namespace UndertaleModTool
                 GameObjItems.Header = room.Flags.HasFlag(RoomEntryFlags.IsGMS2)
                                       ? "Game objects (from all layers)"
                                       : "Game objects";
-                room.SetupRoom();
+                this.SetupRoomWithGrids(room);
                 GenerateSpriteCache(DataContext as UndertaleRoom);
 
                 if (room.Layers.Count > 0) // if GMS 2+
@@ -462,7 +462,7 @@ namespace UndertaleModTool
                 }
 
                 // recalculates room grid size
-                room.SetupRoom();
+                this.SetupRoomWithGrids(room);
             }
             else if (obj is GameObject gameObj)
             {
@@ -1317,7 +1317,7 @@ namespace UndertaleModTool
             }
 
             SelectObject(layer);
-            room.SetupRoom(false);
+            room.SetupRoom(false, false);
         }
 
         private void AddObjectInstance(UndertaleRoom room)
@@ -1671,6 +1671,26 @@ namespace UndertaleModTool
             if (canvas.CurrentLayer is not null)
                 ObjElemDict.Remove(canvas.CurrentLayer);
         }
+        private void SetupRoomWithGrids(UndertaleRoom room)
+        {
+            if (Settings.Instance.GridWidthEnabled)
+            {
+                room.GridWidth = Settings.Instance.GlobalGridWidth;
+                if (Settings.Instance.GridHeightEnabled)
+                {
+                    room.GridHeight = Settings.Instance.GlobalGridHeight;
+                    room.SetupRoom(false, false);
+                }
+                else
+                {
+                    room.SetupRoom(false);
+                }
+            }
+            else
+            {
+                room.SetupRoom();
+            }
+        }
     }
 
     public partial class RoomCanvas : Canvas
@@ -1737,6 +1757,33 @@ namespace UndertaleModTool
     }
 
     public class BGColorConverter : IMultiValueConverter
+    {
+        private static readonly ColorConverter colorConv = new();
+
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Any(x => x is null || x == DependencyProperty.UnsetValue))
+                return null;
+
+            bool isGMS2 = ((RoomEntryFlags)values[1]).HasFlag(RoomEntryFlags.IsGMS2);
+
+            (values[0] as GeometryDrawing).Brush = new SolidColorBrush(Colors.Black);
+            BindingOperations.SetBinding((values[0] as GeometryDrawing).Brush, SolidColorBrush.ColorProperty, new Binding(isGMS2 ? "BGColorLayer.BackgroundData.Color" : "BackgroundColor")
+            {
+                Converter = colorConv,
+                Mode = BindingMode.OneWay
+            });
+
+            return null;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+    public class ForegroundConverter : IMultiValueConverter
     {
         private static readonly ColorConverter colorConv = new();
 
