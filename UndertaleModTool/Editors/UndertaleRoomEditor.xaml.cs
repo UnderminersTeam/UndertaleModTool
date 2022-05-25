@@ -1783,33 +1783,6 @@ namespace UndertaleModTool
         }
     }
 
-    public class ForegroundConverter : IMultiValueConverter
-    {
-        private static readonly ColorConverter colorConv = new();
-
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (values.Any(x => x is null || x == DependencyProperty.UnsetValue))
-                return null;
-
-            bool isGMS2 = ((RoomEntryFlags)values[1]).HasFlag(RoomEntryFlags.IsGMS2);
-
-            (values[0] as GeometryDrawing).Brush = new SolidColorBrush(Colors.Black);
-            BindingOperations.SetBinding((values[0] as GeometryDrawing).Brush, SolidColorBrush.ColorProperty, new Binding(isGMS2 ? "BGColorLayer.BackgroundData.Color" : "BackgroundColor")
-            {
-                Converter = colorConv,
-                Mode = BindingMode.OneWay
-            });
-
-            return null;
-        }
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
-        }
-    }
-
     public class MultiCollectionBinding : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
