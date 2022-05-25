@@ -187,7 +187,6 @@
                         <ContextMenu x:Key="UndertaleResourceMenu">
                             <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
                             <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
-                            <MenuItem Header="Duplicate" Click="MenuItem_Duplicate_Click"/>
                             <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
                         </ContextMenu>
 

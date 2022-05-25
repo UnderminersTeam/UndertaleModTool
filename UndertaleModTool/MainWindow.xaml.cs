@@ -47,7 +47,6 @@ using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Globalization;
 using System.Windows.Controls.Primitives;
-using UndertaleModLib.Util;
 
 namespace UndertaleModTool
 {
@@ -1611,19 +1610,7 @@ namespace UndertaleModTool
             }
             return null;
         }
-        private void DuplicateItem(UndertaleObject obj)
-        {
-            TreeViewItem container = GetNearestParent<TreeViewItem>(GetTreeViewItemFor(obj));
-            object source = container.ItemsSource;
-            IList list = ((source as ICollectionView)?.SourceCollection as IList) ?? (source as IList);
-            bool isLast = list.IndexOf(obj) == list.Count - 1;
-            if (MessageBox.Show("Duplicate " + obj.ToString() + "?", "Confirmation", MessageBoxButton.YesNo, isLast ? MessageBoxImage.Question : MessageBoxImage.Warning) == MessageBoxResult.Yes)
-            {
-                var newObject = obj.DeepCopyByExpressionTree();
-                list.Insert(list.IndexOf(obj) + 1, newObject);
-                UpdateTree();
-            }
-        }
+
         private void DeleteItem(UndertaleObject obj)
         {
             TreeViewItem container = GetNearestParent<TreeViewItem>(GetTreeViewItemFor(obj));
@@ -1750,11 +1737,6 @@ namespace UndertaleModTool
         {
             if (Highlighted is UndertaleNamedResource namedRes)
                 CopyItemName(namedRes);
-        }
-        private void MenuItem_Duplicate_Click(object sender, RoutedEventArgs e)
-        {
-            if (Highlighted is UndertaleObject obj)
-                DuplicateItem(obj);
         }
         private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
         {
