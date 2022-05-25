@@ -5,6 +5,9 @@ using System.Windows;
 using System.IO;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Data;
 
 namespace UndertaleModTool
 {
@@ -33,6 +36,13 @@ namespace UndertaleModTool
                 Bitmap image = TextureWorker.ReadImageFromFile(dlg.FileName);
                 image.SetResolution(96.0F, 96.0F);
                 (this.DataContext as UndertaleTexturePageItem).ReplaceTexture(image);
+
+                // Refresh the image of "ItemDisplay"
+                if (ItemDisplay.FindName("RenderAreaBorder") is not Border border)
+                    return;
+                if (border.Background is not ImageBrush brush)
+                    return;
+                BindingOperations.GetBindingExpression(brush, ImageBrush.ImageSourceProperty).UpdateTarget();
             }
             catch (Exception ex)
             {
