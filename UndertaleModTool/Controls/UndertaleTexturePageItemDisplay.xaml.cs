@@ -20,7 +20,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Logika interakcji dla klasy UndertaleTexturePageItemDisplay.xaml
     /// </summary>
-    public partial class UndertaleTexturePageItemDisplay : DataUserControl
+    public partial class UndertaleTexturePageItemDisplay : UserControl
     {
         public UndertaleTexturePageItemDisplay()
         {
