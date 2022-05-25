@@ -93,11 +93,7 @@ namespace UndertaleModTool
 
         public void ClearRemoveClickHandler()
         {
-            try
-            {
-                RemoveButton.Click -= Remove_Click;
-            }
-            catch { }
+            RemoveButton.Click -= Remove_Click;
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)
