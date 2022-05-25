@@ -129,7 +129,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
     /// <summary>
     /// The thickness of the room grid in pixels.
     /// </summary>
-    public double GridThicknessPx { get; set; } = 0.5d;
+    public double GridThicknessPx { get; set; } = 1d;
     private UndertalePointerList<Layer> _layers = new();
 
     /// <summary>
@@ -393,13 +393,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
             {
                 Point scale = new((int)tile.Width, (int)tile.Height);
                 if (tileSizes.ContainsKey(scale))
-                {
                     tileSizes[scale]++;
-                }
                 else
-                {
                     tileSizes.Add(scale, 1);
-                }
             }
 
             // If tiles exist at all, grab the most used tile size and use that as our grid size
@@ -408,13 +404,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged
             {
                 var largestKey = tileSizes.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
                 if (calculateGridWidth)
-                {
                     GridWidth = largestKey.X;
-                }
+
                 if (calculateGridHeight)
-                {
                     GridHeight = largestKey.Y;
-                }
             }
         }
     }

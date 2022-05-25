@@ -1674,22 +1674,10 @@ namespace UndertaleModTool
         private void SetupRoomWithGrids(UndertaleRoom room)
         {
             if (Settings.Instance.GridWidthEnabled)
-            {
                 room.GridWidth = Settings.Instance.GlobalGridWidth;
-                if (Settings.Instance.GridHeightEnabled)
-                {
-                    room.GridHeight = Settings.Instance.GlobalGridHeight;
-                    room.SetupRoom(false, false);
-                }
-                else
-                {
-                    room.SetupRoom(false);
-                }
-            }
-            else
-            {
-                room.SetupRoom();
-            }
+            if (Settings.Instance.GridHeightEnabled)
+                room.GridHeight = Settings.Instance.GlobalGridHeight;
+            room.SetupRoom(!Settings.Instance.GridWidthEnabled, !Settings.Instance.GridHeightEnabled);
         }
     }
 

@@ -52,7 +52,7 @@
         <Border Background="{x:Static SystemColors.WindowBrush}" Grid.Row="0" Grid.Column="0" Panel.ZIndex="1">
             <TextBlock HorizontalAlignment="Center" Text="{Binding ., Mode=OneTime, Converter={StaticResource RoomCaptionConverter}}" FontSize="14" FontStyle="Italic" Margin="5"/>
         </Border>
-        <ItemsControl Grid.Column="0" Grid.Row="1" Panel.ZIndex="0" Name="RoomGraphics" Background="Black" ClipToBounds="True">
+        <ItemsControl Grid.Column="0" Grid.Row="1" Panel.ZIndex="0" Name="RoomGraphics" Background="Gray" ClipToBounds="True">
             <ItemsControl.Style>
                 <Style TargetType="ItemsControl">
                     <Style.Triggers>
@@ -81,12 +81,12 @@
                     <Canvas x:Name="RoomCanvas" Width="{Binding Width, Mode=OneTime}" Height="{Binding Height, Mode=OneTime}" IsItemsHost="True" AllowDrop="True" ClipToBounds="True"
                             SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor"
                             Loaded="RoomCanvas_Loaded">
-                        <Canvas.Background>
+                        <Canvas.OpacityMask>
                             <DrawingBrush TileMode="Tile" ViewportUnits="Absolute">
                                 <DrawingBrush.Viewport>
                                     <MultiBinding Converter="{StaticResource GridConverter}">
-                                        <Binding Path="GridWidth" Mode="OneTime"/>
-                                        <Binding Path="GridHeight" Mode="OneTime"/>
+                                        <Binding Path="GridWidth" Mode="OneWay"/>
+                                        <Binding Path="GridHeight" Mode="OneWay"/>
                                     </MultiBinding>
                                 </DrawingBrush.Viewport>
                                 <DrawingBrush.Drawing>
@@ -95,22 +95,49 @@
                                             <RectangleGeometry>
                                                 <RectangleGeometry.Rect>
                                                     <MultiBinding Converter="{StaticResource GridConverter}">
-                                                        <Binding Path="GridWidth" Mode="OneTime"/>
-                                                        <Binding Path="GridHeight" Mode="OneTime"/>
+                                                        <Binding Path="GridWidth" Mode="OneWay"/>
+                                                        <Binding Path="GridHeight" Mode="OneWay"/>
                                                     </MultiBinding>
                                                 </RectangleGeometry.Rect>
                                             </RectangleGeometry>
                                         </GeometryDrawing.Geometry>
                                         <GeometryDrawing.Brush>
-                                            <!-- that binding replaces itself with proper one -->
+                                            <SolidColorBrush Color="Black"></SolidColorBrush>
+                                        </GeometryDrawing.Brush>
+                                        <GeometryDrawing.Pen>
+                                            <Pen Brush="Transparent" Thickness="{Binding GridThicknessPx, Mode=OneWay}"/>
+                                        </GeometryDrawing.Pen>
+                                    </GeometryDrawing>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </Canvas.OpacityMask>
+                        <Canvas.Background>
+                            <DrawingBrush TileMode="Tile" ViewportUnits="Absolute">
+                                <DrawingBrush.Viewport>
+                                    <MultiBinding Converter="{StaticResource GridConverter}">
+                                        <Binding Path="GridWidth" Mode="OneWay"/>
+                                        <Binding Path="GridHeight" Mode="OneWay"/>
+                                    </MultiBinding>
+                                </DrawingBrush.Viewport>
+                                <DrawingBrush.Drawing>
+                                    <GeometryDrawing>
+                                        <GeometryDrawing.Geometry>
+                                            <RectangleGeometry>
+                                                <RectangleGeometry.Rect>
+                                                    <MultiBinding Converter="{StaticResource GridConverter}">
+                                                        <Binding Path="GridWidth" Mode="OneWay"/>
+                                                        <Binding Path="GridHeight" Mode="OneWay"/>
+                                                    </MultiBinding>
+                                                </RectangleGeometry.Rect>
+                                            </RectangleGeometry>
+                                        </GeometryDrawing.Geometry>
+                                        <GeometryDrawing.Brush>
+                                            <!-- this binding replaces itself with proper one -->
                                             <MultiBinding Mode="OneTime" Converter="{StaticResource BGColorConverter}">
                                                 <Binding Path="." RelativeSource="{RelativeSource Self}" Mode="OneTime"/>
                                                 <Binding Path="Flags" Mode="OneTime"/>
                                             </MultiBinding>
                                         </GeometryDrawing.Brush>
-                                        <GeometryDrawing.Pen>
-                                            <Pen Brush="Gray" Thickness="{Binding GridThicknessPx, Mode=OneTime}"/>
-                                        </GeometryDrawing.Pen>
                                     </GeometryDrawing>
                                 </DrawingBrush.Drawing>
                             </DrawingBrush>
