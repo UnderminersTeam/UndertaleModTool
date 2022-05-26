@@ -1,2 +1,0 @@
-// By Grossley
-ScriptMessage("This is the content of the test script.");

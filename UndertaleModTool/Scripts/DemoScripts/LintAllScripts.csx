@@ -1,74 +1,76 @@
-// By Grossley
-
 using System;
+using System.Text;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
-int progress = 0;
-
-string UMTBaseDir = Path.Combine(ExePath, "Scripts");
-string dirSampleScripts = Path.Combine(UMTBaseDir, "SampleScripts");
-string dirCommunityScripts = Path.Combine(UMTBaseDir, "CommunityScripts");
-string dirUnpackers = Path.Combine(UMTBaseDir, "Unpackers");
-string dirRepackers = Path.Combine(UMTBaseDir, "Repackers");
-string dirTechnicalScripts = Path.Combine(UMTBaseDir, "TechnicalScripts");
-string dirDemoScripts = Path.Combine(UMTBaseDir, "DemoScripts");
-string dirHelperScripts = Path.Combine(UMTBaseDir, "HelperScripts");
-
-ScriptMessage("Linting all bundled scripts");
-string[] directories = new string[7];
-directories[0] = dirSampleScripts;
-directories[1] = dirCommunityScripts;
-directories[2] = dirUnpackers;
-directories[3] = dirRepackers;
-directories[4] = dirTechnicalScripts;
-directories[5] = dirDemoScripts;
-directories[6] = dirHelperScripts;
-string output = "";
-int scriptsCount = 0;
+string umtBaseDir = Path.Combine(ExePath, "Scripts");
+string[] scripts = GetFilesRecursively(umtBaseDir);
+StringBuilder output = new StringBuilder();
+int scriptsCount = scripts.Length;
 int successCount = 0;
 int failedCount = 0;
-foreach (string dir in directories)
+
+ScriptMessage("Linting all scripts!");
+SetProgressBar(null, "Files", 0, scriptsCount);
+StartProgressBarUpdater();
+
+await Task.Run(() =>
 {
-    string[] filesCount = Directory.GetFiles(dir);
-    scriptsCount += filesCount.Length;
-}
-foreach (string dir in directories)
-{
-    string[] dirFiles = Directory.GetFiles(dir);
-    foreach (string file in dirFiles)
+    // Lint each script and create the output.
+    foreach (string file in scripts)
     {
-        UpdateProgressBar(null, "Files", progress++, scriptsCount);
-        if (!(Path.GetFileName(file).EndsWith(".csx")))
-            continue;
-        bool x = LintUMTScript(file);
-        if (!x)
+        bool lintSuccessful = LintUMTScript(file);
+        if (lintSuccessful)
         {
-            output += (Path.GetFileName(file) + " failed (full path \"" + file + "\") with the following error of type: " + ScriptErrorType + "\r\n\r\nError message: " + ScriptErrorMessage + "\r\n");
-            failedCount += 1;
+            output.Append($"{Path.GetFileName(file)} succeeded (full path \"{file}\")\n");
+            successCount++;
         }
         else
         {
-            output += (Path.GetFileName(file) + " succeeded (full path \"" + file + "\")\r\n");
-            successCount += 1;
+            output.Append($"{Path.GetFileName(file)} failed (full path \"{file}\") with the following error of type: {ScriptErrorType}\n\n" +
+                      $"Error message: {ScriptErrorMessage}\n");
+            failedCount++;
         }
+        IncrementProgress();
     }
-}
-string outputLogLocation = Path.Combine(ExePath, "Lint.txt");
-bool failed = false;
+});
+await StopProgressBarUpdater();
+
+// Write output either in results file, or console if former doesnt work and show results
+string outputLogLocation = Path.Combine(ExePath, "LintResults.txt");
+string infoLocation = outputLogLocation;
 try
 {
-    File.WriteAllText(outputLogLocation, output);
+    File.WriteAllText(outputLogLocation, output.ToString());
 }
 catch
 {
-    failed = true;
+    infoLocation = "the console at the bottom of the screen";
+    ScriptError($"Could not write to {outputLogLocation}, the output log will be in {infoLocation}.");
+    SetUMTConsoleText(output.ToString());
 }
+ScriptMessage($"{successCount} scripts have no errors, {failedCount} have errors.\n\nFor more information see {infoLocation}.");
 HideProgressBar();
-ScriptMessage(successCount.ToString() + " have no errors, " + failedCount.ToString() + " have errors.\n\nFor more information see " + outputLogLocation);
-if (failed)
+
+// Searches for all csx files recursively and returns them.
+string[] GetFilesRecursively(string directoryPath)
 {
-    ScriptError("Could not write to " + outputLogLocation + ", the output log will be in the console at the bottom of the screen.");
-    SetUMTConsoleText(output);
+    List<string> files = new List<string>();
+    DirectoryInfo directory = new DirectoryInfo(directoryPath);
+
+    // Call this recursively for all directories
+    foreach (DirectoryInfo subDir in directory.GetDirectories())
+        files.AddRange(GetFilesRecursively(subDir.FullName));
+
+    // Add all csx files
+    foreach (FileInfo file in directory.GetFiles())
+    {
+        if (file.Extension != ".csx")
+            continue;
+        files.Add(file.FullName);
+    }
+
+    return files.ToArray();
 }
-return;
