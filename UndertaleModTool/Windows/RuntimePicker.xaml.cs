@@ -106,7 +106,7 @@ namespace UndertaleModTool
             DiscoverRuntimes(dataFilePath, data);
             if (Runtimes.Count == 0)
             {
-                MessageBox.Show("Unable to find game EXE or any installed Studio runtime", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
+                OwnedMessageBox.Show("Unable to find game EXE or any installed Studio runtime", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return null;
             }
             else if (Runtimes.Count == 1)

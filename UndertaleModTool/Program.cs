@@ -37,7 +37,7 @@ namespace UndertaleModTool
             catch (Exception e)
             {
                 File.WriteAllText(Path.Combine(GetExecutableDirectory(), "crash.txt"), e.ToString());
-                MessageBox.Show(e.ToString());
+                OwnedMessageBox.Show(e.ToString());
             }
         }
         private static void GlobalUnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)

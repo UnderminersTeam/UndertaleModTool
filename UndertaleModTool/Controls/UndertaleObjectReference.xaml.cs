@@ -100,7 +100,7 @@ namespace UndertaleModTool
         {
             if (ObjectReference is null)
             {
-                MessageBox.Show("This feature is very WIP, so expect it to be broken.");
+                OwnedMessageBox.Show("This feature is very WIP, so expect it to be broken.");
 
                 MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
