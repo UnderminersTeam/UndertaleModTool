@@ -1,6 +1,6 @@
 name: Bug Report
 description: Something not behaving the way it should? Let us know!
-title: ""
+title: "Bug: <Title>"
 labels: ["bug"]
 body:
 - type: textarea
