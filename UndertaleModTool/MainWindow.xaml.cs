@@ -1868,7 +1868,17 @@ namespace UndertaleModTool
             try
             {
                 var appDir = Program.GetExecutableDirectory();
-                foreach (var path in Directory.EnumerateFiles(Path.Combine(appDir, folderName)))
+                var folderDir = Path.Combine(appDir, "Scripts", folderName);
+
+                // exit out early if the path does not exist.
+                if (!Directory.Exists(folderDir))
+                {
+                    item.Items.Add(new MenuItem { Header = $"(Path {folderDir} does not exist, cannot search for files!)", IsEnabled = false });
+                    return;
+                }
+
+
+                foreach (var path in Directory.EnumerateFiles(folderDir))
                 {
                     var filename = Path.GetFileName(path);
                     if (!filename.EndsWith(".csx"))
