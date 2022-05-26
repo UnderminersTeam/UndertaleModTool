@@ -1,6 +1,6 @@
 name: Suggest a Feature
 description: Have an idea for something completely new that UndertaleModTool could benefit from having? Or for improving something that already exists? Let us know!
-title: "Feature: <Title>"
+title: ""
 labels: ["enhancement"]
 body:
 - type: dropdown
