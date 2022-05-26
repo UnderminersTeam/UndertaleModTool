@@ -25,6 +25,8 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleEmbeddedTextureEditor : DataUserControl
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         public UndertaleEmbeddedTextureEditor()
         {
             InitializeComponent();
@@ -55,7 +57,7 @@ namespace UndertaleModTool
                     
                     if ((width & (width - 1)) != 0 || (height & (height - 1)) != 0)
                     {
-                        MessageBox.Show("WARNING: texture page dimensions are not powers of 2. Sprite blurring is very likely in game.", "Unexpected texture dimensions", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBox.Show(mainWindow, "WARNING: texture page dimensions are not powers of 2. Sprite blurring is very likely in game.", "Unexpected texture dimensions", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
 
                     using (var stream = new MemoryStream())
@@ -66,7 +68,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to import file: " + ex.Message, "Failed to import file", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(mainWindow, "Failed to import file: " + ex.Message, "Failed to import file", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -88,7 +90,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(mainWindow, "Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -97,14 +99,14 @@ namespace UndertaleModTool
         {
             var pos = e.GetPosition(sender as IInputElement);
             var tex = this.DataContext as UndertaleEmbeddedTexture;
-            var tpag = (Application.Current.MainWindow as MainWindow).Data.TexturePageItems.Where((x) =>
+            var tpag = mainWindow.Data.TexturePageItems.Where((x) =>
             {
                 if (x.TexturePage != tex)
                     return false;
                 return pos.X > x.SourceX && pos.X < x.SourceX + x.SourceWidth && pos.Y > x.SourceY && pos.Y < x.SourceY + x.SourceHeight;
             }).FirstOrDefault();
             if (tpag != null)
-                (Application.Current.MainWindow as MainWindow).ChangeSelection(tpag);
+                mainWindow.ChangeSelection(tpag);
         }
     }
 }
