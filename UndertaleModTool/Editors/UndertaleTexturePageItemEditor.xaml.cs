@@ -42,7 +42,7 @@ namespace UndertaleModTool
                     return;
                 if (border.Background is not ImageBrush brush)
                     return;
-                BindingOperations.GetBindingExpression(brush, ImageBrush.ImageSourceProperty).UpdateTarget();
+                BindingOperations.GetBindingExpression(brush, ImageBrush.ImageSourceProperty)?.UpdateTarget();
             }
             catch (Exception ex)
             {
