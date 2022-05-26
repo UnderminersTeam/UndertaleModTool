@@ -3,7 +3,7 @@
 //Need to test this, once I do then I can obsolete the other two scripts
 if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
 {
-    bool x = RunUMTScript(Path.Combine(ExePath, "HelperScripts", "ConvertFrom17to16_for_2.3.csx"));
+    bool x = RunUMTScript(Path.Combine(ExePath, "Scripts", "HelperScripts", "ConvertFrom17to16_for_2.3.csx"));
     if (x == false)
         ScriptError("ConvertFrom17to16_for_2.3.csx failed!");
     return;

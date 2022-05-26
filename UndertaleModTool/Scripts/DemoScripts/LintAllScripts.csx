@@ -6,7 +6,7 @@ using UndertaleModLib.Util;
 
 int progress = 0;
 
-string UMTBaseDir = ExePath;
+string UMTBaseDir = Path.Combine(ExePath, "Scripts");
 string dirSampleScripts = Path.Combine(UMTBaseDir, "SampleScripts");
 string dirCommunityScripts = Path.Combine(UMTBaseDir, "CommunityScripts");
 string dirUnpackers = Path.Combine(UMTBaseDir, "Unpackers");
