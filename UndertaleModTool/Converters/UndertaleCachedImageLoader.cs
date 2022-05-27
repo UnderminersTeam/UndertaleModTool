@@ -273,7 +273,7 @@ namespace UndertaleModTool
         {
             throw new NotImplementedException();
         }
-    }    
+    }
 
     // UndertaleCachedImageLoader wrappers
     public class CachedTileImageLoader : IMultiValueConverter
@@ -355,12 +355,14 @@ namespace UndertaleModTool
             if (tilesBG is null)
                 return null;
 
+            MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
             try
             {
                 string texName = tilesBG.Texture?.Name?.Content;
                 if (texName is null or "PageItem Unknown Index")
                 {
-                    texName = ((Application.Current.MainWindow as MainWindow).Data.TexturePageItems.IndexOf(tilesBG.Texture) + 1).ToString();
+                    texName = (mainWindow.Data.TexturePageItems.IndexOf(tilesBG.Texture) + 1).ToString();
                     if (texName == "0")
                         return null;
                 }
@@ -437,8 +439,8 @@ namespace UndertaleModTool
 
                 if (outOfBounds)
                 {
-                    MainWindow.ShowError($"Tileset of \"{tilesData.ParentLayer.LayerName.Content}\" tile layer has wrong parameters (tile size, output border, etc.).\n" +
-                                          "It can't be displayed.", false);
+                    mainWindow.ShowError($"Tileset of \"{tilesData.ParentLayer.LayerName.Content}\" tile layer has wrong parameters (tile size, output border, etc.).\n" +
+                                          "It can't be displayed.");
                     return "Error";
                 }
 
@@ -446,7 +448,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                MainWindow.ShowError($"An error occured while rendering tile layer \"{tilesData.ParentLayer.LayerName.Content}\".\n\n{ex}", false);
+                mainWindow.ShowError($"An error occured while rendering tile layer \"{tilesData.ParentLayer.LayerName.Content}\".\n\n{ex}");
                 return "Error";
             }
         }
