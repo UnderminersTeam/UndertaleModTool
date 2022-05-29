@@ -44,7 +44,7 @@ if (dlg.ShowDialog() == true)
         {
             try
             {
-                System.IO.StreamReader file = new System.IO.StreamReader(dlgin.FileName);
+                StreamReader file = new StreamReader(dlgin.FileName);
                 string line;
                 line = file.ReadLine();
                 using (var stream = new FileStream(dlg.FileName, FileMode.Open, FileAccess.Read))

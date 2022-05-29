@@ -11,7 +11,6 @@ if (exportFolder == null)
     throw new ScriptException("The export folder was not set.");
 
 Directory.CreateDirectory(exportFolder + "/Shader_Data/");
-File.WriteAllText(exportFolder + "/Shader_Data/" + "Import_Loc.txt", "Import location");
 
 foreach(UndertaleShader shader in Data.Shaders)
 {

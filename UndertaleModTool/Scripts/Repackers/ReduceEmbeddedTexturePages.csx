@@ -15,9 +15,8 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-// Get directory paths
-string workDirectory = Path.GetDirectoryName(FilePath) + Path.DirectorySeparatorChar;
-System.IO.DirectoryInfo dir = System.IO.Directory.CreateDirectory(workDirectory + Path.DirectorySeparatorChar + "Packager");
+// Get directory path
+DirectoryInfo dir = Directory.CreateDirectory(Path.Combine(ExePath, "Packager"));
 
 // Clear any files if they already exist
 foreach (FileInfo file in dir.GetFiles())

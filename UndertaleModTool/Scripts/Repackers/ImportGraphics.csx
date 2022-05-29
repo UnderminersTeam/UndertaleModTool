@@ -16,8 +16,7 @@ bool importAsSprite = false;
 
 string importFolder = CheckValidity();
 
-string workDirectory = Path.GetDirectoryName(FilePath) + Path.DirectorySeparatorChar;
-string packDir = Path.Combine(workDirectory, "Packager");
+string packDir = Path.Combine(ExePath, "Packager");
 Directory.CreateDirectory(packDir);
 
 string sourcePath = importFolder;

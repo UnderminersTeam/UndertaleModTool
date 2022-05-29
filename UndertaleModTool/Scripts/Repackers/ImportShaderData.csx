@@ -1,33 +1,23 @@
 using System.Text;
 using System;
+using System.Linq;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 EnsureDataLoaded();
 
-// "Select 'Import_Loc.txt' file in 'Shader_Data'"
 string importFolder = PromptChooseDirectory();
 if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 
-string[] dirFiles = Directory.GetFiles(importFolder, "*.*", SearchOption.AllDirectories);
-List<string> shadersToModify = new List<string>();
+var shadersToModify = Directory.GetDirectories(importFolder).Select(x => Path.GetFileName(x));
 List<string> shadersExisting = new List<string>();
 List<string> shadersNonExist = new List<string>();
-foreach (string file in dirFiles)
-{
-    if (Path.GetFileName(file) == "Import_Loc.txt")
-        continue;
-    else
-    {
-        shadersToModify.Add(Path.GetDirectoryName(file).Replace(importFolder, ""));
-    }
-}
 List<string> currentList = new List<string>();
 string res = "";
 
-for (var i = 0; i < shadersToModify.Count; i++)
+foreach (string shaderName in shadersToModify)
 {
     currentList.Clear();
     for (int j = 0; j < Data.Shaders.Count; j++)
@@ -36,14 +26,14 @@ for (var i = 0; i < shadersToModify.Count; i++)
         res += (x + "\n");
         currentList.Add(x);
     }
-    if (Data.Shaders.ByName(shadersToModify[i]) != null)
+    if (Data.Shaders.ByName(shaderName) != null)
     {
-        Data.Shaders.Remove(Data.Shaders.ByName(shadersToModify[i]));
-        AddShader(shadersToModify[i]);
+        Data.Shaders.Remove(Data.Shaders.ByName(shaderName));
+        AddShader(shaderName);
         Reorganize<UndertaleShader>(Data.Shaders, currentList);
     }
     else
-        AddShader(shadersToModify[i]);
+        AddShader(shaderName);
 }
 
 
@@ -257,7 +247,7 @@ void AddShader(string shader_name)
     {
         string line;
         // Read the file and display it line by line.
-        System.IO.StreamReader file = new System.IO.StreamReader(localImportDir + "VertexShaderAttributes.txt");
+        StreamReader file = new StreamReader(localImportDir + "VertexShaderAttributes.txt");
         while((line = file.ReadLine()) != null)
         {
             if (line != "")

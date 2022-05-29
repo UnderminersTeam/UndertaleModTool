@@ -28,8 +28,7 @@ Would you like to overwrite it?");
     }
 }
 
-BuiltinList list = new BuiltinList();
-list.Initialize(Data);
+BuiltinList list = new BuiltinList(Data);
 
 List<String> extensionFunctions = new List<String>();
 List<String> unknownFunctions = new List<String>();
@@ -89,7 +88,7 @@ if (unknownFunctions.Count > 0)
             resultsToDisplay += (unknownFunctions[i] + "\r\n");
         }
         resultsToDisplay = SimpleTextInput("Prune Menu", "Delete one or more lines to remove those entries", resultsToDisplay, true);
-        string[] IndividualLineArray = resultsToDisplay.Split('\n'}, StringSplitOptions.RemoveEmptyEntries);
+        string[] IndividualLineArray = resultsToDisplay.Split('\n', StringSplitOptions.RemoveEmptyEntries);
         foreach (var OneLine in IndividualLineArray)
         {
             unknownFunctions2.Add(OneLine.Trim());
@@ -116,4 +115,9 @@ if (unknownFunctions.Count > 0)
             removed = "The function(s)\r\n" + removed;
         ScriptMessage(removed + "were removed.");
     }
+}
+else
+{
+    ScriptMessage("No unknown functions were found.");
+    File.Delete(exportFolder + "unknown_functions.txt");
 }
