@@ -16,13 +16,15 @@ string importFolder = PromptChooseDirectory();
 if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 
-System.IO.Directory.CreateDirectory("Packager");
+string packagerDirPath = Path.Combine(ExePath, "Packager");
 string sourcePath = importFolder;
 string searchPattern = "*.png";
-string outName = "Packager/atlas.txt";
+string outName = Path.Combine(packagerDirPath, "atlas.txt");
 int textureSize = 2048;
 int border = 2;
 bool debug = false;
+
+Directory.CreateDirectory(packagerDirPath);
 Packer packer = new Packer();
 packer.Process(sourcePath, searchPattern, textureSize, border, debug);
 packer.SaveAtlasses(outName);
@@ -91,7 +93,7 @@ ScriptMessage("Import Complete!");
 
 public void fontUpdate(UndertaleFont newFont)
 {
-    using(StreamReader reader = new StreamReader(sourcePath + "glyphs_" + newFont.Name.Content + ".csv"))
+    using (StreamReader reader = new StreamReader(Path.Combine(sourcePath, "glyphs_" + newFont.Name.Content + ".csv")))
     {
         newFont.Glyphs.Clear();
         string line;

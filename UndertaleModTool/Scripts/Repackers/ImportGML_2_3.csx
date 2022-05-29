@@ -44,11 +44,12 @@ if (importFolder == null)
 
 List<string> CodeList = new List<string>();
 
-if (File.Exists(importFolder + "/LookUpTable.txt"))
+string tablePath = Path.Combine(importFolder, "LookUpTable.txt");
+if (File.Exists(tablePath))
 {
     int counter = 0;
     string line;
-    System.IO.StreamReader file = new System.IO.StreamReader(importFolder + "/" + "LookUpTable.txt");
+    StreamReader file = new StreamReader(tablePath);
     while((line = file.ReadLine()) != null)
     {
         if (counter > 0)

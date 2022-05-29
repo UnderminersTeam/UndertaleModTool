@@ -79,9 +79,8 @@ foreach (string file in dirFiles)
         throw new ScriptException(spriteName + " is missing one or more indexes. The detected missing index is: " + prevFrameName);
 }
 
-// Get directory paths
-string workDirectory = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).Substring(6);
-System.IO.DirectoryInfo dir = System.IO.Directory.CreateDirectory(workDirectory + Path.DirectorySeparatorChar + "Packager");
+// Get directory path
+DirectoryInfo dir = Directory.CreateDirectory(Path.Combine(ExePath, "Packager"));
 
 // Clear any files if they already exist
 foreach (FileInfo file in dir.GetFiles())
@@ -181,17 +180,17 @@ DirectoryInfo textureDirectory = new DirectoryInfo(importFolder);
 FileInfo[] files = textureDirectory.GetFiles(searchPattern, SearchOption.AllDirectories);
 foreach (FileInfo file in files)
 {
-    string destFile = System.IO.Path.Combine(exportedTexturesFolder, file.Name);
-    string sourceFile = System.IO.Path.Combine(importFolder, file.Name);
+    string destFile = Path.Combine(exportedTexturesFolder, file.Name);
+    string sourceFile = Path.Combine(importFolder, file.Name);
     string stripped = Path.GetFileNameWithoutExtension(sourceFile);
     if (assetCoordinateDict.ContainsKey(stripped))
         assetCoordinateDict.Remove(stripped);
-    System.IO.File.Copy(sourceFile, destFile, true);
+    File.Copy(sourceFile, destFile, true);
 }
 
 try
 {
-    string[] marginLines = System.IO.File.ReadAllLines(importFolder + Path.DirectorySeparatorChar + "margins.txt");
+    string[] marginLines = File.ReadAllLines(importFolder + Path.DirectorySeparatorChar + "margins.txt");
     foreach (String str in marginLines)
     {
         string key = str.Substring(0, str.IndexOf(','));
