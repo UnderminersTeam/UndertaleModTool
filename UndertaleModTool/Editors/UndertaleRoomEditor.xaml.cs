@@ -103,6 +103,12 @@ namespace UndertaleModTool
             visualOffProp.SetValue(roomCanvas, prevOffset);
         }
 
+        /// <summary>
+        /// Checks if the room layers are ordered by depth. If they are not, the user will be prompted,
+        /// whether they want to rearrange them.
+        /// </summary>
+        /// <param name="room">The <see cref="UndertaleRoom"/>, whose layers should be checked and,
+        /// if necessary, rearranged.</param>
         public static void CheckAndRearrangeLayers(UndertaleRoom room)
         {
             bool ordered = true;
@@ -116,8 +122,10 @@ namespace UndertaleModTool
             }
 
             if (!ordered)
+            {
                 if (MainWindow.ShowQuestion("Room layers are not ordered by depth.\nRearrange them?", MessageBoxImage.Warning) == MessageBoxResult.Yes)
                     room.RearrangeLayers();
+            }
         }
 
         private void ExportAsPNG_Click(object sender, RoutedEventArgs e)
@@ -1246,13 +1254,15 @@ namespace UndertaleModTool
                 }
             }
 
+            // "layerDepth" is "long", because otherwise one can't check if the incremented value is larger than "Int32.MaxValue",
+            // because then it would overflow.
             long layerDepth = 0;
             if (room.Layers.Count > 0)
             {
                 layerDepth = room.Layers.Select(l => l.LayerDepth).Max();
-                if (layerDepth + 100 > int.MaxValue)
+                if (layerDepth + 100 > Int32.MaxValue)
                 {
-                    if (layerDepth + 1 > int.MaxValue)
+                    if (layerDepth + 1 > Int32.MaxValue)
                     {
                         layerDepth -= 1;
                         MainWindow.ShowWarning("Warning - the maximum layer depth is reached.\nYou probably should change the depth of the new layer.");
