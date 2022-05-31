@@ -265,7 +265,7 @@ List<string> GetCodeList(string importFolder)
     {
         int counter = 0;
         string line;
-        System.IO.StreamReader file = new System.IO.StreamReader(index_path);
+        StreamReader file = new StreamReader(index_path);
         while ((line = file.ReadLine()) != null)
         {
             if ((counter > 0) && (line.Length >= 1))

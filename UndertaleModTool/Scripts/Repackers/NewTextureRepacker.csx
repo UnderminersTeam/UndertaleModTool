@@ -239,7 +239,7 @@ async Task<List<TPageItem>> dumpTexturePageItems(string dir, bool reuse)
 
     var tpageitems = await Task.Run(() => Data.TexturePageItems
         .AsParallel()
-        .Select(item => dumpTexturePageItem(item, worker, $"{dir}texture_page_{Data.TexturePageItems.IndexOf(item)}.png", reuse))
+        .Select(item => dumpTexturePageItem(item, worker, Path.Combine(dir, $"texture_page_{Data.TexturePageItems.IndexOf(item)}.png"), reuse))
         .ToList());
 
     worker.Cleanup();
@@ -366,10 +366,9 @@ if (maxArea <= 0)
 
 bool reuseTextures = false;
 
-// Setup work directory and packager directory
-string workDirectory = Path.GetDirectoryName(FilePath) + Path.DirectorySeparatorChar;
-string packagerDirectory = $"{workDirectory}{Path.DirectorySeparatorChar}Packager{Path.DirectorySeparatorChar}";
-if (System.IO.Directory.Exists(packagerDirectory))
+// Setup packager directory
+string packagerDirectory = Path.Combine(ExePath, "Packager");
+if (Directory.Exists(packagerDirectory))
 {
     DialogResult dr = MessageBox.Show("Do you want to reuse previously extracted page items?", 
         "Texture Repacker", MessageBoxButtons.YesNo);
@@ -377,7 +376,7 @@ if (System.IO.Directory.Exists(packagerDirectory))
     reuseTextures = dr == DialogResult.Yes;
 }
 
-System.IO.DirectoryInfo dir = System.IO.Directory.CreateDirectory(packagerDirectory);
+Directory.CreateDirectory(packagerDirectory);
 
 // Dump all the texture page items
 ResetProgress("Existing Textures Exported");
@@ -420,7 +419,7 @@ int lastTextPage = Data.EmbeddedTextures.Count - 1;
 
 // Now recreate texture pages and link the items to the pages
 ResetProgress("Regenerating Texture Pages");
-using (var f = new StreamWriter($"{packagerDirectory}log.txt"))
+using (var f = new StreamWriter(Path.Combine(packagerDirectory, "log.txt")))
 {
     var atlasCount = 0;
 

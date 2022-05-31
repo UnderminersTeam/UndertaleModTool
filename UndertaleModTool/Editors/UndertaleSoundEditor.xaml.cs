@@ -12,7 +12,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using NAudio.Vorbis;
 using NAudio.Wave;
 using UndertaleModLib;
@@ -66,10 +65,10 @@ namespace UndertaleModTool
                         filename = sound.File.Content + ".ogg";
                     else
                         filename = sound.File.Content;
-                    string audioPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), filename);
+                    string audioPath = Path.Combine(Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), filename);
                     if (File.Exists(audioPath))
                     {
-                        switch (System.IO.Path.GetExtension(filename).ToLower())
+                        switch (Path.GetExtension(filename).ToLower())
                         {
                             case ".wav":
                                 wavReader = new WaveFileReader(audioPath);
@@ -109,7 +108,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    string path = System.IO.Path.Combine(System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), "audiogroup" + sound.GroupID + ".dat");
+                    string path = Path.Combine(Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), "audiogroup" + sound.GroupID + ".dat");
                     if (File.Exists(path))
                     {
                         if (loadedPath != path)

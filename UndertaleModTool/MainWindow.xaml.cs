@@ -1155,11 +1155,17 @@ namespace UndertaleModTool
         private async Task LoadGMLCache(string filename, LoaderDialog dialog = null)
         {
             await Task.Run(() => {
-                if (SettingsWindow.UseGMLCache && File.Exists(Path.Join("GMLCache", "index")))
+                if (SettingsWindow.UseGMLCache)
                 {
+                    string cacheDirPath = Path.Combine(ExePath, "GMLCache");
+                    string cacheIndexPath = Path.Combine(cacheDirPath, "index");
+
+                    if (!File.Exists(cacheIndexPath))
+                        return;
+
                     dialog?.Dispatcher.Invoke(() => dialog.ReportProgress("Loading decompiled code cache..."));
 
-                    string[] indexLines = File.ReadAllLines(Path.Join("GMLCache", "index"));
+                    string[] indexLines = File.ReadAllLines(cacheIndexPath);
 
                     int num = -1;
                     for (int i = 0; i < indexLines.Length; i++)
@@ -1172,7 +1178,7 @@ namespace UndertaleModTool
                     if (num == -1)
                         return;
 
-                    if (!File.Exists(Path.Join("GMLCache", num.ToString())))
+                    if (!File.Exists(Path.Combine(cacheDirPath, num.ToString())))
                     {
                         ShowWarning("Decompiled code cache file for open data is missing, but its name present in the index.");
 
@@ -1181,7 +1187,7 @@ namespace UndertaleModTool
 
                     string hash = GenerateMD5(filename);
 
-                    using (StreamReader fs = new(Path.Join("GMLCache", num.ToString())))
+                    using (StreamReader fs = new(Path.Combine(cacheDirPath, num.ToString())))
                     {
                         string prevHash = fs.ReadLine();
 
@@ -1242,14 +1248,15 @@ namespace UndertaleModTool
                 {
                     dialog?.Dispatcher.Invoke(() => dialog.ReportProgress("Saving decompiled code cache..."));
 
-                    if (!File.Exists(Path.Join("GMLCache", "index")))
+                    string cacheDirPath = Path.Combine(ExePath, "GMLCache");
+                    string cacheIndexPath = Path.Combine(cacheDirPath, "index");
+                    if (!File.Exists(cacheIndexPath))
                     {
-                        Directory.CreateDirectory("GMLCache");
-
-                        File.WriteAllText(Path.Join("GMLCache", "index"), filename);
+                        Directory.CreateDirectory(cacheDirPath);
+                        File.WriteAllText(cacheIndexPath, filename);
                     }
 
-                    List<string> indexLines = File.ReadAllLines(Path.Join("GMLCache", "index")).ToList();
+                    List<string> indexLines = File.ReadAllLines(cacheIndexPath).ToList();
 
                     int num = -1;
                     for (int i = 0; i < indexLines.Count; i++)
@@ -1284,7 +1291,7 @@ namespace UndertaleModTool
 
                     string hash = GenerateMD5(filename);
 
-                    using (FileStream fs = File.Create(Path.Join("GMLCache", num.ToString())))
+                    using (FileStream fs = File.Create(Path.Combine(cacheDirPath, num.ToString())))
                     {
                         fs.Write(Encoding.UTF8.GetBytes(hash + '\n'));
                         fs.Write(SystemJson.JsonSerializer.SerializeToUtf8Bytes(sortedCache));
@@ -1296,7 +1303,7 @@ namespace UndertaleModTool
                         }
                     }
 
-                    File.WriteAllLines(Path.Join("GMLCache", "index"), indexLines);
+                    File.WriteAllLines(cacheIndexPath, indexLines);
 
                     Data.GMLCacheWasSaved = true;
                 }
@@ -1868,7 +1875,17 @@ namespace UndertaleModTool
             try
             {
                 var appDir = Program.GetExecutableDirectory();
-                foreach (var path in Directory.EnumerateFiles(Path.Combine(appDir, folderName)))
+                var folderDir = Path.Combine(appDir, "Scripts", folderName);
+
+                // exit out early if the path does not exist.
+                if (!Directory.Exists(folderDir))
+                {
+                    item.Items.Add(new MenuItem { Header = $"(Path {folderDir} does not exist, cannot search for files!)", IsEnabled = false });
+                    return;
+                }
+
+
+                foreach (var path in Directory.EnumerateFiles(folderDir))
                 {
                     var filename = Path.GetFileName(path);
                     if (!filename.EndsWith(".csx"))

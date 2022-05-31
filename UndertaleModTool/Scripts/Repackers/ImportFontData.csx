@@ -16,13 +16,15 @@ string importFolder = PromptChooseDirectory();
 if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 
-System.IO.Directory.CreateDirectory("Packager");
+string packagerDirPath = Path.Combine(ExePath, "Packager");
 string sourcePath = importFolder;
 string searchPattern = "*.png";
-string outName = "Packager/atlas.txt";
+string outName = Path.Combine(packagerDirPath, "atlas.txt");
 int textureSize = 2048;
 int border = 2;
 bool debug = false;
+
+Directory.CreateDirectory(packagerDirPath);
 Packer packer = new Packer();
 packer.Process(sourcePath, searchPattern, textureSize, border, debug);
 packer.SaveAtlasses(outName);
@@ -58,16 +60,14 @@ foreach (Atlas atlas in packer.Atlasses)
             texturePageItem.BoundingHeight = (ushort)n.Bounds.Height;
             texturePageItem.TexturePage = texture;
             Data.TexturePageItems.Add(texturePageItem);
-            string stripped = Path.GetFileNameWithoutExtension(n.Texture.Source);
-            int lastUnderscore = stripped.LastIndexOf('_');
-            string spriteName = stripped.Substring(0, lastUnderscore);
+            string spriteName = Path.GetFileNameWithoutExtension(n.Texture.Source);
 
             UndertaleFont font = null;
-            font = Data.Fonts.ByName(stripped);
+            font = Data.Fonts.ByName(spriteName);
 
-            if(font == null)
+            if (font == null)
             {
-                UndertaleString fontUTString = Data.Strings.MakeString(stripped);
+                UndertaleString fontUTString = Data.Strings.MakeString(spriteName);
                 UndertaleFont newFont = new UndertaleFont();
                 newFont.Name = fontUTString;
 
@@ -93,7 +93,7 @@ ScriptMessage("Import Complete!");
 
 public void fontUpdate(UndertaleFont newFont)
 {
-    using(StreamReader reader = new StreamReader(sourcePath + "glyphs_" + newFont.Name.Content + ".csv"))
+    using (StreamReader reader = new StreamReader(Path.Combine(sourcePath, "glyphs_" + newFont.Name.Content + ".csv")))
     {
         newFont.Glyphs.Clear();
         string line;

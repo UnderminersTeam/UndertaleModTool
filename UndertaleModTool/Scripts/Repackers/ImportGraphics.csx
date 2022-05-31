@@ -1,6 +1,5 @@
 // Texture packer by Samuel Roy
 // Uses code from https://github.com/mfascia/TexturePacker
-// Uses code from ExportAllTextures.csx
 
 using System;
 using System.IO;
@@ -9,219 +8,23 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-bool recursiveCheck = ScriptQuestion(@"This script requires will import all valid sprites from all subdirectories.
-If you do not want this to occur, please click ""No"" to cancel the script.
-Then make sure that the sprites you wish to import are in a separate directory with no subdirectories.
-");
-if (!recursiveCheck)
-    throw new ScriptException("Script cancelled.");
+bool importAsSprite = false;
 
-// Get import folder
-string importFolder = PromptChooseDirectory();
-if (importFolder == null)
-    throw new ScriptException("The import folder was not set.");
+string importFolder = CheckValidity();
 
-//Stop the script if there's missing sprite entries or w/e.
-string[] dirFiles = Directory.GetFiles(importFolder, "*.png", SearchOption.AllDirectories);
-foreach (string file in dirFiles)
-{
-    string FileNameWithExtension = Path.GetFileName(file);
-    string stripped = Path.GetFileNameWithoutExtension(file);
-    int lastUnderscore = stripped.LastIndexOf('_');
-    string spriteName = "";
-    try
-    {
-        spriteName = stripped.Substring(0, lastUnderscore);
-    }
-    catch
-    {
-        throw new ScriptException("Getting the sprite name of " + FileNameWithExtension + " failed.");
-    }
-    Int32 validFrameNumber = 0;
-    try
-    {
-        validFrameNumber = Int32.Parse(stripped.Substring(lastUnderscore + 1));
-    }
-    catch
-    {
-        throw new ScriptException("The index of " + FileNameWithExtension + " could not be determined.");
-    }
-    int frame = 0;
-    try
-    {
-        frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
-    }
-    catch
-    {
-        throw new ScriptException(FileNameWithExtension + " is using letters instead of numbers. The script has stopped for your own protection.");
-    }
-    int prevframe = 0;
-    if (frame != 0)
-    {
-        prevframe = (frame - 1);
-    }
-    if (frame < 0)
-    {
-        throw new ScriptException(spriteName + " is using an invalid numbering scheme. The script has stopped for your own protection.");
-    }
-    string[] dupFiles = Directory.GetFiles(importFolder, FileNameWithExtension, SearchOption.AllDirectories);
-    if (dupFiles.Length > 1)
-        throw new ScriptException("Duplicate file detected. There are " + dupFiles.Length + " files named: " + FileNameWithExtension);
-    var prevFrameName = spriteName + "_" + prevframe.ToString() + ".png";
-    string[] previousFrameFiles = Directory.GetFiles(importFolder, prevFrameName, SearchOption.AllDirectories);
-    if (previousFrameFiles.Length < 1)
-        throw new ScriptException(spriteName + " is missing one or more indexes. The detected missing index is: " + prevFrameName);
-}
+string packDir = Path.Combine(ExePath, "Packager");
+Directory.CreateDirectory(packDir);
 
-// Get directory paths
-string workDirectory = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).Substring(6);
-System.IO.DirectoryInfo dir = System.IO.Directory.CreateDirectory(workDirectory + Path.DirectorySeparatorChar + "Packager");
-
-// Clear any files if they already exist
-foreach (FileInfo file in dir.GetFiles())
-    file.Delete();
-foreach (DirectoryInfo di in dir.GetDirectories())
-    di.Delete(true);
-
-// Start export of all existing textures
-
-int progress = 0;
-string exportedTexturesFolder = dir.FullName + Path.DirectorySeparatorChar + "Textures" + Path.DirectorySeparatorChar;
-TextureWorker worker = new TextureWorker();
-Dictionary<string, int[]> assetCoordinateDict = new Dictionary<string, int[]>();
-Dictionary<string, string> assetTypeDict = new Dictionary<string, string>();
-
-Directory.CreateDirectory(exportedTexturesFolder);
-
-SetProgressBar(null, "Existing Textures Exported", 0, Data.TexturePageItems.Count);
-StartProgressBarUpdater();
-
-await DumpSprites();
-await DumpFonts();
-await DumpBackgrounds();
-worker.Cleanup();
-
-await StopProgressBarUpdater();
-HideProgressBar();
-
-async Task DumpSprites()
-{
-    await Task.Run(() => Parallel.ForEach(Data.Sprites, DumpSprite));
-}
-
-async Task DumpBackgrounds()
-{
-    await Task.Run(() => Parallel.ForEach(Data.Backgrounds, DumpBackground));
-}
-
-async Task DumpFonts()
-{
-    await Task.Run(() => Parallel.ForEach(Data.Fonts, DumpFont));
-}
-
-void DumpSprite(UndertaleSprite sprite)
-{
-    for (int i = 0; i < sprite.Textures.Count; i++)
-    {
-        if (sprite.Textures[i]?.Texture != null)
-        {
-            UndertaleTexturePageItem tex = sprite.Textures[i].Texture;
-            worker.ExportAsPNG(tex, exportedTexturesFolder + sprite.Name.Content + "_" + i + ".png");
-            assetCoordinateDict.Add(sprite.Name.Content + "_" + i, new int[] { tex.TargetX, tex.TargetY, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
-            assetTypeDict.Add(sprite.Name.Content + "_" + i, "spr");
-        }
-    }
-
-    AddProgress(sprite.Textures.Count);
-}
-
-void DumpFont(UndertaleFont font)
-{
-    if (font.Texture != null)
-    {
-        UndertaleTexturePageItem tex = font.Texture;
-        worker.ExportAsPNG(tex, exportedTexturesFolder + font.Name.Content + ".png");
-        assetCoordinateDict.Add(font.Name.Content, new int[] { tex.TargetX, tex.TargetY, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
-        assetTypeDict.Add(font.Name.Content, "fnt");
-
-        AddProgress(1);
-    }
-}
-
-void DumpBackground(UndertaleBackground background)
-{
-    if (background.Texture != null)
-    {
-        UndertaleTexturePageItem tex = background.Texture;
-        worker.ExportAsPNG(tex, exportedTexturesFolder + background.Name.Content + ".png");
-        assetCoordinateDict.Add(background.Name.Content, new int[] { tex.TargetX, tex.TargetY, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
-        assetTypeDict.Add(background.Name.Content, "bg");
-
-        AddProgress(1);
-    }
-}
-
-// End export
-
-string sourcePath = exportedTexturesFolder;
+string sourcePath = importFolder;
 string searchPattern = "*.png";
-string outName = dir.FullName + Path.DirectorySeparatorChar + "atlas.txt";
+string outName = Path.Combine(packDir, "atlas.txt");
 int textureSize = 2048;
 int PaddingValue = 2;
 bool debug = false;
-
-// Add imported textures to existing textures, overwrite those with the same name.
-DirectoryInfo textureDirectory = new DirectoryInfo(importFolder);
-FileInfo[] files = textureDirectory.GetFiles(searchPattern, SearchOption.AllDirectories);
-foreach (FileInfo file in files)
-{
-    string destFile = System.IO.Path.Combine(exportedTexturesFolder, file.Name);
-    string sourceFile = System.IO.Path.Combine(importFolder, file.Name);
-    string stripped = Path.GetFileNameWithoutExtension(sourceFile);
-    if (assetCoordinateDict.ContainsKey(stripped))
-        assetCoordinateDict.Remove(stripped);
-    System.IO.File.Copy(sourceFile, destFile, true);
-}
-
-try
-{
-    string[] marginLines = System.IO.File.ReadAllLines(importFolder + Path.DirectorySeparatorChar + "margins.txt");
-    foreach (String str in marginLines)
-    {
-        string key = str.Substring(0, str.IndexOf(','));
-        string tmp = str;
-        tmp = tmp.Substring(str.IndexOf(',') + 1);
-        int[] marginValues = new int[6];
-        for (int i = 0; i < 5; i++)
-        {
-            marginValues[i] = Int32.Parse(tmp.Substring(0, tmp.IndexOf(',')), System.Globalization.NumberStyles.Integer);
-            tmp = tmp.Substring(tmp.IndexOf(',') + 1);
-        }
-        marginValues[5] = Int32.Parse(tmp, System.Globalization.NumberStyles.Integer);
-        if (assetCoordinateDict.ContainsKey(key))
-            assetCoordinateDict[key] = marginValues;
-        else
-            assetCoordinateDict.Add(key, marginValues);
-    }
-}
-catch (IOException e)
-{
-    if (!ScriptQuestion("Margin values were not found.\nImport with default values?"))
-        return;
-}
-
-// Delete all existing Textures and TextureSheets
-Data.TexturePageItems.Clear();
-Data.EmbeddedTextures.Clear();
-
-// Run the texture packer using borrowed and slightly modified code from the
-// Texture packer sourced above
 Packer packer = new Packer();
 packer.Process(sourcePath, searchPattern, textureSize, PaddingValue, debug);
 packer.SaveAtlasses(outName);
@@ -234,7 +37,7 @@ string prefix = outName.Replace(Path.GetExtension(outName), "");
 int atlasCount = 0;
 foreach (Atlas atlas in packer.Atlasses)
 {
-    string atlasName = String.Format(prefix + "{0:000}" + ".png", atlasCount);
+    string atlasName = Path.Combine(packDir, String.Format(prefix + "{0:000}" + ".png", atlasCount));
     Bitmap atlasBitmap = new Bitmap(atlasName);
     UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
     texture.Name = new UndertaleString("Texture " + ++lastTextPage);
@@ -251,6 +54,10 @@ foreach (Atlas atlas in packer.Atlasses)
             texturePageItem.SourceY = (ushort)n.Bounds.Y;
             texturePageItem.SourceWidth = (ushort)n.Bounds.Width;
             texturePageItem.SourceHeight = (ushort)n.Bounds.Height;
+            texturePageItem.TargetX = 0;
+            texturePageItem.TargetY = 0;
+            texturePageItem.TargetWidth = (ushort)n.Bounds.Width;
+            texturePageItem.TargetHeight = (ushort)n.Bounds.Height;
             texturePageItem.BoundingWidth = (ushort)n.Bounds.Width;
             texturePageItem.BoundingHeight = (ushort)n.Bounds.Height;
             texturePageItem.TexturePage = texture;
@@ -260,43 +67,40 @@ foreach (Atlas atlas in packer.Atlasses)
 
             // String processing
             string stripped = Path.GetFileNameWithoutExtension(n.Texture.Source);
-            int firstUnderscore = stripped.IndexOf('_');
-            string spriteType = "";
-            try
+
+            SpriteType spriteType = GetSpriteType(n.Texture.Source);
+
+            if (importAsSprite)
             {
-                if (assetTypeDict.ContainsKey(stripped))
-                    spriteType = assetTypeDict[stripped];
-                else
-                    spriteType = stripped.Substring(0, firstUnderscore);
-            }
-            catch (Exception e)
-            {
-                if (stripped.Equals("background0") || stripped.Equals("background1"))
+                if ((spriteType == SpriteType.Unknown) || (spriteType == SpriteType.Font))
                 {
-                    UndertaleBackground background = Data.Backgrounds.ByName(stripped); //Use stripped instead of sprite name or else the last index calculation gives us a bad string.
-                    background.Texture = texturePageItem;
-                    setTextureTargetBounds(texturePageItem, stripped, n);
-                    continue;
-                }
-                else
-                {
-                    ScriptMessage("Error: Image " + stripped + " has an invalid name.");
-                    continue;
+                    spriteType = SpriteType.Sprite;
                 }
             }
+
             setTextureTargetBounds(texturePageItem, stripped, n);
-            // Special Cases for backgrounds and fonts
-            if (spriteType.Equals("bg"))
+
+
+            if (spriteType == SpriteType.Background)
             {
-                UndertaleBackground background = Data.Backgrounds.ByName(stripped); // Use stripped instead of sprite name or else the last index calculation gives us a bad string.
-                background.Texture = texturePageItem;
+                UndertaleBackground background = Data.Backgrounds.ByName(stripped);
+                if (background != null)
+                {
+                    background.Texture = texturePageItem;
+                }
+                else
+                {
+                    // No background found, let's make one
+                    UndertaleString backgroundUTString = Data.Strings.MakeString(stripped);
+                    UndertaleBackground newBackground = new UndertaleBackground();
+                    newBackground.Name = backgroundUTString;
+                    newBackground.Transparent = false;
+                    newBackground.Preload = false;
+                    newBackground.Texture = texturePageItem;
+                    Data.Backgrounds.Add(newBackground);
+                }
             }
-            else if (spriteType.Equals("fnt"))
-            {
-                UndertaleFont font = Data.Fonts.ByName(stripped); // Use stripped instead of sprite name or else the last index calculation gives us a bad string.
-                font.Texture = texturePageItem;
-            }
-            else
+            else if (spriteType == SpriteType.Sprite)
             {
                 // Get sprite to add this texture to
                 string spriteName;
@@ -386,28 +190,15 @@ foreach (Atlas atlas in packer.Atlasses)
     atlasCount++;
 }
 
+HideProgressBar();
 ScriptMessage("Import Complete!");
-
 
 void setTextureTargetBounds(UndertaleTexturePageItem tex, string textureName, Node n)
 {
-    if (assetCoordinateDict.ContainsKey(textureName))
-    {
-        int[] coords = assetCoordinateDict[textureName];
-        tex.TargetX = (ushort)coords[0];
-        tex.TargetY = (ushort)coords[1];
-        tex.TargetWidth = (ushort)coords[2];
-        tex.TargetHeight = (ushort)coords[3];
-        tex.BoundingWidth = (ushort)coords[4];
-        tex.BoundingHeight = (ushort)coords[5];
-    }
-    else
-    {
-        tex.TargetX = 0;
-        tex.TargetY = 0;
-        tex.TargetWidth = (ushort)n.Bounds.Width;
-        tex.TargetHeight = (ushort)n.Bounds.Height;
-    }
+    tex.TargetX = 0;
+    tex.TargetY = 0;
+    tex.TargetWidth = (ushort)n.Bounds.Width;
+    tex.TargetHeight = (ushort)n.Bounds.Height;
 }
 
 public class TextureInfo
@@ -416,6 +207,15 @@ public class TextureInfo
     public int Width;
     public int Height;
 }
+
+public enum SpriteType
+{
+    Sprite,
+    Background,
+    Font,
+    Unknown
+}
+
 
 public enum SplitType
 {
@@ -698,4 +498,122 @@ public class Packer
         return img2;
         // DPI FIX END
     }
+}
+
+SpriteType GetSpriteType(string path)
+{
+    string folderPath = Path.GetDirectoryName(path);
+    string folderName = new DirectoryInfo(folderPath).Name;
+    string lowerName = folderName.ToLower();
+
+    if (lowerName == "backgrounds" || lowerName == "background")
+    {
+        return SpriteType.Background;
+    }
+    else if (lowerName == "fonts" || lowerName == "font")
+    {
+        return SpriteType.Font;
+    }
+    else if (lowerName == "sprites" || lowerName == "sprite")
+    {
+        return SpriteType.Sprite;
+    }
+    return SpriteType.Unknown;
+}
+
+string CheckValidity()
+{
+    bool recursiveCheck = ScriptQuestion(@"This script imports all sprites in all subdirectories recursively.
+If an image file is in a folder named ""Backgrounds"", then the image will be imported as a background.
+Otherwise, the image will be imported as a sprite.
+Do you want to continue?");
+    if (!recursiveCheck)
+        throw new ScriptException("Script cancelled.");
+
+    // Get import folder
+    string importFolder = PromptChooseDirectory();
+    if (importFolder == null)
+        throw new ScriptException("The import folder was not set.");
+
+    //Stop the script if there's missing sprite entries or w/e.
+    bool hadMessage = false;
+    string[] dirFiles = Directory.GetFiles(importFolder, "*.png", SearchOption.AllDirectories);
+    foreach (string file in dirFiles)
+    {
+        string FileNameWithExtension = Path.GetFileName(file);
+        string stripped = Path.GetFileNameWithoutExtension(file);
+        int lastUnderscore = stripped.LastIndexOf('_');
+        string spriteName = "";
+
+        SpriteType spriteType = GetSpriteType(file);
+
+        if ((spriteType != SpriteType.Sprite) && (spriteType != SpriteType.Background))
+        {
+            if (!hadMessage)
+            {
+                hadMessage = true;
+                importAsSprite = ScriptQuestion(FileNameWithExtension + @" is in an incorrectly-named folder (valid names being ""Sprites"" and ""Backgrounds""). Would you like to import these images as sprites?
+Pressing ""No"" will cause the program to ignore these images.");
+            }
+
+            if (!importAsSprite)
+            {
+                continue;
+            }
+            else
+            {
+                spriteType = SpriteType.Sprite;
+            }
+        }
+
+        // Check for duplicate filenames
+        string[] dupFiles = Directory.GetFiles(importFolder, FileNameWithExtension, SearchOption.AllDirectories);
+        if (dupFiles.Length > 1)
+            throw new ScriptException("Duplicate file detected. There are " + dupFiles.Length + " files named: " + FileNameWithExtension);
+
+        // Sprites can have multiple frames! Do some sprite-specific checking.
+        if (spriteType == SpriteType.Sprite)
+        {
+            try
+            {
+                spriteName = stripped.Substring(0, lastUnderscore);
+            }
+            catch
+            {
+                throw new ScriptException("Getting the sprite name of " + FileNameWithExtension + " failed.");
+            }
+            Int32 validFrameNumber = 0;
+            try
+            {
+                validFrameNumber = Int32.Parse(stripped.Substring(lastUnderscore + 1));
+            }
+            catch
+            {
+                throw new ScriptException("The index of " + FileNameWithExtension + " could not be determined.");
+            }
+            int frame = 0;
+            try
+            {
+                frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
+            }
+            catch
+            {
+                throw new ScriptException(FileNameWithExtension + " is using letters instead of numbers. The script has stopped for your own protection.");
+            }
+            int prevframe = 0;
+            if (frame != 0)
+            {
+                prevframe = (frame - 1);
+            }
+            if (frame < 0)
+            {
+                throw new ScriptException(spriteName + " is using an invalid numbering scheme. The script has stopped for your own protection.");
+            }
+            var prevFrameName = spriteName + "_" + prevframe.ToString() + ".png";
+            string[] previousFrameFiles = Directory.GetFiles(importFolder, prevFrameName, SearchOption.AllDirectories);
+            if (previousFrameFiles.Length < 1)
+                throw new ScriptException(spriteName + " is missing one or more indexes. The detected missing index is: " + prevFrameName);
+        }
+    }
+    return importFolder;
 }
