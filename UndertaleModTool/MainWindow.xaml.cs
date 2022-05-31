@@ -1485,6 +1485,9 @@ namespace UndertaleModTool
 
         private void MainTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            if (Highlighted is UndertaleRoom room && Selected is not UndertaleRoom)
+                UndertaleRoomEditor.CheckAndRearrangeLayers(room);
+
             OpenInTab(Highlighted);
         }
 

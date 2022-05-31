@@ -103,6 +103,23 @@ namespace UndertaleModTool
             visualOffProp.SetValue(roomCanvas, prevOffset);
         }
 
+        public static void CheckAndRearrangeLayers(UndertaleRoom room)
+        {
+            bool ordered = true;
+            for (int i = 0; i < room.Layers.Count - 1; i++)
+            {
+                if (room.Layers[i].LayerDepth > room.Layers[i + 1].LayerDepth)
+                {
+                    ordered = false;
+                    break;
+                }
+            }
+
+            if (!ordered)
+                if (MainWindow.ShowQuestion("Room layers are not ordered by depth.\nRearrange them?", MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                    room.RearrangeLayers();
+        }
+
         private void ExportAsPNG_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog dlg = new();
@@ -167,19 +184,8 @@ namespace UndertaleModTool
                 {
                     LayerZIndexConverter.ProcessOnce = true;
 
-                    bool ordered = true;
-                    for (int i = 0; i < room.Layers.Count - 1; i++)
-                    {
-                        if (room.Layers[i].LayerDepth > room.Layers[i + 1].LayerDepth)
-                        {
-                            ordered = false;
-                            break;
-                        }
-                    }
-
-                    if (!ordered)
-                        if (MainWindow.ShowQuestion("Room layers are not ordered by depth.\nRearrange them?", MessageBoxImage.Warning) == MessageBoxResult.Yes)
-                            room.RearrangeLayers();
+                    if (IsLoaded)
+                        CheckAndRearrangeLayers(room);
 
                     Parallel.ForEach(room.Layers, (layer) =>
                     {
