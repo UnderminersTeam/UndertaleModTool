@@ -1295,14 +1295,21 @@ namespace UndertaleModTool
                 }
             }
 
-            Layer layer = new();
-            layer.LayerName = data.Strings.MakeString(name);
-            layer.LayerId = largest_layerid + 1;
-            layer.LayerType = type;
-            layer.LayerDepth = (int)layerDepth;
-            layer.Data = new T();
+            Layer layer = new()
+            {
+                LayerName = data.Strings.MakeString(name),
+                LayerId = largest_layerid + 1,
+                LayerType = type,
+                LayerDepth = (int)layerDepth,
+                Data = new T()
+            };
             room.Layers.Add(layer);
             room.UpdateBGColorLayer();
+
+            LayerZIndexConverter.ProcessOnce = true;
+            foreach (Layer l in room.Layers)
+                l.UpdateZIndex();
+            layer.ParentRoom = room;
 
             if (layer.LayerType == LayerType.Assets)
             {
@@ -1322,7 +1329,6 @@ namespace UndertaleModTool
             }
 
             SelectObject(layer);
-            room.SetupRoom(false);
         }
 
         private void AddObjectInstance(UndertaleRoom room)
