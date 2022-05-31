@@ -1240,7 +1240,7 @@ namespace UndertaleModTool
                 }
             }
 
-            int layerDepth = 0;
+            long layerDepth = 0;
             if (room.Layers.Count > 0)
             {
                 layerDepth = room.Layers.Select(l => l.LayerDepth).Max();
@@ -1293,7 +1293,7 @@ namespace UndertaleModTool
             layer.LayerName = data.Strings.MakeString(name);
             layer.LayerId = largest_layerid + 1;
             layer.LayerType = type;
-            layer.LayerDepth = layerDepth;
+            layer.LayerDepth = (int)layerDepth;
             layer.Data = new T();
             room.Layers.Add(layer);
             room.UpdateBGColorLayer();
