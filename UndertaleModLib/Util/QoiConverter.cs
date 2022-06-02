@@ -69,6 +69,7 @@ namespace UndertaleModLib.Util
             ReadOnlySpan<byte> pixelData = bytes.Slice(12, length);
 
             Bitmap bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            bmp.SetResolution(96.0f, 96.0f);
 
             BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
             if (data.Stride != width * 4)
