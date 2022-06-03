@@ -11,7 +11,7 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModTool
 {
-    public class MaskImageConverer : IMultiValueConverter
+    public class MaskImageConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
