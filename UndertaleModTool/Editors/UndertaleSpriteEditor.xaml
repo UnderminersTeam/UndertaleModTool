@@ -210,11 +210,12 @@
                     <StackPanel Name="MaskEditor">
                         <Viewbox Stretch="None">
                             <Border BorderThickness="2" BorderBrush="Gray" Name="MaskBorder">
-                                <Image Stretch="None" Name="MaskImage">
+                                <Image Stretch="None" Name="MaskImage"
+                                       SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
                                     <Image.Source>
                                         <MultiBinding>
                                             <MultiBinding.Converter>
-                                                <local:MaskImageConverer/>
+                                                <local:MaskImageConverter/>
                                             </MultiBinding.Converter>
                                             <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="DataContext.Width" Mode="OneWay"/>
                                             <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="DataContext.Height" Mode="OneWay"/>
