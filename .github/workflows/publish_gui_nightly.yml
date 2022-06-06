@@ -1,0 +1,116 @@
+name: Publish continuous prerelease of UndertaleModTool
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build_gui:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        configuration: [Debug]
+        bundled: [true]
+        singlefile: [true, false]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: |
+        dotnet build UndertaleModTool --no-restore
+        dotnet build UndertaleModToolUpdater --no-restore
+    - name: Publish ${{ matrix.os }} GUI
+      run: |
+        dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r win-x64 --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.singlefile }} --output ${{ matrix.os }}
+        dotnet publish UndertaleModToolUpdater -c ${{ matrix.configuration }} -r win-x64 --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output ${{ matrix.os }}/Updater
+    - name: Copy external files
+      run: |
+        cp ./README.md ./${{ matrix.os }}
+        cp ./SCRIPTS.md ./${{ matrix.os }}
+        cp ./LICENSE.txt ./${{ matrix.os }}
+    - name: Create zip for nightly release Windows GUI
+      run: |
+        7z a -tzip GUI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip ${{ matrix.os }} -mx0 
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+          path: GUI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip
+
+  build_cli:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        configuration: [Debug]
+        bundled: [true]
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: macOS-latest
+            rid: osx-x64
+          - os: windows-latest
+            rid: win-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore UndertaleModCli
+    - name: Build
+      run: dotnet build UndertaleModCli --no-restore
+    - name: Publish ${{ matrix.os }} CLI
+      run: dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output CLI-${{ matrix.os }}
+    - name: Copy external files
+      run: |
+        cp ./README.md ./CLI-${{ matrix.os }}/
+        cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
+    - name: Create zip for nightly release CLI
+      run: |
+        7z a -tzip CLI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}.zip CLI-${{ matrix.os }} -mx0 
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+          path: CLI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}.zip
+
+  upload:
+
+    needs: [build_gui, build_cli]
+    runs-on: windows-latest
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v2
+    - name: Delete tag and release
+      uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      with:
+        delete_release: true # default: false
+        tag_name: latest # tag name to delete
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: latest
+        name: Latest Build
+        files: |
+          artifact/*
+        body: | 
+          This is an automatically updating **bleeding edge** build of UndertaleModTool. There *will* be bugs! If you encounter any, please make an issue on GitHub or join the Underminers Discord for more help!
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
