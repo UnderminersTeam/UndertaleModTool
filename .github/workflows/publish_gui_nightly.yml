@@ -92,4 +92,4 @@ jobs:
       run: |
         iwr -outf ghr_v0.14.0_windows_amd64.zip https://github.com/tcnksm/ghr/releases/download/v0.14.0/ghr_v0.14.0_windows_amd64.zip
         7z x ghr_v0.14.0_windows_amd64.zip -y
-        "ghr_v0.14.0_windows_amd64/ghr" -recreate -n "Latest Build" -b "This is the latest build of UndertaleModTool. There may be bugs! If there are, please make an issue on GitHub or join the Underminers Discord for more help!" continuous artifacts/
+        "ghr_v0.14.0_windows_amd64/ghr" -recreate -n "Latest Build" -b "This is an automatically updating **bleeding edge** build of UndertaleModTool. There *will* be bugs! If you encounter any, please make an issue on GitHub or join the Underminers Discord for more help!" continuous artifacts/
