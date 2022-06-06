@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: [windows-latest]
         configuration: [Debug]
-        bundled: [true, false]
+        bundled: [true]
         singlefile: [true, false]
 
     runs-on: ${{ matrix.os }}
@@ -83,7 +83,7 @@ jobs:
         mkdir artifacts
         7z a -tzip artifacts/GUI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip ${{ matrix.os }} -mx0 
 
-  Upload:
+  upload:
 
     needs: [build_gui, build_cli]
     runs-on: windows-latest
@@ -92,4 +92,4 @@ jobs:
       run: |
         iwr -outf ghr_v0.14.0_windows_amd64.zip https://github.com/tcnksm/ghr/releases/download/v0.14.0/ghr_v0.14.0_windows_amd64.zip
         7z x ghr_v0.14.0_windows_amd64.zip -y
-        "ghr_v0.14.0_windows_amd64/ghr" -recreate -n "Latest Build" -b "This is the latest build of UndertaleModTool. There may be bugs! If there are, please make an issue on GitHub or join the Underminers discord for more help!" continuous artifacts/
+        "ghr_v0.14.0_windows_amd64/ghr" -recreate -n "Latest Build" -b "This is the latest build of UndertaleModTool. There may be bugs! If there are, please make an issue on GitHub or join the Underminers Discord for more help!" continuous artifacts/
