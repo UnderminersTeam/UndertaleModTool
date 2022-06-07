@@ -428,7 +428,8 @@
                                         <TextBlock>
                                             <TextBlock.Text>
                                                 <MultiBinding Converter="{StaticResource TabTitleConverter}" Mode="OneWay">
-                                                    <Binding Path="OpenedObject" Mode="OneTime"/>
+                                                    <Binding Mode="OneTime"/>
+                                                    <Binding Path="OpenedObject" Mode="OneWay"/>
                                                     <!-- for notification only -->
                                                     <Binding Path="OpenedObject.Name.Content" Mode="OneWay"/>
                                                 </MultiBinding>
