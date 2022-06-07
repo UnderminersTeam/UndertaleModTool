@@ -140,7 +140,7 @@ namespace UndertaleModTool
             else if (obj is UndertaleString str)
             {
                 string stringFirstLine = str.Content;
-                int stringLength = stringFirstLine.IndexOf('\n');
+                int stringLength = StringTitleConverter.NewLineRegex.Match(stringFirstLine).Index;
                 if (stringLength != -1)
                     stringFirstLine = stringFirstLine[..stringLength] + " ...";
 
