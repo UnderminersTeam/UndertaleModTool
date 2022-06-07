@@ -139,12 +139,12 @@ namespace UndertaleModTool
             }
             else if (obj is UndertaleString str)
             {
-                string stringLine = str.Content;
-                int stringLength = stringLine.IndexOf('\n');
+                string stringFirstLine = str.Content;
+                int stringLength = stringFirstLine.IndexOf('\n');
                 if (stringLength != -1)
-                    stringLine = stringLine[..stringLength] + " ...";
+                    stringFirstLine = stringFirstLine[..stringLength] + " ...";
 
-                title = "String - " + stringLine;
+                title = "String - " + stringFirstLine;
             }
             else if (obj is UndertaleChunkVARI)
             {
@@ -3614,26 +3614,6 @@ result in loss of work.");
         {
             Heading = heading;
             Description = description;
-        }
-    }
-
-    public class StringTitleConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value is not string str)
-                return null;
-
-            if (str.Length > 256)
-                str = str[..256] + "...";
-            str = str.Replace('\n', ' ');
-
-            return str;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 }
