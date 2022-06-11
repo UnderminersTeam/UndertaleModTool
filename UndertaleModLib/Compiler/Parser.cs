@@ -660,10 +660,19 @@ namespace UndertaleModLib.Compiler
             {
                 Statement result = new Statement(Statement.StatementKind.FunctionDef, EnsureTokenKind(TokenKind.KeywordFunction).Token);
                 Statement args = new Statement();
+                bool expression = true;
+                Statement destination = null;
+
+                if (GetNextTokenKind() == TokenKind.ProcFunction)
+                {
+                    expression = false;
+                    Statement s = remainingStageOne.Dequeue();
+                    destination = new Statement(Statement.StatementKind.ExprFuncName, s.Token) { ID = s.ID };
+                }
 
                 EnsureTokenKind(TokenKind.OpenParen);
 
-                while (remainingStageOne.Count > 0 && !hasError && !IsNextToken(TokenKind.EOF) && !IsNextToken(TokenKind.CloseParen))
+                while (remainingStageOne.Count > 0 && !hasError && !IsNextToken(TokenKind.EOF, TokenKind.CloseParen))
                 {
                     Statement expr = ParseExpression(context);
                     if (expr != null)
@@ -682,7 +691,16 @@ namespace UndertaleModLib.Compiler
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
                 result.Children.Add(ParseStatement(context));
-                return result;
+                if (expression)
+                    return result;
+                else // Whatever you call non-anonymous definitions
+                {
+                    Statement trueResult = new Statement(Statement.StatementKind.Assign, new Lexer.Token(TokenKind.Assign));
+                    trueResult.Children.Add(destination);
+                    trueResult.Children.Add(new Statement(Statement.StatementKind.Token, trueResult.Token));
+                    trueResult.Children.Add(result);
+                    return trueResult;
+                }
             }
 
             private static Statement ParseFor(CompileContext context)

@@ -1173,6 +1173,14 @@ namespace UndertaleModLib.Decompiler
                     }
                 }
 
+                // Someone enlighten me on structs, I'm steering clear for now.
+                // And find the "right" way to do this.
+                if (Value is FunctionDefinition functionVal && functionVal.Subtype != FunctionDefinition.FunctionType.Struct)
+                {
+                    functionVal.IsStatement = true;
+                    return functionVal.ToString(context);
+                }
+
                 string varPrefix = (HasVarKeyword ? "var " : "");
 
                 // Check for possible ++, --, or operation equal (for single vars)
@@ -1306,6 +1314,7 @@ namespace UndertaleModLib.Decompiler
             public UndertaleCode FunctionBodyCodeEntry { get; private set; }
             public Block FunctionBodyEntryBlock { get; private set; }
             public FunctionType Subtype { get; private set; }
+            public bool IsStatement = false; // I know it's an expression, yes. But I'm not duplicating the rest.
 
             internal List<Expression> Arguments;
 
@@ -1354,12 +1363,19 @@ namespace UndertaleModLib.Decompiler
                     FunctionDefinition def;
                     var oldDecompilingStruct = context.DecompilingStruct;
                     var oldReplacements = context.ArgumentReplacements;
+
                     if (Subtype == FunctionType.Struct)
                         context.DecompilingStruct = true;
                     else
                     {
                         context.DecompilingStruct = false;
-                        sb.Append("function(");
+                        sb.Append("function");
+                        if (IsStatement)
+                        {
+                            sb.Append(" ");
+                            sb.Append((context.Statements[0].Last() as AssignmentStatement).Destination.Var.Name.Content);
+                        }
+                        sb.Append("(");
                         for (int i = 0; i < FunctionBodyCodeEntry.ArgumentsCount; ++i)
                         {
                             if (i != 0)
