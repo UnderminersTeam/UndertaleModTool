@@ -114,7 +114,7 @@ jobs:
         name: Bleeding Edge
         prerelease: true
         files: |
-          artifact/*
+          /home/runner/work/UndertaleModTool/UndertaleModTool/artifact/*
         body: | 
           This is an automatically updating **bleeding edge** build of UndertaleModTool. There *will* be bugs! If you encounter any, please make an issue on GitHub or join the Underminers Discord for more help!
       env:
