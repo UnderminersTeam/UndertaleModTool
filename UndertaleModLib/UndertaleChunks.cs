@@ -343,27 +343,27 @@ namespace UndertaleModLib
             // Do a length check on room layers to see if this is 2022.1 or higher
             if (!reader.undertaleData.GMS2022_1 && reader.undertaleData.GMS2_3)
             {
-                int returnTo = reader.Offset;
+                uint returnTo = reader.Position;
 
                 // Iterate over all rooms until a length check is performed
                 int roomCount = reader.ReadInt32();
                 bool finished = false;
-                for (int roomIndex = 0; roomIndex < roomCount && !finished; roomIndex++)
+                for (uint roomIndex = 0; roomIndex < roomCount && !finished; roomIndex++)
                 {
                     // Advance to room data we're interested in (and grab pointer for next room)
-                    reader.Offset = returnTo + 4 + (4 * roomIndex);
-                    int roomPtr = reader.ReadInt32();
-                    reader.Offset = roomPtr + (22 * 4);
+                    reader.Position = returnTo + 4 + (4 * roomIndex);
+                    uint roomPtr = (uint)reader.ReadInt32();
+                    reader.Position = roomPtr + (22 * 4);
 
                     // Get the pointer for this room's layer list, as well as pointer to sequence list
-                    int layerListPtr = reader.ReadInt32();
+                    uint layerListPtr = (uint)reader.ReadInt32();
                     int seqnPtr = reader.ReadInt32();
-                    reader.Offset = layerListPtr;
+                    reader.Position = layerListPtr;
                     int layerCount = reader.ReadInt32();
                     if (layerCount >= 1)
                     {
                         // Get pointer into the individual layer data (plus 8 bytes) for the first layer in the room
-                        int jumpOffset = reader.ReadInt32() + 8;
+                        uint jumpOffset = (uint)(reader.ReadInt32() + 8);
 
                         // Find the offset for the end of this layer
                         int nextOffset;
@@ -373,40 +373,40 @@ namespace UndertaleModLib
                             nextOffset = reader.ReadInt32(); // (pointer to next element in the layer list)
 
                         // Actually perform the length checks, depending on layer data
-                        reader.Offset = jumpOffset;
+                        reader.Position = jumpOffset;
                         switch ((LayerType)reader.ReadInt32())
                         {
                             case LayerType.Background:
-                                if (nextOffset - reader.Offset > 16 * 4)
+                                if (nextOffset - reader.Position > 16 * 4)
                                     reader.undertaleData.GMS2022_1 = true;
                                 finished = true;
                                 break;
                             case LayerType.Instances:
-                                reader.Offset += 6 * 4;
+                                reader.Position += 6 * 4;
                                 int instanceCount = reader.ReadInt32();
-                                if (nextOffset - reader.Offset != (instanceCount * 4))
+                                if (nextOffset - reader.Position != (instanceCount * 4))
                                     reader.undertaleData.GMS2022_1 = true;
                                 finished = true;
                                 break;
                             case LayerType.Assets:
-                                reader.Offset += 6 * 4;
+                                reader.Position += 6 * 4;
                                 int tileOffset = reader.ReadInt32();
                                 if (tileOffset != reader.Position + 8)
                                     reader.undertaleData.GMS2022_1 = true;
                                 finished = true;
                                 break;
                             case LayerType.Tiles:
-                                reader.Offset += 7 * 4;
+                                reader.Position += 7 * 4;
                                 int tileMapWidth = reader.ReadInt32();
                                 int tileMapHeight = reader.ReadInt32();
-                                if (nextOffset - reader.Offset != (tileMapWidth * tileMapHeight * 4))
+                                if (nextOffset - reader.Position != (tileMapWidth * tileMapHeight * 4))
                                     reader.undertaleData.GMS2022_1 = true;
                                 finished = true;
                                 break;
                             case LayerType.Effect:
-                                reader.Offset += 7 * 4;
+                                reader.Position += 7 * 4;
                                 int propertyCount = reader.ReadInt32();
-                                if (nextOffset - reader.Offset != (propertyCount * 3 * 4))
+                                if (nextOffset - reader.Position != (propertyCount * 3 * 4))
                                     reader.undertaleData.GMS2022_1 = true;
                                 finished = true;
                                 break;
@@ -414,7 +414,7 @@ namespace UndertaleModLib
                     }
                 }
 
-                reader.Offset = returnTo;
+                reader.Position = returnTo;
             }
         }
     }

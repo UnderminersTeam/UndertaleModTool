@@ -132,7 +132,7 @@ namespace UndertaleModLib
         }
     }
 
-    public class UndertaleReader : Util.BufferBinaryReader
+    public class UndertaleReader : Util.FileBinaryReader
     {
         /// <summary>
         /// function to delegate warning messages to
