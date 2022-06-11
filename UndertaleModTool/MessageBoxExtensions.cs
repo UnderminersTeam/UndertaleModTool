@@ -42,7 +42,7 @@ namespace UndertaleModTool
 		/// <param name="title">A <see cref="string"/> that specifies the title bar caption to display.</param>
 		/// <returns><see cref="MessageBoxResult.OK"/> or <see cref="MessageBoxResult.None"/> if
 		/// the <see cref="MessageBox"/> was cancelled.</returns>
-		public static MessageBoxResult ShowWarning(this Window window, string messageBoxText, string title = "UndertaleModTool")
+		public static MessageBoxResult ShowWarning(this Window window, string messageBoxText, string title = "Warning")
 		{
 			return ShowCore(window, messageBoxText, title, MessageBoxButton.OK, MessageBoxImage.Warning);
 		}
@@ -55,7 +55,7 @@ namespace UndertaleModTool
 		/// <param name="title">A <see cref="string"/> that specifies the title bar caption to display.</param>
 		/// <returns><see cref="MessageBoxResult.OK"/> or <see cref="MessageBoxResult.None"/> if
 		/// the <see cref="MessageBox"/> was cancelled.</returns>
-		public static MessageBoxResult ShowError(this Window window, string messageBoxText, string title = "UndertaleModTool")
+		public static MessageBoxResult ShowError(this Window window, string messageBoxText, string title = "Error")
 		{
 			return ShowCore(window, messageBoxText, title, MessageBoxButton.OK, MessageBoxImage.Error);
 		}

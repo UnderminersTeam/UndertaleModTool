@@ -26,6 +26,8 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleSpriteEditor : DataUserControl
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         public UndertaleSpriteEditor()
         {
             InitializeComponent();
@@ -33,8 +35,8 @@ namespace UndertaleModTool
 
         private void ExportAllSpine(SaveFileDialog dlg, UndertaleSprite sprite)
         {
-            MessageBox.Show("This seems to be a Spine sprite, .json and .atlas files will be exported together with the frames. " +
-                "PLEASE EDIT THEM CAREFULLY! SOME MANUAL EDITING OF THE JSON MAY BE REQUIRED! THE DATA IS EXPORTED AS-IS.", "Spine warning", MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
+            mainWindow.ShowWarning("This seems to be a Spine sprite, .json and .atlas files will be exported together with the frames. " +
+                                 "PLEASE EDIT THEM CAREFULLY! SOME MANUAL EDITING OF THE JSON MAY BE REQUIRED! THE DATA IS EXPORTED AS-IS.", "Spine warning");
 
             if (dlg.ShowDialog() == true)
             {
@@ -58,7 +60,7 @@ namespace UndertaleModTool
                             }
                             catch (Exception ex)
                             {
-                                MessageBox.Show("Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
+                                mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
                             }
                         }
 
@@ -69,7 +71,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to export: " + ex.Message, "Failed to export sprite", MessageBoxButton.OK, MessageBoxImage.Error);
+                    mainWindow.ShowError("Failed to export: " + ex.Message, "Failed to export sprite");
                 }
             }
         }
@@ -112,7 +114,7 @@ namespace UndertaleModTool
                             }
                             catch (Exception ex)
                             {
-                                MessageBox.Show("Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
+                                mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
                             }
                         }
                     }
@@ -124,17 +126,17 @@ namespace UndertaleModTool
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show("Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
+                            mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
                         }
                     }
                     else
                     {
-                        MessageBox.Show("No frames to export", "Failed to export sprite", MessageBoxButton.OK, MessageBoxImage.Error);
+                        mainWindow.ShowError("No frames to export", "Failed to export sprite");
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to export: " + ex.Message, "Failed to export sprite", MessageBoxButton.OK, MessageBoxImage.Error);
+                    mainWindow.ShowError("Failed to export: " + ex.Message, "Failed to export sprite");
                 }
             }
 
@@ -166,7 +168,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to import file: " + ex.Message, "Failed to import file", MessageBoxButton.OK, MessageBoxImage.Error);
+                    mainWindow.ShowError("Failed to import file: " + ex.Message, "Failed to import file");
                 }
             }
         }
@@ -189,7 +191,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to export file: " + ex.Message, "Failed to export file", MessageBoxButton.OK, MessageBoxImage.Error);
+                    mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
                 }
             }
         }
