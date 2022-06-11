@@ -26,6 +26,7 @@
         <local:CompareNumbersConverter x:Key="CompareNumbersConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/> <!-- (built-in converter) -->
         <local:TabTitleConverter x:Key="TabTitleConverter"/>
+        <local:StringTitleConverter x:Key="StringTitleConverter"/>
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="New" Executed="Command_New" />
@@ -345,7 +346,7 @@
                         <TreeViewItem Header="Strings" ItemsSource="{Binding Strings, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Strings, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleString}">
-                                    <TextBlock Text="{Binding Content}" />
+                                    <TextBlock Text="{Binding Content, Mode=OneWay, Converter={StaticResource StringTitleConverter}}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
@@ -428,7 +429,8 @@
                                         <TextBlock>
                                             <TextBlock.Text>
                                                 <MultiBinding Converter="{StaticResource TabTitleConverter}" Mode="OneWay">
-                                                    <Binding Path="OpenedObject" Mode="OneTime"/>
+                                                    <Binding Mode="OneTime"/>
+                                                    <Binding Path="OpenedObject" Mode="OneWay"/>
                                                     <!-- for notification only -->
                                                     <Binding Path="OpenedObject.Name.Content" Mode="OneWay"/>
                                                 </MultiBinding>

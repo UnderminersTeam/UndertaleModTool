@@ -62,6 +62,7 @@ namespace UndertaleModTool
 
         public object OpenedObject { get; set; }
         public string TabTitle { get; set; } = "Untitled";
+        public bool IsCustomTitle { get; set; }
         public int TabIndex { get; set; }
         public bool AutoClose { get; set; } = false;
 
@@ -69,8 +70,16 @@ namespace UndertaleModTool
         {
             OpenedObject = obj;
             TabIndex = tabIndex;
-            TabTitle = tabTitle ?? GetTitleForObject(obj);
             AutoClose = obj is DescriptionView;
+
+            IsCustomTitle = tabTitle is not null;
+            if (IsCustomTitle)
+            {
+                if (tabTitle.Length > 64)
+                    TabTitle = tabTitle[..64] + "...";
+                else
+                    TabTitle = tabTitle;
+            }
         }
 
         public static string GetTitleForObject(object obj)
@@ -128,9 +137,14 @@ namespace UndertaleModTool
                 else
                     Debug.WriteLine($"Could not handle type {obj.GetType()}");
             }
-            else if (obj is UndertaleString)
+            else if (obj is UndertaleString str)
             {
-                title = "String - " + ((UndertaleString)obj).Content;
+                string stringFirstLine = str.Content;
+                int stringLength = StringTitleConverter.NewLineRegex.Match(stringFirstLine).Index;
+                if (stringLength != -1)
+                    stringFirstLine = stringFirstLine[..stringLength] + " ...";
+
+                title = "String - " + stringFirstLine;
             }
             else if (obj is UndertaleChunkVARI)
             {
@@ -153,6 +167,9 @@ namespace UndertaleModTool
                 Debug.WriteLine($"Could not handle type {obj.GetType()}");
             }
 
+            if (title.Length > 64)
+                title = title[..64] + "...";
+
             return title;
         }
 
@@ -166,7 +183,13 @@ namespace UndertaleModTool
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            return Tab.GetTitleForObject(values[0]);
+            if (values[0] is not Tab tab)
+                return null;
+
+            if (!tab.IsCustomTitle)
+                tab.TabTitle = Tab.GetTitleForObject(values[1]);
+
+            return tab.TabTitle;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
