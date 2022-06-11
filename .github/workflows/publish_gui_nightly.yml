@@ -98,8 +98,6 @@ jobs:
     steps:
     - name: Download artifacts
       uses: actions/download-artifact@v2
-      with:
-        path: artifact
     - name: Delete tag and release
       uses: dev-drprasad/delete-tag-and-release@v0.2.0
       with:
@@ -114,7 +112,7 @@ jobs:
         name: Bleeding Edge
         prerelease: true
         files: |
-          /home/runner/work/UndertaleModTool/UndertaleModTool/artifact/*
+          *.zip
         body: | 
           This is an automatically updating **bleeding edge** build of UndertaleModTool. There *will* be bugs! If you encounter any, please make an issue on GitHub or join the Underminers Discord for more help!
       env:
