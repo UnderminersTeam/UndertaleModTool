@@ -104,7 +104,7 @@ namespace UndertaleModTool
 
                 if (mainWindow.Selected is null)
                 {
-                    MainWindow.ShowError("Nothing currently selected! This is currently unsupported.");
+                    mainWindow.ShowError("Nothing currently selected! This is currently unsupported.");
                     return;
                 }
                 else if (mainWindow.Selected is UndertaleGameObject gameObject)
@@ -116,7 +116,7 @@ namespace UndertaleModTool
                 }
                 else
                 {
-                    MainWindow.ShowError("Adding to non-objects is currently unsupported.");
+                    mainWindow.ShowError("Adding to non-objects is currently unsupported.");
                     return;
                 }
             }

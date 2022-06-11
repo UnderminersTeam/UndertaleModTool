@@ -454,7 +454,7 @@ namespace UndertaleModTool
                             foreach (Process instance in updaterInstances)
                             {
                                 if (!instance.WaitForExit(5000))
-                                    ShowWarning("UndertaleModToolUpdater app didn't exit.\nCan't delete its temp folder.");
+                                    this.ShowWarning("UndertaleModToolUpdater app didn't exit.\nCan't delete its temp folder.");
                                 else
                                     updaterClosed = true;
                             }
@@ -486,7 +486,7 @@ namespace UndertaleModTool
                             }
 
                             if (!deleted)
-                                ShowWarning($"The updater temp folder can't be deleted.\nError - {exMessage}.");
+                                this.ShowWarning($"The updater temp folder can't be deleted.\nError - {exMessage}.");
                         }
                     });
                 }
@@ -606,7 +606,7 @@ namespace UndertaleModTool
         {
             if (Data != null)
             {
-                if (MessageBox.Show("Warning: you currently have a project open.\nAre you sure you want to make a new project?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                if (this.ShowQuestion("Warning: you currently have a project open.\nAre you sure you want to make a new project?") == MessageBoxResult.No)
                     return false;
             }
             this.Dispatcher.Invoke(() =>
@@ -656,12 +656,12 @@ namespace UndertaleModTool
 
                     if (fileext == ".csx")
                     {
-                        if (MessageBox.Show($"Run {filepath} as a script?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
+                        if (this.ShowQuestion($"Run {filepath} as a script?") == MessageBoxResult.Yes)
                             await RunScript(filepath);
                     }
                     else if (IFF_EXTENSIONS.Contains(fileext) || fileext == ".dat" /* audiogroup */)
                     {
-                        if (MessageBox.Show($"Open {filepath} as a data file?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
+                        if (this.ShowQuestion($"Open {filepath} as a data file?") == MessageBoxResult.Yes)
                             await LoadFile(filepath, true);
                     }
                     // else, do something?
@@ -733,7 +733,7 @@ namespace UndertaleModTool
             if (CanSave)
             {
                 if (!CanSafelySave)
-                    ShowWarning("Errors occurred during loading. High chance of data loss! Proceed at your own risk.");
+                    this.ShowWarning("Errors occurred during loading. High chance of data loss! Proceed at your own risk.");
 
                 if (await SaveCodeChanges() == SaveResult.NotSaved)
                     _ = DoSaveDialog();
@@ -749,13 +749,13 @@ namespace UndertaleModTool
 
                 if (SettingsWindow.WarnOnClose)
                 {
-                    if (ShowQuestion("Are you sure you want to quit?") == MessageBoxResult.Yes)
+                    if (this.ShowQuestion("Are you sure you want to quit?") == MessageBoxResult.Yes)
                     {
-                        if (ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
+                        if (this.ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
                         {
                             if (scriptDialog is not null)
                             {
-                                if (ShowQuestion("Script still runs. Save anyway?\nIt can corrupt the data file that you'll save.") == MessageBoxResult.Yes)
+                                if (this.ShowQuestion("Script still runs. Save anyway?\nIt can corrupt the data file that you'll save.") == MessageBoxResult.Yes)
                                     save = true;
                             }
                             else
@@ -786,7 +786,7 @@ namespace UndertaleModTool
                 }
 
                 if (SettingsWindow.UseGMLCache && Data?.GMLCache?.Count > 0 && !Data.GMLCacheWasSaved && Data.GMLCacheIsReady)
-                    if (ShowQuestion("Save unedited code cache?") == MessageBoxResult.Yes)
+                    if (this.ShowQuestion("Save unedited code cache?") == MessageBoxResult.Yes)
                         await SaveGMLCache(FilePath, save);
 
                 CloseOtherWindows();
@@ -891,7 +891,7 @@ namespace UndertaleModTool
                     {
                         data = UndertaleIO.Read(stream, warning =>
                         {
-                            MessageBox.Show(warning, "Loading warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            this.ShowWarning(warning, "Loading warning");
                             hadWarnings = true;
                         }, message =>
                         {
@@ -901,7 +901,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("An error occured while trying to load:\n" + e.Message, "Load error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    this.ShowError("An error occured while trying to load:\n" + e.Message, "Load error");
                 }
 
                 Dispatcher.Invoke(async () =>
@@ -910,13 +910,13 @@ namespace UndertaleModTool
                     {
                         if (data.UnsupportedBytecodeVersion)
                         {
-                            MessageBox.Show("Only bytecode versions 13 to 17 are supported for now, you are trying to load " + data.GeneralInfo.BytecodeVersion + ". A lot of code is disabled and will likely break something. Saving/exporting is disabled.", "Unsupported bytecode version", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            this.ShowWarning("Only bytecode versions 13 to 17 are supported for now, you are trying to load " + data.GeneralInfo.BytecodeVersion + ". A lot of code is disabled and will likely break something. Saving/exporting is disabled.", "Unsupported bytecode version");
                             CanSave = false;
                             CanSafelySave = false;
                         }
                         else if (hadWarnings)
                         {
-                            MessageBox.Show("Warnings occurred during loading. Data loss will likely occur when trying to save!", "Loading problems", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            this.ShowWarning("Warnings occurred during loading. Data loss will likely occur when trying to save!", "Loading problems");
                             CanSave = true;
                             CanSafelySave = false;
                         }
@@ -933,17 +933,17 @@ namespace UndertaleModTool
                         }
                         if (data.GMS2_3 && SettingsWindow.Warn_About_GMS23)
                         {
-                            MessageBox.Show("This game was built using GameMaker Studio 2.3 (or above). Support for this version is a work in progress, and you will likely run into issues decompiling code or in other places.", "GMS 2.3", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            this.ShowWarning("This game was built using GameMaker Studio 2.3 (or above). Support for this version is a work in progress, and you will likely run into issues decompiling code or in other places.", "GMS 2.3");
                         }
                         if (data.IsYYC())
                         {
-                            MessageBox.Show("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            this.ShowWarning("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC");
                         }
                         if (data.GeneralInfo != null)
                         {
                             if (!data.GeneralInfo.IsDebuggerDisabled)
                             {
-                                MessageBox.Show("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                this.ShowWarning("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
                             }
                         }
                         if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
@@ -1015,7 +1015,7 @@ namespace UndertaleModTool
 
             DebugDataDialog.DebugDataMode debugMode = DebugDataDialog.DebugDataMode.NoDebug;
             if (!suppressDebug && Data.GeneralInfo != null && !Data.GeneralInfo.IsDebuggerDisabled)
-                MessageBox.Show("You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
+                this.ShowWarning("You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
             Task t = Task.Run(async () =>
             {
                 bool SaveSucceeded = true;
@@ -1110,7 +1110,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("An error occured while trying to save:\n" + e.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    this.ShowError("An error occured while trying to save:\n" + e.Message, "Save error");
                     SaveSucceeded = false;
                 }
                 // Don't make any changes unless the save succeeds.
@@ -1142,7 +1142,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception exc)
                 {
-                    MessageBox.Show("An error occured while trying to save:\n" + exc.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    this.ShowError("An error occured while trying to save:\n" + exc.Message, "Save error");
                     SaveSucceeded = false;
                 }
                 if (Data != null)
@@ -1203,7 +1203,7 @@ namespace UndertaleModTool
 
                     if (!File.Exists(Path.Combine(cacheDirPath, num.ToString())))
                     {
-                        ShowWarning("Decompiled code cache file for open data is missing, but its name present in the index.");
+                        this.ShowWarning("Decompiled code cache file for open data is missing, but its name present in the index.");
 
                         return;
                     }
@@ -1215,7 +1215,7 @@ namespace UndertaleModTool
                         string prevHash = fs.ReadLine();
 
                         if (!Regex.IsMatch(prevHash, "^[0-9a-fA-F]{32}$")) //if first 32 bytes of cache file are not a valid MD5
-                            ShowWarning("Decompiled code cache for open file is broken.\nThe cache will be generated again.");
+                            this.ShowWarning("Decompiled code cache for open file is broken.\nThe cache will be generated again.");
                         else
                         {
                             if (hash == prevHash)
@@ -1234,7 +1234,7 @@ namespace UndertaleModTool
                                 }
                                 catch
                                 {
-                                    ShowWarning("Decompiled code cache for open file is broken.\nThe cache will be generated again.");
+                                    this.ShowWarning("Decompiled code cache for open file is broken.\nThe cache will be generated again.");
 
                                     Data.GMLCache = null;
                                     Data.GMLCacheFailed = null;
@@ -1246,7 +1246,7 @@ namespace UndertaleModTool
                                 string[] invalidNames = Data.GMLCache.Keys.Except(codeNames).ToArray();
                                 if (invalidNames.Length > 0)
                                 {
-                                    ShowWarning($"Decompiled code cache for open file contains one or more non-existent code names (first - \"{invalidNames[0]}\").\nThe cache will be generated again.");
+                                    this.ShowWarning($"Decompiled code cache for open file contains one or more non-existent code names (first - \"{invalidNames[0]}\").\nThe cache will be generated again.");
 
                                     Data.GMLCache = null;
 
@@ -1258,7 +1258,7 @@ namespace UndertaleModTool
                                 Data.GMLCacheWasSaved = true;
                             }
                             else
-                                ShowWarning("Open file differs from the one the cache was generated for.\nThat decompiled code cache will be generated again.");
+                                this.ShowWarning("Open file differs from the one the cache was generated for.\nThat decompiled code cache will be generated again.");
                         }
                     }
                 }
@@ -1650,7 +1650,7 @@ namespace UndertaleModTool
             object source = container.ItemsSource;
             IList list = ((source as ICollectionView)?.SourceCollection as IList) ?? (source as IList);
             bool isLast = list.IndexOf(obj) == list.Count - 1;
-            if (MessageBox.Show("Delete " + obj.ToString() + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), "Confirmation", MessageBoxButton.YesNo, isLast ? MessageBoxImage.Question : MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            if (this.ShowQuestion("Delete " + obj + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), isLast ? MessageBoxImage.Question : MessageBoxImage.Warning, "Confirmation" ) == MessageBoxResult.Yes)
             {
                 list.Remove(obj);
                 if (obj is UndertaleCode codeObj)
@@ -1685,7 +1685,7 @@ namespace UndertaleModTool
             if (namedRes.Name?.Content is not null)
                 Clipboard.SetText(namedRes.Name.Content);
             else
-                ShowWarning("Item name is null.");
+                this.ShowWarning("Item name is null.");
         }
 
         private void MainTree_KeyDown(object sender, KeyEventArgs e)
@@ -2145,7 +2145,7 @@ namespace UndertaleModTool
             }
             else
             {
-                ShowError($"Can't find code \"{name}\".\n(probably, different game data was loaded)");
+                this.ShowError($"Can't find code \"{name}\".\n(probably, different game data was loaded)");
             }
         }
 
@@ -2279,7 +2279,7 @@ namespace UndertaleModTool
             {
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
-                MessageBox.Show(exc.Message, "Script compile error", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.ShowError(exc.Message, "Script compile error");
                 ScriptExecutionSuccess = false;
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "CompilationErrorException";
@@ -2296,7 +2296,7 @@ namespace UndertaleModTool
 
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
-                MessageBox.Show(isScriptException ? exc.Message : excString, "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.ShowError(isScriptException ? exc.Message : excString, "Script error");
                 ScriptExecutionSuccess = false;
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "Exception";
@@ -2330,51 +2330,25 @@ namespace UndertaleModTool
 
         public void ScriptMessage(string message)
         {
-            MessageBox.Show(message, "Script message", MessageBoxButton.OK, MessageBoxImage.Information);
+            this.ShowMessage(message, "Script message");
         }
         public bool ScriptQuestion(string message)
         {
             PlayInformationSound();
-            return MessageBox.Show(message, "Script message", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+            return this.ShowQuestion(message, MessageBoxImage.Question, "Script Question") == MessageBoxResult.Yes;
         }
         public void ScriptWarning(string message)
         {
-            MessageBox.Show(message, "Script warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            this.ShowWarning(message, "Script warning");
         }
         public void ScriptError(string error, string title = "Error", bool SetConsoleText = true)
         {
-            MessageBox.Show(error, title, MessageBoxButton.OK, MessageBoxImage.Error);
+            this.ShowError(error, title);
             if (SetConsoleText)
             {
                 SetUMTConsoleText(error);
                 SetFinishedMessage(false);
             }
-        }
-
-        public static void ShowMessage(string message, bool wait = true)
-        {
-            if (wait)
-                MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Information);
-            else
-                _ = Task.Run(() => MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Information));
-        }
-        public static MessageBoxResult ShowQuestion(string message, MessageBoxImage icon = MessageBoxImage.Question)
-        {
-            return MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.YesNo, icon);
-        }
-        public static void ShowWarning(string message, bool wait = true)
-        {
-            if (wait)
-                MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning);
-            else
-                _ = Task.Run(() => MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning));
-        }
-        public static void ShowError(string message, bool wait = true)
-        {
-            if (wait)
-                MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
-            else
-                _ = Task.Run(() => MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error));
         }
 
         public void SetUMTConsoleText(string message)
@@ -2493,7 +2467,7 @@ namespace UndertaleModTool
 
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("UndertaleModTool by krzys_h\nVersion " + Version, "About", MessageBoxButton.OK);
+            this.ShowMessage("UndertaleModTool by krzys_h\nVersion " + Version, "About");
         }
 
         /// From https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Dialogs/AboutAvaloniaDialog.xaml.cs
@@ -2528,7 +2502,7 @@ namespace UndertaleModTool
             }
             catch (Exception e)
             {
-                MessageBox.Show("Failed to open browser!\n" + e.ToString());
+                Application.Current.MainWindow.ShowError("Failed to open browser!\n" + e);
             }
         }
 
@@ -2548,7 +2522,7 @@ namespace UndertaleModTool
             }
             catch (Exception e)
             {
-                MessageBox.Show("Failed to open folder!\n" + e.ToString());
+                Application.Current.MainWindow.ShowError("Failed to open folder!\n" + e);
             }
         }
 
@@ -2584,9 +2558,9 @@ namespace UndertaleModTool
 
             if (!Environment.Is64BitOperatingSystem)
             {
-                if (ShowQuestion("Your operating system is 32-bit.\n" +
-                                 "32-bit (x86) version of UndertaleModTool is obsolete.\n" +
-                                 "Do you want to continue anyway?", MessageBoxImage.Error) != MessageBoxResult.Yes)
+                if (this.ShowQuestion("Your operating system is 32-bit.\n" +
+                                      "32-bit (x86) version of UndertaleModTool is obsolete.\n" +
+                                      "Do you want to continue anyway?", MessageBoxImage.Error) != MessageBoxResult.Yes)
                 {
                     window.UpdateButtonEnabled = true;
                     return;
@@ -2596,7 +2570,7 @@ namespace UndertaleModTool
             string sysDriveLetter = Path.GetTempPath()[0].ToString();
             if ((new DriveInfo(sysDriveLetter).AvailableFreeSpace / bytesToMB) < 500)
             {
-                ShowError($"Not enough space on the system drive {sysDriveLetter} - at least 500 MB is required.");
+                this.ShowError($"Not enough space on the system drive {sysDriveLetter} - at least 500 MB is required.");
                 window.UpdateButtonEnabled = true;
                 return;
             }
@@ -2614,7 +2588,7 @@ namespace UndertaleModTool
             if (result?.IsSuccessStatusCode != true)
             {
                 string errText = $"{(result is null ? "Check your internet connection." : $"HTTP error - {result.ReasonPhrase}.")}";
-                ShowError($"Failed to fetch latest build!\n{errText}");
+                this.ShowError($"Failed to fetch latest build!\n{errText}");
                 window.UpdateButtonEnabled = true;
                 return;
             }
@@ -2634,7 +2608,7 @@ namespace UndertaleModTool
             }
             if (action == null)
             {
-                ShowError($"Failed to find latest build!\nDetected action name - {detectedActionName}");
+                this.ShowError($"Failed to find latest build!\nDetected action name - {detectedActionName}");
                 window.UpdateButtonEnabled = true;
                 return;
             }
@@ -2642,7 +2616,7 @@ namespace UndertaleModTool
             DateTime currDate = File.GetLastWriteTime(Path.Combine(ExePath, "UndertaleModTool.exe"));
             DateTime lastDate = (DateTime)action["updated_at"];
             if (lastDate.Subtract(currDate).Minutes <= 10)
-                if (ShowQuestion("UndertaleModTool is already up to date.\nUpdate anyway?") != MessageBoxResult.Yes)
+                if (this.ShowQuestion("UndertaleModTool is already up to date.\nUpdate anyway?") != MessageBoxResult.Yes)
                 {
                     window.UpdateButtonEnabled = true;
                     return;
@@ -2652,7 +2626,7 @@ namespace UndertaleModTool
             if (result2?.IsSuccessStatusCode != true)
             {
                 string errText = $"{(result2 is null ? "Check your internet connection." : $"HTTP error - {result2.ReasonPhrase}.")}";
-                ShowError($"Failed to fetch latest build!\n{errText}");
+                this.ShowError($"Failed to fetch latest build!\n{errText}");
                 window.UpdateButtonEnabled = true;
                 return;
             }
@@ -2662,7 +2636,7 @@ namespace UndertaleModTool
 
             if (Environment.Is64BitOperatingSystem && !Environment.Is64BitProcess)
             {
-                if (ShowQuestion("Detected 32-bit (x86) version of UndertaleModTool on the 64-bit operating system.\n" +
+                if (this.ShowQuestion("Detected 32-bit (x86) version of UndertaleModTool on the 64-bit operating system.\n" +
                                  "It's highly recommended to use the 64-bit version instead.\n" +
                                  "Download that?") != MessageBoxResult.Yes)
                 {
@@ -2690,7 +2664,7 @@ namespace UndertaleModTool
             }
             if (artifact is null)
             {
-                ShowError("Failed to find the artifact!");
+                this.ShowError("Failed to find the artifact!");
                 window.UpdateButtonEnabled = true;
                 return;
             }
@@ -2756,7 +2730,7 @@ namespace UndertaleModTool
 
                                 if (isWin7)
                                 {
-                                    if (ShowQuestion(errMsg + win7upd, MessageBoxImage.Error) == MessageBoxResult.Yes)
+                                    if (this.ShowQuestion(errMsg + win7upd, MessageBoxImage.Error) == MessageBoxResult.Yes)
                                         OpenBrowser("https://www.microsoft.com/en-us/download/details.aspx?id=44622");
 
                                     window.UpdateButtonEnabled = true;
@@ -2771,7 +2745,7 @@ namespace UndertaleModTool
                         else
                             errMsg = e.Error.Message;
 
-                        ShowError($"Failed to download new version of UndertaleModTool.\nError - {errMsg}.");
+                        this.ShowError($"Failed to download new version of UndertaleModTool.\nError - {errMsg}.");
                         window.UpdateButtonEnabled = true;
                         return;
                     }
@@ -2779,7 +2753,7 @@ namespace UndertaleModTool
                     string updaterFolder = Path.Combine(ExePath, "Updater");
                     if (!File.Exists(Path.Combine(updaterFolder, "UndertaleModToolUpdater.exe")))
                     {
-                        ShowError("Updater not found! Aborting update, report this to the devs!\nLocation checked: " + updaterFolder);
+                        this.ShowError("Updater not found! Aborting update, report this to the devs!\nLocation checked: " + updaterFolder);
                         window.UpdateButtonEnabled = true;
                         return;
                     }
@@ -2798,7 +2772,7 @@ namespace UndertaleModTool
                     }
                     catch (Exception ex)
                     {
-                        ShowError($"Can't copy the updater app to the temporary folder.\n{ex}");
+                        this.ShowError($"Can't copy the updater app to the temporary folder.\n{ex}");
                         window.UpdateButtonEnabled = true;
                         return;
                     }
@@ -2806,7 +2780,7 @@ namespace UndertaleModTool
 
                     window.UpdateButtonEnabled = true;
 
-                    ShowMessage("UndertaleModTool will now close to finish the update.");
+                    this.ShowMessage("UndertaleModTool will now close to finish the update.");
 
                     Process.Start(new ProcessStartInfo(Path.Combine(updaterFolderTemp, "UndertaleModToolUpdater.exe"))
                     {
@@ -2871,7 +2845,7 @@ result in loss of work.");
             Data.GeneralInfo.IsDebuggerDisabled = oldDisableDebuggerState;
             if (TempFilesFolder == null)
             {
-                ShowWarning("Temp folder is null.");
+                this.ShowWarning("Temp folder is null.");
                 return;
             }
             else if (saveOk)
@@ -2898,7 +2872,7 @@ result in loss of work.");
             }
             else if (!saveOk)
             {
-                ShowWarning("Temp save failed, cannot run.");
+                this.ShowWarning("Temp save failed, cannot run.");
                 return;
             }
             if (File.Exists(TempFilesFolder))
@@ -2915,32 +2889,32 @@ result in loss of work.");
             bool saveOk = true;
             if (!Data.GeneralInfo.IsDebuggerDisabled)
             {
-                if (ShowQuestion("The game has the debugger enabled. Would you like to disable it so the game will run?") == MessageBoxResult.Yes)
+                if (this.ShowQuestion("The game has the debugger enabled. Would you like to disable it so the game will run?") == MessageBoxResult.Yes)
                 {
                     Data.GeneralInfo.IsDebuggerDisabled = true;
                     if (!await DoSaveDialog())
                     {
-                        ShowError("You must save your changes to run.");
+                        this.ShowError("You must save your changes to run.");
                         Data.GeneralInfo.IsDebuggerDisabled = false;
                         return;
                     }
                 }
                 else
                 {
-                    ShowError("Use the \"Run game using debugger\" option to run this game.");
+                    this.ShowError("Use the \"Run game using debugger\" option to run this game.");
                     return;
                 }
             }
             else
             {
                 Data.GeneralInfo.IsDebuggerDisabled = true;
-                if (ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
+                if (this.ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
                     saveOk = await DoSaveDialog();
             }
 
             if (FilePath == null)
             {
-                ShowWarning("The file must be saved in order to be run.");
+                this.ShowWarning("The file must be saved in order to be run.");
             }
             else if (saveOk)
             {
@@ -2963,7 +2937,7 @@ result in loss of work.");
             bool saveOk = await DoSaveDialog(true);
             if (FilePath == null)
             {
-                ShowWarning("The file must be saved in order to be run.");
+                this.ShowWarning("The file must be saved in order to be run.");
             }
             else if (saveOk)
             {
@@ -2974,7 +2948,7 @@ result in loss of work.");
                     return;
                 if (runtime.DebuggerPath == null)
                 {
-                    MessageBox.Show("The selected runtime does not support debugging.", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    this.ShowError("The selected runtime does not support debugging.", "Run error");
                     return;
                 }
 
@@ -3030,7 +3004,7 @@ result in loss of work.");
             if (res is null)
             {
                 if (!silent)
-                    ShowWarning($"Can't highlight the object - it's null or isn't a UndertaleResource.");
+                    this.ShowWarning($"Can't highlight the object - it's null or isn't a UndertaleResource.");
 
                 return;
             }
@@ -3057,7 +3031,7 @@ result in loss of work.");
             catch (Exception ex)
             {
                 if (!silent)
-                    ShowWarning($"Can't highlight the object \"{objName}\".\nError - {ex.Message}");
+                    this.ShowWarning($"Can't highlight the object \"{objName}\".\nError - {ex.Message}");
 
                 return;
             }
@@ -3065,7 +3039,7 @@ result in loss of work.");
             if (resListView is null)
             {
                 if (!silent)
-                    ShowWarning($"Can't highlight the object \"{objName}\" - element with object list not found.");
+                    this.ShowWarning($"Can't highlight the object \"{objName}\" - element with object list not found.");
 
                 return;
             }
@@ -3171,7 +3145,7 @@ result in loss of work.");
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show("An error occured while trying to load:\n" + ex.Message, "Load error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            this.ShowError("An error occured while trying to load:\n" + ex.Message, "Load error");
                         }
 
                         Dispatcher.Invoke(() =>
