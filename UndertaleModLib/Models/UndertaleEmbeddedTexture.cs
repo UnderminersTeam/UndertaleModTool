@@ -126,12 +126,12 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
         }
 
         /// <summary>
-        /// A texture width.
+        /// The width of the texture.
         /// </summary>
         public int Width => _width;
 
         /// <summary>
-        /// A texture height.
+        /// The height of the texture.
         /// </summary>
         public int Height => _height;
 
