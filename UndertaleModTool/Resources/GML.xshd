@@ -59,6 +59,7 @@
             <Word>then</Word>
             <Word>mod</Word>
             <Word>div</Word>
+            <Word>@@this@@</Word>
         </Keywords>
 
         <!-- Some macros -->
