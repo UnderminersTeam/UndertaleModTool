@@ -16,7 +16,6 @@ namespace UndertaleModLib.Util
         }
 
         public Encoding Encoding { get => encoding; }
-        public Stream BaseStream => OutStream;
 
         public FileBinaryWriter(Stream stream, Encoding encoding = null) : base(stream)
         {
