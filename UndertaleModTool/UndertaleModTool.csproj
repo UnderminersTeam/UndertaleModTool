@@ -22,10 +22,6 @@
       <None Remove="X.png" />
     </ItemGroup>
     <ItemGroup>
-        <None Update="README.txt">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </None>
         <EmbeddedResource Include="Resources\GML.xshd" />
         <EmbeddedResource Include="Resources\VMASM.xshd" />
         <Resource Include="Resources\tabs_left_button.png" />
