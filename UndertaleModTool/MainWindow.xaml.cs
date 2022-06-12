@@ -926,7 +926,7 @@ namespace UndertaleModTool
                         {
                             CanSave = true;
                             CanSafelySave = true;
-                            UpdateProfile(data, filename);
+                            await UpdateProfile(data, filename);
                             if (data != null)
                             {
                                 data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
@@ -1116,7 +1116,26 @@ namespace UndertaleModTool
                 }
                 catch (Exception e)
                 {
-                    this.ShowError("An error occured while trying to save:\n" + e.Message, "Save error");
+                    if (!UndertaleIO.IsDictionaryCleared)
+                    {
+                        try
+                        {
+                            var listChunks = Data.FORM.Chunks.Values.Select(x => x as IUndertaleListChunk);
+                            Parallel.ForEach(listChunks.Where(x => x is not null), (chunk) =>
+                            {
+                                chunk.ClearIndexDict();
+                            });
+
+                            UndertaleIO.IsDictionaryCleared = true;
+                        }
+                        catch { }
+                    }
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        this.ShowError("An error occured while trying to save:\n" + e.Message, "Save error");
+                    });
+                    
                     SaveSucceeded = false;
                 }
                 // Don't make any changes unless the save succeeds.
@@ -1134,7 +1153,7 @@ namespace UndertaleModTool
                         await SaveGMLCache(filename, true, dialog, isDifferentPath);
 
                         // Also make the changes to the profile system.
-                        ProfileSaveEvent(Data, filename);
+                        await ProfileSaveEvent(Data, filename);
                         SaveTempToMainProfile();
                     }
                     else
@@ -1148,7 +1167,11 @@ namespace UndertaleModTool
                 }
                 catch (Exception exc)
                 {
-                    this.ShowError("An error occured while trying to save:\n" + exc.Message, "Save error");
+                    Dispatcher.Invoke(() =>
+                    {
+                        this.ShowError("An error occured while trying to save:\n" + exc.Message, "Save error");
+                    });
+                    
                     SaveSucceeded = false;
                 }
                 if (Data != null)

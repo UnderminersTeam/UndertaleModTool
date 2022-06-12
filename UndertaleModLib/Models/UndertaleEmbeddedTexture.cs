@@ -222,12 +222,9 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
                     reader.Position += 8;
 
                     // Need to fully decompress and convert the QOI data to PNG for compatibility purposes (at least for now)
-                    using MemoryStream bufferWrapper = new MemoryStream(reader.Buffer);
-                    bufferWrapper.Seek(reader.Offset, SeekOrigin.Begin);
                     if (sharedStream.Length != 0)
                         sharedStream.Seek(0, SeekOrigin.Begin);
-                    BZip2.Decompress(bufferWrapper, sharedStream, false);
-                    reader.Position = (uint)bufferWrapper.Position;
+                    BZip2.Decompress(reader.Stream, sharedStream, false);
                     ReadOnlySpan<byte> decompressed = sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position];
                     using Bitmap bmp = QoiConverter.GetImageFromSpan(decompressed);
                     _width = bmp.Width;
@@ -245,8 +242,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource
                     reader.undertaleData.UseBZipFormat = false;
 
                     // Need to convert the QOI data to PNG for compatibility purposes (at least for now)
-                    using Bitmap bmp = QoiConverter.GetImageFromSpan(reader.Buffer.AsSpan()[reader.Offset..], out int dataLength);
-                    reader.Offset += dataLength;
+                    using Bitmap bmp = QoiConverter.GetImageFromStream(reader.Stream);
                     _width = bmp.Width;
                     _height = bmp.Height;
                     if (sharedStream.Length != 0)
