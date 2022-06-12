@@ -633,6 +633,14 @@ namespace UndertaleModLib
                 // Compressed size can't be bigger than maximum decompressed size
                 int maxSize = List.Select(x => x.TextureData.TextureBlob?.Length ?? 0).Max();
                 UndertaleEmbeddedTexture.TexData.InitSharedStream(maxSize);
+
+                if (writer.undertaleData.UseQoiFormat)
+                {
+                    // Calculate maximum size of QOI converter buffer
+                    maxSize = List.Select(x => x.TextureData.Width * x.TextureData.Height).Max()
+                              * QoiConverter.MaxChunkSize + QoiConverter.HeaderSize + (writer.undertaleData.GM2022_3 ? 0 : 4);
+                    QoiConverter.InitSharedBuffer(maxSize);
+                }
             }
             foreach (UndertaleEmbeddedTexture obj in List)
                 obj.SerializeBlob(writer);
