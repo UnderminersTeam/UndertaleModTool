@@ -218,8 +218,11 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         foreach (MaskEntry entry in CollisionMasks)
             entry?.Dispose();
         if (SpineTextures is not null)
+        {
             foreach (var spineEntry in SpineTextures)
                 spineEntry?.Dispose();
+        }
+
         Textures = new();
         CollisionMasks.Clear();
         SpineTextures = null;

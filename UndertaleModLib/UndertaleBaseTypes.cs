@@ -10,13 +10,13 @@ namespace UndertaleModLib
     public interface UndertaleObject
     {
         /// <summary>
-        /// Serializes the object into a specified <see cref="UndertaleWriter"/>.
+        /// Serializes this <see cref="UndertaleObject"/> into a specified <see cref="UndertaleWriter"/>.
         /// </summary>
         /// <param name="writer">Where to serialize to.</param>
         void Serialize(UndertaleWriter writer);
 
         /// <summary>
-        /// Deserializes the object from a specified <see cref="UndertaleReader"/>.
+        /// Deserializes this <see cref="UndertaleObject"/> from a specified <see cref="UndertaleReader"/>.
         /// </summary>
         /// <param name="reader">Where to deserialize from.</param>
         void Unserialize(UndertaleReader reader);

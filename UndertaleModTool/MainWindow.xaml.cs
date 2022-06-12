@@ -864,7 +864,7 @@ namespace UndertaleModTool
         {
             if (Data is not null)
             {
-                // This also clears all theirs game object references
+                // This also clears all their game object references
                 CurrentTab = null;
                 Tabs.Clear();
                 SelectionHistory.Clear();

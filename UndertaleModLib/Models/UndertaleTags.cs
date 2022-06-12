@@ -33,9 +33,7 @@ public class UndertaleTags : UndertaleObject, IDisposable
         };
         IList list = data[resource.GetType()] as IList;
 
-        int offset = 0;
-        if (resource is UndertaleScript)
-            offset = 100000;
+        int offset = resource is UndertaleScript ? 100000 : 0;
 
         return ((int)type << 24) | ((list.IndexOf(resource) + offset) & 0xFFFFFF);
     }

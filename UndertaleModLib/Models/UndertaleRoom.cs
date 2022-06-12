@@ -169,9 +169,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     public void UpdateBGColorLayer() => OnPropertyChanged("BGColorLayer");
 
     /// <summary>
-    /// Order the room layers list by depth.
+    /// Orders the room layers list by depth.
     /// </summary>
-    /// <param name="selectedLayer">Should be present if called from the room editor to re-select the selected layer.</param>
+    /// <param name="selectedLayer">A <see cref="Layer"/> that's currently selected in the room editor.</param>
     public void RearrangeLayers(Layer selectedLayer = null)
     {
         if (Layers.Count == 0)
@@ -362,8 +362,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     }
 
     /// <summary>
-    /// Initialize the room by setting every <see cref="Background.ParentRoom"/> or <see cref="Layer.ParentRoom"/>,
-    /// and optionally calculate the room grid size.
+    /// Initialize the room by setting every <see cref="Background.ParentRoom"/> or <see cref="Layer.ParentRoom"/>
+    /// (depending on the GameMaker version), and optionally calculate the room grid size.
     /// </summary>
     /// <param name="calculateGrid">Whether to calculate the room grid size.</param>
     public void SetupRoom(bool calculateGrid = true)
