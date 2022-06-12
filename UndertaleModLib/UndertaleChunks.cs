@@ -628,6 +628,12 @@ namespace UndertaleModLib
             base.SerializeChunk(writer);
 
             // texture blobs
+            if (List.Count > 0)
+            {
+                // Compressed size can't be bigger than maximum decompressed size
+                int maxSize = List.Select(x => x.TextureData.TextureBlob?.Length ?? 0).Max();
+                UndertaleEmbeddedTexture.TexData.InitSharedStream(maxSize);
+            }
             foreach (UndertaleEmbeddedTexture obj in List)
                 obj.SerializeBlob(writer);
 

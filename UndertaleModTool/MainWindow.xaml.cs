@@ -898,6 +898,8 @@ namespace UndertaleModTool
                             FileMessageEvent?.Invoke(message);
                         });
                     }
+
+                    UndertaleEmbeddedTexture.TexData.ClearSharedStream();
                 }
                 catch (Exception e)
                 {
@@ -1029,6 +1031,8 @@ namespace UndertaleModTool
                             FileMessageEvent?.Invoke(message);
                         });
                     }
+
+                    UndertaleEmbeddedTexture.TexData.ClearSharedStream();
 
                     if (debugMode != DebugDataDialog.DebugDataMode.NoDebug)
                     {
