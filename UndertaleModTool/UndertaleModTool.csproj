@@ -3551,7 +3551,6 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="GraphViz.NET" Version="1.0.0" />
         <PackageReference Include="log4net" Version="2.0.12" />
         <PackageReference Include="Microsoft-WindowsAPICodePack-Shell">
             <Version>1.1.4</Version>
