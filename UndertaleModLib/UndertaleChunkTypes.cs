@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -125,7 +126,23 @@ namespace UndertaleModLib
         }
     }
 
-    public abstract class UndertaleSingleChunk<T> : UndertaleChunk where T : UndertaleObject, new()
+    public interface IUndertaleSingleChunk
+    {
+        UndertaleObject GetObject();
+    }
+    public interface IUndertaleListChunk
+    {
+        IList GetList();
+        void GenerateIndexDict();
+        void ClearIndexDict();
+    }
+    public interface IUndertaleSimpleListChunk
+    {
+        IList GetList();
+    }
+
+
+    public abstract class UndertaleSingleChunk<T> : UndertaleChunk, IUndertaleSingleChunk where T : UndertaleObject, new()
     {
         public T Object;
 
@@ -139,15 +156,18 @@ namespace UndertaleModLib
             Object = reader.ReadUndertaleObject<T>();
         }
 
+        public UndertaleObject GetObject() => Object;
+
         public override string ToString()
         {
             return Object.ToString();
         }
     }
 
-    public abstract class UndertaleListChunk<T> : UndertaleChunk where T : UndertaleObject, new()
+    public abstract class UndertaleListChunk<T> : UndertaleChunk, IUndertaleListChunk where T : UndertaleObject, new()
     {
         public UndertalePointerList<T> List = new UndertalePointerList<T>();
+        public Dictionary<T, int> IndexDict;
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
@@ -157,6 +177,22 @@ namespace UndertaleModLib
         internal override void UnserializeChunk(UndertaleReader reader)
         {
             List.Unserialize(reader);
+        }
+
+        public IList GetList() => List;
+        public void GenerateIndexDict()
+        {
+            if (IndexDict is not null)
+                return;
+
+            IndexDict = new();
+            for (int i = 0; i < List.Count; i++)
+                IndexDict[List[i]] = i;
+        }
+        public void ClearIndexDict()
+        {
+            IndexDict.Clear();
+            IndexDict = null;
         }
     }
 
@@ -204,7 +240,7 @@ namespace UndertaleModLib
         }
     }
 
-    public abstract class UndertaleSimpleListChunk<T> : UndertaleChunk where T : UndertaleObject, new()
+    public abstract class UndertaleSimpleListChunk<T> : UndertaleChunk, IUndertaleSimpleListChunk where T : UndertaleObject, new()
     {
         public UndertaleSimpleList<T> List = new UndertaleSimpleList<T>();
 
@@ -217,6 +253,8 @@ namespace UndertaleModLib
         {
             List.Unserialize(reader);
         }
+
+        public IList GetList() => List;
     }
 
     public abstract class UndertaleEmptyChunk : UndertaleChunk
