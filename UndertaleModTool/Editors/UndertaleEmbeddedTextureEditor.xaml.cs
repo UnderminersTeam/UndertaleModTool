@@ -64,7 +64,6 @@ namespace UndertaleModTool
                     {
                         bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                         target.TextureData.TextureBlob = stream.ToArray();
-                        target.TextureData.UpdateSize();
                     }
                 }
                 catch (Exception ex)

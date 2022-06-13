@@ -31,14 +31,14 @@ namespace UndertaleModLib.Util
         private static bool isBufferEmpty = true;
 
         /// <summary>
-        /// Clears the shared buffer.
+        /// Frees up <see cref="sharedBuffer"/> from memory.
         /// </summary>
         public static void ClearSharedBuffer() => sharedBuffer = null;
 
         /// <summary>
-        /// Initializes <see cref="sharedBuffer"/> with defined size.
+        /// Initializes <see cref="sharedBuffer"/> with a specified size.
         /// </summary>
-        /// <param name="size">Size of the array in bytes</param>
+        /// <param name="size">Size of <see cref="sharedBuffer"/> in bytes</param>
         public static void InitSharedBuffer(int size)
         {
             isBufferEmpty = true;
