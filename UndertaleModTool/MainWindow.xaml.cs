@@ -140,9 +140,12 @@ namespace UndertaleModTool
             else if (obj is UndertaleString str)
             {
                 string stringFirstLine = str.Content;
-                int stringLength = StringTitleConverter.NewLineRegex.Match(stringFirstLine).Index;
-                if (stringLength != 0)
-                    stringFirstLine = stringFirstLine[..stringLength] + " ...";
+                if (stringFirstLine is not null)
+                {
+                    int stringLength = StringTitleConverter.NewLineRegex.Match(stringFirstLine).Index;
+                    if (stringLength != 0)
+                        stringFirstLine = stringFirstLine[..stringLength] + " ...";
+                }
 
                 title = "String - " + stringFirstLine;
             }
@@ -167,7 +170,7 @@ namespace UndertaleModTool
                 Debug.WriteLine($"Could not handle type {obj.GetType()}");
             }
 
-            if (title.Length > 64)
+            if (title?.Length > 64)
                 title = title[..64] + "...";
 
             return title;
