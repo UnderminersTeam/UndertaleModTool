@@ -42,8 +42,23 @@
     <None Remove="gitversion.txt" />
     <EmbeddedResource Include="gitversion.txt" />
   </ItemGroup>
+  <!--A prebuild responsible for creating a git commit name and branch name -->
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <!-- puts the git commit name and branch name into gitversion.txt which is an embedded resource -->
-    <Exec Command="( git describe --always --dirty &amp;&amp; git rev-parse --abbrev-ref HEAD  ) &gt; &quot;$(ProjectDir)/gitversion.txt&quot;" IgnoreExitCode="true"/>
+    <!--Create the gitversion.txt file first, in case any of the later commands fail -->
+    <Exec Command="echo &quot;&quot; &gt; &quot;$(ProjectDir)/gitversion.txt&quot;" IgnoreExitCode="true" />
+
+    <!--If on Windows check if git is in PATH-->
+    <Exec Condition="!$([MSBuild]::IsOsPlatform('Windows'))" Command="where /q git" IgnoreExitCode="true">
+      <Output TaskParameter="ExitCode" PropertyName="ErrorCode"/>
+    </Exec>
+    <PropertyGroup>
+      <!--Assign the location of git to GitPath. By default it's "git", if the above PATH checked failed, it'll get set to the git path in VS -->
+      <GitPath>git</GitPath>
+      <GitPath Condition="'$(ErrorCode)'=='1'">$(DevEnvDir)\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\Git\cmd\git</GitPath>
+    </PropertyGroup>
+    <!-- Use GitPath and put the git commit name and branch name into gitversion.txt which is an embedded resource-->
+    <Exec Command="( &quot;$(GitPath)&quot; describe --always --dirty &amp;&amp;
+                     &quot;$(GitPath)&quot; rev-parse --abbrev-ref HEAD ) &gt; &quot;$(ProjectDir)/gitversion.txt&quot;"
+                     IgnoreExitCode="true"/>
   </Target>
 </Project>
