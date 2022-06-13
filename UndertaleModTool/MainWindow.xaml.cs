@@ -141,7 +141,7 @@ namespace UndertaleModTool
             {
                 string stringFirstLine = str.Content;
                 int stringLength = StringTitleConverter.NewLineRegex.Match(stringFirstLine).Index;
-                if (stringLength != -1)
+                if (stringLength != 0)
                     stringFirstLine = stringFirstLine[..stringLength] + " ...";
 
                 title = "String - " + stringFirstLine;
