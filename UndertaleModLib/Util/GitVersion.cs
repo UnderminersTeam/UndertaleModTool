@@ -40,11 +40,11 @@ public static class GitVersion
         // If accessing it fails, give it a default output
         catch
         {
-            gitOutput = "unavailable";
+            gitOutput = "unknownGitCommit";
         }
 
         // return combined commit + branch
-        if (String.IsNullOrWhiteSpace(gitOutput)) gitOutput = "unavailable";
+        if (String.IsNullOrWhiteSpace(gitOutput)) gitOutput = "unknownGitCommit";
         return gitOutput;
     }
 }
