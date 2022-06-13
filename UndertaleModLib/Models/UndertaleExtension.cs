@@ -94,7 +94,7 @@ public class UndertaleExtensionFunctionArg : UndertaleObject
 /// A function in a <see cref="UndertaleExtension"/>.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleExtensionFunction : UndertaleObject
+public class UndertaleExtensionFunction : UndertaleObject, IDisposable
 {
     /// <summary>
     /// The name of the function.
@@ -143,12 +143,22 @@ public class UndertaleExtensionFunction : UndertaleObject
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content + " (" + ExtName.Content + ")";
+        return Name?.Content + " (" + ExtName?.Content + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        Arguments = new();
+        Name = null;
+        ExtName = null;
     }
 }
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleExtensionFile : UndertaleObject
+public class UndertaleExtensionFile : UndertaleObject, IDisposable
 {
     public UndertaleString Filename { get; set; }
     public UndertaleString CleanupScript { get; set; }
@@ -188,13 +198,29 @@ public class UndertaleExtensionFile : UndertaleObject
             return "(Unknown extension file)";
         }
     }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        if (Functions is not null)
+        {
+            foreach (UndertaleExtensionFunction func in Functions)
+                func?.Dispose();
+         }
+        Filename = null;
+        CleanupScript = null;
+        InitScript = null;
+        Functions = new();
+    }
 }
 
 /// <summary>
 /// An extension entry in a GameMaker data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleExtension : UndertaleNamedResource
+public class UndertaleExtension : UndertaleNamedResource, IDisposable
 {
     /// <summary>
     /// In which folder the extension is located. TODO: needs more GM8 research.
@@ -214,7 +240,21 @@ public class UndertaleExtension : UndertaleNamedResource
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content + " (" + GetType().Name + ")";
+        return Name?.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        foreach (UndertaleExtensionFile file in Files)
+            file?.Dispose();
+        Files = new();
+        FolderName = null;
+        Name = null;
+        ClassName = null;
+        Files = new();
     }
 
     /// <inheritdoc />

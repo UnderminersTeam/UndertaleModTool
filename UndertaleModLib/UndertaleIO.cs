@@ -24,7 +24,7 @@ namespace UndertaleModLib
         int SerializeById(UndertaleWriter writer);
     }
 
-    public class UndertaleResourceById<T, ChunkT> : UndertaleResourceRef where T : UndertaleResource, new() where ChunkT : UndertaleListChunk<T>
+    public class UndertaleResourceById<T, ChunkT> : UndertaleResourceRef, IDisposable where T : UndertaleResource, new() where ChunkT : UndertaleListChunk<T>
     {
         public int CachedId { get; set; } = -1;
         public T Resource { get; set; }
@@ -109,9 +109,18 @@ namespace UndertaleModLib
             }
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return (Resource?.ToString() ?? "(null)") + GetMarkerSuffix();
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            Resource = default;
         }
 
         public string GetMarkerSuffix()
