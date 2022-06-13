@@ -36,6 +36,7 @@ It's worth noting that UndertaleModTool has different builds per release. The di
 * Support for running scripts that automatically modify your data file (or perform other nefarious tasks) - this is the way to distribute mods, but creating them is a manual job for now. It also serves as a replacement for sharing hex editor offsets - if you make it into a file-format-aware script instead, there is much smaller change of it breaking after an update.
 * All core IO functionality extracted into a library for use in external tools.
 * Can generate an .yydebug file for the GM:S debugger so that you can edit variables live! (see [here](https://github.com/krzys-h/UndertaleModTool/wiki/Corrections-to-GameMaker-Studio-1.4-data.win-format-and-VM-bytecode,-.yydebug-format-and-debugger-instructions#yydebug-file-format))
+* Automatic file associations for all GameMaker related files. This can be disabled by having a `dna.txt` file next to the executable.
 
 # Screenshots
 
