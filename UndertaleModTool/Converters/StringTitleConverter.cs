@@ -8,6 +8,7 @@ namespace UndertaleModTool
     public class StringTitleConverter : IValueConverter
     {
         public static readonly Regex NewLineRegex = new(@"\r\n?|\n", RegexOptions.Compiled);
+        public static StringTitleConverter Instance { get; } = new();
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

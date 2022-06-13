@@ -1713,10 +1713,17 @@ namespace UndertaleModTool
                 }
             }
         }
-        private void CopyItemName(UndertaleNamedResource namedRes)
+        private void CopyItemName(object obj)
         {
-            if (namedRes.Name?.Content is not null)
-                Clipboard.SetText(namedRes.Name.Content);
+            string name = null;
+
+            if (obj is UndertaleNamedResource namedRes)
+                name = namedRes.Name?.Content;
+            else if (obj is UndertaleString str)
+                name = StringTitleConverter.Instance.Convert(str.Content, null, null, null) as string;
+
+            if (name is not null)
+                Clipboard.SetText(name);
             else
                 this.ShowWarning("Item name is null.");
         }
@@ -1801,8 +1808,7 @@ namespace UndertaleModTool
         }
         private void MenuItem_CopyName_Click(object sender, RoutedEventArgs e)
         {
-            if (Highlighted is UndertaleNamedResource namedRes)
-                CopyItemName(namedRes);
+            CopyItemName(Highlighted);
         }
         private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
         {
