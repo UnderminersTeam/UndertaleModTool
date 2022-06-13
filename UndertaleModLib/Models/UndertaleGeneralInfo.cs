@@ -8,7 +8,7 @@ namespace UndertaleModLib.Models;
 /// General info about a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleGeneralInfo : UndertaleObject
+public class UndertaleGeneralInfo : UndertaleObject, IDisposable
 {
     /// <summary>
     /// Information flags a data file can use.
@@ -278,7 +278,7 @@ public class UndertaleGeneralInfo : UndertaleObject
     /// <summary>
     /// The room order of the data file.
     /// </summary>
-    public UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM> RoomOrder { get; private set; } = new UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>();
+    public UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM> RoomOrder { get; private set; } = new();
 
     /// <summary>
     /// TODO: unknown, some sort of checksum.
@@ -469,13 +469,26 @@ public class UndertaleGeneralInfo : UndertaleObject
     {
         return DisplayName + " (GMS " + Major + "." + Minor + "." + Release + "." + Build + ", bytecode " + BytecodeVersion + ")";
     }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        FileName = null;
+        Config = null;
+        Name = null;
+        DisplayName = null;
+        RoomOrder = new();
+        GMS2RandomUID = new();
+    }
 }
 
 /// <summary>
 /// General options about a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleOptions : UndertaleObject
+public class UndertaleOptions : UndertaleObject, IDisposable
 {
     /// <summary>
     /// Option flags a data file can use
@@ -607,7 +620,7 @@ public class UndertaleOptions : UndertaleObject
     /// A class for game constants.
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class Constant : UndertaleObject
+    public class Constant : UndertaleObject, IDisposable
     {
         /// <summary>
         /// The name of the constant.
@@ -631,6 +644,15 @@ public class UndertaleOptions : UndertaleObject
         {
             Name = reader.ReadUndertaleString();
             Value = reader.ReadUndertaleString();
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            Name = null;
+            Value = null;
         }
     }
 
@@ -760,10 +782,26 @@ public class UndertaleOptions : UndertaleObject
             Constants = reader.ReadUndertaleObject<UndertaleSimpleList<Constant>>();
         }
     }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        if (Constants is not null)
+        {
+            foreach (Constant constant in Constants)
+                constant?.Dispose();
+         }
+        BackImage = new();
+        FrontImage = new();
+        LoadImage = new();
+        Constants = null;
+    }
 }
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleLanguage : UndertaleObject
+public class UndertaleLanguage : UndertaleObject, IDisposable
 {
     // Seems to be a list of entry IDs paired to strings for several languages
     public uint Unknown1 { get; set; } = 1;
@@ -815,8 +853,19 @@ public class UndertaleLanguage : UndertaleObject
         }
     }
 
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        foreach (LanguageData data in Languages)
+            data?.Dispose();
+        EntryIDs = new();
+        Languages = new();
+    }
+
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class LanguageData
+    public class LanguageData : IDisposable
     {
         public UndertaleString Name { get; set; }
         public UndertaleString Region { get; set; }
@@ -824,7 +873,7 @@ public class UndertaleLanguage : UndertaleObject
         // values that correspond to IDs in the main chunk content
 
         /// <summary>
-        /// Serializes the data file into a specified <see cref="UndertaleWriter"/>.
+        /// Serializes <see cref="LanguageData"/> into a specified <see cref="UndertaleWriter"/>.
         /// </summary>
         /// <param name="writer">Where to serialize to.</param>
         public void Serialize(UndertaleWriter writer)
@@ -837,6 +886,11 @@ public class UndertaleLanguage : UndertaleObject
             }
         }
 
+        /// <summary>
+        /// Deserializes <see cref="LanguageData"/> from a specified <see cref="UndertaleReader"/> and with a specified entries count.
+        /// </summary>
+        /// <param name="reader">Where to deserialize from.</param>
+        /// <param name="entryCount">Count of entries to read.</param>
         public void Unserialize(UndertaleReader reader, uint entryCount)
         {
             Name = reader.ReadUndertaleString();
@@ -845,6 +899,16 @@ public class UndertaleLanguage : UndertaleObject
             {
                 Entries.Add(reader.ReadUndertaleString());
             }
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            Entries = new();
+            Name = null;
+            Region = null;
         }
     }
 }

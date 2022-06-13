@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using UndertaleModLib.Util;
 
@@ -13,7 +14,7 @@ namespace UndertaleModLib.Models;
 /// anything outside of that is just transparent. <br/>
 /// <see cref="SourceX"/>, <see cref="SourceY"/>, <see cref="SourceWidth"/> and <see cref="SourceHeight"/> are part of the texture page which
 /// are drawn over <see cref="TargetX"/>, <see cref="TargetY"/>, <see cref="TargetWidth"/>, <see cref="TargetHeight"/>.</remarks>
-public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyChanged
+public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
 {
     /// <summary>
     /// The name of the texture page item.
@@ -71,12 +72,12 @@ public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyC
     /// </summary>
     public ushort BoundingHeight { get; set; }
 
-    private UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR> _TexturePage = new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();
+    private UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR> _texturePage = new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();
 
     /// <summary>
     /// The texture page this item is referencing
     /// </summary>
-    public UndertaleEmbeddedTexture TexturePage { get => _TexturePage.Resource; set { _TexturePage.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TexturePage))); } }
+    public UndertaleEmbeddedTexture TexturePage { get => _texturePage.Resource; set { _texturePage.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TexturePage))); } }
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
@@ -94,7 +95,7 @@ public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyC
         writer.Write(TargetHeight);
         writer.Write(BoundingWidth);
         writer.Write(BoundingHeight);
-        writer.Write((short)_TexturePage.SerializeById(writer));
+        writer.Write((short)_texturePage.SerializeById(writer));
     }
 
     /// <inheritdoc />
@@ -110,8 +111,8 @@ public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyC
         TargetHeight = reader.ReadUInt16();
         BoundingWidth = reader.ReadUInt16();
         BoundingHeight = reader.ReadUInt16();
-        _TexturePage = new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();
-        _TexturePage.UnserializeById(reader, reader.ReadInt16()); // This one is special as it uses a short instead of int
+        _texturePage = new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>();
+        _texturePage.UnserializeById(reader, reader.ReadInt16()); // This one is special as it uses a short instead of int
     }
 
     /// <inheritdoc />
@@ -126,6 +127,15 @@ public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyC
             Name = new UndertaleString("PageItem Unknown Index");
         }
         return Name.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        _texturePage.Dispose();
+        Name = null;
     }
 
     /// <summary>

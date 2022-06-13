@@ -982,7 +982,7 @@ public static class UndertaleInstructionUtil
 /// A code entry in a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
+public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, IDisposable
 {
     /// <summary>
     /// The name of the code entry.
@@ -1017,8 +1017,8 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
     public UndertaleCode ParentEntry { get; set; } = null;
     public List<UndertaleCode> ChildEntries { get; set; } = new List<UndertaleCode>();
 
-    internal uint _BytecodeAbsoluteAddress;
-    internal byte[] _UnsupportedBuffer;
+    internal uint _bytecodeAbsoluteAddress;
+    internal byte[] _unsupportedBuffer;
 
     public void SerializeBlobBefore(UndertaleWriter writer)
     {
@@ -1027,14 +1027,14 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
         if (ParentEntry != null)
         {
             // In GMS 2.3, code entries repeat often
-            _BytecodeAbsoluteAddress = writer.LastBytecodeAddress;
-            Length = writer.Position - _BytecodeAbsoluteAddress;
+            _bytecodeAbsoluteAddress = writer.LastBytecodeAddress;
+            Length = writer.Position - _bytecodeAbsoluteAddress;
             // todo? set Flags to something else?
         }
         else
         {
             writer.LastBytecodeAddress = writer.Position;
-            _BytecodeAbsoluteAddress = writer.Position;
+            _bytecodeAbsoluteAddress = writer.Position;
             uint start = writer.Position;
             foreach (UndertaleInstruction instr in Instructions)
                 writer.WriteUndertaleObject(instr);
@@ -1049,9 +1049,9 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
         writer.WriteUndertaleString(Name);
         if (writer.undertaleData.UnsupportedBytecodeVersion)
         {
-            Length = (uint)_UnsupportedBuffer.Length;
+            Length = (uint)_unsupportedBuffer.Length;
             writer.Write(Length);
-            writer.Write(_UnsupportedBuffer);
+            writer.Write(_unsupportedBuffer);
         }
         else if (writer.Bytecode14OrLower)
         {
@@ -1071,7 +1071,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
             writer.Write(Length);
             writer.Write((ushort)LocalsCount);
             writer.Write((ushort)(ArgumentsCount | (WeirdLocalFlag ? (ushort)0x8000 : 0)));
-            int BytecodeRelativeAddress = (int)_BytecodeAbsoluteAddress - (int)writer.Position;
+            int BytecodeRelativeAddress = (int)_bytecodeAbsoluteAddress - (int)writer.Position;
             writer.Write(BytecodeRelativeAddress);
             writer.Write(Offset);
         }
@@ -1085,7 +1085,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
         Length = reader.ReadUInt32();
         if (reader.undertaleData.UnsupportedBytecodeVersion)
         {
-            _UnsupportedBuffer = reader.ReadBytes((int)Length);
+            _unsupportedBuffer = reader.ReadBytes((int)Length);
         }
         else if (reader.Bytecode14OrLower)
         {
@@ -1111,18 +1111,18 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
                 WeirdLocalFlag = true;
             }
             int BytecodeRelativeAddress = reader.ReadInt32();
-            _BytecodeAbsoluteAddress = (uint)((int)reader.Position - 4 + BytecodeRelativeAddress);
+            _bytecodeAbsoluteAddress = (uint)((int)reader.Position - 4 + BytecodeRelativeAddress);
             uint here = reader.Position;
-            reader.Position = _BytecodeAbsoluteAddress;
-            if (Length > 0 && reader.GMS2_3 && reader.GetOffsetMap().TryGetValue(_BytecodeAbsoluteAddress, out var i))
+            reader.Position = _bytecodeAbsoluteAddress;
+            if (Length > 0 && reader.GMS2_3 && reader.GetOffsetMap().TryGetValue(_bytecodeAbsoluteAddress, out var i))
             {
                 ParentEntry = (i as UndertaleInstruction).Entry;
                 ParentEntry.ChildEntries.Add(this);
             }
             Instructions.Clear();
-            while (reader.Position < _BytecodeAbsoluteAddress + Length)
+            while (reader.Position < _bytecodeAbsoluteAddress + Length)
             {
-                uint a = (reader.Position - _BytecodeAbsoluteAddress) / 4;
+                uint a = (reader.Position - _bytecodeAbsoluteAddress) / 4;
                 UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
                 instr.Address = a;
                 Instructions.Add(instr);
@@ -1225,12 +1225,12 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
 
         Append(context.ResultAssembly);
 
-        data.GMLCacheChanged?.Add(Name.Content);
+        data.GMLCacheChanged?.Add(Name?.Content);
 
         try
         {
             // Attempt to write text in all modes, because this is a special case.
-            string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name.Content + ".gml");
+            string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name?.Content + ".gml");
             if (File.Exists(tempPath))
             {
                 string readText = File.ReadAllText(tempPath) + "\n" + gmlCode;
@@ -1260,13 +1260,13 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
 
         Replace(context.ResultAssembly);
 
-        data.GMLCacheChanged?.Add(Name.Content);
+        data.GMLCacheChanged?.Add(Name?.Content);
 
         //TODO: only do this if profile mode is enabled in the first place
         try
         {
             // When necessary, write to profile.
-            string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name.Content + ".gml");
+            string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name?.Content + ".gml");
             if (!data.GMS2_3 && (data.ToolInfo.ProfileMode || File.Exists(tempPath)))
                 File.WriteAllText(tempPath, gmlCode);
         }
@@ -1279,6 +1279,17 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content + " (" + GetType().Name + ")";
+        return Name?.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        Instructions?.Clear();
+        ChildEntries = new();
+        Name = null;
+        _unsupportedBuffer = null;
     }
 }
