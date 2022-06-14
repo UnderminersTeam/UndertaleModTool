@@ -170,8 +170,17 @@ namespace UndertaleModTool
                 Debug.WriteLine($"Could not handle type {obj.GetType()}");
             }
 
-            if (title?.Length > 64)
-                title = title[..64] + "...";
+            if (title is not null)
+            {
+                // "\t" is displayed as 8 spaces.
+                // So, if the title contains "\t", replace them with spaces,
+                // in order to properly shorten the title.
+                if (title.IndexOf('\t') != -1)
+                    title = title.Replace("\t", "        ");
+
+                if (title.Length > 64)
+                    title = title[..64] + "...";
+            }
 
             return title;
         }
@@ -184,13 +193,15 @@ namespace UndertaleModTool
     }
     public class TabTitleConverter : IMultiValueConverter
     {
+        public static TabTitleConverter Instance { get; } = new();
+
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (values[0] is not Tab tab)
                 return null;
 
             if (!tab.IsCustomTitle)
-                tab.TabTitle = Tab.GetTitleForObject(values[1]);
+                tab.TabTitle = Tab.GetTitleForObject(tab.OpenedObject);
 
             return tab.TabTitle;
         }
@@ -3561,8 +3572,7 @@ result in loss of work.");
         }
         private void CloseOtherTabsMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            Tab tab = (sender as MenuItem).DataContext as Tab;
-            if (tab is null)
+            if ((sender as MenuItem).DataContext is not Tab tab)
                 return;
 
             foreach (Tab t in Tabs.Reverse())
@@ -3576,6 +3586,52 @@ result in loss of work.");
             SelectionHistory.Clear();
             Tabs = new() { tab };
             CurrentTabIndex = 0;
+        }
+
+        private void TabTitleText_Initialized(object sender, EventArgs e)
+        {
+            SetTabTitleBinding(sender, null);
+        }
+        private void TabTitleText_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            SetTabTitleBinding(sender, e.OldValue);
+        }
+        private void SetTabTitleBinding(object sender, object prevObj)
+        {
+            TextBlock textBlock = sender as TextBlock;
+            object obj = (textBlock.DataContext as Tab)?.OpenedObject;
+            if (obj is null || obj == DependencyProperty.UnsetValue)
+                return;
+
+            bool objNamed = obj is UndertaleNamedResource;
+            bool objString = obj is UndertaleString;
+
+            prevObj = (prevObj as Tab)?.OpenedObject;
+            if (prevObj is not null)
+            {
+                bool pObjNamed = prevObj is UndertaleNamedResource;
+                bool pObjString = prevObj is UndertaleString;
+
+                // if both objects have the same type (one of above)
+                // or both objects are not "UndertaleNamedResource",
+                // then there's no need for changing the binding
+                if (pObjNamed && objNamed || pObjString && objString || !(pObjNamed || objNamed))
+                    return;
+            }
+
+            MultiBinding binding = new()
+            {
+                Converter = TabTitleConverter.Instance,
+                Mode = BindingMode.OneWay
+            };
+            binding.Bindings.Add(new Binding() { Mode = BindingMode.OneTime });
+
+            if (objNamed)
+                binding.Bindings.Add(new Binding("OpenedObject.Name.Content") { Mode = BindingMode.OneWay });
+            else if (objString)
+                binding.Bindings.Add(new Binding("OpenedObject.Content") { Mode = BindingMode.OneWay });
+
+            textBlock.SetBinding(TextBlock.TextProperty, binding);
         }
     }
 
@@ -3617,11 +3673,6 @@ result in loss of work.");
     {
         public string Heading { get; private set; }
         public string Description { get; private set; }
-
-        // Used only by the "TabTitleConverter" to prevent the following WPF binding warning:
-        // "Name property not found on object of type DescriptionView".
-        // (within "TabControl.ItemTemplate")
-        public UndertaleString Name { get; } = new();
 
         public DescriptionView(string heading, string description)
         {
