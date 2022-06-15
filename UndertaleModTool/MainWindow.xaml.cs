@@ -996,7 +996,7 @@ namespace UndertaleModTool
 
             // Clear "GC holes" left in the memory in process of data unserializing
             // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.gcsettings.largeobjectheapcompactionmode?view=net-6.0
-            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; 
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect();
         }
 
@@ -1133,7 +1133,7 @@ namespace UndertaleModTool
                     {
                         this.ShowError("An error occured while trying to save:\n" + e.Message, "Save error");
                     });
-                    
+
                     SaveSucceeded = false;
                 }
                 // Don't make any changes unless the save succeeds.
@@ -1169,7 +1169,7 @@ namespace UndertaleModTool
                     {
                         this.ShowError("An error occured while trying to save:\n" + exc.Message, "Save error");
                     });
-                    
+
                     SaveSucceeded = false;
                 }
                 if (Data != null)
@@ -1900,63 +1900,89 @@ namespace UndertaleModTool
             OpenInTab(obj, true);
         }
 
-        private void MenuItem_RunBuiltinScript_SubmenuOpened(object sender, RoutedEventArgs e)
+        private void RootMenuItem_SubmenuOpened(object sender, RoutedEventArgs e)
         {
-            MenuItem_RunScript_SubmenuOpened(sender, e, "SampleScripts");
+            MenuItem_RunScript_SubmenuOpened(sender, e, Path.Combine(ExePath, "Scripts"));
         }
-        private void MenuItem_RunCommunityScript_SubmenuOpened(object sender, RoutedEventArgs e)
-        {
-            MenuItem_RunScript_SubmenuOpened(sender, e, "CommunityScripts");
-        }
-        private void MenuItem_RunTechnicalScript_SubmenuOpened(object sender, RoutedEventArgs e)
-        {
-            MenuItem_RunScript_SubmenuOpened(sender, e, "TechnicalScripts");
-        }
-        private void MenuItem_RunUnpackScript_SubmenuOpened(object sender, RoutedEventArgs e)
-        {
-            MenuItem_RunScript_SubmenuOpened(sender, e, "Unpackers");
-        }
-        private void MenuItem_RunRepackScript_SubmenuOpened(object sender, RoutedEventArgs e)
-        {
-            MenuItem_RunScript_SubmenuOpened(sender, e, "Repackers");
-        }
-        private void MenuItem_RunDemoScript_SubmenuOpened(object sender, RoutedEventArgs e)
-        {
-            MenuItem_RunScript_SubmenuOpened(sender, e, "DemoScripts");
-        }
-        private void MenuItem_RunScript_SubmenuOpened(object sender, RoutedEventArgs e, string folderName)
+
+        private void MenuItem_RunScript_SubmenuOpened(object sender, RoutedEventArgs e, string folderDir)
         {
             MenuItem item = sender as MenuItem;
+
+            // DUMB Wpf behaviour. If a child submenu gets triggered, it triggers ALL parent events.
+            // So we only evaluate if we have at least 1 subitem which is disabled.
+            if (item.Items.Cast<MenuItem>().Count(si => !si.IsEnabled) < 1)
+                return;
+
+            DirectoryInfo directory = new DirectoryInfo(folderDir);
             item.Items.Clear();
             try
             {
-                var appDir = Program.GetExecutableDirectory();
-                var folderDir = Path.Combine(appDir, "Scripts", folderName);
-
                 // exit out early if the path does not exist.
-                if (!Directory.Exists(folderDir))
+                if (!directory.Exists)
                 {
-                    item.Items.Add(new MenuItem { Header = $"(Path {folderDir} does not exist, cannot search for files!)", IsEnabled = false });
+                    item.Items.Add(new MenuItem {Header = $"(Path {folderDir} does not exist, cannot search for files!)", IsEnabled = false});
                     return;
                 }
 
-
-                foreach (var path in Directory.EnumerateFiles(folderDir))
+                foreach (var file in directory.GetFiles())
                 {
-                    var filename = Path.GetFileName(path);
-                    if (!filename.EndsWith(".csx"))
+                    var filename = file.Name;
+                    // Only show script files
+                    if (file.Extension != ".csx")
                         continue;
-                    MenuItem subitem = new MenuItem() { Header = filename.Replace("_", "__") };
+                    // Replace _ with __ because WPF uses _ for keyboard navigation
+                    MenuItem subitem = new MenuItem {Header = filename.Replace("_", "__")};
                     subitem.Click += MenuItem_RunBuiltinScript_Item_Click;
-                    subitem.CommandParameter = path;
+                    subitem.CommandParameter = file.FullName;
                     item.Items.Add(subitem);
                 }
+
+                foreach (var subDirectory in directory.GetDirectories())
+                {
+                    // Don't add directories which don't have script files
+                    if (subDirectory.GetFiles().Count(sf => sf.Extension == ".csx") < 1)
+                        continue;
+
+                    var subDirName = subDirectory.Name;
+                    // In addition to the _ comment from above, we also need to add at least one item, so that WPF uses this as a submenuitem
+                    MenuItem subItem = new MenuItem {Header = subDirName.Replace("_", "__"), Items = {new MenuItem {Header = "(loading...)", IsEnabled = false}}};
+                    subItem.SubmenuOpened += (o, args) => MenuItem_RunScript_SubmenuOpened(o, args, subDirectory.FullName);
+                    item.Items.Add(subItem);
+                }
+
                 if (item.Items.Count == 0)
-                    item.Items.Add(new MenuItem() { Header = "(whoops, no scripts found?)", IsEnabled = false });
+                    item.Items.Add(new MenuItem {Header = "(No scripts found!)", IsEnabled = false});
             }
             catch (Exception err)
             {
-                item.Items.Add(new MenuItem() { Header = err.ToString(), IsEnabled = false });
+                item.Items.Add(new MenuItem {Header = err.ToString(), IsEnabled = false});
+            }
+
+            // If we're at the complete root, we need to add the "Run other script" button as well
+            if (item.Name != "RootScriptItem") return;
+
+            var otherScripts = new MenuItem {Header = "Run _other script..."};
+            otherScripts.Click += MenuItem_RunOtherScript_Click;
+            item.Items.Add(otherScripts);
+        }
+
+        private async void MenuItem_RunBuiltinScript_Item_Click(object sender, RoutedEventArgs e)
+        {
+            string path = (string)(sender as MenuItem).CommandParameter;
+            await RunScript(path);
+        }
+
+        private async void MenuItem_RunOtherScript_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.DefaultExt = "csx";
+            dlg.Filter = "Scripts (.csx)|*.csx|All files|*";
+
+            if (dlg.ShowDialog() == true)
+            {
+                await RunScript(dlg.FileName);
             }
         }
 
@@ -2469,25 +2495,6 @@ namespace UndertaleModTool
 
             // otherwise just return the input (it may be empty aka .Length == 0).
             return dlg.InputText;
-        }
-
-        private async void MenuItem_RunBuiltinScript_Item_Click(object sender, RoutedEventArgs e)
-        {
-            string path = (string)(sender as MenuItem).CommandParameter;
-            await RunScript(path);
-        }
-
-        private async void MenuItem_RunOtherScript_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog dlg = new OpenFileDialog();
-
-            dlg.DefaultExt = "csx";
-            dlg.Filter = "Scripts (.csx)|*.csx|All files|*";
-
-            if (dlg.ShowDialog() == true)
-            {
-                await RunScript(dlg.FileName);
-            }
         }
 
         private void MenuItem_GitHub_Click(object sender, RoutedEventArgs e)
