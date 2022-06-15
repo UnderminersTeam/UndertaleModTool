@@ -996,7 +996,7 @@ namespace UndertaleModTool
 
             // Clear "GC holes" left in the memory in process of data unserializing
             // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.gcsettings.largeobjectheapcompactionmode?view=net-6.0
-            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; 
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect();
         }
 
@@ -1133,7 +1133,7 @@ namespace UndertaleModTool
                     {
                         this.ShowError("An error occured while trying to save:\n" + e.Message, "Save error");
                     });
-                    
+
                     SaveSucceeded = false;
                 }
                 // Don't make any changes unless the save succeeds.
@@ -1169,7 +1169,7 @@ namespace UndertaleModTool
                     {
                         this.ShowError("An error occured while trying to save:\n" + exc.Message, "Save error");
                     });
-                    
+
                     SaveSucceeded = false;
                 }
                 if (Data != null)
@@ -2588,13 +2588,14 @@ namespace UndertaleModTool
 
             if (!Environment.Is64BitOperatingSystem)
             {
-                if (this.ShowQuestion("Your operating system is 32-bit.\n" +
-                                      "32-bit (x86) version of UndertaleModTool is obsolete.\n" +
-                                      "Do you want to continue anyway?", MessageBoxImage.Error) != MessageBoxResult.Yes)
-                {
-                    window.UpdateButtonEnabled = true;
+                this.ShowWarning("Your operating system is 32-bit.\n" +
+                                  "The 32-bit (x86) version of UndertaleModTool is obsolete.\n" +
+                                  "If you wish to continue using the 32-bit version of UndertaleModTool, either use the GitHub Actions Artifacts, " +
+                                  "the Nightly builds if you don't have a GitHub account, or compile UTMT yourself.\n" +
+                                  "For any questions or more information, ask in the Underminers Discord server.");
+                window.UpdateButtonEnabled = true;
                     return;
-                }
+
             }
 
             string sysDriveLetter = Path.GetTempPath()[0].ToString();
@@ -2611,7 +2612,7 @@ namespace UndertaleModTool
             bool isBundled = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
 
             string baseUrl = "https://api.github.com/repos/krzys-h/UndertaleModTool/actions/";
-            string detectedActionName = $"Publish GUI{(!Environment.Is64BitOperatingSystem ? " 32Bit" : "")}";
+            string detectedActionName = "Publish GUI";
 
             // Fetch the latest workflow run
             var result = await HttpGetAsync(baseUrl + "runs?branch=master&status=success&per_page=20");
@@ -2666,9 +2667,9 @@ namespace UndertaleModTool
 
             if (Environment.Is64BitOperatingSystem && !Environment.Is64BitProcess)
             {
-                if (this.ShowQuestion("Detected 32-bit (x86) version of UndertaleModTool on the 64-bit operating system.\n" +
+                if (this.ShowQuestion("Detected 32-bit (x86) version of UndertaleModTool on an 64-bit operating system.\n" +
                                  "It's highly recommended to use the 64-bit version instead.\n" +
-                                 "Download that?") != MessageBoxResult.Yes)
+                                 "Do you wish to download it?") != MessageBoxResult.Yes)
                 {
                     window.UpdateButtonEnabled = true;
                     return;
@@ -2681,16 +2682,8 @@ namespace UndertaleModTool
                 var currentArtifact = (JObject) artifactList[index];
                 string artifactName = (string)currentArtifact["name"];
 
-                if (Environment.Is64BitOperatingSystem)
-                {
-                    if (artifactName.Contains($"isBundled-{isBundled.ToString().ToLower()}-isSingleFile-{isSingleFile.ToString().ToLower()}"))
-                        artifact = currentArtifact;
-                }
-                else
-                {
-                    if (artifactName.Contains($"isSingleFile-{isSingleFile.ToString().ToLower()}"))
-                        artifact = currentArtifact;
-                }
+                if (artifactName.Contains($"isBundled-{isBundled.ToString().ToLower()}-isSingleFile-{isSingleFile.ToString().ToLower()}"))
+                    artifact = currentArtifact;
             }
             if (artifact is null)
             {
