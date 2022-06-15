@@ -134,23 +134,31 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         }
 
         /// <summary>
-        /// The image width.
+        /// The width of the texture.
+        /// In case of an invalid texture data, this will be <c>-1</c>.
         /// </summary>
         public int Width
         {
             get
             {
+                if (_textureBlob is null || _textureBlob.Length < 24)
+                    return -1;
+
                 ReadOnlySpan<byte> span = _textureBlob.AsSpan();
                 return BinaryPrimitives.ReadInt32BigEndian(span[16..20]);
             }
         }
         /// <summary>
-        /// The image height.
+        /// The height of the texture.
+        /// In case of an invalid texture data, this will be <c>-1</c>.
         /// </summary>
         public int Height
         {
             get
             {
+                if (_textureBlob is null || _textureBlob.Length < 24)
+                    return -1;
+
                 ReadOnlySpan<byte> span = _textureBlob.AsSpan();
                 return BinaryPrimitives.ReadInt32BigEndian(span[20..24]);
             }
