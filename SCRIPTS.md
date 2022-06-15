@@ -1,7 +1,7 @@
 ﻿This file contains information regarding the scripts that are bundled with the tool.
 
 Many of them are experimental, so be weary of running more obscure scripts: make backups.
-Please report any bugs or issues with the scripts to the Underminers server's #help channel on Discord at https://discord.gg/RxXpdwJ.
+Please report any bugs or issues with the scripts to the Underminers server's #help channel on Discord at https://discord.gg/hnyMDypMbN.
 
 ## Sample scripts
 
