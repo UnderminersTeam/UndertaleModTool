@@ -112,12 +112,12 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         public ushort SourceY { get; set; }
 
         /// <summary>
-        /// The width of the glyph in pixel.
+        /// The width of the glyph in pixels.
         /// </summary>
         public ushort SourceWidth { get; set; }
 
         /// <summary>
-        /// The height of the glyph in pixel.
+        /// The height of the glyph in pixels.
         /// </summary>
         public ushort SourceHeight { get; set; }
 
