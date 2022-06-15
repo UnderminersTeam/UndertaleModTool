@@ -142,9 +142,14 @@ namespace UndertaleModTool
                 string stringFirstLine = str.Content;
                 if (stringFirstLine is not null)
                 {
-                    int stringLength = StringTitleConverter.NewLineRegex.Match(stringFirstLine).Index;
-                    if (stringLength != 0)
-                        stringFirstLine = stringFirstLine[..stringLength] + " ...";
+                    if (stringFirstLine.Length == 0)
+                        stringFirstLine = "(empty string)";
+                    else
+                    {
+                        int stringLength = StringTitleConverter.NewLineRegex.Match(stringFirstLine).Index;
+                        if (stringLength != 0)
+                            stringFirstLine = stringFirstLine[..stringLength] + " ...";
+                    }
                 }
 
                 title = "String - " + stringFirstLine;
@@ -173,10 +178,9 @@ namespace UndertaleModTool
             if (title is not null)
             {
                 // "\t" is displayed as 8 spaces.
-                // So, if the title contains "\t", replace them with spaces,
+                // So, replace all "\t" with spaces,
                 // in order to properly shorten the title.
-                if (title.IndexOf('\t') != -1)
-                    title = title.Replace("\t", "        ");
+                title = title.Replace("\t", "        ");
 
                 if (title.Length > 64)
                     title = title[..64] + "...";
@@ -1730,7 +1734,7 @@ namespace UndertaleModTool
 
             if (obj is UndertaleNamedResource namedRes)
                 name = namedRes.Name?.Content;
-            else if (obj is UndertaleString str)
+            else if (obj is UndertaleString str && str.Content?.Length > 0)
                 name = StringTitleConverter.Instance.Convert(str.Content, null, null, null) as string;
 
             if (name is not null)
@@ -1914,6 +1918,8 @@ namespace UndertaleModTool
                     (obj as UndertaleNamedResource).Name = new UndertaleString(notDataNewName); // not Data.MakeString!
                 }
             }
+            else if (obj is UndertaleString str)
+                str.Content = "";
             list.Add(obj);
             UpdateTree();
             HighlightObject(obj);
@@ -3053,8 +3059,11 @@ result in loss of work.");
             UndertaleResource res = obj as UndertaleResource;
             if (res is null)
             {
-                if (!silent)
-                    this.ShowWarning($"Can't highlight the object - it's null or isn't a UndertaleResource.");
+                string msg = $"Can't highlight the object - it's null or isn't an UndertaleResource.";
+                if (silent)
+                    Debug.WriteLine(msg);
+                else
+                    this.ShowWarning(msg);
 
                 return;
             }
@@ -3080,16 +3089,22 @@ result in loss of work.");
             }
             catch (Exception ex)
             {
-                if (!silent)
-                    this.ShowWarning($"Can't highlight the object \"{objName}\".\nError - {ex.Message}");
+                string msg = $"Can't highlight the object \"{objName}\".\nError - {ex.Message}";
+                if (silent)
+                    Debug.WriteLine(msg);
+                else
+                    this.ShowWarning(msg);
 
                 return;
             }
 
             if (resListView is null)
             {
-                if (!silent)
-                    this.ShowWarning($"Can't highlight the object \"{objName}\" - element with object list not found.");
+                string msg = $"Can't highlight the object \"{objName}\" - element with object list not found.";
+                if (silent)
+                    Debug.WriteLine(msg);
+                else
+                    this.ShowWarning(msg);
 
                 return;
             }
@@ -3572,7 +3587,8 @@ result in loss of work.");
         }
         private void CloseOtherTabsMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if ((sender as MenuItem).DataContext is not Tab tab)
+            Tab tab = (sender as MenuItem).DataContext as Tab;
+            if (tab is null)
                 return;
 
             foreach (Tab t in Tabs.Reverse())

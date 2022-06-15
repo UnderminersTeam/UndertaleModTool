@@ -55,8 +55,8 @@ namespace UndertaleModLib
         {
             get
             {
-                if (!typeof(UndertaleNamedResource).IsAssignableFrom(resourceType))
-                    throw new NotSupportedException($"\"{resourceType.FullName}\" is not a UndertaleNamedResource.");
+                if (!typeof(UndertaleResource).IsAssignableFrom(resourceType))
+                    throw new NotSupportedException($"\"{resourceType.FullName}\" is not an UndertaleResource.");
 
                 var property = GetType().GetProperties().Where(x => x.PropertyType.Name == "IList`1")
                                                         .FirstOrDefault(x => x.PropertyType.GetGenericArguments()[0] == resourceType);
@@ -67,8 +67,8 @@ namespace UndertaleModLib
             }
             set
             {
-                if (!typeof(UndertaleNamedResource).IsAssignableFrom(resourceType))
-                    throw new NotSupportedException($"\"{resourceType.FullName}\" is not a UndertaleNamedResource.");
+                if (!typeof(UndertaleResource).IsAssignableFrom(resourceType))
+                    throw new NotSupportedException($"\"{resourceType.FullName}\" is not an UndertaleResource.");
 
                 var property = GetType().GetProperties().Where(x => x.PropertyType.Name == "IList`1")
                                                         .FirstOrDefault(x => x.PropertyType.GetGenericArguments()[0] == resourceType);

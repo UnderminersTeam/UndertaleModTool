@@ -15,6 +15,9 @@ namespace UndertaleModTool
             if (value is not string str)
                 return null;
 
+            if (str.Length == 0)
+                return "(empty string)";
+
             if (str.Length > 256)
                 str = str[..256] + "...";
             str = NewLineRegex.Replace(str, " ");
