@@ -466,7 +466,7 @@ namespace UndertaleModTool
                     }
                     catch (Exception exc)
                     {
-                        mainWindow.ShowError(exc.ToString());
+                        mainWindow.ShowErrorInvoke(exc.ToString());
                     }
 
                     if (decompiled != null)
@@ -595,14 +595,14 @@ namespace UndertaleModTool
                     catch (Exception e)
                     {
                         Debug.WriteLine(e.ToString());
-                        if (mainWindow.ShowQuestion("Unable to execute GraphViz: " + e.Message + "\nMake sure you have downloaded it and set the path in settings.\nDo you want to open the download page now?", MessageBoxImage.Error) == MessageBoxResult.Yes)
+                        if (mainWindow.ShowQuestionInvoke("Unable to execute GraphViz: " + e.Message + "\nMake sure you have downloaded it and set the path in settings.\nDo you want to open the download page now?", MessageBoxImage.Error) == MessageBoxResult.Yes)
                             MainWindow.OpenBrowser("https://graphviz.gitlab.io/_pages/Download/Download_windows.html");
                     }
                 }
                 catch (Exception e)
                 {
                     Debug.WriteLine(e.ToString());
-                    mainWindow.ShowError(e.Message, "Graph generation failed");
+                    mainWindow.ShowErrorInvoke(e.Message, "Graph generation failed");
                 }
 
                 Dispatcher.Invoke(() =>
@@ -692,21 +692,21 @@ namespace UndertaleModTool
             if (compileContext == null)
             {
                 dialog.TryClose();
-                mainWindow.ShowError("Compile context was null for some reason...", "This shouldn't happen");
+                mainWindow.ShowErrorInvoke("Compile context was null for some reason...", "This shouldn't happen");
                 return;
             }
 
             if (compileContext.HasError)
             {
                 dialog.TryClose();
-                mainWindow.ShowError(Truncate(compileContext.ResultError, 512), "Compiler error");
+                mainWindow.ShowErrorInvoke(Truncate(compileContext.ResultError, 512), "Compiler error");
                 return;
             }
 
             if (!compileContext.SuccessfulCompile)
             {
                 dialog.TryClose();
-                mainWindow.ShowError("(unknown error message)", "Compile failed");
+                mainWindow.ShowErrorInvoke("(unknown error message)", "Compile failed");
                 return;
             }
 
@@ -733,7 +733,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception exc)
                 {
-                    mainWindow.ShowError("Error during writing of GML code to profile:\n" + exc);
+                    mainWindow.ShowErrorInvoke("Error during writing of GML code to profile:\n" + exc);
                 }
             }
 

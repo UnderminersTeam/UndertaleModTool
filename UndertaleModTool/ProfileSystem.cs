@@ -280,7 +280,7 @@ namespace UndertaleModTool
 
                     if (!SettingsWindow.ProfileMessageShown)
                     {
-                        this.ShowMessage(@"The profile for your game loaded successfully!
+                        this.ShowMessageInvoke(@"The profile for your game loaded successfully!
 
 UndertaleModTool now uses the ""Profile"" system by default for code.
 Using the profile system, many new features are available to you!
@@ -383,7 +383,7 @@ an issue on GitHub.");
                     Directory.CreateDirectory(profDir);
                     Directory.CreateDirectory(Path.Combine(profDir, "Main"));
                     Directory.CreateDirectory(Path.Combine(profDir, "Temp"));
-                    this.ShowMessage("Profile saved successfully to " + ProfileHash);
+                    this.ShowMessageInvoke("Profile saved successfully to " + ProfileHash);
                 }
                 if (SettingsWindow.DeleteOldProfileOnSave && copyProfile)
                 {

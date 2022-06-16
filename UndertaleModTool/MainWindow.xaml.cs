@@ -504,7 +504,7 @@ namespace UndertaleModTool
                             }
 
                             if (!deleted)
-                                this.ShowWarning($"The updater temp folder can't be deleted.\nError - {exMessage}.");
+                                this.ShowWarningInvoke($"The updater temp folder can't be deleted.\nError - {exMessage}.");
                         }
                     });
                 }
@@ -624,7 +624,7 @@ namespace UndertaleModTool
         {
             if (Data != null)
             {
-                if (this.ShowQuestion("Warning: you currently have a project open.\nAre you sure you want to make a new project?") == MessageBoxResult.No)
+                if (this.ShowQuestionInvoke("Warning: you currently have a project open.\nAre you sure you want to make a new project?") == MessageBoxResult.No)
                     return false;
             }
             this.Dispatcher.Invoke(() =>
@@ -923,7 +923,7 @@ namespace UndertaleModTool
                     {
                         data = UndertaleIO.Read(stream, warning =>
                         {
-                            this.ShowWarning(warning, "Loading warning");
+                            this.ShowWarningInvoke(warning, "Loading warning");
                             hadWarnings = true;
                         }, message =>
                         {
@@ -935,7 +935,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception e)
                 {
-                    this.ShowError("An error occured while trying to load:\n" + e.Message, "Load error");
+                    this.ShowErrorInvoke("An error occured while trying to load:\n" + e.Message, "Load error");
                 }
 
                 Dispatcher.Invoke(async () =>
@@ -1153,10 +1153,7 @@ namespace UndertaleModTool
                         catch { }
                     }
 
-                    Dispatcher.Invoke(() =>
-                    {
-                        this.ShowError("An error occured while trying to save:\n" + e.Message, "Save error");
-                    });
+                    this.ShowErrorInvoke("An error occured while trying to save:\n" + e.Message, "Save error");
 
                     SaveSucceeded = false;
                 }
@@ -1189,10 +1186,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception exc)
                 {
-                    Dispatcher.Invoke(() =>
-                    {
-                        this.ShowError("An error occured while trying to save:\n" + exc.Message, "Save error");
-                    });
+                    this.ShowErrorInvoke("An error occured while trying to save:\n" + exc.Message, "Save error");
 
                     SaveSucceeded = false;
                 }
@@ -1257,8 +1251,7 @@ namespace UndertaleModTool
 
                     if (!File.Exists(Path.Combine(cacheDirPath, num.ToString())))
                     {
-                        this.ShowWarning("Decompiled code cache file for open data is missing, but its name present in the index.");
-
+                        this.ShowWarningInvoke("Decompiled code cache file for open data is missing, but its name present in the index.");
                         return;
                     }
 
@@ -1269,7 +1262,7 @@ namespace UndertaleModTool
                         string prevHash = fs.ReadLine();
 
                         if (!Regex.IsMatch(prevHash, "^[0-9a-fA-F]{32}$")) //if first 32 bytes of cache file are not a valid MD5
-                            this.ShowWarning("Decompiled code cache for open file is broken.\nThe cache will be generated again.");
+                            this.ShowWarningInvoke("Decompiled code cache for open file is broken.\nThe cache will be generated again.");
                         else
                         {
                             if (hash == prevHash)
@@ -1288,7 +1281,7 @@ namespace UndertaleModTool
                                 }
                                 catch
                                 {
-                                    this.ShowWarning("Decompiled code cache for open file is broken.\nThe cache will be generated again.");
+                                    this.ShowWarningInvoke("Decompiled code cache for open file is broken.\nThe cache will be generated again.");
 
                                     Data.GMLCache = null;
                                     Data.GMLCacheFailed = null;
@@ -1300,7 +1293,7 @@ namespace UndertaleModTool
                                 string[] invalidNames = Data.GMLCache.Keys.Except(codeNames).ToArray();
                                 if (invalidNames.Length > 0)
                                 {
-                                    this.ShowWarning($"Decompiled code cache for open file contains one or more non-existent code names (first - \"{invalidNames[0]}\").\nThe cache will be generated again.");
+                                    this.ShowWarningInvoke($"Decompiled code cache for open file contains one or more non-existent code names (first - \"{invalidNames[0]}\").\nThe cache will be generated again.");
 
                                     Data.GMLCache = null;
 
@@ -1312,7 +1305,7 @@ namespace UndertaleModTool
                                 Data.GMLCacheWasSaved = true;
                             }
                             else
-                                this.ShowWarning("Open file differs from the one the cache was generated for.\nThat decompiled code cache will be generated again.");
+                                this.ShowWarningInvoke("Open file differs from the one the cache was generated for.\nThat decompiled code cache will be generated again.");
                         }
                     }
                 }
@@ -2341,7 +2334,7 @@ namespace UndertaleModTool
             {
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
-                this.ShowError(exc.Message, "Script compile error");
+                this.ShowErrorInvoke(exc.Message, "Script compile error");
                 ScriptExecutionSuccess = false;
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "CompilationErrorException";
@@ -2358,7 +2351,7 @@ namespace UndertaleModTool
 
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
-                this.ShowError(isScriptException ? exc.Message : excString, "Script error");
+                this.ShowErrorInvoke(isScriptException ? exc.Message : excString, "Script error");
                 ScriptExecutionSuccess = false;
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "Exception";
@@ -2626,8 +2619,7 @@ namespace UndertaleModTool
                                   "the Nightly builds if you don't have a GitHub account, or compile UTMT yourself.\n" +
                                   "For any questions or more information, ask in the Underminers Discord server.");
                 window.UpdateButtonEnabled = true;
-                    return;
-
+                return;
             }
 
             string sysDriveLetter = Path.GetTempPath()[0].ToString();
@@ -3209,7 +3201,7 @@ result in loss of work.");
                         }
                         catch (Exception ex)
                         {
-                            this.ShowError("An error occured while trying to load:\n" + ex.Message, "Load error");
+                            this.ShowErrorInvoke("An error occured while trying to load:\n" + ex.Message, "Load error");
                         }
 
                         Dispatcher.Invoke(() =>

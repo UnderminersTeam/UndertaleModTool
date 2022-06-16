@@ -61,6 +61,59 @@ namespace UndertaleModTool
 		}
 
 		/// <summary>
+		/// Invokes <paramref name="window"/> to show an informational <see cref="MessageBox"/> with <paramref name="window"/> as the parent.
+		/// </summary>
+		/// <param name="window">The parent from which the <see cref="MessageBox"/> will show.</param>
+		/// <param name="messageBoxText">A <see cref="string"/> that specifies the text to display.</param>
+		/// <param name="title">A <see cref="string"/> that specifies the title bar caption to display.</param>
+		/// <returns><see cref="MessageBoxResult.OK"/> or <see cref="MessageBoxResult.None"/> if
+		/// the <see cref="MessageBox"/> was cancelled.</returns>
+		public static MessageBoxResult ShowMessageInvoke(this Window window, string messageBoxText, string title = "UndertaleModTool")
+		{
+			return window.Dispatcher.Invoke(() => ShowCore(window, messageBoxText, title, MessageBoxButton.OK, MessageBoxImage.Information));
+		}
+
+		/// <summary>
+		/// Invokes <paramref name="window"/> to show a <see cref="MessageBox"/> prompting for a yes/no question with <paramref name="window"/> as the parent.
+		/// </summary>
+		/// <param name="window">The parent from which the <see cref="MessageBox"/> will show.</param>
+		/// <param name="messageBoxText">A <see cref="string"/> that specifies the text to display.</param>
+		/// <param name="icon">The <see cref="MessageBoxImage"/> to display.</param>
+		/// <param name="title">A <see cref="string"/> that specifies the title bar caption to display.</param>
+		/// <returns><see cref="MessageBoxResult.Yes"/> or <see cref="MessageBoxResult.No"/> depending on the users' answer.
+		/// <see cref="MessageBoxResult.None"/> if the <see cref="MessageBox"/> was cancelled.</returns>
+		public static MessageBoxResult ShowQuestionInvoke(this Window window, string messageBoxText, MessageBoxImage icon = MessageBoxImage.Question, string title = "UndertaleModTool")
+		{
+			return window.Dispatcher.Invoke(() => ShowCore(window, messageBoxText, title, MessageBoxButton.YesNo, icon));
+		}
+
+		/// <summary>
+		/// Invokes <paramref name="window"/> to show a warning <see cref="MessageBox"/> with <paramref name="window"/> as the parent.
+		/// </summary>
+		/// <param name="window">The parent from which the <see cref="MessageBox"/> will show.</param>
+		/// <param name="messageBoxText">A <see cref="string"/> that specifies the text to display.</param>
+		/// <param name="title">A <see cref="string"/> that specifies the title bar caption to display.</param>
+		/// <returns><see cref="MessageBoxResult.OK"/> or <see cref="MessageBoxResult.None"/> if
+		/// the <see cref="MessageBox"/> was cancelled.</returns>
+		public static MessageBoxResult ShowWarningInvoke(this Window window, string messageBoxText, string title = "Warning")
+		{
+			return window.Dispatcher.Invoke(() => ShowCore(window, messageBoxText, title, MessageBoxButton.OK, MessageBoxImage.Warning));
+		}
+
+		/// <summary>
+		/// Invokes <paramref name="window"/> to show an error <see cref="MessageBox"/> with <paramref name="window"/> as the parent.
+		/// </summary>
+		/// <param name="window">The parent from which the <see cref="MessageBox"/> will show.</param>
+		/// <param name="messageBoxText">A <see cref="string"/> that specifies the text to display.</param>
+		/// <param name="title">A <see cref="string"/> that specifies the title bar caption to display.</param>
+		/// <returns><see cref="MessageBoxResult.OK"/> or <see cref="MessageBoxResult.None"/> if
+		/// the <see cref="MessageBox"/> was cancelled.</returns>
+		public static MessageBoxResult ShowErrorInvoke(this Window window, string messageBoxText, string title = "Error")
+		{
+			return window.Dispatcher.Invoke(() => ShowCore(window, messageBoxText, title, MessageBoxButton.OK, MessageBoxImage.Error));
+		}
+
+		/// <summary>
 		/// The wrapper for the extensions to directly call <see cref="MessageBox.Show(Window, string, string, MessageBoxButton, MessageBoxImage)"/>.
 		/// </summary>
 		/// <param name="window">A Window that represents the owner window of the message box.</param>
