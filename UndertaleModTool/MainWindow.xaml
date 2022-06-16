@@ -181,7 +181,7 @@
                 <TreeView Grid.Column="0" Grid.Row="1" Margin="5" DataContext="{Binding Data}" SelectedItemChanged="TreeView_SelectedItemChanged" MouseDoubleClick="MainTree_MouseDoubleClick" KeyUp="MainTree_KeyUp" AllowDrop="True" Name="MainTree" KeyDown="MainTree_KeyDown" PreviewMouseRightButtonDown="MainTree_PreviewMouseRightButtonDown"
                     VirtualizingStackPanel.IsVirtualizing="True"
                     VirtualizingStackPanel.VirtualizationMode="Recycling">
-                    <TreeView.Resources>
+                    <TreeView.Resources >
                         <ContextMenu x:Key="AddMenu">
                             <MenuItem Header="Add" Click="MenuItem_Add_Click"/>
                         </ContextMenu>
@@ -196,6 +196,7 @@
                             <EventSetter Event="TreeViewItem.DragOver" Handler="TreeView_DragOver"/>
                             <EventSetter Event="TreeViewItem.Drop" Handler="TreeView_Drop"/>
                             <EventSetter Event="TreeViewItem.MouseMove" Handler="TreeView_MouseMove"/>
+                            <EventSetter Event="TreeViewItem.MouseDown" Handler="MainTree_OnMouseDown"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ., Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type undertalelib:UndertaleResource}}" Value="True">
                                     <Setter Property="ContextMenu" Value="{StaticResource UndertaleResourceMenu}"/>

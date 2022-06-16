@@ -1614,6 +1614,15 @@ namespace UndertaleModTool
             e.Handled = true;
         }
 
+        private void MainTree_OnMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var senderTree = sender as TreeViewItem;
+            HighlightObject(senderTree.Header);
+            if (senderTree.Header is string) return;
+            if (Data != null && e.ButtonState == MouseButtonState.Pressed && e.ChangedButton == System.Windows.Input.MouseButton.Middle)
+                OpenInTab(Highlighted, true);
+        }
+
         public static T VisualUpwardSearch<T>(DependencyObject element) where T : class
         {
             T container = element as T;
