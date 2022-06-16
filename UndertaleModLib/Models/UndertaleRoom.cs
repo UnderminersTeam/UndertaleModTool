@@ -570,17 +570,19 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// Indicates whether this <see cref="Background"/> is tiled horizontally.
         /// </summary>
         /// <remarks>
-        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// Internally, GameMaker uses an integer value for storing the state, where <c>0</c> acts as <see langword="false"/> and any other number as <see langword="true"/>.
+        /// This property is a wrapper for it, which is made for convenience.
         /// </remarks>
-        public bool TiledHorizontally { get => tileX > 0; set { tileX = value ? 1 : 0; OnPropertyChanged(); } }
+        public bool TiledHorizontally { get => tileX != 0; set { tileX = value ? 1 : 0; OnPropertyChanged(); } }
 
         /// <summary>
         /// Indicates whether this <see cref="Background"/> is tiled vertically.
         /// </summary>
         /// <remarks>
-        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// Internally, GameMaker uses an integer value for storing the state, where <c>0</c> acts as <see langword="false"/> and any other number as <see langword="true"/>.
+        /// This property is a wrapper for it, which is made for convenience.
         /// </remarks>
-        public bool TiledVertically { get => tileY > 0; set { tileY = value ? 1 : 0; OnPropertyChanged(); } }
+        public bool TiledVertically { get => tileY != 0; set { tileY = value ? 1 : 0; OnPropertyChanged(); } }
 
         /// <summary>
         /// A horizontal offset used for proper background display in the room editor.
