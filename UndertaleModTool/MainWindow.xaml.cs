@@ -140,9 +140,17 @@ namespace UndertaleModTool
             else if (obj is UndertaleString str)
             {
                 string stringFirstLine = str.Content;
-                int stringLength = StringTitleConverter.NewLineRegex.Match(stringFirstLine).Index;
-                if (stringLength != -1)
-                    stringFirstLine = stringFirstLine[..stringLength] + " ...";
+                if (stringFirstLine is not null)
+                {
+                    if (stringFirstLine.Length == 0)
+                        stringFirstLine = "(empty string)";
+                    else
+                    {
+                        int stringLength = StringTitleConverter.NewLineRegex.Match(stringFirstLine).Index;
+                        if (stringLength != 0)
+                            stringFirstLine = stringFirstLine[..stringLength] + " ...";
+                    }
+                }
 
                 title = "String - " + stringFirstLine;
             }
@@ -167,8 +175,16 @@ namespace UndertaleModTool
                 Debug.WriteLine($"Could not handle type {obj.GetType()}");
             }
 
-            if (title.Length > 64)
-                title = title[..64] + "...";
+            if (title is not null)
+            {
+                // "\t" is displayed as 8 spaces.
+                // So, replace all "\t" with spaces,
+                // in order to properly shorten the title.
+                title = title.Replace("\t", "        ");
+
+                if (title.Length > 64)
+                    title = title[..64] + "...";
+            }
 
             return title;
         }
@@ -181,13 +197,15 @@ namespace UndertaleModTool
     }
     public class TabTitleConverter : IMultiValueConverter
     {
+        public static TabTitleConverter Instance { get; } = new();
+
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (values[0] is not Tab tab)
                 return null;
 
             if (!tab.IsCustomTitle)
-                tab.TabTitle = Tab.GetTitleForObject(values[1]);
+                tab.TabTitle = Tab.GetTitleForObject(tab.OpenedObject);
 
             return tab.TabTitle;
         }
@@ -1710,10 +1728,17 @@ namespace UndertaleModTool
                 }
             }
         }
-        private void CopyItemName(UndertaleNamedResource namedRes)
+        private void CopyItemName(object obj)
         {
-            if (namedRes.Name?.Content is not null)
-                Clipboard.SetText(namedRes.Name.Content);
+            string name = null;
+
+            if (obj is UndertaleNamedResource namedRes)
+                name = namedRes.Name?.Content;
+            else if (obj is UndertaleString str && str.Content?.Length > 0)
+                name = StringTitleConverter.Instance.Convert(str.Content, null, null, null) as string;
+
+            if (name is not null)
+                Clipboard.SetText(name);
             else
                 this.ShowWarning("Item name is null.");
         }
@@ -1798,8 +1823,7 @@ namespace UndertaleModTool
         }
         private void MenuItem_CopyName_Click(object sender, RoutedEventArgs e)
         {
-            if (Highlighted is UndertaleNamedResource namedRes)
-                CopyItemName(namedRes);
+            CopyItemName(Highlighted);
         }
         private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
         {
@@ -1894,6 +1918,8 @@ namespace UndertaleModTool
                     (obj as UndertaleNamedResource).Name = new UndertaleString(notDataNewName); // not Data.MakeString!
                 }
             }
+            else if (obj is UndertaleString str)
+                str.Content = "string" + list.Count;
             list.Add(obj);
             UpdateTree();
             HighlightObject(obj);
@@ -3026,8 +3052,11 @@ result in loss of work.");
             UndertaleResource res = obj as UndertaleResource;
             if (res is null)
             {
-                if (!silent)
-                    this.ShowWarning($"Can't highlight the object - it's null or isn't a UndertaleResource.");
+                string msg = $"Can't highlight the object - it's null or isn't an UndertaleResource.";
+                if (silent)
+                    Debug.WriteLine(msg);
+                else
+                    this.ShowWarning(msg);
 
                 return;
             }
@@ -3053,16 +3082,22 @@ result in loss of work.");
             }
             catch (Exception ex)
             {
-                if (!silent)
-                    this.ShowWarning($"Can't highlight the object \"{objName}\".\nError - {ex.Message}");
+                string msg = $"Can't highlight the object \"{objName}\".\nError - {ex.Message}";
+                if (silent)
+                    Debug.WriteLine(msg);
+                else
+                    this.ShowWarning(msg);
 
                 return;
             }
 
             if (resListView is null)
             {
-                if (!silent)
-                    this.ShowWarning($"Can't highlight the object \"{objName}\" - element with object list not found.");
+                string msg = $"Can't highlight the object \"{objName}\" - element with object list not found.";
+                if (silent)
+                    Debug.WriteLine(msg);
+                else
+                    this.ShowWarning(msg);
 
                 return;
             }
@@ -3561,6 +3596,52 @@ result in loss of work.");
             Tabs = new() { tab };
             CurrentTabIndex = 0;
         }
+
+        private void TabTitleText_Initialized(object sender, EventArgs e)
+        {
+            SetTabTitleBinding(sender, null);
+        }
+        private void TabTitleText_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            SetTabTitleBinding(sender, e.OldValue);
+        }
+        private void SetTabTitleBinding(object sender, object prevObj)
+        {
+            TextBlock textBlock = sender as TextBlock;
+            object obj = (textBlock.DataContext as Tab)?.OpenedObject;
+            if (obj is null || obj == DependencyProperty.UnsetValue)
+                return;
+
+            bool objNamed = obj is UndertaleNamedResource;
+            bool objString = obj is UndertaleString;
+
+            prevObj = (prevObj as Tab)?.OpenedObject;
+            if (prevObj is not null)
+            {
+                bool pObjNamed = prevObj is UndertaleNamedResource;
+                bool pObjString = prevObj is UndertaleString;
+
+                // if both objects have the same type (one of above)
+                // or both objects are not "UndertaleNamedResource",
+                // then there's no need for changing the binding
+                if (pObjNamed && objNamed || pObjString && objString || !(pObjNamed || objNamed))
+                    return;
+            }
+
+            MultiBinding binding = new()
+            {
+                Converter = TabTitleConverter.Instance,
+                Mode = BindingMode.OneWay
+            };
+            binding.Bindings.Add(new Binding() { Mode = BindingMode.OneTime });
+
+            if (objNamed)
+                binding.Bindings.Add(new Binding("OpenedObject.Name.Content") { Mode = BindingMode.OneWay });
+            else if (objString)
+                binding.Bindings.Add(new Binding("OpenedObject.Content") { Mode = BindingMode.OneWay });
+
+            textBlock.SetBinding(TextBlock.TextProperty, binding);
+        }
     }
 
     public class GeneralInfoEditor
@@ -3601,11 +3682,6 @@ result in loss of work.");
     {
         public string Heading { get; private set; }
         public string Description { get; private set; }
-
-        // Used only by the "TabTitleConverter" to prevent the following WPF binding warning:
-        // "Name property not found on object of type DescriptionView".
-        // (within "TabControl.ItemTemplate")
-        public UndertaleString Name { get; } = new();
 
         public DescriptionView(string heading, string description)
         {

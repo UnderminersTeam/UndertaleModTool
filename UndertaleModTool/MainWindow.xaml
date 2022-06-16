@@ -426,15 +426,8 @@
                             <TabControl.ItemTemplate>
                                 <DataTemplate DataType="{x:Type local:Tab}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock>
-                                            <TextBlock.Text>
-                                                <MultiBinding Converter="{StaticResource TabTitleConverter}" Mode="OneWay">
-                                                    <Binding Mode="OneTime"/>
-                                                    <Binding Path="OpenedObject" Mode="OneWay"/>
-                                                    <!-- for notification only -->
-                                                    <Binding Path="OpenedObject.Name.Content" Mode="OneWay"/>
-                                                </MultiBinding>
-                                            </TextBlock.Text>
+                                        <TextBlock Initialized="TabTitleText_Initialized" DataContextChanged="TabTitleText_DataContextChanged">
+                                            <!-- "TextBlock.Text" binding is set in code-behind -->
                                         </TextBlock>
                                         <Button Background="Transparent" Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
                                                 Click="TabCloseButton_OnClick" MouseEnter="TabCloseButton_MouseEnter" MouseLeave="TabCloseButton_MouseLeave">
