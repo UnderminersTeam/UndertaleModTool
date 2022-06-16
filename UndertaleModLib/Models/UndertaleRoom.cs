@@ -546,17 +546,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// </summary>
         public int Y { get => _y; set { _y = value; OnPropertyChanged(); UpdateStretch(); } }
 
-        /// <summary>
-        /// Whether this <see cref="Background"/> is tiled horizontally.<br/>
-        /// <c>0</c> - <see langword="false"/>, <c>1</c> - <see langword="true"/>.
-        /// </summary>
-        public int TileX { get; set; } = 1;
-
-        /// <summary>
-        /// Whether this <see cref="Background"/> is tiled vertically.<br/>
-        /// <c>0</c> - <see langword="false"/>, <c>1</c> - <see langword="true"/>.
-        /// </summary>
-        public int TileY { get; set; } = 1;
+        private int tileX = 1;
+        private int tileY = 1;
 
         /// <summary>
         /// Horizontal speed of the background.
@@ -579,17 +570,19 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// Indicates whether this <see cref="Background"/> is tiled horizontally.
         /// </summary>
         /// <remarks>
-        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// Internally, GameMaker uses an integer value for storing the state, where <c>0</c> acts as <see langword="false"/> and any other number as <see langword="true"/>.
+        /// This property is a wrapper for it, which is made for convenience.
         /// </remarks>
-        public bool TiledHorizontally { get => TileX > 0; set { TileX = value ? 1 : 0; OnPropertyChanged(); } }
+        public bool TiledHorizontally { get => tileX != 0; set { tileX = value ? 1 : 0; OnPropertyChanged(); } }
 
         /// <summary>
         /// Indicates whether this <see cref="Background"/> is tiled vertically.
         /// </summary>
         /// <remarks>
-        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// Internally, GameMaker uses an integer value for storing the state, where <c>0</c> acts as <see langword="false"/> and any other number as <see langword="true"/>.
+        /// This property is a wrapper for it, which is made for convenience.
         /// </remarks>
-        public bool TiledVertically { get => TileY > 0; set { TileY = value ? 1 : 0; OnPropertyChanged(); } }
+        public bool TiledVertically { get => tileY != 0; set { tileY = value ? 1 : 0; OnPropertyChanged(); } }
 
         /// <summary>
         /// A horizontal offset used for proper background display in the room editor.
@@ -629,8 +622,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             writer.WriteUndertaleObject(_backgroundDefinition);
             writer.Write(X);
             writer.Write(Y);
-            writer.Write(TileX);
-            writer.Write(TileY);
+            writer.Write(tileX);
+            writer.Write(tileY);
             writer.Write(SpeedX);
             writer.Write(SpeedY);
             writer.Write(Stretch);
@@ -644,8 +637,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             _backgroundDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>>();
             X = reader.ReadInt32();
             Y = reader.ReadInt32();
-            TileX = reader.ReadInt32();
-            TileY = reader.ReadInt32();
+            tileX = reader.ReadInt32();
+            tileY = reader.ReadInt32();
             SpeedX = reader.ReadInt32();
             SpeedY = reader.ReadInt32();
             Stretch = reader.ReadBoolean();
