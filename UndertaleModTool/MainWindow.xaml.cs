@@ -1919,7 +1919,7 @@ namespace UndertaleModTool
                 }
             }
             else if (obj is UndertaleString str)
-                str.Content = "";
+                str.Content = "string" + list.Count;
             list.Add(obj);
             UpdateTree();
             HighlightObject(obj);
