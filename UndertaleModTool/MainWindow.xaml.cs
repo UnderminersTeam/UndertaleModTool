@@ -1924,12 +1924,10 @@ namespace UndertaleModTool
                     return;
                 }
 
-                foreach (var file in directory.GetFiles())
+                // Go over each csx file
+                foreach (var file in directory.EnumerateFiles("*.csx"))
                 {
                     var filename = file.Name;
-                    // Only show script files
-                    if (file.Extension != ".csx")
-                        continue;
                     // Replace _ with __ because WPF uses _ for keyboard navigation
                     MenuItem subitem = new MenuItem {Header = filename.Replace("_", "__")};
                     subitem.Click += MenuItem_RunBuiltinScript_Item_Click;
@@ -1937,10 +1935,10 @@ namespace UndertaleModTool
                     item.Items.Add(subitem);
                 }
 
-                foreach (var subDirectory in directory.GetDirectories())
+                foreach (var subDirectory in directory.EnumerateDirectories())
                 {
                     // Don't add directories which don't have script files
-                    if (subDirectory.GetFiles().Count(sf => sf.Extension == ".csx") < 1)
+                    if (!subDirectory.EnumerateFiles("*.csx").Any())
                         continue;
 
                     var subDirName = subDirectory.Name;
