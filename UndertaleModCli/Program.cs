@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -194,7 +193,6 @@ public partial class Program : IScriptInterface
                 "System.Text.RegularExpressions")
             .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
                 GetType().GetTypeInfo().Assembly,
-                typeof(JsonConvert).GetTypeInfo().Assembly,
                 typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
                 typeof(TextureWorker).GetTypeInfo().Assembly)
             // "WithEmitDebugInformation(true)" not only lets us to see a script line number which threw an exception,
