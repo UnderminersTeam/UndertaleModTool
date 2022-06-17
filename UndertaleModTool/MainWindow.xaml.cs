@@ -1910,9 +1910,8 @@ namespace UndertaleModTool
             MenuItem item = sender as MenuItem;
 
             // DUMB Wpf behaviour. If a child submenu gets triggered, it triggers ALL parent events.
-            // So we only evaluate if we have at least 1 subitem which is disabled.
-            if (item.Items.Cast<MenuItem>().Count(si => !si.IsEnabled) < 1)
-                return;
+            // So this is needed to prevent triggering parent events.
+            e.Handled = true;
 
             DirectoryInfo directory = new DirectoryInfo(folderDir);
             item.Items.Clear();
@@ -1970,7 +1969,10 @@ namespace UndertaleModTool
         private async void MenuItem_RunBuiltinScript_Item_Click(object sender, RoutedEventArgs e)
         {
             string path = (string)(sender as MenuItem).CommandParameter;
-            await RunScript(path);
+            if (File.Exists(path))
+                await RunScript(path);
+            else
+                this.ShowError("The script file doesn't exist.");
         }
 
         private async void MenuItem_RunOtherScript_Click(object sender, RoutedEventArgs e)
