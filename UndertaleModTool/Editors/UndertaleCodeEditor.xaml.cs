@@ -1,7 +1,4 @@
-﻿using GraphVizWrapper;
-using GraphVizWrapper.Commands;
-using GraphVizWrapper.Queries;
-using ICSharpCode.AvalonEdit;
+﻿using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Folding;
@@ -50,7 +47,6 @@ namespace UndertaleModTool
         public UndertaleCode CurrentDisassembled = null;
         public UndertaleCode CurrentDecompiled = null;
         public List<string> CurrentLocals = null;
-        public UndertaleCode CurrentGraphed = null;
         public string ProfileHash = mainWindow.ProfileHash;
         public string MainPath = Path.Combine(Settings.ProfilesFolder, mainWindow.ProfileHash, "Main");
         public string TempPath = Path.Combine(Settings.ProfilesFolder, mainWindow.ProfileHash, "Temp");
@@ -199,10 +195,6 @@ namespace UndertaleModTool
                 _ = DecompileCode(code, !DecompiledYet);
                 DecompiledYet = true;
             }
-            if (GraphTab.IsSelected && code != CurrentGraphed)
-            {
-                GraphCode(code);
-            }
         }
 
         private async void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -258,10 +250,6 @@ namespace UndertaleModTool
                 if (DecompiledTab.IsSelected && code != CurrentDecompiled)
                 {
                     _ = DecompileCode(code, true);
-                }
-                if (GraphTab.IsSelected && code != CurrentGraphed)
-                {
-                    GraphCode(code);
                 }
             }
         }
@@ -556,66 +544,6 @@ namespace UndertaleModTool
             }
         }
 
-        private async void GraphCode(UndertaleCode code)
-        {
-            if (code.ParentEntry != null)
-            {
-                GraphView.Source = null;
-                CurrentGraphed = code;
-                return;
-            }
-
-            LoaderDialog dialog = new LoaderDialog("Generating graph", "Generating graph, please wait...");
-            dialog.Owner = Window.GetWindow(this);
-            Task t = Task.Run(() =>
-            {
-                ImageSource image = null;
-                try
-                {
-                    code.UpdateAddresses();
-                    List<uint> entryPoints = new List<uint>();
-                    entryPoints.Add(0);
-                    foreach (UndertaleCode duplicate in code.ChildEntries)
-                        entryPoints.Add(duplicate.Offset / 4);
-                    var blocks = Decompiler.DecompileFlowGraph(code, entryPoints);
-                    string dot = Decompiler.ExportFlowGraph(blocks);
-
-                    try
-                    {
-                        var getStartProcessQuery = new GetStartProcessQuery();
-                        var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
-                        var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
-                        var wrapper = new GraphGeneration(getStartProcessQuery, getProcessStartInfoQuery, registerLayoutPluginCommand);
-                        wrapper.GraphvizPath = Settings.Instance.GraphVizPath;
-
-                        byte[] output = wrapper.GenerateGraph(dot, Enums.GraphReturnType.Png); // TODO: Use SVG instead
-
-                        image = new ImageSourceConverter().ConvertFrom(output) as ImageSource;
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.WriteLine(e.ToString());
-                        if (mainWindow.ShowQuestion("Unable to execute GraphViz: " + e.Message + "\nMake sure you have downloaded it and set the path in settings.\nDo you want to open the download page now?", MessageBoxImage.Error) == MessageBoxResult.Yes)
-                            MainWindow.OpenBrowser("https://graphviz.gitlab.io/_pages/Download/Download_windows.html");
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine(e.ToString());
-                    mainWindow.ShowError(e.Message, "Graph generation failed");
-                }
-
-                Dispatcher.Invoke(() =>
-                {
-                    GraphView.Source = image;
-                    CurrentGraphed = code;
-                    dialog.Hide();
-                });
-            });
-            dialog.ShowDialog();
-            await t;
-        }
-
         private void DecompiledEditor_GotFocus(object sender, RoutedEventArgs e)
         {
             if (DecompiledEditor.IsReadOnly)
@@ -744,7 +672,6 @@ namespace UndertaleModTool
             // Show new code, decompiled.
             CurrentDisassembled = null;
             CurrentDecompiled = null;
-            CurrentGraphed = null;
 
             // Tab switch
             if (e == null)
@@ -822,7 +749,6 @@ namespace UndertaleModTool
             // Get rid of old code
             CurrentDisassembled = null;
             CurrentDecompiled = null;
-            CurrentGraphed = null;
 
             // Tab switch
             if (e == null)

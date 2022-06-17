@@ -1,11 +1,11 @@
 ﻿<local:DataUserControl x:Class="UndertaleModTool.UndertaleCodeEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleCode}" DataContextChanged="UserControl_DataContextChanged">
     <UserControl.CommandBindings>
         <CommandBinding Command="{x:Static local:UndertaleCodeEditor.Compile}" Executed="Command_Compile" />
@@ -44,7 +44,7 @@
                     <avalonEdit:TextEditor
                         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                         FontFamily="Consolas"
-                        Name="DecompiledEditor" 
+                        Name="DecompiledEditor"
                         IsReadOnly="True"
                         Background="#222222"
                         LineNumbersForeground="#DBDBDB"
@@ -62,7 +62,7 @@
                     <avalonEdit:TextEditor
                         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                         FontFamily="Consolas"
-                        Name="DisassemblyEditor" 
+                        Name="DisassemblyEditor"
                         IsReadOnly="True"
                         Background="#222222"
                         Foreground="#C0C0C0"
@@ -72,11 +72,6 @@
                         FontSize="10pt"
                         Padding="4"/>
                 </Grid>
-            </TabItem>
-            <TabItem Header="Graph view" Name="GraphTab">
-                <Viewbox Stretch="UniformToFill" StretchDirection="DownOnly">
-                    <Image Name="GraphView"/>
-                </Viewbox>
             </TabItem>
         </TabControl>
     </Grid>
