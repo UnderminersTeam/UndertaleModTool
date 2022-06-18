@@ -1571,6 +1571,9 @@ namespace UndertaleModTool
         {
             if (e.ButtonState == MouseButtonState.Pressed && e.ChangedButton == System.Windows.Input.MouseButton.Middle)
             {
+                // Gets the clicked visual element by the mouse position (relative to "MainTree").
+                // This is used instead of "VisualTreeHelper.HitTest()" because that ignores the visibility of elements,
+                // which led to "ghost" hits on empty space.
                 DependencyObject obj = MainTree.InputHitTest(e.GetPosition(MainTree)) as DependencyObject;
                 if (obj is not TextBlock)
                     return;
