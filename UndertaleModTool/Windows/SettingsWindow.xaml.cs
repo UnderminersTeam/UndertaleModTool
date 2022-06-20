@@ -21,16 +21,6 @@ namespace UndertaleModTool
     /// </summary>
     public partial class SettingsWindow : Window
     {
-        public static string GraphVizPath
-        {
-            get => Settings.Instance.GraphVizPath;
-            set
-            {
-                Settings.Instance.GraphVizPath = value;
-                Settings.Save();
-            }
-        }
-
         public static string GameMakerStudioPath
         {
             get => Settings.Instance.GameMakerStudioPath;

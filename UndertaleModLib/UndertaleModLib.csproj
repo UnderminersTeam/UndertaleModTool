@@ -2,28 +2,17 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <OutputType>Library</OutputType>
+    <!-- TODO: this should properly get migrated and get rid of -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DebugType>embedded</DebugType>
     <Platforms>AnyCPU;x64</Platforms>
     <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile></DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Fody" Version="6.5.1">
@@ -42,8 +31,21 @@
     <None Remove="gitversion.txt" />
     <EmbeddedResource Include="gitversion.txt" />
   </ItemGroup>
+  <!--A prebuild responsible for creating a git commit name and branch name -->
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <!-- puts the git commit name and branch name into gitversion.txt which is an embedded resource -->
-    <Exec Command="( git describe --always --dirty &amp;&amp; git rev-parse --abbrev-ref HEAD  ) &gt; &quot;$(ProjectDir)/gitversion.txt&quot;" />
+    <!--Create the gitversion.txt file first, in case any of the later commands fail -->
+    <Exec Command="echo &quot;&quot; &gt; &quot;$(ProjectDir)/gitversion.txt&quot;" IgnoreExitCode="true" />
+
+    <!--If on Windows check if git is in PATH-->
+    <Exec Condition="$([MSBuild]::IsOsPlatform('Windows'))" Command="where /q git" IgnoreExitCode="true">
+      <Output TaskParameter="ExitCode" PropertyName="ErrorCode"/>
+    </Exec>
+    <PropertyGroup>
+      <!--Assign the location of git to GitPath. By default it's "git", if the above PATH checked failed, it'll get set to the git path in VS -->
+      <GitPath>git</GitPath>
+      <GitPath Condition="'$(ErrorCode)'=='1'">$(DevEnvDir)\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\Git\cmd\git</GitPath>
+    </PropertyGroup>
+    <!-- Use GitPath and put the git commit name and branch name into gitversion.txt which is an embedded resource-->
+    <Exec Command="( &quot;$(GitPath)&quot; describe --always --dirty &amp;&amp; &quot;$(GitPath)&quot; rev-parse --abbrev-ref HEAD ) &gt; &quot;$(ProjectDir)/gitversion.txt&quot;" IgnoreExitCode="true"/>
   </Target>
 </Project>

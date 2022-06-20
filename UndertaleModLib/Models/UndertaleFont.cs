@@ -6,7 +6,7 @@ namespace UndertaleModLib.Models;
 /// A font entry of a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleFont : UndertaleNamedResource
+public class UndertaleFont : UndertaleNamedResource, IDisposable
 {
     /// <summary>
     /// The name of the font.
@@ -94,7 +94,7 @@ public class UndertaleFont : UndertaleNamedResource
     /// Glyphs that a font can use.
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class Glyph : UndertaleObject
+    public class Glyph : UndertaleObject, IDisposable
     {
         /// <summary>
         /// The code point of character for the glyph.
@@ -112,12 +112,12 @@ public class UndertaleFont : UndertaleNamedResource
         public ushort SourceY { get; set; }
 
         /// <summary>
-        /// The width of the glyph in pixel.
+        /// The width of the glyph in pixels.
         /// </summary>
         public ushort SourceWidth { get; set; }
 
         /// <summary>
-        /// The height of the glyph in pixel.
+        /// The height of the glyph in pixels.
         /// </summary>
         public ushort SourceHeight { get; set; }
 
@@ -192,6 +192,14 @@ public class UndertaleFont : UndertaleNamedResource
                 Amount = reader.ReadInt16();
             }
         }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            Kerning = new();
+        }
     }
 
     /// <inheritdoc />
@@ -261,6 +269,19 @@ public class UndertaleFont : UndertaleNamedResource
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content + " (" + GetType().Name + ")";
+        return Name?.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        foreach (Glyph glyph in Glyphs)
+            glyph?.Dispose();
+        Name = null;
+        DisplayName = null;
+        Texture = null;
+        Glyphs = new();
     }
 }

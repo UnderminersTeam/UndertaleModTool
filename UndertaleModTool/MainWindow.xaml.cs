@@ -62,6 +62,7 @@ namespace UndertaleModTool
 
         public object OpenedObject { get; set; }
         public string TabTitle { get; set; } = "Untitled";
+        public bool IsCustomTitle { get; set; }
         public int TabIndex { get; set; }
         public bool AutoClose { get; set; } = false;
 
@@ -69,8 +70,16 @@ namespace UndertaleModTool
         {
             OpenedObject = obj;
             TabIndex = tabIndex;
-            TabTitle = tabTitle ?? GetTitleForObject(obj);
             AutoClose = obj is DescriptionView;
+
+            IsCustomTitle = tabTitle is not null;
+            if (IsCustomTitle)
+            {
+                if (tabTitle.Length > 64)
+                    TabTitle = tabTitle[..64] + "...";
+                else
+                    TabTitle = tabTitle;
+            }
         }
 
         public static string GetTitleForObject(object obj)
@@ -128,9 +137,22 @@ namespace UndertaleModTool
                 else
                     Debug.WriteLine($"Could not handle type {obj.GetType()}");
             }
-            else if (obj is UndertaleString)
+            else if (obj is UndertaleString str)
             {
-                title = "String - " + ((UndertaleString)obj).Content;
+                string stringFirstLine = str.Content;
+                if (stringFirstLine is not null)
+                {
+                    if (stringFirstLine.Length == 0)
+                        stringFirstLine = "(empty string)";
+                    else
+                    {
+                        int stringLength = StringTitleConverter.NewLineRegex.Match(stringFirstLine).Index;
+                        if (stringLength != 0)
+                            stringFirstLine = stringFirstLine[..stringLength] + " ...";
+                    }
+                }
+
+                title = "String - " + stringFirstLine;
             }
             else if (obj is UndertaleChunkVARI)
             {
@@ -153,6 +175,17 @@ namespace UndertaleModTool
                 Debug.WriteLine($"Could not handle type {obj.GetType()}");
             }
 
+            if (title is not null)
+            {
+                // "\t" is displayed as 8 spaces.
+                // So, replace all "\t" with spaces,
+                // in order to properly shorten the title.
+                title = title.Replace("\t", "        ");
+
+                if (title.Length > 64)
+                    title = title[..64] + "...";
+            }
+
             return title;
         }
 
@@ -164,9 +197,17 @@ namespace UndertaleModTool
     }
     public class TabTitleConverter : IMultiValueConverter
     {
+        public static TabTitleConverter Instance { get; } = new();
+
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            return Tab.GetTitleForObject(values[0]);
+            if (values[0] is not Tab tab)
+                return null;
+
+            if (!tab.IsCustomTitle)
+                tab.TabTitle = Tab.GetTitleForObject(tab.OpenedObject);
+
+            return tab.TabTitle;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
@@ -431,7 +472,7 @@ namespace UndertaleModTool
                             foreach (Process instance in updaterInstances)
                             {
                                 if (!instance.WaitForExit(5000))
-                                    ShowWarning("UndertaleModToolUpdater app didn't exit.\nCan't delete its temp folder.");
+                                    this.ShowWarning("UndertaleModToolUpdater app didn't exit.\nCan't delete its temp folder.");
                                 else
                                     updaterClosed = true;
                             }
@@ -463,7 +504,7 @@ namespace UndertaleModTool
                             }
 
                             if (!deleted)
-                                ShowWarning($"The updater temp folder can't be deleted.\nError - {exMessage}.");
+                                this.ShowWarning($"The updater temp folder can't be deleted.\nError - {exMessage}.");
                         }
                     });
                 }
@@ -583,7 +624,7 @@ namespace UndertaleModTool
         {
             if (Data != null)
             {
-                if (MessageBox.Show("Warning: you currently have a project open.\nAre you sure you want to make a new project?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                if (this.ShowQuestion("Warning: you currently have a project open.\nAre you sure you want to make a new project?") == MessageBoxResult.No)
                     return false;
             }
             this.Dispatcher.Invoke(() =>
@@ -592,6 +633,9 @@ namespace UndertaleModTool
             });
 
             await SaveGMLCache(FilePath, false);
+
+            DisposeGameData();
+
             FilePath = null;
             Data = UndertaleData.CreateNew();
             Data.ToolInfo.AppDataProfiles = ProfilesFolder;
@@ -604,18 +648,11 @@ namespace UndertaleModTool
                                           ? "Tile sets"
                                           : "Backgrounds & Tile sets";
 
-            CurrentTab = null;
-            Tabs.Clear();
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P");
             OpenInTab(Highlighted);
-            SelectionHistory.Clear();
-            ClosedTabsHistory.Clear();
 
             CanSave = true;
             CanSafelySave = true;
-
-            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; //clean "GC holes" left in the memory by previous game data
-            GC.Collect();                                                                           //https://docs.microsoft.com/en-us/dotnet/api/system.runtime.gcsettings.largeobjectheapcompactionmode?view=net-5.0
 
             return true;
         }
@@ -633,12 +670,12 @@ namespace UndertaleModTool
 
                     if (fileext == ".csx")
                     {
-                        if (MessageBox.Show($"Run {filepath} as a script?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
+                        if (this.ShowQuestion($"Run {filepath} as a script?") == MessageBoxResult.Yes)
                             await RunScript(filepath);
                     }
                     else if (IFF_EXTENSIONS.Contains(fileext) || fileext == ".dat" /* audiogroup */)
                     {
-                        if (MessageBox.Show($"Open {filepath} as a data file?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
+                        if (this.ShowQuestion($"Open {filepath} as a data file?") == MessageBoxResult.Yes)
                             await LoadFile(filepath, true);
                     }
                     // else, do something?
@@ -710,7 +747,7 @@ namespace UndertaleModTool
             if (CanSave)
             {
                 if (!CanSafelySave)
-                    ShowWarning("Errors occurred during loading. High chance of data loss! Proceed at your own risk.");
+                    this.ShowWarning("Errors occurred during loading. High chance of data loss! Proceed at your own risk.");
 
                 if (await SaveCodeChanges() == SaveResult.NotSaved)
                     _ = DoSaveDialog();
@@ -726,13 +763,13 @@ namespace UndertaleModTool
 
                 if (SettingsWindow.WarnOnClose)
                 {
-                    if (ShowQuestion("Are you sure you want to quit?") == MessageBoxResult.Yes)
+                    if (this.ShowQuestion("Are you sure you want to quit?") == MessageBoxResult.Yes)
                     {
-                        if (ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
+                        if (this.ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
                         {
                             if (scriptDialog is not null)
                             {
-                                if (ShowQuestion("Script still runs. Save anyway?\nIt can corrupt the data file that you'll save.") == MessageBoxResult.Yes)
+                                if (this.ShowQuestion("Script still runs. Save anyway?\nIt can corrupt the data file that you'll save.") == MessageBoxResult.Yes)
                                     save = true;
                             }
                             else
@@ -763,7 +800,7 @@ namespace UndertaleModTool
                 }
 
                 if (SettingsWindow.UseGMLCache && Data?.GMLCache?.Count > 0 && !Data.GMLCacheWasSaved && Data.GMLCacheIsReady)
-                    if (ShowQuestion("Save unedited code cache?") == MessageBoxResult.Yes)
+                    if (this.ShowQuestion("Save unedited code cache?") == MessageBoxResult.Yes)
                         await SaveGMLCache(FilePath, save);
 
                 CloseOtherWindows();
@@ -841,6 +878,27 @@ namespace UndertaleModTool
                 CurrentTabIndex--;
         }
 
+        private void DisposeGameData()
+        {
+            if (Data is not null)
+            {
+                // This also clears all their game object references
+                CurrentTab = null;
+                Tabs.Clear();
+                SelectionHistory.Clear();
+                ClosedTabsHistory.Clear();
+
+                // Update GUI and wait for all background processes to finish
+                UpdateLayout();
+                Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+
+                Data.Dispose();
+                Data = null;
+
+                GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                GC.Collect();
+            }
+        }
         private async Task LoadFile(string filename, bool preventClose = false)
         {
             LoaderDialog dialog = new LoaderDialog("Loading", "Loading, please wait...");
@@ -851,12 +909,9 @@ namespace UndertaleModTool
             });
             dialog.Owner = this;
 
-            // temporary save the current tabs in case of loading error
-            Tab[] tempTabs = Tabs.ToArray();
-            int lastTabIndex = CurrentTabIndex;
-
-            CurrentTab = null;
-            Tabs.Clear(); // clear the current tabs to destroy game object references
+            DisposeGameData();
+            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
+            OpenInTab(Highlighted);
 
             Task t = Task.Run(() =>
             {
@@ -868,17 +923,19 @@ namespace UndertaleModTool
                     {
                         data = UndertaleIO.Read(stream, warning =>
                         {
-                            MessageBox.Show(warning, "Loading warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            this.ShowWarning(warning, "Loading warning");
                             hadWarnings = true;
                         }, message =>
                         {
                             FileMessageEvent?.Invoke(message);
                         });
                     }
+
+                    UndertaleEmbeddedTexture.TexData.ClearSharedStream();
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("An error occured while trying to load:\n" + e.Message, "Load error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    this.ShowError("An error occured while trying to load:\n" + e.Message, "Load error");
                 }
 
                 Dispatcher.Invoke(async () =>
@@ -887,13 +944,13 @@ namespace UndertaleModTool
                     {
                         if (data.UnsupportedBytecodeVersion)
                         {
-                            MessageBox.Show("Only bytecode versions 13 to 17 are supported for now, you are trying to load " + data.GeneralInfo.BytecodeVersion + ". A lot of code is disabled and will likely break something. Saving/exporting is disabled.", "Unsupported bytecode version", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            this.ShowWarning("Only bytecode versions 13 to 17 are supported for now, you are trying to load " + data.GeneralInfo.BytecodeVersion + ". A lot of code is disabled and will likely break something. Saving/exporting is disabled.", "Unsupported bytecode version");
                             CanSave = false;
                             CanSafelySave = false;
                         }
                         else if (hadWarnings)
                         {
-                            MessageBox.Show("Warnings occurred during loading. Data loss will likely occur when trying to save!", "Loading problems", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            this.ShowWarning("Warnings occurred during loading. Data loss will likely occur when trying to save!", "Loading problems");
                             CanSave = true;
                             CanSafelySave = false;
                         }
@@ -901,7 +958,7 @@ namespace UndertaleModTool
                         {
                             CanSave = true;
                             CanSafelySave = true;
-                            UpdateProfile(data, filename);
+                            await UpdateProfile(data, filename);
                             if (data != null)
                             {
                                 data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
@@ -910,17 +967,17 @@ namespace UndertaleModTool
                         }
                         if (data.GMS2_3 && SettingsWindow.Warn_About_GMS23)
                         {
-                            MessageBox.Show("This game was built using GameMaker Studio 2.3 (or above). Support for this version is a work in progress, and you will likely run into issues decompiling code or in other places.", "GMS 2.3", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            this.ShowWarning("This game was built using GameMaker Studio 2.3 (or above). Support for this version is a work in progress, and you will likely run into issues decompiling code or in other places.", "GMS 2.3");
                         }
                         if (data.IsYYC())
                         {
-                            MessageBox.Show("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            this.ShowWarning("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC");
                         }
                         if (data.GeneralInfo != null)
                         {
                             if (!data.GeneralInfo.IsDebuggerDisabled)
                             {
-                                MessageBox.Show("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                this.ShowWarning("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
                             }
                         }
                         if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
@@ -949,18 +1006,6 @@ namespace UndertaleModTool
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
                         #pragma warning restore CA1416
-
-                        Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
-                        OpenInTab(Highlighted);
-                        SelectionHistory.Clear();
-                        ClosedTabsHistory.Clear();
-                    }
-                    else
-                    {
-                        // restore the tabs because new data hasn't been loaded
-                        Tabs = new(tempTabs);
-                        CurrentTab = Tabs[lastTabIndex];
-                        CurrentTabIndex = lastTabIndex;
                     }
 
                     dialog.Hide();
@@ -969,8 +1014,10 @@ namespace UndertaleModTool
             dialog.ShowDialog();
             await t;
 
-            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; //clean "GC holes" left in the memory by previous game data
-            GC.Collect();                                                                           //https://docs.microsoft.com/en-us/dotnet/api/system.runtime.gcsettings.largeobjectheapcompactionmode?view=net-5.0
+            // Clear "GC holes" left in the memory in process of data unserializing
+            // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.gcsettings.largeobjectheapcompactionmode?view=net-6.0
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect();
         }
 
         private async Task SaveFile(string filename, bool suppressDebug = false)
@@ -992,7 +1039,7 @@ namespace UndertaleModTool
 
             DebugDataDialog.DebugDataMode debugMode = DebugDataDialog.DebugDataMode.NoDebug;
             if (!suppressDebug && Data.GeneralInfo != null && !Data.GeneralInfo.IsDebuggerDisabled)
-                MessageBox.Show("You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger", MessageBoxButton.OK, MessageBoxImage.Warning);
+                this.ShowWarning("You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
             Task t = Task.Run(async () =>
             {
                 bool SaveSucceeded = true;
@@ -1006,6 +1053,10 @@ namespace UndertaleModTool
                             FileMessageEvent?.Invoke(message);
                         });
                     }
+
+                    UndertaleEmbeddedTexture.TexData.ClearSharedStream();
+                    if (Data.UseQoiFormat)
+                        QoiConverter.ClearSharedBuffer();
 
                     if (debugMode != DebugDataDialog.DebugDataMode.NoDebug)
                     {
@@ -1087,7 +1138,26 @@ namespace UndertaleModTool
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("An error occured while trying to save:\n" + e.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    if (!UndertaleIO.IsDictionaryCleared)
+                    {
+                        try
+                        {
+                            var listChunks = Data.FORM.Chunks.Values.Select(x => x as IUndertaleListChunk);
+                            Parallel.ForEach(listChunks.Where(x => x is not null), (chunk) =>
+                            {
+                                chunk.ClearIndexDict();
+                            });
+
+                            UndertaleIO.IsDictionaryCleared = true;
+                        }
+                        catch { }
+                    }
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        this.ShowError("An error occured while trying to save:\n" + e.Message, "Save error");
+                    });
+
                     SaveSucceeded = false;
                 }
                 // Don't make any changes unless the save succeeds.
@@ -1105,7 +1175,7 @@ namespace UndertaleModTool
                         await SaveGMLCache(filename, true, dialog, isDifferentPath);
 
                         // Also make the changes to the profile system.
-                        ProfileSaveEvent(Data, filename);
+                        await ProfileSaveEvent(Data, filename);
                         SaveTempToMainProfile();
                     }
                     else
@@ -1119,7 +1189,11 @@ namespace UndertaleModTool
                 }
                 catch (Exception exc)
                 {
-                    MessageBox.Show("An error occured while trying to save:\n" + exc.Message, "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Dispatcher.Invoke(() =>
+                    {
+                        this.ShowError("An error occured while trying to save:\n" + exc.Message, "Save error");
+                    });
+
                     SaveSucceeded = false;
                 }
                 if (Data != null)
@@ -1139,6 +1213,9 @@ namespace UndertaleModTool
             });
             dialog.ShowDialog();
             await t;
+
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect();
         }
 
         public string GenerateMD5(string filename)
@@ -1180,7 +1257,7 @@ namespace UndertaleModTool
 
                     if (!File.Exists(Path.Combine(cacheDirPath, num.ToString())))
                     {
-                        ShowWarning("Decompiled code cache file for open data is missing, but its name present in the index.");
+                        this.ShowWarning("Decompiled code cache file for open data is missing, but its name present in the index.");
 
                         return;
                     }
@@ -1192,7 +1269,7 @@ namespace UndertaleModTool
                         string prevHash = fs.ReadLine();
 
                         if (!Regex.IsMatch(prevHash, "^[0-9a-fA-F]{32}$")) //if first 32 bytes of cache file are not a valid MD5
-                            ShowWarning("Decompiled code cache for open file is broken.\nThe cache will be generated again.");
+                            this.ShowWarning("Decompiled code cache for open file is broken.\nThe cache will be generated again.");
                         else
                         {
                             if (hash == prevHash)
@@ -1211,7 +1288,7 @@ namespace UndertaleModTool
                                 }
                                 catch
                                 {
-                                    ShowWarning("Decompiled code cache for open file is broken.\nThe cache will be generated again.");
+                                    this.ShowWarning("Decompiled code cache for open file is broken.\nThe cache will be generated again.");
 
                                     Data.GMLCache = null;
                                     Data.GMLCacheFailed = null;
@@ -1223,7 +1300,7 @@ namespace UndertaleModTool
                                 string[] invalidNames = Data.GMLCache.Keys.Except(codeNames).ToArray();
                                 if (invalidNames.Length > 0)
                                 {
-                                    ShowWarning($"Decompiled code cache for open file contains one or more non-existent code names (first - \"{invalidNames[0]}\").\nThe cache will be generated again.");
+                                    this.ShowWarning($"Decompiled code cache for open file contains one or more non-existent code names (first - \"{invalidNames[0]}\").\nThe cache will be generated again.");
 
                                     Data.GMLCache = null;
 
@@ -1235,7 +1312,7 @@ namespace UndertaleModTool
                                 Data.GMLCacheWasSaved = true;
                             }
                             else
-                                ShowWarning("Open file differs from the one the cache was generated for.\nThat decompiled code cache will be generated again.");
+                                this.ShowWarning("Open file differs from the one the cache was generated for.\nThat decompiled code cache will be generated again.");
                         }
                     }
                 }
@@ -1454,7 +1531,7 @@ namespace UndertaleModTool
         {
             if (e.NewValue is TreeViewItem)
             {
-                string item = (e.NewValue as TreeViewItem)?.Header?.ToString();
+                string item = (e.NewValue as TreeViewItem).Header?.ToString();
 
                 if (item == "Data")
                 {
@@ -1485,9 +1562,37 @@ namespace UndertaleModTool
 
         private void MainTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            if (Highlighted is UndertaleRoom room && Selected is not UndertaleRoom)
+                UndertaleRoomEditor.CheckAndRearrangeLayers(room);
+
             OpenInTab(Highlighted);
         }
+        private void MainTree_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ButtonState == MouseButtonState.Pressed && e.ChangedButton == System.Windows.Input.MouseButton.Middle)
+            {
+                // Gets the clicked visual element by the mouse position (relative to "MainTree").
+                // This is used instead of "VisualTreeHelper.HitTest()" because that ignores the visibility of elements,
+                // which led to "ghost" hits on empty space.
+                DependencyObject obj = MainTree.InputHitTest(e.GetPosition(MainTree)) as DependencyObject;
+                if (obj is not TextBlock)
+                    return;
 
+                TreeViewItem item = GetNearestParent<TreeViewItem>(obj);
+                if (item is null)
+                    return;
+
+                item.IsSelected = true;
+
+                if (item.DataContext is not UndertaleResource)
+                    return;
+
+                if (Highlighted is UndertaleRoom room && Selected is not UndertaleRoom)
+                    UndertaleRoomEditor.CheckAndRearrangeLayers(room);
+
+                OpenInTab(Highlighted, true);
+            }
+        }
         private void MainTree_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return)
@@ -1624,7 +1729,7 @@ namespace UndertaleModTool
             object source = container.ItemsSource;
             IList list = ((source as ICollectionView)?.SourceCollection as IList) ?? (source as IList);
             bool isLast = list.IndexOf(obj) == list.Count - 1;
-            if (MessageBox.Show("Delete " + obj.ToString() + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), "Confirmation", MessageBoxButton.YesNo, isLast ? MessageBoxImage.Question : MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            if (this.ShowQuestion("Delete " + obj + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), isLast ? MessageBoxImage.Question : MessageBoxImage.Warning, "Confirmation" ) == MessageBoxResult.Yes)
             {
                 list.Remove(obj);
                 if (obj is UndertaleCode codeObj)
@@ -1654,12 +1759,19 @@ namespace UndertaleModTool
                 }
             }
         }
-        private void CopyItemName(UndertaleNamedResource namedRes)
+        private void CopyItemName(object obj)
         {
-            if (namedRes.Name?.Content is not null)
-                Clipboard.SetText(namedRes.Name.Content);
+            string name = null;
+
+            if (obj is UndertaleNamedResource namedRes)
+                name = namedRes.Name?.Content;
+            else if (obj is UndertaleString str && str.Content?.Length > 0)
+                name = StringTitleConverter.Instance.Convert(str.Content, null, null, null) as string;
+
+            if (name is not null)
+                Clipboard.SetText(name);
             else
-                ShowWarning("Item name is null.");
+                this.ShowWarning("Item name is null.");
         }
 
         private void MainTree_KeyDown(object sender, KeyEventArgs e)
@@ -1742,8 +1854,7 @@ namespace UndertaleModTool
         }
         private void MenuItem_CopyName_Click(object sender, RoutedEventArgs e)
         {
-            if (Highlighted is UndertaleNamedResource namedRes)
-                CopyItemName(namedRes);
+            CopyItemName(Highlighted);
         }
         private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
         {
@@ -1838,69 +1949,97 @@ namespace UndertaleModTool
                     (obj as UndertaleNamedResource).Name = new UndertaleString(notDataNewName); // not Data.MakeString!
                 }
             }
+            else if (obj is UndertaleString str)
+                str.Content = "string" + list.Count;
             list.Add(obj);
             UpdateTree();
             HighlightObject(obj);
             OpenInTab(obj, true);
         }
 
-        private void MenuItem_RunBuiltinScript_SubmenuOpened(object sender, RoutedEventArgs e)
+        private void RootMenuItem_SubmenuOpened(object sender, RoutedEventArgs e)
         {
-            MenuItem_RunScript_SubmenuOpened(sender, e, "SampleScripts");
+            MenuItem_RunScript_SubmenuOpened(sender, e, Path.Combine(ExePath, "Scripts"));
         }
-        private void MenuItem_RunCommunityScript_SubmenuOpened(object sender, RoutedEventArgs e)
-        {
-            MenuItem_RunScript_SubmenuOpened(sender, e, "CommunityScripts");
-        }
-        private void MenuItem_RunTechnicalScript_SubmenuOpened(object sender, RoutedEventArgs e)
-        {
-            MenuItem_RunScript_SubmenuOpened(sender, e, "TechnicalScripts");
-        }
-        private void MenuItem_RunUnpackScript_SubmenuOpened(object sender, RoutedEventArgs e)
-        {
-            MenuItem_RunScript_SubmenuOpened(sender, e, "Unpackers");
-        }
-        private void MenuItem_RunRepackScript_SubmenuOpened(object sender, RoutedEventArgs e)
-        {
-            MenuItem_RunScript_SubmenuOpened(sender, e, "Repackers");
-        }
-        private void MenuItem_RunDemoScript_SubmenuOpened(object sender, RoutedEventArgs e)
-        {
-            MenuItem_RunScript_SubmenuOpened(sender, e, "DemoScripts");
-        }
-        private void MenuItem_RunScript_SubmenuOpened(object sender, RoutedEventArgs e, string folderName)
+
+        private void MenuItem_RunScript_SubmenuOpened(object sender, RoutedEventArgs e, string folderDir)
         {
             MenuItem item = sender as MenuItem;
+
+            // DUMB Wpf behaviour. If a child submenu gets triggered, it triggers ALL parent events.
+            // So this is needed to prevent triggering parent events.
+            e.Handled = true;
+
+            DirectoryInfo directory = new DirectoryInfo(folderDir);
             item.Items.Clear();
             try
             {
-                var appDir = Program.GetExecutableDirectory();
-                var folderDir = Path.Combine(appDir, "Scripts", folderName);
-
                 // exit out early if the path does not exist.
-                if (!Directory.Exists(folderDir))
+                if (!directory.Exists)
                 {
-                    item.Items.Add(new MenuItem { Header = $"(Path {folderDir} does not exist, cannot search for files!)", IsEnabled = false });
+                    item.Items.Add(new MenuItem {Header = $"(Path {folderDir} does not exist, cannot search for files!)", IsEnabled = false});
                     return;
                 }
 
-
-                foreach (var path in Directory.EnumerateFiles(folderDir))
+                // Go over each csx file
+                foreach (var file in directory.EnumerateFiles("*.csx"))
                 {
-                    var filename = Path.GetFileName(path);
-                    if (!filename.EndsWith(".csx"))
-                        continue;
-                    MenuItem subitem = new MenuItem() { Header = filename.Replace("_", "__") };
+                    var filename = file.Name;
+                    // Replace _ with __ because WPF uses _ for keyboard navigation
+                    MenuItem subitem = new MenuItem {Header = filename.Replace("_", "__")};
                     subitem.Click += MenuItem_RunBuiltinScript_Item_Click;
-                    subitem.CommandParameter = path;
+                    subitem.CommandParameter = file.FullName;
                     item.Items.Add(subitem);
                 }
+
+                foreach (var subDirectory in directory.EnumerateDirectories())
+                {
+                    // Don't add directories which don't have script files
+                    if (!subDirectory.EnumerateFiles("*.csx").Any())
+                        continue;
+
+                    var subDirName = subDirectory.Name;
+                    // In addition to the _ comment from above, we also need to add at least one item, so that WPF uses this as a submenuitem
+                    MenuItem subItem = new MenuItem {Header = subDirName.Replace("_", "__"), Items = {new MenuItem {Header = "(loading...)", IsEnabled = false}}};
+                    subItem.SubmenuOpened += (o, args) => MenuItem_RunScript_SubmenuOpened(o, args, subDirectory.FullName);
+                    item.Items.Add(subItem);
+                }
+
                 if (item.Items.Count == 0)
-                    item.Items.Add(new MenuItem() { Header = "(whoops, no scripts found?)", IsEnabled = false });
+                    item.Items.Add(new MenuItem {Header = "(No scripts found!)", IsEnabled = false});
             }
             catch (Exception err)
             {
-                item.Items.Add(new MenuItem() { Header = err.ToString(), IsEnabled = false });
+                item.Items.Add(new MenuItem {Header = err.ToString(), IsEnabled = false});
+            }
+
+            // If we're at the complete root, we need to add the "Run other script" button as well
+            if (item.Name != "RootScriptItem") return;
+
+            var otherScripts = new MenuItem {Header = "Run _other script..."};
+            otherScripts.Click += MenuItem_RunOtherScript_Click;
+            item.Items.Add(otherScripts);
+        }
+
+        private async void MenuItem_RunBuiltinScript_Item_Click(object sender, RoutedEventArgs e)
+        {
+            string path = (string)(sender as MenuItem).CommandParameter;
+            if (File.Exists(path))
+                await RunScript(path);
+            else
+                this.ShowError("The script file doesn't exist.");
+        }
+
+        private async void MenuItem_RunOtherScript_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.DefaultExt = "csx";
+            dlg.Filter = "Scripts (.csx)|*.csx|All files|*";
+
+            if (dlg.ShowDialog() == true)
+            {
+                await RunScript(dlg.FileName);
             }
         }
 
@@ -2119,7 +2258,7 @@ namespace UndertaleModTool
             }
             else
             {
-                ShowError($"Can't find code \"{name}\".\n(probably, different game data was loaded)");
+                this.ShowError($"Can't find code \"{name}\".\n(probably, different game data was loaded)");
             }
         }
 
@@ -2253,7 +2392,7 @@ namespace UndertaleModTool
             {
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
-                MessageBox.Show(exc.Message, "Script compile error", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.ShowError(exc.Message, "Script compile error");
                 ScriptExecutionSuccess = false;
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "CompilationErrorException";
@@ -2270,7 +2409,7 @@ namespace UndertaleModTool
 
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
-                MessageBox.Show(isScriptException ? exc.Message : excString, "Script error", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.ShowError(isScriptException ? exc.Message : excString, "Script error");
                 ScriptExecutionSuccess = false;
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "Exception";
@@ -2304,51 +2443,25 @@ namespace UndertaleModTool
 
         public void ScriptMessage(string message)
         {
-            MessageBox.Show(message, "Script message", MessageBoxButton.OK, MessageBoxImage.Information);
+            this.ShowMessage(message, "Script message");
         }
         public bool ScriptQuestion(string message)
         {
             PlayInformationSound();
-            return MessageBox.Show(message, "Script message", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+            return this.ShowQuestion(message, MessageBoxImage.Question, "Script Question") == MessageBoxResult.Yes;
         }
         public void ScriptWarning(string message)
         {
-            MessageBox.Show(message, "Script warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            this.ShowWarning(message, "Script warning");
         }
         public void ScriptError(string error, string title = "Error", bool SetConsoleText = true)
         {
-            MessageBox.Show(error, title, MessageBoxButton.OK, MessageBoxImage.Error);
+            this.ShowError(error, title);
             if (SetConsoleText)
             {
                 SetUMTConsoleText(error);
                 SetFinishedMessage(false);
             }
-        }
-
-        public static void ShowMessage(string message, bool wait = true)
-        {
-            if (wait)
-                MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Information);
-            else
-                _ = Task.Run(() => MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Information));
-        }
-        public static MessageBoxResult ShowQuestion(string message, MessageBoxImage icon = MessageBoxImage.Question)
-        {
-            return MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.YesNo, icon);
-        }
-        public static void ShowWarning(string message, bool wait = true)
-        {
-            if (wait)
-                MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning);
-            else
-                _ = Task.Run(() => MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Warning));
-        }
-        public static void ShowError(string message, bool wait = true)
-        {
-            if (wait)
-                MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error);
-            else
-                _ = Task.Run(() => MessageBox.Show(message, "UndertaleModTool", MessageBoxButton.OK, MessageBoxImage.Error));
         }
 
         public void SetUMTConsoleText(string message)
@@ -2441,25 +2554,6 @@ namespace UndertaleModTool
             return dlg.InputText;
         }
 
-        private async void MenuItem_RunBuiltinScript_Item_Click(object sender, RoutedEventArgs e)
-        {
-            string path = (string)(sender as MenuItem).CommandParameter;
-            await RunScript(path);
-        }
-
-        private async void MenuItem_RunOtherScript_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog dlg = new OpenFileDialog();
-
-            dlg.DefaultExt = "csx";
-            dlg.Filter = "Scripts (.csx)|*.csx|All files|*";
-
-            if (dlg.ShowDialog() == true)
-            {
-                await RunScript(dlg.FileName);
-            }
-        }
-
         private void MenuItem_GitHub_Click(object sender, RoutedEventArgs e)
         {
             OpenBrowser("https://github.com/krzys-h/UndertaleModTool");
@@ -2467,7 +2561,7 @@ namespace UndertaleModTool
 
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("UndertaleModTool by krzys_h\nVersion " + Version, "About", MessageBoxButton.OK);
+            this.ShowMessage("UndertaleModTool by krzys_h\nVersion " + Version, "About");
         }
 
         /// From https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Dialogs/AboutAvaloniaDialog.xaml.cs
@@ -2502,7 +2596,7 @@ namespace UndertaleModTool
             }
             catch (Exception e)
             {
-                MessageBox.Show("Failed to open browser!\n" + e.ToString());
+                Application.Current.MainWindow.ShowError("Failed to open browser!\n" + e);
             }
         }
 
@@ -2522,7 +2616,7 @@ namespace UndertaleModTool
             }
             catch (Exception e)
             {
-                MessageBox.Show("Failed to open folder!\n" + e.ToString());
+                Application.Current.MainWindow.ShowError("Failed to open folder!\n" + e);
             }
         }
 
@@ -2558,19 +2652,20 @@ namespace UndertaleModTool
 
             if (!Environment.Is64BitOperatingSystem)
             {
-                if (ShowQuestion("Your operating system is 32-bit.\n" +
-                                 "32-bit (x86) version of UndertaleModTool is obsolete.\n" +
-                                 "Do you want to continue anyway?", MessageBoxImage.Error) != MessageBoxResult.Yes)
-                {
-                    window.UpdateButtonEnabled = true;
+                this.ShowWarning("Your operating system is 32-bit.\n" +
+                                  "The 32-bit (x86) version of UndertaleModTool is obsolete.\n" +
+                                  "If you wish to continue using the 32-bit version of UndertaleModTool, either use the GitHub Actions Artifacts, " +
+                                  "the Nightly builds if you don't have a GitHub account, or compile UTMT yourself.\n" +
+                                  "For any questions or more information, ask in the Underminers Discord server.");
+                window.UpdateButtonEnabled = true;
                     return;
-                }
+
             }
 
             string sysDriveLetter = Path.GetTempPath()[0].ToString();
             if ((new DriveInfo(sysDriveLetter).AvailableFreeSpace / bytesToMB) < 500)
             {
-                ShowError($"Not enough space on the system drive {sysDriveLetter} - at least 500 MB is required.");
+                this.ShowError($"Not enough space on the system drive {sysDriveLetter} - at least 500 MB is required.");
                 window.UpdateButtonEnabled = true;
                 return;
             }
@@ -2581,14 +2676,14 @@ namespace UndertaleModTool
             bool isBundled = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
 
             string baseUrl = "https://api.github.com/repos/krzys-h/UndertaleModTool/actions/";
-            string detectedActionName = $"Publish GUI{(!Environment.Is64BitOperatingSystem ? " 32Bit" : "")}";
+            string detectedActionName = "Publish GUI";
 
             // Fetch the latest workflow run
             var result = await HttpGetAsync(baseUrl + "runs?branch=master&status=success&per_page=20");
             if (result?.IsSuccessStatusCode != true)
             {
                 string errText = $"{(result is null ? "Check your internet connection." : $"HTTP error - {result.ReasonPhrase}.")}";
-                ShowError($"Failed to fetch latest build!\n{errText}");
+                this.ShowError($"Failed to fetch latest build!\n{errText}");
                 window.UpdateButtonEnabled = true;
                 return;
             }
@@ -2608,7 +2703,7 @@ namespace UndertaleModTool
             }
             if (action == null)
             {
-                ShowError($"Failed to find latest build!\nDetected action name - {detectedActionName}");
+                this.ShowError($"Failed to find latest build!\nDetected action name - {detectedActionName}");
                 window.UpdateButtonEnabled = true;
                 return;
             }
@@ -2616,7 +2711,7 @@ namespace UndertaleModTool
             DateTime currDate = File.GetLastWriteTime(Path.Combine(ExePath, "UndertaleModTool.exe"));
             DateTime lastDate = (DateTime)action["updated_at"];
             if (lastDate.Subtract(currDate).Minutes <= 10)
-                if (ShowQuestion("UndertaleModTool is already up to date.\nUpdate anyway?") != MessageBoxResult.Yes)
+                if (this.ShowQuestion("UndertaleModTool is already up to date.\nUpdate anyway?") != MessageBoxResult.Yes)
                 {
                     window.UpdateButtonEnabled = true;
                     return;
@@ -2626,7 +2721,7 @@ namespace UndertaleModTool
             if (result2?.IsSuccessStatusCode != true)
             {
                 string errText = $"{(result2 is null ? "Check your internet connection." : $"HTTP error - {result2.ReasonPhrase}.")}";
-                ShowError($"Failed to fetch latest build!\n{errText}");
+                this.ShowError($"Failed to fetch latest build!\n{errText}");
                 window.UpdateButtonEnabled = true;
                 return;
             }
@@ -2636,9 +2731,9 @@ namespace UndertaleModTool
 
             if (Environment.Is64BitOperatingSystem && !Environment.Is64BitProcess)
             {
-                if (ShowQuestion("Detected 32-bit (x86) version of UndertaleModTool on the 64-bit operating system.\n" +
+                if (this.ShowQuestion("Detected 32-bit (x86) version of UndertaleModTool on an 64-bit operating system.\n" +
                                  "It's highly recommended to use the 64-bit version instead.\n" +
-                                 "Download that?") != MessageBoxResult.Yes)
+                                 "Do you wish to download it?") != MessageBoxResult.Yes)
                 {
                     window.UpdateButtonEnabled = true;
                     return;
@@ -2651,20 +2746,12 @@ namespace UndertaleModTool
                 var currentArtifact = (JObject) artifactList[index];
                 string artifactName = (string)currentArtifact["name"];
 
-                if (Environment.Is64BitOperatingSystem)
-                {
-                    if (artifactName.Contains($"isBundled-{isBundled.ToString().ToLower()}-isSingleFile-{isSingleFile.ToString().ToLower()}"))
-                        artifact = currentArtifact;
-                }
-                else
-                {
-                    if (artifactName.Contains($"isSingleFile-{isSingleFile.ToString().ToLower()}"))
-                        artifact = currentArtifact;
-                }
+                if (artifactName.Contains($"isBundled-{isBundled.ToString().ToLower()}-isSingleFile-{isSingleFile.ToString().ToLower()}"))
+                    artifact = currentArtifact;
             }
             if (artifact is null)
             {
-                ShowError("Failed to find the artifact!");
+                this.ShowError("Failed to find the artifact!");
                 window.UpdateButtonEnabled = true;
                 return;
             }
@@ -2730,7 +2817,7 @@ namespace UndertaleModTool
 
                                 if (isWin7)
                                 {
-                                    if (ShowQuestion(errMsg + win7upd, MessageBoxImage.Error) == MessageBoxResult.Yes)
+                                    if (this.ShowQuestion(errMsg + win7upd, MessageBoxImage.Error) == MessageBoxResult.Yes)
                                         OpenBrowser("https://www.microsoft.com/en-us/download/details.aspx?id=44622");
 
                                     window.UpdateButtonEnabled = true;
@@ -2745,7 +2832,7 @@ namespace UndertaleModTool
                         else
                             errMsg = e.Error.Message;
 
-                        ShowError($"Failed to download new version of UndertaleModTool.\nError - {errMsg}.");
+                        this.ShowError($"Failed to download new version of UndertaleModTool.\nError - {errMsg}.");
                         window.UpdateButtonEnabled = true;
                         return;
                     }
@@ -2753,7 +2840,7 @@ namespace UndertaleModTool
                     string updaterFolder = Path.Combine(ExePath, "Updater");
                     if (!File.Exists(Path.Combine(updaterFolder, "UndertaleModToolUpdater.exe")))
                     {
-                        ShowError("Updater not found! Aborting update, report this to the devs!\nLocation checked: " + updaterFolder);
+                        this.ShowError("Updater not found! Aborting update, report this to the devs!\nLocation checked: " + updaterFolder);
                         window.UpdateButtonEnabled = true;
                         return;
                     }
@@ -2772,7 +2859,7 @@ namespace UndertaleModTool
                     }
                     catch (Exception ex)
                     {
-                        ShowError($"Can't copy the updater app to the temporary folder.\n{ex}");
+                        this.ShowError($"Can't copy the updater app to the temporary folder.\n{ex}");
                         window.UpdateButtonEnabled = true;
                         return;
                     }
@@ -2780,7 +2867,7 @@ namespace UndertaleModTool
 
                     window.UpdateButtonEnabled = true;
 
-                    ShowMessage("UndertaleModTool will now close to finish the update.");
+                    this.ShowMessage("UndertaleModTool will now close to finish the update.");
 
                     Process.Start(new ProcessStartInfo(Path.Combine(updaterFolderTemp, "UndertaleModToolUpdater.exe"))
                     {
@@ -2845,7 +2932,7 @@ result in loss of work.");
             Data.GeneralInfo.IsDebuggerDisabled = oldDisableDebuggerState;
             if (TempFilesFolder == null)
             {
-                ShowWarning("Temp folder is null.");
+                this.ShowWarning("Temp folder is null.");
                 return;
             }
             else if (saveOk)
@@ -2872,7 +2959,7 @@ result in loss of work.");
             }
             else if (!saveOk)
             {
-                ShowWarning("Temp save failed, cannot run.");
+                this.ShowWarning("Temp save failed, cannot run.");
                 return;
             }
             if (File.Exists(TempFilesFolder))
@@ -2889,32 +2976,32 @@ result in loss of work.");
             bool saveOk = true;
             if (!Data.GeneralInfo.IsDebuggerDisabled)
             {
-                if (ShowQuestion("The game has the debugger enabled. Would you like to disable it so the game will run?") == MessageBoxResult.Yes)
+                if (this.ShowQuestion("The game has the debugger enabled. Would you like to disable it so the game will run?") == MessageBoxResult.Yes)
                 {
                     Data.GeneralInfo.IsDebuggerDisabled = true;
                     if (!await DoSaveDialog())
                     {
-                        ShowError("You must save your changes to run.");
+                        this.ShowError("You must save your changes to run.");
                         Data.GeneralInfo.IsDebuggerDisabled = false;
                         return;
                     }
                 }
                 else
                 {
-                    ShowError("Use the \"Run game using debugger\" option to run this game.");
+                    this.ShowError("Use the \"Run game using debugger\" option to run this game.");
                     return;
                 }
             }
             else
             {
                 Data.GeneralInfo.IsDebuggerDisabled = true;
-                if (ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
+                if (this.ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
                     saveOk = await DoSaveDialog();
             }
 
             if (FilePath == null)
             {
-                ShowWarning("The file must be saved in order to be run.");
+                this.ShowWarning("The file must be saved in order to be run.");
             }
             else if (saveOk)
             {
@@ -2937,7 +3024,7 @@ result in loss of work.");
             bool saveOk = await DoSaveDialog(true);
             if (FilePath == null)
             {
-                ShowWarning("The file must be saved in order to be run.");
+                this.ShowWarning("The file must be saved in order to be run.");
             }
             else if (saveOk)
             {
@@ -2948,7 +3035,7 @@ result in loss of work.");
                     return;
                 if (runtime.DebuggerPath == null)
                 {
-                    MessageBox.Show("The selected runtime does not support debugging.", "Run error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    this.ShowError("The selected runtime does not support debugging.", "Run error");
                     return;
                 }
 
@@ -3003,8 +3090,11 @@ result in loss of work.");
             UndertaleResource res = obj as UndertaleResource;
             if (res is null)
             {
-                if (!silent)
-                    ShowWarning($"Can't highlight the object - it's null or isn't a UndertaleResource.");
+                string msg = $"Can't highlight the object - it's null or isn't an UndertaleResource.";
+                if (silent)
+                    Debug.WriteLine(msg);
+                else
+                    this.ShowWarning(msg);
 
                 return;
             }
@@ -3030,16 +3120,22 @@ result in loss of work.");
             }
             catch (Exception ex)
             {
-                if (!silent)
-                    ShowWarning($"Can't highlight the object \"{objName}\".\nError - {ex.Message}");
+                string msg = $"Can't highlight the object \"{objName}\".\nError - {ex.Message}";
+                if (silent)
+                    Debug.WriteLine(msg);
+                else
+                    this.ShowWarning(msg);
 
                 return;
             }
 
             if (resListView is null)
             {
-                if (!silent)
-                    ShowWarning($"Can't highlight the object \"{objName}\" - element with object list not found.");
+                string msg = $"Can't highlight the object \"{objName}\" - element with object list not found.";
+                if (silent)
+                    Debug.WriteLine(msg);
+                else
+                    this.ShowWarning(msg);
 
                 return;
             }
@@ -3145,7 +3241,7 @@ result in loss of work.");
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show("An error occured while trying to load:\n" + ex.Message, "Load error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            this.ShowError("An error occured while trying to load:\n" + ex.Message, "Load error");
                         }
 
                         Dispatcher.Invoke(() =>
@@ -3538,6 +3634,52 @@ result in loss of work.");
             Tabs = new() { tab };
             CurrentTabIndex = 0;
         }
+
+        private void TabTitleText_Initialized(object sender, EventArgs e)
+        {
+            SetTabTitleBinding(sender, null);
+        }
+        private void TabTitleText_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            SetTabTitleBinding(sender, e.OldValue);
+        }
+        private void SetTabTitleBinding(object sender, object prevObj)
+        {
+            TextBlock textBlock = sender as TextBlock;
+            object obj = (textBlock.DataContext as Tab)?.OpenedObject;
+            if (obj is null || obj == DependencyProperty.UnsetValue)
+                return;
+
+            bool objNamed = obj is UndertaleNamedResource;
+            bool objString = obj is UndertaleString;
+
+            prevObj = (prevObj as Tab)?.OpenedObject;
+            if (prevObj is not null)
+            {
+                bool pObjNamed = prevObj is UndertaleNamedResource;
+                bool pObjString = prevObj is UndertaleString;
+
+                // if both objects have the same type (one of above)
+                // or both objects are not "UndertaleNamedResource",
+                // then there's no need for changing the binding
+                if (pObjNamed && objNamed || pObjString && objString || !(pObjNamed || objNamed))
+                    return;
+            }
+
+            MultiBinding binding = new()
+            {
+                Converter = TabTitleConverter.Instance,
+                Mode = BindingMode.OneWay
+            };
+            binding.Bindings.Add(new Binding() { Mode = BindingMode.OneTime });
+
+            if (objNamed)
+                binding.Bindings.Add(new Binding("OpenedObject.Name.Content") { Mode = BindingMode.OneWay });
+            else if (objString)
+                binding.Bindings.Add(new Binding("OpenedObject.Content") { Mode = BindingMode.OneWay });
+
+            textBlock.SetBinding(TextBlock.TextProperty, binding);
+        }
     }
 
     public class GeneralInfoEditor
@@ -3578,11 +3720,6 @@ result in loss of work.");
     {
         public string Heading { get; private set; }
         public string Description { get; private set; }
-
-        // Used only by the "TabTitleConverter" to prevent the following WPF binding warning:
-        // "Name property not found on object of type DescriptionView".
-        // (within "TabControl.ItemTemplate")
-        public UndertaleString Name { get; } = new();
 
         public DescriptionView(string heading, string description)
         {

@@ -26,6 +26,7 @@
         <local:CompareNumbersConverter x:Key="CompareNumbersConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/> <!-- (built-in converter) -->
         <local:TabTitleConverter x:Key="TabTitleConverter"/>
+        <local:StringTitleConverter x:Key="StringTitleConverter"/>
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="New" Executed="Command_New" />
@@ -102,26 +103,8 @@
                     <MenuItem Header="S_ettings" Command="Properties"/>
                     <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+Q"/>
                 </MenuItem>
-                <MenuItem Header="_Scripts">
-                    <MenuItem Header="_Run builtin script" SubmenuOpened="MenuItem_RunBuiltinScript_SubmenuOpened">
-                        <MenuItem Header="(...loading...)" IsEnabled="False"/>
-                    </MenuItem>
-                    <MenuItem Header="_Run community script" SubmenuOpened="MenuItem_RunCommunityScript_SubmenuOpened">
-                        <MenuItem Header="(...loading...)" IsEnabled="False"/>
-                    </MenuItem>
-                    <MenuItem Header="_Unpack assets" SubmenuOpened="MenuItem_RunUnpackScript_SubmenuOpened">
-                        <MenuItem Header="(...loading...)" IsEnabled="False"/>
-                    </MenuItem>
-                    <MenuItem Header="_Repack assets" SubmenuOpened="MenuItem_RunRepackScript_SubmenuOpened">
-                        <MenuItem Header="(...loading...)" IsEnabled="False"/>
-                    </MenuItem>
-                    <MenuItem Header="_Run technical script" SubmenuOpened="MenuItem_RunTechnicalScript_SubmenuOpened">
-                        <MenuItem Header="(...loading...)" IsEnabled="False"/>
-                    </MenuItem>
-                    <MenuItem Header="_Run demo script" SubmenuOpened="MenuItem_RunDemoScript_SubmenuOpened">
-                        <MenuItem Header="(...loading...)" IsEnabled="False"/>
-                    </MenuItem>
-                    <MenuItem Header="Run _other script..." Click="MenuItem_RunOtherScript_Click"/>
+                <MenuItem Name="RootScriptItem" Header="_Scripts" SubmenuOpened="RootMenuItem_SubmenuOpened">
+                    <MenuItem Header="(...loading...)" IsEnabled="False"/>
                 </MenuItem>
                 <MenuItem Header="_Help">
                     <MenuItem Header="_GitHub" Click="MenuItem_GitHub_Click"/>
@@ -177,9 +160,12 @@
                     </Button>
                     <TextBox Grid.Column="1" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"/>
                 </Grid>
-                <TreeView Grid.Column="0" Grid.Row="1" Margin="5" DataContext="{Binding Data}" SelectedItemChanged="TreeView_SelectedItemChanged" MouseDoubleClick="MainTree_MouseDoubleClick" KeyUp="MainTree_KeyUp" AllowDrop="True" Name="MainTree" KeyDown="MainTree_KeyDown" PreviewMouseRightButtonDown="MainTree_PreviewMouseRightButtonDown"
-                    VirtualizingStackPanel.IsVirtualizing="True"
-                    VirtualizingStackPanel.VirtualizationMode="Recycling">
+                <TreeView Grid.Column="0" Grid.Row="1" Name="MainTree" Margin="5" DataContext="{Binding Data}" AllowDrop="True"
+                          SelectedItemChanged="TreeView_SelectedItemChanged"
+                          MouseDoubleClick="MainTree_MouseDoubleClick" PreviewMouseRightButtonDown="MainTree_PreviewMouseRightButtonDown" MouseDown="MainTree_MouseDown"
+                          KeyUp="MainTree_KeyUp" KeyDown="MainTree_KeyDown"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling">
                     <TreeView.Resources>
                         <ContextMenu x:Key="AddMenu">
                             <MenuItem Header="Add" Click="MenuItem_Add_Click"/>
@@ -345,7 +331,7 @@
                         <TreeViewItem Header="Strings" ItemsSource="{Binding Strings, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Strings, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleString}">
-                                    <TextBlock Text="{Binding Content}" />
+                                    <TextBlock Text="{Binding Content, Mode=OneWay, Converter={StaticResource StringTitleConverter}}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
@@ -425,14 +411,8 @@
                             <TabControl.ItemTemplate>
                                 <DataTemplate DataType="{x:Type local:Tab}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock>
-                                            <TextBlock.Text>
-                                                <MultiBinding Converter="{StaticResource TabTitleConverter}" Mode="OneWay">
-                                                    <Binding Path="OpenedObject" Mode="OneTime"/>
-                                                    <!-- for notification only -->
-                                                    <Binding Path="OpenedObject.Name.Content" Mode="OneWay"/>
-                                                </MultiBinding>
-                                            </TextBlock.Text>
+                                        <TextBlock Initialized="TabTitleText_Initialized" DataContextChanged="TabTitleText_DataContextChanged">
+                                            <!-- "TextBlock.Text" binding is set in code-behind -->
                                         </TextBlock>
                                         <Button Background="Transparent" Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
                                                 Click="TabCloseButton_OnClick" MouseEnter="TabCloseButton_MouseEnter" MouseLeave="TabCloseButton_MouseLeave">

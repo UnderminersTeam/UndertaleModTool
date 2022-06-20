@@ -25,7 +25,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                MessageBox.Show("ReplaceTempWithMain error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                this.ShowError("ReplaceTempWithMain error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
         public void ReplaceMainWithTemp(bool imAnExpertBtw = false)
@@ -44,7 +44,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                MessageBox.Show("ReplaceMainWithTemp error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                this.ShowError("ReplaceMainWithTemp error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
         public void ReplaceTempWithCorrections(bool imAnExpertBtw = false)
@@ -69,7 +69,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                MessageBox.Show("ReplaceCorrectionsWithTemp error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                this.ShowError("ReplaceTempWithCorrections error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
         public void ReplaceCorrectionsWithTemp(bool imAnExpertBtw = false)
@@ -85,7 +85,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                MessageBox.Show("ReplaceCorrectionsWithTemp error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                this.ShowError("ReplaceCorrectionsWithTemp error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
         public void UpdateCorrections(bool imAnExpertBtw = false)

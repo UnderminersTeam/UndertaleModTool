@@ -9,6 +9,7 @@ using UndertaleModLib.Scripting;
 using System.Security.Cryptography;
 using UndertaleModLib.Models;
 using UndertaleModLib.Decompiler;
+using System.Threading.Tasks;
 
 namespace UndertaleModTool
 {
@@ -75,12 +76,12 @@ namespace UndertaleModTool
                         if (Directory.Exists(Path.Combine(ProfilesFolder, reportedHashOfCrashedFile)) &&
                             profileHashOfCrashedFile == reportedHashOfCrashedFile)
                         {
-                            if (MessageBox.Show("UndertaleModTool crashed during usage last time while editing " + pathOfCrashedFile + ", would you like to recover your code now?", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                            if (this.ShowQuestion("UndertaleModTool crashed during usage last time while editing " + pathOfCrashedFile + ", would you like to recover your code now?") == MessageBoxResult.Yes)
                             {
                                 LoadFile(pathOfCrashedFile, true).ContinueWith((t) => { });
                                 if (Data == null)
                                 {
-                                    MessageBox.Show("Failed to load data when recovering.");
+                                    this.ShowError("Failed to load data when recovering.");
                                     return;
                                 }
                                 string[] dirFiles = Directory.GetFiles(dataRecoverLocation);
@@ -96,11 +97,11 @@ namespace UndertaleModTool
                                     codeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
                                 }
                                 codeLoadDialog.TryClose();
-                                MessageBox.Show("Completed.");
+                                this.ShowMessage("Completed.");
                             }
-                            else if (MessageBox.Show("Would you like to move this code to the \"Recovered\" folder now? Any previous code there will be cleared!", "UndertaleModTool", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                            else if (this.ShowQuestion("Would you like to move this code to the \"Recovered\" folder now? Any previous code there will be cleared!") == MessageBoxResult.Yes)
                             {
-                                MessageBox.Show("Your code can be recovered from the \"Recovered\" folder at any time.");
+                                this.ShowMessage("Your code can be recovered from the \"Recovered\" folder at any time.");
                                 string recoveredDir = Path.Combine(AppDataFolder, "Recovered", reportedHashOfCrashedFile);
                                 if (!Directory.Exists(Path.Combine(AppDataFolder, "Recovered")))
                                     Directory.CreateDirectory(Path.Combine(AppDataFolder, "Recovered"));
@@ -111,19 +112,19 @@ namespace UndertaleModTool
                             }
                             else
                             {
-                                MessageBox.Show("A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
+                                this.ShowWarning("A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
                             }
                         }
                     }
                     else
                     {
-                        MessageBox.Show("A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
+                        this.ShowWarning("A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
                     }
                 }
             }
             catch (Exception exc)
             {
-                MessageBox.Show("CrashCheck error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                this.ShowError("CrashCheck error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
 
@@ -135,7 +136,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                MessageBox.Show("ApplyCorrections error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                this.ShowError("ApplyCorrections error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
 
@@ -147,7 +148,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                MessageBox.Show("CreateUMTLastEdited error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                this.ShowError("CreateUMTLastEdited error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
 
@@ -161,7 +162,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                MessageBox.Show("DestroyUMTLastEdited error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                this.ShowError("DestroyUMTLastEdited error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
 
@@ -180,7 +181,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                MessageBox.Show("RevertProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                this.ShowError("RevertProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
         public void SaveTempToMainProfile()
@@ -201,22 +202,27 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                MessageBox.Show("SaveTempToMainProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                this.ShowError("SaveTempToMainProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
-        public void UpdateProfile(UndertaleData data, string filename)
+        public async Task UpdateProfile(UndertaleData data, string filename)
         {
+            FileMessageEvent?.Invoke("Calculating MD5 hash...");
+
             try
             {
-                using (var md5Instance = MD5.Create())
+                await Task.Run(() =>
                 {
-                    using (var stream = File.OpenRead(filename))
+                    using (var md5Instance = MD5.Create())
                     {
-                        MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
-                        MD5PreviouslyLoaded = MD5CurrentlyLoaded;
-                        ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                        using (var stream = File.OpenRead(filename))
+                        {
+                            MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                            MD5PreviouslyLoaded = MD5CurrentlyLoaded;
+                            ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                        }
                     }
-                }
+                });
 
                 string profDir = Path.Combine(ProfilesFolder, ProfileHash);
                 string profDirTemp = Path.Combine(profDir, "Temp");
@@ -226,7 +232,7 @@ namespace UndertaleModTool
                 {
                     if (data.GMS2_3)
                     {
-                        MessageBox.Show("Profile mode is not currently supported for GameMaker Studio 2.3 games.");
+                        this.ShowWarning("Profile mode is not currently supported for GameMaker Studio 2.3 games.");
                         return;
                     }
 
@@ -267,14 +273,14 @@ namespace UndertaleModTool
                     Directory.CreateDirectory(profDirTemp);
                     if (!Directory.Exists(profDir) || !Directory.Exists(profDirMain) || !Directory.Exists(profDirTemp))
                     {
-                        MessageBox.Show("Profile should exist, but does not. Insufficient permissions? Profile mode is disabled.");
+                        this.ShowWarning("Profile should exist, but does not. Insufficient permissions? Profile mode is disabled.");
                         SettingsWindow.ProfileModeEnabled = false;
                         return;
                     }
 
                     if (!SettingsWindow.ProfileMessageShown)
                     {
-                        MessageBox.Show(@"The profile for your game loaded successfully!
+                        this.ShowMessage(@"The profile for your game loaded successfully!
 
 UndertaleModTool now uses the ""Profile"" system by default for code.
 Using the profile system, many new features are available to you!
@@ -301,26 +307,32 @@ an issue on GitHub.");
             }
             catch (Exception exc)
             {
-                MessageBox.Show("UpdateProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                this.ShowError("UpdateProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
-        public void ProfileSaveEvent(UndertaleData data, string filename)
+        public async Task ProfileSaveEvent(UndertaleData data, string filename)
         {
+            FileMessageEvent?.Invoke("Calculating MD5 hash...");
+
             try
             {
                 string deleteIfModeActive = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                 bool copyProfile = false;
-                using (var md5Instance = MD5.Create())
+                await Task.Run(() =>
                 {
-                    using (var stream = File.OpenRead(filename))
+                    using (var md5Instance = MD5.Create())
                     {
-                        MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
-                        if (BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant() != BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant())
+                        using (var stream = File.OpenRead(filename))
                         {
-                            copyProfile = true;
+                            MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                            if (BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant() != BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant())
+                            {
+                                copyProfile = true;
+                            }
                         }
                     }
-                }
+                });
+
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Main"));
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Temp"));
                 if (!SettingsWindow.ProfileModeEnabled || data.GMS2_3 || data.IsYYC())
@@ -371,7 +383,7 @@ an issue on GitHub.");
                     Directory.CreateDirectory(profDir);
                     Directory.CreateDirectory(Path.Combine(profDir, "Main"));
                     Directory.CreateDirectory(Path.Combine(profDir, "Temp"));
-                    MessageBox.Show("Profile saved successfully to " + ProfileHash);
+                    this.ShowMessage("Profile saved successfully to " + ProfileHash);
                 }
                 if (SettingsWindow.DeleteOldProfileOnSave && copyProfile)
                 {
@@ -380,7 +392,7 @@ an issue on GitHub.");
             }
             catch (Exception exc)
             {
-                MessageBox.Show("ProfileSaveEvent error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                this.ShowError("ProfileSaveEvent error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
         public void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
@@ -413,7 +425,7 @@ an issue on GitHub.");
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show("An exception occurred while processing copying " + tempPath + "\nException: \n" + ex.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            this.ShowError("An exception occurred while processing copying " + tempPath + "\nException: \n" + ex);
                             return;
                         }
                     }
@@ -431,7 +443,7 @@ an issue on GitHub.");
             }
             catch (Exception exc)
             {
-                MessageBox.Show("DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc.ToString());
+                this.ShowError("DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
     }

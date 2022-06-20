@@ -1,10 +1,12 @@
-﻿namespace UndertaleModLib.Models;
+﻿using System;
+
+namespace UndertaleModLib.Models;
 
 /// <summary>
 /// A string entry a data file can have.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleString : UndertaleResource, ISearchable
+public class UndertaleString : UndertaleResource, ISearchable, IDisposable
 {
     /// <summary>
     /// The contents of the string.
@@ -43,6 +45,14 @@ public class UndertaleString : UndertaleResource, ISearchable
     public override string ToString()
     {
         return ToString(true);
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        Content = null;
     }
 
     /// <summary>

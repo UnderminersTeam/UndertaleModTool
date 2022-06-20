@@ -1,12 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace UndertaleModLib.Models;
 
 /// <summary>
 /// Sound entry in a data file.
 /// </summary>
-public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged
+public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
 {
     /// <summary>
     /// Audio entry flags a sound entry can use.
@@ -76,31 +77,35 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged
     /// </summary>
     public float Pitch { get; set; } = 0;
 
-    private UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP> _AudioGroup = new UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP>();
-    private UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO> _AudioFile = new UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO>();
+    private UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP> _audioGroup = new();
+    private UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO> _audioFile = new();
 
     /// <summary>
     /// The audio group this audio entry belongs to.
     /// </summary>
-    public UndertaleAudioGroup AudioGroup { get => _AudioGroup.Resource; set { _AudioGroup.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AudioGroup))); } }
+    public UndertaleAudioGroup AudioGroup { get => _audioGroup.Resource; set { _audioGroup.Resource = value; OnPropertyChanged(); } }
 
     /// <summary>
     /// The reference to the <see cref="UndertaleEmbeddedAudio"/> audio file.
     /// </summary>
-    public UndertaleEmbeddedAudio AudioFile { get => _AudioFile.Resource; set { _AudioFile.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AudioFile))); } }
+    public UndertaleEmbeddedAudio AudioFile { get => _audioFile.Resource; set { _audioFile.Resource = value; OnPropertyChanged(); } }
 
     /// <summary>
     /// The id of <see cref="AudioFile"></see>.
     /// </summary>
-    public int AudioID { get => _AudioFile.CachedId; set { _AudioFile.CachedId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AudioID))); } }
+    public int AudioID { get => _audioFile.CachedId; set { _audioFile.CachedId = value; OnPropertyChanged(); } }
 
     /// <summary>
     /// The id of <see cref="AudioGroup"/>.
     /// </summary>
-    public int GroupID { get => _AudioGroup.CachedId; set { _AudioGroup.CachedId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GroupID))); } }
+    public int GroupID { get => _audioGroup.CachedId; set { _audioGroup.CachedId = value; OnPropertyChanged(); } }
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
+    protected void OnPropertyChanged([CallerMemberName] string name = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -113,14 +118,14 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged
         writer.Write(Volume);
         writer.Write(Pitch);
         if (Flags.HasFlag(AudioEntryFlags.Regular) && writer.undertaleData.GeneralInfo.BytecodeVersion >= 14)
-            writer.WriteUndertaleObject(_AudioGroup);
+            writer.WriteUndertaleObject(_audioGroup);
         else
             writer.Write(Preload);
 
         if (GroupID == 0)
-            writer.WriteUndertaleObject(_AudioFile);
+            writer.WriteUndertaleObject(_audioFile);
         else
-            writer.Write(_AudioFile.CachedId);
+            writer.Write(_audioFile.CachedId);
     }
 
     /// <inheritdoc />
@@ -136,7 +141,7 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged
 
         if (Flags.HasFlag(AudioEntryFlags.Regular) && reader.undertaleData.GeneralInfo.BytecodeVersion >= 14)
         {
-            _AudioGroup = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP>>();
+            _audioGroup = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP>>();
             Preload = true;
         }
         else
@@ -148,18 +153,30 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged
 
         if (GroupID == reader.undertaleData.GetBuiltinSoundGroupID())
         {
-            _AudioFile = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO>>();
+            _audioFile = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO>>();
         }
         else
         {
-            _AudioFile.CachedId = reader.ReadInt32();
+            _audioFile.CachedId = reader.ReadInt32();
         }
     }
 
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content + " (" + GetType().Name + ")";
+        return Name?.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        _audioGroup.Dispose();
+        _audioFile.Dispose();
+        Name = null;
+        Type = null;
+        File = null;
     }
 }
 
@@ -167,7 +184,7 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged
 /// Audio group entry in a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleAudioGroup : UndertaleNamedResource
+public class UndertaleAudioGroup : UndertaleNamedResource, IDisposable
 {
     /// <summary>
     /// The name of the audio group.
@@ -189,6 +206,14 @@ public class UndertaleAudioGroup : UndertaleNamedResource
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content + " (" + GetType().Name + ")";
+        return Name?.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        Name = null;
     }
 }

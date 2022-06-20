@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 
 namespace UndertaleModLib.Models;
 
@@ -6,13 +7,13 @@ namespace UndertaleModLib.Models;
 /// A timeline in a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleTimeline : UndertaleNamedResource
+public class UndertaleTimeline : UndertaleNamedResource, IDisposable
 {
     /// <summary>
     /// A specific moment in a timeline.
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class UndertaleTimelineMoment : UndertaleObject
+    public class UndertaleTimelineMoment : UndertaleObject, IDisposable
     {
         /// <summary>
         /// After how many steps this moment gets executed.
@@ -57,6 +58,14 @@ public class UndertaleTimeline : UndertaleNamedResource
         {
             // Same goes for unserializing.
         }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            Event = null;
+        }
     }
 
     /// <summary>
@@ -72,7 +81,18 @@ public class UndertaleTimeline : UndertaleNamedResource
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content + " (" + GetType().Name + ")";
+        return Name?.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        foreach (var moment in Moments)
+            moment?.Dispose();
+        Name = null;
+        Moments = new();
     }
 
     /// <inheritdoc />

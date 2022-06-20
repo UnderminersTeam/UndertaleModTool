@@ -1,19 +1,8 @@
 //Originally created by _creepersbane#2074
 //Adapted to work with all games by Grossley
+//Adapted to GMS 2.3+ by Space Core/Jacky720
 
 EnsureDataLoaded();
-
-if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
-{
-    ScriptError("Error 0: Incompatible with the new Deltarune Chapter 1 & 2 demo");
-    return;
-}
-else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1&2")
-{
-    ScriptError("Error 1: Incompatible with the new Deltarune Chapter 1 & 2 demo");
-    return;
-}
-
 
 var obj = Data.GameObjects.ByName("obj_roomselector");
 
@@ -127,14 +116,19 @@ update = 1
 scale = 1
 fnt = -4
 len = 0
-ss = -4
-for (i = room_first; i <= room_last; i++)
+ss = -4" 
++ (!Data.GMS2_3 
+  ? "for (i = room_first; i <= room_last; i++)"
+  : "for (i = 0; room_exists(i); i++)")
++ @"
 {
     if room_exists(i)
         room_names[i] = (((room_get_name(i) + "" ("") + string(i)) + "")"")
     else
         room_names[i] = -4
 }
+// for 2.3
+myroom_last = i
 ww = -1
 hh = -1
 xx = 0
@@ -164,8 +158,11 @@ if selector_active
             positions[0] = -1
             roomid = -1
             if (dest_room != """" && dest_room == string_digits(dest_room))
-                roomid = real(dest_room)
-            for (i = room_first; i <= room_last; i++)
+                roomid = real(dest_room)"
+            + (!Data.GMS2_3
+              ? "for (i = room_first; i <= room_last; i++)"
+              : "for (i = 0; i < myroom_last; i++)")
+            + @"
             {
                 if is_string(room_names[i])
                 {
@@ -410,8 +407,15 @@ selector_active = 0
 exiting = 0
 ", Data);
 
+string version;
+if (Data.GMS2_3)
+    version = "2.3";
+else if (gms2)
+    version = "2";
+else
+    version = "1";
 
-ScriptMessage("Successfully applied for Gamemaker " + (gms2 ? 2 : 1).ToString() + @"
+ScriptMessage(@$"Successfully applied for Gamemaker {version}
 Controls:
 - F3: open/close menu
 - Escape: close menu

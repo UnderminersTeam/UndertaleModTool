@@ -1,7 +1,4 @@
-﻿using GraphVizWrapper;
-using GraphVizWrapper.Commands;
-using GraphVizWrapper.Queries;
-using ICSharpCode.AvalonEdit;
+﻿using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Folding;
@@ -50,7 +47,6 @@ namespace UndertaleModTool
         public UndertaleCode CurrentDisassembled = null;
         public UndertaleCode CurrentDecompiled = null;
         public List<string> CurrentLocals = null;
-        public UndertaleCode CurrentGraphed = null;
         public string ProfileHash = mainWindow.ProfileHash;
         public string MainPath = Path.Combine(Settings.ProfilesFolder, mainWindow.ProfileHash, "Main");
         public string TempPath = Path.Combine(Settings.ProfilesFolder, mainWindow.ProfileHash, "Temp");
@@ -199,10 +195,6 @@ namespace UndertaleModTool
                 _ = DecompileCode(code, !DecompiledYet);
                 DecompiledYet = true;
             }
-            if (GraphTab.IsSelected && code != CurrentGraphed)
-            {
-                GraphCode(code);
-            }
         }
 
         private async void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -258,10 +250,6 @@ namespace UndertaleModTool
                 if (DecompiledTab.IsSelected && code != CurrentDecompiled)
                 {
                     _ = DecompileCode(code, true);
-                }
-                if (GraphTab.IsSelected && code != CurrentGraphed)
-                {
-                    GraphCode(code);
                 }
             }
         }
@@ -359,11 +347,11 @@ namespace UndertaleModTool
                     }
                     catch (ArgumentException)
                     {
-                        MessageBox.Show("There is a duplicate key in textdata_en, being " + m.Groups[1].Value + ". This may cause errors in the comment display of text.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        mainWindow.ShowError("There is a duplicate key in textdata_en, being " + m.Groups[1].Value + ". This may cause errors in the comment display of text.");
                     }
                     catch
                     {
-                        MessageBox.Show("Unknown error in textdata_en. This may cause errors in the comment display of text.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        mainWindow.ShowError("Unknown error in textdata_en. This may cause errors in the comment display of text.");
                     }
                 }
             }
@@ -409,7 +397,7 @@ namespace UndertaleModTool
                     try
                     {
                         _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.TryShowDialog(); }));
-                    } 
+                    }
                     catch
                     {
                         // This is still a problem in rare cases for some unknown reason
@@ -466,7 +454,7 @@ namespace UndertaleModTool
                     }
                     catch (Exception exc)
                     {
-                        MessageBox.Show(exc.ToString());
+                        mainWindow.ShowError(exc.ToString());
                     }
 
                     if (decompiled != null)
@@ -556,66 +544,6 @@ namespace UndertaleModTool
             }
         }
 
-        private async void GraphCode(UndertaleCode code)
-        {
-            if (code.ParentEntry != null)
-            {
-                GraphView.Source = null;
-                CurrentGraphed = code;
-                return;
-            }
-
-            LoaderDialog dialog = new LoaderDialog("Generating graph", "Generating graph, please wait...");
-            dialog.Owner = Window.GetWindow(this);
-            Task t = Task.Run(() =>
-            {
-                ImageSource image = null;
-                try
-                {
-                    code.UpdateAddresses();
-                    List<uint> entryPoints = new List<uint>();
-                    entryPoints.Add(0);
-                    foreach (UndertaleCode duplicate in code.ChildEntries)
-                        entryPoints.Add(duplicate.Offset / 4);
-                    var blocks = Decompiler.DecompileFlowGraph(code, entryPoints);
-                    string dot = Decompiler.ExportFlowGraph(blocks);
-
-                    try
-                    {
-                        var getStartProcessQuery = new GetStartProcessQuery();
-                        var getProcessStartInfoQuery = new GetProcessStartInfoQuery();
-                        var registerLayoutPluginCommand = new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
-                        var wrapper = new GraphGeneration(getStartProcessQuery, getProcessStartInfoQuery, registerLayoutPluginCommand);
-                        wrapper.GraphvizPath = Settings.Instance.GraphVizPath;
-
-                        byte[] output = wrapper.GenerateGraph(dot, Enums.GraphReturnType.Png); // TODO: Use SVG instead
-
-                        image = new ImageSourceConverter().ConvertFrom(output) as ImageSource;
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.WriteLine(e.ToString());
-                        if (MessageBox.Show("Unable to execute GraphViz: " + e.Message + "\nMake sure you have downloaded it and set the path in settings.\nDo you want to open the download page now?", "Graph generation failed", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.Yes)
-                            MainWindow.OpenBrowser("https://graphviz.gitlab.io/_pages/Download/Download_windows.html");
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine(e.ToString());
-                    MessageBox.Show(e.Message, "Graph generation failed", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-
-                Dispatcher.Invoke(() =>
-                {
-                    GraphView.Source = image;
-                    CurrentGraphed = code;
-                    dialog.Hide();
-                });
-            });
-            dialog.ShowDialog();
-            await t;
-        }
-
         private void DecompiledEditor_GotFocus(object sender, RoutedEventArgs e)
         {
             if (DecompiledEditor.IsReadOnly)
@@ -655,7 +583,7 @@ namespace UndertaleModTool
                 else
                     return;                   // probably loaded another data.win or something.
             }
-            
+
             if (code.ParentEntry != null)
                 return;
 
@@ -692,21 +620,21 @@ namespace UndertaleModTool
             if (compileContext == null)
             {
                 dialog.TryClose();
-                MessageBox.Show("Compile context was null for some reason...", "This shouldn't happen", MessageBoxButton.OK, MessageBoxImage.Error);
+                mainWindow.ShowError("Compile context was null for some reason...", "This shouldn't happen");
                 return;
             }
 
             if (compileContext.HasError)
             {
                 dialog.TryClose();
-                MessageBox.Show(Truncate(compileContext.ResultError, 512), "Compiler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                mainWindow.ShowError(Truncate(compileContext.ResultError, 512), "Compiler error");
                 return;
             }
 
             if (!compileContext.SuccessfulCompile)
             {
                 dialog.TryClose();
-                MessageBox.Show("(unknown error message)", "Compile failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                mainWindow.ShowError("(unknown error message)", "Compile failed");
                 return;
             }
 
@@ -733,7 +661,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception exc)
                 {
-                    MessageBox.Show("Error during writing of GML code to profile:\n" + exc.ToString());
+                    mainWindow.ShowError("Error during writing of GML code to profile:\n" + exc);
                 }
             }
 
@@ -744,7 +672,6 @@ namespace UndertaleModTool
             // Show new code, decompiled.
             CurrentDisassembled = null;
             CurrentDecompiled = null;
-            CurrentGraphed = null;
 
             // Tab switch
             if (e == null)
@@ -815,14 +742,13 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Assembler error", MessageBoxButton.OK, MessageBoxImage.Error);
+                mainWindow.ShowError(ex.ToString(), "Assembler error");
                 return;
             }
 
             // Get rid of old code
             CurrentDisassembled = null;
             CurrentDecompiled = null;
-            CurrentGraphed = null;
 
             // Tab switch
             if (e == null)
@@ -1001,7 +927,7 @@ namespace UndertaleModTool
                                 {
                                     if (!((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift))
                                     {
-                                        doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset, 
+                                        doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
                                                     text.Length, myKey, null);
                                         (parent as UndertaleCodeEditor).DecompiledChanged = true;
                                     }
@@ -1120,7 +1046,7 @@ namespace UndertaleModTool
                                 {
                                     if (data.Code.ByName(val.Name.Content) != null)
                                         val = null; // in GMS2.3 every custom "function" is in fact a member variable, and the names in functions make no sense (they have the gml_Script_ prefix)
-                                } 
+                                }
                                 else
                                 {
                                     // Resolve 2.3 sub-functions for their parent entry
@@ -1172,7 +1098,7 @@ namespace UndertaleModTool
                     }
 
                     var line = new ClickVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
-                                                        func ? new SolidColorBrush(Color.FromRgb(0xFF, 0xB8, 0x71)) : 
+                                                        func ? new SolidColorBrush(Color.FromRgb(0xFF, 0xB8, 0x71)) :
                                                                new SolidColorBrush(Color.FromRgb(0xFF, 0x80, 0x80)));
                     if (func)
                         line.Bold = true;

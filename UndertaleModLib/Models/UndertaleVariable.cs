@@ -6,7 +6,7 @@ namespace UndertaleModLib.Models;
 /// A variable entry in a GameMaker data file.
 /// </summary>
 // TODO: INotifyPropertyChanged
-public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleInstruction.ReferencedObject
+public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleInstruction.ReferencedObject, IDisposable
 {
     /// The name of the Variable.
     public UndertaleString Name { get; set; }
@@ -79,7 +79,16 @@ public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleI
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name != null && Name.Content != null ? Name.Content : "<NULL_VAR_NAME>";
+        return Name?.Content != null ? Name.Content : "<NULL_VAR_NAME>";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        Name = null;
+        FirstAddress = null;
     }
 
     /// <inheritdoc />

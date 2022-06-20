@@ -36,7 +36,8 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Viewbox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Stretch="Uniform" StretchDirection="DownOnly">
+            <Viewbox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Stretch="Uniform" StretchDirection="DownOnly"
+                     SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
                 <Border>
                     <Border.Background>
                         <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">

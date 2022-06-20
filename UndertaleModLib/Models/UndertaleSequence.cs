@@ -5,7 +5,7 @@ using System.IO;
 namespace UndertaleModLib.Models;
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleSequence : UndertaleNamedResource
+public class UndertaleSequence : UndertaleNamedResource, IDisposable
 {
     public enum PlaybackType : uint
     {
@@ -78,6 +78,18 @@ public class UndertaleSequence : UndertaleNamedResource
         }
 
         Moments = reader.ReadUndertaleObject<UndertaleSimpleList<Keyframe<Moment>>>();
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        Name = null;
+        BroadcastMessages = null;
+        Moments = null;
+        Tracks = null;
+        FunctionIDs = null;
     }
 
     public class Keyframe<T> : UndertaleObject where T : UndertaleObject, new()

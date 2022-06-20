@@ -1,4 +1,6 @@
-﻿namespace UndertaleModLib.Models;
+﻿using System;
+
+namespace UndertaleModLib.Models;
 
 /// <summary>
 /// An embedded image entry in a GameMaker data file. This is GMS2 only.<br/>
@@ -20,7 +22,7 @@
 /// 32-bit pointer to something relating to a texture page entry?
 /// </code>
 /// <see href="https://github.com/krzys-h/UndertaleModTool/issues/4#issuecomment-421844420"/>.</remarks>
-public class UndertaleEmbeddedImage : UndertaleNamedResource
+public class UndertaleEmbeddedImage : UndertaleNamedResource, IDisposable
 {
     /// <summary>
     /// The name of the <see cref="UndertaleEmbeddedImage"/>.
@@ -49,6 +51,15 @@ public class UndertaleEmbeddedImage : UndertaleNamedResource
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content + " (" + GetType().Name + ")";
+        return Name?.Content + " (" + GetType().Name + ")";
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        Name = null;
+        TextureEntry = null;
     }
 }
