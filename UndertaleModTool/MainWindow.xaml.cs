@@ -1531,7 +1531,7 @@ namespace UndertaleModTool
         {
             if (e.NewValue is TreeViewItem)
             {
-                string item = (e.NewValue as TreeViewItem)?.Header?.ToString();
+                string item = (e.NewValue as TreeViewItem).Header?.ToString();
 
                 if (item == "Data")
                 {
@@ -1567,7 +1567,32 @@ namespace UndertaleModTool
 
             OpenInTab(Highlighted);
         }
+        private void MainTree_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ButtonState == MouseButtonState.Pressed && e.ChangedButton == System.Windows.Input.MouseButton.Middle)
+            {
+                // Gets the clicked visual element by the mouse position (relative to "MainTree").
+                // This is used instead of "VisualTreeHelper.HitTest()" because that ignores the visibility of elements,
+                // which led to "ghost" hits on empty space.
+                DependencyObject obj = MainTree.InputHitTest(e.GetPosition(MainTree)) as DependencyObject;
+                if (obj is not TextBlock)
+                    return;
 
+                TreeViewItem item = GetNearestParent<TreeViewItem>(obj);
+                if (item is null)
+                    return;
+
+                item.IsSelected = true;
+
+                if (item.DataContext is not UndertaleResource)
+                    return;
+
+                if (Highlighted is UndertaleRoom room && Selected is not UndertaleRoom)
+                    UndertaleRoomEditor.CheckAndRearrangeLayers(room);
+
+                OpenInTab(Highlighted, true);
+            }
+        }
         private void MainTree_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return)

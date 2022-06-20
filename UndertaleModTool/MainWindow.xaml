@@ -160,9 +160,12 @@
                     </Button>
                     <TextBox Grid.Column="1" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"/>
                 </Grid>
-                <TreeView Grid.Column="0" Grid.Row="1" Margin="5" DataContext="{Binding Data}" SelectedItemChanged="TreeView_SelectedItemChanged" MouseDoubleClick="MainTree_MouseDoubleClick" KeyUp="MainTree_KeyUp" AllowDrop="True" Name="MainTree" KeyDown="MainTree_KeyDown" PreviewMouseRightButtonDown="MainTree_PreviewMouseRightButtonDown"
-                    VirtualizingStackPanel.IsVirtualizing="True"
-                    VirtualizingStackPanel.VirtualizationMode="Recycling">
+                <TreeView Grid.Column="0" Grid.Row="1" Name="MainTree" Margin="5" DataContext="{Binding Data}" AllowDrop="True"
+                          SelectedItemChanged="TreeView_SelectedItemChanged"
+                          MouseDoubleClick="MainTree_MouseDoubleClick" PreviewMouseRightButtonDown="MainTree_PreviewMouseRightButtonDown" MouseDown="MainTree_MouseDown"
+                          KeyUp="MainTree_KeyUp" KeyDown="MainTree_KeyDown"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling">
                     <TreeView.Resources>
                         <ContextMenu x:Key="AddMenu">
                             <MenuItem Header="Add" Click="MenuItem_Add_Click"/>
