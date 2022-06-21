@@ -3350,8 +3350,8 @@ result in loss of work.");
 
                     if (addDefaultTab)
                     {
-                        Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open a data.win file to get started, then double click on the items on the left to view them");
-                        OpenInTab(Highlighted);
+                        OpenInTab(new DescriptionView("Welcome to UndertaleModTool!",
+                                                      "Open a data.win file to get started, then double click on the items on the left to view them"));
                         CurrentTab = Tabs[CurrentTabIndex];
 
                         Selected = CurrentTab.OpenedObject;
