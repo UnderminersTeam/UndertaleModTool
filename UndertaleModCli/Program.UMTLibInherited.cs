@@ -645,7 +645,7 @@ public partial class Program : IScriptInterface
         string passBack = "";
         GlobalDecompileContext decompileContext = context is null ? new(Data, false) : context;
 
-        if (!Data.ToolInfo.ProfileMode || Data.GMS2_3)
+        if (!Data.ToolInfo.ProfileMode)
         {
             try
             {
@@ -657,7 +657,7 @@ public partial class Program : IScriptInterface
                 throw new Exception("Error during GML code replacement:\n" + exc);
             }
         }
-        else if (Data.ToolInfo.ProfileMode && !Data.GMS2_3)
+        else if (Data.ToolInfo.ProfileMode)
         {
             try
             {

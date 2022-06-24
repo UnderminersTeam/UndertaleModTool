@@ -1267,7 +1267,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         {
             // When necessary, write to profile.
             string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name?.Content + ".gml");
-            if (!data.GMS2_3 && (data.ToolInfo.ProfileMode || File.Exists(tempPath)))
+            if (data.ToolInfo.ProfileMode || File.Exists(tempPath))
                 File.WriteAllText(tempPath, gmlCode);
         }
         catch (Exception exc)
