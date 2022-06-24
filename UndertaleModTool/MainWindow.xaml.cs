@@ -911,6 +911,14 @@ namespace UndertaleModTool
             if (CurrentTabIndex > 0)
                 CurrentTabIndex--;
         }
+        private void Command_GoBack(object sender, ExecutedRoutedEventArgs e)
+        {
+            GoBack();
+        }
+        private void Command_GoForward(object sender, ExecutedRoutedEventArgs e)
+        {
+            GoForward();
+        }
 
         private void DisposeGameData()
         {
@@ -3233,12 +3241,29 @@ result in loss of work.");
             }
         }
 
-        private void BackButton_Click(object sender, RoutedEventArgs e)
+        private void GoBack()
         {
+            if (CurrentTab.HistoryPosition == 0)
+                return;
+
             CurrentTab.HistoryPosition--;
             CurrentTab.CurrentObject = CurrentTab.History[CurrentTab.HistoryPosition];
 
             UpdateObjectLabel(CurrentTab.CurrentObject);
+        }
+        private void GoForward()
+        {
+            if (CurrentTab.HistoryPosition == CurrentTab.History.Count - 1)
+                return;
+
+            CurrentTab.HistoryPosition++;
+            CurrentTab.CurrentObject = CurrentTab.History[CurrentTab.HistoryPosition];
+
+            UpdateObjectLabel(CurrentTab.CurrentObject);
+        }
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            GoBack();
         }
 
         public void EnsureDataLoaded()
@@ -3347,6 +3372,8 @@ result in loss of work.");
                 Tabs.Add(newTab);
                 CurrentTabIndex = newIndex;
 
+                newTab.History.Add(obj);
+
                 if (!TabController.IsLoaded)
                     CurrentTab = newTab;
             }
@@ -3354,18 +3381,18 @@ result in loss of work.");
             {
                 CurrentTab = Tabs[CurrentTabIndex];
 
-                if (CurrentTab.HistoryPosition < CurrentTab.History.Count)
+                if (CurrentTab.HistoryPosition < CurrentTab.History.Count - 1)
                 {
                     // Remove all objects after the current one (overwrite)
-                    int count = CurrentTab.History.Count - CurrentTab.HistoryPosition;
+                    int count = CurrentTab.History.Count - CurrentTab.HistoryPosition - 1;
                     for (int i = 0; i < count; i++)
                         CurrentTab.History.RemoveAt(CurrentTab.History.Count - 1);
                 }
 
-                CurrentTab.History.Add(CurrentTab.CurrentObject);
-                CurrentTab.HistoryPosition++;
-
                 CurrentTab.CurrentObject = obj;
+
+                CurrentTab.History.Add(obj);
+                CurrentTab.HistoryPosition++;
             }
         }
 
