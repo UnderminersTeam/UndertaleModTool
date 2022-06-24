@@ -16,6 +16,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Scaled</TextBlock>
@@ -24,7 +25,17 @@
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Generated mips</TextBlock>
         <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneratedMips}" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
 
-        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="3">
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Size</TextBlock>
+        <Grid Grid.Row="2" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Name="TexWidth" Margin="3" Text="{Binding TextureData.Width, Mode=OneWay}" IsReadOnly="True"/>
+            <TextBox Grid.Column="1" Name="TexHeight" Margin="3" Text="{Binding TextureData.Height, Mode=OneWay}" IsReadOnly="True"/>
+        </Grid>
+        
+        <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
