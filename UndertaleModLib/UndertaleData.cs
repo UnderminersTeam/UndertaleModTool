@@ -385,19 +385,19 @@ namespace UndertaleModLib
         public bool GMLCacheIsReady { get; set; } = true;
 
         /// <summary>
-        /// An array of a <see cref="UndertaleData"/> properties with <see cref="IList{T}"/> type.
+        /// An array of a <see cref="UndertaleData"/> properties with <see cref="IList{T}"/> as their type.
         /// </summary>
-        public PropertyInfo[] ListProperties { get; private set; }
+        public PropertyInfo[] AllListProperties { get; private set; }
 
         /// <summary>
         /// Initializes new <see cref="UndertaleData"/> instance.
         /// </summary>
         public UndertaleData()
         {
-            ListProperties = GetType().GetProperties()
-                            .Where(x => x.PropertyType.IsGenericType
-                                        && x.PropertyType.GetGenericTypeDefinition() == typeof(IList<>))
-                            .ToArray();
+            AllListProperties = GetType().GetProperties()
+                                .Where(x => x.PropertyType.IsGenericType
+                                            && x.PropertyType.GetGenericTypeDefinition() == typeof(IList<>))
+                                .ToArray();
         }
 
         /// <summary>
@@ -437,10 +437,10 @@ namespace UndertaleModLib
         public int IndexOf(UndertaleResource obj, bool panicIfInvalid = true)
         {
             Type objType = obj.GetType();
-            PropertyInfo objListProp = ListProperties.FirstOrDefault(x => x.PropertyType.GetGenericArguments()[0] == objType);
-            if (objListProp is not null)
+            PropertyInfo objListPropInfo = AllListProperties.FirstOrDefault(x => x.PropertyType.GetGenericArguments()[0] == objType);
+            if (objListPropInfo is not null)
             {
-                if (objListProp.GetValue(this) is IList list)
+                if (objListPropInfo.GetValue(this) is IList list)
                     return list.IndexOf(obj);
             }
 
@@ -605,7 +605,7 @@ namespace UndertaleModLib
 
             Type disposableType = typeof(IDisposable);
             PropertyInfo[] dataProperties = GetType().GetProperties();
-            var dataDisposableProps = dataProperties.Except(ListProperties)
+            var dataDisposableProps = dataProperties.Except(AllListProperties)
                                                     .Where(x => disposableType.IsAssignableFrom(x.PropertyType));
 
             // Dispose disposable properties
@@ -619,7 +619,7 @@ namespace UndertaleModLib
             }
 
             // Clear all object lists (sprites, code, etc.)
-            foreach (PropertyInfo dataListProperty in ListProperties)
+            foreach (PropertyInfo dataListProperty in AllListProperties)
             {
                 // If list is null
                 if (dataListProperty.GetValue(this) is not IList list)
