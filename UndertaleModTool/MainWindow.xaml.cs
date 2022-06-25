@@ -61,12 +61,18 @@ namespace UndertaleModTool
         public event PropertyChangedEventHandler PropertyChanged;
 
         private object _currentObject;
+
+        [PropertyChanged.DoNotNotify] // Prevents "PropertyChanged.Invoke()" injection on compile
         public object CurrentObject
         {
             get => _currentObject;
             set
             {
+                object prevObj = _currentObject;
                 _currentObject = value;
+
+                SetTabTitleBinding(value, prevObj);
+
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentObject)));
                 mainWindow.RaiseOnSelectedChanged();
             }
@@ -200,6 +206,51 @@ namespace UndertaleModTool
             }
 
             return title;
+        }
+
+        public static void SetTabTitleBinding(object obj, object prevObj, TextBlock textBlock = null)
+        {
+            if (textBlock is null)
+            {
+                var cont = mainWindow.TabController.ItemContainerGenerator.ContainerFromIndex(mainWindow.CurrentTabIndex);
+                textBlock = MainWindow.FindVisualChild<TextBlock>(cont);
+            }
+            else
+                obj = (textBlock.DataContext as Tab)?.CurrentObject;
+
+            if (obj is null || textBlock is null)
+                return;
+
+            bool objNamed = obj is UndertaleNamedResource;
+            bool objString = obj is UndertaleString;
+
+            if (prevObj is not null)
+            {
+                bool pObjNamed = prevObj is UndertaleNamedResource;
+                bool pObjString = prevObj is UndertaleString;
+
+                // If both objects have the same type (one of above)
+                // or both objects are not "UndertaleNamedResource",
+                // then there's no need for changing the binding
+                if (pObjNamed && objNamed || pObjString && objString || !(pObjNamed || objNamed))
+                    return;
+            }
+
+            MultiBinding binding = new()
+            {
+                Converter = TabTitleConverter.Instance,
+                Mode = BindingMode.OneWay
+            };
+            binding.Bindings.Add(new Binding() { Mode = BindingMode.OneTime });
+
+            // These bindings are only for notification
+            binding.Bindings.Add(new Binding("CurrentObject") { Mode = BindingMode.OneWay });
+            if (objNamed)
+                binding.Bindings.Add(new Binding("CurrentObject.Name.Content") { Mode = BindingMode.OneWay });
+            else if (objString)
+                binding.Bindings.Add(new Binding("CurrentObject.Content") { Mode = BindingMode.OneWay });
+
+            textBlock.SetBinding(TextBlock.TextProperty, binding);
         }
 
         public override string ToString()
@@ -3704,49 +3755,7 @@ result in loss of work.");
 
         private void TabTitleText_Initialized(object sender, EventArgs e)
         {
-            SetTabTitleBinding(sender, null);
-        }
-        private void TabTitleText_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            SetTabTitleBinding(sender, e.OldValue);
-        }
-        private void SetTabTitleBinding(object sender, object prevObj)
-        {
-            TextBlock textBlock = sender as TextBlock;
-            object obj = (textBlock.DataContext as Tab)?.CurrentObject;
-            if (obj is null || obj == DependencyProperty.UnsetValue)
-                return;
-
-            bool objNamed = obj is UndertaleNamedResource;
-            bool objString = obj is UndertaleString;
-
-            prevObj = (prevObj as Tab)?.CurrentObject;
-            if (prevObj is not null)
-            {
-                bool pObjNamed = prevObj is UndertaleNamedResource;
-                bool pObjString = prevObj is UndertaleString;
-
-                // if both objects have the same type (one of above)
-                // or both objects are not "UndertaleNamedResource",
-                // then there's no need for changing the binding
-                if (pObjNamed && objNamed || pObjString && objString || !(pObjNamed || objNamed))
-                    return;
-            }
-
-            MultiBinding binding = new()
-            {
-                Converter = TabTitleConverter.Instance,
-                Mode = BindingMode.OneWay
-            };
-            binding.Bindings.Add(new Binding() { Mode = BindingMode.OneTime });
-            binding.Bindings.Add(new Binding("CurrentObject") { Mode = BindingMode.OneWay });
-
-            if (objNamed)
-                binding.Bindings.Add(new Binding("CurrentObject.Name.Content") { Mode = BindingMode.OneWay });
-            else if (objString)
-                binding.Bindings.Add(new Binding("CurrentObject.Content") { Mode = BindingMode.OneWay });
-
-            textBlock.SetBinding(TextBlock.TextProperty, binding);
+            Tab.SetTabTitleBinding(null, null, sender as TextBlock);
         }
     }
 

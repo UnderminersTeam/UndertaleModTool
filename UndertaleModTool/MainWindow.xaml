@@ -451,7 +451,7 @@
                                 <TabControl.ItemTemplate>
                                     <DataTemplate DataType="{x:Type local:Tab}">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Initialized="TabTitleText_Initialized" DataContextChanged="TabTitleText_DataContextChanged">
+                                            <TextBlock Initialized="TabTitleText_Initialized">
                                             <!-- "TextBlock.Text" binding is set in code-behind -->
                                             </TextBlock>
                                             <Button Background="Transparent" Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
