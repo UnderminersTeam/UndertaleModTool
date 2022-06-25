@@ -3265,6 +3265,10 @@ result in loss of work.");
         {
             GoBack();
         }
+        private void ForwardButton_Click(object sender, RoutedEventArgs e)
+        {
+            GoForward();
+        }
 
         public void EnsureDataLoaded()
         {

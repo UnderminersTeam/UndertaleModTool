@@ -27,6 +27,7 @@
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/> <!-- (built-in converter) -->
         <local:TabTitleConverter x:Key="TabTitleConverter"/>
         <local:StringTitleConverter x:Key="StringTitleConverter"/>
+        <local:ForwardButtonEnabledConverter x:Key="ForwardButtonEnabledConverter"/>
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="New" Executed="Command_New" />
@@ -128,39 +129,70 @@
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
                 <Grid Grid.Column="0" Grid.Row="0" Margin="5,5,5,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" ToolTip="Back" Margin="0,0,5,0" Name="BackButton" Click="BackButton_Click">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding CurrentTab.HistoryPosition}" Value="0">
-                                        <Setter Property="IsEnabled" Value="False" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                        <Image Name="BackButtonImage">
-                            <Image.Style>
-                                <Style TargetType="Image">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Margin="0,0,0,5" Orientation="Horizontal">
+                        <Button ToolTip="Back" Margin="0,0,2,0" Name="BackButton" Click="BackButton_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
                                     <Style.Triggers>
-                                        <Trigger Property="IsEnabled" Value="False">
-                                            <Setter Property="Opacity" Value="0.5" />
-                                        </Trigger>
-                                        <Trigger Property="IsMouseOver" Value="False">
-                                            <Setter Property="Source" Value="/Resources/arrow_blue.png" />
-                                        </Trigger>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Source" Value="/Resources/arrow_red.png" />
-                                        </Trigger>
+                                        <DataTrigger Binding="{Binding CurrentTab.HistoryPosition}" Value="0">
+                                            <Setter Property="IsEnabled" Value="False" />
+                                        </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </Image.Style>
-                        </Image>
-                    </Button>
-                    <TextBox Grid.Column="1" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"/>
+                            </Button.Style>
+                            <Image Name="BackButtonImage">
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="Opacity" Value="0.5" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="False">
+                                                <Setter Property="Source" Value="/Resources/arrow_blue.png" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Source" Value="/Resources/arrow_red.png" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                        </Button>
+                        <Button ToolTip="Forward" Name="ForwardButton" Click="ForwardButton_Click">
+                            <Button.IsEnabled>
+                                <MultiBinding Converter="{StaticResource ForwardButtonEnabledConverter}" Mode="OneWay">
+                                    <Binding Path="CurrentTab.HistoryPosition" Mode="OneWay"/>
+                                    <Binding Path="CurrentTab.History.Count" Mode="OneWay"/>
+                                </MultiBinding>
+                            </Button.IsEnabled>
+                            <Image Name="ForwardButtonImage" RenderTransformOrigin="0.5,0.5">
+                                <Image.RenderTransform>
+                                    <ScaleTransform ScaleX="-1" ScaleY="-1"/>
+                                </Image.RenderTransform>
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="Opacity" Value="0.5" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="False">
+                                                <Setter Property="Source" Value="/Resources/arrow_blue.png" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Source" Value="/Resources/arrow_red.png" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                        </Button>
+                    </StackPanel>
+                    
+                    <TextBox Grid.Row="1" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"/>
                 </Grid>
                 <TreeView Grid.Column="0" Grid.Row="1" Name="MainTree" Margin="5" DataContext="{Binding Data}" AllowDrop="True"
                           SelectedItemChanged="TreeView_SelectedItemChanged"
@@ -370,216 +402,223 @@
 
                 <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
 
-                <Grid Name="TabsGrid" Grid.Column="2" Grid.Row="0" UseLayoutRounding="True">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <ScrollViewer Grid.Column="0" Name="TabScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" PreviewMouseWheel="TabScrollViewer_PreviewMouseWheel">
-                        <TabControl Name="TabController" Height="22" TabStripPlacement="Top" ItemsSource="{Binding Tabs, Mode=OneWay}" SelectedIndex="{Binding CurrentTabIndex}"
+                <Grid Grid.Column="2" Grid.RowSpan="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Grid Grid.Row="0" Name="TabsGrid" UseLayoutRounding="True" Margin="0,0,0,3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ScrollViewer Grid.Column="0" Name="TabScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" PreviewMouseWheel="TabScrollViewer_PreviewMouseWheel">
+                            <TabControl Name="TabController" Height="22" TabStripPlacement="Top" ItemsSource="{Binding Tabs, Mode=OneWay}" SelectedIndex="{Binding CurrentTabIndex}"
                                     SelectionChanged="TabController_SelectionChanged">
-                            <TabControl.Resources>
-                                <ContextMenu x:Key="TabMenu">
-                                    <MenuItem Header="Close" Click="CloseTabMenuItem_Click" InputGestureText="Ctrl+W"/>
-                                    <MenuItem Header="Close other tabs" Click="CloseOtherTabsMenuItem_Click">
-                                        <MenuItem.Style>
-                                            <Style TargetType="MenuItem">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Tabs.Count, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:MainWindow}, Mode=OneWay}" Value="1">
-                                                        <Setter Property="IsEnabled" Value="False"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </MenuItem.Style>
-                                    </MenuItem>
-                                    <MenuItem Header="Close all tabs" Command="{x:Static local:MainWindow.CloseAllTabsCommand}" InputGestureText="Ctrl+Shift+W"/>
-                                </ContextMenu>
-                            </TabControl.Resources>
-                            <TabControl.ItemContainerStyle>
-                                <Style TargetType="TabItem">
-                                    <Setter Property="TabIndex" Value="{Binding TabIndex, Mode=OneWay}"/>
-                                    <Setter Property="ContextMenu" Value="{StaticResource TabMenu}"/>
-                                    <Setter Property="AllowDrop" Value="True"/>
-                                    <EventSetter Event="MouseUp" Handler="TabItem_MouseUp"/>
-                                    <EventSetter Event="PreviewMouseMove" Handler="TabItem_PreviewMouseMove"/>
-                                    <EventSetter Event="Drop" Handler="TabItem_Drop"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding TabTitle, Mode=OneTime}" Value="Welcome!">
-                                            <Setter Property="ContextMenu" Value="{x:Null}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TabControl.ItemContainerStyle>
-                            <TabControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type local:Tab}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Initialized="TabTitleText_Initialized" DataContextChanged="TabTitleText_DataContextChanged">
-                                            <!-- "TextBlock.Text" binding is set in code-behind -->
-                                        </TextBlock>
-                                        <Button Background="Transparent" Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
-                                                Click="TabCloseButton_OnClick" MouseEnter="TabCloseButton_MouseEnter" MouseLeave="TabCloseButton_MouseLeave">
-                                            <Button.Style>
-                                                <Style TargetType="Button">
+                                <TabControl.Resources>
+                                    <ContextMenu x:Key="TabMenu">
+                                        <MenuItem Header="Close" Click="CloseTabMenuItem_Click" InputGestureText="Ctrl+W"/>
+                                        <MenuItem Header="Close other tabs" Click="CloseOtherTabsMenuItem_Click">
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem">
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding TabTitle, Mode=OneTime}" Value="Welcome!">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <DataTrigger Binding="{Binding Tabs.Count, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:MainWindow}, Mode=OneWay}" Value="1">
+                                                            <Setter Property="IsEnabled" Value="False"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
-                                            </Button.Style>
-                                            <Image Source="/Resources/X.png"/>
-                                        </Button>
+                                            </MenuItem.Style>
+                                        </MenuItem>
+                                        <MenuItem Header="Close all tabs" Command="{x:Static local:MainWindow.CloseAllTabsCommand}" InputGestureText="Ctrl+Shift+W"/>
+                                    </ContextMenu>
+                                </TabControl.Resources>
+                                <TabControl.ItemContainerStyle>
+                                    <Style TargetType="TabItem">
+                                        <Setter Property="TabIndex" Value="{Binding TabIndex, Mode=OneWay}"/>
+                                        <Setter Property="ContextMenu" Value="{StaticResource TabMenu}"/>
+                                        <Setter Property="AllowDrop" Value="True"/>
+                                        <EventSetter Event="MouseUp" Handler="TabItem_MouseUp"/>
+                                        <EventSetter Event="PreviewMouseMove" Handler="TabItem_PreviewMouseMove"/>
+                                        <EventSetter Event="Drop" Handler="TabItem_Drop"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TabTitle, Mode=OneTime}" Value="Welcome!">
+                                                <Setter Property="ContextMenu" Value="{x:Null}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TabControl.ItemContainerStyle>
+                                <TabControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type local:Tab}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Initialized="TabTitleText_Initialized" DataContextChanged="TabTitleText_DataContextChanged">
+                                            <!-- "TextBlock.Text" binding is set in code-behind -->
+                                            </TextBlock>
+                                            <Button Background="Transparent" Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
+                                                Click="TabCloseButton_OnClick" MouseEnter="TabCloseButton_MouseEnter" MouseLeave="TabCloseButton_MouseLeave">
+                                                <Button.Style>
+                                                    <Style TargetType="Button">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding TabTitle, Mode=OneTime}" Value="Welcome!">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                                <Image Source="/Resources/X.png"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </TabControl.ItemTemplate>
+                                <TabControl.ContentTemplate>
+                                    <DataTemplate DataType="{x:Type local:Tab}"/>
+                                </TabControl.ContentTemplate>
+                            </TabControl>
+                        </ScrollViewer>
+                        <StackPanel Grid.Column="1" Margin="5" Orientation="Horizontal" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                            <StackPanel.Visibility>
+                                <MultiBinding Converter="{StaticResource CompareNumbersConverter}" ConverterParameter=">" Mode="OneWay">
+                                    <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabController"/>
+                                    <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabsGrid"/>
+                                </MultiBinding>
+                            </StackPanel.Visibility>
+                            <Button Width="16" Height="16" Click="TabsScrollLeftButton_Click">
+                                <Image Source="/Resources/tabs_left_button.png" Stretch="None"/>
+                            </Button>
+                            <Button Width="16" Height="16" Click="TabsScrollRightButton_Click">
+                                <Image Source="/Resources/tabs_right_button.png" Stretch="None"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <ContentControl Margin="10" Content="{Binding Selected, Mode=OneWay}" Name="DataEditor">
+                            <ContentControl.Resources>
+                                <DataTemplate DataType="{x:Type local:DescriptionView}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Heading, Mode=OneWay}" FontWeight="Bold"/>
+                                        <Separator/>
+                                        <TextBlock Text="{Binding Description, Mode=OneWay}"/>
                                     </StackPanel>
                                 </DataTemplate>
-                            </TabControl.ItemTemplate>
-                            <TabControl.ContentTemplate>
-                                <DataTemplate DataType="{x:Type local:Tab}"/>
-                            </TabControl.ContentTemplate>
-                        </TabControl>
+
+                                <DataTemplate DataType="{x:Type local:GeneralInfoEditor}">
+                                    <local:UndertaleGeneralInfoEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type local:GlobalInitEditor}">
+                                    <local:UndertaleGlobalInitEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type local:GameEndEditor}">
+                                    <local:UndertaleGameEndEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleAudioGroup}">
+                                    <local:UndertaleAudioGroupEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleSound}">
+                                    <local:UndertaleSoundEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleBackground}">
+                                    <local:UndertaleBackgroundEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleEmbeddedTexture}">
+                                    <local:UndertaleEmbeddedTextureEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleEmbeddedAudio}">
+                                    <local:UndertaleEmbeddedAudioEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleTexturePageItem}">
+                                    <local:UndertaleTexturePageItemEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleEmbeddedImage}">
+                                    <local:UndertaleEmbeddedImageEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleTextureGroupInfo}">
+                                    <local:UndertaleTextureGroupInfoEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleSprite}">
+                                    <local:UndertaleSpriteEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleScript}">
+                                    <local:UndertaleScriptEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleShader}">
+                                    <local:UndertaleShaderEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertalePath}">
+                                    <local:UndertalePathEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleFont}">
+                                    <local:UndertaleFontEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleTimeline}">
+                                    <local:UndertaleTimelineEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
+                                    <local:UndertaleGameObjectEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate x:Key="roomRendererTemplate">
+                                    <local:UndertaleRoomRenderer/>
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
+                                    <local:UndertaleRoomEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleExtension}">
+                                    <local:UndertaleExtensionEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleExtensionFile}">
+                                    <local:UndertaleExtensionFileEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleExtensionFunction}">
+                                    <local:UndertaleExtensionFunctionEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleCode}">
+                                    <local:UndertaleCodeEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleString}">
+                                    <local:UndertaleStringEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleVariable}">
+                                    <local:UndertaleVariableEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleFunction}">
+                                    <local:UndertaleFunctionEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleCodeLocals}">
+                                    <local:UndertaleCodeLocalsEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertalelib:UndertaleChunkVARI}">
+                                    <local:UndertaleVariableChunkEditor/>
+                                </DataTemplate>
+                            </ContentControl.Resources>
+                        </ContentControl>
                     </ScrollViewer>
-                    <StackPanel Grid.Column="1" Margin="5" Orientation="Horizontal" RenderOptions.BitmapScalingMode="NearestNeighbor">
-                        <StackPanel.Visibility>
-                            <MultiBinding Converter="{StaticResource CompareNumbersConverter}" ConverterParameter=">" Mode="OneWay">
-                                <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabController"/>
-                                <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabsGrid"/>
-                            </MultiBinding>
-                        </StackPanel.Visibility>
-                        <Button Width="16" Height="16" Click="TabsScrollLeftButton_Click">
-                            <Image Source="/Resources/tabs_left_button.png" Stretch="None"/>
-                        </Button>
-                        <Button Width="16" Height="16" Click="TabsScrollRightButton_Click">
-                            <Image Source="/Resources/tabs_right_button.png" Stretch="None"/>
-                        </Button>
-                    </StackPanel>
                 </Grid>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="1">
-                    <ContentControl Margin="10" Content="{Binding Selected, Mode=OneWay}" Name="DataEditor">
-                        <ContentControl.Resources>
-                            <DataTemplate DataType="{x:Type local:DescriptionView}">
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Heading, Mode=OneWay}" FontWeight="Bold"/>
-                                    <Separator/>
-                                    <TextBlock Text="{Binding Description, Mode=OneWay}"/>
-                                </StackPanel>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type local:GeneralInfoEditor}">
-                                <local:UndertaleGeneralInfoEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type local:GlobalInitEditor}">
-                                <local:UndertaleGlobalInitEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type local:GameEndEditor}">
-                                <local:UndertaleGameEndEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleAudioGroup}">
-                                <local:UndertaleAudioGroupEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleSound}">
-                                <local:UndertaleSoundEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleBackground}">
-                                <local:UndertaleBackgroundEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleEmbeddedTexture}">
-                                <local:UndertaleEmbeddedTextureEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleEmbeddedAudio}">
-                                <local:UndertaleEmbeddedAudioEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleTexturePageItem}">
-                                <local:UndertaleTexturePageItemEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleEmbeddedImage}">
-                                <local:UndertaleEmbeddedImageEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleTextureGroupInfo}">
-                                <local:UndertaleTextureGroupInfoEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleSprite}">
-                                <local:UndertaleSpriteEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleScript}">
-                                <local:UndertaleScriptEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleShader}">
-                                <local:UndertaleShaderEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertalePath}">
-                                <local:UndertalePathEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleFont}">
-                                <local:UndertaleFontEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleTimeline}">
-                                <local:UndertaleTimelineEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
-                                <local:UndertaleGameObjectEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate x:Key="roomRendererTemplate">
-                                <local:UndertaleRoomRenderer/>
-                            </DataTemplate>
-                            <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
-                                <local:UndertaleRoomEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleExtension}">
-                                <local:UndertaleExtensionEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleExtensionFile}">
-                                <local:UndertaleExtensionFileEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleExtensionFunction}">
-                                <local:UndertaleExtensionFunctionEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleCode}">
-                                <local:UndertaleCodeEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleString}">
-                                <local:UndertaleStringEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleVariable}">
-                                <local:UndertaleVariableEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleFunction}">
-                                <local:UndertaleFunctionEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertale:UndertaleCodeLocals}">
-                                <local:UndertaleCodeLocalsEditor/>
-                            </DataTemplate>
-
-                            <DataTemplate DataType="{x:Type undertalelib:UndertaleChunkVARI}">
-                                <local:UndertaleVariableChunkEditor/>
-                            </DataTemplate>
-                        </ContentControl.Resources>
-                    </ContentControl>
-                </ScrollViewer>
             </Grid>
         </DockPanel>
     </Grid>
