@@ -3081,8 +3081,17 @@ result in loss of work.");
 
         public void UpdateObjectLabel(object obj)
         {
-            int foundIndex = obj is UndertaleNamedResource ? Data.IndexOf(obj as UndertaleNamedResource, false) : -1;
-            SetIDString(foundIndex == -1 ? "None" : (foundIndex == -2 ? "N/A" : Convert.ToString(foundIndex)));
+            int foundIndex = obj is UndertaleResource res
+                             ? Data.IndexOf(res, false)
+                             : -1;
+            string idString = foundIndex == -1
+                              ? "None"
+                              : (foundIndex == -2
+                                 ? "N/A"
+                                 : Convert.ToString(foundIndex)
+                                );
+
+            SetIDString(idString);
         }
 
         public void HighlightObject(object obj, bool silent = true)

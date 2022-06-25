@@ -385,6 +385,22 @@ namespace UndertaleModLib
         public bool GMLCacheIsReady { get; set; } = true;
 
         /// <summary>
+        /// An array of a <see cref="UndertaleData"/> properties with <see cref="IList{T}"/> type.
+        /// </summary>
+        public PropertyInfo[] ListProperties { get; private set; }
+
+        /// <summary>
+        /// Initializes new <see cref="UndertaleData"/> instance.
+        /// </summary>
+        public UndertaleData()
+        {
+            ListProperties = GetType().GetProperties()
+                            .Where(x => x.PropertyType.IsGenericType
+                                        && x.PropertyType.GetGenericTypeDefinition() == typeof(IList<>))
+                            .ToArray();
+        }
+
+        /// <summary>
         /// Get a resource from the data file by name.
         /// </summary>
         /// <param name="name">The name of the desired resource.</param>
@@ -411,49 +427,22 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// Reports the zero-based index of the first occurence of the specified <see cref="UndertaleNamedResource"/>.
+        /// Reports the zero-based index of the first occurence of the specified <see cref="UndertaleResource"/>.
         /// </summary>
         /// <param name="obj">The object to get the index of.</param>
         /// <param name="panicIfInvalid">Whether to throw if <paramref name="obj"/> is not a valid object.</param>
         /// <returns>The zero-based index position of the <paramref name="obj"/> parameter if it is found or -2 if it is not.</returns>
         /// <exception cref="InvalidOperationException"><paramref name="panicIfInvalid"/> is <see langword="true"/>
         /// and <paramref name="obj"/> could not be found.</exception>
-        public int IndexOf(UndertaleNamedResource obj, bool panicIfInvalid = true)
+        public int IndexOf(UndertaleResource obj, bool panicIfInvalid = true)
         {
-            if (obj is UndertaleSound)
-                return Sounds.IndexOf(obj as UndertaleSound);
-            if (obj is UndertaleSprite)
-                return Sprites.IndexOf(obj as UndertaleSprite);
-            if (obj is UndertaleBackground)
-                return Backgrounds.IndexOf(obj as UndertaleBackground);
-            if (obj is UndertalePath)
-                return Paths.IndexOf(obj as UndertalePath);
-            if (obj is UndertaleScript)
-                return Scripts.IndexOf(obj as UndertaleScript);
-            if (obj is UndertaleFont)
-                return Fonts.IndexOf(obj as UndertaleFont);
-            if (obj is UndertaleGameObject)
-                return GameObjects.IndexOf(obj as UndertaleGameObject);
-            if (obj is UndertaleRoom)
-                return Rooms.IndexOf(obj as UndertaleRoom);
-            if (obj is UndertaleExtension)
-                return Extensions.IndexOf(obj as UndertaleExtension);
-            if (obj is UndertaleShader)
-                return Shaders.IndexOf(obj as UndertaleShader);
-            if (obj is UndertaleTimeline)
-                return Timelines.IndexOf(obj as UndertaleTimeline);
-            if (obj is UndertaleAnimationCurve)
-                return AnimationCurves.IndexOf(obj as UndertaleAnimationCurve);
-            if (obj is UndertaleSequence)
-                return Sequences.IndexOf(obj as UndertaleSequence);
-            if (obj is UndertaleEmbeddedAudio)
-                return EmbeddedAudio.IndexOf(obj as UndertaleEmbeddedAudio);
-            if (obj is UndertaleEmbeddedTexture)
-                return EmbeddedTextures.IndexOf(obj as UndertaleEmbeddedTexture);
-            if (obj is UndertaleTexturePageItem)
-                return TexturePageItems.IndexOf(obj as UndertaleTexturePageItem);
-            if (obj is UndertaleAudioGroup)
-                return AudioGroups.IndexOf(obj as UndertaleAudioGroup);
+            Type objType = obj.GetType();
+            PropertyInfo objListProp = ListProperties.FirstOrDefault(x => x.PropertyType.GetGenericArguments()[0] == objType);
+            if (objListProp is not null)
+            {
+                if (objListProp.GetValue(this) is IList list)
+                    return list.IndexOf(obj);
+            }
 
             if (panicIfInvalid)
                 throw new InvalidOperationException();
@@ -614,12 +603,9 @@ namespace UndertaleModLib
         {
             GC.SuppressFinalize(this);
 
-            Type listType = typeof(IList<>);
             Type disposableType = typeof(IDisposable);
             PropertyInfo[] dataProperties = GetType().GetProperties();
-            var dataListProperties = dataProperties.Where(x => x.PropertyType.IsGenericType
-                                                               && x.PropertyType.GetGenericTypeDefinition() == listType);
-            var dataDisposableProps = dataProperties.Except(dataListProperties)
+            var dataDisposableProps = dataProperties.Except(ListProperties)
                                                     .Where(x => disposableType.IsAssignableFrom(x.PropertyType));
 
             // Dispose disposable properties
@@ -633,7 +619,7 @@ namespace UndertaleModLib
             }
 
             // Clear all object lists (sprites, code, etc.)
-            foreach (PropertyInfo dataListProperty in dataListProperties)
+            foreach (PropertyInfo dataListProperty in ListProperties)
             {
                 // If list is null
                 if (dataListProperty.GetValue(this) is not IList list)
