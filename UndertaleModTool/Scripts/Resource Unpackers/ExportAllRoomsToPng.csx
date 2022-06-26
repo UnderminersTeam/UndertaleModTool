@@ -69,7 +69,7 @@ async Task DumpRooms()
 
         UndertaleRoom room = Data.Rooms[i];
 
-        mainWindow.Selected = room; 
+        mainWindow.CurrentTab.CurrentObject = room; 
 
         if (roomRenderer is null)
         {
