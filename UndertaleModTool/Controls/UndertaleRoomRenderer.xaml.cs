@@ -53,7 +53,7 @@ namespace UndertaleModTool
 
         private void RoomRenderer_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            (DataContext as UndertaleRoom)?.SetupRoom(!bgGridDisabled);
+            (DataContext as UndertaleRoom)?.SetupRoom(!bgGridDisabled, !bgGridDisabled);
             UndertaleRoomEditor.GenerateSpriteCache(DataContext as UndertaleRoom);
         }
 
