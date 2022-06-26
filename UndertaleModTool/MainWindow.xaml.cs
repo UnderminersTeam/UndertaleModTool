@@ -231,7 +231,7 @@ namespace UndertaleModTool
 
                 // If both objects have the same type (one of above)
                 // or both objects are not "UndertaleNamedResource",
-                // then there's no need for changing the binding
+                // then there's no need to change the binding
                 if (pObjNamed && objNamed || pObjString && objString || !(pObjNamed || objNamed))
                     return;
             }

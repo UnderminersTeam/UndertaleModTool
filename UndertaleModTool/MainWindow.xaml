@@ -149,7 +149,7 @@
                                     <Style TargetType="Image">
                                         <Style.Triggers>
                                             <Trigger Property="IsEnabled" Value="False">
-                                                <Setter Property="Opacity" Value="0.5" />
+                                                <Setter Property="Opacity" Value="0.2" />
                                             </Trigger>
                                             <Trigger Property="IsMouseOver" Value="False">
                                                 <Setter Property="Source" Value="/Resources/arrow_blue.png" />
@@ -177,7 +177,7 @@
                                     <Style TargetType="Image">
                                         <Style.Triggers>
                                             <Trigger Property="IsEnabled" Value="False">
-                                                <Setter Property="Opacity" Value="0.5" />
+                                                <Setter Property="Opacity" Value="0.2" />
                                             </Trigger>
                                             <Trigger Property="IsMouseOver" Value="False">
                                                 <Setter Property="Source" Value="/Resources/arrow_blue.png" />
