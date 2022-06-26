@@ -1846,7 +1846,10 @@ namespace UndertaleModTool
                 for (int i = 0; i < ClosedTabsHistory.Count - 1; i++)
                 {
                     if (ClosedTabsHistory[i] == ClosedTabsHistory[i + 1])
+                    {
                         ClosedTabsHistory.RemoveAt(i);
+                        i--;
+                    }
                 }
 
                 // remove all deleted object occurrences from all tab histories
@@ -1856,7 +1859,9 @@ namespace UndertaleModTool
                     {
                         if (tab.History[i] == obj)
                         {
-                            tab.HistoryPosition--;
+                            if (i < tab.HistoryPosition)
+                                tab.HistoryPosition--;
+
                             tab.History.RemoveAt(i);
                         }
                     }
@@ -1866,8 +1871,11 @@ namespace UndertaleModTool
                     {
                         if (tab.History[i] == tab.History[i + 1])
                         {
-                            tab.HistoryPosition--;
+                            if (i < tab.HistoryPosition)
+                                tab.HistoryPosition--;
+
                             tab.History.RemoveAt(i);
+                            i--;
                         } 
                     }
                 }
@@ -3388,36 +3396,9 @@ result in loss of work.");
             if (obj is DescriptionView && CurrentTab is not null && !CurrentTab.AutoClose)
                 return;
 
-            bool tabSwitched = true;
-
-            if (!isNewTab)
-            {
-                for (int i = 0; i < Tabs.Count; i++)
-                {
-                    if (Tabs[i].CurrentObject == obj)
-                    {
-                        if (i != CurrentTabIndex)
-                        {
-                            CurrentTabIndex = i;
-
-                            return;
-                        }
-                        else
-                            tabSwitched = false;
-
-                        break;
-                    }
-                }
-            }
-
-            if (tabSwitched)
-            {
-                // close auto-closing tab
-                if (Tabs.Count > 0 && CurrentTabIndex >= 0 && CurrentTab.AutoClose)
-                    CloseTab(CurrentTab.TabIndex, false);
-            }
-            else
-                return;
+            // close auto-closing tab
+            if (Tabs.Count > 0 && CurrentTabIndex >= 0 && CurrentTab.AutoClose)
+                CloseTab(CurrentTab.TabIndex, false);
 
             if (isNewTab || Tabs.Count == 0)
             {
@@ -3432,10 +3413,8 @@ result in loss of work.");
                 if (!TabController.IsLoaded)
                     CurrentTab = newTab;
             }
-            else
+            else if (obj != CurrentTab?.CurrentObject)
             {
-                CurrentTab = Tabs[CurrentTabIndex];
-
                 if (CurrentTab.HistoryPosition < CurrentTab.History.Count - 1)
                 {
                     // Remove all objects after the current one (overwrite)
@@ -3445,6 +3424,7 @@ result in loss of work.");
                 }
 
                 CurrentTab.CurrentObject = obj;
+                UpdateObjectLabel(obj);
 
                 CurrentTab.History.Add(obj);
                 CurrentTab.HistoryPosition++;
@@ -3535,7 +3515,7 @@ result in loss of work.");
 
         public void ChangeSelection(object newsel)
         {
-            OpenInTab(newsel, true);
+            OpenInTab(newsel);
         }
 
         private void TabController_SelectionChanged(object sender, SelectionChangedEventArgs e)
