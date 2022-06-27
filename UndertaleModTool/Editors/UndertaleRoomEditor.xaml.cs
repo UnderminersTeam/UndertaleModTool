@@ -185,7 +185,7 @@ namespace UndertaleModTool
                 GameObjItems.Header = room.Flags.HasFlag(RoomEntryFlags.IsGMS2)
                                       ? "Game objects (from all layers)"
                                       : "Game objects";
-                room.SetupRoom();
+                SetupRoomWithGrids(room);
                 GenerateSpriteCache(DataContext as UndertaleRoom);
 
                 if (room.Layers.Count > 0) // if GMS 2+
@@ -476,7 +476,7 @@ namespace UndertaleModTool
                 }
 
                 // recalculates room grid size
-                room.SetupRoom();
+                SetupRoomWithGrids(room);
             }
             else if (obj is GameObject gameObj)
             {
@@ -1163,31 +1163,30 @@ namespace UndertaleModTool
 
         public void Command_Undo(object sender, ExecutedRoutedEventArgs e)
         {
-            if (undoStack.Any())
+            if (!undoStack.Any()) return;
+
+            var undoObject = undoStack.Pop();
+            if (undoObject is GameObject && ObjectEditor.Content is GameObject)
             {
-                var undoObject = undoStack.Pop();
-                if (undoObject is GameObject && ObjectEditor.Content is GameObject)
+                var toChange = ObjectEditor.Content as GameObject;
+                var undoGameObject = undoObject as GameObject;
+                if (toChange.InstanceID == undoGameObject.InstanceID)
                 {
-                    var toChange = ObjectEditor.Content as GameObject;
-                    var undoGameObject = undoObject as GameObject;
-                    if (toChange.InstanceID == undoGameObject.InstanceID)
-                    {
-                        toChange.X = undoGameObject.X;
-                        toChange.Y = undoGameObject.Y;
-                    }
+                    toChange.X = undoGameObject.X;
+                    toChange.Y = undoGameObject.Y;
                 }
-                if (undoObject is Tile && ObjectEditor.Content is Tile)
-                {
-                    var toChange = ObjectEditor.Content as Tile;
-                    var undoGameObject = undoObject as Tile;
-                    if (toChange.InstanceID == undoGameObject.InstanceID)
-                    {
-                        toChange.X = undoGameObject.X;
-                        toChange.Y = undoGameObject.Y;
-                    }
-                }
-                (this.DataContext as UndertaleRoom)?.SetupRoom(false);
             }
+            if (undoObject is Tile && ObjectEditor.Content is Tile)
+            {
+                var toChange = ObjectEditor.Content as Tile;
+                var undoGameObject = undoObject as Tile;
+                if (toChange.InstanceID == undoGameObject.InstanceID)
+                {
+                    toChange.X = undoGameObject.X;
+                    toChange.Y = undoGameObject.Y;
+                }
+            }
+            (this.DataContext as UndertaleRoom)?.SetupRoom(false, false);
         }
 
         public void Command_Paste(object sender, ExecutedRoutedEventArgs e)
@@ -1691,6 +1690,23 @@ namespace UndertaleModTool
 
             if (canvas.CurrentLayer is not null)
                 ObjElemDict.Remove(canvas.CurrentLayer);
+        }
+
+        public static void SetupRoomWithGrids(UndertaleRoom room)
+        {
+            if (Settings.Instance.GridWidthEnabled)
+                room.GridWidth = Settings.Instance.GlobalGridWidth;
+            if (Settings.Instance.GridHeightEnabled)
+                room.GridHeight = Settings.Instance.GlobalGridHeight;
+
+            // SetupRoom already overrides GridWidth and GridHeight if the global setting is disabled, but does
+            // not do that for the thickness. Hence why we're overriding it here manually to the default value should
+            // the setting be disabled.
+            if (Settings.Instance.GridThicknessEnabled)
+                room.GridThicknessPx = Settings.Instance.GlobalGridThickness;
+            else
+                room.GridThicknessPx = 1;
+            room.SetupRoom(!Settings.Instance.GridWidthEnabled, !Settings.Instance.GridHeightEnabled);
         }
     }
 

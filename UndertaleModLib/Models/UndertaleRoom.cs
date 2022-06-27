@@ -365,8 +365,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// Initialize the room by setting every <see cref="Background.ParentRoom"/> or <see cref="Layer.ParentRoom"/>
     /// (depending on the GameMaker version), and optionally calculate the room grid size.
     /// </summary>
-    /// <param name="calculateGrid">Whether to calculate the room grid size.</param>
-    public void SetupRoom(bool calculateGrid = true)
+    /// <param name="calculateGridWidth">Whether to calculate the room grid width.</param>
+    /// <param name="calculateGridHeight">Whether to calculate the room grid height.</param>
+    public void SetupRoom(bool calculateGridWidth = true, bool calculateGridHeight = true)
     {
         foreach (Layer layer in Layers)
         {
@@ -376,54 +377,56 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         foreach (UndertaleRoom.Background bgnd in Backgrounds)
             bgnd.ParentRoom = this;
 
-        if (calculateGrid)
+        if (!(calculateGridWidth || calculateGridHeight)) return;
+
+        // Automatically set the grid size to whatever most tiles are sized
+
+        Dictionary<Point, uint> tileSizes = new();
+        IEnumerable<Tile> tileList;
+
+        if (Layers.Count > 0)
         {
-            // Automagically set the grid size to whatever most tiles are sized
-
-            Dictionary<Point, uint> tileSizes = new();
-            IEnumerable<Tile> tileList;
-
-            if (Layers.Count > 0)
+            tileList = new List<Tile>();
+            foreach (Layer layer in Layers)
             {
-                tileList = new List<Tile>();
-                foreach (Layer layer in Layers)
+                if (layer.LayerType == LayerType.Assets)
+                    tileList = tileList.Concat(layer.AssetsData.LegacyTiles);
+                else if (layer.LayerType == LayerType.Tiles && layer.TilesData.TileData.Length != 0)
                 {
-                    if (layer.LayerType == LayerType.Assets)
-                        tileList = tileList.Concat(layer.AssetsData.LegacyTiles);
-                    else if (layer.LayerType == LayerType.Tiles && layer.TilesData.TileData.Length != 0)
-                    {
-                        int w = (int)(Width / layer.TilesData.TilesX);
-                        int h = (int)(Height / layer.TilesData.TilesY);
-                        tileSizes[new(w, h)] = layer.TilesData.TilesX * layer.TilesData.TilesY;
-                    }
-                }
-
-            }
-            else
-                tileList = Tiles;
-
-            // Loop through each tile and save how many times their sizes are used
-            foreach (Tile tile in tileList)
-            {
-                Point scale = new((int)tile.Width, (int)tile.Height);
-                if (tileSizes.ContainsKey(scale))
-                {
-                    tileSizes[scale]++;
-                }
-                else
-                {
-                    tileSizes.Add(scale, 1);
+                    int w = (int) (Width / layer.TilesData.TilesX);
+                    int h = (int) (Height / layer.TilesData.TilesY);
+                    tileSizes[new(w, h)] = layer.TilesData.TilesX * layer.TilesData.TilesY;
                 }
             }
 
-            // If tiles exist at all, grab the most used tile size and use that as our grid size
-            if (tileSizes.Count > 0)
-            {
-                var largestKey = tileSizes.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
-                GridWidth = largestKey.X;
-                GridHeight = largestKey.Y;
-            }
         }
+        else
+            tileList = Tiles;
+
+        // Loop through each tile and save how many times their sizes are used
+        foreach (Tile tile in tileList)
+        {
+            Point scale = new((int) tile.Width, (int) tile.Height);
+            if (tileSizes.ContainsKey(scale))
+                tileSizes[scale]++;
+            else
+                tileSizes.Add(scale, 1);
+        }
+
+
+        if (tileSizes.Count <= 0)
+        {
+            GridWidth = 16;
+            GridHeight = 16;
+            return;
+        }
+
+        // If tiles exist at all, grab the most used tile size and use that as our grid size
+        var largestKey = tileSizes.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
+        if (calculateGridWidth)
+            GridWidth = largestKey.X;
+        if (calculateGridHeight)
+            GridHeight = largestKey.Y;
     }
 
     /// <inheritdoc />

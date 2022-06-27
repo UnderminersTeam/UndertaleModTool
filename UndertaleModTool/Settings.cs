@@ -41,6 +41,14 @@ namespace UndertaleModTool
         public bool DeleteOldProfileOnSave { get; set; } = false;
         public bool WarnOnClose { get; set; } = true;
 
+        public double GlobalGridWidth { get; set; } = 20;
+        public bool GridWidthEnabled { get; set; } = false;
+        public double GlobalGridHeight { get; set; } = 20;
+        public bool GridHeightEnabled { get; set; } = false;
+
+        public double GlobalGridThickness { get; set; } = 1;
+        public bool GridThicknessEnabled { get; set; } = false;
+
         public static Settings Instance;
 
         public static JsonSerializerOptions JsonOptions = new JsonSerializerOptions
