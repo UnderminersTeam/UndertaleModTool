@@ -965,10 +965,6 @@ namespace UndertaleModTool
                                 data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                             }
                         }
-                        /*if (data.GMS2_3 && SettingsWindow.Warn_About_GMS23)
-                        {
-                            this.ShowWarning("This game was built using GameMaker Studio 2.3 (or above). Support for this version is a work in progress, and you will likely run into issues decompiling code or in other places.", "GMS 2.3");
-                        }*/
                         if (data.IsYYC())
                         {
                             this.ShowWarning("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC");

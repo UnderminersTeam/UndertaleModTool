@@ -230,12 +230,6 @@ namespace UndertaleModTool
 
                 if (SettingsWindow.ProfileModeEnabled)
                 {
-/*                    if (data.GMS2_3)
-                    {
-                        this.ShowWarning("Profile mode is not currently supported for GameMaker Studio 2.3 games.");
-                        return;
-                    }
-*/
                     Directory.CreateDirectory(ProfilesFolder);
                     if (Directory.Exists(profDir))
                     {
