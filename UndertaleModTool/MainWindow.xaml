@@ -191,8 +191,32 @@
                             </Image>
                         </Button>
                     </StackPanel>
-                    
-                    <TextBox Grid.Row="1" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"/>
+
+                    <TextBox Grid.Row="1" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged">
+                        <!-- Source - https://stackoverflow.com/a/7433840/12136394 -->
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Style.Resources>
+                                    <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                                        <VisualBrush.Visual>
+                                            <Label Content="Filter by name..." Foreground="Gray" />
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Style.Resources>
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="">
+                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="Text" Value="{x:Null}">
+                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="IsKeyboardFocused" Value="True">
+                                        <Setter Property="Background" Value="White" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
                 </Grid>
                 <TreeView Grid.Column="0" Grid.Row="1" Name="MainTree" Margin="5" DataContext="{Binding Data}" AllowDrop="True"
                           SelectedItemChanged="TreeView_SelectedItemChanged"
