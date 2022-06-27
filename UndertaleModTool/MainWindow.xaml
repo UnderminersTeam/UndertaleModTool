@@ -437,7 +437,9 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ScrollViewer Grid.Column="0" Name="TabScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" PreviewMouseWheel="TabScrollViewer_PreviewMouseWheel">
+                        <ScrollViewer Grid.Column="0" Name="TabScrollViewer" Height="26"
+                                      HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"
+                                      PreviewMouseWheel="TabScrollViewer_PreviewMouseWheel">
                             <TabControl Name="TabController" Height="22" TabStripPlacement="Top" ItemsSource="{Binding Tabs, Mode=OneWay}" SelectedIndex="{Binding CurrentTabIndex}"
                                     SelectionChanged="TabController_SelectionChanged">
                                 <TabControl.Resources>
