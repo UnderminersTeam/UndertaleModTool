@@ -413,9 +413,15 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 tileSizes.Add(scale, 1);
         }
 
-        // If tiles exist at all, grab the most used tile size and use that as our grid size
-        if (tileSizes.Count <= 0) return;
 
+        if (tileSizes.Count <= 0)
+        {
+            GridWidth = 16;
+            GridHeight = 16;
+            return;
+        }
+
+        // If tiles exist at all, grab the most used tile size and use that as our grid size
         var largestKey = tileSizes.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
         if (calculateGridWidth)
             GridWidth = largestKey.X;

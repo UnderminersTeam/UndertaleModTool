@@ -41,19 +41,19 @@
             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="Game Maker: Studio 2 runtimes path" ToolTip="Required only if you want to run GMS2 games using the Studio runner rather than the .exe"/>
             <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Grid.ColumnSpan="3" Text="{Binding GameMakerStudio2RuntimesPath}"/>
 
-            <CheckBox Grid.Row="3" Grid.Column="0" Margin="3"  Content="" IsChecked="{Binding AssetOrderSwappingEnabled}"/>
+            <CheckBox Grid.Row="3" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding AssetOrderSwappingEnabled}"/>
             <TextBlock Grid.Row="3" Grid.Column="0" Margin="25 2 2 2" Text="Enable asset order swapping" ToolTip="Toggles dragging &amp; dropping assets in the asset tabs to different positions in the list. Disabled by default."/>
-            <CheckBox Grid.Row="3" Grid.Column="2" Margin="3"  Content="" IsChecked="{Binding WarnOnClose}"/>
+            <CheckBox Grid.Row="3" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding WarnOnClose}"/>
             <TextBlock Grid.Row="3" Grid.Column="2" Margin="25 2 2 2" Text="Warn about saving before closing" ToolTip="Warn about saving before closing. Enabled by default."/>
 
             <CheckBox Grid.Row="4" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding AutomaticFileAssociation}"/>
             <TextBlock Grid.Row="4" Grid.Column="0" Margin="25 2 2 2" Text="Automatically associate .win files" ToolTip="Automatic file association. Enabled by default."/>
-            <CheckBox Grid.Row="4" Grid.Column="2" Margin="3" Content=""  IsChecked="{Binding TempRunMessageShow}"/>
+            <CheckBox Grid.Row="4" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding TempRunMessageShow}"/>
             <TextBlock Grid.Row="4" Grid.Column="2" Margin="25 2 2 2" Text="Warn about temp running" ToolTip="Warn about temp running. Enabled by default."/>
 
-            <CheckBox Grid.Row="5" Grid.Column="0" Margin="3"  Content="" IsChecked="{Binding Warn_About_GMS23}"/>
+            <CheckBox Grid.Row="5" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding Warn_About_GMS23}"/>
             <TextBlock Grid.Row="5" Grid.Column="0" Margin="25 2 2 2" Text="Warn about GMS 2.3" ToolTip="Warn about GMS 2.3. Enabled by default."/>
-            <CheckBox Grid.Row="5" Grid.Column="2" Margin="3"  Content="" IsChecked="{Binding UseGMLCache}"/>
+            <CheckBox Grid.Row="5" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding UseGMLCache}"/>
             <TextBlock Grid.Row="5" Grid.Column="2" Margin="25 2 2 2" Text="Use decompiled code cache (experimental)" ToolTip="Used by some scripts (e.g. &quot;Search.csx&quot;) for acceleration. Disabled by default."/>
 
             <Separator Grid.Row="6" Grid.ColumnSpan="4" Margin="10"/>
@@ -67,7 +67,7 @@
             <TextBox Grid.Row="8" Grid.Column="1" Margin="3" IsEnabled="{Binding ElementName=gridHeightCheckbox, Path=IsChecked}" Text="{Binding GlobalGridHeight}"/>
 
             <CheckBox Grid.Row="7" Grid.Column="2" Margin="3" VerticalAlignment="Center" Name="gridThicknessCheckBox" Content="" IsChecked="{Binding GridThicknessEnabled}"/>
-            <TextBlock Grid.Row="7" Grid.Column="2" Margin="25 2 2 2"  VerticalAlignment="Center" Text="Global grid thickness" ToolTip="This option globally overrides the automatic assignment of a room's grid thickness."/>
+            <TextBlock Grid.Row="7" Grid.Column="2" Margin="25 2 2 2" VerticalAlignment="Center" Text="Global grid thickness" ToolTip="This option globally overrides the automatic assignment of a room's grid thickness."/>
             <TextBox Grid.Row="7" Grid.Column="3" Margin="3" IsEnabled="{Binding ElementName=gridThicknessCheckBox, Path=IsChecked}" Text="{Binding GlobalGridThickness}"/>
 
             <Separator Grid.Row="11" Grid.ColumnSpan="4" Margin="10"/>

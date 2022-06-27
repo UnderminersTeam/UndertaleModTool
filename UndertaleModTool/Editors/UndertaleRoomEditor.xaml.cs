@@ -185,7 +185,7 @@ namespace UndertaleModTool
                 GameObjItems.Header = room.Flags.HasFlag(RoomEntryFlags.IsGMS2)
                                       ? "Game objects (from all layers)"
                                       : "Game objects";
-                this.SetupRoomWithGrids(room);
+                SetupRoomWithGrids(room);
                 GenerateSpriteCache(DataContext as UndertaleRoom);
 
                 if (room.Layers.Count > 0) // if GMS 2+
@@ -476,7 +476,7 @@ namespace UndertaleModTool
                 }
 
                 // recalculates room grid size
-                this.SetupRoomWithGrids(room);
+                SetupRoomWithGrids(room);
             }
             else if (obj is GameObject gameObj)
             {
@@ -1692,14 +1692,20 @@ namespace UndertaleModTool
                 ObjElemDict.Remove(canvas.CurrentLayer);
         }
 
-        private void SetupRoomWithGrids(UndertaleRoom room)
+        public static void SetupRoomWithGrids(UndertaleRoom room)
         {
             if (Settings.Instance.GridWidthEnabled)
                 room.GridWidth = Settings.Instance.GlobalGridWidth;
             if (Settings.Instance.GridHeightEnabled)
                 room.GridHeight = Settings.Instance.GlobalGridHeight;
+
+            // SetupRoom already overrides GridWidth and GridHeight if the global setting is disabled, but does
+            // not do that for the thickness. Hence why we're overriding it here manually to the default value should
+            // the setting be disabled.
             if (Settings.Instance.GridThicknessEnabled)
                 room.GridThicknessPx = Settings.Instance.GlobalGridThickness;
+            else
+                room.GridThicknessPx = 1;
             room.SetupRoom(!Settings.Instance.GridWidthEnabled, !Settings.Instance.GridHeightEnabled);
         }
     }
