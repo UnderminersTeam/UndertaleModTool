@@ -113,7 +113,7 @@ namespace UndertaleModTool
             string codeName = code.Name.Content;
             GlobalDecompileContext DECOMPILE_CONTEXT = context is null ? new(Data, false) : context;
 
-            if (Data.ToolInfo.ProfileMode == false)
+            if (!Data.ToolInfo.ProfileMode)
             {
                 try
                 {
@@ -125,7 +125,7 @@ namespace UndertaleModTool
                     throw new Exception("Error during GML code replacement:\n" + exc.ToString());
                 }
             }
-            else if (Data.ToolInfo.ProfileMode)
+            else
             {
                 try
                 {

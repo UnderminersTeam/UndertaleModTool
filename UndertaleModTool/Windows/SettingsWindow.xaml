@@ -51,10 +51,8 @@
             <CheckBox Grid.Row="4" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding TempRunMessageShow}"/>
             <TextBlock Grid.Row="4" Grid.Column="2" Margin="25 2 2 2" Text="Warn about temp running" ToolTip="Warn about temp running. Enabled by default."/>
 
-            <CheckBox Grid.Row="5" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding Warn_About_GMS23}"/>
-            <TextBlock Grid.Row="5" Grid.Column="0" Margin="25 2 2 2" Text="Warn about GMS 2.3" ToolTip="Warn about GMS 2.3. Enabled by default."/>
-            <CheckBox Grid.Row="5" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding UseGMLCache}"/>
-            <TextBlock Grid.Row="5" Grid.Column="2" Margin="25 2 2 2" Text="Use decompiled code cache (experimental)" ToolTip="Used by some scripts (e.g. &quot;Search.csx&quot;) for acceleration. Disabled by default."/>
+            <CheckBox Grid.Row="5" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding UseGMLCache}"/>
+            <TextBlock Grid.Row="5" Grid.Column="0" Margin="25 2 2 2" Text="Use decompiled code cache (experimental)" ToolTip="Used by some scripts (e.g. &quot;Search.csx&quot;) for acceleration. Disabled by default."/>
 
 
 
