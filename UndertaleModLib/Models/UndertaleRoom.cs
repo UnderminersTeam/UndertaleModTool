@@ -101,6 +101,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     public uint Right { get; set; } = 1024;
     public uint Bottom { get; set; } = 768;
 
+    private double _gridWidth = 16.0;
+    private double _gridHeight = 16.0;
+
     /// <summary>
     /// The gravity towards x axis using room physics in m/s.
     /// </summary>
@@ -119,12 +122,12 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// <summary>
     /// The width of the room grid in pixels.
     /// </summary>
-    public double GridWidth { get; set; } = 16d;
+    public double GridWidth { get => _gridWidth; set { if (value >= 0) _gridWidth = value; } }
 
     /// <summary>
     /// The height of the room grid in pixels.
     /// </summary>
-    public double GridHeight { get; set; } = 16d;
+    public double GridHeight { get => _gridHeight; set { if (value >= 0) _gridHeight = value; } }
 
     /// <summary>
     /// The thickness of the room grid in pixels.
@@ -416,8 +419,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
         if (tileSizes.Count <= 0)
         {
-            GridWidth = 16;
-            GridHeight = 16;
+            if (calculateGridWidth)
+                GridWidth = 16;
+            if (calculateGridHeight)
+                GridHeight = 16;
             return;
         }
 
