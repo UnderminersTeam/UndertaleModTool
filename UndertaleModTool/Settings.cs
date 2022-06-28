@@ -41,9 +41,11 @@ namespace UndertaleModTool
         public bool DeleteOldProfileOnSave { get; set; } = false;
         public bool WarnOnClose { get; set; } = true;
 
-        public double GlobalGridWidth { get; set; } = 20;
+        private double _globalGridWidth = 20;
+        private double _globalGridHeight = 20;
+        public double GlobalGridWidth { get => _globalGridWidth; set { if (value >= 0) _globalGridWidth = value; } }
         public bool GridWidthEnabled { get; set; } = false;
-        public double GlobalGridHeight { get; set; } = 20;
+        public double GlobalGridHeight { get => _globalGridHeight; set { if (value >= 0) _globalGridHeight = value; } }
         public bool GridHeightEnabled { get; set; } = false;
 
         public double GlobalGridThickness { get; set; } = 1;
