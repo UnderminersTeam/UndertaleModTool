@@ -169,19 +169,55 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     public void UpdateBGColorLayer() => OnPropertyChanged("BGColorLayer");
 
     /// <summary>
+    /// Checks whether the room layers list is ordered by <see cref="Layer.LayerDepth"/>.
+    /// </summary>
+    /// <returns><see langword="true"/> if the room layers list is ordered, and <see langword="false"/> otherwise.</returns>
+    public bool CheckLayersDepthOrder()
+    {
+        bool ordered = true;
+
+        for (int i = 0; i < Layers.Count - 1; i++)
+        {
+            if (Layers[i].LayerDepth > Layers[i + 1].LayerDepth)
+            {
+                ordered = false;
+                break;
+            }
+        }
+
+        return ordered;
+    }
+
+    /// <summary>
     /// Orders the room layers list by depth.
     /// </summary>
-    /// <param name="selectedLayer">A <see cref="Layer"/> that's currently selected in the room editor.</param>
-    public void RearrangeLayers(Layer selectedLayer = null)
+    /// <param name="layerProperties">
+    /// A <see cref="Tuple"/> that consists of: the selected layer (in the room editor), ordered layers array and selected layer index.
+    /// This parameter is used only by <c>LayerZIndexConverter</c> (part of the room editor UI).
+    /// </param>
+    public void RearrangeLayers(Tuple<Layer, Layer[], int> layerProperties = null)
     {
         if (Layers.Count == 0)
             return;
 
-        Layer[] orderedLayers = Layers.OrderBy(l => l.LayerDepth).ToArray();
+        Layer[] orderedLayers = null;
+        Layer selectedLayer = null;
+        int selectedLayerIndex = -1;
+        if (layerProperties is not null)
+        {
+            orderedLayers = layerProperties.Item2;
+            selectedLayer = layerProperties.Item1;
+            selectedLayerIndex = layerProperties.Item3;
+        }
+        else
+        {
+            orderedLayers = Layers.OrderBy(l => l.LayerDepth).ToArray();
+            selectedLayerIndex = Array.IndexOf(orderedLayers, selectedLayer);
+        }
 
         // Ensure that room objects tree will have the layer to re-select
         if (selectedLayer is not null)
-            Layers[Array.IndexOf(orderedLayers, selectedLayer)] = selectedLayer;
+            Layers[selectedLayerIndex] = selectedLayer;
 
         for (int i = 0; i < orderedLayers.Length; i++)
         {
