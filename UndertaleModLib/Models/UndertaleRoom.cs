@@ -169,27 +169,22 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     public void UpdateBGColorLayer() => OnPropertyChanged("BGColorLayer");
 
     /// <summary>
-    /// Checks whether the room layers list is ordered by <see cref="Layer.LayerDepth"/>.
+    /// Checks whether <see cref="Layers"/> is ordered by <see cref="Layer.LayerDepth"/>.
     /// </summary>
-    /// <returns><see langword="true"/> if the room layers list is ordered, and <see langword="false"/> otherwise.</returns>
+    /// <returns><see langword="true"/> if <see cref="Layers"/> is ordered, and <see langword="false"/> otherwise.</returns>
     public bool CheckLayersDepthOrder()
     {
-        bool ordered = true;
-
         for (int i = 0; i < Layers.Count - 1; i++)
         {
             if (Layers[i].LayerDepth > Layers[i + 1].LayerDepth)
-            {
-                ordered = false;
-                break;
-            }
+                return false;
         }
 
-        return ordered;
+        return true;
     }
 
     /// <summary>
-    /// Orders the room layers list by depth.
+    /// Orders <see cref="Layers"/> by depth.
     /// </summary>
     /// <param name="layerProperties">
     /// A <see cref="Tuple"/> that consists of: the selected layer (in the room editor), ordered layers array and selected layer index.

@@ -1839,13 +1839,9 @@ namespace UndertaleModTool
             {
                 int layerZIndex, layerIndex;
                 if (layer == selectedLayer && selectedLayerIndex != -1)
-                {
                     layerIndex = selectedLayerIndex;
-                }
                 else
-                {
                     layerIndex = room.Layers.IndexOf(layer);
-                }
 
                 layerZIndex = room.Layers.Count - layerIndex - 1;
 
