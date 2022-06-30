@@ -103,31 +103,6 @@ namespace UndertaleModTool
             visualOffProp.SetValue(roomCanvas, prevOffset);
         }
 
-        /// <summary>
-        /// Checks if the room layers are ordered by depth. If they are not, the user will be prompted,
-        /// whether they want to rearrange them.
-        /// </summary>
-        /// <param name="room">The <see cref="UndertaleRoom"/>, whose layers should be checked and,
-        /// if necessary, rearranged.</param>
-        public static void CheckAndRearrangeLayers(UndertaleRoom room)
-        {
-            bool ordered = true;
-            for (int i = 0; i < room.Layers.Count - 1; i++)
-            {
-                if (room.Layers[i].LayerDepth > room.Layers[i + 1].LayerDepth)
-                {
-                    ordered = false;
-                    break;
-                }
-            }
-
-            if (!ordered)
-            {
-                if (mainWindow.ShowQuestion("Room layers are not ordered by depth.\nRearrange them?", MessageBoxImage.Warning) == MessageBoxResult.Yes)
-                    room.RearrangeLayers();
-            }
-        }
-
         private void ExportAsPNG_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog dlg = new();
@@ -192,8 +167,8 @@ namespace UndertaleModTool
                 {
                     LayerZIndexConverter.ProcessOnce = true;
 
-                    if (IsLoaded)
-                        CheckAndRearrangeLayers(room);
+                    if (!room.CheckLayersDepthOrder())
+                        room.RearrangeLayers();
 
                     Parallel.ForEach(room.Layers, (layer) =>
                     {
@@ -1315,9 +1290,12 @@ namespace UndertaleModTool
             room.Layers.Add(layer);
             room.UpdateBGColorLayer();
 
-            LayerZIndexConverter.ProcessOnce = true;
-            foreach (Layer l in room.Layers)
-                l.UpdateZIndex();
+            if (room.Layers.Count > 1)
+            {
+                LayerZIndexConverter.ProcessOnce = true;
+                foreach (Layer l in room.Layers)
+                    l.UpdateZIndex();
+            }
             layer.ParentRoom = room;
 
             if (layer.LayerType == LayerType.Assets)
@@ -1852,11 +1830,20 @@ namespace UndertaleModTool
 
         private static bool suspended;
         private static int remainingCount = -1;
+        private static Layer selectedLayer;
+        private static int selectedLayerIndex = -1;
+
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (values[0] is Layer layer && layer.ParentRoom is UndertaleRoom room)
             {
-                int layerIndex = room.Layers.Count - room.Layers.IndexOf(layer) - 1;
+                int layerZIndex, layerIndex;
+                if (layer == selectedLayer && selectedLayerIndex != -1)
+                    layerIndex = selectedLayerIndex;
+                else
+                    layerIndex = room.Layers.IndexOf(layer);
+
+                layerZIndex = room.Layers.Count - layerIndex - 1;
 
                 if (ProcessOnce)
                 {
@@ -1873,28 +1860,28 @@ namespace UndertaleModTool
                         }
                     }
                 }
-                else if (!suspended)
+                else if (!suspended && room.Layers.Count > 1)
                 {
-                    bool ordered = true;
-                    for (int i = 0; i < room.Layers.Count - 1; i++)
-                    {
-                        if (room.Layers[i].LayerDepth > room.Layers[i + 1].LayerDepth)
-                        {
-                            ordered = false;
-                            break;
-                        }
-                    }
-
-                    if (!ordered)
+                    if (!room.CheckLayersDepthOrder())
                     {
                         suspended = true;
+
                         var roomEditor = MainWindow.FindVisualChild<UndertaleRoomEditor>((Application.Current.MainWindow as MainWindow).DataEditor);
-                        room.RearrangeLayers(roomEditor?.RoomObjectsTree.SelectedItem as Layer);
+                        selectedLayer = roomEditor?.RoomObjectsTree.SelectedItem as Layer;
+                        
+                        if (selectedLayer is not null)
+                        {
+                            Layer[] orderedLayers = room.Layers.OrderBy(l => l.LayerDepth).ToArray();
+                            selectedLayerIndex = Array.IndexOf(orderedLayers, selectedLayer);
+                            room.RearrangeLayers(new(selectedLayer, orderedLayers, selectedLayerIndex));
+                            selectedLayerIndex = -1;
+                        }
+
                         suspended = false;
                     }
                 }
 
-                return layerIndex;
+                return layerZIndex;
             }
             else
                 return -1;
