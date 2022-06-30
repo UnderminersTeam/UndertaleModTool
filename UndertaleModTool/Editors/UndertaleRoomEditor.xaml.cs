@@ -842,6 +842,7 @@ namespace UndertaleModTool
                 if (resListView.ItemContainerGenerator.ContainerFromItem(obj1) is TreeViewItem resItem)
                 {
                     resItem.IsSelected = true;
+                    resItem.Focus();
 
                     mainTreeViewer.UpdateLayout();
                     mainTreeViewer.ScrollToHorizontalOffset(0);
