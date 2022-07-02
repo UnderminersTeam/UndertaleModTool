@@ -1065,6 +1065,8 @@ namespace UndertaleModTool
                             DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds((long)data.GeneralInfo.Timestamp);
                             DateTimeOffset dateTimeOffset2 = DateTimeOffset.FromUnixTimeMilliseconds((long)data.GeneralInfo.Timestamp);
                             GameDataIfAvailable = "\nDisplay Name: " + data.GeneralInfo.DisplayName.ToString()
++ "\nFile Name: " + data.GeneralInfo.FileName.Content
++ "\nName: " + data.GeneralInfo.Name.Content
 + "\nBytecode Version: " + data.GeneralInfo.BytecodeVersion.ToString()
 + "\nGMS version: " + data.GeneralInfo.Major.ToString() + "." + data.GeneralInfo.Minor.ToString() + "." + data.GeneralInfo.Release.ToString() + "." + data.GeneralInfo.Build.ToString()
 + "\nTimestamp: " + data.GeneralInfo.Timestamp.ToString() + " (" + dateTimeOffset.ToString() + ")"
@@ -1114,7 +1116,7 @@ This can be reproduced by attempting to load the file described. " + SteamURL + 
                         }
                         else if (!(data.LoadedCorrectly))
                         {
-                            this.ShowError("Something went wrong while loading. Data loss WILL occur when trying to save, probably to a severe degree. As a result, saving has been disabled. You may still view the data file loaded, but there is likely to be missing data and unexpected errors may occur. Please see log" + current_date_and_time + ".txt for more details regarding what errors happened during loading.", "Loading problems");
+                            this.ShowError("Something went wrong while loading. Data loss WILL occur when trying to save, probably to a severe degree. As a result, saving has been disabled.\n\nYou may still view the data file loaded, but there is likely to be missing data and unexpected errors may occur.\n\nPlease see log" + current_date_and_time + ".txt for more details regarding what errors happened during loading.", "Loading problems");
                             CanSave = false;
                             CanSafelySave = false;
                         }
