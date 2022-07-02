@@ -195,31 +195,50 @@ namespace UndertaleModLib
         public UndertaleData ReadUndertaleData()
         {
             UndertaleData data = new UndertaleData();
-            undertaleData = data;
+            try
+            {
+                undertaleData = data;
+    
+                resUpdate.Clear();
+    
+                string name = ReadChars(4);
+                if (name != "FORM")
+                    throw new IOException("Root chunk is " + name + " not FORM");
+                uint length = ReadUInt32();
+                data.FORM = new UndertaleChunkFORM();
+                DebugUtil.Assert(data.FORM.Name == name);
+                data.FORM.Length = length;
+    
+                var lenReader = EnsureLengthFromHere(data.FORM.Length);
+                data.FORM.UnserializeChunk(this);
+                lenReader.ToHere();
+    
+                SubmitMessage("Resolving resource IDs...");
+                foreach (UndertaleResourceRef res in resUpdate)
+                    res.PostUnserialize(this);
+                resUpdate.Clear();
+    
+                data.BuiltinList = new BuiltinList(data);
+                Decompiler.AssetTypeResolver.InitializeTypes(data);
 
-            resUpdate.Clear();
+                data.LoadedCorrectly = true;
+                return data;
+            }
+            catch (Exception e)
+            {
+                data.LoadingError = e;
+                SubmitMessage("Resolving resource IDs...");
+                foreach (UndertaleResourceRef res in resUpdate)
+                    res.PostUnserialize(this);
+                resUpdate.Clear();
 
-            string name = ReadChars(4);
-            if (name != "FORM")
-                throw new IOException("Root chunk is " + name + " not FORM");
-            uint length = ReadUInt32();
-            data.FORM = new UndertaleChunkFORM();
-            DebugUtil.Assert(data.FORM.Name == name);
-            data.FORM.Length = length;
-
-            var lenReader = EnsureLengthFromHere(data.FORM.Length);
-            data.FORM.UnserializeChunk(this);
-            lenReader.ToHere();
-
-            SubmitMessage("Resolving resource IDs...");
-            foreach (UndertaleResourceRef res in resUpdate)
-                res.PostUnserialize(this);
-            resUpdate.Clear();
-
-            data.BuiltinList = new BuiltinList(data);
-            Decompiler.AssetTypeResolver.InitializeTypes(data);
-
-            return data;
+                data.BuiltinList = new BuiltinList(data);
+                Decompiler.AssetTypeResolver.InitializeTypes(data);
+                if (data != null)
+                    return data;
+                else
+                    throw new Exception("Data is null?!");
+            }
         }
 
         internal void RequestResourceUpdate(UndertaleResourceRef res)

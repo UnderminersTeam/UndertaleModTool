@@ -285,6 +285,16 @@ namespace UndertaleModLib
         public bool ShortCircuit = true;
 
         /// <summary>
+        /// Whether the data file loaded correctly
+        /// </summary>
+        public bool LoadedCorrectly = false;
+
+        /// <summary>
+        /// Whether the data file loaded correctly
+        /// </summary>
+        public Exception LoadingError = null;
+
+        /// <summary>
         /// Whether the data file is from version GMS2.2.2.302
         /// </summary>
         public bool GMS2_2_2_302 = false;

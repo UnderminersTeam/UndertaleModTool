@@ -158,6 +158,13 @@ namespace UndertaleModTool
 
         public static Bitmap CreateSpriteBitmap(Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
         {
+            if (texture.TexturePage == null)
+            {
+                texture.TexturePage = new UndertaleEmbeddedTexture();
+                texture.TexturePage.TextureData = new UndertaleEmbeddedTexture.TexData();
+                ImageConverter conv = new ImageConverter();
+                texture.TexturePage.TextureData.TextureBlob = (byte[])conv.ConvertTo(new Bitmap(1, 1), typeof(byte[]));
+            }
             using MemoryStream stream = new(texture.TexturePage.TextureData.TextureBlob);
             Bitmap spriteBMP = new(rect.Width, rect.Height);
 
