@@ -1025,7 +1025,6 @@ namespace UndertaleModTool
                             FileMessageEvent?.Invoke(message);
                         });
                     }
-
                     UndertaleEmbeddedTexture.TexData.ClearSharedStream();
                 }
                 catch (Exception e)
@@ -1037,6 +1036,7 @@ namespace UndertaleModTool
                 if (loadingException != null)
                 {
                     File.AppendAllText(Path.Combine(ExePath, "log" + current_date_and_time + ".txt"), "\n" + loadingException.Message);
+                    /*
                     if (this.ShowQuestion("An error occured while trying to load, please see log" + current_date_and_time + ".txt for more details\n\nSubmit GitHub issue now?") == MessageBoxResult.Yes)
                     {
                         string GameName = (data?.GeneralInfo?.DisplayName != null ? data?.GeneralInfo?.DisplayName.Content : "[GAME NAME UNOBTAINABLE]");
@@ -1102,6 +1102,7 @@ This can be reproduced by attempting to load the file described. " + SteamURL + 
                         string BaseURL = "https://github.com/krzys-h/UndertaleModTool/issues/new?" + "title=" + TitleDescription + "&body=" + BodyDescription + "&labels=bug";
                         ScriptOpenURL(BaseURL);
                     }
+                    */
                 }
 
                 Dispatcher.Invoke(async () =>
