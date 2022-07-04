@@ -1373,7 +1373,15 @@ namespace UndertaleModLib.Decompiler
                         if (IsStatement)
                         {
                             sb.Append(" ");
-                            sb.Append((context.Statements[0].Last() as AssignmentStatement).Destination.Var.Name.Content);
+                            
+                            string funcName = (context.Statements[0].Last() as AssignmentStatement).Destination.Var.Name.Content;
+                            Dictionary<string, UndertaleFunction> subFuncs = context.GlobalContext.Data.KnownSubFunctions;
+                            KeyValuePair<string, UndertaleFunction> kvp = subFuncs.FirstOrDefault(x => x.Value == Function);
+
+                            if (kvp.Key != null)
+                                funcName = kvp.Key;
+                            
+                            sb.Append(funcName);
                         }
                         sb.Append("(");
                         for (int i = 0; i < FunctionBodyCodeEntry.ArgumentsCount; ++i)
