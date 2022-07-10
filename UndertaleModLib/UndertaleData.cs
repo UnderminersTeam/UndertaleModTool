@@ -433,6 +433,44 @@ namespace UndertaleModLib
         }
 
         /// <summary>
+        /// Sets the GMS2+ version flag in GeneralInfo.
+        /// </summary>
+        /// <param name="major">The major version.</param>
+        /// <param name="minor">The minor version.</param>
+        /// <param name="release">The release version.</param>
+        /// <param name="build">The build version.</param>
+        public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0)
+        {
+            if (major == 2022)
+            {
+                if (minor >= 5)
+                    GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GM2022_5;
+                else if (minor >= 3)
+                    GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GM2022_3;
+                else if (minor >= 2)
+                    GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2022_2;
+                else if (minor >= 1)
+                    GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2022_1;
+            }
+            else if (major == 2)
+            {
+                if (minor >= 3)
+                {
+                    if (release >= 2)
+                        GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2_3_2;
+                    else if (release >= 1)
+                        GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2_3_1;
+                    else
+                        GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2_3;
+                }
+                else if (minor >= 2 && release >= 2 && build >= 302)
+                    GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2_2_2_302;
+                else
+                    GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2;
+            }
+        }
+
+        /// <summary>
         /// Reports whether the version of the data file is the same or higher than a specified version.
         /// </summary>
         /// <param name="major">The major version.</param>
