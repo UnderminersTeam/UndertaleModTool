@@ -1363,6 +1363,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 EffectType = reader.ReadUndertaleString();
                 EffectProperties = reader.ReadUndertaleObject<UndertaleSimpleList<EffectProperty>>();
             }
+
             switch (LayerType)
             {
                 case LayerType.Instances: Data = reader.ReadUndertaleObject<LayerInstancesData>(); break;
