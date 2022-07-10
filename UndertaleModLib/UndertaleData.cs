@@ -328,6 +328,11 @@ namespace UndertaleModLib
         /// Whether the data file is from version GMS2022.3.
         /// </summary>
         public bool GM2022_3 = false;
+        
+        /// <summary>
+        /// Whether the data file is from version GMS2022.5.
+        /// </summary>
+        public bool GM2022_5 = false;
 
         /// <summary>
         /// Some info for the editor to store data on.
