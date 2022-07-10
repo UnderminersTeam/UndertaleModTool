@@ -1730,6 +1730,7 @@ namespace UndertaleModTool
         public DataTemplate TilesDataTemplate { get; set; }
         public DataTemplate AssetsDataTemplate { get; set; }
         public DataTemplate BackgroundDataTemplate { get; set; }
+        public DataTemplate EffectDataTemplate { get; set; }
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
@@ -1745,6 +1746,8 @@ namespace UndertaleModTool
                         return AssetsDataTemplate;
                     case LayerType.Background:
                         return BackgroundDataTemplate;
+                    case LayerType.Effect:
+                        return EffectDataTemplate;
                 }
             }
 

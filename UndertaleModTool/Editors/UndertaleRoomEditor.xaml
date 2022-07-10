@@ -241,6 +241,11 @@
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" />
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.BackgroundDataTemplate>
+                                <local:LayerDataTemplateSelector.EffectDataTemplate>
+                                    <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" />
+                                    </HierarchicalDataTemplate>
+                                </local:LayerDataTemplateSelector.EffectDataTemplate>
                             </local:LayerDataTemplateSelector>
                         </TreeViewItem.ItemTemplateSelector>
                     </TreeViewItem>
