@@ -1264,20 +1264,20 @@ namespace UndertaleModTool
                     {
                         baseName = name[..^numMatch.Length];
                         nameNum = Int32.Parse(numMatch.Groups[0].Value) + 1;
-
-                        name = baseName + nameNum;
                     }
                     // Name doesn't have a trailing number, so it's the first duplicate.
-                    // Thus we append append "1" to it ("name" -> "name1")
+                    // Thus we set baseName and nameNum to produce "name1" on the next loop.
                     else
-                        name += "1";
+                    {
+                        baseName = name;
+                        nameNum = 1;
+                    }
                 }
                 // If base name is already extracted, increment "nameNum" and append it to the base name
                 else
-                {
                     nameNum++;
-                    name = baseName + nameNum;
-                }
+                // Update name using baseName and nameNum
+                name = baseName + nameNum;
             }
 
             Layer layer = new()
