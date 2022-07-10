@@ -163,7 +163,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
                 {
                     if (reader.ReadUInt32() != 0) // in 2.3 a int with the value of 0 would be set here,
                     {                             // it cannot be version 2.3 if this value isn't 0
-                        reader.undertaleData.GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2_3_1;
+                        reader.undertaleData.SetGMS2Version(2, 3, 1);
                         reader.Position -= 4;
                     }
                     else
@@ -172,7 +172,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
                         // if BezierX0 equals to 0 (the above check)
                         // then BezierY0 equals to 0 as well (the below check)
                         if (reader.ReadUInt32() == 0)
-                            reader.undertaleData.GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2_3_1;
+                            reader.undertaleData.SetGMS2Version(2, 3, 1);
                         reader.Position -= 8;
                     }
                 }

@@ -541,7 +541,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     if (SVersion >= 3)
                     {
                         if (!reader.undertaleData.IsVersionAtLeast(2, 3, 2))
-                            reader.undertaleData.GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2_3_2;
+                            reader.undertaleData.SetGMS2Version(2, 3, 2);
                         nineSliceOffset = reader.ReadInt32();
                     }
                 }

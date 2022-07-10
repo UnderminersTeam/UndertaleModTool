@@ -266,7 +266,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
     {
-        if (writer.undertaleData.GeneralInfo.Major >= 2)
+        if (writer.undertaleData.IsGameMaker2())
         {
             foreach (var layer in Layers)
             {
@@ -303,7 +303,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         writer.Write(GravityY);
         writer.Write(MetersPerPixel);
         bool sequences = false;
-        if (writer.undertaleData.GeneralInfo.Major >= 2)
+        if (writer.undertaleData.IsGameMaker2())
         {
             writer.WriteUndertaleObjectPointer(Layers);
             sequences = writer.undertaleData.FORM.Chunks.ContainsKey("SEQN");
@@ -314,7 +314,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         writer.WriteUndertaleObject(Views);
         writer.WriteUndertaleObject(GameObjects);
         writer.WriteUndertaleObject(Tiles);
-        if (writer.undertaleData.GeneralInfo.Major >= 2)
+        if (writer.undertaleData.IsGameMaker2())
         {
             writer.WriteUndertaleObject(Layers);
 
@@ -350,7 +350,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         GravityY = reader.ReadSingle();
         MetersPerPixel = reader.ReadSingle();
         bool sequences = false;
-        if (reader.undertaleData.GeneralInfo.Major >= 2)
+        if (reader.undertaleData.IsGameMaker2())
         {
             Layers = reader.ReadUndertaleObjectPointer<UndertalePointerList<Layer>>();
             sequences = reader.GMS2_3;
@@ -361,7 +361,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         reader.ReadUndertaleObject(Views);
         reader.ReadUndertaleObject(GameObjects, tilePtr);
         reader.ReadUndertaleObject(Tiles);
-        if (reader.undertaleData.GeneralInfo.Major >= 2)
+        if (reader.undertaleData.IsGameMaker2())
         {
             reader.ReadUndertaleObject(Layers);
 
@@ -1001,7 +1001,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             if (length == 48)
             {
                 if (!reader.undertaleData.IsVersionAtLeast(2, 2, 2, 302))
-                    reader.undertaleData.GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2_2_2_302;
+                    reader.undertaleData.SetGMS2Version(2, 2, 2, 302);
                 ImageSpeed = reader.ReadSingle();
                 ImageIndex = reader.ReadInt32();
             }
@@ -1161,7 +1161,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         {
             writer.Write(X);
             writer.Write(Y);
-            if (spriteMode != (writer.undertaleData.GeneralInfo.Major >= 2))
+            if (spriteMode != writer.undertaleData.IsGameMaker2())
                 throw new Exception("Unsupported in GMS" + writer.undertaleData.GeneralInfo.Major);
             if (spriteMode)
                 writer.WriteUndertaleObject(_spriteDefinition);
@@ -1183,7 +1183,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         {
             X = reader.ReadInt32();
             Y = reader.ReadInt32();
-            spriteMode = reader.undertaleData.GeneralInfo.Major >= 2;
+            spriteMode = reader.undertaleData.IsGameMaker2();
             if (spriteMode)
                 _spriteDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
             else
