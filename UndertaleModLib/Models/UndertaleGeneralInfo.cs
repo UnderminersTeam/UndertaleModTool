@@ -305,6 +305,54 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// </summary>
     public bool InfoTimestampOffset { get; set; } = true;
 
+    /// <summary>
+    /// Enum for versions past GMS2.
+    /// </summary>
+    public enum GMSVersions
+    {
+        /// <summary>
+        /// Whether the data file is from version GMS2
+        /// </summary>
+        GMS2,
+        /// <summary>
+        /// Whether the data file is from version GMS2.2.2.302
+        /// </summary>
+        GMS2_2_2_302,
+        /// <summary>
+        /// Whether the data file is from version GMS2.3
+        /// </summary>
+        GMS2_3,
+        /// <summary>
+        /// Whether the data file is from version GMS2.3.1
+        /// </summary>
+        GMS2_3_1,
+        /// <summary>
+        /// Whether the data file is from version GMS2.3.2
+        /// </summary>
+        GMS2_3_2,
+        /// <summary>
+        /// Whether the data file is from version GMS2022.1
+        /// </summary>
+        GMS2022_1,
+        /// <summary>
+        /// Whether the data file is from version GMS2022.2
+        /// </summary>
+        GMS2022_2,
+        /// <summary>
+        /// Whether the data file is from version GM2022.3
+        /// </summary>
+        GM2022_3,
+        /// <summary>
+        /// Whether the data file is from version GM2022.5
+        /// </summary>
+        GM2022_5
+    }
+
+    /// <summary>
+    /// Tracks the game version beyond GMS2.
+    /// </summary>
+    public GMSVersions GMS2Version { get; set; } = GMSVersions.GMS2;
+
     /// <inheritdoc/>
     /// <exception cref="IOException">If <see cref="LicenseMD5"/> or <see cref="GMS2GameGUID"/> has an invalid length.</exception>
     public void Serialize(UndertaleWriter writer)
@@ -478,7 +526,10 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// <inheritdoc />
     public override string ToString()
     {
-        return DisplayName + " (GMS " + Major + "." + Minor + "." + Release + "." + Build + ", bytecode " + BytecodeVersion + ")";
+        if (Major == 2)
+            return DisplayName + " (" + Enum.GetName(typeof(GMSVersions), GMS2Version).Replace("_", ".") + ", bytecode " + BytecodeVersion + ")";
+        else
+            return DisplayName + " (GMS " + Major + "." + Minor + "." + Release + "." + Build + ", bytecode " + BytecodeVersion + ")";
     }
 
     /// <inheritdoc/>

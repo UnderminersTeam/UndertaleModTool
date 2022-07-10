@@ -290,56 +290,6 @@ namespace UndertaleModLib
         public bool ShortCircuit = true;
 
         /// <summary>
-        /// Whether the data file is from version GMS2.2.2.302
-        /// </summary>
-        public bool GMS2_2_2_302 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2.3
-        /// </summary>
-        public bool GMS2_3 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2.3.1
-        /// </summary>
-        public bool GMS2_3_1 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2.3.2
-        /// </summary>
-        public bool GMS2_3_2 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.1.
-        /// </summary>
-        public bool GMS2022_1 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.2.
-        /// </summary>
-        public bool GMS2022_2 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.3.
-        /// </summary>
-        public bool GM2022_3 = false;
-        
-        /// <summary>
-        /// Whether the data file is from version GMS2022.5.
-        /// </summary>
-        public bool GM2022_5 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.6.
-        /// </summary>
-        public bool GM2022_6 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.9.
-        /// </summary>
-        public bool GM2022_9 = false;
-
-        /// <summary>
         /// Some info for the editor to store data on.
         /// </summary>
         public readonly ToolInfo ToolInfo = new ToolInfo();
@@ -470,7 +420,7 @@ namespace UndertaleModLib
         /// <returns><see langword="true"/> if yes, <see langword="false"/> if not.</returns>
         public bool IsGameMaker2()
         {
-            return IsVersionAtLeast(2, 0, 0, 0);
+            return IsVersionAtLeast(2);
         }
 
 
@@ -490,19 +440,37 @@ namespace UndertaleModLib
         /// <param name="release">The release version.</param>
         /// <param name="build">The build version.</param>
         /// <returns>Whether the version of the data file is the same or higher than a specified version.</returns>
-        public bool IsVersionAtLeast(uint major, uint minor, uint release, uint build)
+        public bool IsVersionAtLeast(uint major, uint minor = 0, uint release = 0, uint build = 0)
         {
-            if (GeneralInfo.Major != major)
-                return (GeneralInfo.Major > major);
+            uint gameMajor = GeneralInfo.Major;
+            uint gameMinor = GeneralInfo.Minor;
+            uint gameRelease = GeneralInfo.Release;
+            uint gameBuild = GeneralInfo.Build;
+            switch (GeneralInfo.GMS2Version)
+            {
+                case UndertaleGeneralInfo.GMSVersions.GMS2:         break;
+                case UndertaleGeneralInfo.GMSVersions.GMS2_2_2_302: gameMajor = 2; gameMinor = 2; gameRelease = 2; gameBuild = 302; break;
+                case UndertaleGeneralInfo.GMSVersions.GMS2_3:       gameMajor = 2; gameMinor = 3; gameRelease = 0; break;
+                case UndertaleGeneralInfo.GMSVersions.GMS2_3_1:     gameMajor = 2; gameMinor = 3; gameRelease = 1; break;
+                case UndertaleGeneralInfo.GMSVersions.GMS2_3_2:     gameMajor = 2; gameMinor = 3; gameRelease = 2; break;
+                // Fortunately, 2022 is larger than 2 and therefore still valid.
+                case UndertaleGeneralInfo.GMSVersions.GMS2022_1:    gameMajor = 2022; gameMinor = 1; break;
+                case UndertaleGeneralInfo.GMSVersions.GMS2022_2:    gameMajor = 2022; gameMinor = 2; break;
+                case UndertaleGeneralInfo.GMSVersions.GM2022_3:     gameMajor = 2022; gameMinor = 3; break;
+                case UndertaleGeneralInfo.GMSVersions.GM2022_5:     gameMajor = 2022; gameMinor = 5; break;
+            }
 
-            if (GeneralInfo.Minor != minor)
-                return (GeneralInfo.Minor > minor);
+            if (gameMajor != major)
+                return (gameMajor > major);
 
-            if (GeneralInfo.Release != release)
-                return (GeneralInfo.Release > release);
+            if (gameMinor != minor)
+                return (gameMinor > minor);
 
-            if (GeneralInfo.Build != build)
-                return (GeneralInfo.Build > build);
+            if (gameRelease != release)
+                return (gameRelease > release);
+
+            if (gameBuild != build)
+                return (gameBuild > build);
 
             return true; // The version is exactly what supplied.
         }
