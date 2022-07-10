@@ -1363,14 +1363,19 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 EffectType = reader.ReadUndertaleString();
                 EffectProperties = reader.ReadUndertaleObject<UndertaleSimpleList<EffectProperty>>();
             }
-
             switch (LayerType)
             {
                 case LayerType.Instances: Data = reader.ReadUndertaleObject<LayerInstancesData>(); break;
                 case LayerType.Tiles: Data = reader.ReadUndertaleObject<LayerTilesData>(); break;
                 case LayerType.Background: Data = reader.ReadUndertaleObject<LayerBackgroundData>(); break;
                 case LayerType.Assets: Data = reader.ReadUndertaleObject<LayerAssetsData>(); break;
-                case LayerType.Effect: Data = reader.ReadUndertaleObject<LayerEffectData>(); break;
+                case LayerType.Effect:
+                    // Because effect data is empty in 2022.1+, it would erroneously read the next object.
+                    Data =
+                        reader.undertaleData.GMS2022_1
+                        ? new LayerEffectData() { EffectType = EffectType, Properties = EffectProperties }
+                        : reader.ReadUndertaleObject<LayerEffectData>();
+                    break;
                 default: throw new Exception("Unsupported layer type " + LayerType);
             }
         }
