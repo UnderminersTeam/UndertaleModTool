@@ -94,16 +94,16 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     public void Serialize(UndertaleWriter writer)
     {
         writer.Write(Scaled);
-        if (writer.undertaleData.GeneralInfo.Major >= 2)
+        if (writer.undertaleData.IsGameMaker2())
             writer.Write(GeneratedMips);
-        if (writer.undertaleData.GM2022_3)
+        if (writer.undertaleData.IsVersionAtLeast(2022, 3))
         {
             // We're going to overwrite this later with the actual size
             // of our texture block, so save the position
             _textureBlockSizeLocation = writer.Position;
             writer.Write(_textureBlockSize);
         }
-        if (writer.undertaleData.GM2022_9)
+        if (writer.undertaleData.IsVersionAtLeast(2022, 9))
         {
             writer.Write(TextureWidth);
             writer.Write(TextureHeight);
@@ -121,9 +121,9 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         Scaled = reader.ReadUInt32();
         if (reader.undertaleData.GeneralInfo.Major >= 2)
             GeneratedMips = reader.ReadUInt32();
-        if (reader.undertaleData.GM2022_3)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 3))
             _textureBlockSize = reader.ReadUInt32();
-        if (reader.undertaleData.GM2022_9)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 9))
         {
             TextureWidth = reader.ReadInt32();
             TextureHeight = reader.ReadInt32();
@@ -156,7 +156,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         var texStartPos = writer.Position;
         writer.WriteUndertaleObject(_textureData);
 
-        if (writer.undertaleData.GM2022_3)
+        if (writer.undertaleData.IsVersionAtLeast(2022, 3))
         {
             _textureBlockSize = texStartPos - writer.Position;
             // Write the actual size of the texture block in
@@ -377,16 +377,10 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <param name="size">Initial size of <see cref="sharedStream"/> in bytes</param>
         public static void InitSharedStream(int size) => sharedStream = new(size);
 
-        /// <inheritdoc />
-        public void Serialize(UndertaleWriter writer)
-        {
-            Serialize(writer, writer.undertaleData.GM2022_3, writer.undertaleData.GM2022_5);
-        }
-
         /// <summary>
         /// Serializes the texture to any type of writer (can be any destination file).
         /// </summary>
-        public void Serialize(FileBinaryWriter writer, bool gm2022_3, bool gm2022_5)
+        public void Serialize(FileBinaryWriter writer)
         {
             if (FormatQOI)
             {
@@ -398,12 +392,12 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                     using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
                     writer.Write((short)bmp.Width);
                     writer.Write((short)bmp.Height);
-                    byte[] qoiData = QoiConverter.GetArrayFromImage(bmp, gm2022_3 ? 0 : 4);
-                    using MemoryStream input = new MemoryStream(qoiData);
+                    byte[] data = QoiConverter.GetArrayFromImage(bmp, writer.undertaleData.IsVersionAtLeast(2022, 3) ? 0 : 4);
+                    using MemoryStream input = new MemoryStream(data);
                     if (sharedStream.Length != 0)
                         sharedStream.Seek(0, SeekOrigin.Begin);
                     BZip2.Compress(input, sharedStream, false, 9);
-                    if (gm2022_5)
+                    if (writer.undertaleData.IsVersionAtLeast(2022, 5))
                         writer.Write((uint)qoiData.Length);
                     writer.Write(sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position]);
                 }
@@ -411,7 +405,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                 {
                     // Encode the PNG data back to QOI
                     using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
-                    writer.Write(QoiConverter.GetSpanFromImage(bmp, gm2022_3 ? 0 : 4));
+                    writer.Write(QoiConverter.GetSpanFromImage(bmp, writer.undertaleData.IsVersionAtLeast(2022, 3) ? 0 : 4));
                 }
             }
             else
@@ -421,13 +415,13 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
-            Unserialize(reader, reader.undertaleData.GM2022_5);
+            Unserialize(reader, reader.undertaleData.IsVersionAtLeast(2022, 5));
         }
 
         /// <summary>
         /// Unserializes the texture from any type of reader (can be from any source).
         /// </summary>
-        public void Unserialize(FileBinaryReader reader, bool is_2022_5)
+        public void Unserialize(FileBinaryReader reader)
         {
             sharedStream ??= new();
 
@@ -444,7 +438,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                     FormatBZ2 = true;
 
                     // Don't really care about the width/height, so skip them, as well as header
-                    reader.Position += (uint)(is_2022_5 ? 12 : 8);
+                    reader.Position += (uint)(writer.undertaleData.IsVersionAtLeast(2022, 5) ? 12 : 8);
 
                     // Need to fully decompress and convert the QOI data to PNG for compatibility purposes (at least for now)
                     if (sharedStream.Length != 0)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -81,7 +81,9 @@ namespace UndertaleModLib
             reader.Position = startPos;
 
             reader.GMS2_3 = reader.AllChunkNames.Contains("SEQN");
-            reader.undertaleData.GMS2_3 = reader.GMS2_3;
+            // This has to be moved to General Info deserialization (line 432), because the version flag has been moved to General Info.
+            //if (reader.GMS2_3 && !reader.undertaleData.IsVersionAtLeast(2, 3))
+            //    reader.undertaleData.GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2_3;
 
             // Now, parse the chunks
             while (reader.Position < startPos + Length)
@@ -339,7 +341,7 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
-            if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
+            if (!reader.undertaleData.IsVersionAtLeast(2022, 2) && reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
             {
                 /* This code performs four checks to identify GM2022.2.
                  * First, as you've seen, is the bytecode version.
@@ -352,15 +354,16 @@ namespace UndertaleModLib
                  * Maybe try..catch on the whole shebang?
                  */
                 uint positionToReturn = reader.Position;
+                bool GMS2022_2 = false;
                 if (reader.ReadUInt32() > 0) // Font count
                 {
                     uint firstFontPointer = reader.ReadUInt32();
                     reader.Position = firstFontPointer + 48; // There are 48 bytes of existing metadata.
                     uint glyphsLength = reader.ReadUInt32();
-                    reader.undertaleData.GMS2022_2 = true;
+                    GMS2022_2 = true;
                     if ((glyphsLength * 4) > this.Length)
                     {
-                        reader.undertaleData.GMS2022_2 = false;
+                        GMS2022_2 = false;
                     }
                     else if (glyphsLength != 0)
                     {
@@ -371,7 +374,7 @@ namespace UndertaleModLib
                         {
                             if (reader.Position != pointer)
                             {
-                                reader.undertaleData.GMS2022_2 = false;
+                                GMS2022_2 = false;
                                 break;
                             }
 
@@ -382,6 +385,8 @@ namespace UndertaleModLib
                     }
 
                 }
+                if (GMS2022_2)
+                    reader.undertaleData.GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2022_2;
                 reader.Position = positionToReturn;
             }
 
@@ -454,7 +459,7 @@ namespace UndertaleModLib
         private void CheckForEffectData(UndertaleReader reader)
         {
             // Do a length check on room layers to see if this is 2022.1 or higher
-            if (!reader.undertaleData.GMS2022_1 && reader.undertaleData.GMS2_3)
+            if (!reader.undertaleData.IsVersionAtLeast(2022, 1) && reader.undertaleData.IsVersionAtLeast(2, 3))
             {
                 uint returnTo = reader.Position;
 
@@ -491,21 +496,21 @@ namespace UndertaleModLib
                         {
                             case LayerType.Background:
                                 if (nextOffset - reader.Position > 16 * 4)
-                                    reader.undertaleData.GMS2022_1 = true;
+                                    reader.undertaleData.GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2022_1;
                                 finished = true;
                                 break;
                             case LayerType.Instances:
                                 reader.Position += 6 * 4;
                                 int instanceCount = reader.ReadInt32();
                                 if (nextOffset - reader.Position != (instanceCount * 4))
-                                    reader.undertaleData.GMS2022_1 = true;
+                                    reader.undertaleData.GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2022_1;
                                 finished = true;
                                 break;
                             case LayerType.Assets:
                                 reader.Position += 6 * 4;
                                 int tileOffset = reader.ReadInt32();
                                 if (tileOffset != reader.Position + 8)
-                                    reader.undertaleData.GMS2022_1 = true;
+                                    reader.undertaleData.GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2022_1;
                                 finished = true;
                                 break;
                             case LayerType.Tiles:
@@ -513,14 +518,14 @@ namespace UndertaleModLib
                                 int tileMapWidth = reader.ReadInt32();
                                 int tileMapHeight = reader.ReadInt32();
                                 if (nextOffset - reader.Position != (tileMapWidth * tileMapHeight * 4))
-                                    reader.undertaleData.GMS2022_1 = true;
+                                    reader.undertaleData.GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2022_1;
                                 finished = true;
                                 break;
                             case LayerType.Effect:
                                 reader.Position += 7 * 4;
                                 int propertyCount = reader.ReadInt32();
                                 if (nextOffset - reader.Position != (propertyCount * 3 * 4))
-                                    reader.undertaleData.GMS2022_1 = true;
+                                    reader.undertaleData.GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GMS2022_1;
                                 finished = true;
                                 break;
                         }
@@ -762,7 +767,7 @@ namespace UndertaleModLib
                 {
                     // Calculate maximum size of QOI converter buffer
                     maxSize = List.Select(x => x.TextureData.Width * x.TextureData.Height).Max()
-                              * QoiConverter.MaxChunkSize + QoiConverter.HeaderSize + (writer.undertaleData.GM2022_3 ? 0 : 4);
+                              * QoiConverter.MaxChunkSize + QoiConverter.HeaderSize + (writer.undertaleData.IsVersionAtLeast(2022, 3) ? 0 : 4);
                     QoiConverter.InitSharedBuffer(maxSize);
                 }
             }
@@ -778,9 +783,7 @@ namespace UndertaleModLib
         internal override void UnserializeChunk(UndertaleReader reader)
         {
             // Detect GM2022.3
-            if (reader.undertaleData.GM2022_5)
-                reader.undertaleData.GM2022_3 = true;
-            else if (reader.undertaleData.GMS2_3)
+            if (!reader.undertaleData.IsVersionAtLeast(2022, 3) && reader.undertaleData.IsVersionAtLeast(2, 3))
             {
                 uint positionToReturn = reader.Position;
 
@@ -790,14 +793,14 @@ namespace UndertaleModLib
                 {
                     reader.Position += 16; // Jump to either padding or length, depending on version
                     if (reader.ReadUInt32() > 0) // Check whether it's padding or length
-                        reader.undertaleData.GM2022_3 = true;
+                        reader.undertaleData.GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GM2022_3;
                 }
                 else if (texCount > 1)
                 {
                     uint firstTex = reader.ReadUInt32();
                     uint secondTex = reader.ReadUInt32();
                     if (firstTex + 16 == secondTex)
-                        reader.undertaleData.GM2022_3 = true;
+                        reader.undertaleData.GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GM2022_3;
                 }
 
                 if (reader.undertaleData.GM2022_3)

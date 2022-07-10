@@ -428,6 +428,8 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
+        if (GMS2Version < GMSVersions.GMS2_3 && reader.GMS2_3)
+            GMS2Version = GMSVersions.GMS2_3;
         IsDebuggerDisabled = reader.ReadByte() != 0;
         BytecodeVersion = reader.ReadByte();
         Unknown = reader.ReadUInt16();
