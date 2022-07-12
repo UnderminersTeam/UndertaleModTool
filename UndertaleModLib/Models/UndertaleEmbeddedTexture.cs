@@ -398,7 +398,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                         sharedStream.Seek(0, SeekOrigin.Begin);
                     BZip2.Compress(input, sharedStream, false, 9);
                     if (writer.undertaleData.IsVersionAtLeast(2022, 5))
-                        writer.Write((uint)qoiData.Length);
+                        writer.Write((uint)data.Length);
                     writer.Write(sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position]);
                 }
                 else
@@ -438,7 +438,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                     FormatBZ2 = true;
 
                     // Don't really care about the width/height, so skip them, as well as header
-                    reader.Position += (uint)(writer.undertaleData.IsVersionAtLeast(2022, 5) ? 12 : 8);
+                    reader.Position += (uint)(reader.undertaleData.IsVersionAtLeast(2022, 5) ? 12 : 8);
 
                     // Need to fully decompress and convert the QOI data to PNG for compatibility purposes (at least for now)
                     if (sharedStream.Length != 0)

@@ -413,9 +413,10 @@ namespace UndertaleModLib
         internal override void UnserializeChunk(UndertaleReader reader)
         {
             // Simple chunk parser to check for 2022.5, assumes old format until shown otherwise
-            if (reader.undertaleData.GMS2_3)
+            if (!reader.undertaleData.IsVersionAtLeast(2022, 5) && reader.undertaleData.IsVersionAtLeast(2, 3))
             {
                 uint positionToReturn = reader.Position;
+                bool GM2022_5 = false;
                 if (reader.ReadUInt32() > 0) // Object count
                 {
                     uint firstObjectPointer = reader.ReadUInt32();
@@ -423,7 +424,7 @@ namespace UndertaleModLib
                     uint vertexCount = reader.ReadUInt32();
 
                     // If any of these checks fail, it's 2022.5
-                    reader.undertaleData.GM2022_5 = true;
+                    GM2022_5 = true;
                     // Bounds check on vertex data
                     if (reader.Position + 12 + vertexCount * 8 < positionToReturn + this.Length)
                     {
@@ -434,10 +435,12 @@ namespace UndertaleModLib
                             uint subEventPointer = reader.ReadUInt32();
                             // Should start right after the list
                             if (reader.Position + 56 == subEventPointer)
-                                reader.undertaleData.GM2022_5 = false;
+                                GM2022_5 = false;
                         }
                     }
                 }
+                if (GM2022_5)
+                    reader.undertaleData.SetGMS2Version(2022, 5);
                 reader.Position = positionToReturn;
             }
 
