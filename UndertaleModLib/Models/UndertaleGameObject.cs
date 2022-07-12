@@ -50,6 +50,9 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// </summary>
     public bool Visible { get; set; } = true;
 
+    // TODO: This summary
+    public bool Managed { get; set; }
+
     /// <summary>
     /// Whether the game object is solid.
     /// </summary>
@@ -165,6 +168,8 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         writer.WriteUndertaleString(Name);
         writer.WriteUndertaleObject(_sprite);
         writer.Write(Visible);
+        if (writer.undertaleData.GM2022_5)
+            writer.Write(Managed);
         writer.Write(Solid);
         writer.Write(Depth);
         writer.Write(Persistent);
@@ -204,6 +209,8 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         Name = reader.ReadUndertaleString();
         _sprite = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
         Visible = reader.ReadBoolean();
+        if (reader.undertaleData.GM2022_5)
+            Managed = reader.ReadBoolean();
         Solid = reader.ReadBoolean();
         Depth = reader.ReadInt32();
         Persistent = reader.ReadBoolean();
