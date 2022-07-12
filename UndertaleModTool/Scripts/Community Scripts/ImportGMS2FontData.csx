@@ -127,7 +127,7 @@ font.Italic = (bool)fontData["italic"];
 // FIXME: Potentially causes float precision to be lost
 font.EmSize = (uint)fontData["size"];
 // Save font size as a float in GMS2.3+ (shouldn't UML always save EmSize as a float for GMS2.3+ games??)
-font.EmSizeIsFloat = Data.GMS2_3;
+font.EmSizeIsFloat = Data.IsVersionAtLeast(2, 3);
 font.Charset = (byte)fontData["charset"];
 font.AntiAliasing = (byte)fontData["AntiAlias"];
 // FIXME: ??? All YY files I've saw don't contain this

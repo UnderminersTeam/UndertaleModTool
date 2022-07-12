@@ -20,7 +20,7 @@ string game_name = Data.GeneralInfo.Name.Content;
 
 bool is13 = false;
 
-if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
+if (Data.IsVersionAtLeast(2, 3))
 {
     ScriptError(game_name + "is GMS 2.3+ and is ineligible", "Ineligible");
     return;
@@ -137,7 +137,7 @@ else if (Data?.GeneralInfo.BytecodeVersion == 17)
     Data.GeneralInfo.BytecodeVersion = 16;
     if (Data.FORM.Chunks.ContainsKey("TGIN"))
         Data.FORM.Chunks.Remove("TGIN");
-    Data.GMS2_2_2_302 = false;
+    Data.SetGMS2Version(2);
     ScriptMessage("Downgraded from 17 to 16 successfully. Save the game to apply the changes.");
 }
 else if (Data?.GeneralInfo.BytecodeVersion == 16)
@@ -154,13 +154,8 @@ on Discord and provide the name of the game, where
 you obtained it from, and additionally send the
 data.win file of the game." + @"
 
-Current status of game '" + game_name + @"':
-GMS 2.3 == " + Data.GMS2_3.ToString() + @"
-GMS 2.3.1 == " + Data.GMS2_3_1.ToString() + @"
-GMS 2.3.2 == " + Data.GMS2_3_2.ToString() + @"
-GMS 2.3.1 == " + Data.GMS2_3_1.ToString() + @"
+Game and version: '" + Data.GeneralInfo.ToString() + @"'
 ", "Unknown game error");
-    ScriptMessage("Current status of game '" + game_name + "':\r\nGMS 2.3 == " + Data.GMS2_3.ToString() + "\r\n" + "GMS 2.3.1 == " + Data.GMS2_3_1.ToString() + "\r\n" + "GMS 2.3.2 == " + Data.GMS2_3_2.ToString());
-    ScriptMessage("Bytecode: " + (Data?.GeneralInfo.BytecodeVersion).ToString());
+    ScriptMessage("Game and version: '" + Data.GeneralInfo.ToString() + "'");
     return;
 }

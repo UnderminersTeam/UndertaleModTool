@@ -12,14 +12,14 @@ EnsureDataLoaded();
 
 string game_name = Data.GeneralInfo.Name.Content;
 
-if ((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false))
+if (!Data.IsVersionAtLeast(2, 3))
 {
     ScriptError(game_name + "is not GMS 2.3+ and is ineligible", "Ineligible");
     return;
 }
 else
 {
-    ScriptMessage("Current status of game '" + game_name + "':\r\nGMS 2.3 == " + Data.GMS2_3.ToString() + "\r\n" + "GMS 2.3.1 == " + Data.GMS2_3_1.ToString() + "\r\n" + "GMS 2.3.2 == " + Data.GMS2_3_2.ToString());
+    ScriptMessage("Game and version: '" + Data.GeneralInfo.ToString() + "'");
 }
 
 if (Data?.GeneralInfo.BytecodeVersion >= 17)
@@ -77,10 +77,7 @@ applying any changes to the game.";
         Data.FORM.Chunks.Remove("TAGS");
     if (Data.FORM.Chunks.ContainsKey("EMBI"))
         Data.FORM.Chunks.Remove("EMBI");
-    Data.GMS2_2_2_302 = false;
-    Data.GMS2_3 = false;
-    Data.GMS2_3_1 = false;
-    Data.GMS2_3_2 = false;
+    Data.SetGMS2Version(2);
     //Data.IsTPAG4ByteAligned = false;
     for (int i = 0; i < Data.Code.Count; i++)
     {
