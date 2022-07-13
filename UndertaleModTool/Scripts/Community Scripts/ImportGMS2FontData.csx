@@ -38,23 +38,38 @@ string textureSourcePath = Path.Combine(Path.GetDirectoryName(importFile), fontN
 if (!File.Exists(textureSourcePath))
     throw new ScriptException("The font texture file " + textureSourcePath + " doesn't exist.");
 
+UndertaleTextureGroupInfo defaultTexGroup = null;
+bool disappearMigitation = Data.GM2022_3;
+if (disappearMigitation)
+{
+    defaultTexGroup = Data.TextureGroupInfo.ByName("Default");
+    if (defaultTexGroup == null)
+        throw new ScriptException("Default texture group doesn't exist.");
+}
+
 UndertaleFont font = Data.Fonts.ByName(fontName);
 if (font == null)
 {
-    font = new UndertaleFont() {
+    font = new UndertaleFont()
+    {
         Name = Data.Strings.MakeString(fontName)
     };
     Data.Fonts.Add(font);
+    if (disappearMigitation)
+        defaultTexGroup.Fonts.Add(new UndertaleResourceById<UndertaleFont, UndertaleChunkFONT>() { Resource = font });
 }
 
 Bitmap textureBitmap = new Bitmap(textureSourcePath);
+textureBitmap.SetResolution(96.0F, 96.0F); // dpi fix
 UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
-texture.Name = Data.Strings.MakeString("Texture " + Data.EmbeddedTextures.Count); // ???
+texture.Name = new UndertaleString("Texture " + Data.EmbeddedTextures.Count); // ???
 texture.TextureData.TextureBlob = File.ReadAllBytes(textureSourcePath);
 Data.EmbeddedTextures.Add(texture);
+if (disappearMigitation)
+    defaultTexGroup.TexturePages.Add(new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>() { Resource = texture });
 
 UndertaleTexturePageItem texturePageItem = new UndertaleTexturePageItem();
-texturePageItem.Name = Data.Strings.MakeString("PageItem " + Data.TexturePageItems.Count); // ???
+texturePageItem.Name = new UndertaleString("PageItem " + Data.TexturePageItems.Count); // ???
 texturePageItem.TexturePage = texture;
 texturePageItem.SourceX = 0;
 texturePageItem.SourceY = 0;
@@ -67,7 +82,6 @@ texturePageItem.TargetHeight = (ushort)textureBitmap.Height;
 texturePageItem.BoundingWidth = (ushort)textureBitmap.Width;
 texturePageItem.BoundingHeight = (ushort)textureBitmap.Height;
 Data.TexturePageItems.Add(texturePageItem);
-
 font.Texture = texturePageItem;
 
 if (Data.GMS2_3)
@@ -89,17 +103,19 @@ if (fontData.ContainsKey("ascender"))
 if (fontData.ContainsKey("ascenderOffset"))
     font.AscenderOffset = (int)fontData["ascenderOffset"];
 
-font.RangeStart = 0;
-font.RangeEnd = 0;
+ushort rangeStart = 0;
+uint rangeEnd = 0;
 foreach (JObject range in fontData["ranges"].Values<JObject>())
 {
-    var rangeStart = (ushort)range["lower"];
-    var rangeEnd = (uint)range["upper"];
-    if (font.RangeStart > rangeStart)
-        font.RangeStart = rangeStart;
-    if (font.RangeEnd > rangeEnd)
-        font.RangeEnd = rangeEnd;
+    var rangeStartChk = (ushort)range["lower"];
+    var rangeEndChk = (uint)range["upper"];
+    if (rangeStart <= 0)
+        rangeStart = rangeStartChk;
+    if (rangeEnd < rangeEndChk)
+        rangeEnd = rangeEndChk;
 }
+font.RangeStart = rangeStart;
+font.RangeEnd = rangeEnd;
 
 foreach (KeyValuePair<string, JToken> glyphMeta in (JObject)fontData["glyphs"])
 {
@@ -131,6 +147,7 @@ foreach (JObject kerningPair in fontData["kerningPairs"].Values<JObject>())
     });
 }
 
+glyphs = font.Glyphs.ToList();
 // Sort glyphs like in UndertaleFontEditor to be safe
 glyphs.Sort((x, y) => x.Character.CompareTo(y.Character));
 font.Glyphs.Clear();

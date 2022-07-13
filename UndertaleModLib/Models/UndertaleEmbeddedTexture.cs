@@ -35,9 +35,22 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     public uint GeneratedMips { get; set; }
 
     /// <summary>
+    /// The size of the texture data that the embedded image contains. <br/>
+    /// GameMaker: Studio 2 only.
+    /// </summary>
+    private uint _TextureBlockSize { get; set; }
+
+    /// <summary>
     /// The texture data in the embedded image.
     /// </summary>
     public TexData TextureData { get; set; } = new TexData();
+
+    /// <summary>
+    /// The position of the TextureBlockSize value to be overwritten <br/>
+    /// in Serialize. <br/>
+    /// Only used internally.
+    /// </summary>
+    internal uint _TextureBlockSizeLocation { get; set; }
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -45,6 +58,11 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         writer.Write(Scaled);
         if (writer.undertaleData.GeneralInfo.Major >= 2)
             writer.Write(GeneratedMips);
+        // Write a placeholder for the texture blob size,
+        // so we can overwrite this with the actual value
+        // later
+        _TextureBlockSizeLocation = writer.Position;
+        writer.Write((uint)0);
         writer.WriteUndertaleObjectPointer(TextureData);
     }
 
@@ -54,6 +72,8 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         Scaled = reader.ReadUInt32();
         if (reader.undertaleData.GeneralInfo.Major >= 2)
             GeneratedMips = reader.ReadUInt32();
+        if (reader.undertaleData.GM2022_3)
+            _TextureBlockSize = reader.ReadUInt32();
         TextureData = reader.ReadUndertaleObjectPointer<TexData>();
     }
 
@@ -67,7 +87,17 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         while (writer.Position % 0x80 != 0)
             writer.Write((byte)0);
 
+        var objStartPos = writer.Position;
         writer.WriteUndertaleObject(TextureData);
+        var objEndPos = writer.Position;
+
+        uint length = writer.Position - objStartPos;
+        // Move to the placeholder zero value wrote
+        // in Serialize
+        writer.Position = _TextureBlockSizeLocation;
+        // Write texture data size
+        writer.Write(length);
+        writer.Position = objEndPos;
     }
 
     /// <summary>
@@ -154,12 +184,6 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
             }
         }
 
-        /// <summary>
-        /// The size of the texture data that the embedded image contains. <br/>
-        /// GameMaker: Studio 2 only.
-        /// </summary>
-        private uint _TextureBlockSize { get; set; }
-
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -189,13 +213,6 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
-            var originalWriterPosition = writer.Position;
-            // Write a placeholder for the texture blob size,
-            // so we can overwrite this with the actual value
-            // later
-            writer.Write((uint)0);
-
-            var dataStartWriterPosition = writer.Position;
             if (writer.undertaleData.UseQoiFormat)
             {
                 if (writer.undertaleData.UseBZipFormat)
@@ -224,19 +241,12 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
             }
             else
                 writer.Write(TextureBlob);
-
-            var textureBlobSize = writer.Position - dataStartWriterPosition;
-            writer.Position = originalWriterPosition;
-            writer.Write(textureBlobSize);
         }
 
         /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
             sharedStream ??= new();
-
-            if (reader.undertaleData.GM2022_3)
-                _TextureBlockSize = reader.ReadUInt32();
 
             uint startAddress = reader.Position;
 
