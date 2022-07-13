@@ -92,6 +92,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         var objEndPos = writer.Position;
 
         uint length = writer.Position - objStartPos;
+        _TextureBlockSize = length;
         // Move to the placeholder zero value wrote
         // in Serialize
         writer.Position = _TextureBlockSizeLocation;
