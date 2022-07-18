@@ -1775,7 +1775,7 @@ namespace UndertaleModLib.Decompiler
                         if (name == "argument" && context.DecompilingStruct && context.ArgumentReplacements != null && ArrayIndices.Count == 1)
                         {
                             var replacements = context.ArgumentReplacements;
-                            if (int.TryParse(ArrayIndices[0].ToString(context), out int index) && index >= 0 && index < replacements.Count)
+                            if (int.TryParse(ArrayIndices[0].ToString(context), out int index) && index >= 0 && index < replacements.Count && this != replacements[index])
                                 return replacements[index].ToString(context);
                         }
                         foreach (Expression e in ArrayIndices)
