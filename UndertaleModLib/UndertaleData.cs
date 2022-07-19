@@ -335,6 +335,11 @@ namespace UndertaleModLib
         public bool GM2022_5 = false;
 
         /// <summary>
+        /// Whether the data file is from version GMS2022.6.
+        /// </summary>
+        public bool GM2022_6 = false;
+
+        /// <summary>
         /// Some info for the editor to store data on.
         /// </summary>
         public readonly ToolInfo ToolInfo = new ToolInfo();
