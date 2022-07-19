@@ -122,7 +122,7 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
-            if (reader.undertaleData.GMS2_3)
+            if (reader.undertaleData.IsVersionAtLeast(2, 3) && !reader.undertaleData.IsVersionAtLeast(2022, 6))
             {
                 // Check for 2022.6, if possible
                 bool definitely2022_6 = true;
@@ -189,7 +189,7 @@ namespace UndertaleModLib
                 reader.Position = returnPosition;
 
                 if (definitely2022_6)
-                    reader.undertaleData.GM2022_6 = true;
+                    reader.undertaleData.SetGMS2Version(2022, 6);
             }
 
             base.UnserializeChunk(reader);
@@ -806,7 +806,7 @@ namespace UndertaleModLib
                         reader.undertaleData.SetGMS2Version(2022, 3);
                 }
 
-                if (reader.undertaleData.GM2022_3)
+                if (reader.undertaleData.IsVersionAtLeast(2022, 3))
                 {
                     // Also check for 2022.5 format
                     reader.Position = positionToReturn + 4;
@@ -820,22 +820,25 @@ namespace UndertaleModLib
                         if (header.SequenceEqual(UndertaleEmbeddedTexture.TexData.QOIAndBZip2Header))
                         {
                             reader.Position += 4; // skip width/height
-
+                            bool is2022_5 = false;
                             // Now check the actual BZ2 headers
                             if (reader.ReadByte() != (byte)'B')
-                                reader.undertaleData.GM2022_5 = true;
+                                is2022_5 = true;
                             else if (reader.ReadByte() != (byte)'Z')
-                                reader.undertaleData.GM2022_5 = true;
+                                is2022_5 = true;
                             else if (reader.ReadByte() != (byte)'h')
-                                reader.undertaleData.GM2022_5 = true;
+                                is2022_5 = true;
                             else
                             {
                                 reader.ReadByte();
                                 if (reader.ReadUInt24() != 0x594131) // digits of pi... (block header)
-                                    reader.undertaleData.GM2022_5 = true;
+                                    is2022_5 = true;
                                 else if (reader.ReadUInt24() != 0x595326)
-                                    reader.undertaleData.GM2022_5 = true;
+                                    is2022_5 = true;
                             }
+
+                            if (is2022_5)
+                                reader.undertaleData.SetGMS2Version(2022, 5);
 
                             // Checked one QOI+BZ2 texture. No need to check any more
                             break;

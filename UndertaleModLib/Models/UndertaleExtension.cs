@@ -313,7 +313,7 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
         writer.WriteUndertaleString(FolderName);
         writer.WriteUndertaleString(Name);
         writer.WriteUndertaleString(ClassName);
-        if (writer.undertaleData.GM2022_6)
+        if (writer.undertaleData.IsVersionAtLeast(2022, 6))
         {
             writer.WriteUndertaleObjectPointer(Files);
             writer.WriteUndertaleObjectPointer(Options);
@@ -332,7 +332,7 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
         FolderName = reader.ReadUndertaleString();
         Name = reader.ReadUndertaleString();
         ClassName = reader.ReadUndertaleString();
-        if (reader.undertaleData.GM2022_6)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 6))
         {
             Files = reader.ReadUndertaleObjectPointer<UndertalePointerList<UndertaleExtensionFile>>();
             Options = reader.ReadUndertaleObjectPointer<UndertalePointerList<UndertaleExtensionOption>>();

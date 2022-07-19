@@ -443,7 +443,9 @@ namespace UndertaleModLib
         {
             if (major == 2022)
             {
-                if (minor >= 5)
+                if (minor >= 6)
+                    GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GM2022_6;
+                else if (minor >= 5)
                     GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GM2022_5;
                 else if (minor >= 3)
                     GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMSVersions.GM2022_3;
@@ -496,6 +498,7 @@ namespace UndertaleModLib
                 case UndertaleGeneralInfo.GMSVersions.GMS2022_2:    gameMajor = 2022; gameMinor = 2; break;
                 case UndertaleGeneralInfo.GMSVersions.GM2022_3:     gameMajor = 2022; gameMinor = 3; break;
                 case UndertaleGeneralInfo.GMSVersions.GM2022_5:     gameMajor = 2022; gameMinor = 5; break;
+                case UndertaleGeneralInfo.GMSVersions.GM2022_6:     gameMajor = 2022; gameMinor = 6; break;
             }
 
             if (gameMajor != major)

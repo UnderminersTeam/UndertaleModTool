@@ -1374,7 +1374,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 case LayerType.Effect:
                     // Because effect data is empty in 2022.1+, it would erroneously read the next object.
                     Data =
-                        reader.undertaleData.GMS2022_1
+                        reader.undertaleData.IsVersionAtLeast(2022, 1)
                         ? new LayerEffectData() { EffectType = EffectType, Properties = EffectProperties }
                         : reader.ReadUndertaleObject<LayerEffectData>();
                     break;

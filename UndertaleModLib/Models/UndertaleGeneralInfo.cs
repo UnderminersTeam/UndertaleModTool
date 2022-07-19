@@ -345,7 +345,11 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// <summary>
         /// Whether the data file is from version GM2022.5
         /// </summary>
-        GM2022_5
+        GM2022_5,
+        /// <summary>
+        /// Whether the data file is from version GM2022.6
+        /// </summary>
+        GM2022_6
     }
 
     /// <summary>
