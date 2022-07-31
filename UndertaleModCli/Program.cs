@@ -703,6 +703,7 @@ public partial class Program : IScriptInterface
             throw;
         }
 
+        lines = $"#line 1 \"{path}\"\n" + lines;
         ScriptPath = path;
         RunCSharpCode(lines, ScriptPath);
     }
