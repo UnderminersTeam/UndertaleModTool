@@ -1,4 +1,4 @@
-name: Publish continuous prerelease of UndertaleModTool
+name: Publish continuous release of UndertaleModTool
 
 on:
   push:
@@ -108,7 +108,7 @@ jobs:
       with:
         tag_name: bleeding-edge
         name: Bleeding Edge
-        prerelease: true
+        prerelease: false
         files: |
           artifact/*
         body: | 
