@@ -192,9 +192,9 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private static readonly byte[] pngHeader = { 137, 80, 78, 71, 13, 10, 26, 10 };
-        private static readonly byte[] qoiAndBZipHeader = { 50, 122, 111, 113 };
-        private static readonly byte[] qoiHeader = { 102, 105, 111, 113 };
+        public static readonly byte[] PNGHeader = { 137, 80, 78, 71, 13, 10, 26, 10 };
+        public static readonly byte[] QOIAndBZip2Header = { 50, 122, 111, 113 };
+        public static readonly byte[] QOIHeader = { 102, 105, 111, 113 };
 
         /// <summary>
         /// Frees up <see cref="sharedStream"/> from memory.
@@ -218,7 +218,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
             {
                 if (writer.undertaleData.UseBZipFormat)
                 {
-                    writer.Write(qoiAndBZipHeader);
+                    writer.Write(QOIAndBZip2Header);
 
                     // Encode the PNG data back to QOI+BZip2
                     using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
@@ -252,11 +252,11 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
             uint startAddress = reader.Position;
 
             byte[] header = reader.ReadBytes(8);
-            if (!header.SequenceEqual(pngHeader))
+            if (!header.SequenceEqual(PNGHeader))
             {
                 reader.Position = startAddress;
 
-                if (header.Take(4).SequenceEqual(qoiAndBZipHeader))
+                if (header.Take(4).SequenceEqual(QOIAndBZip2Header))
                 {
                     reader.undertaleData.UseQoiFormat = true;
                     reader.undertaleData.UseBZipFormat = true;
@@ -277,7 +277,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                     sharedStream.Read(TextureBlob, 0, TextureBlob.Length);
                     return;
                 }
-                else if (header.Take(4).SequenceEqual(qoiHeader))
+                else if (header.Take(4).SequenceEqual(QOIHeader))
                 {
                     reader.undertaleData.UseQoiFormat = true;
                     reader.undertaleData.UseBZipFormat = false;

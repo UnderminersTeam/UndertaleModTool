@@ -1373,7 +1373,17 @@ namespace UndertaleModLib.Decompiler
                         if (IsStatement)
                         {
                             sb.Append(" ");
-                            sb.Append((context.Statements[0].Last() as AssignmentStatement).Destination.Var.Name.Content);
+
+                            // For further optimization, we could *probably* create a dictionary that's just flipped KVPs (assuming there are no dup. values).
+                            // Doing so would save the need for LINQ and what-not. Not that big of an issue, but still an option.
+                            Dictionary<string, UndertaleFunction> subFuncs = context.GlobalContext.Data.KnownSubFunctions;
+                            KeyValuePair<string, UndertaleFunction> kvp = subFuncs.FirstOrDefault(x => x.Value == Function);
+
+                            // If we found an associated sub-function, use the key as the name.
+                            if (kvp.Key != null)
+                                sb.Append(kvp.Key);
+                            else
+                                sb.Append((context.Statements[0].Last() as AssignmentStatement).Destination.Var.Name.Content);
                         }
                         sb.Append("(");
                         for (int i = 0; i < FunctionBodyCodeEntry.ArgumentsCount; ++i)
