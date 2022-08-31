@@ -58,7 +58,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         writer.Write(Scaled);
         if (writer.undertaleData.GeneralInfo.Major >= 2)
             writer.Write(GeneratedMips);
-        if (reader.undertaleData.GM2022_3)
+        if (writer.undertaleData.GM2022_3)
         {
             // Write a placeholder for the texture blob size,
             // so we can overwrite this with the actual value
@@ -94,7 +94,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         writer.WriteUndertaleObject(TextureData);
         var objEndPos = writer.Position;
 
-        if (reader.undertaleData.GM2022_3)
+        if (writer.undertaleData.GM2022_3)
         {
             uint length = writer.Position - objStartPos;
             _TextureBlockSize = length;
