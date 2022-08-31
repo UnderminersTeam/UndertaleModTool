@@ -58,11 +58,14 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         writer.Write(Scaled);
         if (writer.undertaleData.GeneralInfo.Major >= 2)
             writer.Write(GeneratedMips);
-        // Write a placeholder for the texture blob size,
-        // so we can overwrite this with the actual value
-        // later
-        _TextureBlockSizeLocation = writer.Position;
-        writer.Write((uint)0);
+        if (reader.undertaleData.GM2022_3)
+        {
+            // Write a placeholder for the texture blob size,
+            // so we can overwrite this with the actual value
+            // later
+            _TextureBlockSizeLocation = writer.Position;
+            writer.Write((uint)0);
+        }
         writer.WriteUndertaleObjectPointer(TextureData);
     }
 
@@ -91,14 +94,17 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         writer.WriteUndertaleObject(TextureData);
         var objEndPos = writer.Position;
 
-        uint length = writer.Position - objStartPos;
-        _TextureBlockSize = length;
-        // Move to the placeholder zero value wrote
-        // in Serialize
-        writer.Position = _TextureBlockSizeLocation;
-        // Write texture data size
-        writer.Write(length);
-        writer.Position = objEndPos;
+        if (reader.undertaleData.GM2022_3)
+        {
+            uint length = writer.Position - objStartPos;
+            _TextureBlockSize = length;
+            // Move to the placeholder zero value wrote
+            // in Serialize
+            writer.Position = _TextureBlockSizeLocation;
+            // Write texture data size
+            writer.Write(length);
+            writer.Position = objEndPos;
+        }
     }
 
     /// <summary>
