@@ -307,13 +307,19 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
 
     /// <summary>
     /// Enum for versions past GMS2.
+    /// GameMaker no longer updates the version constants in General Info,
+    /// so it falls to UTMT to detect these versions.
     /// </summary>
-    public enum GMSVersions
+    public enum GMS2Versions
     {
         /// <summary>
         /// Whether the data file is from version GMS2
         /// </summary>
         GMS2,
+        /// <summary>
+        /// Whether the data file is from version GMS2.2.1
+        /// </summary>
+        GMS2_2_1,
         /// <summary>
         /// Whether the data file is from version GMS2.2.2.302
         /// </summary>
@@ -330,6 +336,10 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// Whether the data file is from version GMS2.3.2
         /// </summary>
         GMS2_3_2,
+        /// <summary>
+        /// Whether the data file is from version GMS2.3.6
+        /// </summary>
+        GMS2_3_6,
         /// <summary>
         /// Whether the data file is from version GMS2022.1
         /// </summary>
@@ -349,13 +359,17 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// <summary>
         /// Whether the data file is from version GM2022.6
         /// </summary>
-        GM2022_6
+        GM2022_6,
+        /// <summary>
+        /// Whether the data file is from version GM2022.8
+        /// </summary>
+        GM2022_8
     }
 
     /// <summary>
     /// Tracks the game version beyond GMS2.
     /// </summary>
-    public GMSVersions GMS2Version { get; set; } = GMSVersions.GMS2;
+    public GMS2Versions GMS2Version { get; set; } = GMS2Versions.GMS2;
 
     /// <inheritdoc/>
     /// <exception cref="IOException">If <see cref="LicenseMD5"/> or <see cref="GMS2GameGUID"/> has an invalid length.</exception>
@@ -432,8 +446,14 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
-        if (GMS2Version < GMSVersions.GMS2_3 && reader.GMS2_3)
-            GMS2Version = GMSVersions.GMS2_3;
+        if (GMS2Version < GMS2Versions.GM2022_8 && reader.AllChunkNames.Contains("FEAT"))
+            GMS2Version = GMS2Versions.GM2022_8;
+        if (GMS2Version < GMS2Versions.GMS2_3_6 && reader.AllChunkNames.Contains("FEDS"))
+            GMS2Version = GMS2Versions.GMS2_3_6;
+        if (GMS2Version < GMS2Versions.GMS2_3 && reader.AllChunkNames.Contains("SEQN"))
+            GMS2Version = GMS2Versions.GMS2_3;
+        if (GMS2Version < GMS2Versions.GMS2_2_1 && reader.AllChunkNames.Contains("TGIN"))
+            GMS2Version = GMS2Versions.GMS2_2_1;
         IsDebuggerDisabled = reader.ReadByte() != 0;
         BytecodeVersion = reader.ReadByte();
         Unknown = reader.ReadUInt16();
@@ -533,7 +553,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     public override string ToString()
     {
         if (Major == 2)
-            return DisplayName + " (" + Enum.GetName(typeof(GMSVersions), GMS2Version).Replace("_", ".") + ", bytecode " + BytecodeVersion + ")";
+            return DisplayName + " (" + Enum.GetName(typeof(GMS2Versions), GMS2Version).Replace("_", ".") + ", bytecode " + BytecodeVersion + ")";
         else
             return DisplayName + " (GMS " + Major + "." + Minor + "." + Release + "." + Build + ", bytecode " + BytecodeVersion + ")";
     }
