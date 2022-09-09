@@ -450,7 +450,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
             GMS2Version = GMS2Versions.GM2022_8;
         if (GMS2Version < GMS2Versions.GMS2_3_6 && reader.AllChunkNames.Contains("FEDS"))
             GMS2Version = GMS2Versions.GMS2_3_6;
-        if (GMS2Version < GMS2Versions.GMS2_3 && reader.AllChunkNames.Contains("SEQN"))
+        if (GMS2Version < GMS2Versions.GMS2_3 && reader.GMS2_3)
             GMS2Version = GMS2Versions.GMS2_3;
         if (GMS2Version < GMS2Versions.GMS2_2_1 && reader.AllChunkNames.Contains("TGIN"))
             GMS2Version = GMS2Versions.GMS2_2_1;
