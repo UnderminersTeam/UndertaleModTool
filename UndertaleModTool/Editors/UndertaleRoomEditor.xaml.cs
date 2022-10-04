@@ -103,31 +103,6 @@ namespace UndertaleModTool
             visualOffProp.SetValue(roomCanvas, prevOffset);
         }
 
-        /// <summary>
-        /// Checks if the room layers are ordered by depth. If they are not, the user will be prompted,
-        /// whether they want to rearrange them.
-        /// </summary>
-        /// <param name="room">The <see cref="UndertaleRoom"/>, whose layers should be checked and,
-        /// if necessary, rearranged.</param>
-        public static void CheckAndRearrangeLayers(UndertaleRoom room)
-        {
-            bool ordered = true;
-            for (int i = 0; i < room.Layers.Count - 1; i++)
-            {
-                if (room.Layers[i].LayerDepth > room.Layers[i + 1].LayerDepth)
-                {
-                    ordered = false;
-                    break;
-                }
-            }
-
-            if (!ordered)
-            {
-                if (mainWindow.ShowQuestion("Room layers are not ordered by depth.\nRearrange them?", MessageBoxImage.Warning) == MessageBoxResult.Yes)
-                    room.RearrangeLayers();
-            }
-        }
-
         private void ExportAsPNG_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog dlg = new();
@@ -185,15 +160,15 @@ namespace UndertaleModTool
                 GameObjItems.Header = room.Flags.HasFlag(RoomEntryFlags.IsGMS2)
                                       ? "Game objects (from all layers)"
                                       : "Game objects";
-                room.SetupRoom();
+                SetupRoomWithGrids(room);
                 GenerateSpriteCache(DataContext as UndertaleRoom);
 
                 if (room.Layers.Count > 0) // if GMS 2+
                 {
                     LayerZIndexConverter.ProcessOnce = true;
 
-                    if (IsLoaded)
-                        CheckAndRearrangeLayers(room);
+                    if (!room.CheckLayersDepthOrder())
+                        room.RearrangeLayers();
 
                     Parallel.ForEach(room.Layers, (layer) =>
                     {
@@ -476,7 +451,7 @@ namespace UndertaleModTool
                 }
 
                 // recalculates room grid size
-                room.SetupRoom();
+                SetupRoomWithGrids(room);
             }
             else if (obj is GameObject gameObj)
             {
@@ -867,6 +842,7 @@ namespace UndertaleModTool
                 if (resListView.ItemContainerGenerator.ContainerFromItem(obj1) is TreeViewItem resItem)
                 {
                     resItem.IsSelected = true;
+                    resItem.Focus();
 
                     mainTreeViewer.UpdateLayout();
                     mainTreeViewer.ScrollToHorizontalOffset(0);
@@ -1163,31 +1139,30 @@ namespace UndertaleModTool
 
         public void Command_Undo(object sender, ExecutedRoutedEventArgs e)
         {
-            if (undoStack.Any())
+            if (!undoStack.Any()) return;
+
+            var undoObject = undoStack.Pop();
+            if (undoObject is GameObject && ObjectEditor.Content is GameObject)
             {
-                var undoObject = undoStack.Pop();
-                if (undoObject is GameObject && ObjectEditor.Content is GameObject)
+                var toChange = ObjectEditor.Content as GameObject;
+                var undoGameObject = undoObject as GameObject;
+                if (toChange.InstanceID == undoGameObject.InstanceID)
                 {
-                    var toChange = ObjectEditor.Content as GameObject;
-                    var undoGameObject = undoObject as GameObject;
-                    if (toChange.InstanceID == undoGameObject.InstanceID)
-                    {
-                        toChange.X = undoGameObject.X;
-                        toChange.Y = undoGameObject.Y;
-                    }
+                    toChange.X = undoGameObject.X;
+                    toChange.Y = undoGameObject.Y;
                 }
-                if (undoObject is Tile && ObjectEditor.Content is Tile)
-                {
-                    var toChange = ObjectEditor.Content as Tile;
-                    var undoGameObject = undoObject as Tile;
-                    if (toChange.InstanceID == undoGameObject.InstanceID)
-                    {
-                        toChange.X = undoGameObject.X;
-                        toChange.Y = undoGameObject.Y;
-                    }
-                }
-                (this.DataContext as UndertaleRoom)?.SetupRoom(false);
             }
+            if (undoObject is Tile && ObjectEditor.Content is Tile)
+            {
+                var toChange = ObjectEditor.Content as Tile;
+                var undoGameObject = undoObject as Tile;
+                if (toChange.InstanceID == undoGameObject.InstanceID)
+                {
+                    toChange.X = undoGameObject.X;
+                    toChange.Y = undoGameObject.Y;
+                }
+            }
+            (this.DataContext as UndertaleRoom)?.SetupRoom(false, false);
         }
 
         public void Command_Paste(object sender, ExecutedRoutedEventArgs e)
@@ -1289,20 +1264,20 @@ namespace UndertaleModTool
                     {
                         baseName = name[..^numMatch.Length];
                         nameNum = Int32.Parse(numMatch.Groups[0].Value) + 1;
-
-                        name = baseName + nameNum;
                     }
                     // Name doesn't have a trailing number, so it's the first duplicate.
-                    // Thus we append append "1" to it ("name" -> "name1")
+                    // Thus we set baseName and nameNum to produce "name1" on the next loop.
                     else
-                        name += "1";
+                    {
+                        baseName = name;
+                        nameNum = 1;
+                    }
                 }
                 // If base name is already extracted, increment "nameNum" and append it to the base name
                 else
-                {
                     nameNum++;
-                    name = baseName + nameNum;
-                }
+                // Update name using baseName and nameNum
+                name = baseName + nameNum;
             }
 
             Layer layer = new()
@@ -1316,9 +1291,12 @@ namespace UndertaleModTool
             room.Layers.Add(layer);
             room.UpdateBGColorLayer();
 
-            LayerZIndexConverter.ProcessOnce = true;
-            foreach (Layer l in room.Layers)
-                l.UpdateZIndex();
+            if (room.Layers.Count > 1)
+            {
+                LayerZIndexConverter.ProcessOnce = true;
+                foreach (Layer l in room.Layers)
+                    l.UpdateZIndex();
+            }
             layer.ParentRoom = room;
 
             if (layer.LayerType == LayerType.Assets)
@@ -1692,6 +1670,23 @@ namespace UndertaleModTool
             if (canvas.CurrentLayer is not null)
                 ObjElemDict.Remove(canvas.CurrentLayer);
         }
+
+        public static void SetupRoomWithGrids(UndertaleRoom room)
+        {
+            if (Settings.Instance.GridWidthEnabled)
+                room.GridWidth = Settings.Instance.GlobalGridWidth;
+            if (Settings.Instance.GridHeightEnabled)
+                room.GridHeight = Settings.Instance.GlobalGridHeight;
+
+            // SetupRoom already overrides GridWidth and GridHeight if the global setting is disabled, but does
+            // not do that for the thickness. Hence why we're overriding it here manually to the default value should
+            // the setting be disabled.
+            if (Settings.Instance.GridThicknessEnabled)
+                room.GridThicknessPx = Settings.Instance.GlobalGridThickness;
+            else
+                room.GridThicknessPx = 1;
+            room.SetupRoom(!Settings.Instance.GridWidthEnabled, !Settings.Instance.GridHeightEnabled);
+        }
     }
 
     public partial class RoomCanvas : Canvas
@@ -1735,6 +1730,7 @@ namespace UndertaleModTool
         public DataTemplate TilesDataTemplate { get; set; }
         public DataTemplate AssetsDataTemplate { get; set; }
         public DataTemplate BackgroundDataTemplate { get; set; }
+        public DataTemplate EffectDataTemplate { get; set; }
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
@@ -1750,6 +1746,8 @@ namespace UndertaleModTool
                         return AssetsDataTemplate;
                     case LayerType.Background:
                         return BackgroundDataTemplate;
+                    case LayerType.Effect:
+                        return EffectDataTemplate;
                 }
             }
 
@@ -1836,11 +1834,20 @@ namespace UndertaleModTool
 
         private static bool suspended;
         private static int remainingCount = -1;
+        private static Layer selectedLayer;
+        private static int selectedLayerIndex = -1;
+
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (values[0] is Layer layer && layer.ParentRoom is UndertaleRoom room)
             {
-                int layerIndex = room.Layers.Count - room.Layers.IndexOf(layer) - 1;
+                int layerZIndex, layerIndex;
+                if (layer == selectedLayer && selectedLayerIndex != -1)
+                    layerIndex = selectedLayerIndex;
+                else
+                    layerIndex = room.Layers.IndexOf(layer);
+
+                layerZIndex = room.Layers.Count - layerIndex - 1;
 
                 if (ProcessOnce)
                 {
@@ -1857,28 +1864,28 @@ namespace UndertaleModTool
                         }
                     }
                 }
-                else if (!suspended)
+                else if (!suspended && room.Layers.Count > 1)
                 {
-                    bool ordered = true;
-                    for (int i = 0; i < room.Layers.Count - 1; i++)
-                    {
-                        if (room.Layers[i].LayerDepth > room.Layers[i + 1].LayerDepth)
-                        {
-                            ordered = false;
-                            break;
-                        }
-                    }
-
-                    if (!ordered)
+                    if (!room.CheckLayersDepthOrder())
                     {
                         suspended = true;
+
                         var roomEditor = MainWindow.FindVisualChild<UndertaleRoomEditor>((Application.Current.MainWindow as MainWindow).DataEditor);
-                        room.RearrangeLayers(roomEditor?.RoomObjectsTree.SelectedItem as Layer);
+                        selectedLayer = roomEditor?.RoomObjectsTree.SelectedItem as Layer;
+                        
+                        if (selectedLayer is not null)
+                        {
+                            Layer[] orderedLayers = room.Layers.OrderBy(l => l.LayerDepth).ToArray();
+                            selectedLayerIndex = Array.IndexOf(orderedLayers, selectedLayer);
+                            room.RearrangeLayers(new(selectedLayer, orderedLayers, selectedLayerIndex));
+                            selectedLayerIndex = -1;
+                        }
+
                         suspended = false;
                     }
                 }
 
-                return layerIndex;
+                return layerZIndex;
             }
             else
                 return -1;

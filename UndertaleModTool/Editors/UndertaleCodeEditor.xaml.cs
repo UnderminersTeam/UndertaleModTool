@@ -71,6 +71,7 @@ namespace UndertaleModTool
 
             // Decompiled editor styling and functionality
             DecompiledSearchPanel = SearchPanel.Install(DecompiledEditor.TextArea);
+            DecompiledSearchPanel.LostFocus += SearchPanel_LostFocus;
             DecompiledSearchPanel.MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
 
             using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("UndertaleModTool.Resources.GML.xshd"))
@@ -150,6 +151,7 @@ namespace UndertaleModTool
 
             // Disassembly editor styling and functionality
             DisassemblySearchPanel = SearchPanel.Install(DisassemblyEditor.TextArea);
+            DisassemblySearchPanel.LostFocus += SearchPanel_LostFocus;
             DisassemblySearchPanel.MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
 
             using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("UndertaleModTool.Resources.VMASM.xshd"))
@@ -172,6 +174,27 @@ namespace UndertaleModTool
             DisassemblyEditor.TextArea.SelectionForeground = null;
             DisassemblyEditor.TextArea.SelectionBorder = null;
             DisassemblyEditor.TextArea.SelectionCornerRadius = 0;
+        }
+
+        private void SearchPanel_LostFocus(object sender, RoutedEventArgs e)
+        {
+            SearchPanel panel = sender as SearchPanel;
+            BindingFlags flags = BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.Instance;
+            FieldInfo toolTipField = typeof(SearchPanel).GetField("messageView", flags);
+            if (toolTipField is null)
+            {
+                Debug.WriteLine("The source code of \"AvalonEdit.Search.SearchPanel\" was changed - can't find \"messageView\" field.");
+                return;
+            }
+
+            ToolTip noMatchesTT = toolTipField.GetValue(panel) as ToolTip;
+            if (noMatchesTT is null)
+            {
+                Debug.WriteLine("Can't get an instance of the \"SearchPanel.messageView\" popup.");
+                return;
+            }
+
+            noMatchesTT.IsOpen = false;
         }
 
         private async void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)

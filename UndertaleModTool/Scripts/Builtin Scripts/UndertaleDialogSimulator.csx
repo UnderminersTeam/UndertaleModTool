@@ -319,7 +319,7 @@ private void AddNewTile(UndertaleSprite tilesprite, UndertaleNamedResource tileo
         tilelayer.AssetsData.Sprites = new UndertalePointerList<UndertaleRoom.SpriteInstance>();
     
     UndertaleRoom.Tile tile = new UndertaleRoom.Tile();
-    tile._SpriteMode = true;
+    tile.spriteMode = true;
     tile.X = tilex;
     tile.Y = tiley;
     tile.SpriteDefinition = tilesprite;

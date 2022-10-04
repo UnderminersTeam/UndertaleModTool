@@ -101,6 +101,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     public uint Right { get; set; } = 1024;
     public uint Bottom { get; set; } = 768;
 
+    private double _gridWidth = 16.0;
+    private double _gridHeight = 16.0;
+
     /// <summary>
     /// The gravity towards x axis using room physics in m/s.
     /// </summary>
@@ -119,12 +122,12 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// <summary>
     /// The width of the room grid in pixels.
     /// </summary>
-    public double GridWidth { get; set; } = 16d;
+    public double GridWidth { get => _gridWidth; set { if (value >= 0) _gridWidth = value; } }
 
     /// <summary>
     /// The height of the room grid in pixels.
     /// </summary>
-    public double GridHeight { get; set; } = 16d;
+    public double GridHeight { get => _gridHeight; set { if (value >= 0) _gridHeight = value; } }
 
     /// <summary>
     /// The thickness of the room grid in pixels.
@@ -169,19 +172,50 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     public void UpdateBGColorLayer() => OnPropertyChanged("BGColorLayer");
 
     /// <summary>
-    /// Orders the room layers list by depth.
+    /// Checks whether <see cref="Layers"/> is ordered by <see cref="Layer.LayerDepth"/>.
     /// </summary>
-    /// <param name="selectedLayer">A <see cref="Layer"/> that's currently selected in the room editor.</param>
-    public void RearrangeLayers(Layer selectedLayer = null)
+    /// <returns><see langword="true"/> if <see cref="Layers"/> is ordered, and <see langword="false"/> otherwise.</returns>
+    public bool CheckLayersDepthOrder()
+    {
+        for (int i = 0; i < Layers.Count - 1; i++)
+        {
+            if (Layers[i].LayerDepth > Layers[i + 1].LayerDepth)
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Orders <see cref="Layers"/> by depth.
+    /// </summary>
+    /// <param name="layerProperties">
+    /// A <see cref="Tuple"/> that consists of: the selected layer (in the room editor), ordered layers array and selected layer index.
+    /// This parameter is used only by <c>LayerZIndexConverter</c> (part of the room editor UI).
+    /// </param>
+    public void RearrangeLayers(Tuple<Layer, Layer[], int> layerProperties = null)
     {
         if (Layers.Count == 0)
             return;
 
-        Layer[] orderedLayers = Layers.OrderBy(l => l.LayerDepth).ToArray();
+        Layer[] orderedLayers = null;
+        Layer selectedLayer = null;
+        int selectedLayerIndex = -1;
+        if (layerProperties is not null)
+        {
+            orderedLayers = layerProperties.Item2;
+            selectedLayer = layerProperties.Item1;
+            selectedLayerIndex = layerProperties.Item3;
+        }
+        else
+        {
+            orderedLayers = Layers.OrderBy(l => l.LayerDepth).ToArray();
+            selectedLayerIndex = Array.IndexOf(orderedLayers, selectedLayer);
+        }
 
         // Ensure that room objects tree will have the layer to re-select
         if (selectedLayer is not null)
-            Layers[Array.IndexOf(orderedLayers, selectedLayer)] = selectedLayer;
+            Layers[selectedLayerIndex] = selectedLayer;
 
         for (int i = 0; i < orderedLayers.Length; i++)
         {
@@ -365,8 +399,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// Initialize the room by setting every <see cref="Background.ParentRoom"/> or <see cref="Layer.ParentRoom"/>
     /// (depending on the GameMaker version), and optionally calculate the room grid size.
     /// </summary>
-    /// <param name="calculateGrid">Whether to calculate the room grid size.</param>
-    public void SetupRoom(bool calculateGrid = true)
+    /// <param name="calculateGridWidth">Whether to calculate the room grid width.</param>
+    /// <param name="calculateGridHeight">Whether to calculate the room grid height.</param>
+    public void SetupRoom(bool calculateGridWidth = true, bool calculateGridHeight = true)
     {
         foreach (Layer layer in Layers)
         {
@@ -376,54 +411,58 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         foreach (UndertaleRoom.Background bgnd in Backgrounds)
             bgnd.ParentRoom = this;
 
-        if (calculateGrid)
+        if (!(calculateGridWidth || calculateGridHeight)) return;
+
+        // Automatically set the grid size to whatever most tiles are sized
+
+        Dictionary<Point, uint> tileSizes = new();
+        IEnumerable<Tile> tileList;
+
+        if (Layers.Count > 0)
         {
-            // Automagically set the grid size to whatever most tiles are sized
-
-            Dictionary<Point, uint> tileSizes = new();
-            IEnumerable<Tile> tileList;
-
-            if (Layers.Count > 0)
+            tileList = new List<Tile>();
+            foreach (Layer layer in Layers)
             {
-                tileList = new List<Tile>();
-                foreach (Layer layer in Layers)
+                if (layer.LayerType == LayerType.Assets)
+                    tileList = tileList.Concat(layer.AssetsData.LegacyTiles);
+                else if (layer.LayerType == LayerType.Tiles && layer.TilesData.TileData.Length != 0)
                 {
-                    if (layer.LayerType == LayerType.Assets)
-                        tileList = tileList.Concat(layer.AssetsData.LegacyTiles);
-                    else if (layer.LayerType == LayerType.Tiles && layer.TilesData.TileData.Length != 0)
-                    {
-                        int w = (int)(Width / layer.TilesData.TilesX);
-                        int h = (int)(Height / layer.TilesData.TilesY);
-                        tileSizes[new(w, h)] = layer.TilesData.TilesX * layer.TilesData.TilesY;
-                    }
-                }
-
-            }
-            else
-                tileList = Tiles;
-
-            // Loop through each tile and save how many times their sizes are used
-            foreach (Tile tile in tileList)
-            {
-                Point scale = new((int)tile.Width, (int)tile.Height);
-                if (tileSizes.ContainsKey(scale))
-                {
-                    tileSizes[scale]++;
-                }
-                else
-                {
-                    tileSizes.Add(scale, 1);
+                    int w = (int) (Width / layer.TilesData.TilesX);
+                    int h = (int) (Height / layer.TilesData.TilesY);
+                    tileSizes[new(w, h)] = layer.TilesData.TilesX * layer.TilesData.TilesY;
                 }
             }
 
-            // If tiles exist at all, grab the most used tile size and use that as our grid size
-            if (tileSizes.Count > 0)
-            {
-                var largestKey = tileSizes.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
-                GridWidth = largestKey.X;
-                GridHeight = largestKey.Y;
-            }
         }
+        else
+            tileList = Tiles;
+
+        // Loop through each tile and save how many times their sizes are used
+        foreach (Tile tile in tileList)
+        {
+            Point scale = new((int) tile.Width, (int) tile.Height);
+            if (tileSizes.ContainsKey(scale))
+                tileSizes[scale]++;
+            else
+                tileSizes.Add(scale, 1);
+        }
+
+
+        if (tileSizes.Count <= 0)
+        {
+            if (calculateGridWidth)
+                GridWidth = 16;
+            if (calculateGridHeight)
+                GridHeight = 16;
+            return;
+        }
+
+        // If tiles exist at all, grab the most used tile size and use that as our grid size
+        var largestKey = tileSizes.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
+        if (calculateGridWidth)
+            GridWidth = largestKey.X;
+        if (calculateGridHeight)
+            GridHeight = largestKey.Y;
     }
 
     /// <inheritdoc />
@@ -1331,7 +1370,13 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 case LayerType.Tiles: Data = reader.ReadUndertaleObject<LayerTilesData>(); break;
                 case LayerType.Background: Data = reader.ReadUndertaleObject<LayerBackgroundData>(); break;
                 case LayerType.Assets: Data = reader.ReadUndertaleObject<LayerAssetsData>(); break;
-                case LayerType.Effect: Data = reader.ReadUndertaleObject<LayerEffectData>(); break;
+                case LayerType.Effect:
+                    // Because effect data is empty in 2022.1+, it would erroneously read the next object.
+                    Data =
+                        reader.undertaleData.GMS2022_1
+                        ? new LayerEffectData() { EffectType = EffectType, Properties = EffectProperties }
+                        : reader.ReadUndertaleObject<LayerEffectData>();
+                    break;
                 default: throw new Exception("Unsupported layer type " + LayerType);
             }
         }

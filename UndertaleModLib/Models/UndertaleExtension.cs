@@ -216,6 +216,53 @@ public class UndertaleExtensionFile : UndertaleObject, IDisposable
     }
 }
 
+
+[PropertyChanged.AddINotifyPropertyChangedInterface]
+public class UndertaleExtensionOption : UndertaleObject, IDisposable
+{
+    public enum OptionKind : uint
+    {
+        Boolean = 0,
+        Number = 1,
+        String = 2
+    }
+
+    public UndertaleString Name { get; set; }
+    public UndertaleString Value { get; set; }
+    public OptionKind Kind { get; set; }
+
+    /// <inheritdoc />
+    public void Serialize(UndertaleWriter writer)
+    {
+        writer.WriteUndertaleString(Name);
+        writer.WriteUndertaleString(Value);
+        writer.Write((uint)Kind);
+    }
+
+    /// <inheritdoc />
+    public void Unserialize(UndertaleReader reader)
+    {
+        Name = reader.ReadUndertaleString();
+        Value = reader.ReadUndertaleString();
+        Kind = (OptionKind)reader.ReadUInt32();
+    }
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return Name.Content;
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        Name = null;
+        Value = null;
+    }
+}
+
 /// <summary>
 /// An extension entry in a GameMaker data file.
 /// </summary>
@@ -236,6 +283,7 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
     public UndertaleString ClassName { get; set; }
 
     public UndertalePointerList<UndertaleExtensionFile> Files { get; set; } = new UndertalePointerList<UndertaleExtensionFile>();
+    public UndertalePointerList<UndertaleExtensionOption> Options { get; set; } = new UndertalePointerList<UndertaleExtensionOption>();
 
     /// <inheritdoc />
     public override string ToString()
@@ -251,10 +299,12 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
         foreach (UndertaleExtensionFile file in Files)
             file?.Dispose();
         Files = new();
+        foreach (UndertaleExtensionOption opt in Options)
+            opt?.Dispose();
+        Options = new();
         FolderName = null;
         Name = null;
         ClassName = null;
-        Files = new();
     }
 
     /// <inheritdoc />
@@ -263,7 +313,17 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
         writer.WriteUndertaleString(FolderName);
         writer.WriteUndertaleString(Name);
         writer.WriteUndertaleString(ClassName);
-        writer.WriteUndertaleObject(Files);
+        if (writer.undertaleData.GM2022_6)
+        {
+            writer.WriteUndertaleObjectPointer(Files);
+            writer.WriteUndertaleObjectPointer(Options);
+            writer.WriteUndertaleObject(Files);
+            writer.WriteUndertaleObject(Options);
+        }
+        else
+        {
+            writer.WriteUndertaleObject(Files);
+        }
     }
 
     /// <inheritdoc />
@@ -272,6 +332,16 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
         FolderName = reader.ReadUndertaleString();
         Name = reader.ReadUndertaleString();
         ClassName = reader.ReadUndertaleString();
-        Files = reader.ReadUndertaleObject<UndertalePointerList<UndertaleExtensionFile>>();
+        if (reader.undertaleData.GM2022_6)
+        {
+            Files = reader.ReadUndertaleObjectPointer<UndertalePointerList<UndertaleExtensionFile>>();
+            Options = reader.ReadUndertaleObjectPointer<UndertalePointerList<UndertaleExtensionOption>>();
+            reader.ReadUndertaleObject(Files);
+            reader.ReadUndertaleObject(Options);
+        }
+        else
+        {
+            Files = reader.ReadUndertaleObject<UndertalePointerList<UndertaleExtensionFile>>();
+        }
     }
 }

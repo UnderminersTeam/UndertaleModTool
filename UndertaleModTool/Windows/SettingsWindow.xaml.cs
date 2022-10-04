@@ -61,16 +61,6 @@ namespace UndertaleModTool
             }
         }
 
-        public static bool Warn_About_GMS23
-        {
-            get => Settings.Instance.Warn_About_GMS23;
-            set
-            {
-                Settings.Instance.Warn_About_GMS23 = value;
-                Settings.Save();
-            }
-        }
-
         public static bool UseGMLCache
         {
             get => Settings.Instance.UseGMLCache;
@@ -125,6 +115,66 @@ namespace UndertaleModTool
             set
             {
                 Settings.Instance.WarnOnClose = value;
+                Settings.Save();
+            }
+        }
+
+        public static double GlobalGridWidth
+        {
+            get => Settings.Instance.GlobalGridWidth;
+            set
+            {
+                Settings.Instance.GlobalGridWidth = value;
+                Settings.Save();
+            }
+        }
+
+        public static bool GridWidthEnabled
+        {
+            get => Settings.Instance.GridWidthEnabled;
+            set
+            {
+                Settings.Instance.GridWidthEnabled = value;
+                Settings.Save();
+            }
+        }
+
+        public static double GlobalGridHeight
+        {
+            get => Settings.Instance.GlobalGridHeight;
+            set
+            {
+                Settings.Instance.GlobalGridHeight = value;
+                Settings.Save();
+            }
+        }
+
+        public static bool GridHeightEnabled
+        {
+            get => Settings.Instance.GridHeightEnabled;
+            set
+            {
+                Settings.Instance.GridHeightEnabled = value;
+                Settings.Save();
+            }
+        }
+
+        public static double GlobalGridThickness
+        {
+            get => Settings.Instance.GlobalGridThickness;
+            set
+            {
+                Settings.Instance.GlobalGridThickness = value;
+                Settings.Save();
+            }
+        }
+
+        public static bool GridThicknessEnabled
+        {
+            get => Settings.Instance.GridThicknessEnabled;
+            set
+            {
+                Settings.Instance.GridThicknessEnabled = value;
                 Settings.Save();
             }
         }

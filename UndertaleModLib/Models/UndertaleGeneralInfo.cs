@@ -300,6 +300,11 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// </summary>
     public byte[] GMS2GameGUID { get; set; } = new byte[16];
 
+    /// <summary>
+    /// Whether the random UID's timestamp was initially offset.
+    /// </summary>
+    public bool InfoTimestampOffset { get; set; } = true;
+
     /// <inheritdoc/>
     /// <exception cref="IOException">If <see cref="LicenseMD5"/> or <see cref="GMS2GameGUID"/> has an invalid length.</exception>
     public void Serialize(UndertaleWriter writer)
@@ -343,21 +348,8 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
             // Write random UID
             Random random = new Random((int)(Timestamp & 4294967295L));
             long firstRandom = (long)random.Next() << 32 | (long)random.Next();
-            long infoNumber = (long)(Timestamp - 1000);
-            ulong temp = (ulong)infoNumber;
-            temp = ((temp << 56 & 18374686479671623680UL) | (temp >> 8 & 71776119061217280UL) |
-                    (temp << 32 & 280375465082880UL) | (temp >> 16 & 1095216660480UL) | (temp << 8 & 4278190080UL) |
-                    (temp >> 24 & 16711680UL) | (temp >> 16 & 65280UL) | (temp >> 32 & 255UL));
-            infoNumber = (long)temp;
-            infoNumber ^= firstRandom;
-            infoNumber = ~infoNumber;
-            infoNumber ^= ((long)GameID << 32 | (long)GameID);
-            infoNumber ^= ((long)(DefaultWindowWidth + (int)Info) << 48 |
-                           (long)(DefaultWindowHeight + (int)Info) << 32 |
-                           (long)(DefaultWindowHeight + (int)Info) << 16 |
-                           (long)(DefaultWindowWidth + (int)Info));
-            infoNumber ^= BytecodeVersion;
-            int infoLocation = Math.Abs((int)((int)(Timestamp & 65535L) / 7 + (GameID - DefaultWindowWidth) + RoomOrder.Count)) % 4;
+            long infoNumber = GetInfoNumber(firstRandom, InfoTimestampOffset);
+            int infoLocation = Math.Abs((int)((long)Timestamp & 65535L) / 7 + (int)(GameID - DefaultWindowWidth) + RoomOrder.Count) % 4;
             GMS2RandomUID.Clear();
             writer.Write(firstRandom);
             GMS2RandomUID.Add(firstRandom);
@@ -420,40 +412,35 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         {
             // Begin parsing random UID, and verify it based on original algorithm
             GMS2RandomUID = new List<long>();
-            Random random = new Random((int)(Timestamp & 4294967295L));
+
+            Random random = new Random((int)((long)Timestamp & 4294967295L));
             long firstRandom = (long)random.Next() << 32 | (long)random.Next();
             if (reader.ReadInt64() != firstRandom)
-            {
-                //throw new IOException("Unexpected random UID");
-            }
-            long infoNumber = (long)(Timestamp - 1000);
-            ulong temp = (ulong)infoNumber;
-            temp = ((temp << 56 & 18374686479671623680UL) | (temp >> 8 & 71776119061217280UL) |
-                    (temp << 32 & 280375465082880UL) | (temp >> 16 & 1095216660480UL) | (temp << 8 & 4278190080UL) |
-                    (temp >> 24 & 16711680UL) | (temp >> 16 & 65280UL) | (temp >> 32 & 255UL));
-            infoNumber = (long)temp;
-            infoNumber ^= firstRandom;
-            infoNumber = ~infoNumber;
-            infoNumber ^= ((long)GameID << 32 | (long)GameID);
-            infoNumber ^= ((long)(DefaultWindowWidth + (int)Info) << 48 |
-                           (long)(DefaultWindowHeight + (int)Info) << 32 |
-                           (long)(DefaultWindowHeight + (int)Info) << 16 |
-                           (long)(DefaultWindowWidth + (int)Info));
-            infoNumber ^= BytecodeVersion;
-            int infoLocation = (int)(Math.Abs((int)(Timestamp & 65535L) / 7 + (GameID - DefaultWindowWidth) + RoomOrder.Count) % 4);
+                throw new Exception("Unexpected random UID #1");
+            int infoLocation = Math.Abs((int)((long)Timestamp & 65535L) / 7 + (int)(GameID - DefaultWindowWidth) + RoomOrder.Count) % 4;
             for (int i = 0; i < 4; i++)
             {
                 if (i == infoLocation)
                 {
-                    reader.ReadInt64();
-                    GMS2RandomUID.Add(infoNumber);
+                    long curr = reader.ReadInt64();
+                    GMS2RandomUID.Add(curr);
+                    if (curr != GetInfoNumber(firstRandom, true))
+                    {
+                        if (curr != GetInfoNumber(firstRandom, false))
+                            throw new Exception("Unexpected random UID info");
+                        else
+                            InfoTimestampOffset = false;
+                    }
                 }
                 else
                 {
-                    reader.ReadInt64();
-                    int first = random.Next();
-                    int second = random.Next();
-                    GMS2RandomUID.Add(((long)first << 32) | (long)second);
+                    int first = reader.ReadInt32();
+                    int second = reader.ReadInt32();
+                    if (first != random.Next())
+                        throw new Exception("Unexpected random UID #2");
+                    if (second != random.Next())
+                        throw new Exception("Unexpected random UID #3");
+                    GMS2RandomUID.Add((long)(first << 32) | (long)second);
                 }
             }
             GMS2FPS = reader.ReadSingle();
@@ -462,6 +449,30 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         }
         reader.undertaleData.UnsupportedBytecodeVersion = BytecodeVersion < 13 || BytecodeVersion > 17;
         reader.Bytecode14OrLower = BytecodeVersion <= 14;
+    }
+
+    /// <summary>
+    /// Generates "info number" used for GMS2 UIDs.
+    /// </summary>
+    private long GetInfoNumber(long firstRandom, bool infoTimestampOffset)
+    {
+        long infoNumber = (long)Timestamp;
+        if (infoTimestampOffset)
+            infoNumber -= 1000;
+        ulong temp = (ulong)infoNumber;
+        temp = ((temp << 56 & 18374686479671623680UL) | (temp >> 8 & 71776119061217280UL) |
+                (temp << 32 & 280375465082880UL) | (temp >> 16 & 1095216660480UL) | (temp << 8 & 4278190080UL) |
+                (temp >> 24 & 16711680UL) | (temp >> 16 & 65280UL) | (temp >> 32 & 255UL));
+        infoNumber = (long)temp;
+        infoNumber ^= firstRandom;
+        infoNumber = ~infoNumber;
+        infoNumber ^= ((long)GameID << 32 | (long)GameID);
+        infoNumber ^= ((long)(DefaultWindowWidth + (int)Info) << 48 |
+                       (long)(DefaultWindowHeight + (int)Info) << 32 |
+                       (long)(DefaultWindowHeight + (int)Info) << 16 |
+                       (long)(DefaultWindowWidth + (int)Info));
+        infoNumber ^= BytecodeVersion;
+        return infoNumber;
     }
 
     /// <inheritdoc />

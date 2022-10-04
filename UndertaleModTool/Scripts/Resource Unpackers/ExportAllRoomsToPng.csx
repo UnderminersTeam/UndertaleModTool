@@ -35,7 +35,7 @@ string exportedTexturesFolder = PromptChooseDirectory("Choose an export folder")
 if (exportedTexturesFolder == null)
     throw new ScriptException("The export folder was not set, stopping script.");
 
-bool displayGrid = ScriptQuestion("Draw background grid?");
+bool displayGrid = ScriptQuestion("Draw room grid?");
 
 if (mainWindow.IsGMS2 == Visibility.Visible)
     if (!ScriptQuestion("Use the memory economy mode (uses less RAM, but slower)?"))
@@ -69,7 +69,7 @@ async Task DumpRooms()
 
         UndertaleRoom room = Data.Rooms[i];
 
-        mainWindow.Selected = room; 
+        mainWindow.CurrentTab.CurrentObject = room; 
 
         if (roomRenderer is null)
         {
