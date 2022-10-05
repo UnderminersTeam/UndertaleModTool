@@ -2,6 +2,7 @@
 
 EnsureDataLoaded();
 
+// Is actually incompatible. Something broke when I (Space Core) tried to combine the UT and SURVEY_PROGRAM code.
 if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
 {
     ScriptError("Error 0: Incompatible with the new Deltarune Chapter 1 & 2 demo");
@@ -116,7 +117,16 @@ void StringSwap(int n, int k)
     Data.Strings[n].Content = value;
 }
 
-if (Data.GeneralInfo.Filename.Content.ToLower().Contains("undertale"))
+string GameName = Data.GeneralInfo.DisplayName.Content.ToLower();
+bool deltamode = false;
+if (GameName.Contains("undertale") || GameName.Contains("nxtale"))
+    deltamode = false;
+else if (GameName.Contains("survey_program"))
+    deltamode = true;
+else
+    deltamode = ScriptQuestion("Is this Deltarune Chapter 1 or a mod thereof?") ? true : false;
+
+if (!deltamode)
 {
     List<int> choicer_lines = new List<int>();
     List<int> final_lines = new List<int>();
@@ -228,10 +238,10 @@ foreach (var obj in Data.GameObjects)
 {
     if (!obj.Visible)
         continue;
-    if (obj._Sprite.CachedId >= 0)
-        obj.Sprite = Data.Sprites[obj._Sprite.CachedId];
-    if (obj._TextureMaskId.CachedId >= 0)
-        obj.TextureMaskId = Data.Sprites[obj._TextureMaskId.CachedId];
+    if (obj._sprite.CachedId >= 0)
+        obj.Sprite = Data.Sprites[obj._sprite.CachedId];
+    if (obj._textureMaskId.CachedId >= 0)
+        obj.TextureMaskId = Data.Sprites[obj._textureMaskId.CachedId];
 }
 
 ScriptMessage("* GASTER NOISES *\n\nIT'S DONE");
