@@ -124,7 +124,7 @@ if (GameName.Contains("undertale") || GameName.Contains("nxtale"))
 else if (GameName.Contains("survey_program"))
     deltamode = true;
 else
-    deltamode = ScriptQuestion("Is this Deltarune Chapter 1 or a mod thereof?") ? true : false;
+    deltamode = ScriptQuestion("Is this Deltarune Chapter 1 or a mod thereof?");
 
 if (!deltamode)
 {
