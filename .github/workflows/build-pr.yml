@@ -1,0 +1,13 @@
+﻿name: Build PR
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml
+    with:
+      gui-single-file: false
+      gui-bundled: false
+      cli-bundled: false

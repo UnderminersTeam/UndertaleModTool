@@ -1,9 +1,58 @@
 ﻿name: Build
 
 on:
-  pull_request:
   workflow_dispatch:
+    inputs:
+      gui-single-file:
+        required: false
+        type: boolean
+        default: true
+      gui-non-single-file:
+        required: false
+        type: boolean
+        default: true
+      gui-bundled:
+        required: false
+        type: boolean
+        default: true
+      gui-non-bundled:
+        required: false
+        type: boolean
+        default: true
+      cli-bundled:
+        required: false
+        type: boolean
+        default: true
+      cli-non-bundled:
+        required: false
+        type: boolean
+        default: true
   workflow_call:
+    inputs:
+      gui-single-file:
+        required: false
+        type: boolean
+        default: true
+      gui-non-single-file:
+        required: false
+        type: boolean
+        default: true
+      gui-bundled:
+        required: false
+        type: boolean
+        default: true
+      gui-non-bundled:
+        required: false
+        type: boolean
+        default: true
+      cli-bundled:
+        required: false
+        type: boolean
+        default: true
+      cli-non-bundled:
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   gui:
@@ -14,13 +63,15 @@ jobs:
         rid: [ win-x64, win-x86 ]
         configuration: [ Debug ]
         bundled: [ true, false ]
-        singleFile: [ true, false ]
+        single-file: [ true, false ]
         include:
         - rid: win-x64
           os: windows-latest
         - rid: win-x86
           os: windows-latest
     runs-on: ${{ matrix.os }}
+
+    if: (matrix.single-file && inputs.gui-single-file || !matrix.single-file && inputs.gui-non-single-file) && (matrix.bundled && inputs.gui-bundled || !matrix.bundled && inputs.gui-non-bundled)
 
     steps:
     - uses: actions/checkout@v3
@@ -32,7 +83,7 @@ jobs:
 
     - name: Publish ${{ matrix.rid }}
       run: |
-        dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.singleFile }} --output publish
+        dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.single-file }} --output publish
         dotnet publish UndertaleModToolUpdater -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output publish/Updater
 
     - name: Prepare artifact
@@ -40,7 +91,7 @@ jobs:
       shell: bash
       run: |
         cp ./README.md ./SCRIPTS.md ./LICENSE.txt ./publish
-        echo "::set-output name=artifact_name::GUI-${{ matrix.rid }}$([[ ${{ matrix.bundled }} = true ]] && echo "-bundled")$([[ ${{ matrix.singleFile }} = true ]] && echo "-singleFile")"
+        echo "::set-output name=artifact_name::GUI-${{ matrix.rid }}$([[ ${{ matrix.bundled }} = true ]] && echo "-bundled")$([[ ${{ matrix.single-file }} = true ]] && echo "-singleFile")"
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
@@ -60,11 +111,13 @@ jobs:
           os: windows-latest
         - rid: win-x86
           os: windows-latest
-        - rid: osx-x86
+        - rid: osx-x64
           os: macOS-latest
-        - rid: linux-x86
+        - rid: linux-x64
           os: ubuntu-latest
     runs-on: ${{ matrix.os }}
+
+    if: matrix.bundled && inputs.cli-bundled || !matrix.bundled && inputs.cli-non-bundled
 
     steps:
     - uses: actions/checkout@v3

@@ -9,6 +9,9 @@ jobs:
   build:
     name: Build
     uses: ./.github/workflows/build.yml
+    with:
+      gui-non-bundled: false
+      cli-non-bundled: false
 
   publish:
     needs: [ build ]
