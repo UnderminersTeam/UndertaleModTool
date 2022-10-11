@@ -18,41 +18,35 @@ jobs:
     needs: [ build ]
     runs-on: ubuntu-latest
     steps:
-    - name: Download artifacts
-      uses: actions/download-artifact@v3
+    - uses: actions/checkout@v3
 
     - id: get-short-rev
       run: echo "::set-output name=short_rev::$(git rev-parse --short HEAD)"
 
-    - name: ZIP GUI-win-x64-bundled
-      uses: vimtor/action-zip@v1
+    - name: Prepare GUI-win-x64-bundled
+      uses: ./.github/actions/download-and-zip-artifact
       with:
-        files: GUI-win-x64-bundled
-        dest: GUI-win-x64-bundled.zip
+        name: GUI-win-x64-bundled
 
-    - name: ZIP GUI-win-x64-bundled-singleFile
-      uses: vimtor/action-zip@v1
+    - name: Prepare GUI-win-x64-bundled-singleFile
+      uses: ./.github/actions/download-and-zip-artifact
       with:
-        files: GUI-win-x64-bundled-singleFile
-        dest: GUI-win-x64-bundled-singleFile.zip
+        name: GUI-win-x64-bundled-singleFile
 
-    - name: ZIP CLI-win-x64-bundled
-      uses: vimtor/action-zip@v1
+    - name: Prepare CLI-win-x64-bundled
+      uses: ./.github/actions/download-and-zip-artifact
       with:
-        files: CLI-win-x64-bundled
-        dest: CLI-win-x64-bundled.zip
+        name: CLI-win-x64-bundled
 
-    - name: ZIP CLI-osx-x64-bundled
-      uses: vimtor/action-zip@v1
+    - name: Prepare CLI-osx-x64-bundled
+      uses: ./.github/actions/download-and-zip-artifact
       with:
-        files: CLI-osx-x64-bundled
-        dest: CLI-osx-x64-bundled.zip
+        name: CLI-osx-x64-bundled
 
-    - name: ZIP CLI-linux-x64-bundled
-      uses: vimtor/action-zip@v1
+    - name: Prepare CLI-linux-x64-bundled
+      uses: ./.github/actions/download-and-zip-artifact
       with:
-        files: CLI-linux-x64-bundled
-        dest: CLI-linux-x64-bundled.zip
+        name: CLI-linux-x64-bundled
 
     - name: Update release
       uses: IsaacShelton/update-existing-release@v1.3.1
