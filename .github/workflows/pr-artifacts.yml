@@ -1,0 +1,74 @@
+name: Upload PR Artifacts
+on:
+  workflow_run:
+    workflows:
+    - Publish PR
+    types:
+    - completed
+jobs:
+  pr-comment:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/github-script@v3
+      with:
+        script: |
+          const {owner, repo} = context.repo;
+          const run_id = ${{github.event.workflow_run.id}};
+          const pull_head_sha = "${{github.event.workflow_run.head_sha}}";
+
+          // hack to get PR number - iterate through all PRs
+          const issue_number = await (async () =>
+          {
+            const pulls = await github.pulls.list({owner, repo});
+            for await (const {data} of github.paginate.iterator(pulls))
+            {
+              for (const pull of data)
+              {
+                if (pull.head.sha === pull_head_sha)
+                  return pull.number;
+              }
+            }
+          })();
+          if (!issue_number)
+              return core.error("No pull request found");
+
+
+          core.info("Using pull request " + issue_number);
+
+          const {data: {artifacts}} = await github.actions.listWorkflowRunArtifacts({owner, repo, run_id});
+          if (!artifacts.length)
+              return core.error("No artifacts found");
+
+          core.info("Artifacts found");
+
+          let body = "Download the artifacts for this pull request here:\n";
+          let gui_part = "\nGUI:\n";
+          let cli_part = "\nCLI:\n";
+          for (const artifact of artifacts)
+          {
+              if (artifact.name.includes("GUI-"))
+              {
+                  gui_part += `\n* [${artifact.name}](https://nightly.link/${owner}/${repo}/actions/artifacts/${artifact.id}.zip)`;
+              }
+              else if(artifact.name.includes("CLI-"))
+              {
+                  cli_part += `\n* [${artifact.name}](https://nightly.link/${owner}/${repo}/actions/artifacts/${artifact.id}.zip)`;
+              }
+          }
+          gui_part += "\n";
+          cli_part += "\n";
+          body += gui_part + cli_part;
+
+          const {data: comments} = await github.issues.listComments({repo, owner, issue_number});
+          const doesCommentExist = comments.find((c) => c.user.login === "github-actions[bot]");
+          if (doesCommentExist)
+          {
+              core.info("Updating existing comment on PR " + issue_number);
+              await github.issues.updateComment({repo, owner, comment_id: doesCommentExist.id, body});
+          }
+          else
+          {
+              core.info("Creating new comment on PR " + issue_number);
+              await github.issues.createComment({repo, owner, issue_number, body});
+          }

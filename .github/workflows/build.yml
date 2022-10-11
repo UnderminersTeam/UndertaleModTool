@@ -1,0 +1,91 @@
+﻿name: Build
+
+on:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  gui:
+    name: GUI
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [ win-x64, win-x86 ]
+        configuration: [ Debug ]
+        bundled: [ true, false ]
+        singleFile: [ true, false ]
+        include:
+        - rid: win-x64
+          os: windows-latest
+        - rid: win-x86
+          os: windows-latest
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Publish ${{ matrix.rid }}
+      run: |
+        dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.singleFile }} --output publish
+        dotnet publish UndertaleModToolUpdater -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output publish/Updater
+
+    - name: Prepare artifact
+      id: prepare-artifact
+      shell: bash
+      run: |
+        cp ./README.md ./SCRIPTS.md ./LICENSE.txt ./publish
+        echo "::set-output name=artifact_name::GUI-${{ matrix.rid }}$([[ ${{ matrix.bundled }} = true ]] && echo "-bundled")$([[ ${{ matrix.singleFile }} = true ]] && echo "-singleFile")"
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ steps.prepare-artifact.outputs.artifact_name }}
+        path: publish
+
+  cli:
+    name: CLI
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [ win-x64, win-x86, osx-x64, linux-x64 ]
+        configuration: [ Debug ]
+        bundled: [ true, false ]
+        include:
+        - rid: win-x64
+          os: windows-latest
+        - rid: win-x86
+          os: windows-latest
+        - rid: osx-x86
+          os: macOS-latest
+        - rid: linux-x86
+          os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Publish ${{ matrix.rid }}
+      run: |
+        dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output publish
+
+    - name: Prepare artifact
+      id: prepare-artifact
+      shell: bash
+      run: |
+        cp ./README.md ./LICENSE.txt ./publish
+        echo "::set-output name=artifact_name::CLI-${{ matrix.rid }}$([[ ${{ matrix.bundled }} = true ]] && echo "-bundled")"
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ steps.prepare-artifact.outputs.artifact_name }}
+        path: publish
