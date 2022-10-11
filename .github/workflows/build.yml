@@ -35,13 +35,15 @@ jobs:
     name: Prepare matrix
     runs-on: ubuntu-latest
     outputs:
-      gui-matrix: ${{ steps.set-matrix.outputs.gui-matrix }}
-      cli-matrix: ${{ steps.set-matrix.outputs.cli-matrix }}
+      gui-single-file-matrix: ${{ steps.set-matrix.outputs.gui-single-file-matrix }}
+      gui-bundled-matrix: ${{ steps.set-matrix.outputs.gui-bundled-matrix }}
+      cli-bundled-matrix: ${{ steps.set-matrix.outputs.cli-bundled-matrix }}
     steps:
     - id: set-matrix
       run: |
-        echo "::set-output name=gui-matrix::{ \"single-file\": ${{ inputs.gui-single-file-config }}, \"bundled\": ${{ inputs.gui-bundled-config }} }"
-        echo "::set-output name=cli-matrix::{ \"bundled\": ${{ inputs.cli-bundled-config }} }"
+        echo "::set-output name=gui-single-file-matrix::{ \"val\": ${{ inputs.gui-single-file-config }} }"
+        echo "::set-output name=gui-bundled-matrix::{ \"val\": ${{ inputs.gui-bundled-config }} }"
+        echo "::set-output name=cli-bundled-matrix::{ \"val\": ${{ inputs.cli-bundled-config }} }"
 
   gui:
     name: GUI
@@ -51,12 +53,13 @@ jobs:
       matrix:
         rid: [ win-x64, win-x86 ]
         configuration: [ Debug ]
+        single-file: ${{ fromJson(needs.prepare-matrix.outputs.gui-single-file-matrix).val }}
+        bundled: ${{ fromJson(needs.prepare-matrix.outputs.gui-bundled-matrix).val }}
         include:
         - rid: win-x64
           os: windows-latest
         - rid: win-x86
           os: windows-latest
-        - ${{ fromJson(needs.prepare-matrix.outputs.gui-matrix) }}
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -92,6 +95,7 @@ jobs:
       matrix:
         rid: [ win-x64, win-x86, osx-x64, linux-x64 ]
         configuration: [ Debug ]
+        bundled: ${{ fromJson(needs.prepare-matrix.outputs.cli-bundled-matrix).val }}
         include:
         - rid: win-x64
           os: windows-latest
@@ -101,7 +105,6 @@ jobs:
           os: macOS-latest
         - rid: linux-x64
           os: ubuntu-latest
-        - ${{ fromJson(needs.prepare-matrix.outputs.cli-matrix) }}
     runs-on: ${{ matrix.os }}
 
     steps:
