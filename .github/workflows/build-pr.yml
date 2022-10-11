@@ -8,6 +8,6 @@ jobs:
     name: Build
     uses: ./.github/workflows/build.yml
     with:
-      gui-single-file: false
-      gui-bundled: false
-      cli-bundled: false
+      gui-single-file-config: "[ false ]"
+      gui-bundled-config: "[ false ]"
+      cli-bundled: "[ false ]"

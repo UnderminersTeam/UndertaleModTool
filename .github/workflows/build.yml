@@ -3,75 +3,61 @@
 on:
   workflow_dispatch:
     inputs:
-      gui-single-file:
+      gui-single-file-config:
         required: false
-        type: boolean
-        default: true
-      gui-non-single-file:
+        type: string
+        default: "[ true, false ]"
+      gui-bundled-config:
         required: false
-        type: boolean
-        default: true
-      gui-bundled:
+        type: string
+        default: "[ true, false ]"
+      cli-bundled-config:
         required: false
-        type: boolean
-        default: true
-      gui-non-bundled:
-        required: false
-        type: boolean
-        default: true
-      cli-bundled:
-        required: false
-        type: boolean
-        default: true
-      cli-non-bundled:
-        required: false
-        type: boolean
-        default: true
+        type: string
+        default: "[ true, false ]"
   workflow_call:
     inputs:
-      gui-single-file:
+      gui-single-file-config:
         required: false
-        type: boolean
-        default: true
-      gui-non-single-file:
+        type: string
+        default: "[ true, false ]"
+      gui-bundled-config:
         required: false
-        type: boolean
-        default: true
-      gui-bundled:
+        type: string
+        default: "[ true, false ]"
+      cli-bundled-config:
         required: false
-        type: boolean
-        default: true
-      gui-non-bundled:
-        required: false
-        type: boolean
-        default: true
-      cli-bundled:
-        required: false
-        type: boolean
-        default: true
-      cli-non-bundled:
-        required: false
-        type: boolean
-        default: true
+        type: string
+        default: "[ true, false ]"
 
 jobs:
+  prepare-matrix:
+    name: Prepare matrix
+    runs-on: ubuntu-latest
+    outputs:
+      gui-matrix: ${{ steps.set-matrix.outputs.gui-matrix }}
+      cli-matrix: ${{ steps.set-matrix.outputs.cli-matrix }}
+    steps:
+    - id: set-matrix
+      run: |
+        echo "::set-output name=gui-matrix::{ \"single-file\": ${{ inputs.gui-single-file-config }}, \"bundled\": ${{ inputs.gui-bundled-config }} }"
+        echo "::set-output name=cli-matrix::{ \"bundled\": ${{ inputs.cli-bundled-config }} }"
+
   gui:
     name: GUI
+    needs: prepare-matrix
     strategy:
       fail-fast: false
       matrix:
         rid: [ win-x64, win-x86 ]
         configuration: [ Debug ]
-        bundled: [ true, false ]
-        single-file: [ true, false ]
         include:
         - rid: win-x64
           os: windows-latest
         - rid: win-x86
           os: windows-latest
+        - ${{ fromJson(needs.prepare-matrix.outputs.gui-matrix) }}
     runs-on: ${{ matrix.os }}
-
-    if: (matrix.single-file && inputs.gui-single-file || !matrix.single-file && inputs.gui-non-single-file) && (matrix.bundled && inputs.gui-bundled || !matrix.bundled && inputs.gui-non-bundled)
 
     steps:
     - uses: actions/checkout@v3
@@ -100,12 +86,12 @@ jobs:
 
   cli:
     name: CLI
+    needs: prepare-matrix
     strategy:
       fail-fast: false
       matrix:
         rid: [ win-x64, win-x86, osx-x64, linux-x64 ]
         configuration: [ Debug ]
-        bundled: [ true, false ]
         include:
         - rid: win-x64
           os: windows-latest
@@ -115,6 +101,7 @@ jobs:
           os: macOS-latest
         - rid: linux-x64
           os: ubuntu-latest
+        - ${{ fromJson(needs.prepare-matrix.outputs.cli-matrix) }}
     runs-on: ${{ matrix.os }}
 
     if: matrix.bundled && inputs.cli-bundled || !matrix.bundled && inputs.cli-non-bundled
