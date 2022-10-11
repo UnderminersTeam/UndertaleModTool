@@ -3,10 +3,6 @@
 on:
   workflow_dispatch:
     inputs:
-      gui-rid-config:
-        required: false
-        type: string
-        default: "[ \"win-x64\", \"win-x86\" ]"
       gui-single-file-config:
         required: false
         type: string
@@ -15,20 +11,12 @@ on:
         required: false
         type: string
         default: "[ true, false ]"
-      cli-rid-config:
-        required: false
-        type: string
-        default: "[ \"win-x64\", \"win-x86\", \"osx-x64\", \"linux-x64\" ]"
       cli-bundled-config:
         required: false
         type: string
         default: "[ true, false ]"
   workflow_call:
     inputs:
-      gui-rid-config:
-        required: false
-        type: string
-        default: "[ \"win-x64\", \"win-x86\" ]"
       gui-single-file-config:
         required: false
         type: string
@@ -37,10 +25,6 @@ on:
         required: false
         type: string
         default: "[ true, false ]"
-      cli-rid-config:
-        required: false
-        type: string
-        default: "[ \"win-x64\", \"win-x86\", \"osx-x64\", \"linux-x64\" ]"
       cli-bundled-config:
         required: false
         type: string
@@ -51,18 +35,14 @@ jobs:
     name: Prepare matrix
     runs-on: ubuntu-latest
     outputs:
-      gui-rid-matrix: ${{ steps.set-matrix.outputs.gui-rid-matrix }}
       gui-single-file-matrix: ${{ steps.set-matrix.outputs.gui-single-file-matrix }}
       gui-bundled-matrix: ${{ steps.set-matrix.outputs.gui-bundled-matrix }}
-      cli-rid-matrix: ${{ steps.set-matrix.outputs.cli-rid-matrix }}
       cli-bundled-matrix: ${{ steps.set-matrix.outputs.cli-bundled-matrix }}
     steps:
     - id: set-matrix
       run: |
-        echo "::set-output name=gui-rid-matrix::{ \"val\": ${{ inputs.gui-rid-config }} }"
         echo "::set-output name=gui-single-file-matrix::{ \"val\": ${{ inputs.gui-single-file-config }} }"
         echo "::set-output name=gui-bundled-matrix::{ \"val\": ${{ inputs.gui-bundled-config }} }"
-        echo "::set-output name=cli-rid-matrix::{ \"val\": ${{ inputs.cli-rid-config }} }"
         echo "::set-output name=cli-bundled-matrix::{ \"val\": ${{ inputs.cli-bundled-config }} }"
 
   gui:
@@ -71,8 +51,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        rid: [ win-x64, win-x86 ]
         configuration: [ Debug ]
-        rid: ${{ fromJson(needs.prepare-matrix.outputs.gui-rid-matrix).val }}
         single-file: ${{ fromJson(needs.prepare-matrix.outputs.gui-single-file-matrix).val }}
         bundled: ${{ fromJson(needs.prepare-matrix.outputs.gui-bundled-matrix).val }}
         include:
@@ -113,8 +93,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        rid: [ win-x64, win-x86, osx-x64, linux-x64 ]
         configuration: [ Debug ]
-        rid: ${{ fromJson(needs.prepare-matrix.outputs.gui-cli-matrix).val }}
         bundled: ${{ fromJson(needs.prepare-matrix.outputs.cli-bundled-matrix).val }}
         include:
         - rid: win-x64
