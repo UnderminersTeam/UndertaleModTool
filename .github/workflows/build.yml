@@ -6,7 +6,7 @@ on:
       gui-rid-config:
         required: false
         type: string
-        default: "[ win-x64, win-x86 ]"
+        default: "[ \"win-x64\", \"win-x86\" ]"
       gui-single-file-config:
         required: false
         type: string
@@ -18,7 +18,7 @@ on:
       cli-rid-config:
         required: false
         type: string
-        default: "[ win-x64, win-x86, osx-x64, linux-x64 ]"
+        default: "[ \"win-x64\", \"win-x86\", \"osx-x64\", \"linux-x64\" ]"
       cli-bundled-config:
         required: false
         type: string
@@ -28,7 +28,7 @@ on:
       gui-rid-config:
         required: false
         type: string
-        default: "[ win-x64, win-x86 ]"
+        default: "[ \"win-x64\", \"win-x86\" ]"
       gui-single-file-config:
         required: false
         type: string
@@ -40,7 +40,7 @@ on:
       cli-rid-config:
         required: false
         type: string
-        default: "[ win-x64, win-x86, osx-x64, linux-x64 ]"
+        default: "[ \"win-x64\", \"win-x86\", \"osx-x64\", \"linux-x64\" ]"
       cli-bundled-config:
         required: false
         type: string
