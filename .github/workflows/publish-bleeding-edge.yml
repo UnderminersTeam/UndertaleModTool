@@ -20,9 +20,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - id: get-short-rev
-      run: echo "::set-output name=short_rev::$(git rev-parse --short HEAD)"
-
     - name: Prepare GUI-win-x64-bundled
       uses: ./.github/actions/download-and-zip-artifact
       with:
