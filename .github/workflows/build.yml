@@ -104,8 +104,6 @@ jobs:
         - ${{ fromJson(needs.prepare-matrix.outputs.cli-matrix) }}
     runs-on: ${{ matrix.os }}
 
-    if: matrix.bundled && inputs.cli-bundled || !matrix.bundled && inputs.cli-non-bundled
-
     steps:
     - uses: actions/checkout@v3
 
