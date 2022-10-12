@@ -62,6 +62,9 @@ jobs:
           os: windows-latest
     runs-on: ${{ matrix.os }}
 
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
     steps:
     - uses: actions/checkout@v3
 
@@ -70,10 +73,23 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
+    - name: Restore cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ github.workspace }}/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore projects
+      run: |
+        dotnet restore UndertaleModTool --locked-mode
+        dotnet restore UndertaleModToolUpdater --locked-mode
+
     - name: Publish ${{ matrix.rid }}
       run: |
-        dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.single-file }} -p:CiBuild=true --output publish
-        dotnet publish UndertaleModToolUpdater -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output publish/Updater
+        dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.single-file }} -p:CiBuild=true --no-restore --output publish
+        dotnet publish UndertaleModToolUpdater -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --no-restore --output publish/Updater
 
     - name: Prepare artifact
       id: prepare-artifact
@@ -107,6 +123,9 @@ jobs:
           os: ubuntu-latest
     runs-on: ${{ matrix.os }}
 
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
     steps:
     - uses: actions/checkout@v3
 
@@ -115,9 +134,19 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
+    - name: Restore cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ github.workspace }}/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore project
+      run: dotnet restore UndertaleModCli --locked-mode
+
     - name: Publish ${{ matrix.rid }}
-      run: |
-        dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false -p:CiBuild=true --output publish
+      run: dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false -p:CiBuild=true --no-restore --output publish
 
     - name: Prepare artifact
       id: prepare-artifact
