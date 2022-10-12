@@ -9697,12 +9697,17 @@ __nccwpck_require__.r(__webpack_exports__);
 
 async function run() {
     try {
-        const groups = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('names', { required: true });
+        const names = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('names', { required: true }).split(' ');
+        let groups = [ ];
+        for(const group of names)
+            groups.push(group.split(','));
+
         let groupDownloads = [ ];
         const artifactClient = _actions_artifact__WEBPACK_IMPORTED_MODULE_1__/* .create */ .U();
         for(const group of groups)
             groupDownloads.push(downloadGroup(artifactClient, group));
         await Promise.all(groupDownloads);
+
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info('Artifact download has finished successfully');
     }
     catch(error) {
@@ -9711,7 +9716,7 @@ async function run() {
 }
 
 async function downloadGroup(artifactClient, artifacts) {
-    for(const name in artifacts) {
+    for(const name of artifacts) {
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Starting download for ${name}`);
         const downloadOptions = { createArtifactFolder: true };
         const downloadResponse = await artifactClient.downloadArtifact(name, (0,path__WEBPACK_IMPORTED_MODULE_2__.resolve)('./'), downloadOptions);
