@@ -8,6 +8,7 @@
 	<RollForward>LatestMajor</RollForward>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RuntimeIdentifiers>win-x64;win-x86;osx-x64;linux-x64</RuntimeIdentifiers>
   </PropertyGroup>
   <PropertyGroup Condition="'$(CiBuild)' == 'true'">
     <NoWarn>$(NoWarn);1591</NoWarn>

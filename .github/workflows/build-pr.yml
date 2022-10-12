@@ -1,7 +1,8 @@
 ﻿name: Build for PR
 
 on:
-  pull_request:
+  # TODO: enable before pr merge
+  #pull_request:
 
 jobs:
   build:
