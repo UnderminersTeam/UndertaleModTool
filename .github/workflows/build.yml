@@ -41,9 +41,9 @@ jobs:
     steps:
     - id: set-matrix
       run: |
-        echo "::set-output name=gui-single-file-matrix::{ \"val\": ${{ inputs.gui-single-file-config }} }"
-        echo "::set-output name=gui-bundled-matrix::{ \"val\": ${{ inputs.gui-bundled-config }} }"
-        echo "::set-output name=cli-bundled-matrix::{ \"val\": ${{ inputs.cli-bundled-config }} }"
+        echo "gui-single-file-matrix={ \"val\": ${{ inputs.gui-single-file-config }} }" >> $GITHUB_OUTPUT
+        echo "gui-bundled-matrix={ \"val\": ${{ inputs.gui-bundled-config }} }" >> $GITHUB_OUTPUT
+        echo "cli-bundled-matrix={ \"val\": ${{ inputs.cli-bundled-config }} }" >> $GITHUB_OUTPUT
 
   gui:
     name: GUI
@@ -80,7 +80,7 @@ jobs:
       shell: bash
       run: |
         cp ./README.md ./SCRIPTS.md ./LICENSE.txt ./publish
-        echo "::set-output name=artifact_name::GUI-${{ matrix.rid }}$([[ ${{ matrix.bundled }} = true ]] && echo "-bundled")$([[ ${{ matrix.single-file }} = true ]] && echo "-singleFile")"
+        echo "artifact_name=GUI-${{ matrix.rid }}$([[ ${{ matrix.bundled }} = true ]] && echo "-bundled")$([[ ${{ matrix.single-file }} = true ]] && echo "-singleFile")" >> $GITHUB_OUTPUT
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
@@ -124,7 +124,7 @@ jobs:
       shell: bash
       run: |
         cp ./README.md ./LICENSE.txt ./publish
-        echo "::set-output name=artifact_name::CLI-${{ matrix.rid }}$([[ ${{ matrix.bundled }} = true ]] && echo "-bundled")"
+        echo "artifact_name=CLI-${{ matrix.rid }}$([[ ${{ matrix.bundled }} = true ]] && echo "-bundled")" >> $GITHUB_OUTPUT
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
