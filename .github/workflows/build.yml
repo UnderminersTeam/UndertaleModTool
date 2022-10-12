@@ -83,8 +83,8 @@ jobs:
 
     - name: Restore projects
       run: |
-        dotnet restore UndertaleModTool -r ${{ matrix.rid }} --locked-mode
-        dotnet restore UndertaleModToolUpdater -r ${{ matrix.rid }} --locked-mode
+        dotnet restore UndertaleModTool --locked-mode
+        dotnet restore UndertaleModToolUpdater --locked-mode
 
     - name: Publish ${{ matrix.rid }}
       run: |
@@ -143,7 +143,7 @@ jobs:
           ${{ runner.os }}-nuget-
 
     - name: Restore project
-      run: dotnet restore UndertaleModCli -r ${{ matrix.rid }} --locked-mode
+      run: dotnet restore UndertaleModCli --locked-mode
 
     - name: Publish ${{ matrix.rid }}
       run: dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false -p:CiBuild=true --no-restore --output publish
