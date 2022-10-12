@@ -72,8 +72,8 @@ jobs:
 
     - name: Publish ${{ matrix.rid }}
       run: |
-        dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.single-file }} -p:NoWarn=${NoWarn};1591 --output publish
-        dotnet publish UndertaleModToolUpdater -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false -p:NoWarn=${NoWarn};1591 --output publish/Updater
+        dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.single-file }} -p:CiBuild=true --output publish
+        dotnet publish UndertaleModToolUpdater -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output publish/Updater
 
     - name: Prepare artifact
       id: prepare-artifact
@@ -117,7 +117,7 @@ jobs:
 
     - name: Publish ${{ matrix.rid }}
       run: |
-        dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false -p:NoWarn=${NoWarn};1591 --output publish
+        dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false -p:CiBuild=true --output publish
 
     - name: Prepare artifact
       id: prepare-artifact

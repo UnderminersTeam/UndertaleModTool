@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UndertaleModLib\UndertaleModLib.csproj" />
+    <ProjectReference Include="..\UndertaleModLib\UndertaleModLib.csproj" Properties="CiBuild=$(CiBuild)" />
   </ItemGroup>
 
   <ItemGroup>

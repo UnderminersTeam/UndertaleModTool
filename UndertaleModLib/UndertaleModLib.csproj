@@ -14,6 +14,9 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(CiBuild)' == 'true'">
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Fody" Version="6.5.1">
       <PrivateAssets>all</PrivateAssets>
