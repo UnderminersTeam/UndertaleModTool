@@ -23,10 +23,7 @@ jobs:
     - name: Download artifacts
       uses: ./.github/actions/download-artifacts
       with:
-        names:
-        - [ GUI-win-x64-bundled ]
-        - [ GUI-win-x64-bundled-singleFile ]
-        - [ CLI-win-x64-bundled, CLI-osx-x64-bundled, CLI-linux-x64-bundled ]
+        names: [ [ GUI-win-x64-bundled ], [ GUI-win-x64-bundled-singleFile ], [ CLI-win-x64-bundled, CLI-osx-x64-bundled, CLI-linux-x64-bundled ] ]
 
     - name: Zip GUI-win-x64-bundled
       uses: vimtor/action-zip@v1
