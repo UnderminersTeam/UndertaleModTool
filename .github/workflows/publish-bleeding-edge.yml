@@ -20,30 +20,43 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Prepare GUI-win-x64-bundled
-      uses: ./.github/actions/download-and-zip-artifact
+    - name: Download artifacts
+      uses: ./.github/actions/download-artifacts
       with:
-        name: GUI-win-x64-bundled
+        names:
+        - [ GUI-win-x64-bundled ]
+        - [ GUI-win-x64-bundled-singleFile ]
+        - [ CLI-win-x64-bundled, CLI-osx-x64-bundled, CLI-linux-x64-bundled ]
 
-    - name: Prepare GUI-win-x64-bundled-singleFile
-      uses: ./.github/actions/download-and-zip-artifact
+    - name: Zip GUI-win-x64-bundled
+      uses: vimtor/action-zip@v1
       with:
-        name: GUI-win-x64-bundled-singleFile
+        files: GUI-win-x64-bundled
+        dest: GUI-win-x64-bundled.zip
 
-    - name: Prepare CLI-win-x64-bundled
-      uses: ./.github/actions/download-and-zip-artifact
+    - name: Zip GUI-win-x64-bundled-singleFile
+      uses: vimtor/action-zip@v1
       with:
-        name: CLI-win-x64-bundled
+        files: GUI-win-x64-bundled-singleFile
+        dest: GUI-win-x64-bundled-singleFile.zip
 
-    - name: Prepare CLI-osx-x64-bundled
-      uses: ./.github/actions/download-and-zip-artifact
+    - name: Zip CLI-win-x64-bundled
+      uses: vimtor/action-zip@v1
       with:
-        name: CLI-osx-x64-bundled
+        files: CLI-win-x64-bundled
+        dest: CLI-win-x64-bundled.zip
 
-    - name: Prepare CLI-linux-x64-bundled
-      uses: ./.github/actions/download-and-zip-artifact
+    - name: Zip CLI-osx-x64-bundled
+      uses: vimtor/action-zip@v1
       with:
-        name: CLI-linux-x64-bundled
+        files: CLI-osx-x64-bundled
+        dest: CLI-osx-x64-bundled.zip
+
+    - name: Zip CLI-linux-x64-bundled
+      uses: vimtor/action-zip@v1
+      with:
+        files: CLI-linux-x64-bundled
+        dest: CLI-linux-x64-bundled.zip
 
     - name: Update release
       uses: IsaacShelton/update-existing-release@v1.3.1
