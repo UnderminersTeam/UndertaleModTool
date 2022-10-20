@@ -50,6 +50,7 @@ namespace UndertaleModLib
         public UndertaleChunkACRV ACRV => Chunks.GetValueOrDefault("ACRV") as UndertaleChunkACRV;
         public UndertaleChunkSEQN SEQN => Chunks.GetValueOrDefault("SEQN") as UndertaleChunkSEQN;
         public UndertaleChunkTAGS TAGS => Chunks.GetValueOrDefault("TAGS") as UndertaleChunkTAGS;
+        public UndertaleChunkFEAT FEAT => Chunks.GetValueOrDefault("FEAT") as UndertaleChunkFEAT;
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
@@ -1050,6 +1051,36 @@ namespace UndertaleModLib
 
             if (reader.ReadUInt32() != 1)
                 throw new IOException("Expected FEDS version 1");
+
+            base.UnserializeChunk(reader);
+        }
+    }
+
+    // GMS2022.8+ only
+    public class UndertaleChunkFEAT : UndertaleSingleChunk<UndertaleFeatureFlags>
+    {
+        public override string Name => "FEAT";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            if (writer.undertaleData.GeneralInfo.Major < 2)
+                throw new InvalidOperationException();
+
+            while (writer.Position % 4 != 0)
+                writer.Write((byte)0);
+
+            base.SerializeChunk(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            if (reader.undertaleData.GeneralInfo.Major < 2)
+                throw new InvalidOperationException();
+
+            // Padding
+            while (reader.Position % 4 != 0)
+                if (reader.ReadByte() != 0)
+                    throw new IOException("Padding error!");
 
             base.UnserializeChunk(reader);
         }

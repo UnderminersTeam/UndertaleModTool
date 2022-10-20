@@ -270,6 +270,11 @@ namespace UndertaleModLib
         public IList<UndertaleSequence> Sequences => FORM.SEQN?.List;
 
         /// <summary>
+        /// The feature flags stored in the data file.
+        /// </summary>
+        public UndertaleFeatureFlags FeatureFlags => FORM.FEAT?.Object;
+
+        /// <summary>
         /// Whether this is an unsupported bytecode version.
         /// </summary>
         public bool UnsupportedBytecodeVersion = false;
