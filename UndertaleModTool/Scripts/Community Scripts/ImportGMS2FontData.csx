@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UndertaleModLib;
 using UndertaleModLib.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -14,38 +15,50 @@ using Newtonsoft.Json.Linq;
 EnsureDataLoaded();
 
 ScriptMessage(@"ImportGMS2FontData by Dobby233Liu
-This script imports the .yy file the GM IDE generates for font assets to your game
-Designed for the data IDE v2022.6.0.23 generates
-Select a .yy file in the fonts directory of your project
-");
+This script can import GM font asset data to your mod
+(Designed for the data IDE v2022.6.0.23 generates)
+Select the .yy file of the GM font asset you want to import"
+);
 
 string importFile = PromptLoadFile("yy", "GameMaker Studio 2 files (.yy)|*.yy|All files|*");
 if (importFile == null)
-    throw new ScriptException("The import folder was not set.");
+{
+    ScriptError("Import cancelled.");
+    return;
+}
 
 JObject fontData = null;
 using (StreamReader file = File.OpenText(importFile))
 {
     using (JsonTextReader reader = new JsonTextReader(file))
     {
-        fontData = (JObject)JToken.ReadFrom(reader);
+        fontData = JObject.Load(reader);
     }
 }
 
 string fontPath = Path.GetFullPath(importFile);
-string fontName = (string)fontData["name"]; // im gonna trust the yy file lmao
-string textureSourcePath = Path.Combine(Path.GetDirectoryName(importFile), fontName + ".png");
-if (!File.Exists(textureSourcePath))
-    throw new ScriptException("The font texture file " + textureSourcePath + " doesn't exist.");
+string yyFilename = Path.GetFileName(importFile);
+string fontName = (string)fontData["name"] ?? yyFilename;
+string fontTexturePath = Path.Combine(fontPath, yyFilename + ".png");
+// Failsafe to use font name
+if (!File.Exists(fontTexturePath))
+    fontTexturePath = Path.Combine(fontPath, fontName + ".png");
+// If we still can't find the texture
+if (!File.Exists(fontTexturePath))
+    throw new ScriptException(
+$@"Could not find a texture file for the selected font.
+Try renaming the correct texture file to
+{yyFilename}.png
+and putting it in the same directory as the .yy file."
+    );
 
-UndertaleTextureGroupInfo defaultTexGroup = null;
-bool disappearMigitation = Data.GM2022_3;
-if (disappearMigitation)
-{
-    defaultTexGroup = Data.TextureGroupInfo.ByName("Default");
-    if (defaultTexGroup == null)
-        throw new ScriptException("Default texture group doesn't exist.");
-}
+/*
+  If true, the script will attempt to add the new font (if any) and the new font glyph texture that it created to a texture group
+  This was an attempt to get fonts that this script creates appear in a specific 2022.3 game, but was proved unnecessary, as the problem was caused by something else
+*/
+bool attemptToFixFontNotAppearing = false; // Data.GM2022_3;
+// Default to putting the font into the default texgroup
+UndertaleTextureGroupInfo fontTexGroup = Data.TextureGroupInfo.ByName("Default");
 
 UndertaleFont font = Data.Fonts.ByName(fontName);
 if (font == null)
@@ -55,21 +68,45 @@ if (font == null)
         Name = Data.Strings.MakeString(fontName)
     };
     Data.Fonts.Add(font);
-    if (disappearMigitation)
-        defaultTexGroup.Fonts.Add(new UndertaleResourceById<UndertaleFont, UndertaleChunkFONT>() { Resource = font });
+
+    if (attemptToFixFontNotAppearing)
+    {
+        if (fontTexGroup == null)
+            throw new ScriptException("The default texture group doesn't exist??? (this shouldn't happen)");
+        fontTexGroup.Fonts.Add(new UndertaleResourceById<UndertaleFont, UndertaleChunkFONT>() { Resource = font });
+    }
+}
+else if (attemptToFixFontNotAppearing)
+{
+    // Try to find the texgroup that the font belongs to
+    // Scariest LINQ query I've ever written (yet)
+    fontTexGroup = Data.TextureGroupInfo
+        .Where(t => t.Fonts.Exists(f => f.Resource == font))
+        .DefaultIfEmpty(fontTexGroup)
+        .FirstOrDefault();
+    if (fontTexGroup == null)
+        throw new ScriptException("Existing font doesn't belong to any texture group AND the default texture group doesn't exist??? (this shouldn't happen)");
+    // Failsafe - put it in Default if it's not in there
+    if (!fontTexGroup.Fonts.Exists(f => f.Resource == font))
+        fontTexGroup.Fonts.Add(new UndertaleResourceById<UndertaleFont, UndertaleChunkFONT>() { Resource = font });
 }
 
-Bitmap textureBitmap = new Bitmap(textureSourcePath);
-textureBitmap.SetResolution(96.0F, 96.0F); // dpi fix
+// Prepare font texture
+Bitmap textureBitmap = new Bitmap(fontTexturePath);
+// Make the DPI exactly 96 for this bitmap
+textureBitmap.SetResolution(96.0F, 96.0F);
+
 UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
-texture.Name = new UndertaleString("Texture " + Data.EmbeddedTextures.Count); // ???
-texture.TextureData.TextureBlob = File.ReadAllBytes(textureSourcePath);
+// ??? Why?
+texture.Name = new UndertaleString("Texture " + Data.EmbeddedTextures.Count);
+texture.TextureData.TextureBlob = File.ReadAllBytes(fontTexturePath);
 Data.EmbeddedTextures.Add(texture);
-if (disappearMigitation)
-    defaultTexGroup.TexturePages.Add(new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>() { Resource = texture });
+if (attemptToFixFontNotAppearing)
+    fontTexGroup.TexturePages.Add(new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>() { Resource = texture });
 
 UndertaleTexturePageItem texturePageItem = new UndertaleTexturePageItem();
-texturePageItem.Name = new UndertaleString("PageItem " + Data.TexturePageItems.Count); // ???
+// ??? Same as above
+texturePageItem.Name = new UndertaleString("PageItem " + Data.TexturePageItems.Count);
 texturePageItem.TexturePage = texture;
 texturePageItem.SourceX = 0;
 texturePageItem.SourceY = 0;
@@ -82,76 +119,68 @@ texturePageItem.TargetHeight = (ushort)textureBitmap.Height;
 texturePageItem.BoundingWidth = (ushort)textureBitmap.Width;
 texturePageItem.BoundingHeight = (ushort)textureBitmap.Height;
 Data.TexturePageItems.Add(texturePageItem);
-font.Texture = texturePageItem;
-
-if (Data.GMS2_3)
-    font.EmSizeIsFloat = true; // forcbliy save as float lmao
-
-font.Glyphs.Clear();
 
 font.DisplayName = Data.Strings.MakeString((string)fontData["fontName"]);
-font.EmSize = (uint)fontData["size"];
+font.Texture = texturePageItem;
 font.Bold = (bool)fontData["bold"];
 font.Italic = (bool)fontData["italic"];
+// FIXME: Potentially causes float precision to be lost
+font.EmSize = (uint)fontData["size"];
+// Save font size as a float in GMS2.3+ (shouldn't UML always save EmSize as a float for GMS2.3+ games??)
+font.EmSizeIsFloat = Data.GMS2_3;
 font.Charset = (byte)fontData["charset"];
 font.AntiAliasing = (byte)fontData["AntiAlias"];
-// ???
+// FIXME: ??? All YY files I've saw don't contain this
 font.ScaleX = 1;
 font.ScaleY = 1;
-if (fontData.ContainsKey("ascender"))
-    font.Ascender = (uint)fontData["ascender"];
-if (fontData.ContainsKey("ascenderOffset"))
-    font.AscenderOffset = (int)fontData["ascenderOffset"];
+// Ascender is GM2022.2+
+font.Ascender = (uint)fontData["ascender"]?;
+font.AscenderOffset = (int)fontData["ascenderOffset"]?;
 
-ushort rangeStart = 0;
-uint rangeEnd = 0;
+// FIXME: Too complicated?
+List<int> charRangesUppersAndLowers = new();
 foreach (JObject range in fontData["ranges"].Values<JObject>())
 {
-    var rangeStartChk = (ushort)range["lower"];
-    var rangeEndChk = (uint)range["upper"];
-    if (rangeStart <= 0)
-        rangeStart = rangeStartChk;
-    if (rangeEnd < rangeEndChk)
-        rangeEnd = rangeEndChk;
+    charRangesUppersAndLowers.Add(range["upper"]);
+    charRangesUppersAndLowers.Add(range["lower"]);
 }
-font.RangeStart = rangeStart;
-font.RangeEnd = rangeEnd;
+charRangesUppersAndLowers.Sort();
+// FIXME: Check the range by ourselves if ranges don't have it probably
+font.RangeStart = (ushort)charRangesUppersAndLowers.DefaultIfEmpty(0).FirstOrDefault();
+font.RangeEnd = (uint)charRangesUppersAndLowers.DefaultIfEmpty(0xFFFF).LastOrDefault();
 
-foreach (KeyValuePair<string, JToken> glyphMeta in (JObject)fontData["glyphs"])
+font.Glyphs.Clear();
+List<UndertaleFont.Glyph> glyphs = new();
+// From what I've seen, the keys of the objects in glyphs is just the character property of the object itself but in string form 
+foreach (KeyValuePair<string, JToken> glyphKVEntry in (JObject)fontData["glyphs"])
 {
-    var glyph = (JObject)glyphMeta.Value;
-    font.Glyphs.Add(new UndertaleFont.Glyph()
+    var glyphData = (JObject)glyphKVEntry.Value;
+    glyphs.Add(new UndertaleFont.Glyph()
     {
-        Character = (ushort)glyph["character"],
-        SourceX = (ushort)glyph["x"],
-        SourceY = (ushort)glyph["y"],
-        SourceWidth = (ushort)glyph["w"],
-        SourceHeight = (ushort)glyph["h"],
-        Shift = (short)glyph["shift"],
-        Offset = (short)glyph["offset"],
+        Character = (ushort)glyphData["character"],
+        SourceX = (ushort)glyphData["x"],
+        SourceY = (ushort)glyphData["y"],
+        SourceWidth = (ushort)glyphData["w"],
+        SourceHeight = (ushort)glyphData["h"],
+        Shift = (short)glyphData["shift"],
+        Offset = (short)glyphData["offset"],
     });
 }
+// Sort glyphs like UndertaleFontEditor to be safe
+glyphs.Sort((x, y) => x.Character.CompareTo(y.Character));
+font.Glyphs.AddRange(glyphs);
 
-List<UndertaleFont.Glyph> glyphs = font.Glyphs.ToList();
-
-// I'm literally going to LINQ 100000 times
-// and you can't stop me
-foreach (JObject kerningPair in fontData["kerningPairs"].Values<JObject>())
+// TODO: Does this always exist?
+foreach (JObject kerningPair in fontData["kerningPairs"]?.Values<JObject>())
 {
+    // Why do I need to do this. Thanks YoYo
     var first = (ushort)kerningPair["first"];
-    var glyph = glyphs.Find(x => x.Character == first);
+    var glyph = font.Glyphs.Find(x => x.Character == first);
     glyph.Kerning.Add(new UndertaleFont.Glyph.GlyphKerning()
     {
         Other = (short)kerningPair["second"],
         Amount = (short)kerningPair["amount"],
     });
 }
-
-glyphs = font.Glyphs.ToList();
-// Sort glyphs like in UndertaleFontEditor to be safe
-glyphs.Sort((x, y) => x.Character.CompareTo(y.Character));
-font.Glyphs.Clear();
-foreach (UndertaleFont.Glyph glyph in glyphs)
-    font.Glyphs.Add(glyph);
 
 ScriptMessage("Import complete.");
