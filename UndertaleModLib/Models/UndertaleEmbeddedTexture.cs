@@ -36,14 +36,14 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
 
     /// <summary>
     /// The size of the texture data in the embedded image in bytes. <br/>
-    /// GameMaker: Studio 2 only.
+    /// GameMaker: Studio 2 only. Use not recommended.
     /// </summary>
     private uint _TextureBlockSize { get; set; }
 
     /// <summary>
     /// The position of the placeholder <see cref="_TextureBlockSize">TextureBlockSize</see> value
-    /// to be overwritten in Serialize. <br/>
-    /// Only used internally in UMTLib for GM 2022.3 support.
+    /// to be overwritten in SerializeBlob. <br/>
+    /// Only used internally for GM 2022.3+ support.
     /// </summary>
     private uint _TextureBlockSizeLocation { get; set; }
 
@@ -61,8 +61,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         if (writer.undertaleData.GM2022_3)
         {
             // Write a placeholder for the texture blob size,
-            // so we can overwrite this with the actual value
-            // later
+            // so we can overwrite this with the actual value later
             _TextureBlockSizeLocation = writer.Position;
             writer.Write((uint)0);
         }
@@ -98,8 +97,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         {
             uint length = writer.Position - objStartPos;
             _TextureBlockSize = length;
-            // Move to the placeholder zero value wrote
-            // in Serialize
+            // Move to the placeholder zero value written in Serialize
             writer.Position = _TextureBlockSizeLocation;
             // Write texture data size
             writer.Write(length);
