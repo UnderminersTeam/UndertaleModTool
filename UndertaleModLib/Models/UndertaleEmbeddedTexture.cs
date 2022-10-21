@@ -35,16 +35,17 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     public uint GeneratedMips { get; set; }
 
     /// <summary>
-    /// The size of the texture data in the embedded image. <br/>
+    /// The size of the texture data in the embedded image in bytes. <br/>
     /// GameMaker: Studio 2 only.
     /// </summary>
     private uint _TextureBlockSize { get; set; }
 
     /// <summary>
-    /// The position of the TextureBlockSize value to be overwritten in Serialize. <br/>
+    /// The position of the placeholder <see cref="_TextureBlockSize">TextureBlockSize</see> value
+    /// to be overwritten in Serialize. <br/>
     /// Only used internally in UMTLib for GM 2022.3 support.
     /// </summary>
-    internal uint _TextureBlockSizeLocation { get; set; }
+    private uint _TextureBlockSizeLocation { get; set; }
 
     /// <summary>
     /// The texture data in the embedded image.
