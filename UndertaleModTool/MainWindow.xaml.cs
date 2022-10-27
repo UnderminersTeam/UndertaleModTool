@@ -1669,7 +1669,8 @@ namespace UndertaleModTool
 
                 item.IsSelected = true;
 
-                if (item.DataContext is not UndertaleResource)
+                if (item.DataContext is not UndertaleResource
+                    && (item.Tag as string) != "StandaloneTab")
                     return;
 
                 OpenInTab(Highlighted, true);
