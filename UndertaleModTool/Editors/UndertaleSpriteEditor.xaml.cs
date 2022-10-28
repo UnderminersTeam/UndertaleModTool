@@ -56,7 +56,7 @@ namespace UndertaleModTool
                         {
                             try
                             {
-                                File.WriteAllBytes(System.IO.Path.Combine(path, tex.id + ext), tex.tex.PNGBlob);
+                                File.WriteAllBytes(System.IO.Path.Combine(path, tex.id + ext), tex.tex.TexBlob);
                             }
                             catch (Exception ex)
                             {
