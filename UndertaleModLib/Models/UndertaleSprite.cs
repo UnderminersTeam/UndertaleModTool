@@ -27,14 +27,14 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
     public int PageHeight { get; set; }
     
     /// <summary>
-    /// Can be raw GM QOI bytes or PNG bytes.
+    /// The atlas as raw bytes, can be a GameMaker QOI texture or a PNG file.
     /// </summary>
     public byte[] TexBlob { get; set; }
     
     /// <summary>
-    /// Returns true if TexBlob contains a GMQOI texture.
+    /// Indicates whether <see cref="TexBlob=/> contains a GameMaker QOI texture (the header is qoif reversed).
     /// </summary>
-    public bool IsQOI => TexBlob != null && TexBlob.Length > 7 && TexBlob[0] == 102 && TexBlob[1] == 105 && TexBlob[2] == 111 && TexBlob[3] == 113;
+    public bool IsQOI => TexBlob != null && TexBlob.Length > 7 && TexBlob[0] == 102/*f*/ && TexBlob[1] == 105/*i*/ && TexBlob[2] == 111/*o*/ && TexBlob[3] == 113/*q*/;
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
