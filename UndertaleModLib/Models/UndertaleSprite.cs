@@ -32,7 +32,7 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
     public byte[] TexBlob { get; set; }
     
     /// <summary>
-    /// Indicates whether <see cref="TexBlob=/> contains a GameMaker QOI texture (the header is qoif reversed).
+    /// Indicates whether <see cref="TexBlob"/> contains a GameMaker QOI texture (the header is qoif reversed).
     /// </summary>
     public bool IsQOI => TexBlob != null && TexBlob.Length > 7 && TexBlob[0] == 102/*f*/ && TexBlob[1] == 105/*i*/ && TexBlob[2] == 111/*o*/ && TexBlob[3] == 113/*q*/;
 
