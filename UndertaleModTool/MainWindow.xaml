@@ -233,6 +233,9 @@
                             <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
                             <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
                         </ContextMenu>
+                        <ContextMenu x:Key="StandaloneTabMenu">
+                            <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
+                        </ContextMenu>
 
                         <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#D4D4D4"/>
                         <Style TargetType="{x:Type TreeViewItem}">
@@ -253,8 +256,20 @@
                         </Style>
                     </TreeView.Resources>
                     <TreeViewItem Header="Data" IsExpanded="True">
-                        <TreeViewItem Header="General info" Visibility="{Binding GeneralInfo, Converter={StaticResource VisibleIfNotNull}}"/>
-                        <TreeViewItem Header="Global init" Visibility="{Binding GlobalInitScripts, Converter={StaticResource VisibleIfNotNull}}"/>
+                        <TreeViewItem Header="General info" Visibility="{Binding GeneralInfo, Converter={StaticResource VisibleIfNotNull}}" Tag="StandaloneTab">
+                            <TreeViewItem.Style>
+                                <Style TargetType="{x:Type TreeViewItem}">
+                                    <Setter Property="ContextMenu" Value="{StaticResource StandaloneTabMenu}"/>
+                                </Style>
+                            </TreeViewItem.Style>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Global init" Visibility="{Binding GlobalInitScripts, Converter={StaticResource VisibleIfNotNull}}" Tag="StandaloneTab">
+                            <TreeViewItem.Style>
+                                <Style TargetType="{x:Type TreeViewItem}">
+                                    <Setter Property="ContextMenu" Value="{StaticResource StandaloneTabMenu}"/>
+                                </Style>
+                            </TreeViewItem.Style>
+                        </TreeViewItem>
                         <TreeViewItem Header="Game End scripts" Visibility="{Binding GameEndScripts, Converter={StaticResource VisibleIfNotNull}}"/>
                         <TreeViewItem Header="Audio groups" ItemsSource="{Binding AudioGroups, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding AudioGroups, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
