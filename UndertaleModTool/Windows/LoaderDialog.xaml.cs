@@ -143,15 +143,7 @@ namespace UndertaleModTool
         }
         public void UpdateValue(double value)
         {
-            if (value - ProgressBar.Value <= 1) //if value not changed or changed by 1
-            {
-                ProgressBar.Value = value;
-            }
-            else
-            {
-                DoubleAnimation animation = new(value, TimeSpan.FromMilliseconds(100)); //time is the same as in "ProgressUpdater()"
-                ProgressBar.BeginAnimation(ProgressBar.ValueProperty, animation);       //smooth progress change
-            }
+           ProgressBar.Value = value;
         }
 
         public void ReportProgress(string status, double value)

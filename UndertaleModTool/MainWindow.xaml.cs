@@ -2303,21 +2303,32 @@ namespace UndertaleModTool
 
         private void ProgressUpdater()
         {
-            DateTime prevTime = default;
+            Stopwatch sw = new();
+            Stopwatch swTimeout = null;
             int prevValue = 0;
 
             while (true)
             {
+                sw.Restart();
+
                 if (cToken.IsCancellationRequested)
                 {
-                    if (prevValue >= progressValue) //if reached maximum
+                    if (prevValue >= progressValue) // if reached maximum
+                    {
+                        sw.Stop();
+                        swTimeout?.Stop();
                         return;
+                    }
                     else
                     {
-                        if (prevTime == default)
-                            prevTime = DateTime.UtcNow;                                       //begin measuring
-                        else if (DateTime.UtcNow.Subtract(prevTime).TotalMilliseconds >= 500) //timeout - 0.5 seconds
+                        if (swTimeout is null)
+                            swTimeout = Stopwatch.StartNew();          // begin measuring
+                        else if (swTimeout.ElapsedMilliseconds >= 500) // timeout - 0.5 seconds
+                        {
+                            sw.Stop();
+                            swTimeout.Stop();
                             return;
+                        }
                     }
                 }
 
@@ -2325,7 +2336,7 @@ namespace UndertaleModTool
 
                 prevValue = progressValue;
 
-                Thread.Sleep(100); //10 times per second
+                Thread.Sleep((int)Math.Max(0, 33 - sw.ElapsedMilliseconds)); // ~30 times per second
             }
         }
         public void StartProgressBarUpdater()
