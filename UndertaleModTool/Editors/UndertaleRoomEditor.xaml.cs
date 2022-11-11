@@ -1468,7 +1468,9 @@ namespace UndertaleModTool
                             break;
 
                         case LayerType.Instances:
-                            allObjects.AddRange(layer.InstancesData.Instances);
+                            var instances = layer.InstancesData.Instances
+                                            .Where(g => g.ObjectDefinition?.Sprite?.Textures.Count > 0);
+                            allObjects.AddRange(instances);
                             break;
                     }
                 }
