@@ -48,7 +48,7 @@ namespace UndertaleModTool
         private void InitAudio()
         {
             if (waveOut == null)
-                waveOut = new WaveOutEvent();
+                waveOut = new WaveOutEvent() { DeviceNumber = 0 };
             else if (waveOut.PlaybackState != PlaybackState.Stopped)
                 waveOut.Stop();
         }

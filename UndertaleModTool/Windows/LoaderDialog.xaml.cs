@@ -16,6 +16,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.Windows.Shell;
 
 namespace UndertaleModTool
 {
@@ -42,7 +43,12 @@ namespace UndertaleModTool
             {
                 ProgressBar.IsIndeterminate = !value.HasValue;
                 if (value.HasValue)
+                {
                     ProgressBar.Maximum = value.Value;
+                    TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
+                }
+                else
+                    TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
             }
         }
         public bool IsClosed { get; set; } = false;
@@ -143,7 +149,8 @@ namespace UndertaleModTool
         }
         public void UpdateValue(double value)
         {
-           ProgressBar.Value = value;
+            ProgressBar.Value = value;
+            TaskbarItemInfo.ProgressValue = value / ProgressBar.Maximum;
         }
 
         public void ReportProgress(string status, double value)

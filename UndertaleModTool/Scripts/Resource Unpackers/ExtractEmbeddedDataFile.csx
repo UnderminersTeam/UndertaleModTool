@@ -4,8 +4,6 @@ using System;
 using System.IO;
 using UndertaleModLib.Util;
 
-EnsureDataLoaded();
-
 byte[] extracted_data_file;
 
 ScriptMessage("This script can extract an embedded data file from a YYC compiled game or from a dump file from memory.");
