@@ -91,7 +91,7 @@
                     <DataGridTemplateColumn Width="*">
                       <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                          <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Resource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleTextureGroupInfo}" CanRemove="False"/>
+                          <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Resource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleEmbeddedTexture}" CanRemove="False"/>
                         </DataTemplate>
                       </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -135,7 +135,7 @@
                     <DataGridTemplateColumn Width="*">
                       <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                          <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Resource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleTextureGroupInfo}" CanRemove="False"/>
+                          <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Resource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleSprite}" CanRemove="False"/>
                         </DataTemplate>
                       </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -179,7 +179,7 @@
                     <DataGridTemplateColumn Width="*">
                       <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                          <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Resource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleTextureGroupInfo}" CanRemove="False"/>
+                          <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Resource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleSprite}" CanRemove="False"/>
                         </DataTemplate>
                       </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -223,7 +223,7 @@
                     <DataGridTemplateColumn Width="*">
                       <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                          <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Resource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleTextureGroupInfo}" CanRemove="False"/>
+                          <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Resource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleFont}" CanRemove="False"/>
                         </DataTemplate>
                       </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -267,7 +267,7 @@
                     <DataGridTemplateColumn Width="*">
                       <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                          <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Resource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleTextureGroupInfo}" CanRemove="False"/>
+                          <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Resource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleBackground}" CanRemove="False"/>
                         </DataTemplate>
                       </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
