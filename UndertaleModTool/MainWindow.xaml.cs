@@ -1004,10 +1004,13 @@ namespace UndertaleModTool
             DisposeGameData();
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
             OpenInTab(Highlighted);
+            String current_date_and_time = DateTime.Now.ToString("_\\M\\D\\Y_\\H\\M\\S_MM-dd-yyyy_HH-mm-ss");
 
             Task t = Task.Run(() =>
             {
                 bool hadWarnings = false;
+                bool loadedCorrectly = true;
+                Exception loadingException = null;
                 UndertaleData data = null;
                 try
                 {
@@ -1015,19 +1018,91 @@ namespace UndertaleModTool
                     {
                         data = UndertaleIO.Read(stream, warning =>
                         {
-                            this.ShowWarning(warning, "Loading warning");
+                            File.AppendAllText(Path.Combine(ExePath, "log" + current_date_and_time + ".txt"), "\n" + warning);
                             hadWarnings = true;
                         }, message =>
                         {
                             FileMessageEvent?.Invoke(message);
                         });
                     }
-
                     UndertaleEmbeddedTexture.TexData.ClearSharedStream();
                 }
                 catch (Exception e)
                 {
-                    this.ShowError("An error occured while trying to load:\n" + e.Message, "Load error");
+                    loadingException = e;
+                }
+                if (data != null)
+                    loadingException = data.LoadingError;
+                if (loadingException != null)
+                {
+                    File.AppendAllText(Path.Combine(ExePath, "log" + current_date_and_time + ".txt"), "\n" + loadingException.Message);
+                    /*
+                    if (this.ShowQuestion("An error occured while trying to load, please see log" + current_date_and_time + ".txt for more details\n\nSubmit GitHub issue now?") == MessageBoxResult.Yes)
+                    {
+                        string GameName = (data?.GeneralInfo?.DisplayName != null ? data?.GeneralInfo?.DisplayName.Content : "[GAME NAME UNOBTAINABLE]");
+                        string localfilename = Path.GetFileName(filename);
+                        string GameMD5 = GenerateMD5(filename);
+                        string SteamURL = "I will provide a link to the game below.";
+                        int SteamID = 0;
+                        if (data != null)
+                        {
+                            SteamID = Math.Abs(data.GeneralInfo.SteamAppID);
+                            if (SteamID > 0)
+                                SteamURL = "This game can be found at https://store.steampowered.com/app/" + SteamID.ToString() + "/ or at https://steamdb.info/app/" + SteamID.ToString() + "/";
+                            Math.Abs(data.GeneralInfo.SteamAppID).ToString();
+                        }
+                        string OSDescription = System.Runtime.InteropServices.RuntimeInformation.OSDescription;
+                        string ProcessArchitecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString();
+                        string OSArchitecture = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture.ToString();
+                        string FrameworkDescription = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
+                        var name = (from x in new System.Management.ManagementObjectSearcher("SELECT Caption FROM Win32_OperatingSystem").Get().Cast<System.Management.ManagementObject>()
+                                    select x.GetPropertyValue("Caption")).FirstOrDefault();
+                        string OSName = (name != null ? name.ToString() : "Unknown");
+                        string TitleDescription = Uri.EscapeDataString(@"The game """ + GameName + @""" failed to load in UndertaleModTool (commit " + GitVersion.GetGitVersion() + ")");
+                        string GameDataIfAvailable = "";
+                        if (data != null)
+                        {
+                            DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds((long)data.GeneralInfo.Timestamp);
+                            DateTimeOffset dateTimeOffset2 = DateTimeOffset.FromUnixTimeMilliseconds((long)data.GeneralInfo.Timestamp);
+                            GameDataIfAvailable = "\nDisplay Name: " + data.GeneralInfo.DisplayName.ToString()
++ "\nFile Name: " + data.GeneralInfo.FileName.Content
++ "\nName: " + data.GeneralInfo.Name.Content
++ "\nBytecode Version: " + data.GeneralInfo.BytecodeVersion.ToString()
++ "\nGMS version: " + data.GeneralInfo.Major.ToString() + "." + data.GeneralInfo.Minor.ToString() + "." + data.GeneralInfo.Release.ToString() + "." + data.GeneralInfo.Build.ToString()
++ "\nTimestamp: " + data.GeneralInfo.Timestamp.ToString() + " (" + dateTimeOffset.ToString() + ")"
++ "\n";
+                        }
+                        string BodyDescription = Uri.EscapeDataString(@"### Describe the bug
+The game """ + GameName + @""" (File name: " + localfilename + ", MD5: " + GameMD5 + @") failed to load.
+"
+    + GameDataIfAvailable
+    +
+    @"
+See log attached:
+```
+"
+    +
+    File.ReadAllText(Path.Combine(ExePath, "log" + current_date_and_time + ".txt"))
+    +
+    @"
+```
+
+### Reproducing steps
+This can be reproduced by attempting to load the file described. " + SteamURL + @"
+
+### Setup Details
+" +
+    "\nCommit number: " + GitVersion.GetGitVersion() +
+    "\nOS Name: " + OSName +
+    "\nOS Details: " + OSDescription +
+    "\nProcess Architecture: " + ProcessArchitecture +
+    "\nPlatform Architecture: " + OSArchitecture +
+    "\nFramework Description: " + FrameworkDescription +
+    @"");
+                        string BaseURL = "https://github.com/krzys-h/UndertaleModTool/issues/new?" + "title=" + TitleDescription + "&body=" + BodyDescription + "&labels=bug";
+                        ScriptOpenURL(BaseURL);
+                    }
+                    */
                 }
 
                 Dispatcher.Invoke(async () =>
@@ -1040,9 +1115,15 @@ namespace UndertaleModTool
                             CanSave = false;
                             CanSafelySave = false;
                         }
-                        else if (hadWarnings)
+                        else if (!(data.LoadedCorrectly))
                         {
-                            this.ShowWarning("Warnings occurred during loading. Data loss will likely occur when trying to save!", "Loading problems");
+                            this.ShowError("Something went wrong while loading. Data loss WILL occur when trying to save, probably to a severe degree. As a result, saving has been disabled.\n\nYou may still view the data file loaded, but there is likely to be missing data and unexpected errors may occur.\n\nPlease see log" + current_date_and_time + ".txt for more details regarding what errors happened during loading.", "Loading problems");
+                            CanSave = false;
+                            CanSafelySave = false;
+                        }
+                        else if (hadWarnings && data.LoadedCorrectly)
+                        {
+                            this.ShowWarning("Warnings occurred during loading. Data loss will likely occur when trying to save! Please see log" + current_date_and_time + ".txt for more details", "Loading problems");
                             CanSave = true;
                             CanSafelySave = false;
                         }
