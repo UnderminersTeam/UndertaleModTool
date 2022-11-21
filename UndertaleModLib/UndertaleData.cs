@@ -310,16 +310,6 @@ namespace UndertaleModLib
         public bool GMS2_3_2 = false;
 
         /// <summary>
-        /// Whether the data file uses the QOI format for images.
-        /// </summary>
-        public bool UseQoiFormat = false;
-
-        /// <summary>
-        /// Whether the data file uses BZip compression.
-        /// </summary>
-        public bool UseBZipFormat = false;
-
-        /// <summary>
         /// Whether the data file is from version GMS2022.1.
         /// </summary>
         public bool GMS2022_1 = false;
@@ -343,6 +333,11 @@ namespace UndertaleModLib
         /// Whether the data file is from version GMS2022.6.
         /// </summary>
         public bool GM2022_6 = false;
+
+        /// <summary>
+        /// Whether the data file is from version GMS2022.9.
+        /// </summary>
+        public bool GM2022_9 = false;
 
         /// <summary>
         /// Some info for the editor to store data on.

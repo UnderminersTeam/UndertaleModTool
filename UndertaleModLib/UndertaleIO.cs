@@ -155,11 +155,28 @@ namespace UndertaleModLib
         private WarningHandlerDelegate WarningHandler;
         private MessageHandlerDelegate MessageHandler;
 
+        /// <summary>
+        /// The detected absolute path of the data file, if a FileStream is passed in, or null otherwise (by default).
+        /// Can also be manually changed.
+        /// </summary>
+        public string FilePath { get; set; } = null;
+
+        /// <summary>
+        /// The detected absolute path of the directory containing the data file, if a FileStream is passed in, or null otherwise (by default).
+        /// Can also be manually changed.
+        /// </summary>
+        public string Directory { get; set; } = null;
+
         public UndertaleReader(Stream input,
                                WarningHandlerDelegate warningHandler = null, MessageHandlerDelegate messageHandler = null) : base(input)
         {
             WarningHandler = warningHandler;
             MessageHandler = messageHandler;
+            if (input is FileStream fs)
+            {
+                FilePath = fs.Name;
+                Directory = Path.GetDirectoryName(FilePath);
+            }
         }
 
         // TODO: This would be more useful if it reported location like the exceptions did
@@ -218,6 +235,7 @@ namespace UndertaleModLib
 
             data.BuiltinList = new BuiltinList(data);
             Decompiler.AssetTypeResolver.InitializeTypes(data);
+            UndertaleEmbeddedTexture.FindAllTextureInfo(data);
 
             return data;
         }

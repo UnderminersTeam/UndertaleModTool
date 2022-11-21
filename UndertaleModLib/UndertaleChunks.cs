@@ -747,7 +747,18 @@ namespace UndertaleModLib
                 int maxSize = List.Select(x => x.TextureData.TextureBlob?.Length ?? 0).Max();
                 UndertaleEmbeddedTexture.TexData.InitSharedStream(maxSize);
 
-                if (writer.undertaleData.UseQoiFormat)
+                bool anythingUsesQoi = false;
+                foreach (var tex in List)
+                {
+                    if (tex.TextureExternal && !tex.TextureExternallyLoaded)
+                        continue; // don't accidentally load everything...
+                    if (tex.TextureData.FormatQOI)
+                    {
+                        anythingUsesQoi = true;
+                        break;
+                    }
+                }
+                if (anythingUsesQoi)
                 {
                     // Calculate maximum size of QOI converter buffer
                     maxSize = List.Select(x => x.TextureData.Width * x.TextureData.Height).Max()
@@ -907,6 +918,27 @@ namespace UndertaleModLib
                 throw new InvalidOperationException();
             if (reader.ReadUInt32() != 1)
                 throw new IOException("Expected TGIN version 1");
+            if (reader.undertaleData.GMS2_3)
+            {
+                // Check for 2022.8
+                uint returnPosition = reader.Position;
+
+                uint tginCount = reader.ReadUInt32();
+                if (tginCount > 0)
+                {
+                    uint tginPtr = reader.ReadUInt32();
+                    uint secondTginPtr = (tginCount >= 2) ? reader.ReadUInt32() : (returnPosition + this.Length);
+                    reader.Position = tginPtr + 4;
+
+                    // Check to see if the pointer located at this address points within this object
+                    // If not, then we know we're using a new format!
+                    uint ptr = reader.ReadUInt32();
+                    if (ptr < tginPtr || ptr >= secondTginPtr)
+                        reader.undertaleData.GM2022_9 = true;
+                }
+
+                reader.Position = returnPosition;
+            }
             base.UnserializeChunk(reader);
         }
     }
