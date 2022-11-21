@@ -54,9 +54,9 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
 
 
     /// <summary>
-    /// Helper variable for whether or not an external texture was loaded yet.
+    /// Helper variable for whether or not a texture was loaded yet.
     /// </summary>
-    public bool TextureExternallyLoaded { get; set; } = false;
+    public bool TextureLoaded { get; set; } = false;
 
     /// <summary>
     /// Width of the texture. 2022.9+ only.
@@ -156,6 +156,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                 throw new IOException("Padding error!");
 
         reader.ReadUndertaleObject(_textureData);
+        TextureLoaded = true;
     }
 
     /// <summary>
@@ -173,21 +174,20 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         }
     }
 
-    private static TexData _placeholderTexture = null;
-    private static TexData CreatePlaceholderTexture()
+    // 1x1 black pixel in PNG format
+    private static TexData _placeholderTexture = new()
     {
-        _placeholderTexture = new();
-
-        // Construct new PNG file that has placeholder image
-        // TODO: display a helpful message instead?
-        Bitmap image = new Bitmap(64, 64);
-        Graphics g = Graphics.FromImage(image);
-        g.Clear(Color.Black);
-        g.Dispose();
-
-        _placeholderTexture.TextureBlob = TextureWorker.GetImageBytes(image);
-        return _placeholderTexture;
-    }
+        TextureBlob = new byte[]
+        {
+            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 
+            0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, 0xDE, 0x00, 0x00, 0x00, 0x01, 0x73, 0x52, 0x47, 
+            0x42, 0x00, 0xAE, 0xCE, 0x1C, 0xE9, 0x00, 0x00, 0x00, 0x04, 0x67, 0x41, 0x4D, 0x41, 0x00, 0x00, 0xB1, 0x8F, 0x0B, 0xFC, 
+            0x61, 0x05, 0x00, 0x00, 0x00, 0x09, 0x70, 0x48, 0x59, 0x73, 0x00, 0x00, 0x0E, 0xC3, 0x00, 0x00, 0x0E, 0xC3, 0x01, 0xC7, 
+            0x6F, 0xA8, 0x64, 0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41, 0x54, 0x18, 0x57, 0x63, 0x60, 0x60, 0x60, 0x00, 0x00, 0x00, 
+            0x04, 0x00, 0x01, 0x5C, 0xCD, 0xFF, 0x69, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82
+        }
+    };
+    private static object _textureLoadLock = new();
 
     /// <summary>
     /// Attempts to load the corresponding external texture. Should only happen in 2022.9 and above.
@@ -195,32 +195,38 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     /// <returns></returns>
     public TexData LoadExternalTexture()
     {
-        TexData texData;
-
-        if (_2022_9_GameDirectory == null)
-            return _placeholderTexture ?? CreatePlaceholderTexture();
-
-        // Try to find file on disk
-        string path = Path.Combine(_2022_9_GameDirectory, TextureInfo.Directory.Content,
-                                   TextureInfo.Name.Content + "_" + IndexInGroup.ToString() + TextureInfo.Extension.Content);
-        if (!File.Exists(path))
-            return _placeholderTexture ?? CreatePlaceholderTexture();
-
-        // Load file!
-        try
+        lock (_textureLoadLock)
         {
-            using FileStream fs = new(path, FileMode.Open);
-            using FileBinaryReader fbr = new(fs);
-            texData = new TexData();
-            texData.Unserialize(fbr, true);
-            TextureExternallyLoaded = true;
-        }
-        catch (IOException)
-        {
-            return _placeholderTexture ?? CreatePlaceholderTexture();
-        }
+            if (TextureLoaded)
+                return _textureData;
 
-        return texData;
+            TexData texData;
+
+            if (_2022_9_GameDirectory == null)
+                return _placeholderTexture;
+
+            // Try to find file on disk
+            string path = Path.Combine(_2022_9_GameDirectory, TextureInfo.Directory.Content,
+                                       TextureInfo.Name.Content + "_" + IndexInGroup.ToString() + TextureInfo.Extension.Content);
+            if (!File.Exists(path))
+                return _placeholderTexture;
+
+            // Load file!
+            try
+            {
+                using FileStream fs = new(path, FileMode.Open);
+                using FileBinaryReader fbr = new(fs);
+                texData = new TexData();
+                texData.Unserialize(fbr, true);
+                TextureLoaded = true;
+            }
+            catch (IOException)
+            {
+                return _placeholderTexture;
+            }
+
+            return texData;
+        }
     }
 
     /// <inheritdoc />
@@ -238,7 +244,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     {
         GC.SuppressFinalize(this);
 
-        _textureData.Dispose();
+        _textureData?.Dispose();
         _textureData = null;
         Name = null;
         TextureInfo = null;

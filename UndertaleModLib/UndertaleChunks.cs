@@ -750,7 +750,7 @@ namespace UndertaleModLib
                 bool anythingUsesQoi = false;
                 foreach (var tex in List)
                 {
-                    if (tex.TextureExternal && !tex.TextureExternallyLoaded)
+                    if (tex.TextureExternal && !tex.TextureLoaded)
                         continue; // don't accidentally load everything...
                     if (tex.TextureData.FormatQOI)
                     {
