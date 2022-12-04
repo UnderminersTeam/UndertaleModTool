@@ -11,7 +11,7 @@ const string texturesName = "EmbeddedTextures";
 // The folder data.win is located in.
 string dataFolder = Path.GetDirectoryName(FilePath);
 // The folder to write the image data to.
-string texturesFolder = Path.Combine(FilePath, texturesName);
+string texturesFolder = Path.Combine(dataFolder, texturesName);
 
 if (!CanOverwrite())
     return;

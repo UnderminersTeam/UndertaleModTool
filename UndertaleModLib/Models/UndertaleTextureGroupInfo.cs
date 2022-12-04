@@ -72,6 +72,42 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
     public UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND> Tilesets { get; set; }
 
     /// <summary>
+    /// Directory of the texture on disk. 2022.9+ only.
+    /// </summary>
+    public UndertaleString Directory { get; set; }
+
+    /// <summary>
+    /// File extension of the texture on disk. 2022.9+ only.
+    /// </summary>
+    public UndertaleString Extension { get; set; }
+
+    /// <summary>
+    /// The load type of the texture. 2022.9+ only.
+    /// </summary>
+    public TextureGroupLoadType LoadType { get; set; }
+
+    /// <summary>
+    /// The possible load types of a texture in 2022.9 and above. Old versions default to "InFile".
+    /// </summary>
+    public enum TextureGroupLoadType
+    {
+        /// <summary>
+        /// The texture data is located inside this file.
+        /// </summary>
+        InFile = 0,
+        /// <summary>
+        /// The textures of the group this belongs to are located externally
+        /// May mean more specifically that textures for one texture group are all in one file.
+        /// </summary>
+        SeparateGroup = 1,
+        /// <summary>
+        /// The textures of the group this belongs to are located externally.
+        /// May mean more specifically that textures are separated into different files, within the group.
+        /// </summary>
+        SeparateTextures = 2
+    }
+
+    /// <summary>
     /// Initializes a new instance of <see cref="UndertaleTextureGroupInfo"/>.
     /// </summary>
     public UndertaleTextureGroupInfo()
@@ -87,6 +123,13 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
     public void Serialize(UndertaleWriter writer)
     {
         writer.WriteUndertaleString(Name);
+
+        if (writer.undertaleData.GM2022_9)
+        {
+            writer.WriteUndertaleString(Directory);
+            writer.WriteUndertaleString(Extension);
+            writer.Write((int)LoadType);
+        }
 
         writer.WriteUndertaleObjectPointer(TexturePages);
         writer.WriteUndertaleObjectPointer(Sprites);
@@ -105,6 +148,13 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
     public void Unserialize(UndertaleReader reader)
     {
         Name = reader.ReadUndertaleString();
+
+        if (reader.undertaleData.GM2022_9)
+        {
+            Directory = reader.ReadUndertaleString();
+            Extension = reader.ReadUndertaleString();
+            LoadType = (TextureGroupLoadType)reader.ReadInt32();
+        }
 
         // Read the pointers
         TexturePages = reader.ReadUndertaleObjectPointer<UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR>>();

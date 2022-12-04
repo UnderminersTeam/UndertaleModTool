@@ -16,17 +16,33 @@ public enum AnimSpeedType : uint
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
 {
+    /// <summary>
+    /// The width of the Spine atlas in pixels.
+    /// </summary>
     public int PageWidth { get; set; }
+    
+    /// <summary>
+    /// The height of the Spine atlas in pixels.
+    /// </summary>
     public int PageHeight { get; set; }
-    public byte[] PNGBlob { get; set; }
+    
+    /// <summary>
+    /// The atlas as raw bytes, can be a GameMaker QOI texture or a PNG file.
+    /// </summary>
+    public byte[] TexBlob { get; set; }
+    
+    /// <summary>
+    /// Indicates whether <see cref="TexBlob"/> contains a GameMaker QOI texture (the header is qoif reversed).
+    /// </summary>
+    public bool IsQOI => TexBlob != null && TexBlob.Length > 7 && TexBlob[0] == 102/*f*/ && TexBlob[1] == 105/*i*/ && TexBlob[2] == 111/*o*/ && TexBlob[3] == 113/*q*/;
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
     {
         writer.Write(PageWidth);
         writer.Write(PageHeight);
-        writer.Write(PNGBlob.Length);
-        writer.Write(PNGBlob);
+        writer.Write(TexBlob.Length);
+        writer.Write(TexBlob);
     }
 
     /// <inheritdoc />
@@ -34,7 +50,7 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
     {
         PageWidth = reader.ReadInt32();
         PageHeight = reader.ReadInt32();
-        PNGBlob = reader.ReadBytes(reader.ReadInt32());
+        TexBlob = reader.ReadBytes(reader.ReadInt32());
     }
 
     /// <inheritdoc />
@@ -48,7 +64,7 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
     {
         GC.SuppressFinalize(this);
 
-        PNGBlob = null;
+        TexBlob = null;
     }
 }
 
@@ -182,6 +198,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     public bool IsSpecialType { get; set; } = false;
 
     public int SpineVersion { get; set; }
+    public int SpineCacheVersion { get; set; }
     public string SpineJSON { get; set; }
     public string SpineAtlas { get; set; }
     public UndertaleSimpleList<UndertaleSpineTextureEntry> SpineTextures { get; set; }
@@ -377,6 +394,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
 
                     // the header.
                     writer.Write(SpineVersion);
+                    if (SpineVersion >= 3) writer.Write(SpineCacheVersion);
                     writer.Write(encodedJson.Length);
                     writer.Write(encodedAtlas.Length);
 
@@ -385,7 +403,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                         case 1:
                         {
                             UndertaleSpineTextureEntry atlas = SpineTextures.First(); // will throw an exception if the list is null, what I want!
-                            writer.Write(atlas.PNGBlob.Length);
+                            writer.Write(atlas.TexBlob.Length);
                             writer.Write(atlas.PageWidth);
                             writer.Write(atlas.PageHeight);
 
@@ -394,11 +412,12 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                             writer.Write(encodedAtlas);
 
                             // the one and only atlas.
-                            writer.Write(atlas.PNGBlob);
+                            writer.Write(atlas.TexBlob);
 
                             break;
                         }
                         case 2:
+                        case 3:
                         {
                             writer.Write(SpineTextures.Count);
 
@@ -554,16 +573,22 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     reader.Align(4);
 
                     SpineVersion = reader.ReadInt32();
-                    Util.DebugUtil.Assert(SpineVersion == 2 || SpineVersion == 1, "Invalid Spine format version number, expected 2 or 1, got " + SpineVersion);
+                    if (SpineVersion >= 3)
+                    {
+                        SpineCacheVersion = reader.ReadInt32();
+                        Util.DebugUtil.Assert(SpineCacheVersion == 1, "Invalid Spine cache format version number, expected 1, got " + SpineCacheVersion);
+                    }
+                    Util.DebugUtil.Assert(SpineVersion == 3 || SpineVersion == 2 || SpineVersion == 1, "Invalid Spine format version number, expected 3, 2 or 1, got " + SpineVersion);
                     int jsonLength = reader.ReadInt32();
                     int atlasLength = reader.ReadInt32();
-                    int textures = reader.ReadInt32(); // count in v2 and size in bytes in v1.
+                    int textures = reader.ReadInt32(); // count in v2(and newer) and size in bytes in v1.
                     SpineTextures = new UndertaleSimpleList<UndertaleSpineTextureEntry>();
 
                     switch (SpineVersion)
                     {
                         // Version 1 - only one single PNG atlas.
                         // Version 2 - can be multiple atlases.
+                        // Version 3 - an atlas can be a QOI blob.
                         case 1:
                         {
                             UndertaleSpineTextureEntry atlas = new UndertaleSpineTextureEntry();
@@ -574,11 +599,12 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
 
                             atlas.PageWidth = atlasWidth;
                             atlas.PageHeight = atlasHeight;
-                            atlas.PNGBlob = reader.ReadBytes(textures);
+                            atlas.TexBlob = reader.ReadBytes(textures);
                             SpineTextures.Add(atlas);
                             break;
                         }
                         case 2:
+                        case 3:
                         {
                             SpineJSON = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(jsonLength)));
                             SpineAtlas = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(atlasLength)));

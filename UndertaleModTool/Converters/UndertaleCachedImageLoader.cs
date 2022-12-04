@@ -96,6 +96,8 @@ namespace UndertaleModTool
                     return null;
             }
 
+            if (texture.SourceWidth == 0 || texture.SourceHeight == 0)
+                return null;
 
             if (tileRectList is not null)
             {

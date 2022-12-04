@@ -7,12 +7,16 @@
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleEmbeddedTexture}">
+    <UserControl.Resources>
+        <local:BooleanToVisibilityConverter x:Key="BoolFalseToVisConverter" local:trueValue="Collapsed" local:falseValue="Visible"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -34,8 +38,10 @@
             <TextBox Grid.Column="0" Name="TexWidth" Margin="3" Text="{Binding TextureData.Width, Mode=OneWay}" IsReadOnly="True"/>
             <TextBox Grid.Column="1" Name="TexHeight" Margin="3" Text="{Binding TextureData.Height, Mode=OneWay}" IsReadOnly="True"/>
         </Grid>
+
+        <TextBlock Grid.Row="3" Grid.Column="4" Margin="3" Foreground="Red" Visibility="{Binding TextureLoaded, Mode=OneWay, Converter={StaticResource BoolFalseToVisConverter}}">Warning: Texture failed to load!</TextBlock>
         
-        <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="3">
+        <Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
