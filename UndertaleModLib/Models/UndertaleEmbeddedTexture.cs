@@ -41,7 +41,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     private uint _textureBlockSize { get; set; }
 
     /// <summary>
-    /// The position of the placeholder <see cref="_TextureBlockSize">TextureBlockSize</see> value
+    /// The position of the placeholder <see cref="_textureBlockSize">TextureBlockSize</see> value
     /// to be overwritten in SerializeBlob. <br/>
     /// Only used internally for GM 2022.3+ support.
     /// </summary>
