@@ -213,23 +213,23 @@ public class UndertaleInstruction : UndertaleObject
 
         public Reference(int int32Value)
         {
-            NextOccurrenceOffset = (uint)int32Value & 0x00FFFFFF;
-            Type = (VariableType)(int32Value >> 24);
+            NextOccurrenceOffset = (uint)int32Value & 0x07FFFFFF;
+            Type = (VariableType)((int32Value >> 24) & 0xF8);
         }
 
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             NextOccurrenceOffset = 0xdead;
-            writer.WriteUInt24(NextOccurrenceOffset);
-            writer.Write((byte)Type);
+            writer.Write((NextOccurrenceOffset & 0x07FFFFFF) | (((uint)Type & 0xF8) << 24));
         }
 
         /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
-            NextOccurrenceOffset = reader.ReadUInt24();
-            Type = (VariableType)reader.ReadByte();
+            int int32Value = reader.ReadInt32();
+            NextOccurrenceOffset = (uint)int32Value & 0x07FFFFFF;
+            Type = (VariableType)((int32Value >> 24) & 0xF8);
         }
 
         /// <inheritdoc />
@@ -289,8 +289,9 @@ public class UndertaleInstruction : UndertaleObject
                         }
                         else
                             addrDiff = var.NameStringID;
-                        writer.Position = writer.GetAddressForUndertaleObject(references[var][i].GetReference<T>());
-                        writer.WriteInt24(addrDiff);
+                        Reference<T> thisRef = references[var][i].GetReference<T>();
+                        writer.Position = writer.GetAddressForUndertaleObject(thisRef);
+                        writer.Write((addrDiff & 0x07FFFFFF) | (((int)thisRef.Type & 0xF8) << 24));
                     }
                 }
                 else

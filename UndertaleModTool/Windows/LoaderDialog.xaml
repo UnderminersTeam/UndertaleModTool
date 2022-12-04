@@ -6,6 +6,9 @@
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
         Title="{Binding MessageTitle}" Height="150" Width="400" WindowStartupLocation="CenterOwner" ResizeMode="CanMinimize">
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo ProgressState="Indeterminate"/>
+    </Window.TaskbarItemInfo>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>

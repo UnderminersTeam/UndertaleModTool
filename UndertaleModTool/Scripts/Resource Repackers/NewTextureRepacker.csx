@@ -197,6 +197,7 @@ public class TPageItem
     public UndertaleTexturePageItem Item;
 }
 
+// TODO: make the script use new progress bar updater when the progress bar will be fixed
 volatile int progress = 0;
 string updateText = "";
 void UpdateProgress(int updateAmount)
@@ -381,7 +382,6 @@ Directory.CreateDirectory(packagerDirectory);
 // Dump all the texture page items
 ResetProgress("Existing Textures Exported");
 var texPageItems = await dumpTexturePageItems(packagerDirectory, reuseTextures);
-HideProgressBar();
 
 // Clear embedded textures and any possibly stale references to them
 Data.EmbeddedTextures.Clear();
@@ -393,23 +393,27 @@ if (Data.TextureGroupInfo != null)
     }
 }
 
-// This query:
-// - Sorts and groups textures that are inside the bounds defined by maxDims, maxArea
-// - Eliminates from the pool any Page Item that sits alone in a Texture Page 
-//   (since there's probably a reason for that, e.g. shaders)
-// - Attempts to preserve texture page properties
-var texPageLookup = texPageItems.OrderBy(
-    // Order by smallest textures first
-    item => Math.Max(item.OriginalRect.Width, item.OriginalRect.Height)
-).Where(
-    // Select textures that are small enough to be worth get paged
-    item => (item.OriginalRect.Area < maxArea)                                          // area too big
-         && (item.OriginalRect.Width <= maxDims && item.OriginalRect.Height <= maxDims) // both axis too big
-         && (texPageItems.Any(item2 => (item2 != item) && (item.Item.TexturePage == item2.Item.TexturePage))) // shares a page with a different item
-).ToLookup(
-    // Preserve texture page settings by grouping items with similar settings
-    item => (item.Item.TexturePage.Scaled, doItemGrouping(item))
-);
+ILookup<(uint Scaled, int), TPageItem> texPageLookup = null;
+await Task.Run(() =>
+{
+    // This query:
+    // - Sorts and groups textures that are inside the bounds defined by maxDims, maxArea
+    // - Eliminates from the pool any Page Item that sits alone in a Texture Page 
+    //   (since there's probably a reason for that, e.g. shaders)
+    // - Attempts to preserve texture page properties
+    texPageLookup = texPageItems.OrderBy(
+        // Order by smallest textures first
+        item => Math.Max(item.OriginalRect.Width, item.OriginalRect.Height)
+    ).Where(
+        // Select textures that are small enough to be worth get paged
+        item => (item.OriginalRect.Area < maxArea)                                          // area too big
+             && (item.OriginalRect.Width <= maxDims && item.OriginalRect.Height <= maxDims) // both axis too big
+             && (texPageItems.Any(item2 => (item2 != item) && (item.Item.TexturePage == item2.Item.TexturePage))) // shares a page with a different item
+    ).ToLookup(
+        // Preserve texture page settings by grouping items with similar settings
+        item => (item.Item.TexturePage.Scaled, doItemGrouping(item))
+    );
+});
 
 // Layout all the texture items (grouped by doItemGrouping) into atlases
 ResetProgress("Laying out texture items");
@@ -419,12 +423,15 @@ int lastTextPage = Data.EmbeddedTextures.Count - 1;
 
 // Now recreate texture pages and link the items to the pages
 ResetProgress("Regenerating Texture Pages");
-using (var f = new StreamWriter(Path.Combine(packagerDirectory, "log.txt")))
-{
-    var atlasCount = 0;
 
-    // Group items based on which atlas they belong to, if they do
-    var groups = texPageItems.GroupBy(item => item.Atlas);
+var f = new StreamWriter(Path.Combine(packagerDirectory, "log.txt"));
+int atlasCount = 0;
+
+// Group items based on which atlas they belong to, if they do
+var groups = texPageItems.GroupBy(item => item.Atlas);
+SyncBinding("EmbeddedTextures", true);
+await Task.Run(() =>
+{
     foreach (var group in groups)
     {
         TextureAtlas atlas = group.Key;
@@ -437,7 +444,11 @@ using (var f = new StreamWriter(Path.Combine(packagerDirectory, "log.txt")))
             UndertaleEmbeddedTexture tex = new UndertaleEmbeddedTexture();
             tex.Name = new UndertaleString("Texture " + ++lastTextPage);
             Data.EmbeddedTextures.Add(tex);
-            Image img = new Bitmap(atlas.Size, atlas.Size, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            Bitmap img = new Bitmap(atlas.Size, atlas.Size, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            // DPI fix
+            img.SetResolution(96.0F, 96.0F);
+
             Graphics g = Graphics.FromImage(img);
             tex.Scaled = group.First().Scaled; // Make sure the original pane "Scaled" value is mantained.
 
@@ -450,8 +461,9 @@ using (var f = new StreamWriter(Path.Combine(packagerDirectory, "log.txt")))
             {
                 f.WriteLine($"tex: {texPageItems.IndexOf(item)}: {item.NewRect.X}, {item.NewRect.Y}, {item.NewRect.Width}, {item.NewRect.Height}");
 
-                Image source = Image.FromFile(item.Filename);
-                g.DrawImage(source, item.NewRect.X, item.NewRect.Y);
+                using (Bitmap source = new Bitmap(item.Filename))
+                    g.DrawImage(source, item.NewRect.X, item.NewRect.Y);
+
                 item.Item.TexturePage = tex;
                 item.Item.SourceX = (ushort)item.NewRect.X;
                 item.Item.SourceY = (ushort)item.NewRect.Y;
@@ -460,15 +472,12 @@ using (var f = new StreamWriter(Path.Combine(packagerDirectory, "log.txt")))
                 UpdateProgress(1);
             }
 
-            // DPI fix
-            Bitmap ResolutionFix = new Bitmap(img);
-            ResolutionFix.SetResolution(96.0F, 96.0F);
-            Image img2 = ResolutionFix;
-
             // Save atlas into a file and load it back into 
-            var atlasFile = $"{packagerDirectory}atlas_{atlasName}.png";
-            img2.Save(atlasFile, System.Drawing.Imaging.ImageFormat.Png);
+            string atlasFile = Path.Combine(packagerDirectory, $"atlas_{atlasName}.png");
+            img.Save(atlasFile, System.Drawing.Imaging.ImageFormat.Png);
             tex.TextureData.TextureBlob = File.ReadAllBytes(atlasFile);
+
+            img.Dispose();
         }
         else
         {
@@ -482,26 +491,27 @@ using (var f = new StreamWriter(Path.Combine(packagerDirectory, "log.txt")))
                 Data.EmbeddedTextures.Add(tex);
 
                 // Create POT texture if needed
-                var itemFile = item.Filename;
+                string itemFile = item.Filename;
                 if (forcePOT && !potBlacklist.Contains(item))
                 {
                     int potw = NearestPowerOf2((uint)item.OriginalRect.Width),
                         poth = NearestPowerOf2((uint)item.OriginalRect.Height);
 
-                    Image img = new Bitmap(potw, poth, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    Bitmap img = new Bitmap(potw, poth, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+                    // DPI fix
+                    img.SetResolution(96.0F, 96.0F);
+
                     Graphics g = Graphics.FromImage(img);
 
                     // Load texture
-                    Image source = Image.FromFile(item.Filename);
-                    g.DrawImage(source, 0, 0);
+                    using (Bitmap source = new Bitmap(item.Filename))
+                        g.DrawImage(source, 0, 0);
 
-                    // DPI fix
-                    Bitmap ResolutionFix = new Bitmap(img);
-                    ResolutionFix.SetResolution(96.0F, 96.0F);
-                    Image img2 = ResolutionFix;
+                    itemFile = Path.Combine(packagerDirectory, $"pot_{texPageItems.IndexOf(item)}.png");
+                    img.Save(itemFile, System.Drawing.Imaging.ImageFormat.Png);
 
-                    itemFile = $"{packagerDirectory}pot_{texPageItems.IndexOf(item)}.png";
-                    img2.Save(itemFile, System.Drawing.Imaging.ImageFormat.Png);
+                    img.Dispose();
                 }
 
                 tex.TextureData.TextureBlob = File.ReadAllBytes(itemFile);
@@ -516,7 +526,10 @@ using (var f = new StreamWriter(Path.Combine(packagerDirectory, "log.txt")))
             }
         }
     }
-}
+});
+
+SyncBinding(false);
+f.Close();
 
 // Done.
 HideProgressBar();
