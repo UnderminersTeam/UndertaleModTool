@@ -26,7 +26,7 @@ if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 
 //Overwrite Check One
-if (!File.Exists(importFolder + "/strings.txt"))
+if (!File.Exists(importFolder + "\\strings.txt"))
 {
     ScriptError("No 'strings.txt' file exists!", "Error");
     return;
@@ -34,7 +34,7 @@ if (!File.Exists(importFolder + "/strings.txt"))
 
 int file_length = 0;
 string line = "";
-using (StreamReader reader = new StreamReader(importFolder + "/strings.txt"))
+using (StreamReader reader = new StreamReader(importFolder + "\\strings.txt"))
 {
     while ((line = reader.ReadLine()) != null)
     {
@@ -61,7 +61,7 @@ else if (file_length > validStringsCount)
     return;
 }
 
-using (StreamReader reader = new StreamReader(importFolder + "/strings.txt"))
+using (StreamReader reader = new StreamReader(importFolder + "\\strings.txt"))
 {
     int line_no = 1;
     line = "";
@@ -78,7 +78,7 @@ using (StreamReader reader = new StreamReader(importFolder + "/strings.txt"))
     }
 }
 
-using (StreamReader reader = new StreamReader(importFolder + "/strings.txt"))
+using (StreamReader reader = new StreamReader(importFolder + "\\strings.txt"))
 {
     int line_no = 1;
     line = "";
