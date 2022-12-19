@@ -179,6 +179,18 @@ namespace UndertaleModTool
             }
         }
 
+        public static bool EnableDarkMode
+        {
+            get => Settings.Instance.EnableDarkMode;
+            set
+            {
+                Settings.Instance.EnableDarkMode = value;
+                Settings.Save();
+
+                MainWindow.SetDarkMode(value);
+            }
+        }
+
         public bool UpdateButtonEnabled
         {
             get => UpdateAppButton.IsEnabled;

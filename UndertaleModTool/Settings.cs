@@ -51,6 +51,8 @@ namespace UndertaleModTool
         public double GlobalGridThickness { get; set; } = 1;
         public bool GridThicknessEnabled { get; set; } = false;
 
+        public bool EnableDarkMode { get; set; } = false;
+
         public static Settings Instance;
 
         public static JsonSerializerOptions JsonOptions = new JsonSerializerOptions

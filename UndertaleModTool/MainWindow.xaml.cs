@@ -441,6 +441,18 @@ namespace UndertaleModTool
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? "-" + Edition : "");
 #endif
 
+        private static readonly Color darkColor = Color.FromArgb(255, 51, 51, 51);
+        private static readonly Color darkLightColor = Color.FromArgb(255, 64, 64, 64);
+        private static readonly Style elementStyle = new(typeof(Control));
+        private static readonly Dictionary<ResourceKey, object> appDarkStyle = new()
+        {
+            { SystemColors.WindowTextBrushKey, new SolidColorBrush(Colors.White) },
+            { SystemColors.ControlTextBrushKey, new SolidColorBrush(Colors.White) },
+            { SystemColors.WindowBrushKey, new SolidColorBrush(darkColor) },
+            { SystemColors.ControlBrushKey, new SolidColorBrush(darkColor) },
+            { SystemColors.ControlLightLightBrushKey, new SolidColorBrush(darkLightColor) }
+        };
+
         public MainWindow()
         {
             InitializeComponent();
@@ -467,6 +479,8 @@ namespace UndertaleModTool
                                                 typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly)
                                 .WithEmitDebugInformation(true); //when script throws an exception, add a exception location (line number)
             });
+
+            elementStyle.Setters.Add(new Setter(Control.ForegroundProperty, SystemColors.ControlTextBrush));
         }
 
         private void SetIDString(string str)
@@ -503,6 +517,10 @@ namespace UndertaleModTool
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Settings.Load();
+
+            if (Settings.Instance.EnableDarkMode)
+                SetDarkMode(true);
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 try
@@ -701,6 +719,36 @@ namespace UndertaleModTool
                     throw new Exception("errrrr");
                 OpenInTab(Data.EmbeddedAudio[Int32.Parse(thingToOpen[1])], false, "Embedded Audio");
                 Activate();
+            }
+        }
+
+        public static void SetDarkMode(bool enable)
+        {
+            if (enable)
+            {
+                foreach (var pair in appDarkStyle)
+                    Application.Current.Resources[pair.Key] = pair.Value;
+
+                Application.Current.Resources[typeof(Button)] = elementStyle;
+                Application.Current.Resources[typeof(ComboBox)] = elementStyle;
+                Windows.TextInput.BGColor = System.Drawing.Color.FromArgb(darkColor.R,
+                                                                          darkColor.G,
+                                                                          darkColor.B);
+                Windows.TextInput.TextBoxBGColor = System.Drawing.Color.FromArgb(darkLightColor.R,
+                                                                                 darkLightColor.G,
+                                                                                 darkLightColor.B);
+                Windows.TextInput.TextColor = System.Drawing.Color.White;
+            }
+            else
+            {
+                foreach (ResourceKey key in appDarkStyle.Keys)
+                    Application.Current.Resources.Remove(key);
+
+                Application.Current.Resources.Remove(typeof(Button));
+                Application.Current.Resources.Remove(typeof(ComboBox));
+                Windows.TextInput.BGColor = System.Drawing.SystemColors.Control;
+                Windows.TextInput.TextBoxBGColor = System.Drawing.SystemColors.Window;
+                Windows.TextInput.TextColor = System.Drawing.SystemColors.ControlText;
             }
         }
 

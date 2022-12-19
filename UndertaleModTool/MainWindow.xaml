@@ -211,7 +211,7 @@
                                         <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
                                     </Trigger>
                                     <Trigger Property="IsKeyboardFocused" Value="True">
-                                        <Setter Property="Background" Value="White" />
+                                        <Setter Property="Background" Value="{x:Null}" />
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
