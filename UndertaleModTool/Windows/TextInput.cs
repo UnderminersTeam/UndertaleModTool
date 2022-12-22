@@ -84,6 +84,7 @@ namespace UndertaleModTool.Windows
 
             label1.AutoSize = false;
 
+            // dark mode related
             BackColor = BGColor;
             richTextBox1.BackColor = TextBoxBGColor;
             label1.ForeColor = TextColor;

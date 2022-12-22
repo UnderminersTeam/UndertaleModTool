@@ -369,7 +369,11 @@
                                     <Setter Property="Foreground" Value="Gray"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Path=ParentEntry}" Value="{x:Null}">
-                                            <Setter Property="Foreground" Value="Black"/>
+                                            <Setter Property="Foreground">
+                                                <Setter.Value>
+                                                    <DynamicResource ResourceKey="{x:Static SystemColors.ControlTextBrushKey}"/>
+                                                </Setter.Value>
+                                            </Setter>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
