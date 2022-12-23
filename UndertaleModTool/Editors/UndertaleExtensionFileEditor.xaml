@@ -39,8 +39,8 @@
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Kind</TextBlock>
 
-        <ComboBox ItemsSource="{Binding Source={StaticResource ExtensionKind}}" SelectedItem="{Binding Kind}"
-                  Grid.Row="3" Grid.Column="1" Margin="3"/>
+        <local:ComboBox ItemsSource="{Binding Source={StaticResource ExtensionKind}}" SelectedItem="{Binding Kind}"
+                        Grid.Row="3" Grid.Column="1" Margin="3"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Functions</TextBlock>
         <DataGrid Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Functions}" Name="FunctionsList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" AddingNewItem="DataGrid_AddingNewItem" IsSynchronizedWithCurrentItem="True">

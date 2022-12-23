@@ -91,8 +91,8 @@
         <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding BBoxMode}"/>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">SepMasks</TextBlock>
-        <ComboBox ItemsSource="{Binding Source={StaticResource SepMaskType}}" SelectedItem="{Binding Path=SepMasks}"
-                  Grid.Row="8" Grid.Column="1" Margin="3"/>
+        <local:ComboBox ItemsSource="{Binding Source={StaticResource SepMaskType}}" SelectedItem="{Binding Path=SepMasks}"
+                        Grid.Row="8" Grid.Column="1" Margin="3"/>
 
         <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Origin</TextBlock>
         <Grid Grid.Row="9" Grid.Column="1">
@@ -283,8 +283,8 @@
             <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding SVersion}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Type</TextBlock>
-            <ComboBox ItemsSource="{Binding Source={StaticResource SpriteType}}" SelectedItem="{Binding Path=SSpriteType}"
-                  Grid.Row="1" Grid.Column="1" Margin="3"/>
+            <local:ComboBox ItemsSource="{Binding Source={StaticResource SpriteType}}" SelectedItem="{Binding Path=SSpriteType}"
+                            Grid.Row="1" Grid.Column="1" Margin="3"/>
 
             <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
                 <Grid.ColumnDefinitions>
@@ -300,8 +300,8 @@
                 <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2PlaybackSpeed}"/>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Playback speed type</TextBlock>
-                <ComboBox ItemsSource="{Binding Source={StaticResource AnimSpeedType}}" SelectedItem="{Binding Path=GMS2PlaybackSpeedType}"
-                    Grid.Row="1" Grid.Column="1" Margin="3"/>
+                <local:ComboBox ItemsSource="{Binding Source={StaticResource AnimSpeedType}}" SelectedItem="{Binding Path=GMS2PlaybackSpeedType}"
+                                Grid.Row="1" Grid.Column="1" Margin="3"/>
             </Grid>
         </Grid>
     </Grid>

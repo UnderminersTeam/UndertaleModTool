@@ -242,7 +242,7 @@
             <CheckBox Grid.Row="10" Grid.Column="1" Margin="3" IsChecked="{Binding IsSensor}"/>
 
             <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Collision shape</TextBlock>
-            <ComboBox Grid.Row="11" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource CollisionShapeFlags}}" SelectedItem="{Binding Path=CollisionShape}" />
+            <local:ComboBox Grid.Row="11" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource CollisionShapeFlags}}" SelectedItem="{Binding Path=CollisionShape}" />
 
             <Separator Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2"/>
 
@@ -382,7 +382,7 @@
                                                                     <Setter.Value>
                                                                         <DataTemplate>
                                                                             <StackPanel>
-                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                                <local:ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                                 <TextBox Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
@@ -394,7 +394,7 @@
                                                                     <Setter.Value>
                                                                         <DataTemplate>
                                                                             <StackPanel>
-                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                                <local:ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                                 <TextBox Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
@@ -406,7 +406,7 @@
                                                                     <Setter.Value>
                                                                         <DataTemplate>
                                                                             <StackPanel>
-                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                                <local:ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                                 <TextBox Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
@@ -435,7 +435,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeStep}}" SelectedItem="{Binding DataContext.EventSubtypeStep, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                            <local:ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeStep}}" SelectedItem="{Binding DataContext.EventSubtypeStep, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -444,7 +444,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeMouse}}" SelectedItem="{Binding DataContext.EventSubtypeMouse, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                            <local:ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeMouse}}" SelectedItem="{Binding DataContext.EventSubtypeMouse, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -453,7 +453,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeOther}}" SelectedItem="{Binding DataContext.EventSubtypeOther, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                            <local:ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeOther}}" SelectedItem="{Binding DataContext.EventSubtypeOther, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -462,7 +462,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeDraw}}" SelectedItem="{Binding DataContext.EventSubtypeDraw, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                            <local:ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeDraw}}" SelectedItem="{Binding DataContext.EventSubtypeDraw, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>

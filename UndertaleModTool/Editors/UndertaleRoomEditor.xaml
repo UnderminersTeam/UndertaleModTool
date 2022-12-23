@@ -883,7 +883,7 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <TextBox Grid.Column="0" Text="{Binding AnimationSpeed}"/>
-                                                <ComboBox Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
+                                                <local:ComboBox Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
                                             </Grid>
                                         </Grid>
                                     </DataTemplate>
@@ -960,7 +960,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBox Grid.Column="0" Text="{Binding AnimationSpeed}"/>
-                                <ComboBox Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
+                                <local:ComboBox Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
                             </Grid>
 
                             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Frame index</TextBlock>
