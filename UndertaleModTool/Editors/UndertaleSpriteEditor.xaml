@@ -164,7 +164,7 @@
             </Border>
         </Viewbox>
 
-        <Button Grid.Row="12" Grid.Column="1" Content="Export all frames (or Spine data if this is a Spine sprite)" Click="ExportAll_Click"/>
+        <local:Button Grid.Row="12" Grid.Column="1" Content="Export all frames (or Spine data if this is a Spine sprite)" Click="ExportAll_Click"/>
 
         <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Collision masks</TextBlock>
         <DataGrid Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks, Mode=OneWay}" Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
@@ -238,8 +238,8 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <Button Grid.Row="0" Grid.Column="0" Content="Import mask" Click="MaskImport_Click" Name="MaskImport"/>
-                            <Button Grid.Row="0" Grid.Column="3" Content="Export mask" Click="MaskExport_Click" Name="MaskExport"/>
+                            <local:Button Grid.Row="0" Grid.Column="0" Content="Import mask" Click="MaskImport_Click" x:Name="MaskImport"/>
+                            <local:Button Grid.Row="0" Grid.Column="3" Content="Export mask" Click="MaskExport_Click" x:Name="MaskExport"/>
                         </Grid>
                     </StackPanel>
                     <ControlTemplate.Triggers>

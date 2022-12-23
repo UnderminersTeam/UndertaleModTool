@@ -50,7 +50,7 @@
         </DataGrid>
 
         <TextBlock Grid.Row="4" Grid.Column="1" Margin="5" TextAlignment="Center" FontStyle="Italic">Click button below to add extension file.</TextBlock>
-        <Button Grid.Row="5" Grid.Column="1" Content="Add new extension file" Click="Button_Click"/>
+        <local:Button Grid.Row="5" Grid.Column="1" Content="Add new extension file" Click="Button_Click"/>
 
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Product ID</TextBlock>
         <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="6" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Text="{Binding ProductIdData, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleExtensionEditor}}, Mode = TwoWay, Converter={StaticResource byteArrayConverter}}"/>

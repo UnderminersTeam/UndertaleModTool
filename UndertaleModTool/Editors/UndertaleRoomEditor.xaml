@@ -816,8 +816,8 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Button Grid.Column="0" Margin="3" Click="TileDataExport_Click">Export</Button>
-                                                <Button Grid.Column="1" Margin="3" Click="TileDataImport_Click">Import</Button>
+                                                <local:Button Grid.Column="0" Margin="3" Click="TileDataExport_Click">Export</local:Button>
+                                                <local:Button Grid.Column="1" Margin="3" Click="TileDataImport_Click">Import</local:Button>
                                             </Grid>
                                         </Grid>
                                     </DataTemplate>
@@ -1352,6 +1352,6 @@
                 </ItemsControl.Resources>
             </ItemsControl>
         </ScrollViewer>
-        <Button Grid.Column="0" Grid.Row="3" Content="Save as PNG" Click="ExportAsPNG_Click"/>
+        <local:Button Grid.Column="0" Grid.Row="3" Content="Save as PNG" Click="ExportAsPNG_Click"/>
     </Grid>
 </local:DataUserControl>

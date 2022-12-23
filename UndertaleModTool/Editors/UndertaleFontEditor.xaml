@@ -169,6 +169,6 @@
             Note that the glyphs need to be specified in ascending order.<LineBreak/>
             Press the button below to sort them appropriately.
         </TextBlock>
-        <Button Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Click="Button_Sort_Click">Sort glyphs</Button>
+        <local:Button Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Click="Button_Sort_Click">Sort glyphs</local:Button>
     </Grid>
 </local:DataUserControl>

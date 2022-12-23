@@ -443,7 +443,6 @@ namespace UndertaleModTool
 
         private static readonly Color darkColor = Color.FromArgb(255, 51, 51, 51);
         private static readonly Color darkLightColor = Color.FromArgb(255, 64, 64, 64);
-        private static readonly Style elementStyle = new(typeof(Control));
         private static readonly Dictionary<ResourceKey, object> appDarkStyle = new()
         {
             { SystemColors.WindowTextBrushKey, new SolidColorBrush(Colors.White) },
@@ -480,7 +479,7 @@ namespace UndertaleModTool
                                 .WithEmitDebugInformation(true); //when script throws an exception, add a exception location (line number)
             });
 
-            elementStyle.Setters.Add(new Setter(Control.ForegroundProperty, SystemColors.ControlTextBrush));
+            Application.Current.Resources["CustomTextBrush"] = SystemColors.ControlTextBrush;
         }
 
         private void SetIDString(string str)
@@ -724,13 +723,13 @@ namespace UndertaleModTool
 
         public static void SetDarkMode(bool enable)
         {
+            var resources = Application.Current.Resources;
+
             if (enable)
             {
                 foreach (var pair in appDarkStyle)
-                    Application.Current.Resources[pair.Key] = pair.Value;
+                    resources[pair.Key] = pair.Value;
 
-                Application.Current.Resources[typeof(Button)] = elementStyle;
-                Application.Current.Resources[typeof(ComboBox)] = elementStyle;
                 Windows.TextInput.BGColor = System.Drawing.Color.FromArgb(darkColor.R,
                                                                           darkColor.G,
                                                                           darkColor.B);
@@ -742,10 +741,8 @@ namespace UndertaleModTool
             else
             {
                 foreach (ResourceKey key in appDarkStyle.Keys)
-                    Application.Current.Resources.Remove(key);
+                    resources.Remove(key);
 
-                Application.Current.Resources.Remove(typeof(Button));
-                Application.Current.Resources.Remove(typeof(ComboBox));
                 Windows.TextInput.BGColor = System.Drawing.SystemColors.Control;
                 Windows.TextInput.TextBoxBGColor = System.Drawing.SystemColors.Window;
                 Windows.TextInput.TextColor = System.Drawing.SystemColors.ControlText;

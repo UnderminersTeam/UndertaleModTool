@@ -90,8 +90,8 @@
             <TextBlock Grid.Row="17" Grid.Column="0" Margin="25 2 2 2" VerticalAlignment="Center" Text="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
 
             <Separator Grid.Row="18" Grid.ColumnSpan="4" Margin="10"/>
-            <Button Grid.Row="19" Grid.Column="0" Grid.ColumnSpan="1" Margin="5" Click="AppDataButton_Click">Open application data folder</Button>
-            <Button Grid.Row="19" Grid.Column="2" Grid.ColumnSpan="2" Margin="5" Click="UpdateAppButton_Click" Name="UpdateAppButton" HorizontalAlignment="Right" Width="223">Update app to latest commit</Button>
+            <local:Button Grid.Row="19" Grid.Column="0" Grid.ColumnSpan="1" Margin="5" Click="AppDataButton_Click">Open application data folder</local:Button>
+            <local:Button Grid.Row="19" Grid.Column="2" Grid.ColumnSpan="2" Margin="5" Click="UpdateAppButton_Click" x:Name="UpdateAppButton" HorizontalAlignment="Right" Width="223">Update app to latest commit</local:Button>
         </Grid>
     </ScrollViewer>
 </Window>

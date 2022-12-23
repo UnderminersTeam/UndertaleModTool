@@ -134,7 +134,7 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Margin="0,0,0,5" Orientation="Horizontal">
-                        <Button ToolTip="Back" Margin="0,0,2,0" Name="BackButton" Click="BackButton_Click">
+                        <local:Button ToolTip="Back" Margin="0,0,2,0" x:Name="BackButton" Click="BackButton_Click">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Style.Triggers>
@@ -161,8 +161,8 @@
                                     </Style>
                                 </Image.Style>
                             </Image>
-                        </Button>
-                        <Button ToolTip="Forward" Name="ForwardButton" Click="ForwardButton_Click">
+                        </local:Button>
+                        <local:Button ToolTip="Forward" x:Name="ForwardButton" Click="ForwardButton_Click">
                             <Button.IsEnabled>
                                 <MultiBinding Converter="{StaticResource ForwardButtonEnabledConverter}" Mode="OneWay">
                                     <Binding Path="CurrentTab.HistoryPosition" Mode="OneWay"/>
@@ -189,7 +189,7 @@
                                     </Style>
                                 </Image.Style>
                             </Image>
-                        </Button>
+                        </local:Button>
                     </StackPanel>
 
                     <TextBox Grid.Row="1" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged">
@@ -499,8 +499,8 @@
                                             <TextBlock Initialized="TabTitleText_Initialized">
                                             <!-- "TextBlock.Text" binding is set in code-behind -->
                                             </TextBlock>
-                                            <Button Background="Transparent" Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
-                                                Click="TabCloseButton_OnClick" MouseEnter="TabCloseButton_MouseEnter" MouseLeave="TabCloseButton_MouseLeave">
+                                            <local:Button Background="Transparent" Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
+                                                          Click="TabCloseButton_OnClick" MouseEnter="TabCloseButton_MouseEnter" MouseLeave="TabCloseButton_MouseLeave">
                                                 <Button.Style>
                                                     <Style TargetType="Button">
                                                         <Style.Triggers>
@@ -511,7 +511,7 @@
                                                     </Style>
                                                 </Button.Style>
                                                 <Image Source="/Resources/X.png"/>
-                                            </Button>
+                                            </local:Button>
                                         </StackPanel>
                                     </DataTemplate>
                                 </TabControl.ItemTemplate>
@@ -527,12 +527,12 @@
                                     <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabsGrid"/>
                                 </MultiBinding>
                             </StackPanel.Visibility>
-                            <Button Width="16" Height="16" Click="TabsScrollLeftButton_Click">
+                            <local:Button Width="16" Height="16" Click="TabsScrollLeftButton_Click">
                                 <Image Source="/Resources/tabs_left_button.png" Stretch="None"/>
-                            </Button>
-                            <Button Width="16" Height="16" Click="TabsScrollRightButton_Click">
+                            </local:Button>
+                            <local:Button Width="16" Height="16" Click="TabsScrollRightButton_Click">
                                 <Image Source="/Resources/tabs_right_button.png" Stretch="None"/>
-                            </Button>
+                            </local:Button>
                         </StackPanel>
                     </Grid>
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">

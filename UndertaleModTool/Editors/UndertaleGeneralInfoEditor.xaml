@@ -185,7 +185,7 @@
                     </DataGrid>
                 </Expander>
 
-                <Button Grid.Row="22" Grid.Column="1" Margin="3" Content="Sync with room list" Click="SyncRoomList_Click"/>
+                <local:Button Grid.Row="22" Grid.Column="1" Margin="3" Content="Sync with room list" Click="SyncRoomList_Click"/>
 
                 <Grid Grid.Row="23" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
                     <Grid.ColumnDefinitions>
