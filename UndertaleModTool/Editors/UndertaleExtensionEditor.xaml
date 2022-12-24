@@ -37,7 +37,7 @@
         <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding ClassName}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Files</TextBlock>
-        <DataGrid Grid.Row="3" Grid.Column="1" Margin="3" ItemsSource="{Binding Files}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+        <local:DataGrid Grid.Row="3" Grid.Column="1" Margin="3" ItemsSource="{Binding Files}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="Files" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
@@ -47,7 +47,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </DataGrid>
+        </local:DataGrid>
 
         <TextBlock Grid.Row="4" Grid.Column="1" Margin="5" TextAlignment="Center" FontStyle="Italic">Click button below to add extension file.</TextBlock>
         <local:Button Grid.Row="5" Grid.Column="1" Content="Add new extension file" Click="Button_Click"/>

@@ -105,10 +105,10 @@
         </Grid>
 
         <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Textures</TextBlock>
-        <DataGrid Grid.Row="10" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures, Mode=OneWay}" Name="TextureList"
-                  AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
-                  HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
-                  HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
+        <local:DataGrid Grid.Row="10" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures, Mode=OneWay}" x:Name="TextureList"
+                        AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
+                        HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
+                        HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -146,7 +146,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </DataGrid>
+        </local:DataGrid>
 
         <Viewbox Grid.Row="11" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
             <Border>
@@ -167,7 +167,7 @@
         <local:Button Grid.Row="12" Grid.Column="1" Content="Export all frames (or Spine data if this is a Spine sprite)" Click="ExportAll_Click"/>
 
         <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Collision masks</TextBlock>
-        <DataGrid Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks, Mode=OneWay}" Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
+        <local:DataGrid Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks, Mode=OneWay}" x:Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -202,7 +202,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </DataGrid>
+        </local:DataGrid>
 
         <ContentControl Grid.Row="14" Grid.Column="1" Margin="3" DataContext="{Binding SelectedItem, Mode=OneWay, ElementName=MaskList}">
             <ContentControl.Template>

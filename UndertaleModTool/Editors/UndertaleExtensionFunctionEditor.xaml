@@ -47,7 +47,7 @@
                         Grid.Row="4" Grid.Column="1" Margin="3"/>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Argument Types</TextBlock>
-        <DataGrid Grid.Row="5" Grid.Column="1" Margin="3" ItemsSource="{Binding Arguments}" Name="ArgumentTypesList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
+        <local:DataGrid Grid.Row="5" Grid.Column="1" Margin="3" ItemsSource="{Binding Arguments}" x:Name="ArgumentTypesList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -82,7 +82,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </DataGrid>
+        </local:DataGrid>
 
         <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
             <TextBlock Foreground="Red" FontStyle="Italic">
