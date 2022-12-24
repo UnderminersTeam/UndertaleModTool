@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 
 namespace UndertaleModTool
@@ -17,6 +20,19 @@ namespace UndertaleModTool
         {
             // Even though this will be called again in "OnPropertyChanged()", it's required.
             SetResourceReference(ForegroundProperty, "CustomTextBrush");
+
+            Loaded += ComboBox_Loaded;
+        }
+
+        private void ComboBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            Popup popup = MainWindow.FindVisualChild<Popup>(this);
+            var content = MainWindow.FindVisualChild<Border>(popup?.Child);
+            if (content is null)
+                return;
+
+            // Change text color of dropdown items
+            content.SetResourceReference(ForegroundProperty, SystemColors.ControlTextBrushKey);
         }
 
         /// <inheritdoc/>
