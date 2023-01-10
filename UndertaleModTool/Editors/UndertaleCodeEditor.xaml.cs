@@ -231,7 +231,7 @@ namespace UndertaleModTool
                 CurrentDecompiled is not null && CurrentDecompiled != code)
             {
                 DecompiledSkipped = true;
-                DecompiledEditor_LostFocus(sender, null);
+                await DecompiledLostFocusBody(sender, null);
 
             }
             else if (DisassemblyTab.IsSelected && DisassemblyFocused && DisassemblyChanged &&
@@ -241,8 +241,11 @@ namespace UndertaleModTool
                 DisassemblyEditor_LostFocus(sender, null);
             }
 
-            DecompiledEditor_LostFocus(sender, null);
+            await DecompiledLostFocusBody(sender, null);
             DisassemblyEditor_LostFocus(sender, null);
+
+            DecompiledYet = false;
+            DisassembledYet = false;
 
             if (MainWindow.CodeEditorDecompile != Unstated) //if opened from the code search results "link"
             {
