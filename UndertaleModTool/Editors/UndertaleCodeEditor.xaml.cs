@@ -56,12 +56,14 @@ namespace UndertaleModTool
         public bool DecompiledYet = false;
         public bool DecompiledSkipped = false;
         public SearchPanel DecompiledSearchPanel;
+        public static (int Caret, int Line) OverriddenDecompPos;
 
         public bool DisassemblyFocused = false;
         public bool DisassemblyChanged = false;
         public bool DisassembledYet = false;
         public bool DisassemblySkipped = false;
         public SearchPanel DisassemblySearchPanel;
+        public static (int Caret, int Line) OverriddenDisasmPos;
 
         public static RoutedUICommand Compile = new RoutedUICommand("Compile code", "Compile", typeof(UndertaleCodeEditor));
 
@@ -131,8 +133,8 @@ namespace UndertaleModTool
 
             DecompiledEditor.Options.ConvertTabsToSpaces = true;
 
-            DecompiledEditor.TextArea.TextView.ElementGenerators.Add(new NumberGenerator());
-            DecompiledEditor.TextArea.TextView.ElementGenerators.Add(new NameGenerator());
+            DecompiledEditor.TextArea.TextView.ElementGenerators.Add(new NumberGenerator(this));
+            DecompiledEditor.TextArea.TextView.ElementGenerators.Add(new NameGenerator(this));
 
             DecompiledEditor.TextArea.TextView.Options.HighlightCurrentLine = true;
             DecompiledEditor.TextArea.TextView.CurrentLineBackground = new SolidColorBrush(Color.FromRgb(60, 60, 60));
@@ -162,7 +164,7 @@ namespace UndertaleModTool
                 }
             }
 
-            DisassemblyEditor.TextArea.TextView.ElementGenerators.Add(new NameGenerator());
+            DisassemblyEditor.TextArea.TextView.ElementGenerators.Add(new NameGenerator(this));
 
             DisassemblyEditor.TextArea.TextView.Options.HighlightCurrentLine = true;
             DisassemblyEditor.TextArea.TextView.CurrentLineBackground = new SolidColorBrush(Color.FromRgb(60, 60, 60));
@@ -174,6 +176,12 @@ namespace UndertaleModTool
             DisassemblyEditor.TextArea.SelectionForeground = null;
             DisassemblyEditor.TextArea.SelectionBorder = null;
             DisassemblyEditor.TextArea.SelectionCornerRadius = 0;
+        }
+
+        private void DataUserControl_Unloaded(object sender, RoutedEventArgs e)
+        {
+            OverriddenDecompPos = default;
+            OverriddenDisasmPos = default;
         }
 
         private void SearchPanel_LostFocus(object sender, RoutedEventArgs e)
@@ -231,8 +239,7 @@ namespace UndertaleModTool
                 CurrentDecompiled is not null && CurrentDecompiled != code)
             {
                 DecompiledSkipped = true;
-                DecompiledEditor_LostFocus(sender, null);
-
+                await DecompiledLostFocusBody(sender, null);
             }
             else if (DisassemblyTab.IsSelected && DisassemblyFocused && DisassemblyChanged &&
                      CurrentDisassembled is not null && CurrentDisassembled != code)
@@ -241,8 +248,13 @@ namespace UndertaleModTool
                 DisassemblyEditor_LostFocus(sender, null);
             }
 
-            DecompiledEditor_LostFocus(sender, null);
+            await DecompiledLostFocusBody(sender, null);
             DisassemblyEditor_LostFocus(sender, null);
+
+            DecompiledYet = false;
+            DisassembledYet = false;
+            CurrentDecompiled = null;
+            CurrentDisassembled = null;
 
             if (MainWindow.CodeEditorDecompile != Unstated) //if opened from the code search results "link"
             {
@@ -309,6 +321,21 @@ namespace UndertaleModTool
 
             string text;
 
+            int caretOffset = 0;
+            int currLine = 1;
+            if (!first)
+            {
+                caretOffset = DisassemblyEditor.CaretOffset;
+                currLine = DisassemblyEditor.Document.GetLineByOffset(caretOffset).LineNumber;
+            }
+            else if (OverriddenDisasmPos != default)
+            {
+                caretOffset = OverriddenDisasmPos.Caret;
+                currLine = OverriddenDisasmPos.Line;
+
+                OverriddenDisasmPos = default;
+            }
+
             DisassemblyEditor.TextArea.ClearSelection();
             if (code.ParentEntry != null)
             {
@@ -327,6 +354,16 @@ namespace UndertaleModTool
 
             DisassemblyEditor.Document.BeginUpdate();
             DisassemblyEditor.Document.Text = text;
+
+            if (caretOffset <= text.Length)
+            {
+                DisassemblyEditor.CaretOffset = caretOffset;
+                if (currLine != -1)
+                    DisassemblyEditor.ScrollToLine(currLine);
+                else
+                    DisassemblyEditor.ScrollToEnd();
+            }
+
             DisassemblyEditor.Document.EndUpdate();
 
             if (first)
@@ -398,7 +435,24 @@ namespace UndertaleModTool
         private async Task DecompileCode(UndertaleCode code, bool first, LoaderDialog existingDialog = null)
         {
             DecompiledEditor.IsReadOnly = true;
+
+            int caretOffset = 0;
+            int currLine = 1;
+            if (!first)
+            {
+                caretOffset = DecompiledEditor.CaretOffset;
+                currLine = DecompiledEditor.Document.GetLineByOffset(caretOffset).LineNumber;
+            }
+            else if (OverriddenDecompPos != default)
+            {
+                caretOffset = OverriddenDecompPos.Caret;
+                currLine = OverriddenDecompPos.Line;
+
+                OverriddenDecompPos = default;
+            }
+
             DecompiledEditor.TextArea.ClearSelection();
+
             if (code.ParentEntry != null)
             {
                 DecompiledEditor.Text = "// This code entry is a reference to an anonymous function within " + code.ParentEntry.Name.Content + ", view it there";
@@ -539,6 +593,15 @@ namespace UndertaleModTool
                                     CurrentLocals.Add(local.Name.Content);
                             }
 
+                            if (caretOffset <= decompiled.Length)
+                            {
+                                DecompiledEditor.CaretOffset = caretOffset;
+                                if (currLine != -1)
+                                    DecompiledEditor.ScrollToLine(currLine);
+                                else
+                                    DecompiledEditor.ScrollToEnd();
+                            }
+
                             if (existingDialog is not null)                      //if code was edited (and compiles after it)
                             {
                                 dataa.GMLCacheChanged.Add(code.Name.Content);
@@ -547,10 +610,12 @@ namespace UndertaleModTool
                                 openSaveDialog = mainWindow.IsSaving;
                             }
                         }
+
                         DecompiledEditor.Document.EndUpdate();
                         DecompiledEditor.IsReadOnly = false;
                         if (first)
                             DecompiledEditor.Document.UndoStack.ClearAll();
+
                         DecompiledChanged = false;
 
                         CurrentDecompiled = code;
@@ -796,10 +861,12 @@ namespace UndertaleModTool
         // Based on https://stackoverflow.com/questions/28379206/custom-hyperlinks-using-avalonedit
         public class NumberGenerator : VisualLineElementGenerator
         {
-            readonly static Regex regex = new Regex(@"-?\d+\.?");
+            private static readonly Regex regex = new Regex(@"-?\d+\.?");
+            private readonly UndertaleCodeEditor codeEditorInst;
 
-            public NumberGenerator()
+            public NumberGenerator(UndertaleCodeEditor codeEditorInst)
             {
+                this.codeEditorInst = codeEditorInst;
             }
 
             Match FindMatch(int startOffset, Regex r)
@@ -866,20 +933,13 @@ namespace UndertaleModTool
                     var doc = CurrentContext.Document;
                     var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
                     var editor = textArea.GetService(typeof(TextEditor)) as TextEditor;
-                    var parent = VisualTreeHelper.GetParent(editor);
-                    do
-                    {
-                        if ((parent as FrameworkElement) is UserControl)
-                            break;
-                        parent = VisualTreeHelper.GetParent(parent);
-                    } while (parent != null);
                     line.Clicked += (text) =>
                     {
                         if (text.EndsWith("."))
                             return;
                         if (int.TryParse(text, out int id))
                         {
-                            (parent as UndertaleCodeEditor).DecompiledFocused = true;
+                            codeEditorInst.DecompiledFocused = true;
                             UndertaleData data = mainWindow.Data;
 
                             List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
@@ -920,7 +980,7 @@ namespace UndertaleModTool
                                     {
                                         doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
                                                     text.Length, (obj as UndertaleNamedResource).Name.Content, null);
-                                        (parent as UndertaleCodeEditor).DecompiledChanged = true;
+                                        codeEditorInst.DecompiledChanged = true;
                                     }
                                 };
                                 contextMenu.Items.Add(item);
@@ -935,7 +995,7 @@ namespace UndertaleModTool
                                     {
                                         doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
                                                     text.Length, "0x" + id.ToString("X6"), null);
-                                        (parent as UndertaleCodeEditor).DecompiledChanged = true;
+                                        codeEditorInst.DecompiledChanged = true;
                                     }
                                 };
                                 contextMenu.Items.Add(item);
@@ -952,7 +1012,7 @@ namespace UndertaleModTool
                                     {
                                         doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
                                                     text.Length, myKey, null);
-                                        (parent as UndertaleCodeEditor).DecompiledChanged = true;
+                                        codeEditorInst.DecompiledChanged = true;
                                     }
                                 };
                                 contextMenu.Items.Add(item);
@@ -971,10 +1031,12 @@ namespace UndertaleModTool
 
         public class NameGenerator : VisualLineElementGenerator
         {
-            readonly static Regex regex = new Regex(@"[_a-zA-Z][_a-zA-Z0-9]*");
+            private static readonly Regex regex = new Regex(@"[_a-zA-Z][_a-zA-Z0-9]*");
+            private readonly UndertaleCodeEditor codeEditorInst;
 
-            public NameGenerator()
+            public NameGenerator(UndertaleCodeEditor codeEditorInst)
             {
+                this.codeEditorInst = codeEditorInst;
             }
 
             Match FindMatch(int startOffset, Regex r)
@@ -1046,13 +1108,6 @@ namespace UndertaleModTool
                     var doc = CurrentContext.Document;
                     var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
                     var editor = textArea.GetService(typeof(TextEditor)) as TextEditor;
-                    var parent = VisualTreeHelper.GetParent(editor);
-                    do
-                    {
-                        if ((parent as FrameworkElement) is UserControl)
-                            break;
-                        parent = VisualTreeHelper.GetParent(parent);
-                    } while (parent != null);
 
                     // Process the content of this identifier/function
                     if (func)
@@ -1114,7 +1169,7 @@ namespace UndertaleModTool
                             data.BuiltinList.GlobalArray.ContainsKey(m.Value))
                             return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
                                                             new SolidColorBrush(Color.FromRgb(0x58, 0xE3, 0x5A)));
-                        if ((parent as UndertaleCodeEditor).CurrentLocals.Contains(m.Value))
+                        if (codeEditorInst.CurrentLocals.Contains(m.Value))
                             return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
                                                             new SolidColorBrush(Color.FromRgb(0xFF, 0xF8, 0x99)));
                         return null;

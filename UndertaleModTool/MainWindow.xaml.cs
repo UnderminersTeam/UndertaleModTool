@@ -130,6 +130,8 @@ namespace UndertaleModTool
             Left,
             Right
         }
+
+        // TODO: move this to the code editor
         public static CodeEditorMode CodeEditorDecompile { get; set; } = CodeEditorMode.Unstated;
 
         private int progressValue;
@@ -3234,6 +3236,9 @@ result in loss of work.");
 
                 if (Tabs.Count == 0)
                 {
+                    if (!closingTab.AutoClose)
+                        CurrentTab.SaveTabContentState(DataEditor);
+
                     CurrentTabIndex = -1;
                     CurrentTab = null;
 
@@ -3250,6 +3255,8 @@ result in loss of work.");
                 }
                 else
                 {
+                    bool tabIsChanged = false;
+
                     for (int i = tabIndex; i < Tabs.Count; i++)
                         Tabs[i].TabIndex = i;
 
@@ -3262,8 +3269,14 @@ result in loss of work.");
                             // switch to the last tab
                             currIndex = Tabs.Count - 1;
                         }
-                        else if (currIndex != 0)
-                            currIndex -= 1;
+                        else
+                        {
+                            if (currIndex != 0)
+                                currIndex -= 1;
+
+                            tabIsChanged = true;
+                            CurrentTab.SaveTabContentState(DataEditor);
+                        }
                     }
                     else if (currIndex > tabIndex)
                     {
@@ -3273,7 +3286,15 @@ result in loss of work.");
                     TabController.SelectionChanged += TabController_SelectionChanged;
 
                     CurrentTabIndex = currIndex;
-                    CurrentTab = Tabs[CurrentTabIndex];
+                    Tab newTab = Tabs[CurrentTabIndex];
+
+                    if (tabIsChanged)
+                        newTab.PrepareCodeEditor();
+
+                    CurrentTab = newTab;
+
+                    if (tabIsChanged)
+                        _ = CurrentTab.RestoreTabContentState(DataEditor);
                 }
             }
         }
@@ -3303,10 +3324,17 @@ result in loss of work.");
         {
             if (TabController.SelectedIndex >= 0)
             {
+                CurrentTab?.SaveTabContentState(DataEditor);
+
                 ScrollToTab(CurrentTabIndex);
 
-                CurrentTab = Tabs[CurrentTabIndex];
+                Tab newTab = Tabs[CurrentTabIndex];
+                newTab.PrepareCodeEditor();
+                CurrentTab = newTab;
+
                 UpdateObjectLabel(CurrentTab.CurrentObject);
+
+                _ = CurrentTab.RestoreTabContentState(DataEditor);
             }
         }
 

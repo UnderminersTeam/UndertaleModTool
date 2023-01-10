@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using UndertaleModLib.Models;
 using UndertaleModLib;
 using System.Windows;
+using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace UndertaleModTool
 {
@@ -251,6 +253,172 @@ namespace UndertaleModTool
             textBlock.SetBinding(TextBlock.TextProperty, binding);
         }
 
+        /// <summary>Saves the current tab content state.</summary>
+        /// <param name="dataEditor">A reference to the object editor of main window.</param>
+        public void SaveTabContentState(ContentControl dataEditor)
+        {
+            if (dataEditor is null
+                || dataEditor.Content is null
+                || dataEditor.Content is DescriptionView)
+                return;
+
+            UserControl editor;
+            try
+            {
+                var contPres = VisualTreeHelper.GetChild(dataEditor, 0);
+                editor = (UserControl)VisualTreeHelper.GetChild(contPres, 0);
+            }
+            catch
+            {
+                mainWindow.ShowWarning("The last tab content state can't be saved - \"UserControl\" is not found.");
+                return;
+            }
+
+            double mainScrollPos = MainWindow.GetNearestParent<ScrollViewer>(dataEditor)?.VerticalOffset ?? 0;
+
+            switch (editor)
+            {
+                case UndertaleCodeEditor codeEditor:
+                    #pragma warning disable CA1416
+                    bool isDecompiledOpen = codeEditor.CodeModeTabs.SelectedIndex == 0;
+                    
+                    var textEditor = codeEditor.DecompiledEditor;
+                    (int, int) decompCodePos;
+                    int caretOffset, linePos;
+                    // If the overridden position wasn't read
+                    if (UndertaleCodeEditor.OverriddenDecompPos != default)
+                    {
+                        decompCodePos = UndertaleCodeEditor.OverriddenDecompPos;
+                        UndertaleCodeEditor.OverriddenDecompPos = default;
+                    }
+                    else
+                    {
+                        caretOffset = textEditor.CaretOffset;
+                        linePos = textEditor.Document.GetLineByOffset(caretOffset).LineNumber;
+                        decompCodePos = (caretOffset, linePos);
+                    }
+
+                    textEditor = codeEditor.DisassemblyEditor;
+                    (int, int) disasmCodePos;
+                    if (UndertaleCodeEditor.OverriddenDisasmPos != default)
+                    {
+                        disasmCodePos = UndertaleCodeEditor.OverriddenDisasmPos;
+                        UndertaleCodeEditor.OverriddenDisasmPos = default;
+                    }
+                    else
+                    {
+                        caretOffset = textEditor.CaretOffset;
+                        linePos = textEditor.Document.GetLineByOffset(caretOffset).LineNumber;
+                        disasmCodePos = (caretOffset, linePos);
+                    }
+                    #pragma warning restore CA1416
+
+                    LastContentState = new CodeTabState()
+                    {
+                        MainScrollPosition = mainScrollPos,
+                        DecompiledCodePosition = decompCodePos,
+                        DisassemblyCodePosition = disasmCodePos,
+                        IsDecompiledOpen = isDecompiledOpen
+                    };
+                    break;
+
+                case UndertaleRoomEditor roomEditor:
+
+                    break;
+
+                default:
+                    LastContentState = new()
+                    {
+                        MainScrollPosition = mainScrollPos
+                    };
+                    break;
+            }
+        }
+
+        /// <summary>Restores the last tab content state.</summary>
+        /// <param name="dataEditor">A reference to the object editor of main window.</param>
+        public async Task RestoreTabContentState(ContentControl dataEditor)
+        {
+            if (dataEditor is null
+                || dataEditor.Content is null
+                || dataEditor.Content is DescriptionView
+                || LastContentState is null)
+                return;
+
+            UserControl editor;
+            try
+            {
+                // Wait until the new editor will be loaded
+                await mainWindow.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
+
+                var contPres = VisualTreeHelper.GetChild(dataEditor, 0);
+                editor = (UserControl)VisualTreeHelper.GetChild(contPres, 0);
+            }
+            catch
+            {
+                mainWindow.ShowWarning("The last tab content state can't be restored - \"UserControl\" is not found.");
+                return;
+            }
+
+            if (LastContentState.MainScrollPosition != 0)
+            {
+                ScrollViewer mainScrollViewer = MainWindow.GetNearestParent<ScrollViewer>(dataEditor);
+                if (mainScrollViewer is null)
+                {
+                    mainWindow.ShowWarning("The last tab content state can't be restored - \"ScrollViewer\" is not found.");
+                    return;
+                }
+
+                mainScrollViewer.ScrollToVerticalOffset(LastContentState.MainScrollPosition);
+            }
+
+            // if "LastContentState" is an instance of "TabContentState" (e.g. not "CodeTabState")
+            if (!LastContentState.GetType().IsSubclassOf(typeof(TabContentState)))
+            {
+                LastContentState = null;
+                return;
+            }
+
+            switch (LastContentState)
+            {
+                case CodeTabState:
+                    // processed in "Tab.PrepareCodeEditor()"
+                    break;
+
+                case RoomTabState roomTabState:
+
+                    break;
+
+                default:
+                    Debug.WriteLine($"The content state of a tab \"{this}\" is unknown?");
+                    break;
+            }
+
+            LastContentState = null;
+        }
+
+
+        /// <summary>
+        /// Prepares the code editor before opening the code entry
+        /// by setting a corresponding mode ("Decompiled" or "Disassembly") and restoring the code positions.
+        /// </summary>
+        /// <remarks>Does nothing if it's not a code tab.</remarks>
+        public void PrepareCodeEditor()
+        {
+            if (LastContentState is CodeTabState codeTabState)
+            {
+                if (codeTabState.IsDecompiledOpen)
+                    MainWindow.CodeEditorDecompile = MainWindow.CodeEditorMode.Decompile;
+                else
+                    MainWindow.CodeEditorDecompile = MainWindow.CodeEditorMode.DontDecompile;
+
+                #pragma warning disable CA1416
+                UndertaleCodeEditor.OverriddenDecompPos = codeTabState.DecompiledCodePosition;
+                UndertaleCodeEditor.OverriddenDisasmPos = codeTabState.DisassemblyCodePosition;
+                #pragma warning restore CA1416
+            }
+        }
+
         /// <inheritdoc/>
         public override string ToString()
         {
@@ -269,8 +437,21 @@ namespace UndertaleModTool
     /// <summary>Stores the information about the tab with a code.</summary>
     public class CodeTabState : TabContentState
     {
-        /// <summary>The code line number.</summary>
-        public int LineNumber;
+        /// <summary>The decompiled code position (absolute caret offset and line number).</summary>
+        public (int Caret, int Line) DecompiledCodePosition;
+
+        /// <summary>The disassembly code position (absolute caret offset and line number).</summary>
+        public (int Caret, int Line) DisassemblyCodePosition;
+
+        /// <summary>Whether the "Decompiled" tab is open.</summary>
+        public bool IsDecompiledOpen;
+    }
+
+    /// <summary>Stores the information about the tab with a room.</summary>
+    public class RoomTabState : TabContentState
+    {
+        /// <summary>The scroll position of the room editor preview.</summary>
+        public (double Left, double Top) RoomPreviewScrollPosition;
     }
 
 
