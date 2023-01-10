@@ -244,6 +244,9 @@ namespace UndertaleModTool
             await DecompiledLostFocusBody(sender, null);
             DisassemblyEditor_LostFocus(sender, null);
 
+            DecompiledYet = false;
+            DisassembledYet = false;
+
             if (MainWindow.CodeEditorDecompile != Unstated) //if opened from the code search results "link"
             {
                 if (MainWindow.CodeEditorDecompile == DontDecompile && code != CurrentDisassembled)
