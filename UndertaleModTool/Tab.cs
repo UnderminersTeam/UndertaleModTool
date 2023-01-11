@@ -284,7 +284,7 @@ namespace UndertaleModTool
                     
                     var textEditor = codeEditor.DecompiledEditor;
                     (int, int) decompCodePos;
-                    int caretOffset, linePos;
+                    int linePos, columnPos;
                     // If the overridden position wasn't read
                     if (UndertaleCodeEditor.OverriddenDecompPos != default)
                     {
@@ -293,9 +293,16 @@ namespace UndertaleModTool
                     }
                     else
                     {
-                        caretOffset = textEditor.CaretOffset;
-                        linePos = textEditor.Document.GetLineByOffset(caretOffset).LineNumber;
-                        decompCodePos = (caretOffset, linePos);
+                        var caret = textEditor.TextArea.Caret;
+                        linePos = caret.Line;
+                        columnPos = caret.Column;
+
+                        int lineLen = textEditor.Document.GetLineByNumber(linePos).Length;
+                        // If caret is at the end of line
+                        if (lineLen == columnPos - 1)
+                            columnPos = -1;
+
+                        decompCodePos = (linePos, columnPos);
                     }
 
                     textEditor = codeEditor.DisassemblyEditor;
@@ -307,9 +314,16 @@ namespace UndertaleModTool
                     }
                     else
                     {
-                        caretOffset = textEditor.CaretOffset;
-                        linePos = textEditor.Document.GetLineByOffset(caretOffset).LineNumber;
-                        disasmCodePos = (caretOffset, linePos);
+                        var caret = textEditor.TextArea.Caret;
+                        linePos = caret.Line;
+                        columnPos = caret.Column;
+
+                        int lineLen = textEditor.Document.GetLineByNumber(linePos).Length;
+                        // If caret is at the end of line
+                        if (lineLen == columnPos - 1)
+                            columnPos = -1;
+
+                        disasmCodePos = (linePos, columnPos);
                     }
                     #pragma warning restore CA1416
 
@@ -437,11 +451,11 @@ namespace UndertaleModTool
     /// <summary>Stores the information about the tab with a code.</summary>
     public class CodeTabState : TabContentState
     {
-        /// <summary>The decompiled code position (absolute caret offset and line number).</summary>
-        public (int Caret, int Line) DecompiledCodePosition;
+        /// <summary>The decompiled code position.</summary>
+        public (int Line, int Column) DecompiledCodePosition;
 
-        /// <summary>The disassembly code position (absolute caret offset and line number).</summary>
-        public (int Caret, int Line) DisassemblyCodePosition;
+        /// <summary>The disassembly code position.</summary>
+        public (int Line, int Column) DisassemblyCodePosition;
 
         /// <summary>Whether the "Decompiled" tab is open.</summary>
         public bool IsDecompiledOpen;
