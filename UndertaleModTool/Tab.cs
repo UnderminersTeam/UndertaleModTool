@@ -395,8 +395,12 @@ namespace UndertaleModTool
 
             switch (LastContentState)
             {
-                case CodeTabState:
-                    // processed in "Tab.PrepareCodeEditor()"
+                case CodeTabState codeTabState:
+                    // Is executed only if it's the same code entry (between new and old tabs)
+                    #pragma warning disable CA1416
+                    if (!codeTabState.IsStateRestored)
+                        (editor as UndertaleCodeEditor).RestoreState(codeTabState);
+                    #pragma warning restore CA1416
                     break;
 
                 case RoomTabState roomTabState:
@@ -421,14 +425,16 @@ namespace UndertaleModTool
         {
             if (LastContentState is CodeTabState codeTabState)
             {
+                #pragma warning disable CA1416
                 if (codeTabState.IsDecompiledOpen)
                     MainWindow.CodeEditorDecompile = MainWindow.CodeEditorMode.Decompile;
                 else
                     MainWindow.CodeEditorDecompile = MainWindow.CodeEditorMode.DontDecompile;
 
-                #pragma warning disable CA1416
                 UndertaleCodeEditor.OverriddenDecompPos = codeTabState.DecompiledCodePosition;
                 UndertaleCodeEditor.OverriddenDisasmPos = codeTabState.DisassemblyCodePosition;
+
+                codeTabState.IsStateRestored = true;
                 #pragma warning restore CA1416
             }
         }
@@ -440,6 +446,7 @@ namespace UndertaleModTool
             return GetType().FullName + " - {" + CurrentObject?.ToString() + '}';
         }
     }
+
 
     /// <summary>A base class for the information of a tab content state.</summary>
     public class TabContentState
@@ -459,6 +466,9 @@ namespace UndertaleModTool
 
         /// <summary>Whether the "Decompiled" tab is open.</summary>
         public bool IsDecompiledOpen;
+
+        /// <summary>Whether this state was already restored (applied to the code editor).</summary>
+        public bool IsStateRestored;
     }
 
     /// <summary>Stores the information about the tab with a room.</summary>

@@ -3289,7 +3289,10 @@ result in loss of work.");
                     Tab newTab = Tabs[CurrentTabIndex];
 
                     if (tabIsChanged)
-                        newTab.PrepareCodeEditor();
+                    {
+                        if (closingTab.CurrentObject != newTab.CurrentObject)
+                            newTab.PrepareCodeEditor();
+                    }
 
                     CurrentTab = newTab;
 
@@ -3329,7 +3332,10 @@ result in loss of work.");
                 ScrollToTab(CurrentTabIndex);
 
                 Tab newTab = Tabs[CurrentTabIndex];
-                newTab.PrepareCodeEditor();
+
+                if (CurrentTab?.CurrentObject != newTab.CurrentObject)
+                    newTab.PrepareCodeEditor();
+
                 CurrentTab = newTab;
 
                 UpdateObjectLabel(CurrentTab.CurrentObject);
